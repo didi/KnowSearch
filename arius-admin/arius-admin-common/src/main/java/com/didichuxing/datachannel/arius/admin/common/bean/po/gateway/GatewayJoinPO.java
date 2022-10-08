@@ -1,15 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.gateway;
 
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
 import com.google.common.collect.Maps;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Map;
 
 /**
  * @author: D10865
@@ -132,6 +134,11 @@ public class GatewayJoinPO extends BaseESPO {
      * 请求源ip
      */
     private String            remoteAddr;
+
+    /**
+     * 所属集群
+     */
+    private String            clusterName;
 
     @JSONField(name = "selectFields")
     public void setSelectFields(String selectFields) {

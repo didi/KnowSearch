@@ -58,6 +58,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.ElasticsearchTimeoutException;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.stereotype.Repository;
@@ -68,6 +69,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ESClusterDAO extends BaseESDAO {
     private final static String REMOTE_TARGET_CLUSTER="_remote/info?filter_path=%s.%s";
+    private final static String REMOTE_TARGET_CLUSTER_COUNT="%s:*/_count?ignore_unavailable=true";
     private final static String CONNECTED="connected";
 
     /**
@@ -836,9 +838,59 @@ public class ESClusterDAO extends BaseESDAO {
                     "class=ESClusterDAO||method=checkTargetClusterConnected||clusterName={}||errMsg=esClient is null",
                     cluster);
         }
+        Function<JSONObject,Boolean> jsonObjectFunc=jsonObject -> {
+            //如果是空的，则直接为false
+            if (jsonObject.isEmpty()){
+                return false;
+            }
+            
+           return jsonObject.getJSONObject(targetCluster).getBoolean(CONNECTED) || tryRemoteClusterCountIndicesAndIgnoreException(cluster
+                   , targetCluster);
+        };
+        
         return Optional.ofNullable(directResponse).filter(d -> d.getRestStatus() == RestStatus.OK)
-                .map(DirectResponse::getResponseContent).map(JSON::parseObject)
-                .map(jsonObject -> jsonObject.getJSONObject(targetCluster))
-                .map(jsonObject -> jsonObject.getBoolean(CONNECTED)).orElse(false);
+                .map(DirectResponse::getResponseContent)
+                .map(JSON::parseObject)
+                .map(jsonObjectFunc)
+                
+                .orElse(false);
+    }
+    
+    /**
+     * > 它尝试获取目标集群中的索引计数，只是为了进行主集群到从集群正常的健康性校验:
+     * <pre>
+     *     1. 无需关注底层异常，这是由于如果集群不通，那么会触发Gateway Time-out，
+     *      那么也可以证明集群是不通的，所以无需关注
+     *     2.如果远程集群_count报错后，我们无需理会它，它会自动为remote信息刷新，
+     *     从而使得remote信息是刷新的，且由此可以证明集群是联通的
+     *     3.如果远程集群报了connect_exception信息，则证明集群配置是错误的或者不是联通的，那么可以证明集群是不联通的
+     * </pre>
+     *
+     * @param cluster 索引所属的集群的名称。
+     * @param targetCluster 目标集群的名称。
+     */
+    private boolean tryRemoteClusterCountIndicesAndIgnoreException(String cluster, String targetCluster)  {
+        DirectResponse directResponse;
+        try {
+            DirectRequest directRequest = new DirectRequest("GET",
+                    String.format(REMOTE_TARGET_CLUSTER_COUNT, targetCluster));
+            directResponse = esOpClient.getESClient(cluster).direct(directRequest).actionGet(3, TimeUnit.SECONDS);
+        } catch (Exception exception) {
+            final String messageByException = ParsingExceptionUtils.getESErrorMessageByException(
+                    exception);
+            if (StringUtils.equals(messageByException,ParsingExceptionUtils.CLUSTER_ERROR)){
+                return false;
+            }
+            if (StringUtils.endsWith(messageByException, ParsingExceptionUtils.CONNECT_EXCEPTION)) {
+                return false;
+            }
+            if (exception instanceof ElasticsearchTimeoutException) {
+                return false;
+            }
+            return true;
+        }
+        return Optional.ofNullable(directResponse).map(d -> d.getRestStatus() == RestStatus.OK)
+                .orElse(false);
+        
     }
 }

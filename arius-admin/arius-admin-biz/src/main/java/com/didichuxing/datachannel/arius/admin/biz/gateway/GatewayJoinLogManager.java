@@ -1,8 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.gateway;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayJoinQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayJoinVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+
 import java.util.List;
 
 public interface GatewayJoinLogManager {
@@ -36,22 +39,6 @@ public interface GatewayJoinLogManager {
     Result<Long> getSearchCountByProjectId(String dataCenter, Long projectId, Long startDate, Long endDate);
 
     /**
-     * 获取GatewaySlowList
-     * @param projectId 应用id
-     * @param queryDTO 查询条件
-     * @return Result<List<GatewayJoinVO>>
-     */
-    Result<List<GatewayJoinVO>> getGatewayJoinSlowList(Integer projectId, GatewayJoinQueryDTO queryDTO);
-
-    /**
-     * 获取GatewayErrorList
-     * @param projectId 应用id
-     * @param queryDTO 查询条件
-     * @return Result<List<GatewayJoinVO>>
-     */
-    Result<List<GatewayJoinVO>> getGatewayJoinErrorList(Integer projectId, GatewayJoinQueryDTO queryDTO);
-    
-    /**
      * 获取指定索引的DSL
      *
      * @param projectId 项目编号
@@ -59,4 +46,12 @@ public interface GatewayJoinLogManager {
      * @return Result<String>
      */
     Result<String> getDSLByProjectIdAndIndexName(Integer projectId, String indexName);
+
+    /**
+     * 分页查询
+     * @param projectId
+     * @param queryDTO
+     * @return
+     */
+    PaginationResult<GatewayJoinVO> getGatewayJoinPage(Integer projectId, GatewayJoinQueryDTO queryDTO) throws NotFindSubclassException;
 }

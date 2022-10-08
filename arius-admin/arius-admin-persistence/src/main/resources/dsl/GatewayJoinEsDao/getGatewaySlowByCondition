@@ -1,5 +1,6 @@
 {
-  "size": 1000,
+  "from": %d,
+  "size": %d,
   "query": {
     "bool": {
       "must": %s,
@@ -24,13 +25,14 @@
     "totalHits",
     "totalShards",
     "responseLen",
-    "isTimedOut"
+    "isTimedOut",
+    "clusterName"
   ],
   "sort": [
-    {
-      "timeStamp": {
-        "order": "desc"
+      {
+        "%s": {
+          "order": "%s"
+        }
       }
-    }
   ]
 }

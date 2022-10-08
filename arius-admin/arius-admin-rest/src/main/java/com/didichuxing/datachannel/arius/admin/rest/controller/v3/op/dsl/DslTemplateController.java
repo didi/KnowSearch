@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayJo
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.UserConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayJoinVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.QueryDiagnosisTabNameEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -73,18 +74,20 @@ public class DslTemplateController {
         return dslTemplateManager.updateDslTemplateQueryLimit(HttpRequestUtil.getProjectId(request),HttpRequestUtil.getOperator(),dslTemplateList);
     }
 
-    @PostMapping(path = "/slow/list")
-    @ApiOperation(value = "dsl慢查询列表", notes = "根据指定页获取dsl慢查询列表")
-    public Result<List<GatewayJoinVO>> slowList(@RequestBody GatewayJoinQueryDTO queryDTO, HttpServletRequest request) {
-        return gatewayJoinLogManager.getGatewayJoinSlowList(HttpRequestUtil.getProjectId(request), queryDTO);
+    @PostMapping("/slow/page")
+    @ApiOperation(value = "dsl慢查询分页", notes = "根据指定页获取dsl慢查询列表")
+    public PaginationResult<GatewayJoinVO> slowPage(@RequestBody GatewayJoinQueryDTO queryDTO, HttpServletRequest request) throws NotFindSubclassException {
+        queryDTO.setTabName(QueryDiagnosisTabNameEnum.SLOW_QUERY.getTabName());
+        return gatewayJoinLogManager.getGatewayJoinPage(HttpRequestUtil.getProjectId(request), queryDTO);
     }
 
-    @PostMapping(path = "/error/list")
-    @ApiOperation(value = "dsl异常查询列表", notes = "根据指定条件获取dsl异常查询列表")
-    public Result<List<GatewayJoinVO>> errorList(@RequestBody GatewayJoinQueryDTO queryDTO,
-                                                 HttpServletRequest request) {
-        return gatewayJoinLogManager.getGatewayJoinErrorList(HttpRequestUtil.getProjectId(request), queryDTO);
+    @PostMapping("/error/page")
+    @ApiOperation(value = "dsl慢查询分页", notes = "根据指定页获取dsl慢查询列表")
+    public PaginationResult<GatewayJoinVO> errorPage(@RequestBody GatewayJoinQueryDTO queryDTO, HttpServletRequest request) throws NotFindSubclassException {
+        queryDTO.setTabName(QueryDiagnosisTabNameEnum.ERROR_QUERY.getTabName());
+        return gatewayJoinLogManager.getGatewayJoinPage(HttpRequestUtil.getProjectId(request), queryDTO);
     }
+
     @GetMapping("/{indexName}")
     public Result<String> getDSLByProjectIdAndIndexName(@PathVariable(value = "indexName") String indexName,
                                                         HttpServletRequest request) {

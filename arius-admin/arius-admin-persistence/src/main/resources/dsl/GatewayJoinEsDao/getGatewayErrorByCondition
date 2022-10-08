@@ -1,5 +1,6 @@
 {
-  "size": 1000,
+  "from": %d,
+  "size": %d,
   "query": {
     "bool": {
       "must": %s,
@@ -29,13 +30,14 @@
     "timeStamp",
     "indices",
     "uri",
-    "requestId"
+    "requestId",
+    "clusterName"
   ],
   "sort": [
-    {
-      "timeStamp": {
-        "order": "desc"
+      {
+        "%s": {
+          "order": "%s"
+        }
       }
-    }
   ]
 }

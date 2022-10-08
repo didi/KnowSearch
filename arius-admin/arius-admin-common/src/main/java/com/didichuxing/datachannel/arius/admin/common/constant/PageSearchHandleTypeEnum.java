@@ -11,7 +11,8 @@ public enum PageSearchHandleTypeEnum {
 
         QUICK_COMMAND_INDEX("quickCommandIndicesDistributionPageSearch"),
         QUICK_COMMAND_SHARD("quickCommandShardsDistributionPageSearch"),
-        OPERATE_RECORD("operateRecordPageSearch");
+        OPERATE_RECORD("operateRecordPageSearch"),
+        GATEWAY_JOIN("gatewayJoinPageSearch");
        private String pageSearchType;
 
         public String getPageSearchType(){

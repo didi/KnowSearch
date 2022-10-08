@@ -1,22 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics;
 
-import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
-import com.didichuxing.datachannel.arius.admin.biz.metrics.impl.GatewayMetricsManagerImpl;
-import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.GatewayOverviewMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.gateway.GatewayOverviewMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.MetricsContentCellVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.MetricsContentVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.metadata.service.GatewayMetricsService;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -32,12 +22,24 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
+import com.didichuxing.datachannel.arius.admin.biz.metrics.impl.GatewayMetricsManagerImpl;
+import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.GatewayOverviewMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.gateway.GatewayOverviewMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.MetricsContentCellVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.MetricsContentVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.metadata.service.GatewayMetricsService;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
 
 @ActiveProfiles("test")
 @ExtendWith({ SpringExtension.class, MockitoExtension.class })
@@ -635,7 +637,7 @@ class GatewayMetricsManagerTest {
             .thenReturn(variousLineChartMetrics5);
 
         when(gatewayMetricsService.getEsClientNodeIpListByGatewayNode("nodeIp", 0L, 0L, 0))
-            .thenReturn(Arrays.asList("value"));
+            .thenReturn(Collections.singletonList(new Tuple<>("value1", "value")));
 
         // Run the test
         final Result<List<VariousLineChartMetricsVO>> result = gatewayMetricsManager.getClientNodeMetrics(dto, 0);
@@ -1098,12 +1100,12 @@ class GatewayMetricsManagerTest {
     @Test
     void getClientNodeIdListTest() {
         // Setup
-        final Result<List<String>> expectedResult = Result.buildFail(Arrays.asList("value"));
+        final Result<List<Tuple<String, String>>> expectedResult = Result.buildFail(Collections.singletonList(new Tuple<>("value1", "value")));
         when(gatewayMetricsService.getEsClientNodeIpListByGatewayNode("gatewayNode", 0L, 0L, 0))
-            .thenReturn(Arrays.asList("value"));
+            .thenReturn(Collections.singletonList(new Tuple<>("value1", "value")));
 
         // Run the test
-        final Result<List<String>> result = gatewayMetricsManager.getClientNodeIdList("gatewayNode", 0L, 0L, 0);
+        final Result<List<Tuple<String, String>>> result = gatewayMetricsManager.getClientNodeIdList("gatewayNode", 0L, 0L, 0);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -1116,7 +1118,7 @@ class GatewayMetricsManagerTest {
             .thenReturn(Collections.emptyList());
 
         // Run the test
-        final Result<List<String>> result = gatewayMetricsManager.getClientNodeIdList("gatewayNode", 0L, 0L, 0);
+        final Result<List<Tuple<String, String>>> result = gatewayMetricsManager.getClientNodeIdList("gatewayNode", 0L, 0L, 0);
 
         // Verify the results
         assertThat(result).isEqualTo(Result.buildFail(Collections.emptyList()));
