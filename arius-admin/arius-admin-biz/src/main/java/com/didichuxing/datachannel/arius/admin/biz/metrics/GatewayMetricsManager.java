@@ -1,11 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics;
 
+import java.util.List;
+
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.gateway.GatewayOverviewMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
-
-import java.util.List;
 
 /**
  * Created by fitz on 2021-08-11
@@ -62,5 +63,5 @@ public interface GatewayMetricsManager {
     /**
      * 获取clientNode ip信息
      */
-    Result<List<String>> getClientNodeIdList(String gatewayNode, Long startTime, Long endTime, Integer projectId);
+    Result<List<Tuple<String, String>>> getClientNodeIdList(String gatewayNode, Long startTime, Long endTime, Integer projectId);
 }

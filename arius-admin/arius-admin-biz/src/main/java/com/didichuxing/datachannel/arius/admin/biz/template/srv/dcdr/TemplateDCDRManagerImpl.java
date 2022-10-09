@@ -31,10 +31,12 @@ import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDCDRStepEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.event.template.DCDRLinkAbnormalIndicesRebuildEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -46,6 +48,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.dcdr.ESDCDRService;
@@ -303,7 +306,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> createPhyDCDR(TemplatePhysicalDCDRDTO param, String operator) throws ESOperateException {
-        Result<Void> checkDCDRResult = checkDCDRParam(param);
+        Result<Void> checkDCDRResult = checkDCDRParam(param, OperationEnum.CREATE_DCDR);
 
         if (checkDCDRResult.failed()) { return Result.buildFrom(checkDCDRResult);}
 
@@ -351,7 +354,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
      */
     @Override
     public Result<Void> deletePhyDCDR(TemplatePhysicalDCDRDTO param, String operator, Integer projectId) throws ESOperateException {
-        Result<Void> checkDCDRResult = checkDCDRParam(param);
+        Result<Void> checkDCDRResult = checkDCDRParam(param, OperationEnum.DELETE_DCDR);
 
         if (checkDCDRResult.failed()) {
             return checkDCDRResult;
@@ -801,9 +804,17 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         //获取从集群的真实索引
         List<String> slaveMasterAllIndexList = esIndexService.syncCatIndex(slavePhyTemplate.getCluster(), 3).stream()
                 .map(CatIndexResult::getIndex).collect(Collectors.toList());
+        
         // 对索引进行过滤，找到从集群存在的索引，目的是保证从集群获取 count 数据不会报出 no such index not found 问题
         List<String> relaIndexNames = indexNames.stream().filter(slaveMasterAllIndexList::contains)
                 .collect(Collectors.toList());
+        // 获取从集群中没有创建创建出来的索引，进行二次补偿，目的是：当从机器挂掉了，那么索引没有创建出来，会造成 dcdr 数据无法同步，
+        // 所以这里通过删除从集群未生成的索引的链路，将其创建，从而解决该问题
+        final List<String> targetClusterNotCreateIndices = indexNames.stream()
+                .filter(i -> !slaveMasterAllIndexList.contains(i)).collect(Collectors.toList());
+        // 发布事件进行重建
+        SpringTool.publish(new DCDRLinkAbnormalIndicesRebuildEvent(this, masterPhyTemplate.getCluster(),
+                slavePhyTemplate.getCluster(), targetClusterNotCreateIndices));
         Map<String, IndexNodes> indexStatForSlaveMap = esIndexService.syncBatchGetIndices(slavePhyTemplate.getCluster(),
                 relaIndexNames);
 
@@ -886,7 +897,28 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         templateDCDRInfoVO.setTemplateCheckPointDiff(checkPointDiff);
         return Result.buildSucc(templateDCDRInfoVO);
     }
-
+    
+    /**
+     * 重建DCDR链路异常索引
+     *
+     * @param cluster       源集群的集群名称
+     * @param targetCluster 目标集群名称
+     * @param indices       要重建的索引
+     * @return 操作的结果。
+     */
+    @Override
+    public Result<Void> rebuildDCDRLinkAbnormalIndices(String cluster, String targetCluster,
+                                                       List<String> indices) throws ESOperateException {
+        if (esClusterService.checkTargetClusterConnected(cluster, targetCluster)) {
+            return Result.buildFail(DCDR_CLUSTER_REMOTE_ERROR);
+        }
+       
+    
+        return Result.build( esDCDRService.delete("rebuildDCDRLinkAbnormalIndices", cluster, targetCluster,
+                indices, 3));
+    
+    }
+    
     /**************************************** private method ****************************************************/
     private Result<Void> checkDCDRParam(Integer logicId) {
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
@@ -910,7 +942,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         return Result.buildSucc();
     }
 
-    private Result<Void> checkDCDRParam(TemplatePhysicalDCDRDTO param) {
+    private Result<Void> checkDCDRParam(TemplatePhysicalDCDRDTO param, OperationEnum operationEnum) {
         if (param == null) {
             return Result.buildParamIllegal("DCDR参数不存在");
         }
@@ -932,13 +964,15 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             if (!clusterPhyManager.isClusterExists(param.getReplicaClusters().get(i))) {
                 return Result.buildNotExist("从集群不存在");
             }
-
-            if (!clusterSupport(templatePhysical.getCluster())) {
-                return Result.buildParamIllegal("模板所在集群不支持DCDR");
-            }
-
-            if (!clusterSupport(param.getReplicaClusters().get(i))) {
-                return Result.buildParamIllegal("所选的从集群不支持DCDR");
+    
+            // 只有create阶段的dcdr才需要校验
+            if (OperationEnum.CREATE_DCDR.equals(operationEnum)) {
+                if (!clusterSupport(templatePhysical.getCluster())) {
+                    return Result.buildParamIllegal("模板所在集群不支持 DCDR");
+                }
+                if (!clusterSupport(param.getReplicaClusters().get(i))) {
+                    return Result.buildParamIllegal("所选的从集群不支持 DCDR");
+                }
             }
 
             if (templatePhysical.getCluster().equals(param.getReplicaClusters().get(i))) {
@@ -1059,8 +1093,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                                                      Long expectMasterPhysicalId, int step,
                                                      IndexTemplatePhy masterTemplate, IndexTemplatePhy slaveTemplate,
                                                      String operator) {
-        List<String> matchIndexNames = indexTemplatePhyService.getMatchIndexNames(slaveTemplate.getId());
         int templateId = switchDetail.getTemplateId().intValue();
+        final String expression = slaveTemplate.getExpression();
         try {
             if (DCDR_SWITCH_STEP_1 == step) {
                 // 不需要校验从集群到主集群是否是通路：这里是由于强切之后不会创建链路
@@ -1070,7 +1104,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                 if (hasCancelSubTask(workTaskId, switchDetail.getTemplateId())) {
                     setSettingResult = Result.buildFail(TASK_IS_CANCEL);
                 } else {
-                    Result<Void> changeSlaveDCDRConfig = changeDCDRConfig(slaveTemplate.getCluster(), matchIndexNames,
+                    //这里采用表达式设置这个会更快，这样会保证任务快速执行
+                    Result<Void> changeSlaveDCDRConfig = changeDCDRConfig(slaveTemplate.getCluster(), Collections.singletonList(expression),
                             false);
                     if (changeSlaveDCDRConfig.failed()) {
                         setSettingResult = Result.buildFail(changeSlaveDCDRConfig.getMessage());
@@ -1731,7 +1766,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
             });
         }
-        BATCH_DCDR_FUTURE_UTIL.waitExecute();
+        BATCH_DCDR_FUTURE_UTIL.waitExecute(120);
 
         try {
             saveNewestWorkTaskStatusToDB(taskForDCDRSwitch, dcdrTasksDetail, AuthConstant.SUPER_PROJECT_ID);

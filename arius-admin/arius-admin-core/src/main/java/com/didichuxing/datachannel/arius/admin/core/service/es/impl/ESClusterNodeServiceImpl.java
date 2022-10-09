@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginConstant;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -287,8 +288,16 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     @Override
     public Map<String, Triple<Long, Long, Double>> syncGetNodesDiskUsage(String cluster) {
         Map<String, Triple<Long, Long, Double>> diskUsageMap = new HashMap<>();
-        List<ClusterNodeStats> nodeStatsList = esClusterNodeDAO.syncGetNodesStats(cluster);
-
+        List<ClusterNodeStats> nodeStatsList = null;
+        try {
+            nodeStatsList = esClusterNodeDAO.syncGetNodesStats(cluster);
+        } catch (ESOperateException e) {
+            LOGGER.error(
+                "class=ESClusterNodeServiceImpl||method=syncGetNodesDiskUsage||clusterName={}",
+                cluster,e);
+            return diskUsageMap;
+        }
+    
         if (CollectionUtils.isNotEmpty(nodeStatsList)) {
             // 遍历节点，获得节点和对应的磁盘使用率
             nodeStatsList.forEach(nodeStats -> {
@@ -320,8 +329,15 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     @Override
     public Map<String, Tuple<Long, Long>> syncGetNodesMemoryAndDisk(String cluster) {
         Map<String, Tuple<Long, Long>> node2MemAndDiskMap = Maps.newHashMap();
-        List<ClusterNodeStats> nodeStatsList = esClusterNodeDAO.syncGetNodesStats(cluster);
-
+        List<ClusterNodeStats> nodeStatsList;
+        try {
+            nodeStatsList = esClusterNodeDAO.syncGetNodesStats(cluster);
+        } catch (ESOperateException e) {
+            LOGGER.error("class={}||method=syncGetNodesDiskUsage||clusterName={}", getClass().getSimpleName(), cluster,
+                    e);
+            return node2MemAndDiskMap;
+        }
+    
         if (CollectionUtils.isNotEmpty(nodeStatsList)) {
             // 遍历节点，获得节点和对应的磁盘使用率
             nodeStatsList.forEach(nodeStats -> {
