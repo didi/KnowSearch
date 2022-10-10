@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
@@ -22,6 +23,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -121,6 +124,9 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
 
     @Override
     protected PaginationResult<ClusterLogicVO> buildPageData(ClusterLogicConditionDTO condition, Integer projectId) {
+        if(StringUtils.isNotBlank(condition.getMemo())){
+            condition.setMemo(CommonUtils.sqlFuzzyQueryTransfer(condition.getMemo()));
+        }
         List<ClusterLogic> pagingGetClusterLogicList = clusterLogicService.pagingGetClusterLogicByCondition(condition);
         List<ClusterLogicVO> clusterLogicVOS = ConvertUtil.list2List(pagingGetClusterLogicList,ClusterLogicVO.class);
         long totalHit = clusterLogicService.fuzzyClusterLogicHitByCondition(condition);
