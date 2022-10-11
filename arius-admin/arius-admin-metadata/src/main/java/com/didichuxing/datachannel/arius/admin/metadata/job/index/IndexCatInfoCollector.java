@@ -185,6 +185,17 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
                                 clusterName,
                                 timeMillis);
                         indexCatCells.addAll(nativeIndexCatCells);
+                        // 4.4 从 indexCatCells 和索引管理下的索引集合进行比对，找到索引管理中不存在的索引，进行打标
+                        List<String> indexLists = indexCatCells.stream().map(IndexCatCellPO::getIndex).distinct()
+                                .collect(Collectors.toList());
+                        List<IndexCatCell> ariusNativeIndexDeleteCatCells = Optional.ofNullable(
+                                        clusterPhy2IndexCatCellListMap.get(clusterName)).orElse(Collections.emptyList())
+                                .stream()
+                                // 如果 index 不在 indexLists 中，则认为此索引是被第三方删除的，这个时候可以进行打标
+                                .filter(catIndexResult -> !indexLists.contains(catIndexResult.getIndex()))
+                                .peek(r -> r.setDeleteFlag(true)).collect(Collectors.toList());
+                        indexCatCells.addAll(
+                                ConvertUtil.list2List(ariusNativeIndexDeleteCatCells, IndexCatCellPO.class));
                     } catch (Exception e) {
                         Thread.currentThread().interrupt();
                         LOGGER.error("class=IndexCatInfoCollector||method=handleJobTask||errMsg={}", e.getMessage(), e);
