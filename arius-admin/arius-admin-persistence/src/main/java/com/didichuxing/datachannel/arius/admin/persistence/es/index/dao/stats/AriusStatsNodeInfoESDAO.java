@@ -44,6 +44,11 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     private static final String           THREAD_POOL_WRITE_REJECTED       = "thread_pool-write-rejected";
     private static final String           SEARCH_REJECTED_TOTAL            = "search_rejected_total";
     private static final String           THREAD_POOL_SEARCH_REJECTED      = "thread_pool-search-rejected";
+    private static final String           BREAKERS                         = "breakers";
+    private static final String           LIMIT_SIZE_IN_BYTES              = "limit_size_in_bytes";
+    private static final String           ESTIMATED_SIZE_IN_BYTES          = "estimated_size_in_bytes";
+
+
     private static final FutureUtil<Void> futureUtil        = FutureUtil.init("AriusStatsNodeInfoESDAO", 10, 10, 500);
 
     @PostConstruct
@@ -342,6 +347,9 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
 
         String interval = MetricsUtils.getInterval(endTime - startTime);
         List<String> metricsKeys = Lists.newArrayList(topMetrics.getType());
+        if (topMetrics.getType().contains(BREAKERS)){
+            metricsKeys.add(topMetrics.getType().replaceAll(LIMIT_SIZE_IN_BYTES,ESTIMATED_SIZE_IN_BYTES));
+        }
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TOPN_NODE_AGG_METRICS_INFO, clusterPhyName,
             topNameStr, startTime, endTime, esNodesMaxNum, interval, startTime, endTime,
@@ -454,7 +462,13 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     public List<VariousLineChartMetrics> getAggClusterPhySingleNodeMetrics(String clusterPhyName, List<String> metrics,
                                                                            String nodeName, String aggType,
                                                                            long startTime, long endTime) {
-
+        List<String> metricsLimit = new ArrayList<>();
+        metrics.forEach(metric -> {
+            if (metric.contains(BREAKERS)) {
+                metricsLimit.add(metric.replaceAll(LIMIT_SIZE_IN_BYTES, ESTIMATED_SIZE_IN_BYTES));
+            }
+        });
+        metrics.addAll(metricsLimit);
         String interval = MetricsUtils.getInterval(endTime - startTime);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_CLUSTER_PHY_SINGLE_NODE_NODE,

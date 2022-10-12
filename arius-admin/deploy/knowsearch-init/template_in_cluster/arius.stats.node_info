@@ -344,6 +344,12 @@
                     "indices-request_cache-hit_rate":{
                         "type":"double"
                     },
+                    "indices-query_cache-evictions":{
+                        "type":"double"
+                    },
+                    "indices-request_cache-evictions":{
+                        "type":"double"
+                     },
                     "jvm-gc-old-collection_avg_time":{
                         "type":"double"
                     },
@@ -363,6 +369,21 @@
                         "type":"double"
                     },
                     "breakers-parent-limit_size_in_bytes":{
+                        "type":"double"
+                    },
+                    "breakers-fielddata-estimated_size_in_bytes":{
+                        "type":"double"
+                    },
+                    "breakers-request-estimated_size_in_bytes":{
+                        "type":"double"
+                    },
+                    "breakers-in_flight_requests-estimated_size_in_bytes":{
+                        "type":"double"
+                    },
+                    "breakers-accounting-estimated_size_in_bytes":{
+                        "type":"double"
+                    },
+                    "breakers-parent-estimated_size_in_bytes":{
                         "type":"double"
                     },
                     "script-compilations":{
