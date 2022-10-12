@@ -49,6 +49,6 @@
 		<if test="tags != null">and tags = #{tags}</if>
 		<if test="model != null">and model = #{model}</if>
 		<if test="isThreshold != null">and is_hreshold = #{isThreshold}</if>
-		and is_active = 1;
+;
 	</select>
 </mapper>
