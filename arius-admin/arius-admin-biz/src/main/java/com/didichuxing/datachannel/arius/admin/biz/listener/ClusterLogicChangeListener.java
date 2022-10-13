@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.listener;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
+import com.didichuxing.datachannel.arius.admin.common.util.EventRetryExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -19,21 +20,18 @@ public class ClusterLogicChangeListener implements ApplicationListener<ClusterLo
     private static final ILog     LOGGER = LogFactory.getLog(ClusterLogicChangeListener.class);
 
     @Autowired
-    private ClusterContextManager clusterContextManager;
-
-    @Autowired
     private ClusterLogicManager   clusterLogicManager;
 
     @Override
     public void onApplicationEvent(ClusterLogicEvent event) {
-        try {
-            clusterContextManager.flushClusterLogicContext(event.getClusterLogicId());
 
-            clusterLogicManager.updateClusterLogicHealth(event.getClusterLogicId());
+        try {
+            EventRetryExecutor.eventRetryExecute("更新逻辑集群状态", () -> clusterLogicManager.updateClusterLogicHealth(event.getClusterLogicId()));
         } catch (Exception e) {
             LOGGER.error(
                 "class=ClusterPhyChangeListener||method=onApplicationEvent||projectId={}||clusterPhyName={}||ErrorMsg={}",
                 event.getProjectId(), event.getClusterLogicId(), e.getMessage());
         }
+
     }
 }
