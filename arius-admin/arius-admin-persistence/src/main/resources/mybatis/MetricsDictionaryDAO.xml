@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.metrics.MetricsDictionaryDAO">
+	<resultMap id="BaseResultMap"
+	           type="com.didichuxing.datachannel.arius.admin.common.bean.po.metrics.MetricsDictionaryPO">
+		<!--@mbg.generated--><!--@Table user_metrics_config_info-->
+		<id column="id" jdbcType="BIGINT" property="id"/>
+		<result column="type" jdbcType="VARCHAR" property="type"/>
+		<result column="metric_type" jdbcType="VARCHAR" property="metricType"/>
+		<result column="name" jdbcType="VARCHAR" property="name"/>
+		<result column="price" jdbcType="VARCHAR" property="price"/>
+		<result column="interval" jdbcType="VARCHAR" property="interval"/>
+		<result column="current_cal_logic" jdbcType="VARCHAR" property="currentCalLogic"/>
+		<result column="is_gold" jdbcType="TINYINT" property="isGold"/>
+		<result column="unit" jdbcType="VARCHAR" property="unit"/>
+		<result column="is_warning" jdbcType="TINYINT" property="isWarning"/>
+		<result column="interactive_form" jdbcType="VARCHAR" property="interactiveForm"/>
+		<result column="source" jdbcType="VARCHAR" property="source"/>
+		<result column="tags" jdbcType="VARCHAR" property="tags"/>
+		<result column="model" jdbcType="VARCHAR" property="model"/>
+		<result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+		<result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+	</resultMap>
+
+
+	<sql id="Base_Column_List">
+		id, `type`, `name`, price, `interval`, current_cal_logic, `is_gold`, `unit`, is_warning,interactive_form, `source`,
+        tags, `model`,`metric_type`
+	</sql>
+
+	<select id="listAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List"/>
+		from metric_dictionary_info where is_active = 1;
+	</select>
+
+	<select id="listByCondition" resultMap="BaseResultMap"
+			parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricDictionaryDTO" >
+		select
+		<include refid="Base_Column_List"/>
+		from metric_dictionary_info
+		where id > 0
+		<if test="type != null">and `type` = #{type}</if>
+		<if test="name != null">and `name` = #{name}</if>
+		<if test="metricType != null">and `metric_type` = #{metricType}</if>
+		<if test="isGold != null">and is_gold = #{isGold}</if>
+		<if test="isWarning != null">and is_warning = #{isWarning}</if>
+		<if test="source != null">and source = #{source}</if>
+		<if test="tags != null">and tags = #{tags}</if>
+		<if test="model != null">and model = #{model}</if>
+		<if test="isThreshold != null">and is_hreshold = #{isThreshold}</if>
+;
+	</select>
+</mapper>

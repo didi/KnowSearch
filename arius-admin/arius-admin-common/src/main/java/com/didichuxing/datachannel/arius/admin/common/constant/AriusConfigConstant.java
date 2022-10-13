@@ -258,12 +258,12 @@ public class AriusConfigConstant {
     /**
      * 采集延时阈值定义
      */
-    public static final String DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_DEFAULT_VALUE                         = "{\"name\":\"cluster.metric.collector.delayed_threshold\",\"metrics\":\"clusterMetricCollectorTimeDelayMin\",\"unit\":\"m\",\"compare\":\">\",\"value\":5}";
+    public static final String DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_DEFAULT_VALUE                         = "{\"name\":\"cluster.metric.collector.delayed_threshold\",\"metrics\":\"clusterMetricCollectorTimeDelayMin\",\"unit\":\"MIN\",\"compare\":\">\",\"value\":5}";
 
     /**
      * dashboard节点CPU利用率超阈值的[持续时间]默认值
      */
-    public static final String DASHBOARD_NODE_CPU_USED_PERCENT_THRESHOLD_TIME_DURATION_THRESHOLD_DEFAULT_VALUE = "{\"name\":\"node.cpu.used_percent_threshold_time_duration\",\"metrics\":\"cpuUsedPercentThresholdTimeDuration\",\"unit\":\"m\",\"compare\":\">\",\"value\":5}";
+    public static final String DASHBOARD_NODE_CPU_USED_PERCENT_THRESHOLD_TIME_DURATION_THRESHOLD_DEFAULT_VALUE = "{\"name\":\"node.cpu.used_percent_threshold_time_duration\",\"metrics\":\"cpuUsedPercentThresholdTimeDuration\",\"unit\":\"MIN\",\"compare\":\">\",\"value\":5}";
     /**
      * dashboardCPU利用率红线默认值
      */
@@ -272,7 +272,7 @@ public class AriusConfigConstant {
     /**
      * dashboard内存利用率持续时间红线默认值
      */
-    public static final String DASHBOARD_LARGE_HEAD_USED_PERCENT_TIME_DEFAULT_VALUE                            = "{\"name\":\"node.jvm.heap.used_percent_threshold_time_duration_threshold\",\"metrics\":\"jvmHeapUsedPercentThresholdTimeDuration\",\"unit\":\"m\",\"compare\":\">\",\"value\":10}";
+    public static final String DASHBOARD_LARGE_HEAD_USED_PERCENT_TIME_DEFAULT_VALUE                            = "{\"name\":\"node.jvm.heap.used_percent_threshold_time_duration_threshold\",\"metrics\":\"jvmHeapUsedPercentThresholdTimeDuration\",\"unit\":\"MIN\",\"compare\":\">\",\"value\":10}";
     /**
      * dashboard堆内存利用率超红线阈值默认值
      */
