@@ -3,7 +3,7 @@
   "name": "arius.dsl.template",
   "resourceId": #resourceId,
   "level": 1,
-  "cyclicalRoll": 1,
+  "cyclicalRoll": 0,
   "expireTime": -1,
   "dateField": "logTime",
   "dateFieldFormat": "epoch_millis",

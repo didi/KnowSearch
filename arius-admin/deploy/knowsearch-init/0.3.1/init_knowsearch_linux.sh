@@ -1,5 +1,4 @@
 #!/bin/bash
-data_path='/root/KnowSearch-0.3.1/admin/init'
 #需要变更一些地址
 url_prefix='http://127.0.0.1:8015/admin/api'
 #元数据项目，默认不变
@@ -43,6 +42,10 @@ create_logic_template(){
     echo "Create template results : $result ...."
   done
 }
+url_status=$(curl -s -m 5 -IL $url_prefix/health  |grep 200)
+if ["$url_status" == ""];then
+	echo "服务异常，无法执行脚本"
+fi
 #接入物理集群
 join_cluster
 
