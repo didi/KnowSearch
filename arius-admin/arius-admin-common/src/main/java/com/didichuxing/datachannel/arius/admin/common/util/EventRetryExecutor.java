@@ -51,7 +51,7 @@ public class EventRetryExecutor {
 
                         @Override
                         public boolean needExceptionRetry(Exception e) {
-                            return e instanceof ESOperateException;
+                            return e instanceof Exception;
                         }
 
                         @Override
@@ -65,9 +65,7 @@ public class EventRetryExecutor {
                         }
                     });
             return retryExecutor.execute();
-        } catch (ESOperateException e) {
-            throw new ESOperateException(e.getMessage(),e.getCause());
-        }catch (Exception e){
+        } catch (Exception e){
             throw new ESOperateException(e.getMessage(), e);
         }
     }
