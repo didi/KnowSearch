@@ -104,11 +104,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         String dateFormat = newTemplate.getDateFormat();
 
         Integer expireDay = newTemplate.getExpireTime();
-        if (newTemplate.getHotTime() != null && newTemplate.getHotTime() > 0) {
-            expireDay = newTemplate.getHotTime();
-        } else if (oldTemplate.getHotTime() != null && oldTemplate.getHotTime() > 0) {
-            expireDay = oldTemplate.getHotTime();
-        }
+
 
         if (cyclicalRollChanged) {
             dateField = "";
@@ -249,8 +245,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
      * @return
      */
     private boolean isExpireDayChange(Integer expireTime, Integer hotTime, Integer pipelineExpireDay) {
-        return ((hotTime > 0 && !pipelineExpireDay.equals(hotTime))
-                || (hotTime <= 0 && !pipelineExpireDay.equals(expireTime)));
+        return pipelineExpireDay.equals(expireTime);
     }
 
     /**
@@ -286,7 +281,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         Integer version = indexTemplatePhy.getVersion();
         String idField = logicTemplate.getIdField();
         String routingField = logicTemplate.getRoutingField();
-        Integer expireDay = logicTemplate.getHotTime() > 0 ? logicTemplate.getHotTime() : logicTemplate.getExpireTime();
+        Integer expireDay =  logicTemplate.getExpireTime();
 
         LOGGER.info(
             "class=PipelineManagerImpl||method=doCreatePipeline||cluster={}||pipelineId={}||dateField={}||dateFormat={}||expireDay={}||rateLimit={}||version={}",
@@ -408,9 +403,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         esPipeline.setDateField(logicWithPhysical.getDateField());
         esPipeline.setDateFieldFormat(logicWithPhysical.getDateFieldFormat());
         esPipeline.setDateFormat(logicWithPhysical.getDateFormat());
-        esPipeline.setExpireDay(logicWithPhysical.getHotTime() > 0
-                ? logicWithPhysical.getHotTime()
-                : logicWithPhysical.getExpireTime());
+        esPipeline.setExpireDay( logicWithPhysical.getExpireTime());
         esPipeline.setRateLimit(rateLimit);
         esPipeline.setVersion(newTemplate.getVersion());
         esPipeline.setIdField(logicWithPhysical.getIdField());
@@ -551,9 +544,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
             esPipeline.setDateField(templateLogicWithPhysical.getDateField());
             esPipeline.setDateFieldFormat(templateLogicWithPhysical.getDateFieldFormat());
             esPipeline.setDateFormat(templateLogicWithPhysical.getDateFormat());
-            esPipeline.setExpireDay(templateLogicWithPhysical.getHotTime() > 0
-                    ? templateLogicWithPhysical.getHotTime()
-                    : templateLogicWithPhysical.getExpireTime());
+            esPipeline.setExpireDay(templateLogicWithPhysical.getExpireTime());
             esPipeline.setRateLimit(finalRateLimitNew);
             esPipeline.setVersion(templatePhysical.getVersion());
             esPipeline.setIdField(templateLogicWithPhysical.getIdField());
@@ -658,8 +649,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         Integer version = indexTemplatePhysicalInfo.getVersion();
         String idField = logicWithPhysical.getIdField();
         String routingField = logicWithPhysical.getRoutingField();
-        Integer expireDay = logicWithPhysical.getHotTime() > 0 ? logicWithPhysical.getHotTime()
-            : logicWithPhysical.getExpireTime();
+        Integer expireDay = logicWithPhysical.getExpireTime();
 
         LOGGER.info(
             "class=TemplatePipelineManagerImpl||method=createPipeline||cluster={}||pipelineId={}||dateField={}||dateFormat={}||expireDay={}||rateLimit={}||version={}",

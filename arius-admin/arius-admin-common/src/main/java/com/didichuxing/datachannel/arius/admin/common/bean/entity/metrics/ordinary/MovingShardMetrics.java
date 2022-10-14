@@ -14,23 +14,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MovingShardMetrics implements Serializable {
+
     /**
      * 归属索引
      */
     private String i;
 
     /**
-     * shard标识
-     */
-    private long   s;
-
-    /**
-     * 耗时
-     */
-    private String t;
-
-    /**
-     * 源节点Ip
+     * 源节点ip
      */
     private String shost;
 
@@ -40,7 +31,17 @@ public class MovingShardMetrics implements Serializable {
     private String thost;
 
     /**
-     * 状态 init、index、start、translog、finalize、done
+     * 覆盖的字节数
      */
-    private String st;
+    private String br;
+
+    /**
+     * 字节占比
+     */
+    private String bp;
+
+    /**
+     * 转换日志操作占比
+     */
+    private String top;
 }

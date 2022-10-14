@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusTaskThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -30,6 +31,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+
 /**
  *
  * @author d06679
@@ -47,12 +50,18 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     private static final String  USER_OPERATION = "user_operation";
     private static final String  ID = "id";
 
+    private AriusTaskThreadPool ariusTaskThreadPool;
+
     @Autowired
     private OperateRecordDAO  operateRecordDAO;
     @Autowired
     private ProjectDao projectDao;
-   
 
+    @PostConstruct
+    public void init() {
+        ariusTaskThreadPool = new AriusTaskThreadPool();
+        ariusTaskThreadPool.init(3, "OperateRecordServiceImpl", 100);
+    }
 
     
     @Override
@@ -65,9 +74,17 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     
     @Override
     public Result<Void> save(OperateRecord operateRecord) {
-        final OperateRecordInfoPO operateRecordInfoPO = ConvertUtil.obj2Obj(operateRecord, OperateRecordInfoPO.class);
-        return Result.build(operateRecordDAO.insert(operateRecordInfoPO) == 1);
-
+        ariusTaskThreadPool.run(() -> {
+            try {
+                OperateRecordInfoPO operateRecordInfoPO = ConvertUtil.obj2Obj(operateRecord, OperateRecordInfoPO.class);
+                operateRecordDAO.insert(operateRecordInfoPO);
+            } catch (Exception e) {
+                LOGGER.error(
+                        "class=OperateRecordServiceImply||method=save||errMsg={}||operateId={}",
+                        e.getMessage(), operateRecord.getOperateId(), e);
+            }
+        });
+        return Result.buildSucc();
     }
     
     @Override
@@ -208,9 +225,8 @@ public class OperateRecordServiceImpl implements OperateRecordService {
      * @param operateRecordDTO
      */
     private Result<Integer> insertOperateRecordInfoWithoutCheck(OperateRecordDTO operateRecordDTO) {
-        OperateRecordInfoPO operateRecordInfoPO = ConvertUtil.obj2Obj(operateRecordDTO, OperateRecordInfoPO.class);
-        boolean succ = (1 == operateRecordDAO.insert(operateRecordInfoPO));
-        return Result.build(succ, operateRecordInfoPO.getId());
+        OperateRecord operateRecord = ConvertUtil.obj2Obj(operateRecordDTO,OperateRecord.class);
+        return Result.build(save(operateRecord).success(),operateRecordDTO.getId());
     }
 
     /**

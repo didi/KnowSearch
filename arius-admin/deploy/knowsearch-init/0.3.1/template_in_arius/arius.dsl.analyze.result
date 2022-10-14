@@ -3,7 +3,7 @@
   "name": "arius.dsl.analyze.result",
   "resourceId": #resourceId,
   "level": 1,
-  "cyclicalRoll": 1,
+  "cyclicalRoll": 0,
   "expireTime": 3,
   "dateField": "logTime",
   "dateFieldFormat": "epoch_millis",
