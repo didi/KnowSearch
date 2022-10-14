@@ -5,7 +5,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatC
 import com.didichuxing.datachannel.arius.admin.common.event.index.IndexDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.EventException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.EventRetryExecutor;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import java.util.List;
@@ -13,7 +12,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,17 +48,6 @@ public class TemplateEventClearIndexListener extends ApplicationRetryListener<In
 					event.getProjectId(), index, e.getMessage());
 			throw new EventException(e.getMessage(), e);
 		}
-
-	}
-
-	/**
-	 * @param event
-	 */
-	@SneakyThrows
-	@Override
-	public void onApplicationEvent(@NotNull IndexDeleteEvent event) {
-
-		EventRetryExecutor.eventRetryExecute("根据物理集群删除索引",  () -> onApplicationRetryEvent(event));
 
 	}
 

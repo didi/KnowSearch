@@ -37,11 +37,4 @@ public class ClusterLogicChangeListener extends ApplicationRetryListener<Cluster
         }
     }
 
-    @SneakyThrows
-    @Override
-    public void onApplicationEvent(ClusterLogicEvent event) {
-
-        EventRetryExecutor.eventRetryExecute("更新逻辑集群状态", () -> onApplicationRetryEvent(event));
-
-    }
 }
