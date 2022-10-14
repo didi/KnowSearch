@@ -3,12 +3,9 @@ package com.didichuxing.datachannel.arius.admin.biz.listener;
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.event.index.IndexDeleteEvent;
-import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.EventException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EventRetryExecutor;
-import com.didichuxing.datachannel.arius.admin.common.util.RetryExecutor;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import java.util.List;
@@ -19,8 +16,6 @@ import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 /**
