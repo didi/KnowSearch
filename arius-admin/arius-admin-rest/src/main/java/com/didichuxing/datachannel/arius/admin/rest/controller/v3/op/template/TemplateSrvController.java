@@ -6,8 +6,10 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManag
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.ColdSrvOpenDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateIncrementalSettingsDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -63,5 +65,14 @@ public class TemplateSrvController {
                                          @PathVariable("templateIdList") List<Integer> templateIdList) {
         return templateSrvManager.closeSrv(srvCode, templateIdList, HttpRequestUtil.getOperator(request),
             HttpRequestUtil.getProjectId(request));
+    }
+
+    @PutMapping("/statusWithSetting/{templateIdList}")
+    @ResponseBody
+    @ApiOperation(value = "通过更新模版settings和部分索引settings来实现模版服务功能")
+    public Result<Void> updateSrvStatusBySettings(HttpServletRequest request, @RequestBody TemplateIncrementalSettingsDTO settings,
+                                                    @PathVariable("templateIdList") List<Integer> templateIdList) throws AdminOperateException {
+        return templateSrvManager.updateSrvStatusBySettings(settings, templateIdList, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 }

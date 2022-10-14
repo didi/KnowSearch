@@ -2,31 +2,41 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TEMPLATE_SRV;
 
+import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateSrvPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesIncrementalSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.ColdSrvOpenDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateIncrementalSettingsDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.ESSettingConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.SupportSrv;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -36,6 +46,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
@@ -59,7 +70,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         .newConcurrentMap();
 
 
-
     @Autowired
     private IndexTemplateService                                        indexTemplateService;
 
@@ -70,10 +80,15 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     private HandleFactory                                               handleFactory;
     @Autowired
     private RoleTool                                                    roleTool;
-   
+
     @Autowired
     private ColdManager          coldManager;
- 
+
+    @Autowired
+    private TemplateLogicSettingsManager                                templateLogicSettingsManager;
+
+    @Autowired
+    private IndicesManager                                              indicesManager;
 
     @PostConstruct
     public void init() {
@@ -140,8 +155,8 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
          * 预创建，过期删除（分区才可以操作），冷热分离（分区并且有冷region才能操作），dcdr和pipeline（es有对应module才能操作），rolloer没有限制但是产品侧有提示
          */
         for (TemplateServiceEnum srvEnum : allSrvList) {
-        
-           
+
+
             //1.非分区模版不支持：预创建、过期删除、冷热划分的能力
             if (Boolean.FALSE.equals(isPartition)&&TemplateServiceEnum.usePartitionService().contains(srvEnum)){
                 final UnavailableTemplateSrv unavailableTemplateSrv = new UnavailableTemplateSrv(srvEnum.getCode(),
@@ -155,7 +170,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                             srvEnum.getServiceName(), srvEnum.getEsClusterVersion().getVersion(),
                             "集群没有冷region，不支持此能力");
                     unavailableSrvList.add(unavailableTemplateSrv);
-                    
+
                 } else
                     //3.dcdr dcdrSupport==true支持
                     if (Boolean.FALSE.equals(dcdrSupport) && srvEnum.equals(TemplateServiceEnum.TEMPLATE_DCDR)) {
@@ -231,12 +246,12 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
 
-    
 
 
 
 
-   
+
+
 
 
 
@@ -248,10 +263,10 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
      */
     @Override
     public List<String> getPhyClusterByOpenTemplateSrv(int srvId) {
-        
+
         return clusterPhyService.listAllClusters().stream().map(ClusterPhy::getCluster).collect(Collectors.toList());
     }
-  
+
     /**
      * 查询开启了某个索引服务的索引模板列表
      *
@@ -266,6 +281,116 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                 .map(IndexTemplate::getName)
                 .collect(Collectors.toList());
     }
-    
 
+
+
+    /**
+     * 通过更新模版settings和部分索引settings来实现模版服务(如异步translog、恢复优先级)
+     * @param settings 模版增量settings
+     * @param templateIdList  模版id列表
+     * @param operator
+     * @param projectId
+     * @return
+     */
+    @Override
+    public Result<Void> updateSrvStatusBySettings(TemplateIncrementalSettingsDTO settings, List<Integer> templateIdList, String operator, Integer projectId) throws AdminOperateException {
+
+        Result<Void> checkResult = checkParam(projectId, operator, settings);
+        if(checkResult.failed()){
+            return Result.buildFail(checkResult.getMessage());
+        }
+
+        // 用于错误消息拼接
+        boolean updateFail = false;
+        StringBuilder updateFailTemplates = new StringBuilder();
+        // 构造模版的增量settings
+        Map<String, String> incrementalSettings = Maps.newHashMap();
+        incrementalSettings.put(settings.getKey(), settings.getValue());
+
+        // indicesIncrementalSettingList 存储需要更新settings的索引
+        List<IndicesIncrementalSettingDTO> indicesIncrementalSettingList = Lists.newArrayList();
+
+        for (Integer logicId : templateIdList) {
+            // 增量方式修改每个模版的settings
+            Result<Void> result = templateLogicSettingsManager.updateSettingsByMerge(logicId, incrementalSettings, operator, projectId);
+            if(result.failed()){
+                updateFail = true;
+                updateFailTemplates.append(logicId).append(",");
+                LOGGER.error("class=TemplateSrvManagerImpl||method=updateSrvStatusBySettings,templateId={}, errMsg={}",
+                        logicId, "update settings failed");
+            }
+
+            // 更新服务状态到数据库中
+
+
+            // 对于非分区模版，还要修改其对应的那一个索引的settings
+            IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(logicId);
+            if(!templateLogicWithPhysical.getExpression().endsWith("*")){
+                List<IndexTemplatePhy> physicalMasters = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+                for (IndexTemplatePhy physicalMaster : physicalMasters) {
+                    CatIndexResult catIndexResult = indicesManager.listIndexCatInfoByTemplatePhyId(physicalMaster.getId())
+                            .stream().findFirst().orElse(null);
+                    if(AriusObjUtils.isNull(catIndexResult)){
+                        continue;
+                    }
+
+                    IndicesIncrementalSettingDTO indicesIncrementalSettingDTO = new IndicesIncrementalSettingDTO();
+                    indicesIncrementalSettingDTO.setCluster(physicalMaster.getCluster());
+                    indicesIncrementalSettingDTO.setIndex(catIndexResult.getIndex());
+                    indicesIncrementalSettingDTO.setKey(settings.getKey());
+                    indicesIncrementalSettingDTO.setValue(settings.getValue());
+
+                    indicesIncrementalSettingList.add(indicesIncrementalSettingDTO);
+                }
+            }
+        }
+
+        // 批量更新索引settings
+        if(!indicesIncrementalSettingList.isEmpty()){
+            Result<Void> result = indicesManager.updateIndexSettingsByMerge(indicesIncrementalSettingList, projectId, operator);
+            if(result.failed()){
+                return Result.buildFail(result.getMessage());
+            }
+        }
+
+        if(updateFail){
+            return Result.buildFail(updateFailTemplates.deleteCharAt(updateFailTemplates.length()-1) + "模版更新settings失败");
+        }
+
+        return Result.buildSucc();
+    }
+
+    /***************************************************private**********************************************************/
+
+    private Result<Void> checkParam(Integer projectId, String operator, TemplateIncrementalSettingsDTO settings){
+        final Result<Void> projectCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (projectCheck.failed()) {
+            return Result.buildFail(projectCheck.getMessage());
+        }
+        if (AriusObjUtils.isNull(operator)) {
+            return Result.buildParamIllegal("操作人为空");
+        }
+
+        if(ESSettingConstant.INDEX_TRANSLOG_DURABILITY.equals(settings.getKey())){
+            if(!(ESSettingConstant.ASYNC.equals(settings.getValue()) || ESSettingConstant.REQUEST.equals(settings.getValue()))) {
+                return Result.buildParamIllegal("setting [index.translog.durability] must be 'request' or 'async'");
+            }
+        }else if (ESSettingConstant.INDEX_PRIORITY.equals(settings.getKey())){
+            if(!StringUtils.isNumeric(settings.getValue())){
+                return Result.buildParamIllegal("setting [index.priority] must be numeric");
+            }
+            Integer priorityLevel = Integer.valueOf(settings.getValue());
+            if(priorityLevel < 0){
+                return Result.buildParamIllegal("setting [index.priority] must be >= 0");
+            }
+            if(!(ESSettingConstant.HIGH_PRIORITY.equals(priorityLevel) || ESSettingConstant.MIDDLE_PRIORITY
+                    .equals(priorityLevel) || ESSettingConstant.LOW_PRIORITY.equals(priorityLevel))){
+                return Result.buildParamIllegal("setting [index.priority] must be 10,5,0");
+            }
+        }else {
+            return Result.buildParamIllegal("模版settings的key取值有误");
+        }
+
+        return Result.buildSucc();
+    }
 }

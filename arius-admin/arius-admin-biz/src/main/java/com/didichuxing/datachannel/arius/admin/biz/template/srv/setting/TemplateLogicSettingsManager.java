@@ -7,6 +7,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateS
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 
+import java.util.Map;
+
 /**
  * 逻辑模板settings service
  * @author wangshu
@@ -59,13 +61,13 @@ public interface TemplateLogicSettingsManager {
     Result<Void> updateSettings(Integer logicId, String operator, AriusIndexTemplateSetting settings);
 
     /**
-     * 更新settings信息
-     *
-     * @param logicId   逻辑ID
-     * @param settings  settings
+     * 以全量的方式更新模版settings
+     * @param logicId   逻辑模版ID
+     * @param settings  全量settings
      * @param operator
      * @param projectId
      * @return
+     * @throws AdminOperateException
      */
     Result<Void> updateSettings(Integer logicId, IndexTemplatePhySetting settings, String operator, Integer projectId)
             throws AdminOperateException;
@@ -76,4 +78,16 @@ public interface TemplateLogicSettingsManager {
      * @return
      */
     Result<IndexTemplatePhySetting> getTemplateSettings(Integer logicId);
+
+    /**
+     * 以增量的方式更新模版settings
+     * @param logicId   模版id
+     * @param incrementalSettings  settings的增量
+     * @param operator
+     * @param projectId
+     * @return
+     * @throws AdminOperateException
+     */
+    Result<Void> updateSettingsByMerge(Integer logicId, Map<String, String> incrementalSettings, String operator,
+                                       Integer projectId) throws AdminOperateException;
 }

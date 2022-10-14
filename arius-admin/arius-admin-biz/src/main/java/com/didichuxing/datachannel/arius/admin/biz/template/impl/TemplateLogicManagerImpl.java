@@ -22,6 +22,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplateValue;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -38,13 +39,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellWithTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateClearVO;
@@ -188,6 +183,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     protected ESClusterNodeService esClusterNodeService;
     @Autowired
     private ESClusterService esClusterService;
+
+    @Autowired
+    private TemplateLogicSettingsManager templateLogicSettingsManager;
 
     public static final int                 MAX_PERCENT           = 10000;
     public static final int                 MIN_PERCENT           = -99;
@@ -1007,6 +1005,12 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
                 .map(IndexTemplateConfig::getDisableIndexRollover)
                 .ifPresent(consoleTemplateDetail::setDisableIndexRollover);
+        // 获取模版恢复优先级
+        IndexTemplatePhySetting templateSetting = templateLogicSettingsManager.getTemplateSettings(logicId).getData();
+        Map<String, String> templateSettingMap = templateSetting.flatSettings();
+        consoleTemplateDetail.setRecoveryPriorityLevel(Integer.valueOf(templateSettingMap
+                .getOrDefault(ESSettingConstant.INDEX_PRIORITY, "0")));
+
         return Result.buildSucc(consoleTemplateDetail);
     }
 
