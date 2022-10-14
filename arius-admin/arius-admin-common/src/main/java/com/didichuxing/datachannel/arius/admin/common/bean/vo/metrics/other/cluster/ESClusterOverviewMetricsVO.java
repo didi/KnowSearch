@@ -71,6 +71,9 @@ public class ESClusterOverviewMetricsVO extends MetricsVO {
     @ApiModelProperty("正在迁移shard列表")
     private List<MovingShardMetricsVO>               movingShards;
 
+    @ApiModelProperty("未分配的shard列表")
+    private List<UnAssignShardMetricsVO>               unAssignShards;
+
     @ApiModelProperty("大shard列表")
     private List<BigShardMetricsVO>                  bigShards;
 

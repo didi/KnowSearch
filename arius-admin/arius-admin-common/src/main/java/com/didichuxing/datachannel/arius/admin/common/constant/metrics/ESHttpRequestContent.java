@@ -13,7 +13,7 @@ public class ESHttpRequestContent {
     /**
      * 获取集群搬迁shard
      */
-    public static final String GET_MOVING_SHARD            = "_cat/recovery?v&h=i,s,t,st,shost,thost&active_only=true";
+    public static final String GET_MOVING_SHARD            = "_cat/recovery?v&h=i,shost,thost,br,bp,top&active_only=true";
 
     /**
      * 获取集群pendingTask
@@ -34,6 +34,12 @@ public class ESHttpRequestContent {
      * 获取集群shard
      */
     public static final String GET_SHARDS                  = "/_cat/shards/";
+
+    /**
+     * 获取json格式的集群shard
+     */
+    public static final String GET_SHARDS_JSON                  = "_cat/shards?format=json";
+
     /**
      * 获取集群shard
      */

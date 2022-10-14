@@ -19,7 +19,7 @@ public enum ClusterDynamicConfigsTypeEnum {
                                            /**
                                             * 物理集群下的routing配置项
                                             */
-                                           ROUTING(2, "routing"),
+                                           ALLOCATION(2, "allocation"),
 
                                            /**
                                             * 物理集群下的zen配置项
