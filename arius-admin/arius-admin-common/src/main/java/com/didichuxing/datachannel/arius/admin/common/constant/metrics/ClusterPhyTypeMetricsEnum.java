@@ -4,17 +4,13 @@ package com.didichuxing.datachannel.arius.admin.common.constant.metrics;
  * Created by linyunan on 2021-08-01
  */
 public enum ClusterPhyTypeMetricsEnum {
-                                       /*** 未知*/
-                                       UNKNOWN(-1, "未知",
-                                               false), CLUSTER(1, "clusterPhyOverviewMetrics",
-                                                               false), NODE(2, "clusterPhyNodeMetrics",
-                                                                            true), INDICES(3,
-                                                                                           "clusterPhyIndicesMetrics",
-                                                                                           true), TEMPLATES(4,
-                                                                                                            "clusterPhyTemplateMetrics",
-                                                                                                            true), NODE_TASKS(5,
-                                                                                                                              "clusterPhyNodesTaskMetricsHandler",
-                                                                                                                              true);
+    /*** 未知*/
+    UNKNOWN(-1, "未知",false),
+    CLUSTER(1, "clusterPhyOverviewMetrics",false),
+    NODE(2, "clusterPhyNodeMetrics", true),
+    INDICES(3, "clusterPhyIndicesMetrics", true),
+    TEMPLATES(4, "clusterPhyTemplateMetrics", true),
+    NODE_TASKS(5, "clusterPhyNodesTaskMetricsHandler", true);
 
     ClusterPhyTypeMetricsEnum(int code, String type, boolean collectCurveMetricsList) {
         this.code = code;
@@ -22,9 +18,9 @@ public enum ClusterPhyTypeMetricsEnum {
         this.collectCurveMetricsList = collectCurveMetricsList;
     }
 
-    private int     code;
+    private int code;
 
-    private String  type;
+    private String type;
 
     private boolean collectCurveMetricsList;
 

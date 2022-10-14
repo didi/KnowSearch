@@ -1,39 +1,91 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.handle;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.BIG_SHARD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.PHY_CLUSTER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.CPU_LOAD_15M;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.CPU_LOAD_1M;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.CPU_LOAD_5M;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.CPU_USAGE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.DISK_USAGE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.INDEXING_LATENCY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.SEARCH_LATENCY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.TASK_COST;
+
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.DiskInfoMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.ReadQPSMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.RecvTransMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.SendTransMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.ShardInfoMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.TaskCountMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.WriteTPSMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.BigIndexMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ClusterMemInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.MovingShardMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.PendingTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ShardMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.UnAssignShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentileMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.BigIndexMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.BigShardMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.CpuLoadFor15MinMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.CpuLoadFor1MinMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.CpuLoadFor5MinMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.CpuUsageMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.DiskInfoMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.DiskUsageMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterOverviewMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterPhyBasicMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.IndexingLatencyMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.MovingShardMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.NodeInfoForDiskUsageGte75PercentVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.PendingTaskVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ReadQPSMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.RecvTransMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.SearchLatencyMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.SendTransMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ShardInfoMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.TaskCostMetricVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.TaskCountMetricVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.UnAssignShardMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.WriteTPSMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.*;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.BIG_SHARD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.PHY_CLUSTER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.*;
 
 /**
  * Created by linyunan on 2021-08-02
@@ -196,6 +248,9 @@ public class ClusterOverviewMetricsHandle {
                 case MOVING_SHARDS:
                     getMovingShardsMetrics(metrics);
                     return;
+                case UNASSIGN_SHARDS:
+                    getUnassignedShardsMetrics(metrics);
+                    return;
                 case INVALID_NODES:
                     getInvalidNodesMetrics(metrics);
                     return;
@@ -300,6 +355,11 @@ public class ClusterOverviewMetricsHandle {
     private void getMovingShardsMetrics(ESClusterOverviewMetricsVO metrics) {
         List<MovingShardMetrics> movingShardsMetrics = esShardService.syncGetMovingShards(metrics.getClusterName());
         metrics.setMovingShards(ConvertUtil.list2List(movingShardsMetrics, MovingShardMetricsVO.class));
+    }
+
+    private void getUnassignedShardsMetrics(ESClusterOverviewMetricsVO metrics) {
+        List<UnAssignShardMetrics> unAssignShardMetrics = esShardService.syncGetUnAssignShards(metrics.getClusterName());
+        metrics.setUnAssignShards(ConvertUtil.list2List(unAssignShardMetrics, UnAssignShardMetricsVO.class));
     }
 
     private void getPendingTasksMetrics(ESClusterOverviewMetricsVO metrics) {

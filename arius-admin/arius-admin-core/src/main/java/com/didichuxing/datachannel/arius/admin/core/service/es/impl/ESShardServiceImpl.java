@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.MovingShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ShardMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.UnAssignShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.SegmentPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmenNodeVO;
@@ -25,10 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
@@ -51,6 +49,7 @@ public class ESShardServiceImpl implements ESShardService {
     private String              decider                      = "decider";
     private String              deciders                     = "deciders";
     private String              explanation                  = "explanation";
+    private String              unassign                     = "UNASSIGNED";
     private int                 ONE                          = 1;
     
     
@@ -75,6 +74,18 @@ public class ESShardServiceImpl implements ESShardService {
         return movingShardsMetrics;
     }
 
+    @Override
+    public List<UnAssignShardMetrics> syncGetUnAssignShards(String clusterName) {
+        DirectResponse directResponse = esShardDAO.getDirectResponse(clusterName, "Get", GET_SHARDS_JSON);
+
+        if (directResponse.getRestStatus() == RestStatus.OK
+                && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+
+            return ConvertUtil.str2ObjArrayByJson(directResponse.getResponseContent(),
+                    UnAssignShardMetrics.class).stream().filter(r->r.getState().equals(unassign)).collect(Collectors.toList());
+        }
+        return Lists.newArrayList();
+    }
     @Override
     public List<ShardMetrics> syncGetBigShards(String clusterName) {
         List<ShardMetrics> shardsMetrics = getShardMetrics(clusterName);
