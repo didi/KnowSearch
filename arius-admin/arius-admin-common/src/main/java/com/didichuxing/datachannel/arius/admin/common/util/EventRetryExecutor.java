@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.util;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.EventException;
 
 import java.util.function.Predicate;
 
@@ -26,7 +27,7 @@ public class EventRetryExecutor {
     /**
      * 定制事件重试方法，不对返回判断重试
      */
-    public static <T> T eventRetryExecute(String methodName, RetryExecutor.Handler<T> handler) throws ESOperateException {
+    public static <T> T eventRetryExecute(String methodName, RetryExecutor.Handler<T> handler) throws EventException {
         return eventRetryExecute(methodName, handler, t -> false);
     }
 
@@ -34,13 +35,13 @@ public class EventRetryExecutor {
      * 定制事件重试方法，根据事件的返回值来判断是否需要重试
      */
     public static <T> T eventRetryExecute(String methodName, RetryExecutor.Handler<T> handler,
-                                          Predicate<T> retNeedRetry) throws ESOperateException {
+                                          Predicate<T> retNeedRetry) throws EventException {
         return eventRetryExecuteInner(methodName, handler, retNeedRetry);
     }
 
     /**************************************** private method ***************************************************/
     private static <T> T eventRetryExecuteInner(String methodName, RetryExecutor.Handler<T> handler,
-                                             Predicate<T> retNeedRetry) throws ESOperateException {
+                                             Predicate<T> retNeedRetry) throws EventException {
         try {
             final RetryExecutor<T> retryExecutor = RetryExecutor.builder().name(methodName).retryCount(RETRY_COUNT)
                     .handler(new RetryExecutor.Handler() {
@@ -66,7 +67,7 @@ public class EventRetryExecutor {
                     });
             return retryExecutor.execute();
         } catch (Exception e){
-            throw new ESOperateException(e.getMessage(), e);
+            throw new EventException(e.getMessage(), e);
         }
     }
 }
