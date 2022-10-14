@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.listener;
 
-import com.didichuxing.datachannel.arius.admin.common.event.index.IndexDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.EventException;
 import com.didichuxing.datachannel.arius.admin.common.util.EventRetryExecutor;
 import lombok.SneakyThrows;
