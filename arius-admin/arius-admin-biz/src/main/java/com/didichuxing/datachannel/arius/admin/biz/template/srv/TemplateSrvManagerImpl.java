@@ -62,7 +62,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         .getLog(TemplateSrvManagerImpl.class);
 
     private static final String                                         NO_PERMISSION_CONTENT                                     = "只有运维或者研发才有权限操作";
-
     private static final String                                         CLUSTER_LOGIC_NOT_EXISTS                                  = "逻辑集群不存在";
     private static final String                                         PHYSICAL_CLUSTER_NOT_EXISTS                               = "物理集群不存在";
 
@@ -82,7 +81,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     private RoleTool                                                    roleTool;
 
     @Autowired
-    private ColdManager          coldManager;
+    private ColdManager                                                 coldManager;
 
     @Autowired
     private TemplateLogicSettingsManager                                templateLogicSettingsManager;
@@ -155,7 +154,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
          * 预创建，过期删除（分区才可以操作），冷热分离（分区并且有冷region才能操作），dcdr和pipeline（es有对应module才能操作），rolloer没有限制但是产品侧有提示
          */
         for (TemplateServiceEnum srvEnum : allSrvList) {
-
 
             //1.非分区模版不支持：预创建、过期删除、冷热划分的能力
             if (Boolean.FALSE.equals(isPartition)&&TemplateServiceEnum.usePartitionService().contains(srvEnum)){
@@ -245,16 +243,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         }
     }
 
-
-
-
-
-
-
-
-
-
-
     /**
      * 查询开启了某个索引服务的物理集群列表
      *
@@ -281,8 +269,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                 .map(IndexTemplate::getName)
                 .collect(Collectors.toList());
     }
-
-
 
     /**
      * 通过更新模版settings和部分索引settings来实现模版服务(如异步translog、恢复优先级)
@@ -319,9 +305,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                 LOGGER.error("class=TemplateSrvManagerImpl||method=updateSrvStatusBySettings,templateId={}, errMsg={}",
                         logicId, "update settings failed");
             }
-
-            // 更新服务状态到数据库中
-
 
             // 对于非分区模版，还要修改其对应的那一个索引的settings
             IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(logicId);
