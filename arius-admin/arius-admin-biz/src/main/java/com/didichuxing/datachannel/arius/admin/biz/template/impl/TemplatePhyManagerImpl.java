@@ -53,6 +53,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Inde
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
+import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
@@ -129,6 +130,8 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     @Autowired
     private ProjectService                  projectService;
+    @Autowired
+    private ESTemplateService templateService;
 
     @Override
     public boolean checkMeta() {
@@ -321,6 +324,17 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         tgtTemplateParam.setShard(param.getShard());
         tgtTemplateParam.setVersion(indexTemplatePhy.getVersion());
         tgtTemplateParam.setRegionId(param.getRegionId());
+        // 获取 master 中的集群然后进行 setting 和 mapping 的复制流程
+        Integer logicId = indexTemplatePhy.getLogicId();
+        Optional<IndexTemplatePhy> masterIndexTemplatePhyOption = indexTemplatePhyService.getTemplateByLogicId(logicId)
+                .stream().filter(ip -> ip.getRole().equals(MASTER.getCode())).findAny();
+        if (masterIndexTemplatePhyOption.isPresent()) {
+            IndexTemplatePhy masterIndexTemplatePhy = masterIndexTemplatePhyOption.get();
+            TemplateConfig templateConfig = templateService.syncGetTemplateConfig(masterIndexTemplatePhy.getCluster(),
+                    masterIndexTemplatePhy.getName());
+            tgtTemplateParam.setMappings(templateConfig.getMappings().toJson().toJSONString());
+            tgtTemplateParam.setSettings(JsonUtils.reFlat(templateConfig.getSetttings()).toJSONString());
+        }
 
         Result<Long> addResult = addTemplateWithoutCheck(tgtTemplateParam);
         if (addResult.failed()) {
