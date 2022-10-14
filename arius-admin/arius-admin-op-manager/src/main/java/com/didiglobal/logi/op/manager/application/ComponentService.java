@@ -1,7 +1,6 @@
 package com.didiglobal.logi.op.manager.application;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
-import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
@@ -11,6 +10,7 @@ import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
+import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +37,9 @@ public class ComponentService {
 
     /**
      * 根据条件获取所有的组件list
+     *
      * @param component 组件
-     * @return Result<List<Component>
+     * @return Result<List < Component>
      */
     public Result<List<Component>> listComponent(Component component) {
         return componentDomainService.queryComponent(component);
@@ -99,7 +100,7 @@ public class ComponentService {
     }
 
     public Result<Integer> upgradeComponent(GeneralUpgradeComponent generalUpgradeComponent) {
-        LOGGER.info("start upgrade component[{}]",generalUpgradeComponent);
+        LOGGER.info("start upgrade component[{}]", generalUpgradeComponent);
         Result checkRes = generalUpgradeComponent.checkUpgradeParam();
         if (checkRes.failed()) {
             return checkRes;
@@ -149,7 +150,7 @@ public class ComponentService {
         }
 
         if (generalRollbackComponent.getType() != OperationEnum.CONFIG_CHANGE.getType()
-        && generalRollbackComponent.getType() != OperationEnum.UPGRADE.getType()) {
+                && generalRollbackComponent.getType() != OperationEnum.UPGRADE.getType()) {
             return Result.fail("只有配置变更以及升级才能允许回滚");
         }
 
@@ -161,7 +162,7 @@ public class ComponentService {
     }
 
     public Result<Integer> executeFunctionComponent(GeneralExecuteComponentFunction executeComponentFunction) {
-        LOGGER.info("start execute function component[{}]",executeComponentFunction);
+        LOGGER.info("start execute function component[{}]", executeComponentFunction);
         Result checkRes = executeComponentFunction.checkExecuteFunctionParam();
         if (checkRes.failed()) {
             return checkRes;
@@ -173,11 +174,27 @@ public class ComponentService {
         return componentDomainService.submitExecuteFunctionComponent(executeComponentFunction);
     }
 
-    public Result<ComponentGroupConfig> getConfig(Integer componentId, String groupName) {
+    public Result<GeneralGroupConfig> getGeneralConfig(Integer componentId, String groupName) {
         if (null == componentId || null == groupName) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "组件id或者groupName不能为空");
         }
-        return componentDomainService.getComponentConfigByGroupName(componentId, groupName);
+
+        Result componentRes = componentDomainService.getComponentById(componentId);
+        if (componentRes.failed()) {
+            return componentRes;
+        }
+
+        Result configRes = componentDomainService.getComponentConfigByGroupName(componentId, groupName);
+        if (configRes.failed()) {
+            return configRes;
+        }
+
+        GeneralGroupConfig generalGroupConfig = ConvertUtil.obj2Obj(configRes.getData(), GeneralGroupConfig.class);
+        Component component = (Component) componentRes.getData();
+        generalGroupConfig.setUsername(component.getUsername());
+        generalGroupConfig.setPassword(component.getPassword());
+        generalGroupConfig.setIsOpenTSL(component.getIsOpenTSL());
+        return Result.success(generalGroupConfig);
     }
 
     public Result<Integer> reportHostStatus(Integer componentId, String groupName, String host, Integer status) {

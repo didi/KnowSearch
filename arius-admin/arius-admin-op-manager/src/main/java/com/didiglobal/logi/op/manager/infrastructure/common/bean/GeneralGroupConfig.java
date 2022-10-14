@@ -45,7 +45,7 @@ public class GeneralGroupConfig {
      */
     private String version;
 
-
+    //这里主要是给比如安装或者回滚之类的操作需要的一些参数返回
     /**
      * 包的url
      */
@@ -54,4 +54,16 @@ public class GeneralGroupConfig {
      * 针对哪种操作类型
      */
     private Integer type;
+    /**
+     * 用户名密码
+     */
+    private String username;
+    /**
+     * 密码
+     */
+    private String password;
+    /**
+     * 是否开启tsl认证（0未开启，1开启）
+     */
+    private Integer isOpenTSL;
 }

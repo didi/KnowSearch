@@ -16,8 +16,6 @@ import com.didiglobal.logi.op.manager.interfaces.vo.ComponentVO;
 import com.didiglobal.logi.op.manager.interfaces.vo.GeneralGroupConfigHostVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,8 +32,6 @@ public class ComponentController {
 
     @Autowired
     private ComponentService componentService;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PackageController.class);
 
     @PostMapping("/query")
     @ApiOperation(value = "获取组件详情列表")
@@ -103,10 +99,9 @@ public class ComponentController {
     public Result<GeneralGroupConfigHostVO> getConfig(@RequestParam(value = "componentId", required = true) Integer componentId,
                                                       @RequestParam(value = "groupName", required = true) String groupName,
                                                       @RequestParam(value = "host", required = true) String host) {
-        Result res = componentService.getConfig(componentId, groupName);
+        Result res = componentService.getGeneralConfig(componentId, groupName);
         if (res.isSuccess()) {
-            ComponentGroupConfig groupConfig = (ComponentGroupConfig) res.getData();
-            return ComponentAssembler.toGeneralGroupConfigVO(ConvertUtil.obj2Obj(groupConfig, GeneralGroupConfig.class), host);
+            return ComponentAssembler.toGeneralGroupConfigVO((GeneralGroupConfig) res.getData(), host);
         }
         return res;
     }

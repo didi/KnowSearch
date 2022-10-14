@@ -1,5 +1,7 @@
 package com.didiglobal.logi.op.manager.application;
 
+import com.alibaba.fastjson.JSON;
+import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
@@ -17,7 +19,6 @@ import com.didiglobal.logi.op.manager.infrastructure.common.hander.ComponentHand
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ import java.util.List;
  * @author didi
  * @date 2022-07-13 2:06 下午
  */
-@Component
+@org.springframework.stereotype.Component
 public class TaskService {
 
     @Autowired
@@ -132,15 +133,25 @@ public class TaskService {
 
         if (task.getType() == OperationEnum.INSTALL.getType() ||
                 task.getType() == OperationEnum.UPGRADE.getType()) {
+            GeneralInstallComponent installComponent = ConvertUtil.str2ObjByJson(task.getContent(), GeneralInstallComponent.class);
             //如果是安装和升级，设置url
-            Integer packageId = ConvertUtil.str2ObjByJson(task.getContent(), GeneralInstallComponent.class).getPackageId();
+            Integer packageId = installComponent.getPackageId();
             configResult.getData().setUrl(packageDomainService.getPackageById(packageId).getData().getUrl());
-        } else if (task.getType() == OperationEnum.ROLLBACK.getType()) {
+            configResult.getData().setUsername(installComponent.getUsername());
+            configResult.getData().setPassword(installComponent.getPassword());
+            configResult.getData().setIsOpenTSL(installComponent.getIsOpenTSL());
+        } else {
+            Integer componentId = JSON.parseObject(task.getContent()).getInteger("componentId");
+            Component component = componentDomainService.getComponentById(componentId).getData();
             //如果是回滚，设置回滚类型以及url
-            GeneralRollbackComponent rollbackComponent = ConvertUtil.str2ObjByJson(task.getContent(), GeneralRollbackComponent.class);
-            configResult.getData().setType(rollbackComponent.getType());
-            int packageId = componentDomainService.getComponentById(rollbackComponent.getComponentId()).getData().getPackageId();
-            configResult.getData().setUrl(packageDomainService.getPackageById(packageId).getData().getUrl());
+            if (task.getType() == OperationEnum.ROLLBACK.getType()) {
+                GeneralRollbackComponent rollbackComponent = ConvertUtil.str2ObjByJson(task.getContent(), GeneralRollbackComponent.class);
+                configResult.getData().setType(rollbackComponent.getType());
+                configResult.getData().setUrl(packageDomainService.getPackageById(component.getPackageId()).getData().getUrl());
+            }
+            configResult.getData().setUsername(component.getUsername());
+            configResult.getData().setPassword(component.getPassword());
+            configResult.getData().setIsOpenTSL(component.getIsOpenTSL());
         }
         return Result.success(configResult.getData());
     }
@@ -163,8 +174,8 @@ public class TaskService {
     /**
      * 根据任务id获取任务详情
      *
-     * @param taskId   任务id
-     * @return Result<List<TaskDetail>>
+     * @param taskId 任务id
+     * @return Result<List < TaskDetail>>
      */
     public Result<List<TaskDetail>> getTaskDetail(Integer taskId) {
         if (null == taskId) {

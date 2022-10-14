@@ -9,10 +9,7 @@ import com.didiglobal.logi.op.manager.interfaces.dto.PackageDTO;
 import com.didiglobal.logi.op.manager.interfaces.vo.PackageVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,8 +24,6 @@ import java.util.List;
 public class PackageController {
     @Autowired
     private PackageService packageService;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PackageController.class);
 
     @PostMapping("")
     @ApiOperation(value = "新建安装包")
@@ -48,7 +43,7 @@ public class PackageController {
 
     @PostMapping("edit")
     @ApiOperation(value = "编辑安装包")
-    public Result<Void> editPackage( PackageDTO packageDTO) {
+    public Result<Void> editPackage(PackageDTO packageDTO) {
         return packageService.updatePackage(PackageAssembler.toDO(packageDTO));
     }
 

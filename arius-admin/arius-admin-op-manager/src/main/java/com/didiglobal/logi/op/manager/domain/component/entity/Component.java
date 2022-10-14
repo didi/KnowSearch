@@ -6,6 +6,7 @@ import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.ComponentStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.DeleteEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TSLEnum;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -84,12 +85,30 @@ public class Component {
      */
     private Integer dependConfigComponentId;
 
+    /**
+     * 用户名密码
+     */
+    private String username;
+
+    /**
+     * 密码
+     */
+    private String password;
+
+    /**
+     * 是否开启tsl认证（0未开启，1开启）
+     */
+    private Integer isOpenTSL;
+
 
     public Component create() {
         this.status = ComponentStatusEnum.UN_KNOW.getStatus();
         this.isDeleted = DeleteEnum.NORMAL.getType();
         this.createTime = new Timestamp(System.currentTimeMillis());
         this.updateTime = new Timestamp(System.currentTimeMillis());
+        if (this.isOpenTSL == null) {
+            this.isOpenTSL = TSLEnum.CLOSE.getType();
+        }
         return this;
     }
 

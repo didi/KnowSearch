@@ -9,20 +9,23 @@
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="package_id" jdbcType="VARCHAR" property="packageId"/>
         <result column="depend_config_component_id" jdbcType="INTEGER" property="dependConfigComponentId"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="is_open_tsl" jdbcType="INTEGER" property="isOpenTSL"/>
         <result column="is_deleted" jdbcType="INTEGER" property="isDeleted"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, `name`, contain_component_ids, package_id, depend_config_component_id, status, is_deleted, create_time, update_time
+        id, `name`, contain_component_ids, package_id, depend_config_component_id, username, password, is_open_tsl, status, is_deleted, create_time, update_time
     </sql>
 
     <insert id="insert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
-        insert into logi_op_component (`name`, contain_component_ids, package_id, depend_config_component_id, status, is_deleted, create_time, update_time)
-        values (#{name}, #{containComponentIds}, #{packageId}, #{dependConfigComponentId}, #{status}, #{isDeleted}, #{createTime}, #{updateTime})
+        insert into logi_op_component (`name`, contain_component_ids, package_id, depend_config_component_id, username, password, is_open_tsl, status, is_deleted, create_time, update_time)
+        values (#{name}, #{containComponentIds}, #{packageId}, #{dependConfigComponentId}, #{username}, #{password}, #{isOpenTSL}, #{status}, #{isDeleted}, #{createTime}, #{updateTime})
     </insert>
 
     <select id="findById"

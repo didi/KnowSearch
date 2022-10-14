@@ -43,12 +43,23 @@ public class ComponentPO {
      */
     private Timestamp updateTime;
     /**
-     * 是否卸载
+     * 是否卸载（0未卸载，1卸载）
      */
     private Integer isDeleted;
-
     /**
      * 依赖配置的组件id
      */
     private Integer dependConfigComponentId;
+    /**
+     * 用户名密码
+     */
+    private String username;
+    /**
+     * 密码
+     */
+    private String password;
+    /**
+     * 是否开启tsl认证（0未开启，1开启）
+     */
+    private Integer isOpenTSL;
 }

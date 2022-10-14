@@ -24,4 +24,16 @@ public class GeneraInstallComponentDTO extends GeneralBaseOperationComponentDTO 
      * 依赖的组件id
      */
     private Integer dependComponentId;
+    /**
+     * 用户名密码
+     */
+    private String username;
+    /**
+     * 密码
+     */
+    private String password;
+    /**
+     * 是否开启tsl认证（0未开启，1开启）
+     */
+    private Integer isOpenTSL;
 }

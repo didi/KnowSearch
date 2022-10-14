@@ -37,6 +37,21 @@ public class GeneralInstallComponent extends GeneralBaseOperationComponent{
      */
     private Integer dependConfigComponentId;
 
+    /**
+     * 用户名密码
+     */
+    private String username;
+
+    /**
+     * 密码
+     */
+    private String password;
+
+    /**
+     * 是否开启tsl认证（0未开启，1开启）
+     */
+    private Integer isOpenTSL = 0;
+
     public Result<Void> checkInstallParam(){
         super.checkParam();
 

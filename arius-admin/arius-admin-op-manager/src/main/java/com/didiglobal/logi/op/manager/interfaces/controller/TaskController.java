@@ -82,7 +82,7 @@ public class TaskController {
         return taskService.getTaskLog(taskId, hostname, TaskLogEnum.STDERR.getType());
     }
 
-    @GetMapping("/taskdetail")
+    @GetMapping("/detail-info")
     @ApiOperation(value = "通过任务id获取任务详情")
     public Result<List<TaskDetailVO>> getTaskDetail(@RequestParam(value = "taskId", required = true) Integer taskId) {
         Result res = taskService.getTaskDetail(taskId);

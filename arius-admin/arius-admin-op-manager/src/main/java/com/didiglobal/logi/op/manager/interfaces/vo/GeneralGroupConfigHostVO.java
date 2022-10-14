@@ -36,7 +36,6 @@ public class GeneralGroupConfigHostVO {
      * 进程数配置
      */
     private String processNum;
-
     /**
      * 安装包url
      */
@@ -45,5 +44,17 @@ public class GeneralGroupConfigHostVO {
      * 操作类型
      */
     private Integer type;
+    /**
+     * 用户名密码
+     */
+    private String username;
+    /**
+     * 密码
+     */
+    private String password;
+    /**
+     * 是否开启tsl认证（0未开启，1开启）
+     */
+    private Integer isOpenTSL;
 
 }
