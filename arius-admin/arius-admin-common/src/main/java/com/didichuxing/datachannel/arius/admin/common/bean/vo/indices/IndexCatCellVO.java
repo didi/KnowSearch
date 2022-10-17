@@ -78,4 +78,10 @@ public class IndexCatCellVO extends BaseVO {
 
     @ApiModelProperty("别名")
     private List<String> aliases;
+
+    @ApiModelProperty("异步translog")
+    private Boolean translogAsync;
+
+    @ApiModelProperty("恢复优先级")
+    private Integer priorityLevel;
 }

@@ -19,6 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
@@ -29,6 +30,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
@@ -304,6 +306,13 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                 updateFailTemplates.append(logicId).append(",");
                 LOGGER.error("class=TemplateSrvManagerImpl||method=updateSrvStatusBySettings,templateId={}, errMsg={}",
                         logicId, "update settings failed");
+            } else {
+                // 更新状态到DB中，以便page查询数据时获取到服务的状态：对于translog功能，更新srvCode字段；对于恢复优先级功能，要更新字段priority_level
+                Result<Void> updateDBResult = updateStatusToDB(logicId, settings);
+                if(updateDBResult.failed()){
+                    LOGGER.error("class=TemplateSrvManagerImpl||method=updateSrvStatusBySettings,templateId={}, errMsg={}",
+                            logicId, "update db failed");
+                }
             }
 
             // 对于非分区模版，还要修改其对应的那一个索引的settings
@@ -374,6 +383,44 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
             return Result.buildParamIllegal("模版settings的key取值有误");
         }
 
+        return Result.buildSucc();
+    }
+
+    /**
+     * 更新状态到数据库中
+     * 对于异步translog功能，更新srvCode字段；对于恢复优先级功能，要更新字段priority_level
+     * @param logicId
+     * @param settings
+     * @return
+     */
+    private Result<Void> updateStatusToDB(Integer logicId, TemplateIncrementalSettingsDTO settings){
+        IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(logicId);
+        if(ESSettingConstant.INDEX_TRANSLOG_DURABILITY.equals(settings.getKey())){
+            String srvCodeStr = indexTemplate.getOpenSrv();
+            List<String> srvCodeList = ListUtils.string2StrList(srvCodeStr);
+            String updateSrvCode = TemplateServiceEnum.TEMPLATE_TRANSLOG_ASYNC.getCode().toString();
+            if(ESSettingConstant.ASYNC.equals(settings.getValue())){
+                if (srvCodeList.isEmpty()) {
+                    indexTemplate.setOpenSrv(updateSrvCode);
+                } else {
+                    if (!srvCodeList.contains(updateSrvCode)) {
+                        indexTemplate.setOpenSrv(srvCodeStr + "," + updateSrvCode);
+                    }
+                }
+            }else {
+                if (srvCodeList.contains(updateSrvCode)) {
+                    srvCodeList.remove(updateSrvCode);
+                    indexTemplate.setOpenSrv(ListUtils.strList2String(srvCodeList));
+                }
+            }
+        }else if (ESSettingConstant.INDEX_PRIORITY.equals(settings.getKey())){
+            indexTemplate.setPriorityLevel(Integer.valueOf(settings.getValue()));
+        }
+        IndexTemplatePO indexTemplatePO = ConvertUtil.obj2Obj(indexTemplate, IndexTemplatePO.class);
+        boolean update = indexTemplateService.update(indexTemplatePO);
+        if(!update){
+            return Result.buildFail(logicId + "模版更新db失败");
+        }
         return Result.buildSucc();
     }
 }

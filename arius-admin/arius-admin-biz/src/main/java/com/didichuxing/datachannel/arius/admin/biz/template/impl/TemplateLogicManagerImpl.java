@@ -22,7 +22,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplateValue;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -183,9 +182,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     protected ESClusterNodeService esClusterNodeService;
     @Autowired
     private ESClusterService esClusterService;
-
-    @Autowired
-    private TemplateLogicSettingsManager templateLogicSettingsManager;
 
     public static final int                 MAX_PERCENT           = 10000;
     public static final int                 MIN_PERCENT           = -99;
@@ -978,6 +974,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             ConsoleTemplateDetailVO.class);
 
         consoleTemplateDetail.setCyclicalRoll(indexTemplateLogicWithCluster.getExpression().endsWith("*"));
+        consoleTemplateDetail.setRecoveryPriorityLevel(indexTemplateLogicWithCluster.getPriorityLevel());
         //根据模板resourceId project获取逻辑集群
          ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(
                     consoleTemplateDetail.getResourceId(), consoleTemplateDetail.getProjectId());
@@ -1005,11 +1002,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
                 .map(IndexTemplateConfig::getDisableIndexRollover)
                 .ifPresent(consoleTemplateDetail::setDisableIndexRollover);
-        // 获取模版恢复优先级
-        IndexTemplatePhySetting templateSetting = templateLogicSettingsManager.getTemplateSettings(logicId).getData();
-        Map<String, String> templateSettingMap = templateSetting.flatSettings();
-        consoleTemplateDetail.setRecoveryPriorityLevel(Integer.valueOf(templateSettingMap
-                .getOrDefault(ESSettingConstant.INDEX_PRIORITY, "0")));
 
         return Result.buildSucc(consoleTemplateDetail);
     }
