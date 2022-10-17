@@ -118,6 +118,13 @@ public class ESUserManagerImpl implements ESUserManager {
         }
         initESUser(appDTO, projectId);
 
+        //检查esuser选择的集群并设置集群
+        Result<Void> checkClusterResult = checkClusterAuthAndSetCluster(appDTO);
+        if (checkClusterResult.failed()){
+            LOGGER.warn("class=ESUserManagerImpl||method=registerESUser||fail msg={}", checkClusterResult.getMessage());
+            return Result.buildFail(checkClusterResult.getMessage());
+        }
+
         final TupleTwo</*创建的es user*/Result, /*创建的es user po*/ ESUserPO> resultESUserPOTuple = esUserService
             .registerESUser(appDTO, operator);
 
@@ -149,7 +156,12 @@ public class ESUserManagerImpl implements ESUserManager {
             LOGGER.warn("class=ESUserManagerImpl||method=editESUser||fail msg={}", checkResult.getMessage());
             return checkResult;
         }
-       
+        Result<Void> checkClusterResult = checkClusterAuthAndSetCluster(esUserDTO);
+        if (checkClusterResult.failed()) {
+            LOGGER.warn("class=ESUserManagerImpl||method=editESUser||fail msg={}", checkClusterResult.getMessage());
+            return checkClusterResult;
+        }
+
         //获取更新之前的po
         final ESUser oldESUser = esUserService.getEsUserById(esUserDTO.getId());
         //校验当前esUserDTO中的projectId是否存在于esUser
@@ -163,6 +175,8 @@ public class ESUserManagerImpl implements ESUserManager {
                             ProjectSearchTypeEnum.valueOf(oldESUser.getSearchType()).getDesc(),
                             ProjectSearchTypeEnum.valueOf(esUserDTO.getSearchType()).getDesc()), oldESUser.getProjectId(),
                     operator, OperateTypeEnum.APPLICATION_ACCESS_MODE);
+            saveOperateRecord(String.format("修改访问集群:%s-->%s", oldESUser.getCluster(), esUserDTO.getCluster()), oldESUser.getProjectId(),
+                    operator, OperateTypeEnum.APPLICATION_ACCESS_CLUSTER);
         }
         return resultESUserTuple.v1();
     }
