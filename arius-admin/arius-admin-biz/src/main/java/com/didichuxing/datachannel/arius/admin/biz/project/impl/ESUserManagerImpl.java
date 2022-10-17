@@ -171,12 +171,10 @@ public class ESUserManagerImpl implements ESUserManager {
 
         if (resultESUserTuple.v1().success()) {
             // 操作记录
-            saveOperateRecord(String.format("修改访问模式:%s-->%s",
+            saveOperateRecord(String.format("修改访问模式:%s-->%s,修改访问集群:%s-->%s",
                             ProjectSearchTypeEnum.valueOf(oldESUser.getSearchType()).getDesc(),
-                            ProjectSearchTypeEnum.valueOf(esUserDTO.getSearchType()).getDesc()), oldESUser.getProjectId(),
-                    operator, OperateTypeEnum.APPLICATION_ACCESS_MODE);
-            saveOperateRecord(String.format("修改访问集群:%s-->%s", oldESUser.getCluster(), esUserDTO.getCluster()), oldESUser.getProjectId(),
-                    operator, OperateTypeEnum.APPLICATION_ACCESS_CLUSTER);
+                            ProjectSearchTypeEnum.valueOf(esUserDTO.getSearchType()).getDesc(),oldESUser.getCluster(), esUserDTO.getCluster()), oldESUser.getProjectId(),
+                    operator, OperateTypeEnum.APPLICATION_ACCESS_CHANGE);
         }
         return resultESUserTuple.v1();
     }
@@ -332,7 +330,7 @@ public class ESUserManagerImpl implements ESUserManager {
         }
         // 索引模式默认集群设置未 null
         if (searchTypeEnum.equals(ProjectSearchTypeEnum.TEMPLATE)) {
-            esUserDTO.setCluster(null);
+            esUserDTO.setCluster("");
         }
         return Result.buildSucc();
     }

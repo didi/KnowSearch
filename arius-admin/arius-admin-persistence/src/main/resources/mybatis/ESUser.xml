@@ -130,7 +130,9 @@
 			<if test="verifyCode != null">
 				, verify_code = #{verifyCode}
 			</if>
+			<if test="cluster != null">
 				, cluster = #{cluster}
+			</if>
 			<if test="searchType != null">
 				, search_type = #{searchType}
 			</if>

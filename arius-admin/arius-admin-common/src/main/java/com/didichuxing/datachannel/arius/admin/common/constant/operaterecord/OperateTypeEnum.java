@@ -92,9 +92,9 @@ public enum OperateTypeEnum {
      */
     APPLICATION_ACCESS_MODE(ModuleEnum.APPLICATION, "访问模式", 19),
     /**
-     * 应用：访问集群
+     * 应用：访问设置
      */
-    APPLICATION_ACCESS_CLUSTER(ModuleEnum.APPLICATION,"访问集群",69),
+    APPLICATION_ACCESS_CHANGE(ModuleEnum.APPLICATION,"访问设置变更",69),
 
     /**
      * 应用：负责人变更
