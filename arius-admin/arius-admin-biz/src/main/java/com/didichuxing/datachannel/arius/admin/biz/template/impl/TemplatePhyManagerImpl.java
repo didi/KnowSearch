@@ -332,6 +332,9 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             IndexTemplatePhy masterIndexTemplatePhy = masterIndexTemplatePhyOption.get();
             TemplateConfig templateConfig = templateService.syncGetTemplateConfig(masterIndexTemplatePhy.getCluster(),
                     masterIndexTemplatePhy.getName());
+            if (Objects.isNull(templateConfig)){
+                return Result.buildFail("无法获取源集群模版信息");
+            }
             tgtTemplateParam.setMappings(templateConfig.getMappings().toJson().toJSONString());
             tgtTemplateParam.setSettings(JsonUtils.reFlat(templateConfig.getSetttings()).toJSONString());
         }
@@ -968,7 +971,9 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (null != shard && shard > 0) {
             settingsMap.put(INDEX_SHARD_NUM, String.valueOf(shard));
         }
-
+        if (null != settings) {
+            settingsMap.putAll(AriusIndexTemplateSetting.flat(JSON.parseObject(settings)));
+        }
         if (null != regionId) {
             Result<List<ClusterRoleHost>> roleHostResult = clusterRoleHostService.listByRegionId(regionId);
             if (roleHostResult.failed()) {
@@ -982,11 +987,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                 .filter(nodeName -> !AriusObjUtils.isBlank(nodeName)).distinct().collect(Collectors.toList());
             settingsMap.put(TEMPLATE_INDEX_INCLUDE_NODE_NAME, String.join(",", nodeNames));
         }
-
-        if (null != settings) {
-            settingsMap.putAll(AriusIndexTemplateSetting.flat(JSON.parseObject(settings)));
-        }
-
         return settingsMap;
     }
 
