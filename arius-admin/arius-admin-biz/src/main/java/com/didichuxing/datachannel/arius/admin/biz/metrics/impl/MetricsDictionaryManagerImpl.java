@@ -6,10 +6,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricDic
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.dictionary.MetricsDictionaryVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.metrics.MetricsDictionaryService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * 详细介绍类情况.
@@ -24,11 +23,7 @@ public class MetricsDictionaryManagerImpl implements MetricsDictionaryManager {
     @Autowired
     private MetricsDictionaryService metricsDictionaryService;
 
-    @Override
-    public Result<List<MetricsDictionaryVO>> listMetricsDictionaries(String model) {
-        return Result.buildSucc(ConvertUtil.list2List(metricsDictionaryService.list(model), MetricsDictionaryVO.class));
-    }
-
+    
     @Override
     public Result<List<MetricsDictionaryVO>> listByCondition(MetricDictionaryDTO param) {
         return Result.buildSucc(ConvertUtil.list2List(metricsDictionaryService.listByCondition(param), MetricsDictionaryVO.class));
