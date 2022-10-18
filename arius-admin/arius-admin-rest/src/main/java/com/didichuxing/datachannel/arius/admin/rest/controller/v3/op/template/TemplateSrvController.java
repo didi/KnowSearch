@@ -67,12 +67,4 @@ public class TemplateSrvController {
             HttpRequestUtil.getProjectId(request));
     }
 
-    @PutMapping("/statusWithSetting/{templateIdList}")
-    @ResponseBody
-    @ApiOperation(value = "通过更新模版settings和部分索引settings来实现模版服务功能")
-    public Result<Void> updateSrvStatusBySettings(HttpServletRequest request, @RequestBody TemplateIncrementalSettingsDTO settings,
-                                                    @PathVariable("templateIdList") List<Integer> templateIdList) throws AdminOperateException {
-        return templateSrvManager.updateSrvStatusBySettings(settings, templateIdList, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
-    }
 }

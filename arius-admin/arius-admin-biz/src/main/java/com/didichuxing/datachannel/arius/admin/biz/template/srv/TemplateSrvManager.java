@@ -91,15 +91,4 @@ public interface TemplateSrvManager {
      * @return
      */
     List<String> getIndexTemplateContainsSrv(int srvId);
-
-    /**
-     * 通过更新模版settings和部分索引settings来实现模版服务(如异步translog、恢复优先级)
-     * @param  settingsDTO 模版增量settings
-     * @param templateIdList  模版id列表
-     * @param operator
-     * @param projectId
-     * @return
-     */
-    Result<Void> updateSrvStatusBySettings(TemplateIncrementalSettingsDTO settingsDTO, List<Integer> templateIdList, String operator, Integer projectId) throws AdminOperateException;
-
 }
