@@ -245,7 +245,14 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
 
     @Override
     public int syncGetIndicesCount(String cluster, String nodes) {
-        return esClusterNodeDAO.getIndicesCount(cluster, nodes);
+        try {
+            return esClusterNodeDAO.getIndicesCount(cluster, nodes);
+        } catch (ESOperateException e) {
+            LOGGER.error(
+                    "class=ESClusterNodeServiceImpl||method=syncGetIndicesCount||clusterName={}",
+                    cluster,e);
+            return 0;
+        }
     }
 
     @Override
