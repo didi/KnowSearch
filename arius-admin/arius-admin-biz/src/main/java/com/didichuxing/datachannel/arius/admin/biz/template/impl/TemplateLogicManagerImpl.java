@@ -1273,13 +1273,13 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             if(result.failed()){
                 updateFail = true;
                 updateFailTemplates.append(logicId).append(",");
-                LOGGER.error("class=TemplateSrvManagerImpl||method=updateSrvStatusBySettings,templateId={}, errMsg={}",
+                LOGGER.error("class=TemplateLogicManagerImpl||method=updateTemplateAndIndexSettings,templateId={}, errMsg={}",
                         logicId, "update settings failed");
             } else {
                 // 更新状态到DB中，以便page查询数据时获取到服务的状态：对于translog功能，更新srvCode字段；对于恢复优先级功能，要更新字段priority_level
                 Result<Void> updateDBResult = updateStatusToDB(logicId, settings);
                 if(updateDBResult.failed()){
-                    LOGGER.error("class=TemplateSrvManagerImpl||method=updateSrvStatusBySettings,templateId={}, errMsg={}",
+                    LOGGER.error("class=TemplateLogicManagerImpl||method=updateTemplateAndIndexSettings,templateId={}, errMsg={}",
                             logicId, "update db failed");
                 }
             }
