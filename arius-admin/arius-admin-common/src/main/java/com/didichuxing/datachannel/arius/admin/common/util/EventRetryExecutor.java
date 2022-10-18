@@ -26,7 +26,7 @@ public class EventRetryExecutor {
      * 定制事件重试方法，不对返回判断重试
      */
     public static <T> T eventRetryExecute(String methodName, RetryExecutor.Handler<T> handler, int retryTimes) throws EventException {
-        return eventRetryExecute(methodName, handler, retryTimes);
+        return eventRetryExecuteInner(methodName, handler, retryTimes);
     }
 
     /**************************************** private method ***************************************************/
