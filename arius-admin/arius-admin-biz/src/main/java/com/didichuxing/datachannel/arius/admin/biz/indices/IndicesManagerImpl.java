@@ -803,8 +803,7 @@ public class IndicesManagerImpl implements IndicesManager {
             }
             
         }
-        
-        
+
         return Result.buildSucc();
     }
     

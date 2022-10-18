@@ -17,8 +17,7 @@ import java.util.function.Predicate;
  * @date 2022/10/13
  */
 public class EventRetryExecutor {
-    private static final int RETRY_TIMES = 10;
-    private static final int RETRY_COUNT = 3;
+    private static final int SEC_1 = 1000;
 
     private EventRetryExecutor() {
     }
@@ -26,23 +25,15 @@ public class EventRetryExecutor {
     /**
      * 定制事件重试方法，不对返回判断重试
      */
-    public static <T> T eventRetryExecute(String methodName, RetryExecutor.Handler<T> handler) throws EventException {
-        return eventRetryExecute(methodName, handler, t -> false);
-    }
-
-    /**
-     * 定制事件重试方法，根据事件的返回值来判断是否需要重试
-     */
-    public static <T> T eventRetryExecute(String methodName, RetryExecutor.Handler<T> handler,
-                                          Predicate<T> retNeedRetry) throws EventException {
-        return eventRetryExecuteInner(methodName, handler, retNeedRetry);
+    public static <T> T eventRetryExecute(String methodName, RetryExecutor.Handler<T> handler, int retryTimes) throws EventException {
+        return eventRetryExecute(methodName, handler, retryTimes);
     }
 
     /**************************************** private method ***************************************************/
     private static <T> T eventRetryExecuteInner(String methodName, RetryExecutor.Handler<T> handler,
-                                             Predicate<T> retNeedRetry) throws EventException {
+                                                int retryTimes) throws EventException {
         try {
-            final RetryExecutor<T> retryExecutor = RetryExecutor.builder().name(methodName).retryCount(RETRY_COUNT)
+            final RetryExecutor<T> retryExecutor = RetryExecutor.builder().name(methodName).retryCount(retryTimes)
                     .handler(new RetryExecutor.Handler() {
                         @Override
                         public T process() throws BaseException {
@@ -51,17 +42,12 @@ public class EventRetryExecutor {
 
                         @Override
                         public boolean needExceptionRetry(Exception e) {
-                            return e instanceof Exception;
-                        }
-
-                        @Override
-                        public boolean needReturnObjRetry(Object t) {
-                            return retNeedRetry.test((T)t);
+                            return e instanceof EventException;
                         }
 
                         @Override
                         public int retrySleepTime(int retryTimes) {
-                            return RETRY_TIMES;
+                            return SEC_1;
                         }
                     });
             return retryExecutor.execute();
