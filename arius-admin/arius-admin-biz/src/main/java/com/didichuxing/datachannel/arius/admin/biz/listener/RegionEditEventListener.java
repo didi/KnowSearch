@@ -6,7 +6,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionEditEvent;
-import com.didichuxing.datachannel.arius.admin.common.event.template.TemplateEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.EventException;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
@@ -17,11 +16,9 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.sun.org.apache.bcel.internal.generic.RETURN;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import java.util.*;

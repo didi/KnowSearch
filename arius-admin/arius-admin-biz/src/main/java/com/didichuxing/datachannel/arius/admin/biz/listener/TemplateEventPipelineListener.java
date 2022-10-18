@@ -11,9 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.EventException;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 /**
