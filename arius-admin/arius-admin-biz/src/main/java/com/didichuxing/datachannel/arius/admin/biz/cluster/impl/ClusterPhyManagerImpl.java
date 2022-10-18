@@ -1153,6 +1153,19 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     /**
+     * 获取当前集群所有节点名称
+     * @param cluster 集群名
+     * @return
+     */
+    @Override
+    public Result<List<String>> getClusterNodesName(String cluster) {
+        List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getNodesByCluster(cluster);
+        List<String> clusterNodeNameList = clusterRoleHostList.stream()
+                .map(ClusterRoleHost::getNodeSet).collect(Collectors.toList());
+        return Result.buildSucc(clusterNodeNameList);
+    }
+
+    /**
      * 批量更新物理集群的动态配置项
      * @param clusterList  物理集群名称list
      * @param param        要更新的配置项

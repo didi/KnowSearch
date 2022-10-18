@@ -16,7 +16,12 @@ import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author ohushenglin_v
@@ -50,13 +55,9 @@ public class ESClusterDynamicConfigController {
         return clusterPhyManager.getRoutingAllocationAwarenessAttributes(cluster);
     }
 
-    @PutMapping("/{clusterList}")
-    @ResponseBody
-    @ApiOperation(value = "批量更新物理集群的动态配置项")
-    public Result<Boolean> batchUpdateClusterDynamicConfig(@PathVariable List<String> clusterList,
-                                                           @RequestBody ClusterSettingDTO param,
-                                                           HttpServletRequest request) throws ESOperateException {
-        return clusterPhyManager.batchUpdateClusterDynamicConfig(clusterList, param, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+    @GetMapping("/{cluster}/nodes")
+    @ApiOperation(value = "获取当前集群的所有节点名称")
+    public Result<List<String>> getClusterNodesName(@PathVariable String cluster) {
+        return clusterPhyManager.getClusterNodesName(cluster);
     }
 }
