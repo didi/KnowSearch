@@ -60,7 +60,7 @@ public class ESShardServiceImpl implements ESShardService {
     private AriusConfigInfoService ariusConfigInfoService;
 
     @Override
-    public List<MovingShardMetrics> syncGetMovingShards(String clusterName) {
+    public List<MovingShardMetrics> syncGetMovingShards(String clusterName) throws ESOperateException {
         DirectResponse directResponse = esShardDAO.getDirectResponse(clusterName, "Get", GET_MOVING_SHARD);
 
         List<MovingShardMetrics> movingShardsMetrics = Lists.newArrayList();
@@ -75,7 +75,7 @@ public class ESShardServiceImpl implements ESShardService {
     }
 
     @Override
-    public List<UnAssignShardMetrics> syncGetUnAssignShards(String clusterName) {
+    public List<UnAssignShardMetrics> syncGetUnAssignShards(String clusterName) throws ESOperateException {
         DirectResponse directResponse = esShardDAO.getDirectResponse(clusterName, "Get", GET_SHARDS_JSON);
 
         if (directResponse.getRestStatus() == RestStatus.OK
@@ -87,7 +87,7 @@ public class ESShardServiceImpl implements ESShardService {
         return Lists.newArrayList();
     }
     @Override
-    public List<ShardMetrics> syncGetBigShards(String clusterName) {
+    public List<ShardMetrics> syncGetBigShards(String clusterName) throws ESOperateException {
         List<ShardMetrics> shardsMetrics = getShardMetrics(clusterName);
         long configBigShard = SizeUtil.getUnitSize(ariusConfigInfoService.doubleSetting(ARIUS_COMMON_GROUP,BIG_SHARD_THRESHOLD,BIG_SHARD)+"g");
         return shardsMetrics.stream().filter(s->filterBigShard(configBigShard,s)).sorted(Comparator.comparing(s->SizeUtil.getUnitSize(s.getStore())))
@@ -96,8 +96,16 @@ public class ESShardServiceImpl implements ESShardService {
 
     @Override
     public Tuple</*大shard列表*/List<ShardMetrics>, /*小shard列表*/List<ShardMetrics>> syncGetBigAndSmallShards(String clusterName,long configBigShard,long configSmallShard) {
-        List<ShardMetrics> shardsMetrics = getShardMetrics(clusterName);
+        List<ShardMetrics> shardsMetrics = null;
         Tuple<List<ShardMetrics>, List<ShardMetrics>> tuple = new Tuple<>();
+        try {
+            shardsMetrics = getShardMetrics(clusterName);
+        } catch (ESOperateException e) {
+            LOGGER.error(
+                    "class=ESShardServiceImpl||method=syncGetBigAndSmallShards||clusterName={}||errMsg={}",
+                    clusterName,e.getMessage());
+            return tuple;
+        }
         Map<String, List<ShardMetrics>> indexAndShardMetricsMap =  ConvertUtil.list2MapOfList(
                 shardsMetrics, ShardMetrics::getIndex, shardMetrics -> shardMetrics);
         tuple.setV1(shardsMetrics.stream().filter(s->filterBigShard(configBigShard,s)).collect(Collectors.toList()));
@@ -108,14 +116,30 @@ public class ESShardServiceImpl implements ESShardService {
     @Override
     public List<Segment> syncGetSegments(String clusterName) {
         String segmentsPartInfoRequestContent = getSegmentsPartInfoRequestContent();
-        List<SegmentPO> segmentPOS = esShardDAO.commonGet(clusterName, segmentsPartInfoRequestContent, SegmentPO.class);
+        List<SegmentPO> segmentPOS = null;
+        try {
+            segmentPOS = esShardDAO.commonGet(clusterName, segmentsPartInfoRequestContent, SegmentPO.class);
+        } catch (ESOperateException e) {
+            LOGGER.error(
+                    "class=ESShardServiceImpl||method=syncGetSegments||clusterName={}||errMsg={}",
+                    clusterName,e.getMessage());
+            return null;
+        }
         return ConvertUtil.list2List(segmentPOS, Segment.class);
     }
 
     @Override
     public List<Segment> syncGetSegmentsCountInfo(String clusterName) {
         String segmentsCountContent = getSegmentsCountContent();
-        List<SegmentPO> segmentPOS = esShardDAO.commonGet(clusterName, segmentsCountContent, SegmentPO.class);
+        List<SegmentPO> segmentPOS = null;
+        try {
+            segmentPOS = esShardDAO.commonGet(clusterName, segmentsCountContent, SegmentPO.class);
+        } catch (ESOperateException e) {
+            LOGGER.error(
+                    "class=ESShardServiceImpl||method=syncGetSegmentsCountInfo||clusterName={}||errMsg={}",
+                    clusterName,e.getMessage());
+            return null;
+        }
         return ConvertUtil.list2List(segmentPOS, Segment.class);
     }
 
@@ -135,7 +159,7 @@ public class ESShardServiceImpl implements ESShardService {
 
 
     @NotNull
-    private List<ShardMetrics> getShardMetrics(String clusterName) {
+    private List<ShardMetrics> getShardMetrics(String clusterName) throws ESOperateException {
         String shardsRequestContent = getShardsAllInfoRequestContent("20s");
         return esShardDAO.commonGet(clusterName, shardsRequestContent, ShardMetrics.class);
     }

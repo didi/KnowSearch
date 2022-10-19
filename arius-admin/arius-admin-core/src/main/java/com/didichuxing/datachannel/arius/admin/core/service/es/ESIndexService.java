@@ -312,7 +312,7 @@ public interface ESIndexService {
     /**
      * 获取原生集群索引名称列表,不包含特殊索引（带.开头）
      */
-    List<String> syncGetIndexName(String clusterName);
+    List<String> syncGetIndexName(String clusterName) throws ESOperateException ;
 
     /**
      * 索引是否存在

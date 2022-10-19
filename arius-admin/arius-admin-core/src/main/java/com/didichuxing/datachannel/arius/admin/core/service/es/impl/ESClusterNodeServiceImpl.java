@@ -156,7 +156,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     }
 
     @Override
-    public List<PendingTask> syncGetPendingTask(String clusterName) {
+    public List<PendingTask> syncGetPendingTask(String clusterName) throws ESOperateException {
         DirectResponse directResponse = esClusterNodeDAO.getDirectResponse(clusterName, "Get", GET_PENDING_TASKS);
         List<PendingTask> pendingTasks = Lists.newArrayList();
         if (directResponse.getRestStatus() == RestStatus.OK
@@ -195,7 +195,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     }
 
     @Override
-    public Map<String/*node*/, Long /*shardNum*/> syncGetNode2ShardNumMap(String clusterName) {
+    public Map<String/*node*/, Long /*shardNum*/> syncGetNode2ShardNumMap(String clusterName) throws ESOperateException {
         String bigShardsRequestContent = getShards2NodeRequestContent("20s");
         DirectResponse directResponse = esClusterNodeDAO.getDirectResponse(clusterName, "Get", bigShardsRequestContent);
 
@@ -218,7 +218,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     }
 
     @Override
-    public List<BigIndexMetrics> syncGetBigIndices(String clusterName) {
+    public List<BigIndexMetrics> syncGetBigIndices(String clusterName) throws ESOperateException {
 
         String indicesRequestContent = getBigIndicesRequestContent("20s");
 
@@ -368,7 +368,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     }
 
     @Override
-    public Map<String, Integer> syncGetNodesCpuNum(String cluster) {
+    public Map<String, Integer> syncGetNodesCpuNum(String cluster) throws ESOperateException {
         Map<String, Integer> node2CpuNumMap = Maps.newHashMap();
         //这里直接使用 esClient.admin().cluster().nodes(new ESClusterNodesRequest().flag("os")).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);无法正确获取到数据，所以使用
         DirectResponse directResponse = esClusterNodeDAO.getDirectResponse(cluster, "GET", "/_nodes/os");
@@ -411,7 +411,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
      * @return {@code List<TupleTwo<String, List<String>>>}
      */
     @Override
-    public List<TupleTwo<String, List<String>>> syncGetNodePluginTupleList(String phyCluster) {
+    public List<TupleTwo<String, List<String>>> syncGetNodePluginTupleList(String phyCluster) throws ESOperateException {
         return esClusterNodeDAO.syncGetNodesPlugins(phyCluster);
     }
     
@@ -421,19 +421,25 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
      */
     @Override
     public TupleTwo<Boolean, Boolean> existDCDRAndPipelineModule(String phyClusterName) {
-        //获取物理集群侧的插件列表
-        final List<TupleTwo<String, List<String>>> syncGetNodePluginTupleList = syncGetNodePluginTupleList(
-                phyClusterName);
-        if (CollectionUtils.isEmpty(syncGetNodePluginTupleList)) {
+        try {
+            //获取物理集群侧的插件列表
+            final List<TupleTwo<String, List<String>>> syncGetNodePluginTupleList = syncGetNodePluginTupleList(
+                    phyClusterName);
+            if (CollectionUtils.isEmpty(syncGetNodePluginTupleList)) {
+                return Tuples.of(Boolean.FALSE, Boolean.FALSE);
+            }
+            //这里对于一个集群来说，不需要校验全部节点是否是存在dcdr和pipeline的;这里属于内置的module，默认拿一个验证即可
+            final TupleTwo<String, List<String>> nodeNamePlugins = syncGetNodePluginTupleList.get(0);
+            if (CollectionUtils.isEmpty(nodeNamePlugins.v2())) {
+                return Tuples.of(Boolean.FALSE, Boolean.FALSE);
+            }
+            return Tuples.of(nodeNamePlugins.v2().contains(PluginConstant.DIDI_CROSS_DATACENTER_REPLICATION),
+                    nodeNamePlugins.v2().contains(PluginConstant.INGEST_INDEX_TEMPLATE));
+        } catch (ESOperateException e) {
+            LOGGER.error("class={}||method=existDCDRAndPipelineModule||clusterName={}||errmsg={}", getClass().getSimpleName(), phyClusterName,
+                    e.getMessage());
             return Tuples.of(Boolean.FALSE, Boolean.FALSE);
         }
-        //这里对于一个集群来说，不需要校验全部节点是否是存在dcdr和pipeline的;这里属于内置的module，默认拿一个验证即可
-        final TupleTwo<String, List<String>> nodeNamePlugins = syncGetNodePluginTupleList.get(0);
-        if (CollectionUtils.isEmpty(nodeNamePlugins.v2())) {
-            return Tuples.of(Boolean.FALSE, Boolean.FALSE);
-        }
-        return Tuples.of(nodeNamePlugins.v2().contains(PluginConstant.DIDI_CROSS_DATACENTER_REPLICATION),
-                nodeNamePlugins.v2().contains(PluginConstant.INGEST_INDEX_TEMPLATE));
     }
 
     @Override

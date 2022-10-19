@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.NodeMetrics;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -90,7 +91,14 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
         futureUtil
             // 注意这里单集群节点比较多会比较慢
             .runnableTask(() -> clusterNodeStatsMapAtomic.set(esClusterNodeService.syncGetNodePartStatsMap(cluster)))
-            .runnableTask(() -> node2ShardNumMapAtomic.set(esClusterNodeService.syncGetNode2ShardNumMap(cluster)))
+            .runnableTask(() -> {
+                try {
+                    node2ShardNumMapAtomic.set(esClusterNodeService.syncGetNode2ShardNumMap(cluster));
+                } catch (ESOperateException e) {
+                    LOGGER
+                            .error("class=NodeDashBoardCollector||method=collectSingleCluster||errMsg=fail to syncGetNode2ShardNumMap");
+                }
+            })
             .runnableTask(() -> clusterNodesTaskTotalCostAtomic
                 .set(ariusStatsClusterTaskInfoESDAO.getClusterNodesTaskTotalCost(cluster)))
             .waitExecute();

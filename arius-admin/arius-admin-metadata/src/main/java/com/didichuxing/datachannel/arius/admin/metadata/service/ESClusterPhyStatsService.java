@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentileMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterNodeDAO;
@@ -143,7 +144,7 @@ public class ESClusterPhyStatsService {
      * @param cluster 集群
      * @return {@code Long}
      */
-    public Long getClustersShardTotal(String cluster) {
+    public Long getClustersShardTotal(String cluster) throws ESOperateException {
         return  ariusStatsClusterInfoEsDao.getClustersShardTotal(cluster);
     }
 
@@ -153,7 +154,7 @@ public class ESClusterPhyStatsService {
      * @param cluster 集群
      * @return {@code Long}
      */
-    public Long getPendingTaskTotal(String cluster) {
+    public Long getPendingTaskTotal(String cluster) throws ESOperateException {
         return ariusStatsClusterInfoEsDao.getPendingTaskTotal(cluster);
     }
 

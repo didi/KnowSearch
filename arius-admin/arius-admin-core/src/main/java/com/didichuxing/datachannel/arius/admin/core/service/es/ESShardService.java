@@ -18,17 +18,17 @@ public interface ESShardService {
     /**
      * 获取ES集群movingShard信息
      */
-    List<MovingShardMetrics> syncGetMovingShards(String clusterName);
+    List<MovingShardMetrics> syncGetMovingShards(String clusterName) throws ESOperateException;
 
     /**
      * 获取ES集群unassignShard信息
      */
-    List<UnAssignShardMetrics> syncGetUnAssignShards(String clusterName);
+    List<UnAssignShardMetrics> syncGetUnAssignShards(String clusterName) throws ESOperateException;
 
     /**
      * 获取ES集群大Shard(平台可配置，默认50G)信息
      */
-    List<ShardMetrics> syncGetBigShards(String clusterName);
+    List<ShardMetrics> syncGetBigShards(String clusterName) throws ESOperateException;
 
     /**
      * 获取ES集群大Shard(50G)信息 和 小Shard(1G以内)信息

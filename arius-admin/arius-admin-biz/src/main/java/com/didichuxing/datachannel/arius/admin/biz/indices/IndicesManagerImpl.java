@@ -554,7 +554,14 @@ public class IndicesManagerImpl implements IndicesManager {
             return Result.buildFrom(ret);
         }
 
-        List<IndexShardInfo> indexShardInfoList = esIndexCatService.syncGetIndexShardInfo(phyCluster, indexName);
+        List<IndexShardInfo> indexShardInfoList = null;
+        try {
+            indexShardInfoList = esIndexCatService.syncGetIndexShardInfo(phyCluster, indexName);
+        } catch (ESOperateException e) {
+            LOGGER.error("class=IndicesManagerImpl||method=getIndexShardsInfo||clusterName={}||indexName={}||errMsg={}",
+                    phyCluster,indexName,e.getMessage());
+            return Result.buildFail(e.getMessage());
+        }
         List<IndexShardInfoVO> indexNodeShardVOList = indexShardInfoList.stream().filter(this::filterPrimaryShard)
             .map(this::coverUnit).collect(Collectors.toList());
         return Result.buildSucc(indexNodeShardVOList);
