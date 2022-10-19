@@ -149,7 +149,7 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
         Map<String, List<ClusterLogicStats>> nodeStatsMap = Maps.newConcurrentMap();
         Map<Long, List<IndexStatusResult>> logicClusterIndicesStatsMap = Maps.newConcurrentMap();
         for (String phyClusterName : monitorClusterSet) {
-//            clusterLogicFutureUtil.runnableTask(() -> {
+            clusterLogicFutureUtil.runnableTask(() -> {
                 clusterLogicStaticsService.buildLogicClusterStats(phyClusterRegionMap, regionNodeMap,
                         logicClusterIndicesNameMap, phyClusterName, logicClusterNodesNameMap,
                         nodeStatsMap, logicClusterIndicesStatsMap);
@@ -202,12 +202,12 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
                 }
                 // send cluster status to es and kafka
                 if (CollectionUtils.isNotEmpty(esLogicClusterStatsList)) {
-//                    monitorMetricsSender.sendClusterStats(esLogicClusterStatsList);
-//                    SpringTool.publish(new MetricsMonitorLogicClusterEvent(this, esLogicClusterStatsList, hostName));
+                    monitorMetricsSender.sendClusterStats(esLogicClusterStatsList);
+                    SpringTool.publish(new MetricsMonitorLogicClusterEvent(this, esLogicClusterStatsList, hostName));
                 }
-//            });
+            });
         }
-//        clusterLogicFutureUtil.waitExecute();
+        clusterLogicFutureUtil.waitExecute();
     }
 
     /**
