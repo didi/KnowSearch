@@ -50,7 +50,7 @@ public interface ESClusterNodeService {
      */
     List<PendingTask> syncGetPendingTask(String clusterName) throws ESOperateException;
 
-    Map<String/*node*/, Long /*shardNum*/> syncGetNode2ShardNumMap(String clusterName) throws ESOperateException;
+    Map<String/*node*/, Long /*shardNum*/> syncGetNode2ShardNumMap(String clusterName);
 
     /**
      * 获取ES集群大索引(大于10亿文档数)信息

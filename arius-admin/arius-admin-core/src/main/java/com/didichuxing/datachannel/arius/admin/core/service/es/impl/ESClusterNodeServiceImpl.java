@@ -195,9 +195,17 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     }
 
     @Override
-    public Map<String/*node*/, Long /*shardNum*/> syncGetNode2ShardNumMap(String clusterName) throws ESOperateException {
+    public Map<String/*node*/, Long /*shardNum*/> syncGetNode2ShardNumMap(String clusterName) {
         String bigShardsRequestContent = getShards2NodeRequestContent("20s");
-        DirectResponse directResponse = esClusterNodeDAO.getDirectResponse(clusterName, "Get", bigShardsRequestContent);
+        DirectResponse directResponse = null;
+        try {
+            directResponse = esClusterNodeDAO.getDirectResponse(clusterName, "Get", bigShardsRequestContent);
+        } catch (ESOperateException e) {
+            directResponse.setRestStatus(RestStatus.SERVICE_UNAVAILABLE);
+            LOGGER.error(
+                    "class=ESClusterNodeServiceImpl||method=syncGetNode2ShardNumMap||clusterName={}||errMsg={}",
+                    clusterName,e.getMessage());
+        }
 
         Map<String/*node*/, Long /*shardNum*/> node2ShardNumMap = Maps.newHashMap();
         if (directResponse.getRestStatus() == RestStatus.OK

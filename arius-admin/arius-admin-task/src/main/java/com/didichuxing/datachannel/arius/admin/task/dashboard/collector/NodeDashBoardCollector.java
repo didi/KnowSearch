@@ -91,14 +91,7 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
         futureUtil
             // 注意这里单集群节点比较多会比较慢
             .runnableTask(() -> clusterNodeStatsMapAtomic.set(esClusterNodeService.syncGetNodePartStatsMap(cluster)))
-            .runnableTask(() -> {
-                try {
-                    node2ShardNumMapAtomic.set(esClusterNodeService.syncGetNode2ShardNumMap(cluster));
-                } catch (ESOperateException e) {
-                    LOGGER
-                            .error("class=NodeDashBoardCollector||method=collectSingleCluster||errMsg=fail to syncGetNode2ShardNumMap");
-                }
-            })
+            .runnableTask(() -> node2ShardNumMapAtomic.set(esClusterNodeService.syncGetNode2ShardNumMap(cluster)))
             .runnableTask(() -> clusterNodesTaskTotalCostAtomic
                 .set(ariusStatsClusterTaskInfoESDAO.getClusterNodesTaskTotalCost(cluster)))
             .waitExecute();
