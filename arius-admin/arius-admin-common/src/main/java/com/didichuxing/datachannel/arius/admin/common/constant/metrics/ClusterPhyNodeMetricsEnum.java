@@ -63,13 +63,13 @@ public enum ClusterPhyNodeMetricsEnum {
 
     INDICES_INDEXING_RATE("indices-indexing-index_total_rate", "索引写入TPS"),
     /**
-     * 单位：次/MIN
+     * 单位：次/S
      */
-    INDICES_QUERY_CACHE_EVICTIONS("indices-query_cache-evictions", "索引写入TPS"),
+    INDICES_QUERY_CACHE_EVICTIONS("indices-query_cache-evictions", "query Cache evictions"),
     /**
-     * 单位：次/MIN
+     * 单位：次/S
      */
-    INDICES_REQUEST_CACHE_EVICTIONS("indices-request_cache-evictions", "索引写入TPS"),
+    INDICES_REQUEST_CACHE_EVICTIONS("indices-request_cache-evictions", "request Cache eviction"),
     /**
      * 单位：ms
      */

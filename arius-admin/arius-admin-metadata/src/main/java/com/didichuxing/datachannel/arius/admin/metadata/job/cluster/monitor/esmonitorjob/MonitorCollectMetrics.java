@@ -1,16 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob;
 
-import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsComputeType.AVG;
-import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsComputeType.AVG_MIN;
-import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsComputeType.DERIVE_DIVISION;
-import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsComputeType.MINUS;
-import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsComputeType.NONE;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.CollectMetrics;
 import com.google.common.collect.Lists;
+
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsComputeType.*;
 
 public class MonitorCollectMetrics {
 
@@ -384,10 +381,10 @@ public class MonitorCollectMetrics {
                 .valueRoute("indices.search.scroll_total").computeType(MINUS).bIndexToNodeMetrics().build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.query_cache.evictions")
-            .valueRoute("indices.query_cache.evictions").computeType(NONE).bIndexToNodeMetrics().build());
+            .valueRoute("indices.query_cache.evictions").computeType(AVG).bIndexToNodeMetrics().build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.request_cache.evictions")
-                .valueRoute("indices.request_cache.evictions").computeType(NONE).bIndexToNodeMetrics().build());
+                .valueRoute("indices.request_cache.evictions").computeType(AVG).bIndexToNodeMetrics().build());
 
         /**********************************node -> http*****************************************/
 
