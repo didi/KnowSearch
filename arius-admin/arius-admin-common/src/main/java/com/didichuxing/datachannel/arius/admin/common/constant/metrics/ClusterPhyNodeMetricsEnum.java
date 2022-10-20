@@ -75,7 +75,10 @@ public enum ClusterPhyNodeMetricsEnum {
      */
 
     INDICES_INDEXING_LATENCY("indices-indexing-index_time_in_millis", "索引写入耗时"),
-
+    /**
+     * 单位：MS
+     */
+    INDICES_INDEXING_INDEX_TIME_PER_DOC("indices-indexing-index_time_per_doc", "单个文档写入耗时"),
     /**
      * 单位：个/S
      */
@@ -84,7 +87,6 @@ public enum ClusterPhyNodeMetricsEnum {
     /**
      * 单位：个/S
      */
-
     INDICES_FETCH_RATE("indices-search-fetch_total_rate", "Fetch QPS"),
     /**
      * 单位：MS
@@ -96,31 +98,25 @@ public enum ClusterPhyNodeMetricsEnum {
      * 单位：个
      */
     INDICES_QUERY_TOTAL("indices-search-query_total", "索引Query总数"),
-
     /**
      * 单位：MS
      */
-
     INDICES_FETCH_LATENCY("indices-search-fetch_time_per_fetch", "索引Fetch耗时"),
     /**
      * 单位：个
      */
-
     INDICES_CUREENT_SCROLL_NUM("indices-search-scroll_current", "Scroll当下请求量"),
     /**
      * 单位：MS
      */
-
     INDICES_SCROLL_LATENCY("indices-search-scroll_avg_time", "Scroll请求耗时"),
     /**
      * 单位：MS
      */
-
     INDICES_MERGE_LATENCY("indices-merges_avg_time", "Merge操作耗时"),
     /**
      * 单位：次/MIN
      */
-
     INDICES_MERGES_NUM_PER_MIN("indices-merges-total", "每分钟merges操作次数"),
     /**
      * 单位：次/MIN
@@ -130,40 +126,33 @@ public enum ClusterPhyNodeMetricsEnum {
     /**
      * 单位：次/MIN
      */
-
     INDICES_REFRESH_NUM_PER_MIN("indices-refresh-total", "每分钟refresh操作次数"),
     /**
      * 单位：MS
      */
-
     INDICES_REFRESH_LATENCY("indices-refresh_avg_time", "Refresh操作耗时"),
     /**
      * 单位：MS
      */
-
     INDICES_FLUSH_LATENCY("indices-flush_avg_time", "Flush操作耗时"),
     /**
      * 单位：MB
      */
-
     INDICES_UNCOMMITTED_TRANSLOG_SIZE("indices-translog-uncommitted_size_in_bytes",
             "未提交Translog大小"),
     /**
      * 单位：MB
      */
-
     INDICES_QUERY_CACHE_MEM_SIZE("indices-query_cache-memory_size_in_bytes",
             "QueryCache内存占用大小"),
     /**
      * 单位：MB
      */
-
     INDICES_REQUEST_CACHE_MEM_SIZE("indices-request_cache-memory_size_in_bytes",
             "RequestCache内存占用大小"),
     /**
      * 单位：次/MIN
      */
-
     INDICES_QUERY_CACHE_HIT_NUM("indices-query_cache-hit_count", "QueryCache内存命中次数"),
     /**
      * 单位：次/MIN
