@@ -1,15 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.rest;
 
-import java.io.IOException;
-
-import javax.servlet.*;
-import javax.servlet.http.HttpServletResponse;
-
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.rest.swagger.SwaggerConfiguration;
+import com.didichuxing.datachannel.arius.admin.rest.web.WebConstant;
+import com.didichuxing.datachannel.arius.admin.rest.web.WebRequestLogFilter;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletComponentScan;
@@ -19,15 +20,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.rest.swagger.SwaggerConfiguration;
-import com.didichuxing.datachannel.arius.admin.rest.web.WebConstant;
-import com.didichuxing.datachannel.arius.admin.rest.web.WebRequestLogFilter;
-
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-
-import lombok.NoArgsConstructor;
+import javax.servlet.*;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * 启动类

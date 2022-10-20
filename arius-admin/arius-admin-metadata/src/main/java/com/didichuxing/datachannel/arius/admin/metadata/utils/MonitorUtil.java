@@ -12,6 +12,7 @@ public class MonitorUtil {
     public static final String COLLECTION_ROUTE_SPLIT            = ".";
 
     public static final String COLLECTION_ROUTE_COMPUTE_DIVISION = "/";
+    public static final String COLLECTION_ROUTE_COMPUTE_PLUS     = "+";
 
     public static Object getValueByRoute(Map map, String route) {
         if (StringUtils.isEmpty(route)) {
@@ -34,6 +35,21 @@ public class MonitorUtil {
                 return dividend / (divisor * 1.0);
             }
         }
+
+        if (route.contains(COLLECTION_ROUTE_COMPUTE_PLUS)) {
+            String[] routers = StringUtils.split(route,COLLECTION_ROUTE_COMPUTE_PLUS);
+            Double paramOne = obj2Double(getValueByRoute(map, routers[0]));
+            Double paramTwo = obj2Double(getValueByRoute(map, routers[1]));
+
+            if (paramOne == null) {
+                 paramOne = 0D;
+            }
+            if (paramTwo == null) {
+                paramTwo = 0D;
+            }
+            return paramOne + paramTwo;
+        }
+
 
         if (route.contains(COLLECTION_ROUTE_SPLIT)) {
             int offset = route.indexOf(COLLECTION_ROUTE_SPLIT);

@@ -3,22 +3,26 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esm
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.CollectBean;
 
 public enum MetricsComputeType {
-                                /**
-                                 * MINUS
-                                 */
-                                MINUS,
-                                /**
-                                 * AVG
-                                 */
-                                AVG,
-                                /**
-                                 * DERIVE_DIVISION
-                                 */
-                                DERIVE_DIVISION,
-                                /**
-                                 * NONE
-                                 */
-                                NONE;
+    /**
+     * MINUS
+     */
+    MINUS,
+    /**
+     * AVG
+     */
+    AVG,
+    /**
+     * AVG_MIN
+     */
+    AVG_MIN,
+    /**
+     * DERIVE_DIVISION
+     */
+    DERIVE_DIVISION,
+    /**
+     * NONE
+     */
+    NONE;
 
     public Double compute(CollectBean before, CollectBean now) {
         Double beforeD = before.getValue();
@@ -29,6 +33,8 @@ public enum MetricsComputeType {
                 return minusByDouble(beforeD, nowD);
             case AVG:
                 return avg(before, now, minusByDouble(beforeD, nowD));
+            case AVG_MIN:
+                return avgMin(before, now, minusByDouble(beforeD, nowD));
             case DERIVE_DIVISION:
                 return divide(beforeD, nowD);
             case NONE:
@@ -56,6 +62,23 @@ public enum MetricsComputeType {
 
         //now.getTimestamp()时间戳单位是毫秒
         Double value = 1000 * result / (now.getTimestamp() - before.getTimestamp());
+        if (value < 0.0) {
+            value = 0.0;
+        }
+
+        return value;
+    }
+
+    private Double avgMin(CollectBean before, CollectBean now, Double result) {
+        if (result == null) {
+            return null;
+        }
+        if (result == 0.0) {
+            return 0.0;
+        }
+
+        //now.getTimestamp()时间戳单位是毫秒
+        Double value = 1000 * 60 * result / (now.getTimestamp() - before.getTimestamp());
         if (value < 0.0) {
             value = 0.0;
         }
