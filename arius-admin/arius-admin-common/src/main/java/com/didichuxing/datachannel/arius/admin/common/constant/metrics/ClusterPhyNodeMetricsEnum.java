@@ -74,7 +74,8 @@ public enum ClusterPhyNodeMetricsEnum {
      * 单位：MS
      */
 
-    INDICES_INDEXING_LATENCY("indices-indexing-index_time_per_doc", "索引写入耗时"),
+    INDICES_INDEXING_LATENCY("indices-indexing-index_time_in_millis", "索引写入耗时"),
+
     /**
      * 单位：个/S
      */
