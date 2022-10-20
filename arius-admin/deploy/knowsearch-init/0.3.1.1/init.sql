@@ -1386,197 +1386,79 @@ values (1, null, 'cn', 1, '管理员 APP', '', 'azAWiJhxkho33ac', 1, 100, 'logi-
 
 
 ## 配置初始化数据
-insert into arius_config_info (id, value_group, value_name, value, edit, dimension, status, memo,
-                                               create_time, update_time, search_time)
-values (187, 'arius.cache.switch', 'logic.template.cache.enable', 'true', 1, -1, -1, '逻辑模板缓存是否开启',
-        '2021-09-01 20:37:47.0', '2021-11-29 14:57:47.0', '2021-09-01 20:37:47.0'),
-       (189, 'arius.cache.switch', 'physical.template.cache.enable', 'true', 1, -1, -1,
-        '获取物理模板列表是否开启全局缓存', '2021-09-01 20:41:22.0', '2021-11-29 14:57:45.0', '2021-09-01 20:41:22.0'),
-       (191, 'arius.cache.switch', 'cluster.phy.cache.enable', 'true', 1, -1, -1, '获取物理集群列表是否开启全局缓存',
-        '2021-09-01 20:42:31.0', '2021-11-29 14:57:42.0', '2021-09-01 20:42:31.0'),
-       (193, 'arius.cache.switch', 'cluster.logic.cache.enable', 'true', 1, -1, -1, '获取逻辑集群列表是否开启全局缓存',
-        '2021-09-01 20:43:08.0', '2021-11-29 14:57:39.0', '2021-09-01 20:43:08.0'),
-       (1217, 'arius.meta.monitor', 'nodestat.collect.concurrent', 'true', 1, -1, -1, '', '2021-11-18 20:24:54.0',
-        '2021-11-19 16:05:39.0', '2021-11-18 20:24:54.0'),
-       (1223, 'arius.common.group', 'app.default.read.auth.indices', '""', 1, -1, 2, 'app 可读写的权限 ',
-        '2021-12-15 20:17:06.0', '2021-12-16 11:17:26.0', '2021-12-15 20:17:06.0'),
-       (1225, 'arius.common.group', 'delete.expire.index.ahead.clusters', '""', 1, -1, 2, ' 删除过期权限 ',
-        '2021-12-15 20:17:48.0', '2021-12-16 11:17:24.0', '2021-12-15 20:17:48.0'),
-       (1227, 'arius.common.group', 'operate.index.ahead.seconds', '2 * 60 * 60', 1, -1, 2, '索引操作提前时间',
-        '2021-12-15 20:18:37.0', '2021-12-16 11:17:22.0', '2021-12-15 20:18:37.0'),
-       (1229, 'arius.common.group', 'platform.govern.admin.hot.days', '-1', 1, -1, 2, '平台治理导入热存的天数',
-        '2021-12-15 20:19:13.0', '2021-12-16 11:17:19.0', '2021-12-15 20:19:13.0'),
-       (1231, 'arius.common.group', 'quota.dynamic.limit.black.appIds', 'none', 1, -1, 2, 'appid 黑名单控制',
-        '2021-12-15 20:20:11.0', '2021-12-16 11:17:17.0', '2021-12-15 20:20:11.0'),
-       (1233, 'arius.common.group', 'quota.dynamic.limit.black.cluster', '""', 1, -1, 2, 'cluster 黑名单控制 ',
-        '2021-12-15 20:20:39.0', '2021-12-16 11:17:15.0', '2021-12-15 20:20:39.0'),
-       (1235, 'arius.common.group', 'quota.dynamic.limit.black.logicId', 'none', 1, -1, 2, '模板黑名单控制',
-        '2021-12-15 20:21:21.0', '2021-12-16 11:17:12.0', '2021-12-15 20:21:21.0'),
-       (1237, 'arius.common.group', 'arius.wo.auto.process.create.template.disk.maxG', '10.0', 1, -1, 2,
-        '模板创建时设置的磁盘空间最大值', '2021-12-15 20:21:49.0', '2021-12-16 11:15:12.0', '2021-12-15 20:21:49.0'),
-       (1239, 'arius.common.group', 'request.interceptor.switch.open', 'true', 1, -1, 2, '请求拦截开关',
-        '2021-12-15 20:22:14.0', '2021-12-16 11:15:10.0', '2021-12-15 20:22:14.0'),
-       (1241, 'arius.common.group', 'arius.didi.t2.leader.mail', '""', 1, -1, 2, 'didi 领导者邮箱 ',
-        '2021-12-15 20:22:40.0', '2021-12-16 11:15:07.0', '2021-12-15 20:22:40.0'),
-       (1243, 'arius.common.group', 'defaultDay', '""', 1, -1, 2, ' 默认 hotDay 值 ', '2021-12-15 20:23:17.0',
-        '2021-12-16 11:15:04.0', '2021-12-15 20:23:17.0'),
-       (1245, 'arius.quota.config.group', 'arius.quota.config.tps.per.cpu.with.replica', '1000.0', 1, -1, 2,
-        '资源管控 cpu 项', '2021-12-15 20:23:56.0', '2021-12-16 11:15:01.0', '2021-12-15 20:23:56.0'),
-       (1247, 'arius.quota.config.group', 'arius.quota.config.tps.per.cpu.NO.replica', '2300.0', 1, -1, 2,
-        '资源管控 cpu 项', '2021-12-15 20:24:27.0', '2021-12-16 11:14:58.0', '2021-12-15 20:24:27.0'),
-       (1249, 'arius.quota.config.group', 'arius.quota.config.cost.per.g.per.month', '1.06', 1, -1, 2,
-        '资源配置模板费用', '2021-12-15 20:24:59.0', '2021-12-16 11:14:56.0', '2021-12-15 20:24:59.0'),
-       (1251, 'arius.meta.monitor.group', 'nodestat.collect.concurrent', 'fasle', 1, -1, 2, '节点状态信息是否并行采集',
-        '2021-12-15 20:25:35.0', '2022-08-26 18:10:50.0', '2021-12-15 20:25:35.0'),
-       (1253, 'arius.meta.monitor.group', 'indexstat.collect.concurrent', 'fasle', 1, -1, 2, '索引状态信息是否并行采集',
-        '2021-12-15 20:26:00.0', '2022-08-26 18:10:45.0', '2021-12-15 20:26:00.0'),
-       (1255, 'arius.common.group', 'indices.recovery.ceph_max_bytes_per_sec', '10MB', 1, -1, 2, '单节点分片恢复的速率',
-        '2021-12-15 21:33:29.0', '2022-04-08 17:43:14.0', '2021-12-15 21:33:29.0'),
-       (1257, 'arius.common.group', 'cluster.routing.allocation.node_concurrent_incoming_recoveries', '2', 1, -1, 2,
-        '一个节点上允许多少并发的传入分片还原, 表示为传入还原', '2021-12-16 14:41:51.0', '2021-12-16 14:42:24.0',
-        '2021-12-16 14:41:51.0'),
-       (1259, 'arius.common', 'cluster.routing.allocation.node_concurrent_outgoing_recoveries', '2', 1, -1, 2,
-        '一个节点上允许多少并发的传入分片还原, 传出还原', '2021-12-16 14:42:15.0', '2022-02-22 11:11:48.0',
-        '2021-12-16 14:42:15.0'),
-       (1585, 'test.test', 'testt', '21', 1, -1, -1, '请忽略 2221', '2022-01-13 14:25:40.0', '2022-01-15 16:27:05.0',
-        '2022-01-13 14:25:40.0'),
-       (1587, 'zptest', 'test', '<script>alert(1)</script>', 1, -1, -1, 'alert(1)', '2022-01-18 16:14:12.0',
-        '2022-01-18 16:15:49.0', '2022-01-18 16:14:12.0'),
-       (1589, 'test1ddd', 'dd ddd', 'dssdddd', 1, -1, -1, 'sddsdssd', '2022-01-26 11:39:23.0', '2022-01-26 11:39:42.0',
-        '2022-01-26 11:39:23.0'),
-       (1591, 'yyftemptest-01s', 'yyftemptest-01d', '', 1, -1, -1, '', '2022-03-01 16:44:12.0', '2022-03-01 16:44:39.0',
-        '2022-03-01 16:44:12.0'),
-       (1593, 'test1', 's', '', 1, -1, -1, '', '2022-03-07 11:37:39.0', '2022-03-07 11:37:43.0',
-        '2022-03-07 11:37:39.0'),
-       (1595, 'test1', '22',
-        'm1qaz2wsx3edc4rfv5tgb6yhn7ujm1qaz2wsx3edc4rfv5tgb6yhn7ujm1qaz2wsx3edc4rfv5tgb6yhn7ujm1qaz2', 1, -1, -1, '',
-        '2022-03-15 11:19:49.0', '2022-03-15 11:20:08.0', '2022-03-15 11:19:49.0'),
-       (1597, 'r''r', '22', 'EE', 1, -1, -1, 'EEEE', '2022-03-15 12:19:26.0', '2022-08-01 08:52:43.0',
-        '2022-03-15 12:19:26.0'),
-       (1599, 'test1', 'testtemp1', 'uu''uuuu', 1, -1, -1, '那你能', '2022-03-29 15:30:59.0', '2022-03-29 15:31:26.0',
-        '2022-03-29 15:30:59.0'),
-       (1601, 'yyyYF223', 'WEFWfwef', '', 1, -1, -1, '', '2022-03-31 19:31:01.0', '2022-08-01 08:52:47.0',
-        '2022-03-31 19:31:01.0'),
-       (1603, 'yyftestYY0411-01', 'yyftestYY0411-01', 'sdsd', 1, -1, -1, 'sdsdcsg 参赛暗杀诉法设计风格！@',
-        '2022-04-11 15:22:22.0', '2022-04-11 15:26:29.0', '2022-04-11 15:22:22.0'),
-       (1607, 'arius.dashboard.threshold.group', 'index.segment.num_threshold',
-        '{"name":" 索引 Segments 个数 ","metrics":"segmentNum","unit":" 个 ","compare":">","value":100}', 1, -1, 1,
-        '索引 Segment 个数阈值定义', '2022-06-17 09:52:11.0', '2022-08-27 16:05:06.0', '2022-06-17 09:52:11.0'),
-       (1609, 'arius.dashboard.threshold.group', 'index.template.segment_num_threshold',
-        '{"name":" 模板 Segments 个数 ","metrics":"segmentNum","unit":" 个 ","compare":">","value":700}', 1, -1, 1,
-        '索引模板 [Segment 个数阈值] 定义', '2022-06-17 09:53:34.0', '2022-08-27 19:01:57.0', '2022-06-17 09:53:34.0'),
-       (1611, 'arius.dashboard.threshold.group', 'index.segment.memory_size_threshold',
-        '{"name":" 索引 Segments 内存大小 ","metrics":"segmentMemSize","unit":"MB","compare":">","value":50}', 1, -1, 1,
-        '索引 [Segment 内存大小阈值] 定义', '2022-06-17 09:54:20.0', '2022-08-27 22:24:52.0', '2022-06-17 09:54:20.0'),
-       (1613, 'arius.dashboard.threshold.group', 'index.template.segment_memory_size_threshold',
-        '{"name":" 模板 Segments 内存大小 ","metrics":"segmentMemSize","unit":"MB","compare":">","value":100}', 1, -1,
-        1, '索引模板 [Segment 内存大小阈值] 定义', '2022-06-17 09:54:50.0', '2022-08-27 19:18:54.0',
-        '2022-06-17 09:54:50.0'),
-       (1617, 'arius.dashboard.threshold.group', 'node.shard.num_threshold',
-        '{"name":" 节点分片个数 ","metrics":"shardNum","unit":" 个 ","compare":">","value":1000}', 1, -1, 1,
-        '节点 [分片个数阈值] 定义', '2022-06-17 10:01:40.0', '2022-08-27 19:09:44.0', '2022-06-17 10:01:40.0'),
-       (1619, 'arius.dashboard.threshold.group', 'index.shard.small_threshold',
-        '{"name":" 小 shard 索引列表 ","metrics":"shardSize","unit":"MB","compare":"<","value":1000}', 1, -1, 1,
-        '索引 [小 Shard 阈值] 定义', '2022-06-17 16:11:53.0', '2022-08-27 19:04:19.0', '2022-06-17 16:11:53.0'),
-       (1623, 'settingGroup', 'name', 'value', 1, -1, -1, 'test', '2022-06-23 14:17:56.0', '2022-06-23 15:47:26.0',
-        '2022-06-23 14:17:56.0'),
-       (1625, 'group11', 'name1', 'value1', 1, -1, -1, 'des-edit', '2022-06-23 15:22:51.0', '2022-06-24 09:40:51.0',
-        '2022-06-23 15:22:51.0'),
-       (1627, 'arius.common.group', 'cluster.node.specification_list', '16c-64g-3072g,16c-48g-3071g,1c-48g-3071g,', 1,
-        -1, 1, '节点规格列表，机型列表', '2022-07-05 14:10:27.0', '2022-07-18 15:01:29.0', '2022-07-05 14:10:27.0'),
-       (1629, 'ccccccccccccccdcdccccccccccccccdcdccccccccccccccdb', 'dccccccccccccccdcdcccccccc', 'vjh', 1, -1, -1,
-        'cdcdccccccccccccccdcdccccccccccccccdcdccccccccccccccdcdccccccccccccccdcdccccccccccccccdcdccccc',
-        '2022-07-05 15:27:38.0', '2022-07-05 15:28:09.0', '2022-07-05 15:27:38.0'),
-       (1631, '2', '3', '', 1, -1, -1, '', '2022-07-06 15:26:45.0', '2022-07-06 15:26:58.0', '2022-07-06 15:26:45.0'),
-       (1633, 'arius.common.group', 'cluster.data.center_list', 'cn,en', 1, -1, 1, '数据中心列表',
-        '2022-07-06 16:14:03.0', '2022-08-27 19:11:25.0', '2022-07-06 16:14:03.0'),
-       (1635, 'arius.common.group', 'cluster.package.version_list', '7.6.1.1,6.6.6.6,7.6.1.2', 1, -1, 1,
-        '系统预制支持的版本', '2022-07-06 16:17:25.0', '2022-07-06 16:17:25.0', '2022-07-06 16:17:25.0'),
-       (1637, 'template.time.type', 'format', '[
-  "yyyy-MM-dd HH:mm:ss",
-  "yyyy-MM-dd HH:mm:ss.SSS",
-  "yyyy-MM-dd''T''HH:mm:ss",
-  "yyyy-MM-dd''T''HH:mm:ss.SSS",
-  "yyyy-MM-dd HH:mm:ss.SSS Z",
-  "yyyy/MM/dd HH:mm:ss",
-  "epoch_seconds",
-  "epoch_millis"
-]', 1, -1, 1, ' 新建模版的时间格式 ', '2022-07-07 16:15:37.0', '2022-07-07 16:15:37.0', '2022-07-07 16:15:37.0'),
-       (1639, 'arius.cluster.blacklist', 'cluster.phy.name', 'didi-cluster-test', 1, -1, 1,
-        '滴滴内部测试环境集群, 禁止任何编辑删除新增操作', '2022-07-07 17:58:02.0', '2022-07-07 18:44:42.0',
-        '2022-07-07 17:58:02.0'),
-       (1641, 'arius.common.group', 'cluster.resource.type_list', '信创,acs,vmware', 1, -1, 1,
-        '所属资源类型列表,IaaS 平台类型列表', '2022-07-07 19:13:13.0', '2022-08-27 19:11:50.0',
-        '2022-07-07 19:13:13.0'),
-       (1643, '55', '666', '1', 1, -1, -1, '143', '2022-07-13 16:59:41.0', '2022-07-13 17:01:48.0',
-        '2022-07-13 16:59:41.0'),
-       (1645, 'arius.common.group', 'index.rollover.threshold', '0.0001', 1, -1, 1, '主分片大小达到 1G 后升版本',
-        '2022-07-15 21:03:12.0', '2022-07-22 16:53:26.0', '2022-07-15 21:03:12.0'),
-       (1647, 'yyftemptest-01', 'yyf', 'sdv', 1, -1, -1, 'sdv', '2022-07-18 15:02:08.0', '2022-07-18 15:02:24.0',
-        '2022-07-18 15:02:08.0'),
-       (1649, 'arius.common.group', 'cluster.node.count_list', '2,4,6,10', 1, -1, 1, '集群节点个数列表',
-        '2022-07-18 15:22:33.0', '2022-08-27 19:13:09.0', '2022-07-18 15:22:33.0'),
-       (1651, '调度 yyfceshi', '是对的 s''d''c''d 测试', '等待的', 1, -1, -1, '的士速递', '2022-07-20 17:06:43.0',
-        '2022-07-20 17:10:39.0', '2022-07-20 17:06:43.0'),
-       (1653, 'arius.common.group', 'arius.system.template', '[
-    "arius.dsl.analyze.result",
-    "arius.dsl.metrics",
-    "arius.dsl.template",
-    "arius.gateway.join",
-    "arius_stats_index_info",
-    "arius_stats_node_info",
-    "arius.template.access",
-    "arius_cat_index_info",
-    "arius_gateway_metrics",
-    "arius_stats_cluster_info",
-    "arius_stats_cluster_task_info",
-    "arius_stats_dashboard_info",
-    "arius.appid.template.access"
-]', 1, -1, 1, ' 系统核心模版集合 ', '2022-07-21 12:25:48.0', '2022-07-21 12:30:06.0', '2022-07-21 12:25:48.0'),
-       (1655, 'ds12', 'sd34', 'sdsddsd', 1, -1, -1, 'ds78', '2022-07-21 17:00:44.0', '2022-08-01 08:52:35.0',
-        '2022-07-21 17:00:44.0'),
-       (1656, 'arius.dashboard.threshold.group', 'index.mapping.num_threshold',
-        '{"name":" 索引 Mapping 个数 ","metrics":"mappingNum","unit":" 个 ","compare":">","value":100}', 1, -1, 1,
-        '索引 [Mapping 个数阈值] 定义', '2022-07-28 15:50:59.0', '2022-08-27 18:36:48.0', '2022-07-28 15:50:59.0'),
-       (1657, 'arius.common.group', 'cluster.shard.big_threshold', '10', 1, -1, 1,
-        '用于设置集群看板中的大 Shard 阈值，单位为 gb，大于这个值就认为是大 shard', '2022-07-28 17:49:59.0',
-        '2022-08-26 18:08:56.0', '2022-07-28 17:49:59.0'),
-       (1659, 'arius.dashboard.threshold.group', 'cluster.shard.num_threshold',
-        '{"name":" 集群 shard 个数 ","metrics":"shardNum","unit":" 个 ","compare":">","value":2000}', 1, -1, 1,
-        '集群 [Shard 个数阈值] 定义', '2022-08-05 15:58:22.0', '2022-08-27 18:31:22.0', '2022-08-05 15:58:22.0'),
-       (1661, 'arius.dashboard.threshold.group', 'cluster.metric.collector.delayed_threshold',
-        '{"name":"node_status 指标采集延时 ","metrics":"clusterElapsedTimeGte5Min","unit":"m","compare":">","value":5}',
-        1, -1, 1, '集群 [指标采集延时阈值] 定义', '2022-08-10 14:10:47.0', '2022-08-27 18:28:59.0',
-        '2022-08-10 14:10:47.0'),
-       (1663, 'arius.dashboard.threshold.group', 'node.disk.used_percent_threshold',
-        '{"name":" 磁盘利用率 ","metrics":"largeDiskUsage","unit":"%","compare":">","value":40}', 1, -1, 1,
-        '节点 [磁盘利用率阈值] 定义', '2022-08-25 14:50:41.0', '2022-08-27 19:20:14.0', '2022-08-25 14:50:41.0'),
-       (1665, 'arius.dashboard.threshold.group', 'node.jvm.heap.used_percent_threshold',
-        '{"name":" 堆内存利用率 ","metrics":"largeHead","unit":"%","compare":">","value":35}', 1, -1, 1,
-        '节点 [堆内存利用率阈值] 定义', '2022-08-25 16:45:33.0', '2022-08-27 19:20:20.0', '2022-08-25 16:45:33.0'),
-       (1666, 'arius.dashboard.threshold.group', 'node.cpu.used_percent_threshold',
-        '{"name":"CPU 利用率红线 ","metrics":"largeCpuUsage","unit":"%","compare":">","value":40}', 1, -1, 1,
-        '节点 [CPU 利用率阈值] 定义', '2022-08-25 16:45:33.0', '2022-08-27 19:20:08.0', '2022-08-25 16:45:33.0'),
-       (1667, 'arius.dashboard.threshold.group', 'node.jvm.heap.used_percent_time_duration_threshold',
-        '{"name":"node.jvm.heap.used_percent_threshold_time_duration","metrics":"jvmHeapUsedPercentThresholdTimeDuration","unit":"m","compare":">","value":10}',
-        1, -1, 1, '节点堆内存利用率阈值的 [持续时间]', '2022-08-25 16:45:33.0', '2022-08-27 15:44:06.0',
-        '2022-08-25 16:45:33.0'),
-       (1668, 'arius.dashboard.threshold.group', 'node.cpu.used_percent_threshold_time_duration_threshold',
-        '{"name":"node.large.cpu.used.percent.time.threshold","metrics":"largeCpuUsage","unit":"s","compare":">","value":60}',
-        1, -1, 1, '节点 CPU 利用率超阈值的 [持续时间]', '2022-08-25 16:45:33.0', '2022-08-27 19:28:08.0',
-        '2022-08-25 16:45:33.0'),
-       (1669, 'arius.dashboard.threshold.group', 'index.shard.big_threshold',
-        '{"name":"index.shard.big_threshold","metrics":"shardSize","unit":"G","compare":">","value":20}', 1, -1, 1,
-        '索引 [大 shard 阈值] 定义', '2022-08-26 15:25:07.0', '2022-08-29 10:28:24.0', '2022-08-26 15:25:07.0'),
-       (1671, 'arius.template.group', 'logic.template.business_type',
-        '系统数据, 日志数据, 业务上报数据,RDS 数据, 离线导入数据,testset', 1, -1, 1, '模板业务类型',
-        '2022-08-26 18:02:47.0', '2022-08-27 19:14:56.0', '2022-08-26 18:02:47.0'),
-       (1673, 'arius.common.group', 'logic.template.time_format_list',
-        'yyyy-MM-dd HH:mm:ss,yyyy-MM-dd HH:mm:ss.SSS,yyyy-MM-dd HH:mm:ss.SSS Z,yyyy-MM-dd''T''HH:mm:ss,yyyy-MM-dd''T''HH:mm:ss.SSS,yyyy-MM-dd''T''HH:mm:ssZ,yyyy-MM-dd''T''HH:mm:ss.SSSZ,yyyy/MM/dd HH:mm:ss,epoch_second,epoch_millis,yyyy-MM-dd',
-        1, -1, 1, '模板时间格式列表', '2022-08-26 18:06:07.0', '2022-08-27 19:14:06.0', '2022-08-26 18:06:07.0'),
-       (1675, 'arius.common.group', 'history.template.physic.indices.allocation.is_effective', 'ture', 1, -1, 1,
-        '历史索引模板 shard 分配是否自动调整', '2022-08-26 18:07:53.0', '2022-08-26 18:07:53.0',
-        '2022-08-26 18:07:53.0');
+
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (187, 'arius.cache.switch', 'logic.template.cache.enable', 'true', 1, -1, -1, '逻辑模板缓存是否开启', '2021-09-01 20:37:47', '2021-11-29 14:57:47', '2021-09-01 20:37:47');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (189, 'arius.cache.switch', 'physical.template.cache.enable', 'true', 1, -1, -1, '获取物理模板列表是否开启全局缓存', '2021-09-01 20:41:22', '2021-11-29 14:57:45', '2021-09-01 20:41:22');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (191, 'arius.cache.switch', 'cluster.phy.cache.enable', 'true', 1, -1, -1, '获取物理集群列表是否开启全局缓存', '2021-09-01 20:42:31', '2021-11-29 14:57:42', '2021-09-01 20:42:31');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (193, 'arius.cache.switch', 'cluster.logic.cache.enable', 'true', 1, -1, -1, '获取逻辑集群列表是否开启全局缓存', '2021-09-01 20:43:08', '2021-11-29 14:57:39', '2021-09-01 20:43:08');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1217, 'arius.meta.monitor', 'nodestat.collect.concurrent', 'true', 1, -1, -1, '', '2021-11-18 20:24:54', '2021-11-19 16:05:39', '2021-11-18 20:24:54');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1223, 'arius.common.group', 'app.default.read.auth.indices', '\"\"', 1, -1, 2, 'app可读写的权限', '2021-12-15 20:17:06', '2021-12-16 11:17:26', '2021-12-15 20:17:06');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1225, 'arius.common.group', 'delete.expire.index.ahead.clusters', '\"\"', 1, -1, 2, '删除过期权限', '2021-12-15 20:17:48', '2021-12-16 11:17:24', '2021-12-15 20:17:48');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1227, 'arius.common.group', 'operate.index.ahead.seconds', '2 * 60 * 60', 1, -1, 2, '索引操作提前时间', '2021-12-15 20:18:37', '2021-12-16 11:17:22', '2021-12-15 20:18:37');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1229, 'arius.common.group', 'platform.govern.admin.hot.days', '-1', 1, -1, 2, '平台治理导入热存的天数', '2021-12-15 20:19:13', '2021-12-16 11:17:19', '2021-12-15 20:19:13');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1231, 'arius.common.group', 'quota.dynamic.limit.black.appIds', 'none', 1, -1, 2, 'appid黑名单控制', '2021-12-15 20:20:11', '2021-12-16 11:17:17', '2021-12-15 20:20:11');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1233, 'arius.common.group', 'quota.dynamic.limit.black.cluster', '\"\"', 1, -1, 2, 'cluster黑名单控制', '2021-12-15 20:20:39', '2021-12-16 11:17:15', '2021-12-15 20:20:39');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1235, 'arius.common.group', 'quota.dynamic.limit.black.logicId', 'none', 1, -1, 2, '模板黑名单控制', '2021-12-15 20:21:21', '2021-12-16 11:17:12', '2021-12-15 20:21:21');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1237, 'arius.common.group', 'arius.wo.auto.process.create.template.disk.maxG', '10.0', 1, -1, 2, '模板创建时设置的磁盘空间最大值', '2021-12-15 20:21:49', '2021-12-16 11:15:12', '2021-12-15 20:21:49');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1239, 'arius.common.group', 'request.interceptor.switch.open', 'true', 1, -1, 2, '请求拦截开关', '2021-12-15 20:22:14', '2021-12-16 11:15:10', '2021-12-15 20:22:14');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1241, 'arius.common.group', 'arius.didi.t2.leader.mail', '\"\"', 1, -1, 2, 'didi领导者邮箱', '2021-12-15 20:22:40', '2021-12-16 11:15:07', '2021-12-15 20:22:40');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1243, 'arius.common.group', 'defaultDay', '\"\"', 1, -1, 2, '默认hotDay值', '2021-12-15 20:23:17', '2021-12-16 11:15:04', '2021-12-15 20:23:17');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1245, 'arius.quota.config.group', 'arius.quota.config.tps.per.cpu.with.replica', '1000.0', 1, -1, 2, '资源管控cpu项', '2021-12-15 20:23:56', '2021-12-16 11:15:01', '2021-12-15 20:23:56');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1247, 'arius.quota.config.group', 'arius.quota.config.tps.per.cpu.NO.replica', '2300.0', 1, -1, 2, '资源管控cpu项', '2021-12-15 20:24:27', '2021-12-16 11:14:58', '2021-12-15 20:24:27');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1249, 'arius.quota.config.group', 'arius.quota.config.cost.per.g.per.month', '1.06', 1, -1, 2, '资源配置模板费用', '2021-12-15 20:24:59', '2021-12-16 11:14:56', '2021-12-15 20:24:59');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1251, 'arius.meta.monitor.group', 'nodestat.collect.concurrent', 'fasle', 1, -1, 2, '节点状态信息是否并行采集', '2021-12-15 20:25:35', '2022-08-26 18:10:50', '2021-12-15 20:25:35');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1253, 'arius.meta.monitor.group', 'indexstat.collect.concurrent', 'fasle', 1, -1, 2, '索引状态信息是否并行采集', '2021-12-15 20:26:00', '2022-08-26 18:10:45', '2021-12-15 20:26:00');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1255, 'arius.common.group', 'indices.recovery.ceph_max_bytes_per_sec', '10MB', 1, -1, 2, '单节点分片恢复的速率', '2021-12-15 21:33:29', '2022-04-08 17:43:14', '2021-12-15 21:33:29');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1257, 'arius.common.group', 'cluster.routing.allocation.node_concurrent_incoming_recoveries', '2', 1, -1, 2, '一个节点上允许多少并发的传入分片还原,表示为传入还原', '2021-12-16 14:41:51', '2021-12-16 14:42:24', '2021-12-16 14:41:51');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1259, 'arius.common', 'cluster.routing.allocation.node_concurrent_outgoing_recoveries', '2', 1, -1, 2, '一个节点上允许多少并发的传入分片还原,传出还原', '2021-12-16 14:42:15', '2022-02-22 11:11:48', '2021-12-16 14:42:15');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1585, 'test.test', 'testt', '21', 1, -1, -1, '请忽略2221', '2022-01-13 14:25:40', '2022-01-15 16:27:05', '2022-01-13 14:25:40');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1587, 'zptest', 'test', '<script>alert(1)</script>', 1, -1, -1, 'alert(1)', '2022-01-18 16:14:12', '2022-01-18 16:15:49', '2022-01-18 16:14:12');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1589, 'test1ddd', 'dd ddd', 'dssdddd', 1, -1, -1, 'sddsdssd', '2022-01-26 11:39:23', '2022-01-26 11:39:42', '2022-01-26 11:39:23');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1591, 'yyftemptest-01s', 'yyftemptest-01d', '', 1, -1, -1, '', '2022-03-01 16:44:12', '2022-03-01 16:44:39', '2022-03-01 16:44:12');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1593, 'test1', 's', '', 1, -1, -1, '', '2022-03-07 11:37:39', '2022-03-07 11:37:43', '2022-03-07 11:37:39');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1595, 'test1', '22', 'm1qaz2wsx3edc4rfv5tgb6yhn7ujm1qaz2wsx3edc4rfv5tgb6yhn7ujm1qaz2wsx3edc4rfv5tgb6yhn7ujm1qaz2', 1, -1, -1, '', '2022-03-15 11:19:49', '2022-03-15 11:20:08', '2022-03-15 11:19:49');
+
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1607, 'arius.dashboard.threshold.group', 'index.segment.num_threshold', '{\"name\":\"索引Segments个数\",\"metrics\":\"segmentNum\",\"unit\":\"个\",\"compare\":\">\",\"value\":100}', 1, -1, 1, '索引Segment个数阈值定义', '2022-06-17 09:52:11', '2022-08-27 16:05:06', '2022-06-17 09:52:11');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1609, 'arius.dashboard.threshold.group', 'index.template.segment_num_threshold', '{\"name\":\"模板Segments个数\",\"metrics\":\"segmentNum\",\"unit\":\"个\",\"compare\":\">\",\"value\":700}', 1, -1, 1, '索引模板[Segment个数阈值]定义', '2022-06-17 09:53:34', '2022-08-27 19:01:57', '2022-06-17 09:53:34');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1611, 'arius.dashboard.threshold.group', 'index.segment.memory_size_threshold', '{\"name\":\"索引Segments内存大小\",\"metrics\":\"segmentMemSize\",\"unit\":\"MB\",\"compare\":\">\",\"value\":50}', 1, -1, 1, '索引[Segment内存大小阈值]定义', '2022-06-17 09:54:20', '2022-08-27 22:24:52', '2022-06-17 09:54:20');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1613, 'arius.dashboard.threshold.group', 'index.template.segment_memory_size_threshold', '{\"name\":\"模板Segments内存大小\",\"metrics\":\"segmentMemSize\",\"unit\":\"MB\",\"compare\":\">\",\"value\":100}', 1, -1, 1, '索引模板[Segment内存大小阈值]定义', '2022-06-17 09:54:50', '2022-08-27 19:18:54', '2022-06-17 09:54:50');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1617, 'arius.dashboard.threshold.group', 'node.shard.num_threshold', '{\"name\":\"节点分片个数\",\"metrics\":\"shardNum\",\"unit\":\"个\",\"compare\":\">\",\"value\":1000}', 1, -1, 1, '节点[分片个数阈值]定义', '2022-06-17 10:01:40', '2022-08-27 19:09:44', '2022-06-17 10:01:40');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1619, 'arius.dashboard.threshold.group', 'index.shard.small_threshold', '{\"name\":\"小shard索引列表\",\"metrics\":\"shardSize\",\"unit\":\"MB\",\"compare\":\"<\",\"value\":1000}', 1, -1, 1, '索引[小Shard阈值]定义', '2022-06-17 16:11:53', '2022-08-27 19:04:19', '2022-06-17 16:11:53');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1623, 'settingGroup', 'name', 'value', 1, -1, -1, 'test', '2022-06-23 14:17:56', '2022-06-23 15:47:26', '2022-06-23 14:17:56');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1625, 'group11', 'name1', 'value1', 1, -1, -1, 'des-edit', '2022-06-23 15:22:51', '2022-06-24 09:40:51', '2022-06-23 15:22:51');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1627, 'arius.common.group', 'cluster.node.specification_list', '16c-64g-3072g,16c-48g-3071g,1c-48g-3071g,', 1, -1, 1, '节点规格列表，机型列表', '2022-07-05 14:10:27', '2022-07-18 15:01:29', '2022-07-05 14:10:27');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1629, 'ccccccccccccccdcdccccccccccccccdcdccccccccccccccdb', 'dccccccccccccccdcdcccccccc', 'vjh', 1, -1, -1, 'cdcdccccccccccccccdcdccccccccccccccdcdccccccccccccccdcdccccccccccccccdcdccccccccccccccdcdccccc', '2022-07-05 15:27:38', '2022-07-05 15:28:09', '2022-07-05 15:27:38');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1631, '2', '3', '', 1, -1, -1, '', '2022-07-06 15:26:45', '2022-07-06 15:26:58', '2022-07-06 15:26:45');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1633, 'arius.common.group', 'cluster.data.center_list', 'cn,en', 1, -1, 1, '数据中心列表', '2022-07-06 16:14:03', '2022-08-27 19:11:25', '2022-07-06 16:14:03');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1635, 'arius.common.group', 'cluster.package.version_list', '7.6.1.1,6.6.6.6,7.6.1.2', 1, -1, 1, '系统预制支持的版本', '2022-07-06 16:17:25', '2022-07-06 16:17:25', '2022-07-06 16:17:25');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1637, 'template.time.type', 'format', '[\n  \"yyyy-MM-dd HH:mm:ss\",\n  \"yyyy-MM-dd HH:mm:ss.SSS\",\n  \"yyyy-MM-dd\'T\'HH:mm:ss\",\n  \"yyyy-MM-dd\'T\'HH:mm:ss.SSS\",\n  \"yyyy-MM-dd HH:mm:ss.SSS Z\",\n  \"yyyy/MM/dd HH:mm:ss\",\n  \"epoch_seconds\",\n  \"epoch_millis\"\n]', 1, -1, 1, '新建模版的时间格式', '2022-07-07 16:15:37', '2022-07-07 16:15:37', '2022-07-07 16:15:37');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1639, 'arius.cluster.blacklist', 'cluster.phy.name', 'didi-cluster-test', 1, -1, 1, '滴滴内部测试环境集群, 禁止任何编辑删除新增操作', '2022-07-07 17:58:02', '2022-07-07 18:44:42', '2022-07-07 17:58:02');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1641, 'arius.common.group', 'cluster.resource.type_list', '信创,acs,vmware', 1, -1, 1, '所属资源类型列表,IaaS平台类型列表', '2022-07-07 19:13:13', '2022-08-31 16:38:37', '2022-07-07 19:13:13');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1643, '55', '666', '1', 1, -1, -1, '143', '2022-07-13 16:59:41', '2022-07-13 17:01:48', '2022-07-13 16:59:41');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1645, 'arius.common.group', 'index.rollover.threshold', '0.00001', 1, -1, 1, '主分片大小达到1G后升版本', '2022-07-15 21:03:12', '2022-09-22 15:28:54', '2022-07-15 21:03:12');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1647, 'yyftemptest-01', 'yyf', 'sdv', 1, -1, -1, 'sdv', '2022-07-18 15:02:08', '2022-07-18 15:02:24', '2022-07-18 15:02:08');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1649, 'arius.common.group', 'cluster.node.count_list', '2,4,6,10', 1, -1, 1, '集群节点个数列表', '2022-07-18 15:22:33', '2022-08-27 19:13:09', '2022-07-18 15:22:33');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1653, 'arius.common.group', 'arius.system.template', '[\n    \"arius.dsl.analyze.result\",\n    \"arius.dsl.metrics\",\n    \"arius.dsl.template\",\n    \"arius.gateway.join\",\n    \"arius_stats_index_info\",\n    \"arius_stats_node_info\",\n    \"arius.template.access\",\n    \"arius_cat_index_info\",\n    \"arius_gateway_metrics\",\n    \"arius_stats_cluster_info\",\n    \"arius_stats_cluster_task_info\",\n    \"arius_stats_dashboard_info\",\n    \"arius.appid.template.access\"\n]', 1, -1, 1, '系统核心模版集合', '2022-07-21 12:25:48', '2022-07-21 12:30:06', '2022-07-21 12:25:48');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1655, 'ds12', 'sd34', 'sdsddsd', 1, -1, -1, 'ds78', '2022-07-21 17:00:44', '2022-08-01 08:52:35', '2022-07-21 17:00:44');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1656, 'arius.dashboard.threshold.group', 'index.mapping.num_threshold', '{\"name\":\"索引Mapping个数\",\"metrics\":\"mappingNum\",\"unit\":\"个\",\"compare\":\">\",\"value\":100}', 1, -1, 1, '索引[Mapping个数阈值]定义', '2022-07-28 15:50:59', '2022-08-27 18:36:48', '2022-07-28 15:50:59');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1657, 'arius.common.group', 'cluster.shard.big_threshold', '10', 1, -1, 1, '用于设置集群看板中的大Shard阈值，单位为gb，大于这个值就认为是大shard', '2022-07-28 17:49:59', '2022-08-26 18:08:56', '2022-07-28 17:49:59');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1659, 'arius.dashboard.threshold.group', 'cluster.shard.num_threshold', '{\"name\":\"集群shard个数\",\"metrics\":\"shardNum\",\"unit\":\"个\",\"compare\":\">\",\"value\":2000}', 1, -1, 1, '集群[Shard个数阈值]定义', '2022-08-05 15:58:22', '2022-08-27 18:31:22', '2022-08-05 15:58:22');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1661, 'arius.dashboard.threshold.group', 'cluster.metric.collector.delayed_threshold ', '{\"name\":\"node_status指标采集延时\",\"metrics\":\"clusterElapsedTimeGte5Min\",\"unit\":\"MIN\",\"compare\":\">\",\"value\":0}', 1, -1, 1, '集群[指标采集延时阈值]定义', '2022-08-10 14:10:47', '2022-10-19 09:19:19', '2022-08-10 14:10:47');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1663, 'arius.dashboard.threshold.group', 'node.disk.used_percent_threshold', '{\"name\":\"磁盘利用率\",\"metrics\":\"largeDiskUsage\",\"unit\":\"%\",\"compare\":\">\",\"value\":40}', 1, -1, 1, '节点[磁盘利用率阈值]定义', '2022-08-25 14:50:41', '2022-08-27 19:20:14', '2022-08-25 14:50:41');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1665, 'arius.dashboard.threshold.group', 'node.jvm.heap.used_percent_threshold', '{\"name\":\"堆内存利用率\",\"metrics\":\"largeHead\",\"unit\":\"%\",\"compare\":\">\",\"value\":35}', 1, -1, 1, '节点[堆内存利用率阈值]定义', '2022-08-25 16:45:33', '2022-08-27 19:20:20', '2022-08-25 16:45:33');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1666, 'arius.dashboard.threshold.group', 'node.cpu.used_percent_threshold', '{\"name\":\"CPU利用率红线\",\"metrics\":\"largeCpuUsage\",\"unit\":\"%\",\"compare\":\">\",\"value\":40}', 1, -1, 1, '节点[CPU利用率阈值]定义', '2022-08-25 16:45:33', '2022-08-27 19:20:08', '2022-08-25 16:45:33');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1667, 'arius.dashboard.threshold.group', 'node.jvm.heap.used_percent_time_duration_threshold', '{\"name\":\"node.jvm.heap.used_percent_threshold_time_duration\",\"metrics\":\"jvmHeapUsedPercentThresholdTimeDuration\",\"unit\":\"m\",\"compare\":\">\",\"value\":10}', 1, -1, 1, '节点堆内存利用率阈值的[持续时间]', '2022-08-25 16:45:33', '2022-08-27 15:44:06', '2022-08-25 16:45:33');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1668, 'arius.dashboard.threshold.group', 'node.cpu.used_percent_threshold_time_duration_threshold', '{\"name\":\"node.large.cpu.used.percent.time.threshold\",\"metrics\":\"largeCpuUsage\",\"unit\":\"s\",\"compare\":\">\",\"value\":60}', 1, -1, 1, '节点CPU利用率超阈值的[持续时间]', '2022-08-25 16:45:33', '2022-08-27 19:28:08', '2022-08-25 16:45:33');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1669, 'arius.dashboard.threshold.group', 'index.shard.big_threshold', '{\"name\":\"index.shard.big_threshold\",\"metrics\":\"shardSize\",\"unit\":\"G\",\"compare\":\">\",\"value\":20}', 1, -1, 1, '索引[大shard阈值]定义', '2022-08-26 15:25:07', '2022-08-29 10:28:24', '2022-08-26 15:25:07');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1671, 'arius.template.group', 'logic.template.business_type', '系统数据,日志数据,业务上报数据,test_businesss_type1,RDS数据,离线导入数据,testset,123,test_businesss_type1', 1, -1, 1, '模板业务类型', '2022-08-26 18:02:47', '2022-09-01 15:16:11', '2022-08-26 18:02:47');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1673, 'arius.template.group', 'logic.template.time_format_list', 'yyyy-MM-dd HH:mm:ss,yyyy-MM-dd HH:mm:ss.SSS,yyyy-MM-dd HH:mm:ss.SSS Z,yyyy-MM-dd\'T\'HH:mm:ss,yyyy-MM-dd\'T\'HH:mm:ss.SSS,yyyy-MM-dd\'T\'HH:mm:ssZ,yyyy-MM-dd\'T\'HH:mm:ss.SSSZ,yyyy/MM/dd HH:mm:ss,epoch_second,epoch_millis,yyyy-MM-dd', 1, -1, 1, '模板时间格式列表', '2022-08-26 18:06:07', '2022-08-31 17:16:03', '2022-08-26 18:06:07');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1675, 'arius.template.group', 'history.template.physic.indices.allocation.is_effective', 'ture', 1, -1, 1, '历史索引模板shard分配是否自动调整', '2022-08-26 18:07:53', '2022-08-31 17:07:02', '2022-08-26 18:07:53');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1677, 'arius.common.group', 'operate.record.save.time', '29', 1, -1, -1, '操作记录的保存时间', '2022-09-01 16:44:03', '2022-09-01 17:23:48', '2022-09-01 16:44:03');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1679, 'arius.common.group', 'operate.record.save_time', '25', 1, -1, 1, '操作记录的保存时间(天)', '2022-09-01 19:34:33', '2022-09-19 15:14:59', '2022-09-01 19:34:33');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1681, 'arius.common.group', 'super_app.default.dsl.command', '#获取节点状态\nGET _nodes/stats\n\n#获取集群信息\nGET _cluster/stats\n\n#获取集群健康信息\nGET _cluster/health?v\n\n#查看当前集群的热点线程\nGET _nodes/hot_threads\n\n#查看当前集群运行中的任务信息\nGET _tasks?actions=*&detailed\n\n#shard分配说明，会在分片未分配的事后去通过这个命令查看下具体原因\nGET /_cluster/allocation/explain\n\n#异常shard分配重试，当集群red有shard未分配的情况下会通过这个命令来重试分配\nPOST /_cluster/reroute?retry_failed=true\n\n#清除fielddata内存，当集群因为fileddata太大导致熔断或占用很多内存，可以通过此命令释放内存\nPOST _cache/clear?fielddata=true\n', 1, -1, 1, '超级应用默认就有的命令', '2022-09-20 10:26:08', '2022-09-26 11:34:14', '2022-09-20 10:26:08');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1683, 'arius.common.group', 'operate.record.save.num', '30', 1, -1, -1, 'DSL和kibana操作记录保存条数', '2022-09-20 10:45:31', '2022-09-22 16:49:16', '2022-09-20 10:45:31');
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1685, 'ddd', 'sdd', 'sd', 1, -1, -1, 'ds', '2022-09-21 15:22:31', '2022-09-21 15:23:00', '2022-09-21 15:22:31');
+
 
 ####
 insert into es_package (id, url, es_version, creator, `release`, manifest, `desc`, create_time, update_time, delete_flag)
