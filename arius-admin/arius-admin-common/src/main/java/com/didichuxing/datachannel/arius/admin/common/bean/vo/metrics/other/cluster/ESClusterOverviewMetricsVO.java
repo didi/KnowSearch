@@ -1,14 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster;
 
-import java.util.List;
-
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.MetricsVO;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * Created by linyunan on 2021-07-30
@@ -71,8 +71,14 @@ public class ESClusterOverviewMetricsVO extends MetricsVO {
     @ApiModelProperty("正在迁移shard列表")
     private List<MovingShardMetricsVO>               movingShards;
 
+    @ApiModelProperty("未分配的shard列表")
+    private List<UnAssignShardMetricsVO>               unAssignShards;
+
     @ApiModelProperty("大shard列表")
     private List<BigShardMetricsVO>                  bigShards;
+
+    @ApiModelProperty("大shard阈值，单位g")
+    private Double                                   bigShardThreshold;
 
     /******************************************6.节点信息******************************************/
 
@@ -80,7 +86,7 @@ public class ESClusterOverviewMetricsVO extends MetricsVO {
     private List<NodeInfoForDiskUsageGte75PercentVO> nodesForDiskUsageGte75Percent;
 
     @ApiModelProperty("无效节点的Ip列表")
-    private List<String>                             invalidNodes;
+    private List<ClusterRoleHost>                             invalidNodes;
 
     /****************************************7.进程任务信息******************************************/
 
@@ -105,7 +111,7 @@ public class ESClusterOverviewMetricsVO extends MetricsVO {
     private List<TaskCostMetricVO>                   taskCost;
 
     @ApiModelProperty("当前执行的task数量")
-    private List<TaskCountMetricVO>                   taskCount;
+    private List<TaskCountMetricVO>                  taskCount;
 
     /******************************************6.索引信息******************************************/
 

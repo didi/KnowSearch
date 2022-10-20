@@ -12,8 +12,8 @@ import java.util.Map;
 @AllArgsConstructor
 public class CollectMetrics {
 
-    public static final String ES_2 = "2";
-    public static final String ES_6 = "6";
+    public static final String  ES_2                 = "2";
+    public static final String  ES_6                 = "6";
 
     /**
      * 指标名字
@@ -48,7 +48,7 @@ public class CollectMetrics {
     /**
      * 是否需要发送夜莺
      */
-    private boolean             sendToN9e = false;
+    private boolean             sendToN9e            = false;
 
     @Data
     public static class Builder {
@@ -109,12 +109,12 @@ public class CollectMetrics {
     }
 
     public CollectMetrics(Builder builder) {
-        this.valueName      = builder.getValueName();
-        this.valueRoute     = builder.getValueRoute();
-        this.computeType    = builder.getComputeType();
-        this.deriveParam    = builder.getDeriveParam();
+        this.valueName = builder.getValueName();
+        this.valueRoute = builder.getValueRoute();
+        this.computeType = builder.getComputeType();
+        this.deriveParam = builder.getDeriveParam();
         this.isIndexToNodeMetrics = builder.isIndexToNodeMetrics();
-        this.needCorrectFromOdin  = builder.isNeedCorrectFromOdin();
+        this.needCorrectFromOdin = builder.isNeedCorrectFromOdin();
         this.sendToN9e = builder.isSendToN9e();
     }
 }

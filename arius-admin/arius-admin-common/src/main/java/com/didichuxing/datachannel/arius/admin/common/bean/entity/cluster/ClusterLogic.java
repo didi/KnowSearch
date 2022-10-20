@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClusterLogic extends BaseEntity implements  Comparable<ClusterLogic> {
+public class ClusterLogic extends BaseEntity implements Comparable<ClusterLogic> {
 
     /**
      * 主键
@@ -33,6 +33,11 @@ public class ClusterLogic extends BaseEntity implements  Comparable<ClusterLogic
     private Integer projectId;
 
     /**
+     * 所属projectName
+     */
+    private String projectName;
+
+    /**
      * 数据中心
      */
     private String  dataCenter;
@@ -45,22 +50,7 @@ public class ClusterLogic extends BaseEntity implements  Comparable<ClusterLogic
     /**
      * dataNode的个数
      */
-    private Integer  dataNodeNu;
-
-    /**
-     * 责任人
-     */
-    private String  responsible;
-
-    /**
-     * 成本部门
-     */
-    private String  libraDepartmentId;
-
-    /**
-     * 成本部门
-     */
-    private String  libraDepartment;
+    private Integer dataNodeNum;
 
     /**
      * 备注
@@ -86,6 +76,31 @@ public class ClusterLogic extends BaseEntity implements  Comparable<ClusterLogic
      * 健康状态 1 green 2 yellow 3 red -1 未知
      */
     private Integer health;
+
+    /**
+     * 磁盘使用率
+     */
+    private Double diskUsagePercent;
+
+    /**
+     * 磁盘总量
+     */
+    private Long diskTotal;
+
+    /**
+     * 磁盘使用量
+     */
+    private Long diskUsage;
+
+    /**
+     * 集群版本
+     */
+    private String esClusterVersion;
+
+    /**
+     * 数据节点数
+     */
+    private Integer nodeNum;
 
     @Override
     public int compareTo(ClusterLogic o) {

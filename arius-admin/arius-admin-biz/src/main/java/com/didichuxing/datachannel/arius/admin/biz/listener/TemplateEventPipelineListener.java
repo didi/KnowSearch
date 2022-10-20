@@ -1,7 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.listener;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
-import com.didichuxing.datachannel.arius.admin.common.event.template.*;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
+import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
+import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateDeleteEvent;
+import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateModifyEvent;
+import com.didichuxing.datachannel.arius.admin.common.event.template.TemplateEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -19,10 +24,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class TemplateEventPipelineListener implements ApplicationListener<TemplateEvent> {
 
-    private static final ILog       LOGGER = LogFactory.getLog(TemplateEventPipelineListener.class);
+    private static final ILog LOGGER = LogFactory.getLog(TemplateEventPipelineListener.class);
 
     @Autowired
-    private TemplatePipelineManager templatePipelineManager;
+    private PipelineManager   templatePipelineManager;
 
     /**
      * Handle an application event.
@@ -50,47 +55,59 @@ public class TemplateEventPipelineListener implements ApplicationListener<Templa
     /****************************************************** private methods ******************************************************/
     private void handlePhysicalTemplateModifyEvent(PhysicalTemplateModifyEvent event) throws ESOperateException {
         PhysicalTemplateModifyEvent e = event;
-        LOGGER.info("class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateModifyEvent||templateName={}",
+        LOGGER.info(
+            "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateModifyEvent||templateName={}",
             e.getOldTemplate().getName());
         if (templatePipelineManager.editFromTemplatePhysical(e.getOldTemplate(), e.getNewTemplate(),
             e.getLogicWithPhysical())) {
-            LOGGER.info("class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateModifyEvent||templateName={}||msg=succ",
+            LOGGER.info(
+                "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateModifyEvent||templateName={}||msg=succ",
                 e.getOldTemplate().getName());
         } else {
-            LOGGER.warn("class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateModifyEvent||templateName={}||msg=fail",
+            LOGGER.warn(
+                "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateModifyEvent||templateName={}||msg=fail",
                 e.getOldTemplate().getName());
         }
     }
 
     private void handleLogicTemplateModifyEvent(LogicTemplateModifyEvent event) {
         LogicTemplateModifyEvent e = event;
-        if (templatePipelineManager.editFromTemplateLogic(e.getOldTemplate(), e.getNewTemplate())) {
-            LOGGER.info("class=TemplateEventPipelineListener||method=onApplicationEvent||msg=LogicTemplateModifyEvent||templateName={}||msg=succ",
+        final Result<Void> result = templatePipelineManager.editFromTemplateLogic(e.getOldTemplate(),
+            e.getNewTemplate());
+        if (result.success()) {
+            LOGGER.info(
+                "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=LogicTemplateModifyEvent||templateName={}||msg=succ",
                 e.getOldTemplate().getName());
         } else {
-            LOGGER.warn("class=TemplateEventPipelineListener||method=onApplicationEvent||msg=LogicTemplateModifyEvent||templateName={}||msg=fail",
+            LOGGER.warn(
+                "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=LogicTemplateModifyEvent||templateName={}||msg=fail",
                 e.getOldTemplate().getName());
         }
     }
 
     private void handlePhysicalTemplateDeleteEvent(PhysicalTemplateDeleteEvent event) throws ESOperateException {
         PhysicalTemplateDeleteEvent e = event;
-        if (templatePipelineManager.deletePipeline(e.getDelTemplate())) {
-            LOGGER.info("class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateDeleteEvent||templateName={}||msg=succ",
+        Result<Void> result = templatePipelineManager.deletePipeline(e.getDelTemplate().getId().intValue());
+        if (result.success()) {
+            LOGGER.info(
+                "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateDeleteEvent||templateName={}||msg=succ",
                 e.getDelTemplate().getName());
         } else {
-            LOGGER.warn("class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateDeleteEvent||templateName={}||msg=fail",
-                e.getDelTemplate().getName());
+            LOGGER.warn(
+                "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateDeleteEvent||templateName={}||msg={}",
+                e.getDelTemplate().getName(),result.getMessage());
         }
     }
 
     private void handlePhysicalTemplateAddEvent(PhysicalTemplateAddEvent event) throws ESOperateException {
         PhysicalTemplateAddEvent e = event;
         if (templatePipelineManager.createPipeline(e.getNewTemplate(), e.getLogicWithPhysical())) {
-            LOGGER.info("class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateAddEvent||templateName={}||msg=succ",
+            LOGGER.info(
+                "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateAddEvent||templateName={}||msg=succ",
                 e.getNewTemplate().getName());
         } else {
-            LOGGER.warn("class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateAddEvent||templateName={}||msg=fail",
+            LOGGER.warn(
+                "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateAddEvent||templateName={}||msg=fail",
                 e.getNewTemplate().getName());
         }
     }

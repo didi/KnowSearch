@@ -2,23 +2,12 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.ha
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.INVALID_VALUE;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EsConfigAction;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsCreateActionParam;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsParamBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsScaleActionParam;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostCreateActionParam;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostScaleActionParam;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmOperateAppBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
@@ -42,11 +31,19 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.remote.zeus.ZeusClusterRemoteService;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+import javax.annotation.PostConstruct;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service("ecmHostHandler")
 public class EcmHostHandler extends AbstractEcmBaseHandle {
     @Autowired
-    private ClusterRoleService clusterRoleService;
+    private ClusterRoleService       clusterRoleService;
 
     @Autowired
     private ESPluginService          esPluginService;
@@ -55,10 +52,10 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
     private ESPackageService         esPackageService;
 
     @Autowired
-    private ClusterRoleHostService clusterRoleHostService;
+    private ClusterRoleHostService   clusterRoleHostService;
 
     @Autowired
-    private ClusterPhyService esClusterPhyService;
+    private ClusterPhyService        esClusterPhyService;
 
     @Autowired
     private ZeusClusterRemoteService zeusClusterRemoteService;
@@ -70,9 +67,9 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
 
     @Override
     public Result<Long> saveESCluster(List<EcmParamBase> ecmParamBaseList) {
-        List<HostsCreateActionParam> hostCreateActionParamList = new ArrayList<>();
+        List<HostCreateActionParam> hostCreateActionParamList = new ArrayList<>();
         for (EcmParamBase ecmParamBase : ecmParamBaseList) {
-            HostsCreateActionParam hostCreateActionParam = (HostsCreateActionParam) ecmParamBase;
+            HostCreateActionParam hostCreateActionParam = (HostCreateActionParam) ecmParamBase;
             // 检查参数是否合理
             Result<Void> fieldCheckResult = hostCreateActionParam.validateFiledIllegal();
             if (fieldCheckResult.failed()) {
@@ -82,20 +79,20 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
         }
 
         //保存物理集群信息 es_cluster_phy_info
-        Result<HostsCreateActionParam> hostCreateActionParamResult = persistClusterPOAndSupplyField(
+        Result<HostCreateActionParam> hostCreateActionParamResult = persistClusterPOAndSupplyField(
             hostCreateActionParamList.get(0));
         if (hostCreateActionParamResult.failed()) {
             return Result.buildFrom(hostCreateActionParamResult);
         }
 
-        for (HostsCreateActionParam hostCreateActionParam : hostCreateActionParamList) {
+        for (HostCreateActionParam hostCreateActionParam : hostCreateActionParamList) {
             hostCreateActionParam.setPhyClusterId(hostCreateActionParamResult.getData().getPhyClusterId());
             hostCreateActionParam.setPlugs(hostCreateActionParamResult.getData().getPlugs());
             hostCreateActionParam.setImageName(hostCreateActionParamResult.getData().getImageName());
         }
 
         // 保存集群角色信息 es_cluster_role_info
-        for (HostsCreateActionParam hostCreateActionParam : hostCreateActionParamList) {
+        for (HostCreateActionParam hostCreateActionParam : hostCreateActionParamList) {
             // 角色集群 信息入库
             ESClusterRoleDTO esClusterRoleDTO = new ESClusterRoleDTO();
             esClusterRoleDTO.setElasticClusterId(hostCreateActionParam.getPhyClusterId());
@@ -122,7 +119,7 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
      * @param  param
      * @return esClusterDTO
      */
-    private Result<HostsCreateActionParam> persistClusterPOAndSupplyField(HostsCreateActionParam param) {
+    private Result<HostCreateActionParam> persistClusterPOAndSupplyField(HostCreateActionParam param) {
         ClusterPhyDTO esClusterDTO = ConvertUtil.obj2Obj(param, ClusterPhyDTO.class);
         esClusterDTO.setCluster(param.getPhyClusterName());
         ESPackage esPackage = esPackageService.getByVersionAndType(param.getEsVersion(), param.getType());
@@ -130,7 +127,6 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
 
         esClusterDTO.setPlugIds(buildEsClusterPlugins(esClusterDTO));
         esClusterDTO.setPackageId(esPackage.getId());
-        esClusterDTO.setTemplateSrvs(ClusterConstant.DEFAULT_CLUSTER_TEMPLATE_SRVS);
         esClusterDTO.setHttpAddress(ClusterConstant.DEFAULT_HTTP_ADDRESS);
         if (StringUtils.isBlank(esClusterDTO.getDataCenter())) {
             esClusterDTO.setDataCenter(EnvUtil.getDC().getCode());
@@ -152,43 +148,42 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
 
     @Override
     public Result<EcmOperateAppBase> startESCluster(EcmParamBase ecmParamBase) {
-        HostsCreateActionParam hostCreateActionParam = (HostsCreateActionParam) ecmParamBase;
+        HostCreateActionParam hostCreateActionParam = (HostCreateActionParam) ecmParamBase;
         return zeusClusterRemoteService.createTask(hostCreateActionParam.getHostList(),
-                buildArgs(hostCreateActionParam,
-                        ZeusClusterActionEnum.NEW.getValue(),
-                        hostCreateActionParam.getHostList(),
-                        getInitialRackValue(ecmParamBase, ZeusClusterActionEnum.NEW)));
+            buildArgs(hostCreateActionParam, ZeusClusterActionEnum.NEW.getValue(), hostCreateActionParam.getHostList(),
+                getInitialRackValue(ecmParamBase, ZeusClusterActionEnum.NEW)));
     }
 
     @Override
     public Result scaleESCluster(EcmParamBase actionParamBase) {
-        HostsScaleActionParam hostScaleActionParam = (HostsScaleActionParam) actionParamBase;
-        return zeusClusterRemoteService.createTask(hostScaleActionParam.getHostList(),
-                buildArgs(hostScaleActionParam,
-                        hostScaleActionParam.getAction(),
-                        hostScaleActionParam.getHostList(),
-                        getInitialRackValue(actionParamBase, ZeusClusterActionEnum.valueFrom(hostScaleActionParam.getAction()))));
+        HostScaleActionParam hostScaleActionParam = (HostScaleActionParam) actionParamBase;
+        return zeusClusterRemoteService.createTask(hostScaleActionParam.getHostList(), buildArgs(hostScaleActionParam,
+            hostScaleActionParam.getAction(), hostScaleActionParam.getHostList(),
+            getInitialRackValue(actionParamBase, ZeusClusterActionEnum.valueFrom(hostScaleActionParam.getAction()))));
     }
 
     @Override
     public Result upgradeESCluster(EcmParamBase actionParamBase) {
-        HostsParamBase hostUpgradeActionParam = (HostsParamBase) actionParamBase;
-        return zeusClusterRemoteService.createTask(hostUpgradeActionParam.getHostList(), buildArgs(
-            hostUpgradeActionParam.getMasterHostList(), hostUpgradeActionParam, ZeusClusterActionEnum.UPDATE.getValue(), null));
+        HostParamBase hostUpgradeActionParam = (HostParamBase) actionParamBase;
+        return zeusClusterRemoteService.createTask(hostUpgradeActionParam.getHostList(),
+            buildArgs(hostUpgradeActionParam.getMasterHostList(), hostUpgradeActionParam,
+                ZeusClusterActionEnum.UPDATE.getValue(), null));
     }
 
     @Override
     public Result<EcmOperateAppBase> restartESCluster(EcmParamBase actionParamBase) {
-        HostsParamBase hostsParamBase = (HostsParamBase) actionParamBase;
-        return zeusClusterRemoteService.createTask(hostsParamBase.getHostList(),
-            buildArgs(hostsParamBase.getMasterHostList(), hostsParamBase, ZeusClusterActionEnum.RESTART.getValue(), getConfigActionType(hostsParamBase.getEsConfigAction())));
+        HostParamBase hostParamBase = (HostParamBase) actionParamBase;
+        return zeusClusterRemoteService.createTask(hostParamBase.getHostList(),
+            buildArgs(hostParamBase.getMasterHostList(), hostParamBase, ZeusClusterActionEnum.RESTART.getValue(),
+                getConfigActionType(hostParamBase.getEsConfigAction())));
     }
 
     @Override
     public Result<EcmOperateAppBase> removeESCluster(EcmParamBase actionParamBase) {
-        HostsScaleActionParam hostScaleActionParam = (HostsScaleActionParam) actionParamBase;
-        return zeusClusterRemoteService.createTask(hostScaleActionParam.getHostList(), buildArgs(
-            hostScaleActionParam.getMasterHostList(), hostScaleActionParam, ZeusClusterActionEnum.SHRINK.getValue(), null));
+        HostScaleActionParam hostScaleActionParam = (HostScaleActionParam) actionParamBase;
+        return zeusClusterRemoteService.createTask(hostScaleActionParam.getHostList(),
+            buildArgs(hostScaleActionParam.getMasterHostList(), hostScaleActionParam,
+                ZeusClusterActionEnum.SHRINK.getValue(), null));
     }
 
     @Override
@@ -217,22 +212,22 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
 
     /*********************** private method ***********************************/
 
-    private String buildArgs(List<String> masterHostList, HostsParamBase hostActionParam, String action, Integer configActionType) {
+    private String buildArgs(List<String> masterHostList, HostParamBase hostActionParam, String action,
+                             Integer configActionType) {
         return String.format(
-                "--cluster_name=%s,,--port=%s,,--masters=%s,,--package_url=%s,,--es_version=%s,,--role=%s,,--pid_count=%d,,--action=%s,,--config_action=%s",
-                hostActionParam.getPhyClusterName(), hostActionParam.getPort(),
-                ListUtils.strList2String(masterHostList), hostActionParam.getImageName(),
-                hostActionParam.getEsVersion(), hostActionParam.getRoleName(),
-                hostActionParam.getPidCount(), action, configActionType);
+            "--cluster_name=%s,,--port=%s,,--masters=%s,,--package_url=%s,,--es_version=%s,,--role=%s,,--pid_count=%d,,--action=%s,,--config_action=%s",
+            hostActionParam.getPhyClusterName(), hostActionParam.getPort(), ListUtils.strList2String(masterHostList),
+            hostActionParam.getImageName(), hostActionParam.getEsVersion(), hostActionParam.getRoleName(),
+            hostActionParam.getPidCount(), action, configActionType);
     }
 
-    private String buildArgs(HostsParamBase hostsParamBase, String action, List<String> hostLists, String initialRack) {
+    private String buildArgs(HostParamBase hostParamBase, String action, List<String> hostLists, String initialRack) {
         return String.format(
-                "--cluster_name=%s,,--port=%s,,--masters=%s,,--package_url=%s,,--es_version=%s,,--role=%s,,--pid_count=%d,,--action=%s,,--hosts=%s,,--initial_rack=%s",
-                hostsParamBase.getPhyClusterName(), hostsParamBase.getPort(),
-                ListUtils.strList2String(hostsParamBase.getMasterHostList()), hostsParamBase.getImageName(),
-                hostsParamBase.getEsVersion(), hostsParamBase.getRoleName(),
-                hostsParamBase.getPidCount(), action, ListUtils.strList2String(hostLists), initialRack);
+            "--cluster_name=%s,,--port=%s,,--masters=%s,,--package_url=%s,,--es_version=%s,,--role=%s,,--pid_count=%d,,--action=%s,,--hosts=%s,,--initial_rack=%s",
+            hostParamBase.getPhyClusterName(), hostParamBase.getPort(),
+            ListUtils.strList2String(hostParamBase.getMasterHostList()), hostParamBase.getImageName(),
+            hostParamBase.getEsVersion(), hostParamBase.getRoleName(), hostParamBase.getPidCount(), action,
+            ListUtils.strList2String(hostLists), initialRack);
     }
 
     private String buildEsClusterPlugins(ClusterPhyDTO esClusterDTO) {
@@ -245,25 +240,25 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
     }
 
     private Integer getConfigActionType(EsConfigAction esConfigAction) {
-        if(null == esConfigAction || esConfigAction.getActionType().equals(EsConfigActionEnum.UNKNOWN.getCode())) {
+        if (null == esConfigAction || esConfigAction.getActionType().equals(EsConfigActionEnum.UNKNOWN.getCode())) {
             return null;
         }
         return esConfigAction.getActionType();
     }
 
     private String getInitialRackValue(EcmParamBase actionParamBase, ZeusClusterActionEnum zeusClusterActionEnum) {
-        HostsParamBase hostParamBase = (HostsParamBase) actionParamBase;
+        HostParamBase hostParamBase = (HostParamBase) actionParamBase;
         if (!actionParamBase.getRoleName().equals(ESClusterNodeRoleEnum.DATA_NODE.getDesc())
-                || CollectionUtils.isEmpty(hostParamBase.getHostList())) {
+            || CollectionUtils.isEmpty(hostParamBase.getHostList())) {
             return null;
         }
 
         String initialRack = null;
         if (zeusClusterActionEnum.equals(ZeusClusterActionEnum.EXPAND)
-                || zeusClusterActionEnum.equals(ZeusClusterActionEnum.NEW)) {
+            || zeusClusterActionEnum.equals(ZeusClusterActionEnum.NEW)) {
             // 根据物理集群id和数据节点的角色名称获取所有的当前集群绑定的主机列表
-            List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.getByRoleAndClusterId(hostParamBase.getPhyClusterId(),
-                    ESClusterNodeRoleEnum.DATA_NODE.getDesc());
+            List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService
+                .getByRoleAndClusterId(hostParamBase.getPhyClusterId(), ESClusterNodeRoleEnum.DATA_NODE.getDesc());
 
             float initialRackValue = 0;
             if (CollectionUtils.isEmpty(clusterRoleHosts)) {

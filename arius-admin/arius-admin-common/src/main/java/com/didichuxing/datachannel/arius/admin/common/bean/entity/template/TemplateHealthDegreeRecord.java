@@ -15,17 +15,17 @@ public class TemplateHealthDegreeRecord {
     /**
      * 统计时间
      */
-    private Long timestamp;
+    private Long          timestamp;
 
     /**
      * 索引模板id
      */
-    private Integer logicTemplateId;
+    private Integer       logicTemplateId;
 
     /**
      * 健康分
      */
-    private Integer healthDegree;
+    private Integer       healthDegree;
 
     /**
      * 标签

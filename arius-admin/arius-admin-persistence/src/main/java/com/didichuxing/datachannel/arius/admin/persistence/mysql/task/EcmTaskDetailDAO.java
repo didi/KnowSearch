@@ -21,16 +21,14 @@ public interface EcmTaskDetailDAO {
 
     List<EcmTaskDetailPO> listByWorkOrderTaskId(Long workOrderTaskId);
 
-    int updateStatus(@Param("workOrderTaskId") Long workOrderTaskId,
-                     @Param("hostname") String hostname,
+    int updateStatus(@Param("workOrderTaskId") Long workOrderTaskId, @Param("hostname") String hostname,
                      @Param("status") String status);
 
     List<EcmTaskDetailPO> listByTaskIdAndRoleAndWorkOrderTaskId(@Param("workOrderTaskId") Integer workOrderTaskId,
                                                                 @Param("role") String role,
                                                                 @Param("taskId") Integer taskId);
 
-    int updateTaskIdByRoleAndWorkOrderTaskId(@Param("workOrderTaskId") Long workOrderTaskId,
-                                             @Param("role") String role,
+    int updateTaskIdByRoleAndWorkOrderTaskId(@Param("workOrderTaskId") Long workOrderTaskId, @Param("role") String role,
                                              @Param("taskId") Long taskId);
 
     int update(EcmTaskDetailPO param);

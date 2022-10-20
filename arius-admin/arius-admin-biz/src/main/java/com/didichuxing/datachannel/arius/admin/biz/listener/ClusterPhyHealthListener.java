@@ -18,7 +18,7 @@ public class ClusterPhyHealthListener implements ApplicationListener<ClusterPhyH
 
     @Autowired
     private ESOpClient        esOpClient;
-    
+
     @Autowired
     private ClusterPhyManager clusterPhyManager;
 
@@ -34,7 +34,7 @@ public class ClusterPhyHealthListener implements ApplicationListener<ClusterPhyH
             clusterPhyManager.updateClusterHealth(event.getClusterPhyName(), AriusUser.SYSTEM.getDesc());
         } catch (Exception e) {
             LOGGER.error("class=ClusterPhyHealthListener||method=onApplicationEvent||cluster={},errMsg={}",
-                    event.getClusterPhyName(), e.getMessage());
+                event.getClusterPhyName(), e.getMessage());
         }
     }
 }

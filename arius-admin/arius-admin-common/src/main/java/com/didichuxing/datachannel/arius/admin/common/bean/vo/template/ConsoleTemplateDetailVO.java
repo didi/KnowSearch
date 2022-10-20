@@ -1,11 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
-import java.util.List;
-
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicLevelEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicLevelEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -36,7 +35,7 @@ public class ConsoleTemplateDetailVO extends BaseTemplateVO {
      * @see ResourceLogicLevelEnum
      */
     @ApiModelProperty("集群服务等级")
-    private Integer       clusterLevel;
+    private Integer      clusterLevel;
 
     @ApiModelProperty("索引分区列表，按着先后顺序排列")
     private List<String> indices;
@@ -51,8 +50,8 @@ public class ConsoleTemplateDetailVO extends BaseTemplateVO {
     private Boolean      editable;
 
     @ApiModelProperty("服务等级")
-    private Integer level;
+    private Integer      level;
 
     @ApiModelProperty("是否开启indexRollover能力")
-    private Boolean disableIndexRollover;
+    private Boolean      disableIndexRollover;
 }

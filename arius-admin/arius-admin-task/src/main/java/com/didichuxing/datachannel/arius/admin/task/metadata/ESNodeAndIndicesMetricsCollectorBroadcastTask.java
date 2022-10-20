@@ -16,7 +16,7 @@ public class ESNodeAndIndicesMetricsCollectorBroadcastTask implements Job {
     private static final Logger LOGGER = LoggerFactory.getLogger(ESNodeAndIndicesMetricsCollectorBroadcastTask.class);
 
     @Autowired
-    private MonitorJobHandler monitorJobHandler;
+    private MonitorJobHandler   monitorJobHandler;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {

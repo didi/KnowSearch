@@ -1,14 +1,5 @@
 package com.didi.arius.gateway.core.es.http;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.Strings;
-import org.elasticsearch.rest.RestChannel;
-import org.elasticsearch.rest.RestRequest;
-
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
 import com.didi.arius.gateway.common.metadata.JoinLogContext;
 import com.didi.arius.gateway.common.metadata.QueryContext;
@@ -16,6 +7,16 @@ import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import com.didi.arius.gateway.elasticsearch.client.gateway.direct.DirectRequest;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.Strings;
+import org.elasticsearch.rest.RestChannel;
+import org.elasticsearch.rest.RestRequest;
 
 public abstract class ESAction extends HttpRestHandler {
 
@@ -118,5 +119,21 @@ public abstract class ESAction extends HttpRestHandler {
 		}
 
 		return false;
+	}
+	
+	/**
+	 * 如果存在 filter_path 参数，则将 take、timed_out、_shards 和 hits 添加到 filter_path
+	 *
+	 * @param params 要传递给 Elasticsearch API 的参数。
+	 */
+	protected void addFilterPathDefaultValue(Map<String, String> params) {
+		if (params.containsKey("filter_path")) {
+			Set<String> filterPath = Sets.newHashSet(StringUtils.split(params.get("filter_path"), ","));
+			filterPath.add("took");
+			filterPath.add("timed_out");
+			filterPath.add("_shards");
+			filterPath.add("hits");
+			params.put("filter_path", String.join(",", filterPath));
+		}
 	}
 }

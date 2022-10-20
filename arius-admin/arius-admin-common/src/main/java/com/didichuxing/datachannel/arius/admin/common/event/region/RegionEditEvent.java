@@ -21,5 +21,3 @@ public class RegionEditEvent extends ApplicationEvent {
         return regionIdList;
     }
 }
-
-

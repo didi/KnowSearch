@@ -44,10 +44,7 @@
         <include refid="Base_Column_List"/>
         from es_cluster_region
         where delete_flag = 0
-        and (logic_cluster_id = #{logicClusterId}
-        or logic_cluster_id like CONCAT(#{logicClusterId},',%')
-        or logic_cluster_id like CONCAT('%,', #{logicClusterId})
-        or logic_cluster_id like CONCAT('%,', #{logicClusterId},',%'))
+        and find_in_set(#{logicClusterId},logic_cluster_id)
     </select>
 
     <select id="getByPhyClusterName" parameterType="string" resultMap="BaseResultMap">

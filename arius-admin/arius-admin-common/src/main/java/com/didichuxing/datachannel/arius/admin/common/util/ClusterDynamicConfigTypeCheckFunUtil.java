@@ -9,16 +9,17 @@ import org.apache.commons.lang3.StringUtils;
 
 public class ClusterDynamicConfigTypeCheckFunUtil {
 
-    private ClusterDynamicConfigTypeCheckFunUtil(){}
+    private ClusterDynamicConfigTypeCheckFunUtil() {
+    }
 
-    public static final Set<String> reBalanceEnableTypes = new HashSet<>();
+    public static final Set<String> reBalanceEnableTypes  = new HashSet<>();
 
-    public static final Set<String> allowReBalanceTypes = new HashSet<>();
+    public static final Set<String> allowReBalanceTypes   = new HashSet<>();
 
     public static final Set<String> allocationEnableTypes = new HashSet<>();
 
-    public static final Set<String> masterBlockTypes = new HashSet<>();
-    public static final Set<String> bandwidthUnits = new HashSet<>();
+    public static final Set<String> masterBlockTypes      = new HashSet<>();
+    public static final Set<String> bandwidthUnits        = new HashSet<>();
     static {
         reBalanceEnableTypes.add("all");
         reBalanceEnableTypes.add("primaries");
@@ -36,7 +37,7 @@ public class ClusterDynamicConfigTypeCheckFunUtil {
 
         masterBlockTypes.add("all");
         masterBlockTypes.add("write");
-        
+
         bandwidthUnits.addAll(Arrays.asList("k", "kb", "m", "mb", "g", "gb", "t", "tb", "p", "pb", "b"));
     }
 
@@ -55,9 +56,9 @@ public class ClusterDynamicConfigTypeCheckFunUtil {
     }
 
     public static boolean floatValueCheck1to100(String value) {
-        if(floatCheck(value)) {
+        if (floatCheck(value)) {
             float number = Float.valueOf(value);
-            if(number<100&&number>1) {
+            if (number < 100 && number > 1) {
                 return true;
             }
         }
@@ -65,15 +66,14 @@ public class ClusterDynamicConfigTypeCheckFunUtil {
     }
 
     public static boolean floatValueCheckPositive(String value) {
-        if(floatCheck(value)) {
+        if (floatCheck(value)) {
             float number = Float.valueOf(value);
-            if(number>=0) {
+            if (number >= 0) {
                 return true;
             }
         }
         return false;
     }
-
 
     public static boolean timeCheck(String value) {
         if (value == null || value.isEmpty()) {
@@ -171,5 +171,9 @@ public class ClusterDynamicConfigTypeCheckFunUtil {
             //pass
         }
         return bandwidth != null;
+    }
+
+    public static boolean stringListCheck(String value) {
+        return true;
     }
 }

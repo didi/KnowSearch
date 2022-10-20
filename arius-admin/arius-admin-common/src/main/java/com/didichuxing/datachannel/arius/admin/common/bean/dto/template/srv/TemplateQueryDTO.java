@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 /**
  * @author chengxiang
  * @date 2022/5/18
@@ -20,4 +19,13 @@ public class TemplateQueryDTO extends IndexTemplateDTO {
 
     @ApiModelProperty("所属物理集群")
     private String cluster;
+    @ApiModelProperty("模板健康度")
+    private Integer health;
+    @ApiModelProperty("是否具备 dcdr")
+    private Boolean hasDCDR;
+    @ApiModelProperty("排序字段 id、（主从位点差）check_point_diff、（模板健康度）health")
+    private String  sortTerm;
+    
+    @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
+    private Boolean orderByDesc = true;
 }

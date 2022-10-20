@@ -22,9 +22,7 @@ public interface ProjectConfigService {
      * @return 配置信息
      */
     ProjectConfig getProjectConfig(int projectId);
-    
 
-    
     /**
      * 项目id2下项目config地图
      * <p>
@@ -33,7 +31,7 @@ public interface ProjectConfigService {
      * @return {@code Map<Integer, ProjectConfig>}
      */
     Map<Integer/*项目id*/, ProjectConfig> projectId2ProjectConfigMap();
-    
+
     /**
      * 更新或初始化项目config 更新或初始化projectConfig
      *
@@ -42,12 +40,12 @@ public interface ProjectConfigService {
      * @return {@code Tuple<Result<Void>, ProjectConfigPO>}
      */
     TupleTwo<Result<Void>, ProjectConfigPO> updateOrInitProjectConfig(ProjectConfigDTO configDTO, String operator);
-    
+
     /**
      * 按项目id删除 通过项目id逻辑删除项目配置
      *
      * @param projectId 项目id
      */
     void deleteByProjectId(int projectId);
-    
+
 }

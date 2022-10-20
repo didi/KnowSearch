@@ -22,11 +22,13 @@ public class DslMetricsManagerImpl implements DslMetricsManager {
     @Override
     public Result<List<DslTemplateVO>> getDSLMetricsInfoByProjectId(Integer projectId, Long startDate, Long endDate) {
         return Result.buildSucc(ConvertUtil.list2List(
-            dslMetricsService.getDSLMetricsInfoByProjectId(projectId, startDate, endDate).getData(), DslTemplateVO.class));
+            dslMetricsService.getDSLMetricsInfoByProjectId(projectId, startDate, endDate).getData(),
+            DslTemplateVO.class));
     }
 
     @Override
-    public Result<List<DslMetricsVO>> getDetailMetrics(Integer projectId, String dslTemplateMd5, Long startDate, Long endDate) {
+    public Result<List<DslMetricsVO>> getDetailMetrics(Integer projectId, String dslTemplateMd5, Long startDate,
+                                                       Long endDate) {
         return Result.buildSucc(ConvertUtil.list2List(
             dslMetricsService.getDetailMetrics(projectId, dslTemplateMd5, startDate, endDate).getData(),
             DslMetricsVO.class));
@@ -37,8 +39,8 @@ public class DslMetricsManagerImpl implements DslMetricsManager {
                                                                          String dslTag, String sortInfo, Long from,
                                                                          Long size, Long startDate, Long endDate) {
         SearchDslTemplateResponse data = dslMetricsService
-                .getDslTemplateByCondition(projectId, searchKeyword, dslTag, sortInfo, from, size, startDate, endDate)
-                .getData();
+            .getDslTemplateByCondition(projectId, searchKeyword, dslTag, sortInfo, from, size, startDate, endDate)
+            .getData();
         return Result.buildSucc(ConvertUtil.obj2Obj(data, SearchDslTemplateResponseVO.class));
     }
 }

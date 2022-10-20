@@ -21,10 +21,7 @@ public class TemplateSrvVO {
     /**
      * 模板服务名称
      */
-    private String srvName;
+    private String  srvName;
 
-    /**
-     * 模板服务所需的最低es版本
-     */
-    private String esVersion;
+
 }

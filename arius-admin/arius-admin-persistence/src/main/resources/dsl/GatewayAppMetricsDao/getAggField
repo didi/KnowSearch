@@ -17,7 +17,7 @@
   "aggs": {
     "group_by_app": {
       "terms": {
-        "field": "appid",
+        "field": "projectId",
         "size": 1000
       },
       "aggs": {

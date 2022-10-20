@@ -22,9 +22,9 @@ public class UpdateIndexTemplateLabelParam {
     private List<Label> indexTemplateLabels;
 
     @ApiModelProperty("索引模板ID")
-    private Integer templateId;
+    private Integer     templateId;
 
     @ApiModelProperty("操作人")
-    private String operator;
+    private String      operator;
 
 }

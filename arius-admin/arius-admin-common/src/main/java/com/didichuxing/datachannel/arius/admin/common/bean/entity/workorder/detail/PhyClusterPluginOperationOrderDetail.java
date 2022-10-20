@@ -23,5 +23,5 @@ public class PhyClusterPluginOperationOrderDetail extends AbstractOrderDetail {
     /**
      * 插件在url上的地址
      */
-    private String url;
+    private String  url;
 }

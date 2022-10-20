@@ -1,8 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,8 +20,8 @@ import java.util.List;
 @AllArgsConstructor
 public class ClusterLogicTemplateIndexDetailDTO {
     @ApiModelProperty("模板列表")
-    private List<IndexTemplateLogicAggregate> templateLogicAggregates;
+    private List<IndexTemplate>    templates;
 
     @ApiModelProperty("索引列表")
-    private List<IndexCatCellDTO> catIndexResults;
+    private List<IndexCatCellDTO>  catIndexResults;
 }

@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "工单创建完成")
 public class AriusWorkOrderInfoSubmittedVO extends BaseVO {
     @ApiModelProperty(value = "工单ID")
-    private Long id;
+    private Long   id;
 
     @ApiModelProperty(value = "工单标题")
     private String title;

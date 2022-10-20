@@ -1,15 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.gateway;
 
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
 import com.google.common.collect.Maps;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Map;
 
 /**
  * @author: D10865
@@ -27,87 +29,87 @@ public class GatewayJoinPO extends BaseESPO {
     /**
      * 请求path
      */
-    private String uri;
+    private String            uri;
     /**
      * 请求id
      */
-    private String  requestId;
+    private String            requestId;
     /**
      * projectId
      */
-    private Integer projectId;
+    private Integer           projectId;
     /**
      * 索引名称
      */
-    private String  indices;
+    private String            indices;
     /**
      * type名称
      */
-    private String typeName;
+    private String            typeName;
     /**
      * 查询命中索引信息json
      */
-    private String index;
+    private String            index;
     /**
      * 查询语句
      */
-    private String dsl;
+    private String            dsl;
     /**
      * 查询模板
      */
-    private String dslTemplate;
+    private String            dslTemplate;
     /**
      * 查询模板MD5
      */
-    private String dslTemplateMd5;
+    private String            dslTemplateMd5;
     /**
      * 是否超时，"true"/"false"
      */
-    private String isTimedOut;
+    private String            isTimedOut;
     /**
      * 查询语句类型
      */
-    private String dslType;
+    private String            dslType;
     /**
      * 查询方式,dsl/sql
      */
-    private String searchType;
+    private String            searchType;
     /**
      * 查询es耗时
      */
-    private Long esCost;
+    private Long              esCost;
     /**
      * 查询总耗时
      */
-    private Long totalCost;
+    private Long              totalCost;
     /**
      * 查询shard个数
      */
-    private Long totalShards;
+    private Long              totalShards;
     /**
      * 查询总命中数
      */
-    private Long totalHits;
+    private Long              totalHits;
     /**
      * 查询响应长度
      */
-    private Long responseLen;
+    private Long              responseLen;
     /**
      * 错误名称
      */
-    private String exceptionName;
+    private String            exceptionName;
     /**
      * 创建时间
      */
-    private String ariusCreateTime;
+    private String            ariusCreateTime;
     /**
      * timeStamp
      */
-    private long timeStamp;
+    private long              timeStamp;
     /**
      * indiceSample
      */
-    private String indiceSample;
+    private String            indiceSample;
     /**
      * 查询字段
      */
@@ -127,31 +129,36 @@ public class GatewayJoinPO extends BaseESPO {
     /**
      * 多type索引查询映射后的索引名称
      */
-    private String destIndexName;
+    private String            destIndexName;
     /**
      * 请求源ip
      */
-    private String remoteAddr;
+    private String            remoteAddr;
 
-    @JSONField(name="selectFields")
+    /**
+     * 所属集群
+     */
+    private String            clusterName;
+
+    @JSONField(name = "selectFields")
     public void setSelectFields(String selectFields) {
         this.selectFields = Maps.newHashMap();
         splitFieldsThenAddMetric(selectFields, this.selectFields);
     }
 
-    @JSONField(name="whereFields")
+    @JSONField(name = "whereFields")
     public void setWhereFields(String whereFields) {
         this.whereFields = Maps.newHashMap();
         splitFieldsThenAddMetric(whereFields, this.whereFields);
     }
 
-    @JSONField(name="groupByFields")
+    @JSONField(name = "groupByFields")
     public void setGroupByFields(String groupByFields) {
         this.groupByFields = Maps.newHashMap();
         splitFieldsThenAddMetric(groupByFields, this.groupByFields);
     }
 
-    @JSONField(name="orderByFields")
+    @JSONField(name = "orderByFields")
     public void setOrderByFields(String orderByFields) {
         this.orderByFields = Maps.newHashMap();
         splitFieldsThenAddMetric(orderByFields, this.orderByFields);
@@ -178,8 +185,8 @@ public class GatewayJoinPO extends BaseESPO {
      * @param count
      */
     public void resetFieldUseCount(Long count) {
-        setMapValue(this.selectFields,  count);
-        setMapValue(this.whereFields,   count);
+        setMapValue(this.selectFields, count);
+        setMapValue(this.whereFields, count);
         setMapValue(this.groupByFields, count);
         setMapValue(this.orderByFields, count);
     }

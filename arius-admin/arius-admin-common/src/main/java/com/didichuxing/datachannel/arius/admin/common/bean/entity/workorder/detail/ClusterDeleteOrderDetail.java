@@ -14,10 +14,10 @@ public class ClusterDeleteOrderDetail extends AbstractOrderDetail {
     /**
      * type 3:docker 4:host
      */
-    private Integer    type;
+    private Integer type;
 
     /**
      * 物理集群名称
      */
-    private String phyClusterName;
+    private String  phyClusterName;
 }

@@ -8,7 +8,11 @@ public enum PageSearchHandleTypeEnum {
         CLUSTER_PHY("clusterPhyPageSearch"),
         INDEX("indexPageSearch"),
         TEMPLATE_SRV("templateSrvPageSearch"),
-        OPERATE_RECORD("operateRecordPageSearch");
+
+        QUICK_COMMAND_INDEX("quickCommandIndicesDistributionPageSearch"),
+        QUICK_COMMAND_SHARD("quickCommandShardsDistributionPageSearch"),
+        OPERATE_RECORD("operateRecordPageSearch"),
+        GATEWAY_JOIN("gatewayJoinPageSearch");
        private String pageSearchType;
 
         public String getPageSearchType(){

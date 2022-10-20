@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.QueryDslLimitEditContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslQueryLimit;
-import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisticsService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ import java.util.List;
 public class QueryDslLimitEditHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private DslStatisService dslStatisService;
+    private DslStatisticsService dslStatisticsService;
 
     /**
      * 工单是否自动审批
@@ -139,7 +139,7 @@ public class QueryDslLimitEditHandler extends BaseWorkOrderHandler {
         List<DslQueryLimit> dslQueryLimitList = new ArrayList<>();
         dslQueryLimitList.add(dslQueryLimit);
 
-        Result<Boolean> result = dslStatisService.batchUpdateQueryLimit(dslQueryLimitList, approver);
+        Result<Boolean> result = dslStatisticsService.batchUpdateQueryLimit(dslQueryLimitList, approver);
 
         if (result.failed()) {
             return Result.buildFail("模版扩缩容失败！");

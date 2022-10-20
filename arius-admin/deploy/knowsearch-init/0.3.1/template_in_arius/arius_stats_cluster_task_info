@@ -1,0 +1,14 @@
+{
+  "dataCenter": "cn",
+  "name": "arius_stats_cluster_task_info",
+  "resourceId": #resourceId,
+  "level": 1,
+  "cyclicalRoll": 1,
+  "expireTime": 3,
+  "dateField": "timestamp",
+  "dateFieldFormat": "epoch_millis",
+  "diskSize": 30,
+  "dataType": 0,
+  "mapping": "{\"properties\":{\"cluster\":{\"ignore_above\":512,\"type\":\"keyword\"},\"physicCluster\":{\"type\":\"long\"},\"dataCenter\":{\"type\":\"keyword\"},\"routingValue\":{\"type\":\"text\",\"fields\":{\"keyword\":{\"ignore_above\":256,\"type\":\"keyword\"}}},\"metrics\":{\"properties\":{\"node\":{\"type\":\"keyword\"},\"parentTaskId\":{\"type\":\"keyword\"},\"ip\":{\"type\":\"keyword\"},\"action\":{\"type\":\"keyword\"},\"runningTimeString\":{\"type\":\"keyword\"},\"description\":{\"type\":\"keyword\"},\"startTime\":{\"type\":\"long\"},\"runningTime\":{\"type\":\"long\"},\"type\":{\"type\":\"keyword\"},\"taskId\":{\"type\":\"keyword\"}}},\"key\":{\"type\":\"text\",\"fields\":{\"keyword\":{\"ignore_above\":256,\"type\":\"keyword\"}}},\"timestamp\":{\"format\":\"epoch_millis\",\"type\":\"date\"}}}",
+  "setting": "{\"index\":{\"translog.durability\":\"async\",\"translog.sync_interval\":\"15s\",\"refresh_interval\":\"1s\"}}"
+}

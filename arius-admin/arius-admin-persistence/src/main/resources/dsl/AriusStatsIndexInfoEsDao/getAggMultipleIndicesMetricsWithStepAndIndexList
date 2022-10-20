@@ -1,0 +1,53 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "cluster": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "terms": {
+            "index": %s
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "hist": {
+      "terms": {
+        "field": "index",
+        "size": %d,
+        "min_doc_count": 1,
+        "collect_mode": "breadth_first"
+      },
+      "aggs": {
+        "hist": {
+          "date_histogram": {
+            "field": "timestamp",
+            "fixed_interval": "%s",
+            "time_zone": "Asia/Shanghai",
+            "min_doc_count": 0
+          },
+          "aggs": {
+             %s
+          }
+        },
+         %s
+      }
+    }
+  }
+}

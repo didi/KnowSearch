@@ -23,16 +23,16 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDTO, IndexCatCellVO> {
-    private static final String DEFAULT_SORT_TERM = "timestamp";
+    private static final String           DEFAULT_SORT_TERM  = "timestamp";
+
+    private static final Long             QUERY_COUNT_THRESHOLD = 10000L;
 
     @Autowired
-    private ESIndexCatService   esIndexCatService;
+    private ESIndexCatService             esIndexCatService;
 
     @Autowired
-    private ESIndexService      esIndexService;
-    private static final FutureUtil<Void> INDEX_BUILD_FUTURE = FutureUtil.init("INDEX_BUILD_FUTURE", 10, 10, 100);
-
-
+    private ESIndexService                esIndexService;
+    private static final FutureUtil<List<IndexCatCell>> INDEX_BUILD_FUTURE = FutureUtil.init("INDEX_BUILD_FUTURE", 10, 10, 100);
     @Override
     protected Result<Boolean> checkCondition(IndexQueryDTO condition, Integer projectId) {
 
@@ -43,6 +43,12 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
         String indexName = condition.getIndex();
         if (!AriusObjUtils.isBlack(indexName) && (indexName.startsWith("*") || indexName.startsWith("?"))) {
             return Result.buildParamIllegal("索引名称不允许带类似*, ?等通配符查询");
+        }
+
+        // 只允许查询前10000条数据
+        long startNum = (condition.getPage() - 1) * condition.getSize();
+        if(startNum >= QUERY_COUNT_THRESHOLD) {
+            return Result.buildParamIllegal(String.format("查询条数不能超过%d条", QUERY_COUNT_THRESHOLD));
         }
 
         return Result.buildSucc(true);
@@ -74,11 +80,10 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
             String queryCluster = condition.getCluster();
             // 使用超级项目访问时，queryProjectId为null
             Integer queryProjectId = null;
-            if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-                queryProjectId = projectId;
-            }
+            if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) { queryProjectId = projectId;}
+
             Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(
-                queryCluster, condition.getIndex(), condition.getHealth(), queryProjectId,
+                queryCluster, condition.getIndex(), condition.getHealth(), condition.getStatus(), queryProjectId,
                 (condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(),
                 condition.getOrderByDesc());
             if (null == totalHitAndIndexCatCellListTuple) {
@@ -89,15 +94,17 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
             }
 
             //设置索引阻塞信息
-            List<IndexCatCell> finalIndexCatCellList = batchFetchIndexAliasesAndBlockInfo(totalHitAndIndexCatCellListTuple.getV2());
-            List<IndexCatCellVO> indexCatCellVOList = ConvertUtil.list2List(finalIndexCatCellList, IndexCatCellVO.class);
+            List<IndexCatCell> finalIndexCatCellList = batchFetchIndexAliasesAndBlockInfo(
+                totalHitAndIndexCatCellListTuple.getV2());
+            List<IndexCatCellVO> indexCatCellVOList = ConvertUtil.list2List(finalIndexCatCellList,
+                IndexCatCellVO.class);
 
             return PaginationResult.buildSucc(indexCatCellVOList, totalHitAndIndexCatCellListTuple.getV1(),
-                    condition.getPage(), condition.getSize());
+                condition.getPage(), condition.getSize());
         } catch (Exception e) {
             LOGGER.error(
-                    "class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||errMsg={}",
-                    condition.getCluster(), condition.getIndex(), e.getMessage(), e);
+                "class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||errMsg={}",
+                condition.getCluster(), condition.getIndex(), e.getMessage(), e);
             return PaginationResult.buildFail("获取分页索引列表失败");
         }
     }
@@ -110,7 +117,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
     private List<IndexCatCell> batchFetchIndexAliasesAndBlockInfo(List<IndexCatCell> catCellList) {
         List<IndexCatCell> finalIndexCatCellList = Lists.newCopyOnWriteArrayList(catCellList);
         Map<String, List<IndexCatCell>> cluster2IndexCatCellListMap = ConvertUtil.list2MapOfList(finalIndexCatCellList,
-                IndexCatCell::getClusterPhy, indexCatCell -> indexCatCell);
+            IndexCatCell::getCluster, indexCatCell -> indexCatCell);
         if (MapUtils.isEmpty(cluster2IndexCatCellListMap)) {
             return finalIndexCatCellList;
         }

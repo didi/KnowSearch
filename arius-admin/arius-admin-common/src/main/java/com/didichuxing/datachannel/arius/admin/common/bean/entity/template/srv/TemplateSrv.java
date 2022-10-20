@@ -1,16 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author chengxiang
@@ -29,13 +26,9 @@ public class TemplateSrv extends BaseEntity {
     /**
      * 模板服务名称
      */
-    protected String srvName;
+    protected String  srvName;
 
-    /**
-     * todo: 这个暂时没用到，后续干掉
-     * 模板服务所需的最低es版本号
-     */
-    protected String esVersion;
+
 
     public static List<TemplateSrv> codeStr2SrvList(String codeStr) {
         if (StringUtils.isBlank(codeStr)) {
@@ -43,7 +36,7 @@ public class TemplateSrv extends BaseEntity {
         }
 
         List<TemplateSrv> srvList = new ArrayList<>();
-        for(String srvId : codeStr.split(",")) {
+        for (String srvId : StringUtils.split(codeStr, ",")) {
             TemplateSrv templateSrv = getSrv(Integer.parseInt(srvId));
             if (null != templateSrv) {
                 srvList.add(templateSrv);
@@ -54,7 +47,7 @@ public class TemplateSrv extends BaseEntity {
     }
 
     public static TemplateSrv getSrv(Integer templateSrvCode) {
-        NewTemplateSrvEnum srvEnum = NewTemplateSrvEnum.getByCode(templateSrvCode);
-        return new TemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(), srvEnum.getEsClusterVersion().getVersion());
+        TemplateServiceEnum srvEnum = TemplateServiceEnum.getById(templateSrvCode);
+        return new TemplateSrv(srvEnum.getCode(), srvEnum.getServiceName());
     }
 }

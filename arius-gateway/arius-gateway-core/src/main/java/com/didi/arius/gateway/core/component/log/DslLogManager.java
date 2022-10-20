@@ -9,13 +9,16 @@ import com.didi.arius.gateway.core.component.log.process.MetricLogProcess;
 import com.didi.arius.gateway.core.component.log.process.TemplateLogProcess;
 import com.didi.arius.gateway.core.service.ESRestClientService;
 import com.didi.arius.gateway.core.service.arius.IndexTemplateService;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author didi
@@ -29,9 +32,10 @@ public class DslLogManager extends AbstractAggLogManager {
     public static final String VERSION = "version";
     public static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS Z";
     public static final String[] OUTPUT_FIELD_NAME = new String[]{
-            "appid", "dslTemplate", "dslTemplateMd5", "timeStamp", "dsl", "indices", "indiceSample", "requestType", "searchType",
+            "appid","projectId", "dslTemplate", "dslTemplateMd5", "timeStamp", "dsl", "indices", "indiceSample",
+            "requestType", "searchType",
             "dslType", "isFromUserConsole", "version", "dslLenAvg", "responseLenAvg", "beforeCostAvg", "esCostAvg",
-            "totalCostAvg", "successfulShardsAvg", "totalShardsAvg", "failedShardsAvg", "totalHitsAvg", "searchCount", "gatewayNode", "appidDslTemplateMd5"
+            "totalCostAvg", "successfulShardsAvg", "totalShardsAvg", "failedShardsAvg", "totalHitsAvg", "searchCount", "gatewayNode", "appidDslTemplateMd5","projectIdDslTemplateMd5"
     };
     public static final int ONE = 1;
     public static final int INTERVAL_MINUTES = 1;

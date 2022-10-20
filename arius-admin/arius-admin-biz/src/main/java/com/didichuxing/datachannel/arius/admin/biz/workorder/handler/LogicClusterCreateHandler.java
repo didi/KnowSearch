@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterCreateContent;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
@@ -12,16 +13,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.deta
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterCreateOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,11 +32,11 @@ import org.springframework.stereotype.Service;
 @Service("logicClusterCreateHandler")
 public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
 
-    @Autowired
-    private ClusterLogicService clusterLogicService;
+   
 
     @Autowired
     private ClusterLogicManager clusterLogicManager;
+    
 
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
@@ -86,7 +85,10 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
         ESLogicClusterDTO resourceLogicDTO = ConvertUtil.obj2Obj(content, ESLogicClusterDTO.class);
         resourceLogicDTO.setProjectId(workOrder.getSubmitorProjectId());
         resourceLogicDTO.setType(ClusterResourceTypeEnum.PRIVATE.getCode());
-        return clusterLogicService.validateClusterLogicParams(resourceLogicDTO, OperationEnum.ADD, resourceLogicDTO.getProjectId());
+        return clusterLogicManager.validateClusterLogicParams(resourceLogicDTO,
+                
+                OperationEnum.ADD,
+            resourceLogicDTO.getProjectId());
     }
 
     @Override
@@ -120,17 +122,22 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
         ESLogicClusterWithRegionDTO esLogicClusterWithRegionDTO = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             ESLogicClusterWithRegionDTO.class);
         esLogicClusterWithRegionDTO.setProjectId(workOrder.getSubmitorProjectId());
-
-        // 创建逻辑集群并且批量绑定指定的region,默认是能成功
-        Result<Void> result = Result.buildSucc();
-        if(!CollectionUtils.isEmpty(esLogicClusterWithRegionDTO.getClusterRegionDTOS())) {
-            result = clusterLogicManager.addLogicClusterAndClusterRegions(esLogicClusterWithRegionDTO,approver);
+    
+        if (CollectionUtils.isEmpty(esLogicClusterWithRegionDTO.getClusterRegionDTOS())) {
+            return Result.buildFail("集群未绑定region");
         }
-
+        Result<Void> result = clusterLogicManager.addLogicClusterAndClusterRegions(esLogicClusterWithRegionDTO,
+                approver);
+        
         if (result.success()) {
-            List<String> administrators = getOPList().stream().map(UserBriefVO::getUserName).collect(Collectors.toList());
-            return Result.buildSuccWithMsg(
-                String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));
+            //操作记录
+            //逻辑集群创建添加操作记录
+            operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.MY_CLUSTER_APPLY)
+                    .bizId(esLogicClusterWithRegionDTO.getName())
+                    .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
+                    .content(String.format("申请:【%s】", esLogicClusterWithRegionDTO.getName()))
+                    .userOperation(workOrder.getSubmitor())
+                    .buildDefaultManualTrigger());
         }
 
         return Result.buildFrom(result);

@@ -40,13 +40,13 @@ public class AriusOptional<T> {
         return new AriusOptional<>(value);
     }
 
-	public static <T> AriusOptional<T> ofListNullable(T value) {
-    	if (value instanceof Collection) {
-    		return CollectionUtils.isEmpty((Collection<?>) value) ? empty() : of(value);
-		}
+    public static <T> AriusOptional<T> ofListNullable(T value) {
+        if (value instanceof Collection) {
+            return CollectionUtils.isEmpty((Collection<?>) value) ? empty() : of(value);
+        }
 
-		return ofObjNullable(value);
-	}
+        return ofObjNullable(value);
+    }
 
     public static <T> AriusOptional<T> ofObjNullable(T value) {
         return value == null ? empty() : of(value);
@@ -139,6 +139,5 @@ public class AriusOptional<T> {
     public String toString() {
         return value != null ? String.format("AriusOptional[%s]", value) : "AriusOptional.empty";
     }
-
 
 }

@@ -1,12 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 
 /**
  *
@@ -17,7 +17,9 @@ import org.apache.commons.lang3.time.DateUtils;
 public class AriusDateUtils {
 
     private static final String FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private AriusDateUtils(){}
+
+    private AriusDateUtils() {
+    }
 
     public static Long date2Long(Date time, String formatStr) {
 
@@ -282,5 +284,32 @@ public class AriusDateUtils {
             i++;
         }
         return i;
+    }
+
+    /**
+     * 将时间的其他单位（s,m,h,d）转化为ms
+     * @param value
+     * @param unit
+     * @return
+     */
+    public static long getUnitTime(long value, String unit) {
+        long ms = 0L;
+        switch (unit) {
+            case "S":
+                ms = value * 1000;
+            break;
+            case "MIN":
+                ms =  value * 1000 * 60;
+            break;
+            case "H":
+                ms =  value * 1000 * 60 * 60;
+                break;
+            case "D":
+                ms =  value * 1000 * 60 * 60 * 24;
+                break;
+            default:
+                ms = value;
+        }
+        return ms;
     }
 }

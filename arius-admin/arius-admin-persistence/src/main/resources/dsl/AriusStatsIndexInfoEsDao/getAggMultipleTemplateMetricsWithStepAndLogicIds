@@ -1,0 +1,52 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+       {
+          "terms": {
+            "logicTemplateId": %s
+          }
+        },
+        {
+          "term": {
+            "cluster": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "hist": {
+      "terms": {
+        "field": "logicTemplateId",
+        "size": %d,
+        "collect_mode": "breadth_first"
+      },
+      "aggs": {
+        "hist": {
+          "date_histogram": {
+            "field": "timestamp",
+            "fixed_interval": "%s",
+            "time_zone": "Asia/Shanghai",
+            "min_doc_count": 0
+          },
+          "aggs": {
+             %s
+          }
+        }
+        ,%s
+      }
+    }
+  }
+}

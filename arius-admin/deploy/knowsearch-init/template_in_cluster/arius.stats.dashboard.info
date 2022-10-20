@@ -10,7 +10,7 @@
             },
             "number_of_shards":"4",
             "number_of_replicas":"1",
-            "number_of_routing_size":"4"
+            "refresh_interval": "10s"
         }
     },
     "mappings":{
@@ -76,6 +76,21 @@
                     "httpNum":{
                         "type":"long"
                     },
+                    "clusterElapsedTime":{
+                        "type":"long"
+                    },
+                    "nodeElapsedTime":{
+                         "type":"long"
+                    },
+                    "collectorDelayed":{
+                         "type":"long"
+                    },
+                    "indexCount":{
+                         "type":"long"
+                    },
+                    "clusterElapsedTimeGte5Min":{
+                        "type":"boolean"
+                    },
                     "timestamp":{
                         "format":"epoch_millis",
                         "type":"date"
@@ -109,6 +124,9 @@
                         "type":"boolean"
                     },
                     "SearchRejectedNum":{
+                        "type":"long"
+                    },
+                    "nodeElapsedTime":{
                         "type":"long"
                     },
                     "timestamp":{
@@ -197,6 +215,12 @@
                     },
                     "bigShard":{
                         "type":"boolean"
+                    },
+                    "shardSize":{
+                        "type":"long"
+                    },
+                    "shardNum":{
+                        "type":"long"
                     },
                     "singReplicate":{
                         "type":"boolean"

@@ -9,7 +9,6 @@ import com.didi.arius.gateway.elasticsearch.client.request.batch.BatchNode;
 import com.didi.arius.gateway.elasticsearch.client.request.batch.BatchType;
 import com.didi.arius.gateway.elasticsearch.client.request.batch.ESBatchRequest;
 import com.didi.arius.gateway.elasticsearch.client.response.batch.ESBatchResponse;
-
 import java.util.List;
 
 /**
@@ -20,7 +19,7 @@ public class TemplateLogProcess extends AbstractDslLogProcess {
 
     public static final String DSL_TEMPLATE_INDEX_NAME = "arius.dsl.template";
 
-    public static final String APP_ID_TEMPLATE = "appidDslTemplateMd5";
+    public static final String PROJECT_ID_TEMPLATE = "projectIdDslTemplateMd5";
 
     public TemplateLogProcess(ESRestClientService esRestClientService, IndexTemplateService indexTemplateService) {
         super(esRestClientService, indexTemplateService);
@@ -36,7 +35,7 @@ public class TemplateLogProcess extends AbstractDslLogProcess {
                 esBatchRequest.setPipeline(indexTemplate.getIngestPipeline());
                 records.stream().forEach(x ->
                         esBatchRequest.addNode(new BatchNode(BatchType.UPDATE, DSL_TEMPLATE_INDEX_NAME, TYPE,
-                                x.getString(APP_ID_TEMPLATE), x.toJSONString())));
+                                x.getString(PROJECT_ID_TEMPLATE), x.toJSONString())));
                 ESBatchResponse response = esClient.batch(esBatchRequest).get();
                 if (response.getErrors()) {
                     bootLogger.warn("batch insert error [{}]", response.buildFailureMessage());

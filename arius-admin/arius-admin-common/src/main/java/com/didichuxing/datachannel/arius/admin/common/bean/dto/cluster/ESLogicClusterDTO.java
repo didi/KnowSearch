@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -16,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description ="逻辑集群信息")
+@ApiModel(description = "逻辑集群信息")
 public class ESLogicClusterDTO extends PageDTO {
 
     @ApiModelProperty("逻辑集群ID")
@@ -31,7 +30,6 @@ public class ESLogicClusterDTO extends PageDTO {
     @ApiModelProperty("类型(1:公共：2:独立, 3:独占)")
     private Integer type;
 
-
     @ApiModelProperty("所属应用ID")
     private Integer projectId;
 
@@ -39,12 +37,7 @@ public class ESLogicClusterDTO extends PageDTO {
     private String  dataCenter;
 
     @ApiModelProperty("数据节点个数")
-    private Integer  dataNodeNum;
-
-    @ApiModelProperty("责任人")
-    private String  responsible;
-
-
+    private Integer dataNodeNum;
 
     @ApiModelProperty("备注")
     private String  memo;
@@ -64,4 +57,15 @@ public class ESLogicClusterDTO extends PageDTO {
     @ApiModelProperty("规格")
     private String  dataNodeSpec;
 
+    @ApiModelProperty("磁盘使用率")
+    private Double diskUsagePercent;
+
+    @ApiModelProperty("磁盘总量")
+    private Long diskTotal;
+
+    @ApiModelProperty("磁盘使用量")
+    private Long diskUsage;
+
+    @ApiModelProperty("集群版本")
+    private String esClusterVersion;
 }

@@ -1,6 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import java.util.Date;
 import lombok.AllArgsConstructor;
@@ -22,7 +24,7 @@ public class OperateRecordInfoPO extends BasePO {
     private Integer id;
 
     /**
-     * @see com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum
+     * @see ModuleEnum
      */
     private Integer moduleId;
 
@@ -30,7 +32,6 @@ public class OperateRecordInfoPO extends BasePO {
      * @see OperateTypeEnum
      */
     private Integer operateId;
-
 
     /**
      * 操作描述
@@ -40,7 +41,7 @@ public class OperateRecordInfoPO extends BasePO {
     /**
      * 操作人
      */
-    private String userOperation;
+    private String  userOperation;
 
     /**
      * 操作时间
@@ -58,6 +59,6 @@ public class OperateRecordInfoPO extends BasePO {
     /**
      * 业务id
      */
-    private String bizId;
+    private String  bizId;
 
 }

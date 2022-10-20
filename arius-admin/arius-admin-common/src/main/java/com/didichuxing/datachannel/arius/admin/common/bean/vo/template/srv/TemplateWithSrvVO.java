@@ -1,13 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterConnectionStatusWithTemplateVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * @author chengxiang
@@ -42,5 +42,22 @@ public class TemplateWithSrvVO extends BaseVO {
 
     @ApiModelProperty("热数据保存时长 单位天")
     private Integer                        hotTime;
+
+    @ApiModelProperty("项目名称 ")
+    private String                         projectName;
+
+    @ApiModelProperty("是否具有dcdr")
+    private Boolean hasDCDR;
+
+    @ApiModelProperty("是否分区")
+    private Boolean partition;
+    @ApiModelProperty("模版健康:-1：未知")
+    private Integer health;
+    
+    /**
+     * 指示主集群的联通状态
+     */
+    @ApiModelProperty(value = "主集群是否能够连通的标志的标志",notes = "清理，升版本，扩缩容接口使用")
+    private List<ClusterConnectionStatusWithTemplateVO> clusterConnectionStatus;
 
 }

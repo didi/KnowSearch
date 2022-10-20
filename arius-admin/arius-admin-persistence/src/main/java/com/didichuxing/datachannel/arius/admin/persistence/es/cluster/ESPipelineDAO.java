@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ESPipelineProcessor;
@@ -10,14 +12,15 @@ import com.didiglobal.logi.elasticsearch.client.response.ingest.ESDeletePipeline
 import com.didiglobal.logi.elasticsearch.client.response.ingest.ESGetPipelineResponse;
 import com.didiglobal.logi.elasticsearch.client.response.ingest.ESPutPipelineResponse;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 
 /**
  * @author d06679
@@ -26,29 +29,31 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 @Repository
 public class ESPipelineDAO extends BaseESDAO {
 
-    public static final String INDEX_TEMPLATE_PROCESSOR          = "index_template";
-    public static final String THROTTLE_PROCESSOR                = "throttle";
-    public static final String DATE_FIELD                        = "field";
-    public static final String DATE_FIELD_FORMAT                 = "field_format";
-    public static final String INDEX_NAME_FORMAT                 = "index_name_format";
-    public static final String EXPIRE_DAY                        = "expire_day";
-    public static final String INDEX_VERSION                     = "index_version";
-    public static final String ID_FIELD                          = "id_field";
-    public static final String ROUTING_FIELD                     = "routing_field";
-    public static final String RATE_LIMIT                        = "rate_limit";
-    public static final String MS_TIME_FIELD_ES_FORMAT           = "UNIX_MS";
-    public static final String SECOND_TIME_FIELD_ES_FORMAT       = "UNIX";
-    public static final String MS_TIME_FIELD_PLATFORM_FORMAT     = "epoch_millis";
-    public static final String SECOND_TIME_FIELD_PLATFORM_FORMAT = "epoch_second";
-    public static final int    FILE_BEATS_PROCESSOR_INDEX        = 0;
-    public static final Set<String>        FILE_BEATS_PIPELINE_ID_SET        = new HashSet<>();
-    public static final List<JSONObject>   FILE_BEATS_PROCESSOR              = new ArrayList<>();
+    public static final String           INDEX_TEMPLATE_PROCESSOR          = "index_template";
+    public static final String           THROTTLE_PROCESSOR                = "throttle";
+    public static final String           DATE_FIELD                        = "field";
+    public static final String           DATE_FIELD_FORMAT                 = "field_format";
+    public static final String           INDEX_NAME_FORMAT                 = "index_name_format";
+    public static final String           EXPIRE_DAY                        = "expire_day";
+    public static final String           INDEX_VERSION                     = "index_version";
+    public static final String           ID_FIELD                          = "id_field";
+    public static final String           ROUTING_FIELD                     = "routing_field";
+    public static final String           RATE_LIMIT                        = "rate_limit";
+    public static final String           MS_TIME_FIELD_ES_FORMAT           = "UNIX_MS";
+    public static final String           SECOND_TIME_FIELD_ES_FORMAT       = "UNIX";
+    public static final String           MS_TIME_FIELD_PLATFORM_FORMAT     = "epoch_millis";
+    public static final String           SECOND_TIME_FIELD_PLATFORM_FORMAT = "epoch_second";
+    public static final int              FILE_BEATS_PROCESSOR_INDEX        = 0;
+    public static final Set<String>      FILE_BEATS_PIPELINE_ID_SET        = new HashSet<>();
+    public static final List<JSONObject> FILE_BEATS_PROCESSOR              = new ArrayList<>();
 
     static {
-        FILE_BEATS_PROCESSOR.add(JSON.parseObject("{\"grok\":{\"field\":\"message\",\"patterns\":[\"%{GREEDYDATA}] {%{GREEDYDATA:message}\"]}}"));
+        FILE_BEATS_PROCESSOR.add(JSON.parseObject(
+            "{\"grok\":{\"field\":\"message\",\"patterns\":[\"%{GREEDYDATA}] {%{GREEDYDATA:message}\"]}}"));
         FILE_BEATS_PROCESSOR.add(JSON.parseObject("{\"set\":{\"field\":\"message\",\"value\":\"{ {{{message}}}\"}}"));
         FILE_BEATS_PROCESSOR.add(JSON.parseObject("{\"json\":{\"field\":\"message\",\"add_to_root\":true}}"));
-        FILE_BEATS_PROCESSOR.add(JSON.parseObject("{\"remove\":{\"field\":[\"message\",\"@timestamp\",\"flag\"],\"ignore_missing\":true}}"));
+        FILE_BEATS_PROCESSOR.add(
+            JSON.parseObject("{\"remove\":{\"field\":[\"message\",\"@timestamp\",\"flag\"],\"ignore_missing\":true}}"));
 
         FILE_BEATS_PIPELINE_ID_SET.add("arius.gateway.join");
         FILE_BEATS_PIPELINE_ID_SET.add("cn_arius_gateway_metrics");
@@ -67,21 +72,27 @@ public class ESPipelineDAO extends BaseESDAO {
      */
     public boolean save(String cluster, String pipelineId, String dateField, String dateFieldFormat, String dateFormat,
                         Integer expireDay, Integer rateLimit, Integer version, String idField, String routingField) {
-        LOGGER.info("class=ESPipelineDAO||method=save||cluster={}||pipelineId={}||dateField={}||" +
-                        "dateFieldFormat={}||dateFormat={}||expireDay={}||rateLimit={}||version={}||idField={}||" +
-                        "routingField={}",
-                cluster, pipelineId, dateField, dateFieldFormat, dateFormat,
-                expireDay, rateLimit, version, idField, routingField);
+        LOGGER.info("class=ESPipelineDAO||method=save||cluster={}||pipelineId={}||dateField={}||"
+                    + "dateFieldFormat={}||dateFormat={}||expireDay={}||rateLimit={}||version={}||idField={}||"
+                    + "routingField={}",
+            cluster, pipelineId, dateField, dateFieldFormat, dateFormat, expireDay, rateLimit, version, idField,
+            routingField);
 
         ESClient client = esOpClient.getESClient(cluster);
-
+        if (client == null) {
+            LOGGER.error("class={}||method=save||clusterName={}||pipelineId={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster, pipelineId);
+            return false;
+        }
+        
         Pipeline pipeline = null;
 
         try {
             pipeline = getPipeLine(cluster, pipelineId);
         } catch (Exception e) {
-            LOGGER.warn("class=ESPipelineDAO||method=save||cluster={}||pipelineId={}||msg=failed to get pipeline||exception={}",
-                    cluster, pipelineId, e);
+            LOGGER.warn(
+                "class=ESPipelineDAO||method=save||cluster={}||pipelineId={}||msg=failed to get pipeline||exception={}",
+                cluster, pipelineId, e);
         }
 
         if (pipeline == null) {
@@ -89,7 +100,8 @@ public class ESPipelineDAO extends BaseESDAO {
         }
 
         pipeline.setDescription(pipelineId);
-        pipeline.setProcessors(buildProcessors(dateField, dateFieldFormat, dateFormat, expireDay, version, rateLimit, pipeline.getProcessors()));
+        pipeline.setProcessors(buildProcessors(dateField, dateFieldFormat, dateFormat, expireDay, version, rateLimit,
+            pipeline.getProcessors()));
 
         if (FILE_BEATS_PIPELINE_ID_SET.contains(pipelineId)) {
             pipeline.getProcessors().addAll(FILE_BEATS_PROCESSOR_INDEX, FILE_BEATS_PROCESSOR);
@@ -110,6 +122,11 @@ public class ESPipelineDAO extends BaseESDAO {
      */
     public boolean delete(String cluster, String pipelineId) {
         ESClient client = esOpClient.getESClient(cluster);
+        if (client == null) {
+            LOGGER.warn("class={}||method=delete||clusterName={}||pipelineId={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster, pipelineId);
+            return false;
+        }
 
         ESDeletePipelineResponse response = client.admin().indices().prepareDeletePipeline().setPipelineId(pipelineId)
             .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
@@ -143,7 +160,11 @@ public class ESPipelineDAO extends BaseESDAO {
 
     private Pipeline getPipeLine(String cluster, String pipelineId) {
         ESClient client = esOpClient.getESClient(cluster);
-
+        if (client == null) {
+            LOGGER.warn("class={}||method=getPipeLine||clusterName={}||pipelineId={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster, pipelineId);
+            return null;
+        }
         ESGetPipelineResponse response = client.admin().indices().prepareGetPipeline().setPipelineId(pipelineId)
             .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
@@ -156,7 +177,8 @@ public class ESPipelineDAO extends BaseESDAO {
     }
 
     private List<JSONObject> buildProcessors(String dateField, String dateFieldFormat, String indexNameFormat,
-                                             Integer expireDay, Integer indexVersion, Integer rateLimit, List<JSONObject> oldProcessors) {
+                                             Integer expireDay, Integer indexVersion, Integer rateLimit,
+                                             List<JSONObject> oldProcessors) {
 
         if (MS_TIME_FIELD_PLATFORM_FORMAT.equals(dateFieldFormat)) {
             dateFieldFormat = MS_TIME_FIELD_ES_FORMAT;

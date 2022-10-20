@@ -11,5 +11,5 @@
       ]
     }
   },
-  "_source": ["appid","destIndexName","requestId"]
+  "_source": ["projectId","destIndexName","requestId"]
 }

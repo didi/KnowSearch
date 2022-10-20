@@ -1,11 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.template;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,7 +25,7 @@ public class IndexTemplateDTO extends PageDTO {
     private String                    name;
 
     @ApiModelProperty("索引应用ID")
-    private Integer projectId;
+    private Integer                   projectId;
 
     @ApiModelProperty("数据类型（0:系统 1:日志；2:上报；3:rds数据；4:离线导入数据")
     private Integer                   dataType;
@@ -44,10 +42,7 @@ public class IndexTemplateDTO extends PageDTO {
     @ApiModelProperty("热数据保存天数, 单位天")
     private Integer                   hotTime;
 
-  
-
-    @ApiModelProperty("责任人")
-    private String                    responsible;
+   
 
     @ApiModelProperty("时间分区字段")
     private String                    dateField;
@@ -56,11 +51,11 @@ public class IndexTemplateDTO extends PageDTO {
     private String                    dateFieldFormat;
 
     @Deprecated
-    @ApiModelProperty("主键字段")
+    @ApiModelProperty("主键字段：后续下线，无需使用")
     private String                    idField;
 
     @Deprecated
-    @ApiModelProperty("routing字段")
+    @ApiModelProperty("routing字段：后续下线，无需使用")
     private String                    routingField;
 
     @ApiModelProperty("表达式")
@@ -111,7 +106,7 @@ public class IndexTemplateDTO extends PageDTO {
     @ApiModelProperty("逻辑集群id")
     private Long                      resourceId;
 
-    @ApiModelProperty("是否禁写")
+    @ApiModelProperty("位点差")
     private Long                      checkPointDiff;
 
     @ApiModelProperty("是否已创建dcdr")

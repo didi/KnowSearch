@@ -22,6 +22,17 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -36,17 +47,6 @@ import org.elasticsearch.common.xcontent.XContentHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-
 /**
  * @Author: zqr
  * es的查询类操作需要通过ESGatewayClient, 访问gateway的客户端，
@@ -56,43 +56,43 @@ import java.util.function.Function;
 @Data
 public class ESGatewayClient {
 
-    private static final ILog                                   LOGGER                = LogFactory
+    private static final ILog                                      LOGGER                = LogFactory
         .getLog(ESGatewayClient.class);
 
     /**
      * 请求gateway地址
      */
     @Value("${es.gateway.url}")
-    private String                                               gatewayUrl;
+    private String                                                 gatewayUrl;
     /**
      * 请求gateway 端口号
      */
     @Value("${es.gateway.port}")
-    private Integer                                              gatewayPort;
+    private Integer                                                gatewayPort;
 
     @Value("${es.client.io.thread.count:0}")
-    private Integer                                              ioThreadCount;
+    private Integer                                                ioThreadCount;
 
     /**
      * 访问索引的es user
      */
     @Value("${es.user}")
-    private String esUser;
+    private String                                                 esUser;
     /**
      * 访问索引的密钥
      */
     @Value("${es.password}")
-    private String password;
+    private String                                                 password;
 
     @Value("${scroll.timeout}")
-    private String                                               scrollTimeOut;
+    private String                                                 scrollTimeOut;
 
-    private static final String                                  COMMA                 = ",";
+    private static final String                                    COMMA                 = ",";
 
     /**
      * 查询es的客户端
      */
-    private Map<String/*esUser*/, ESClient>                       queryClientMap        = Maps.newLinkedHashMap();
+    private Map<String/*esUser*/, ESClient>                        queryClientMap        = Maps.newLinkedHashMap();
     /**
      * 访问国内索引模板和es user的映射
      */
@@ -100,7 +100,7 @@ public class ESGatewayClient {
     /**
      * 认证header
      */
-    private Map<String/*esUser*/, Header>                        esUserHeaderMap       = Maps.newTreeMap();
+    private Map<String/*esUser*/, Header>                          esUserHeaderMap       = Maps.newTreeMap();
 
     /**
      * 初始化访问es客户端
@@ -119,7 +119,7 @@ public class ESGatewayClient {
 
         // 构建认证信息的header
         Header accessHeader = null;
-        ESClient esClient   = null;
+        ESClient esClient = null;
 
         for (int i = 0; i < esUsers.length; ++i) {
             accessHeader = BaseHttpUtil.buildHttpHeader(esUsers[i], passwords[i]);
@@ -148,7 +148,7 @@ public class ESGatewayClient {
         List<String> urls = ListUtils.string2StrList(gatewayUrl);
         Random random = new Random();
         int n = random.nextInt(urls.size());
-        return urls.get(n) +":" + gatewayPort;
+        return urls.get(n) + ":" + gatewayPort;
     }
 
     /**
@@ -157,8 +157,7 @@ public class ESGatewayClient {
      * @return
      */
     @Nullable
-    public ESQueryResponse performSQLRequest(String indexName, String sql,
-                                             String orginalQuery) {
+    public ESQueryResponse performSQLRequest(String indexName, String sql, String orginalQuery) {
         return performSQLRequest(null, indexName, sql, orginalQuery);
     }
 
@@ -168,8 +167,7 @@ public class ESGatewayClient {
      * @return
      */
     @Nullable
-    public ESQueryResponse performSQLRequest(String clusterName, String indexName,
-                                             String sql, String orginalQuery) {
+    public ESQueryResponse performSQLRequest(String clusterName, String indexName, String sql, String orginalQuery) {
         Tuple<String, ESClient> gatewayClientTuple = null;
         try {
             gatewayClientTuple = getGatewayClientByDataCenterAndIndexName(clusterName, indexName);
@@ -178,7 +176,8 @@ public class ESGatewayClient {
         } catch (Exception e) {
             LOGGER.warn(
                 "class=GatewayClient||method=performSQLRequest||dataCenter={}||gatewayClientTuple={}||clusterName={}||sql={}||md5={}||errMsg=query error. ",
-                EnvUtil.getDC(), JSON.toJSONString(gatewayClientTuple), clusterName, sql, CommonUtils.getMD5(orginalQuery), e);
+                EnvUtil.getDC(), JSON.toJSONString(gatewayClientTuple), clusterName, sql,
+                CommonUtils.getMD5(orginalQuery), e);
             return null;
         }
     }
@@ -191,8 +190,7 @@ public class ESGatewayClient {
      * @param queryDsl
      * @return
      */
-    public String performRequestAndGetResponse(String indexName, String typeName,
-                                               String queryDsl) {
+    public String performRequestAndGetResponse(String indexName, String typeName, String queryDsl) {
 
         return performRequestAndGetResponse(null, indexName, typeName, queryDsl);
     }
@@ -205,8 +203,7 @@ public class ESGatewayClient {
      * @param queryDsl
      * @return
      */
-    public String performRequestAndGetResponse(String clusterName, String indexName,
-                                               String typeName, String queryDsl) {
+    public String performRequestAndGetResponse(String clusterName, String indexName, String typeName, String queryDsl) {
 
         ESQueryResponse esQueryResponse = doQuery(clusterName, indexName,
             new ESQueryRequest().indices(indexName).types(typeName).source(queryDsl));
@@ -226,8 +223,7 @@ public class ESGatewayClient {
      * @return
      * @throws IOException
      */
-    public ESQueryResponse performRequest(String indexName, String typeName,
-                                          String queryDsl) {
+    public ESQueryResponse performRequest(String indexName, String typeName, String queryDsl) {
 
         return performRequest(null, indexName, typeName, queryDsl);
     }
@@ -241,8 +237,7 @@ public class ESGatewayClient {
      * @return
      * @throws IOException
      */
-    public ESQueryResponse performRequest(String clusterName, String indexName,
-                                          String typeName, String queryDsl) {
+    public ESQueryResponse performRequest(String clusterName, String indexName, String typeName, String queryDsl) {
         return doQuery(clusterName, indexName,
             new ESQueryRequest().indices(indexName).types(typeName).source(queryDsl));
     }
@@ -250,7 +245,7 @@ public class ESGatewayClient {
     public ESQueryResponse performRequestWithRouting(String clusterName, String routing, String indexName,
                                                      String typeName, String queryDsl) {
         return doQuery(clusterName, indexName,
-                new ESQueryRequest().indices(indexName).routing(routing).types(typeName).source(queryDsl));
+            new ESQueryRequest().indices(indexName).routing(routing).types(typeName).source(queryDsl));
     }
 
     /**
@@ -264,28 +259,6 @@ public class ESGatewayClient {
     public Long performRequestAndGetTotalCount(String indexName, String typeName, String queryDsl) {
         return performRequestAndGetTotalCount(null, indexName, typeName, queryDsl);
     }
-    /**
-     * 获取命中总数
-     *
-     * @param indexName
-     * @param typeName
-     * @param queryDsl
-     * @return
-     */
-    public Long performRequestAndGetTotalCount(String clusterName, String indexName,
-        String typeName, String queryDsl, int tryTimes) {
-        return performRequest(clusterName, indexName, typeName, queryDsl,
-            esQueryResponse -> {
-                if (null == esQueryResponse || esQueryResponse.getHits() == null) {
-                    return 0L;
-                }
-                return Long
-                    .valueOf(esQueryResponse.getHits().getUnusedMap()
-                        .getOrDefault(ESConstant.HITS_TOTAL, "0").toString());
-            }
-            , tryTimes);
-    }
-    
 
     /**
      * 获取命中总数
@@ -295,8 +268,26 @@ public class ESGatewayClient {
      * @param queryDsl
      * @return
      */
-    public Long performRequestAndGetTotalCount(String clusterName, String indexName,
-                                               String typeName, String queryDsl) {
+    public Long performRequestAndGetTotalCount(String clusterName, String indexName, String typeName, String queryDsl,
+                                               int tryTimes) {
+        return performRequest(clusterName, indexName, typeName, queryDsl, esQueryResponse -> {
+            if (null == esQueryResponse || esQueryResponse.getHits() == null) {
+                return 0L;
+            }
+            return Long
+                .valueOf(esQueryResponse.getHits().getUnusedMap().getOrDefault(ESConstant.HITS_TOTAL, "0").toString());
+        }, tryTimes);
+    }
+
+    /**
+     * 获取命中总数
+     *
+     * @param indexName
+     * @param typeName
+     * @param queryDsl
+     * @return
+     */
+    public Long performRequestAndGetTotalCount(String clusterName, String indexName, String typeName, String queryDsl) {
         ESQueryResponse esQueryResponse = performRequest(clusterName, indexName, typeName, queryDsl);
         if (null == esQueryResponse || esQueryResponse.getHits() == null) {
             return 0L;
@@ -316,8 +307,7 @@ public class ESGatewayClient {
      * @param <T>
      * @return
      */
-    public <T> List<T> performRequest(String indexName, String typeName, String queryDsl,
-                                      Class<T> clzz) {
+    public <T> List<T> performRequest(String indexName, String typeName, String queryDsl, Class<T> clzz) {
         return performRequest(null, indexName, typeName, queryDsl, clzz);
     }
 
@@ -354,7 +344,8 @@ public class ESGatewayClient {
      * @param <T>
      * @return
      */
-    public <T> List<T> performRequest(String clusterName, String indexName, String typeName, String queryDsl, Class<T> clzz) {
+    public <T> List<T> performRequest(String clusterName, String indexName, String typeName, String queryDsl,
+                                      Class<T> clzz) {
         ESQueryResponse esQueryResponse = doQuery(clusterName, indexName,
             new ESQueryRequest().indices(indexName).types(typeName).source(queryDsl).clazz(clzz));
         if (esQueryResponse == null) {
@@ -374,38 +365,39 @@ public class ESGatewayClient {
         return hits;
     }
 
-    public <R> R performRequest(String indexName, String typeName, String queryDsl,
-                                Function<ESQueryResponse, R> func, int tryTimes) {
+    public <R> R performRequest(String indexName, String typeName, String queryDsl, Function<ESQueryResponse, R> func,
+                                int tryTimes) {
         return performRequest(null, indexName, typeName, queryDsl, func, tryTimes);
     }
 
-    public <R> R performRequest(String clusterName, String indexName, String typeName,
-                                String queryDsl, Function<ESQueryResponse, R> func, int tryTimes) {
+    public <R> R performRequest(String clusterName, String indexName, String typeName, String queryDsl,
+                                Function<ESQueryResponse, R> func, int tryTimes) {
         ESQueryResponse esQueryResponse;
         do {
             esQueryResponse = doQuery(clusterName, indexName,
                 new ESQueryRequest().indices(indexName).types(typeName).source(queryDsl));
         } while (tryTimes-- > 0 && null == esQueryResponse);
 
-        if(!EnvUtil.isOnline()){
-        LOGGER.warn("class=GatewayClient||method=performRequest||dataCenter={}||indexName={}||queryDsl={}||ret={}",
-            EnvUtil.getDC(), indexName, queryDsl, JSON.toJSONString(esQueryResponse));
-                }
+        if (!EnvUtil.isOnline()) {
+            LOGGER.warn("class=GatewayClient||method=performRequest||dataCenter={}||indexName={}||queryDsl={}||ret={}",
+                EnvUtil.getDC(), indexName, queryDsl, JSON.toJSONString(esQueryResponse));
+        }
 
         return func.apply(esQueryResponse);
     }
 
     public <R> R performRequestWithRouting(String clusterName, String routingValue, String indexName, String typeName,
-                                String queryDsl, Function<ESQueryResponse, R> func, int tryTimes) {
+                                           String queryDsl, Function<ESQueryResponse, R> func, int tryTimes) {
         ESQueryResponse esQueryResponse;
         do {
             esQueryResponse = doQuery(clusterName, indexName,
-                    new ESQueryRequest().routing(routingValue).indices(indexName).types(typeName).source(queryDsl));
+                new ESQueryRequest().routing(routingValue).indices(indexName).types(typeName).source(queryDsl));
         } while (tryTimes-- > 0 && null == esQueryResponse);
 
-        if(!EnvUtil.isOnline()){
-            LOGGER.warn("class=GatewayClient||method=performRequestWithRouting||dataCenter={}||indexName={}||queryDsl={}||ret={}",
-                    EnvUtil.getDC(), indexName, queryDsl, JSON.toJSONString(esQueryResponse));
+        if (!EnvUtil.isOnline()) {
+            LOGGER.warn(
+                "class=GatewayClient||method=performRequestWithRouting||dataCenter={}||indexName={}||queryDsl={}||ret={}",
+                EnvUtil.getDC(), indexName, queryDsl, JSON.toJSONString(esQueryResponse));
         }
 
         return func.apply(esQueryResponse);
@@ -435,8 +427,8 @@ public class ESGatewayClient {
      * @param <T>
      * @return
      */
-    public <T> T performRequestAndTakeFirst(String clusterName, String indexName,
-                                            String typeName, String queryDsl, Class<T> clzz) {
+    public <T> T performRequestAndTakeFirst(String clusterName, String indexName, String typeName, String queryDsl,
+                                            Class<T> clzz) {
         List<T> hits = performRequest(clusterName, indexName, typeName, queryDsl, clzz);
 
         if (CollectionUtils.isEmpty(hits)) {
@@ -456,7 +448,8 @@ public class ESGatewayClient {
      * @param <T>
      * @return
      */
-    public <T> Tuple<Long, T> performRequestAndGetTotalCount(String indexName, String typeName, String queryDsl, Class<T> clzz) {
+    public <T> Tuple<Long, T> performRequestAndGetTotalCount(String indexName, String typeName, String queryDsl,
+                                                             Class<T> clzz) {
         return performRequestAndGetTotalCount(null, indexName, typeName, queryDsl, clzz);
     }
 
@@ -470,8 +463,8 @@ public class ESGatewayClient {
      * @param <T>
      * @return
      */
-    public <T> Tuple<Long, T> performRequestAndGetTotalCount(String clusterName, String indexName, String typeName, String queryDsl,
-                                                             Class<T> clzz) {
+    public <T> Tuple<Long, T> performRequestAndGetTotalCount(String clusterName, String indexName, String typeName,
+                                                             String queryDsl, Class<T> clzz) {
         ESQueryResponse esQueryResponse = doQuery(clusterName, indexName,
             new ESQueryRequest().indices(indexName).types(typeName).source(queryDsl).clazz(clzz));
         if (esQueryResponse == null) {
@@ -532,7 +525,8 @@ public class ESGatewayClient {
      * @throws IOException
      */
     @Nullable
-    public ESAggrMap performAggRequestWithPreference(String indexName, String typeName, String queryDsl, String preference) {
+    public ESAggrMap performAggRequestWithPreference(String indexName, String typeName, String queryDsl,
+                                                     String preference) {
         return performAggRequest(null, indexName, typeName, queryDsl, preference);
     }
 
@@ -546,25 +540,28 @@ public class ESGatewayClient {
      * @param <T>
      * @return
      */
-    public <T> Tuple<Long, List<T>> performRequestListAndGetTotalCount(String clusterName,String indexName, String typeName, String queryDsl, Class<T> clzz) {
+    public <T> Tuple<Long, List<T>> performRequestListAndGetTotalCount(String clusterName, String indexName,
+                                                                       String typeName, String queryDsl,
+                                                                       Class<T> clzz) {
         ESQueryResponse esQueryResponse = doQuery(clusterName, indexName,
-                new ESQueryRequest().indices(indexName).types(typeName).source(queryDsl).clazz(clzz));
+            new ESQueryRequest().indices(indexName).types(typeName).source(queryDsl).clazz(clzz));
         if (esQueryResponse == null) {
             return null;
         }
 
         List<Object> objectList = esQueryResponse.getSourceList();
         if (CollectionUtils.isEmpty(objectList)) {
-            return null;
+            return new Tuple<>(0L, Collections.emptyList());
         }
 
         List<T> hits = Lists.newLinkedList();
         for (Object obj : objectList) {
-            hits.add((T)obj);
+            hits.add((T) obj);
         }
 
-        return new Tuple<>(Long.valueOf(esQueryResponse.getHits().getUnusedMap().getOrDefault(ESConstant.HITS_TOTAL, "0").toString()),
-                hits);
+        return new Tuple<>(
+            Long.valueOf(esQueryResponse.getHits().getUnusedMap().getOrDefault(ESConstant.HITS_TOTAL, "0").toString()),
+            hits);
     }
 
     /**
@@ -577,7 +574,8 @@ public class ESGatewayClient {
      * @throws IOException
      */
     @Nullable
-    public ESAggrMap performAggRequest(String clusterName, String indexName, String typeName, String queryDsl, String preference) {
+    public ESAggrMap performAggRequest(String clusterName, String indexName, String typeName, String queryDsl,
+                                       String preference) {
         ESQueryResponse esQueryResponse = doQuery(clusterName, indexName,
             new ESQueryRequest().indices(indexName).types(typeName).source(queryDsl).preference(preference));
         if (esQueryResponse == null || esQueryResponse.getAggs() == null) {
@@ -598,12 +596,10 @@ public class ESGatewayClient {
      * @param <T>
      * @return
      */
-    public <T> ESQueryResponse prepareScrollQuery(String indexName, String typeName,
-                                                  String queryDsl, String preference, Class<T> clzz,
-                                                  ScrollResultVisitor<T> scrollResultVisitor) {
+    public <T> ESQueryResponse prepareScrollQuery(String indexName, String typeName, String queryDsl, String preference,
+                                                  Class<T> clzz, ScrollResultVisitor<T> scrollResultVisitor) {
 
-        return prepareScrollQuery(null, indexName, typeName, queryDsl, preference, clzz,
-            scrollResultVisitor);
+        return prepareScrollQuery(null, indexName, typeName, queryDsl, preference, clzz, scrollResultVisitor);
     }
 
     /**
@@ -617,8 +613,8 @@ public class ESGatewayClient {
      * @param <T>
      * @return
      */
-    public <T> ESQueryResponse prepareScrollQuery(String clusterName, String indexName,
-                                                  String typeName, String queryDsl, String preference, Class<T> clzz,
+    public <T> ESQueryResponse prepareScrollQuery(String clusterName, String indexName, String typeName,
+                                                  String queryDsl, String preference, Class<T> clzz,
                                                   ScrollResultVisitor<T> scrollResultVisitor) {
         ESQueryResponse esQueryResponse = null;
         ESQueryRequestBuilder builder = null;
@@ -662,8 +658,8 @@ public class ESGatewayClient {
      * @param <T>
      * @return
      */
-    public <T> ESQueryResponse queryScrollQuery(String indexName, String scrollId,
-                                                Class<T> clzz, ScrollResultVisitor<T> scrollResultVisitor) {
+    public <T> ESQueryResponse queryScrollQuery(String indexName, String scrollId, Class<T> clzz,
+                                                ScrollResultVisitor<T> scrollResultVisitor) {
         return queryScrollQuery(null, indexName, scrollId, clzz, scrollResultVisitor);
     }
 
@@ -676,8 +672,7 @@ public class ESGatewayClient {
      * @param <T>
      * @return
      */
-    public <T> ESQueryResponse queryScrollQuery(String clusterName, String indexName,
-                                                String scrollId, Class<T> clzz,
+    public <T> ESQueryResponse queryScrollQuery(String clusterName, String indexName, String scrollId, Class<T> clzz,
                                                 ScrollResultVisitor<T> scrollResultVisitor) {
         ESQueryResponse esQueryResponse = null;
         ESQueryScrollRequest queryScrollRequest = new ESQueryScrollRequest();
@@ -717,11 +712,9 @@ public class ESGatewayClient {
      * @param clzz
      * @return
      */
-    public <T> void queryWithScroll(String indexName, String typeName, String queryDsl,
-                                    int scrollSize, String preference, Class<T> clzz,
-                                    ScrollResultVisitor<T> scrollResultVisitor) {
-        queryWithScroll(null, indexName, typeName, queryDsl, scrollSize, preference, clzz,
-            scrollResultVisitor);
+    public <T> void queryWithScroll(String indexName, String typeName, String queryDsl, int scrollSize,
+                                    String preference, Class<T> clzz, ScrollResultVisitor<T> scrollResultVisitor) {
+        queryWithScroll(null, indexName, typeName, queryDsl, scrollSize, preference, clzz, scrollResultVisitor);
     }
 
     /**
@@ -734,13 +727,13 @@ public class ESGatewayClient {
      * @param clzz
      * @return
      */
-    public <T> void queryWithScroll(String clusterName, String indexName,
-                                    String typeName, String queryDsl, int scrollSize, String preference, Class<T> clzz,
+    public <T> void queryWithScroll(String clusterName, String indexName, String typeName, String queryDsl,
+                                    int scrollSize, String preference, Class<T> clzz,
                                     ScrollResultVisitor<T> scrollResultVisitor) {
         ESQueryResponse esQueryResponse = null;
         try {
-            esQueryResponse = prepareScrollQuery(clusterName, indexName, typeName, queryDsl, preference,
-                clzz, scrollResultVisitor);
+            esQueryResponse = prepareScrollQuery(clusterName, indexName, typeName, queryDsl, preference, clzz,
+                scrollResultVisitor);
         } catch (Exception e) {
             LOGGER.warn(
                 "class=GatewayClient||method=queryWithScroll||dataCenter={}||indexName={}||queryDsl={}||errMsg=query error. ",
@@ -756,17 +749,18 @@ public class ESGatewayClient {
         int scrollCnt = (int) Math.ceil((double) totalCount / scrollSize);
 
         for (int scrollIndex = 0; scrollIndex < scrollCnt - 1; ++scrollIndex) {
-            if (esQueryResponse == null) {continue;}
+            if (esQueryResponse == null) {
+                continue;
+            }
 
             String scrollId = esQueryResponse.getUnusedMap().get("_scroll_id").toString();
 
             try {
-                esQueryResponse = queryScrollQuery(clusterName, indexName, scrollId, clzz,
-                    scrollResultVisitor);
+                esQueryResponse = queryScrollQuery(clusterName, indexName, scrollId, clzz, scrollResultVisitor);
             } catch (Exception e) {
                 LOGGER.warn(
                     "class=GatewayClient||method=queryWithScroll||dataCenter={}||scrollId={}||errMsg=query error. ",
-                        EnvUtil.getDC(), scrollId, e);
+                    EnvUtil.getDC(), scrollId, e);
             }
         }
 
@@ -808,7 +802,7 @@ public class ESGatewayClient {
         } catch (Exception e) {
             LOGGER.warn(
                 "class=GatewayClient||method=doGet||dataCenter={}||gatewayClientTuple={}||indexName={}||typeName={}||id={}||errMsg=get error. ",
-                    EnvUtil.getDC(), JSON.toJSONString(gatewayClientTuple), indexName, typeName, id, e);
+                EnvUtil.getDC(), JSON.toJSONString(gatewayClientTuple), indexName, typeName, id, e);
         }
 
         if (response == null) {
@@ -821,7 +815,7 @@ public class ESGatewayClient {
         } catch (JSONException e) {
             LOGGER.warn(
                 "class=GatewayClient||method=doGet||dataCenter={}||indexName={}||typeName={}||id={}||clzz={}||errMsg=fail to parse json. ",
-                    EnvUtil.getDC(), indexName, typeName, id, clzz, e);
+                EnvUtil.getDC(), indexName, typeName, id, clzz, e);
         }
 
         return obj;
@@ -843,7 +837,7 @@ public class ESGatewayClient {
             String queryDsl = bytesReferenceConvertDsl(queryRequest.source());
             LOGGER.warn(
                 "class=GatewayClient||method=doQuery||dataCenter={}||gatewayClientTuple={}||clusterName={}||indexName={}||queryDsl={}||md5={}||errMsg=query error. ",
-                    EnvUtil.getDC(), JSON.toJSONString(gatewayClientTuple), clusterName, queryRequest.indices(), queryDsl,
+                EnvUtil.getDC(), JSON.toJSONString(gatewayClientTuple), clusterName, queryRequest.indices(), queryDsl,
                 CommonUtils.getMD5(queryDsl), e);
             return null;
         }
@@ -862,9 +856,9 @@ public class ESGatewayClient {
         } catch (Exception e) {
             String dsl = bytesReferenceConvertDsl(indexRequest.source());
             LOGGER.warn(
-                    "class=GatewayClient||method=doWrite||dataCenter={}||gatewayClientTuple={}||clusterName={}||indexName={}||queryDsl={}||md5={}||errMsg=query error. ",
-                    EnvUtil.getDC(), JSON.toJSONString(gatewayClientTuple), clusterName, indexRequest.index(), dsl,
-                    CommonUtils.getMD5(dsl), e);
+                "class=GatewayClient||method=doWrite||dataCenter={}||gatewayClientTuple={}||clusterName={}||indexName={}||queryDsl={}||md5={}||errMsg=query error. ",
+                EnvUtil.getDC(), JSON.toJSONString(gatewayClientTuple), clusterName, indexRequest.index(), dsl,
+                CommonUtils.getMD5(dsl), e);
         }
     }
 
@@ -880,8 +874,7 @@ public class ESGatewayClient {
 
         // 只有一个es user时或者没传索引名称时，直接返回第一个；配置多个es user时，根据访问索引名称进行选择
         if (queryClientMap.size() > 1 && StringUtils.isNotBlank(indexName)) {
-            for (Map.Entry<String/*access template name*/, String/*esUser*/> entry : accessTemplateNameMap
-                .entrySet()) {
+            for (Map.Entry<String/*access template name*/, String/*esUser*/> entry : accessTemplateNameMap.entrySet()) {
                 // 去掉索引表达式最后的*，如果访问的索引名称以表达式开头，则返回该es user
                 String accessTemplateName = StringUtils.removeEnd(entry.getKey(), "*");
                 if (StringUtils.isNotBlank(accessTemplateName) && indexName.startsWith(accessTemplateName)) {
@@ -948,7 +941,7 @@ public class ESGatewayClient {
                     .setConnectionRequestTimeout(120000));
                 esClient.start();
             } catch (Exception e) {
-                if(null != esClient){
+                if (null != esClient) {
                     esClient.close();
                 }
 

@@ -12,17 +12,17 @@ public class PhysicalTemplatePropertiesTypesModifyEvent extends PhysicalMetaData
     /**
      * project ID
      */
-    private final Integer projectId;
+    private final Integer      projectId;
 
     /**
      * 集群
      */
-    private final String cluster;
+    private final String       cluster;
 
     /**
      * 模板名称
      */
-    private final String templateName;
+    private final String       templateName;
 
     /**
      * 接受者列表
@@ -39,14 +39,9 @@ public class PhysicalTemplatePropertiesTypesModifyEvent extends PhysicalMetaData
      */
     private final List<String> afterUpdateTypes;
 
-    public PhysicalTemplatePropertiesTypesModifyEvent(
-            Object source,
-            Integer projectId,
-            String cluster,
-            String templateName,
-            List<String> receivers,
-            List<String> beforeUpdateTypes,
-            List<String> afterUpdateTypes) {
+    public PhysicalTemplatePropertiesTypesModifyEvent(Object source, Integer projectId, String cluster,
+                                                      String templateName, List<String> receivers,
+                                                      List<String> beforeUpdateTypes, List<String> afterUpdateTypes) {
         super(source);
         this.projectId = projectId;
         this.cluster = cluster;

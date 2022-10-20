@@ -23,7 +23,7 @@ public class IndexTemplatePhy extends BaseEntity {
     /**
      * 主键
      */
-    private Long id;
+    private Long    id;
 
     /**
      * 逻辑模板id
@@ -33,22 +33,22 @@ public class IndexTemplatePhy extends BaseEntity {
     /**
      * 模板名称
      */
-    private String name;
+    private String  name;
 
     /**
      * 表达式
      */
-    private String expression;
+    private String  expression;
 
     /**
      * 集群
      */
-    private String cluster;
+    private String  cluster;
 
     /**
      * rack
      */
-    private String rack;
+    private String  rack;
 
     /**
      * shard个数
@@ -80,7 +80,7 @@ public class IndexTemplatePhy extends BaseEntity {
     /**
      * 配置 json格式
      */
-    private String config;
+    private String  config;
 
     /**
      * regionId

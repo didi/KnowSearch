@@ -128,12 +128,22 @@
         set status = #{status}
         where id = #{physicalId}
     </update>
-
-    <select id="getByLogicIdAndStatus" parameterType="map" resultMap="BaseResultMap">
+	<update id="updateShardNumByLogicId">
+      update index_template_physical_info
+        set shard = #{shardNum}
+        where logic_id = #{logicId}
+	</update>
+	
+	<select id="getByLogicIdAndStatus" parameterType="map" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from index_template_physical_info
         where logic_id = #{logicId} and status = #{status}
+    </select>
+    <select id="getTemplateByLogicIdAndRole" parameterType="map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template_physical_info where status > 0 and logic_id = #{logicId} and role = #{role}
     </select>
 
     <select id="getByClusterAndStatus" parameterType="map" resultMap="BaseResultMap">

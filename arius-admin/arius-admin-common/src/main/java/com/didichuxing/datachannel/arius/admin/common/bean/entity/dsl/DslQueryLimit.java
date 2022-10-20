@@ -25,7 +25,6 @@ public class DslQueryLimit extends DslBase {
         this.queryLimit = queryLimit;
     }
 
-
     public Double getQueryLimit() {
         return queryLimit;
     }

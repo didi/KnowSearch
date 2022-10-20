@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 public class ClusterRoleServiceImpl implements ClusterRoleService {
 
     @Autowired
-    private ESClusterRoleDAO roleClusterDAO;
+    private ESClusterRoleDAO  roleClusterDAO;
 
     @Autowired
     private ClusterPhyService clusterPhyService;
@@ -38,7 +38,7 @@ public class ClusterRoleServiceImpl implements ClusterRoleService {
     public Result<Void> save(ESClusterRoleDTO esClusterRoleDTO) {
         ESClusterRolePO esClusterRolePO = ConvertUtil.obj2Obj(esClusterRoleDTO, ESClusterRolePO.class);
         boolean succ = (1 == roleClusterDAO.insert(esClusterRolePO));
-        if(succ) {
+        if (succ) {
             esClusterRoleDTO.setId(esClusterRolePO.getId());
         }
 
@@ -68,11 +68,6 @@ public class ClusterRoleServiceImpl implements ClusterRoleService {
     }
 
     @Override
-    public ClusterRoleInfo getById(Long id) {
-        return ConvertUtil.obj2Obj(roleClusterDAO.getById(id), ClusterRoleInfo.class);
-    }
-
-    @Override
     public List<ClusterRoleInfo> getAllRoleClusterByClusterId(Integer clusterId) {
         List<ESClusterRolePO> roleClusterPos = roleClusterDAO.listByClusterId(clusterId.toString());
         return ConvertUtil.list2List(roleClusterPos, ClusterRoleInfo.class);
@@ -80,7 +75,7 @@ public class ClusterRoleServiceImpl implements ClusterRoleService {
 
     @Override
     public Map<Long, List<ClusterRoleInfo>> getAllRoleClusterByClusterIds(List<Integer> clusterIds) {
-        List<String> clusterStrIds = clusterIds.stream().map(i -> String.valueOf(i)).collect( Collectors.toList());
+        List<String> clusterStrIds = clusterIds.stream().map(i -> String.valueOf(i)).collect(Collectors.toList());
         List<ESClusterRolePO> roleClusterPos = roleClusterDAO.listByClusterIds(clusterStrIds);
 
         Map<Long, List<ClusterRoleInfo>> ret = new HashMap<>();
@@ -130,21 +125,13 @@ public class ClusterRoleServiceImpl implements ClusterRoleService {
     public Result<Void> deleteRoleClusterByClusterId(Integer clusterId, Integer projectId) {
         //校验操作项目的合法性
         final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
-        if (result.failed()){
-         return result;
+        if (result.failed()) {
+            return result;
         }
-        boolean success = (roleClusterDAO.delete(clusterId) > 0);
-        if (!success) {
-            return Result.buildFail();
-        }
-        return Result.buildSucc();
-    }
-
-    @Override
-    public Result deleteRoleClusterByClusterIdAndRole(Long clusterId, String role) {
-        boolean success = (roleClusterDAO.deleteRoleClusterByCluterIdAndRole(clusterId,role) > 0);
-        if (!success) {
-            return Result.buildFail();
+        //在接入集群阶段可能会存在角色表未插入的脏数据，直接用>0判断可能导致结果不准确
+        final int countByClusterId = roleClusterDAO.countByClusterId(clusterId);
+        if (countByClusterId>0){
+            return Result.build(roleClusterDAO.delete(clusterId) >0);
         }
         return Result.buildSucc();
     }

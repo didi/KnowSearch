@@ -67,10 +67,10 @@ public class ESClusterRoleHostVO extends BaseVO {
     private String  logicDepart;
 
     @ApiModelProperty("attributes, 逗号分隔 key1:value1,key2:value2")
-    private String attributes;
+    private String  attributes;
 
     @ApiModelProperty("regionName")
-    private String regionName;
+    private String  regionName;
 
     @ApiModelProperty("磁盘使用率")
     private Double  diskUsagePercent;

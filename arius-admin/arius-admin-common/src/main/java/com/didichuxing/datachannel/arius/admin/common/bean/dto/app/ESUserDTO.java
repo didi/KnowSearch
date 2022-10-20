@@ -17,21 +17,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @ApiModel(description = "es user 信息")
 public class ESUserDTO extends BaseDTO {
-    
+
     @ApiModelProperty("es user name")
     private Integer id;
 
-   
-
     @ApiModelProperty("root用户")
-    private Integer isRoot=0;
+    private Integer isRoot = 0;
 
     @ApiModelProperty("验证码")
     private String  verifyCode;
-    
-
-    @ApiModelProperty("责任人:当前责任都为admin")
-    private String  responsible;
 
     @ApiModelProperty("备注")
     private String  memo;
@@ -50,8 +44,8 @@ public class ESUserDTO extends BaseDTO {
 
     @ApiModelProperty("数据中心")
     private String  dataCenter;
+
     @ApiModelProperty("项目id")
     private Integer projectId;
-    
 
 }

@@ -23,7 +23,7 @@
         },
         {
           "term": {
-            "appid": %d
+            "projectId": %d
           }
         }
       ]

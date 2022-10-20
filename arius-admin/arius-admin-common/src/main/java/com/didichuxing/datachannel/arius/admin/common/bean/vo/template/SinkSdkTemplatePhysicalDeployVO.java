@@ -32,5 +32,5 @@ public class SinkSdkTemplatePhysicalDeployVO {
     private Boolean defaultWriterFlags;
 
     @ApiModelProperty("组ID")
-    private String groupId;
+    private String  groupId;
 }

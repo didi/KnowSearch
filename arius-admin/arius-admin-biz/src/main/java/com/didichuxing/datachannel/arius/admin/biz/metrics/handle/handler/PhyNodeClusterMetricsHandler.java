@@ -10,8 +10,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linech
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.AggMetricsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatisService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatsService;
 import java.util.List;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Service;
 @Service("clusterPhyNodeMetricsHandler")
 public class PhyNodeClusterMetricsHandler extends BaseClusterMetricsHandle {
     @Autowired
-    private NodeStatisService nodeStatisService;
+    private NodeStatsService nodeStatsService;
 
     @Override
     protected Result<Void> checkSpecialParam(MetricsClusterPhyDTO param) {
@@ -40,7 +41,7 @@ public class PhyNodeClusterMetricsHandler extends BaseClusterMetricsHandle {
 
     @Override
     protected List<VariousLineChartMetrics> getAggClusterPhyMetrics(MetricsClusterPhyDTO param) {
-        return nodeStatisService.getAggClusterPhyNodeMetrics((MetricsClusterPhyNodeDTO) param);
+        return nodeStatsService.getAggClusterPhyNodeMetrics((MetricsClusterPhyNodeDTO) param);
     }
 
     @Override

@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "应用权限信息")
 public class ProjectTemplateAuthVO extends BaseVO {
     @ApiModelProperty("ID")
-    private Long id;
+    private Long    id;
 
     @ApiModelProperty("应用ID")
     private Integer projectId;
@@ -27,7 +27,7 @@ public class ProjectTemplateAuthVO extends BaseVO {
     private Integer templateId;
 
     @ApiModelProperty("模板名称")
-    private String templateName;
+    private String  templateName;
 
     /**
      * 权限类型  读写  读
@@ -37,11 +37,10 @@ public class ProjectTemplateAuthVO extends BaseVO {
     private Integer type;
 
     @ApiModelProperty("所属逻辑集群ID")
-    private Long logicClusterId;
+    private Long    logicClusterId;
 
     @ApiModelProperty("所属逻辑集群名称")
-    private String logicClusterName;
+    private String  logicClusterName;
 
-    @ApiModelProperty("权限责任人")
-    private String responsible;
+    
 }

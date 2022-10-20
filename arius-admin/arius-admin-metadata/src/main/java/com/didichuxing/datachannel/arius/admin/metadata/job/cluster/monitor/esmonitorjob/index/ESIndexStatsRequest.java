@@ -12,26 +12,26 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ESIndexStatsRequest extends ESBroadcastTimeoutRequest<ESIndexStatsRequest> {
-    public static String COMPLETION = "completion";
-    public static String STORE = "store";
-    public static String INDEXING = "indexing";
-    public static String TRANSLOG = "translog";
-    public static String REFRESH = "refresh";
-    public static String SUGGEST = "suggest";
-    public static String RECOVERY = "recovery";
-    public static String WARMER = "warmer";
-    public static String SEGMENTS = "segments";
-    public static String SEARCH = "search";
-    public static String QUERY_CACHE = "query_cache";
-    public static String DOCS = "docs";
-    public static String FLUSH = "flush";
-    public static String FIELDDATA = "fielddata";
-    public static String GET = "get";
-    public static String MERGE = "merge";
-    public static String REQUEST_CACHE = "request_cache";
+    public static String      COMPLETION    = "completion";
+    public static String      STORE         = "store";
+    public static String      INDEXING      = "indexing";
+    public static String      TRANSLOG      = "translog";
+    public static String      REFRESH       = "refresh";
+    public static String      SUGGEST       = "suggest";
+    public static String      RECOVERY      = "recovery";
+    public static String      WARMER        = "warmer";
+    public static String      SEGMENTS      = "segments";
+    public static String      SEARCH        = "search";
+    public static String      QUERY_CACHE   = "query_cache";
+    public static String      DOCS          = "docs";
+    public static String      FLUSH         = "flush";
+    public static String      FIELDDATA     = "fielddata";
+    public static String      GET           = "get";
+    public static String      MERGE         = "merge";
+    public static String      REQUEST_CACHE = "request_cache";
 
-    private Set<String> flags = new HashSet<>();
-    private IndicesStatsLevel level = null;
+    private Set<String>       flags         = new HashSet<>();
+    private IndicesStatsLevel level         = null;
 
     /**
      * Sets all flags to return all nodestats.
@@ -71,7 +71,6 @@ public class ESIndexStatsRequest extends ESBroadcastTimeoutRequest<ESIndexStatsR
         }
         return this;
     }
-
 
     public ESIndexStatsRequest flag(String type, boolean isSet) {
         if (isSet) {

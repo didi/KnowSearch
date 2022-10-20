@@ -22,9 +22,9 @@
     }
   },
   "aggs": {
-    "appId": {
+    "projectId": {
       "terms": {
-        "field": "appId",
+        "field": "projectId",
         "size": 1000
       }
     }

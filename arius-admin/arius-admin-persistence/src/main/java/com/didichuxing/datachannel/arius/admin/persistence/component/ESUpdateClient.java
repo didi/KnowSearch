@@ -1,5 +1,22 @@
 package com.didichuxing.datachannel.arius.admin.persistence.component;
 
+import java.net.InetSocketAddress;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
@@ -18,21 +35,9 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.deletebyquery.E
 import com.didiglobal.logi.elasticsearch.client.response.indices.refreshindex.ESIndicesRefreshIndexResponse;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import java.net.InetSocketAddress;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import javax.annotation.PostConstruct;
+import com.google.common.collect.Lists;
+
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
  * @Author: D10865
@@ -47,7 +52,7 @@ import org.springframework.stereotype.Component;
 public class ESUpdateClient {
 
     private static final ILog             LOGGER            = LogFactory.getLog(ESUpdateClient.class);
-    public static final int MAX_RETRY_CONT = 5;
+    public static final int               MAX_RETRY_CONT    = 5;
 
     /**
      * 集群名称
@@ -65,14 +70,19 @@ public class ESUpdateClient {
     /**
      *  更新es数据的客户端连接队列
      */
-    private LinkedBlockingQueue<ESClient> updateClientPool  = new LinkedBlockingQueue<>(clientCount);
+    private final List<ESClient> updateClientPool  = Lists.newCopyOnWriteArrayList();
+
+    /**
+     * 轮询获取esClient 时使用的下标
+     */
+    private final AtomicInteger  esClientCounter   = new AtomicInteger(0);
     /**
      * 之前的http连接地址
      */
     private String                        beforeHttpAddress = null;
 
     @Autowired
-    private PhyClusterDAO clusterDAO;
+    private PhyClusterDAO                 clusterDAO;
 
     public static final int               MAX_RETRY_CNT     = 5;
 
@@ -146,10 +156,6 @@ public class ESUpdateClient {
                     "class=UpdateClient||method=index||indexName={}||typeName={}||id={}||source={}||errMsg=response {}",
                     indexName, typeName, id, source, JSON.toJSONString(response));
             }
-        } finally {
-            if (esClient != null) {
-                returnUpdateEsClientToPool(esClient);
-            }
         }
 
         return false;
@@ -179,7 +185,8 @@ public class ESUpdateClient {
             for (BaseESPO po : pos) {
                 //write with routing
                 if (null != po.getRoutingValue()) {
-                    BatchNode batchNode = new BatchNode(BatchType.INDEX, indexName, typeName, po.getKey(), JSON.toJSONString(po));
+                    BatchNode batchNode = new BatchNode(BatchType.INDEX, indexName, typeName, po.getKey(),
+                        JSON.toJSONString(po));
                     batchNode.setRouting(po.getRoutingValue());
                     batchNode.setEsVersion(getUpdateEsVersion(esClient));
                     batchRequest.addNode(batchNode);
@@ -192,9 +199,13 @@ public class ESUpdateClient {
 
             for (int i = 0; i < MAX_RETRY_CNT; ++i) {
                 response = esClient.batch(batchRequest).actionGet(2, TimeUnit.MINUTES);
-                if (response == null) {continue;}
+                if (response == null) {
+                    continue;
+                }
 
-                if (handleErrorResponse(indexName, typeName, pos, response)) {return false;}
+                if (handleErrorResponse(indexName, typeName, pos, response)) {
+                    return false;
+                }
 
                 return response.getRestStatus().getStatus() == HttpStatus.SC_OK && !response.getErrors();
             }
@@ -207,10 +218,6 @@ public class ESUpdateClient {
                     indexName, typeName, JSON.toJSONString(response));
             }
 
-        } finally {
-            if (esClient != null) {
-                returnUpdateEsClientToPool(esClient);
-            }
         }
 
         return false;
@@ -263,10 +270,6 @@ public class ESUpdateClient {
                     indexName, typeName, JSON.toJSONString(response));
             }
 
-        } finally {
-            if (esClient != null) {
-                returnUpdateEsClientToPool(esClient);
-            }
         }
 
         return false;
@@ -315,10 +318,6 @@ public class ESUpdateClient {
                     indexName, typeName, JSON.toJSONString(response));
             }
 
-        } finally {
-            if (esClient != null) {
-                returnUpdateEsClientToPool(esClient);
-            }
         }
 
         return false;
@@ -352,10 +351,6 @@ public class ESUpdateClient {
         } catch (Exception e) {
             LOGGER.warn("class=UpdateClient||method=refreshIndex||indexName={}||errMsg=refresh index error. ",
                 indexName, e);
-        } finally {
-            if (esClient != null) {
-                returnUpdateEsClientToPool(esClient);
-            }
         }
 
         return false;
@@ -369,39 +364,28 @@ public class ESUpdateClient {
      */
     private ESClient getUpdateEsClientFromPool() {
         ESClient esClient = null;
-        int retryCount = 0;
-
-        // 如果esClient为空或者重试次数小于5次，循环获取
-        while (esClient == null && retryCount < MAX_RETRY_CONT) {
-            try {
-                ++retryCount;
-                esClient = updateClientPool.poll(3, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+        try {
+            //这里获取当前轮询的次数，如果次数超过一定阈值则置为 0 （暂定阈值为client数量的10倍）
+            int flag = esClientCounter.getAndIncrement();
+            if (flag > clientCount * 5) {
+                esClientCounter.lazySet(0);
             }
+            //获取真正的esClient下标
+            int currentIndex = flag % clientCount;
+            esClient = updateClientPool.get(currentIndex);
+        } catch (Exception e) {
+            LOGGER.error(
+                "class=ESUpdateClient||method=getUpdateEsClientFromPool||errMsg=fail to get es client from pool：", e);
         }
-
         if (esClient == null) {
-            LOGGER.error( "class=ESUpdateClient||method=getUpdateEsClientFromPool||errMsg=fail to get es client from pool");
+            LOGGER.error(
+                "class=ESUpdateClient||method=getUpdateEsClientFromPool||errMsg=fail to get es client from pool");
         }
 
         return esClient;
     }
 
-    /**
-     * 归还到es http 客户端连接池
-     *
-     * @param esClient
-     */
-    private void returnUpdateEsClientToPool(ESClient esClient) {
-        try {
-            this.updateClientPool.put(esClient);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    private ESClient buildEsClient(String address,String password,String clusterName) {
+    private ESClient buildEsClient(String address, String password, String clusterName) {
         if (StringUtils.isBlank(address)) {
             return null;
         }
@@ -427,7 +411,7 @@ public class ESUpdateClient {
             if (ioThreadCount > 0) {
                 esClient.setIoThreadCount(ioThreadCount);
             }
-            if(StringUtils.isNotBlank(password)){
+            if (StringUtils.isNotBlank(password)) {
                 esClient.setPassword(password);
             }
 
@@ -460,7 +444,7 @@ public class ESUpdateClient {
 
         if (updateClusterDataSource == null) {
             LOGGER.error("class=UpdateClient||method=setDataSourceList||errMsg=fail to get es cluster info {}",
-                    metadataClusterName);
+                metadataClusterName);
             return;
         }
 
@@ -481,12 +465,12 @@ public class ESUpdateClient {
                     }
                     iterator.remove();
                     LOGGER.info("class=UpdateClient||method=setDataSourceList||msg=remove old es client {}, {}",
-                            metadataClusterName, beforeHttpAddress);
+                        metadataClusterName, beforeHttpAddress);
                 }
             }
         } catch (Exception e) {
             LOGGER.error("class=UpdateClient||method=setDataSourceList||errMsg=fail to remove old es client {}",
-                    metadataClusterName, e);
+                metadataClusterName, e);
         }
 
         this.updateClientPool.clear();
@@ -500,8 +484,7 @@ public class ESUpdateClient {
             if (esClient != null) {
                 this.updateClientPool.add(esClient);
                 LOGGER.info("class=UpdateClient||method=setDataSourceList||msg=add new es client {}, {}",
-                        metadataClusterName,
-                    beforeHttpAddress);
+                    metadataClusterName, beforeHttpAddress);
             }
         }
     }
@@ -517,7 +500,8 @@ public class ESUpdateClient {
         return updateClusterDataSource;
     }
 
-    private boolean handleErrorResponse(String indexName, String typeName, List<? extends BaseESPO> pos, ESBatchResponse response) {
+    private boolean handleErrorResponse(String indexName, String typeName, List<? extends BaseESPO> pos,
+                                        ESBatchResponse response) {
         if (response.getErrors().booleanValue()) {
             int errorItemIndex = 0;
 
@@ -533,20 +517,21 @@ public class ESUpdateClient {
         return false;
     }
 
-    private void recordErrorResponseItem(String indexName, String typeName, List<? extends BaseESPO> pos, int errorItemIndex, IndexResultItemNode item) {
+    private void recordErrorResponseItem(String indexName, String typeName, List<? extends BaseESPO> pos,
+                                         int errorItemIndex, IndexResultItemNode item) {
         if (item.getIndex() != null && item.getIndex().getShards() != null
-                && CollectionUtils.isNotEmpty(item.getIndex().getShards().getFailures())) {
+            && CollectionUtils.isNotEmpty(item.getIndex().getShards().getFailures())) {
             LOGGER.warn(
-                    "class=UpdateClient||method=batchInsert||indexName={}||typeName={}||errMsg=Failures: {}, content: {}",
-                    indexName, typeName, item.getIndex().getShards().getFailures().toString(),
-                    JSON.toJSONString(pos.get(errorItemIndex)));
+                "class=UpdateClient||method=batchInsert||indexName={}||typeName={}||errMsg=Failures: {}, content: {}",
+                indexName, typeName, item.getIndex().getShards().getFailures().toString(),
+                JSON.toJSONString(pos.get(errorItemIndex)));
         }
 
         if (item.getIndex() != null && item.getIndex().getError() != null) {
             LOGGER.warn(
-                    "class=UpdateClient||method=batchInsert||indexName={}||typeName={}||errMsg=Error: {}, content: {}",
-                    indexName, typeName, item.getIndex().getError().getReason(),
-                    JSON.toJSONString(pos.get(errorItemIndex)));
+                "class=UpdateClient||method=batchInsert||indexName={}||typeName={}||errMsg=Error: {}, content: {}",
+                indexName, typeName, item.getIndex().getError().getReason(),
+                JSON.toJSONString(pos.get(errorItemIndex)));
         }
     }
 }

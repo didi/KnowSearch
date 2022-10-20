@@ -17,29 +17,29 @@ import java.util.Date;
 @AllArgsConstructor
 public class WorkOrderVO extends BaseVO {
     @ApiModelProperty(value = "工单ID")
-    private Long id;
+    private Long    id;
 
     @ApiModelProperty(value = "工单标题")
-    private String title;
+    private String  title;
 
     @ApiModelProperty(value = "工单类型")
-    private String type;
+    private String  type;
 
     @ApiModelProperty(value = "申请人")
-    private String applicant;
+    private String  applicant;
 
     @ApiModelProperty(value = "描述信息")
-    private String description;
+    private String  description;
 
     @ApiModelProperty(value = "工单状态, 0:待审批, 1:通过, 2:拒绝, 3:取消")
     private Integer status;
 
     @ApiModelProperty(value = "申请/审核时间")
-    private Date createTime;
-    
+    private Date    createTime;
+
     @ApiModelProperty(value = "审批人ProjectId")
     private Integer approverProjectId;
 
     @ApiModelProperty(value = "扩展字段")
-    private String extensions;
+    private String  extensions;
 }

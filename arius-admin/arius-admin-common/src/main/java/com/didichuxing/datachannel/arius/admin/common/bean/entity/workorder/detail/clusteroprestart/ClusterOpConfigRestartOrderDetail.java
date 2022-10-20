@@ -20,15 +20,15 @@ public class ClusterOpConfigRestartOrderDetail extends ClusterOpRestartOrderDeta
      * Es配置操作: 1.新增 2.编辑 3.删除
      * @see EsConfigActionEnum
      */
-    private Integer                 actionType;
+    private Integer        actionType;
 
     /**
      * 新增Es配置
      */
-    private List<ESConfig>          newEsConfigs;
+    private List<ESConfig> newEsConfigs;
 
     /**
      * 原始Es配置
      */
-    private List<ESConfig>          originalConfigs;
+    private List<ESConfig> originalConfigs;
 }

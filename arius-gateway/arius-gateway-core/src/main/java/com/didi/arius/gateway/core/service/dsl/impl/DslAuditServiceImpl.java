@@ -12,6 +12,8 @@ import com.didi.arius.gateway.core.service.arius.DslTemplateService;
 import com.didi.arius.gateway.core.service.dsl.DslAuditService;
 import com.didiglobal.logi.dsl.parse.DslExtractionUtilV2;
 import com.didiglobal.logi.dsl.parse.bean.ExtractResult;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import lombok.NoArgsConstructor;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.xcontent.XContentHelper;
@@ -19,9 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author fitz
@@ -68,11 +67,12 @@ public class DslAuditServiceImpl implements DslAuditService {
     private String audit(BaseContext baseContext, String source) {
         ExtractResult extractResult = DslExtractionUtilV2.extractDsl(source);
         if ("FAILED".equals(extractResult.getDslTemplate())) {
-            logger.error("extractDsl_failed||appid={}||requestId={}||source={}", baseContext.getAppid(), baseContext.getRequestId(), source);
+            logger.error("extractDsl_failed||projectId={}||appid={}||requestId={}||source={}",
+                    baseContext.getProjectId(), baseContext.getAppid(), baseContext.getRequestId(), source);
             return "";
         }
 
-        String dslKey = baseContext.getAppid() + "_" + extractResult.getDslTemplateMd5();
+        String dslKey = baseContext.getProjectId() + "_" + extractResult.getDslTemplateMd5();
         baseContext.setDslTemplateKey(dslKey);
 
         if (baseContext.isDetailLog()) {

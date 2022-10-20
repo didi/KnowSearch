@@ -36,11 +36,12 @@ public class LogicClusterIndecreaseOrderDetail extends AbstractOrderDetail {
      * dataNode的个数
      */
     private Integer dataNodeNu;
-
+    
     /**
-     * 责任人
+     * 原有 dataNode 的个数
      */
-    private String  responsible;
+    private int oldDataNodeNu;
+   
 
     /**
      * 备注
@@ -57,13 +58,5 @@ public class LogicClusterIndecreaseOrderDetail extends AbstractOrderDetail {
      */
     private String  config;
 
-    /**
-     * 部门id
-     */
-    private String  libraDepartmentId;
-
-    /**
-     * 部门名称
-     */
-    private String  libraDepartment;
+  
 }

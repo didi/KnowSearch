@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import com.alibaba.druid.util.StringUtils;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
@@ -18,6 +19,17 @@ public class SizeUtil {
 
     private static final ILog LOGGER = LogFactory.getLog(SizeUtil.class);
 
+
+    public static Long getDasboardUnitSize(String proStoreSize) {
+        if (StringUtils.isEmpty(proStoreSize)){
+            return 0L;
+        }
+        if (proStoreSize.contains("个")){
+            return (long) (Double.parseDouble(proStoreSize.replaceAll("个","")));
+        }else {
+            return getUnitSize(proStoreSize);
+        }
+    }
     /**
      * 得到字节数
      *
@@ -32,35 +44,35 @@ public class SizeUtil {
         final long C4 = C3 * 1024L;
         final long C5 = C4 * 1024L;
         long bytes = 0L;
-
+        //TODO:JIANG
         try {
-            String lowerSValue = proStoreSize.trim();
-            if (lowerSValue.endsWith("k")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 1)) * C1);
-            } else if (lowerSValue.endsWith("kb")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 2)) * C1);
-            } else if (lowerSValue.endsWith("m")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 1)) * C2);
-            } else if (lowerSValue.endsWith("mb")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 2)) * C2);
-            } else if (lowerSValue.endsWith("g")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 1)) * C3);
-            } else if (lowerSValue.endsWith("gb")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 2)) * C3);
-            } else if (lowerSValue.endsWith("t")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 1)) * C4);
-            } else if (lowerSValue.endsWith("tb")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 2)) * C4);
-            } else if (lowerSValue.endsWith("p")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 1)) * C5);
-            } else if (lowerSValue.endsWith("pb")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 2)) * C5);
-            } else if (lowerSValue.endsWith("b")) {
-                bytes = Long.parseLong(lowerSValue.substring(0, lowerSValue.length() - 1).trim());
-            } else if (lowerSValue.equals("-1")) {
+            String trimValue = proStoreSize.trim();
+            if (trimValue.endsWith("k")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 1)) * C1);
+            } else if (trimValue.endsWith("kb")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 2)) * C1);
+            } else if (trimValue.endsWith("m")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 1)) * C2);
+            } else if (trimValue.endsWith("mb")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 2)) * C2);
+            } else if (trimValue.endsWith("g")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 1)) * C3);
+            } else if (trimValue.endsWith("gb")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 2)) * C3);
+            } else if (trimValue.endsWith("t")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 1)) * C4);
+            } else if (trimValue.endsWith("tb")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 2)) * C4);
+            } else if (trimValue.endsWith("p")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 1)) * C5);
+            } else if (trimValue.endsWith("pb")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 2)) * C5);
+            } else if (trimValue.endsWith("b")) {
+                bytes = Long.parseLong(trimValue.substring(0, trimValue.length() - 1).trim());
+            } else if (trimValue.equals("-1")) {
                 // Allow this special value to be unit-less:
                 bytes = -1;
-            } else if (lowerSValue.equals("0")) {
+            } else if (trimValue.equals("0")) {
                 // Allow this special value to be unit-less:
                 bytes = 0;
             } else {
@@ -140,5 +152,36 @@ public class SizeUtil {
         }
 
         return String.format("%f%s", value, suffix);
+    }
+
+    public static String getShortUnitSize(long bytes) {
+        final long c1 = 1024L;
+        final long c2 = c1 * 1024L;
+        final long c3 = c2 * 1024L;
+        final long c4 = c3 * 1024L;
+        final long c5 = c4 * 1024L;
+        long value = bytes;
+        String suffix = "b";
+        if (bytes >= c5) {
+            value /= c5;
+            suffix = "p";
+        } else if (bytes >= c4) {
+            value /= c4;
+            suffix = "t";
+        } else if (bytes >= c3) {
+            value /= c3;
+            suffix = "g";
+        } else if (bytes >= c2) {
+            value /= c2;
+            suffix = "m";
+        } else if (bytes >= c1) {
+            value /= c1;
+            suffix = "k";
+        }
+        return String.format("%d%s", value, suffix);
+    }
+
+    public static String getMachineSpec(int cpuNum, long memoryBytes, long diskBytes) {
+        return String.format("%sc-%s-%s", cpuNum, getShortUnitSize(memoryBytes), getShortUnitSize(diskBytes));
     }
 }

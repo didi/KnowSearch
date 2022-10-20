@@ -26,43 +26,38 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes ={ SpringTool.class })
+@ContextConfiguration(classes = { SpringTool.class })
 @SpringBootTest
 class ProjectConfigManagerTest {
-    
+
     @Mock
-    private ProjectConfigService projectConfigService;
+    private ProjectConfigService     projectConfigService;
     @Mock
-    private OperateRecordService operateRecordService;
-    
+    private OperateRecordService     operateRecordService;
+
     @InjectMocks
     private ProjectConfigManagerImpl projectConfigManager;
-    
+
     @BeforeEach
     void setUp() {
         initMocks(this);
-      
+
     }
-    
+
     @Test
     void testGet() {
         // Setup
         final Result<ProjectConfigVO> expectedResult = Result.buildSucc(new ProjectConfigVO(0, 0, 0, 0, 0, 0, "memo"));
-        
+
         // Configure ProjectConfigService.getProjectConfig(...).
         final ProjectConfig projectConfig = new ProjectConfig(0, 0, 0, 0, 0, 0, "memo");
         when(projectConfigService.getProjectConfig(0)).thenReturn(projectConfig);
-        
+
         // Run the test
         final Result<ProjectConfigVO> result = projectConfigManager.get(0);
-        
+
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
     }
-    
-   
-    
-    
 
-    
 }

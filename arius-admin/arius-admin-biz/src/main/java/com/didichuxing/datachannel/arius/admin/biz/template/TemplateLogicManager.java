@@ -1,14 +1,22 @@
 package com.didichuxing.datachannel.arius.admin.biz.template;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateClearVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDeleteVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDetailVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateRateLimitVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateCyclicalRollInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
@@ -32,9 +40,6 @@ public interface TemplateLogicManager {
      */
     int DEFAULT_TEMPLATE_VALUE = 61;
 
-
-
-
     /**
      * 获取最近访问该模板的project
      *
@@ -42,8 +47,6 @@ public interface TemplateLogicManager {
      * @return result
      */
     List<ProjectBriefVO> getLogicTemplateProjectAccess(Integer logicId) throws AmsRemoteException;
-
-
 
     /**
      * 新建逻辑模板
@@ -53,7 +56,8 @@ public interface TemplateLogicManager {
      * @return result
      */
     @Transactional(rollbackFor = Exception.class)
-    Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer projectId) throws AdminOperateException;
+    Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator,
+                        Integer projectId) throws AdminOperateException;
 
     /**
      * 获取所有逻辑模板聚合
@@ -63,14 +67,7 @@ public interface TemplateLogicManager {
      */
     List<IndexTemplateLogicAggregate> getAllTemplatesAggregate(Integer projectId);
 
-    /**
-     * 获取逻辑集群所有逻辑模板聚合
-     *
-     * @param logicClusterId 逻辑集群ID
-     * @param projectId 操作的project Id
-     * @return
-     */
-    List<IndexTemplateLogicAggregate> getLogicClusterTemplatesAggregate(Long logicClusterId, Integer projectId);
+
 
     /**
      * 拼接集群名称
@@ -112,11 +109,7 @@ public interface TemplateLogicManager {
      */
     List<String> getTemplateLogicNames(Integer projectId);
 
-    @Deprecated
-    //todo: 下线并重命名方法
-    Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId) throws AdminOperateException;
-
-    Result<Void> newEditTemplate(IndexTemplateDTO param, String operator, Integer projectId);
+    Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId);
 
     Result<Void> delTemplate(Integer logicTemplateId, String operator, Integer projectId) throws AdminOperateException;
 
@@ -126,7 +119,8 @@ public interface TemplateLogicManager {
      * @param projectId      项目
      * @return
      */
-    PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(TemplateConditionDTO condition, Integer projectId) throws NotFindSubclassException;
+    PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(TemplateConditionDTO condition,
+                                                                  Integer projectId) throws NotFindSubclassException;
 
     /**
      * 校验创建模板名称是否合法
@@ -152,11 +146,8 @@ public interface TemplateLogicManager {
      * @return
      */
     Result<Void> switchRolloverStatus(Integer templateLogicId, Integer status, String operator, Integer projectId);
-    /**
-     * 获取创建dcdr链路模板
-     * @return
-     */
-    List<Integer> getHaveDCDRLogicIds();
+
+
 
     /**
      * 校验模板是否可以使用索引模板的相关服务，例如是否可以编辑mapping,setting
@@ -192,7 +183,7 @@ public interface TemplateLogicManager {
     /**
      * 清除索引
      */
-    Result<Void> clearIndices(Integer templateId, List<String> indices, Integer projectId);
+    Result<Void> clearIndices(TemplateClearDTO clearDTO, String operator, Integer projectId);
 
     /**
      * 执行调整shard 数量
@@ -203,7 +194,8 @@ public interface TemplateLogicManager {
      * @param operator
      * @return 调整结果
      */
-    Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum, Integer projectId, String operator) throws AdminOperateException;
+    Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum, Integer projectId,
+                             String operator) throws AdminOperateException;
 
     /**
      * 模板升级
@@ -216,4 +208,49 @@ public interface TemplateLogicManager {
     Result<Void> upgrade(Integer templateId, String operator, Integer projectId) throws AdminOperateException;
 
     Result<List<ConsoleTemplateVO>> listTemplateVOByLogicCluster(String clusterLogicName, Integer projectId);
+
+    Result<List<Tuple<String, String>>> listLogicTemplatesByProjectId(Integer projectId);
+
+    Result<List<TemplateCyclicalRollInfoVO>> getCyclicalRollInfo(Integer logicId);
+
+    Result<ConsoleTemplateRateLimitVO> getTemplateRateLimit(Integer logicId);
+
+    Result<ConsoleTemplateDetailVO> getDetailVoByLogicId(Integer logicId, Integer projectId);
+
+    Result<ConsoleTemplateClearVO> getLogicTemplateClearInfo(Integer logicId) throws AmsRemoteException;
+
+    Result<ConsoleTemplateDeleteVO> getLogicTemplateDeleteInfo(Integer logicId) throws AmsRemoteException;
+
+    Result<Void> updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO, String operator,
+                                              Integer projectId);
+    
+    /**
+     * 它通过其逻辑 ID 更新模板的健康状况。
+     *
+     * @param logicId 模板的 logicId。
+     * @return 一个布尔值。
+     */
+    boolean updateTemplateHealthByLogicId(Integer logicId);
+    
+    /**
+     * 用索引模板的写操作。
+     *
+     * @param templateId 要操作的模板的 id
+     * @param status     0：否，1：是
+     * @param operator   触发操作的操作员
+     * @param projectId  项目编号
+     * @return Result<Void>
+     */
+    Result<Void> blockWrite(Integer templateId, Boolean status, String operator, Integer projectId);
+    
+    /**
+     * 用于索引模板的读取。
+     *
+     * @param templateId 要操作的模板的 id
+     * @param status     0：否，1：是
+     * @param operator   触发操作的用户
+     * @param projectId  项目编号
+     * @return Result<Void>
+     */
+    Result<Void> blockRead(Integer templateId, Boolean status, String operator, Integer projectId);
 }

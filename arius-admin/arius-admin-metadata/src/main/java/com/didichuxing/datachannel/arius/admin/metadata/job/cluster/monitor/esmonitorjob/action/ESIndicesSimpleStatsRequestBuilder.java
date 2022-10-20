@@ -34,7 +34,8 @@ import static com.didiglobal.logi.elasticsearch.client.request.index.stats.ESInd
  * All the nodestats to be returned can be cleared using {@link #clear()}, at which point, specific
  * nodestats can be enabled.
  */
-public class ESIndicesSimpleStatsRequestBuilder extends ESBroadcastOperationRequestBuilder<ESIndicesSimpleStatsRequest, ESIndicesSimpleStatsResponse, ESIndicesSimpleStatsRequestBuilder> {
+public class ESIndicesSimpleStatsRequestBuilder extends
+                                                ESBroadcastOperationRequestBuilder<ESIndicesSimpleStatsRequest, ESIndicesSimpleStatsResponse, ESIndicesSimpleStatsRequestBuilder> {
 
     public ESIndicesSimpleStatsRequestBuilder(ElasticsearchClient client, ESIndicesSimpleStatsAction action) {
         super(client, action, new ESIndicesSimpleStatsRequest());
@@ -64,7 +65,6 @@ public class ESIndicesSimpleStatsRequestBuilder extends ESBroadcastOperationRequ
         request.types(types);
         return this;
     }
-
 
     public ESIndicesSimpleStatsRequestBuilder setDocs(boolean docs) {
         request.flag(DOCS, docs);
@@ -130,7 +130,6 @@ public class ESIndicesSimpleStatsRequestBuilder extends ESBroadcastOperationRequ
         request.flag(COMPLETION, completion);
         return this;
     }
-
 
     public ESIndicesSimpleStatsRequestBuilder setTranslog(boolean translog) {
         request.flag(TRANSLOG, translog);

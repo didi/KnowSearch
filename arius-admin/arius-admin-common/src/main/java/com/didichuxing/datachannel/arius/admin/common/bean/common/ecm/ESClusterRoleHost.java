@@ -13,27 +13,27 @@ public class ESClusterRoleHost implements Serializable {
     /**
      * ip:port 主機名:port = hostname:port
      */
-    private String address;
+    private String  address;
 
     /**
      * 角色名称
      */
-    private String role;
+    private String  role;
 
     /**
      * 主機名
      */
-    private String hostname;
+    private String  hostname;
 
     /**
      * IP
      */
-    private String ip;
+    private String  ip;
 
     /**
      * 端口号
      */
-    private String port;
+    private String  port;
 
     /**
      * 冷热节点标识
@@ -43,7 +43,7 @@ public class ESClusterRoleHost implements Serializable {
     /**
      * 机器规格 例如32C-64G-SSD-6T
      */
-    private String machineSpec;
+    private String  machineSpec;
 
     /**
      * regionId
@@ -53,5 +53,5 @@ public class ESClusterRoleHost implements Serializable {
     /**
      * attributes, 逗号分隔  key1:value1,key2:value2
      */
-    private String attributes;
+    private String  attributes;
 }

@@ -9,7 +9,8 @@
                 "single_type":"true"
             },
             "number_of_shards":"4",
-            "number_of_replicas":"1"
+            "number_of_replicas":"1",
+            "refresh_interval": "10s"
         }
     },
     "mappings":{
@@ -17,218 +18,284 @@
             "enabled":true
         },
         "properties":{
-            "template":{
-                "type":"keyword"
+        "cleanTime" : {
+          "type" : "date",
+          "format" : "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis"
+        },
+        "cluster" : {
+          "type" : "keyword"
+        },
+        "collectTime" : {
+          "type" : "date",
+          "format" : "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis"
+        },
+        "index" : {
+          "type" : "keyword"
+        },
+        "key" : {
+          "type" : "keyword",
+          "ignore_above" : 512
+        },
+        "logTime" : {
+          "type" : "date",
+          "format" : "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis"
+        },
+        "logicTemplateId" : {
+          "type" : "long"
+        },
+        "metrics" : {
+          "properties" : {
+            "cost-index_time_in_millis" : {
+                "type" : "double"
             },
-            "cluster":{
-                "type":"keyword"
+            "cost-query_time_in_millis" : {
+                "type" : "double"
             },
-            "collectTime":{
-                "format":"yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
-                "type":"date"
+            "cost-refresh-total_time_in_millis" : {
+                "type" : "double"
             },
-            "routingValue":{
-                "type":"text",
-                "fields":{
-                    "keyword":{
-                        "ignore_above":256,
-                        "type":"keyword"
-                    }
-                }
+            "cost-scroll_time_in_millis" : {
+                "type" : "double"
             },
-            "index":{
-                "type":"keyword"
+            "cost_fetch_time_in_millis" : {
+              "type" : "double"
             },
-            "templateId":{
-                "type":"long"
+            "cost_flush_total_time_in_millis" : {
+              "type" : "double"
             },
-            "logTime":{
-                "format":"yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
-                "type":"date"
+            "cost_index_time_in_millis" : {
+              "type" : "double"
             },
-            "cleanTime":{
-                "format":"yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
-                "type":"date"
+            "cost_query_time_in_millis" : {
+              "type" : "double"
             },
-            "shardNu":{
-                "type":"double"
+            "cost_refresh_total_time_in_millis" : {
+              "type" : "double"
             },
-            "sinkTime":{
-                "format":"yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
-                "type":"date"
+            "cost_scroll_time_in_millis" : {
+              "type" : "double"
             },
-            "metrics":{
-                "properties":{
-                    "refresh-total":{
-                        "type":"double"
-                    },
-                    "indexing-index_time_in_millis_rate":{
-                        "type":"double"
-                    },
-                    "store-size_in_bytes":{
-                        "type":"double"
-                    },
-                    "docs-count-total":{
-                        "type":"float"
-                    },
-                    "search-fetch_time_in_millis":{
-                        "type":"double"
-                    },
-                    "search-query_time_in_millis_rate":{
-                        "type":"double"
-                    },
-                    "merges-total":{
-                        "type":"double"
-                    },
-                    "segments-doc_values_memory_in_bytes":{
-                        "type":"double"
-                    },
-                    "search-query_time_in_millis":{
-                        "type":"double"
-                    },
-                    "indexing-index_time_per_doc":{
-                        "type":"double"
-                    },
-                    "segments-index_writer_memory_in_bytes":{
-                        "type":"double"
-                    },
-                    "indexing-index_total_rate":{
-                        "type":"double"
-                    },
-                    "segments-memory_in_bytes":{
-                        "type":"double"
-                    },
-                    "store-size_in_bytes_rate":{
-                        "type":"double"
-                    },
-                    "query_cache-memory_size_in_bytes":{
-                        "type":"double"
-                    },
-                    "docs-count":{
-                        "type":"double"
-                    },
-                    "shardNu":{
-                        "type":"double"
-                    },
-                    "search-query_total_rate":{
-                        "type":"double"
-                    },
-                    "refresh-total_time_in_millis":{
-                        "type":"double"
-                    },
-                    "search-scroll_time_in_millis_rate":{
-                        "type":"double"
-                    },
-                    "merges-total_rate":{
-                        "type":"double"
-                    },
-                    "flush-total":{
-                        "type":"double"
-                    },
-                    "search-fetch_total_rate":{
-                        "type":"double"
-                    },
-                    "refresh-total_rate":{
-                        "type":"double"
-                    },
-                    "translog-size_in_bytes":{
-                        "type":"double"
-                    },
-                    "segments-count":{
-                        "type":"double"
-                    },
-                    "indices-search-query_avg_time":{
-                        "type":"double"
-                    },
-                    "flush-total_time_in_millis":{
-                        "type":"double"
-                    },
-                    "indexing-index_total":{
-                        "type":"double"
-                    },
-                    "indexing-index_time_in_millis":{
-                        "type":"double"
-                    },
-                    "search-fetch_time_in_millis_rate":{
-                        "type":"double"
-                    },
-                    "indexing-index_total_times":{
-                        "type":"double"
-                    },
-                    "flush-total_rate":{
-                        "type":"double"
-                    },
-                    "search-scroll_time_in_millis":{
-                        "type":"double"
-                    },
-                    "indices-merge_avg_time":{
-                        "type":"double"
-                    },
-                    "merges-current":{
-                        "type":"double"
-                    },
-                    "search-query_total":{
-                        "type":"text",
-                        "fields":{
-                            "keyword":{
-                                "ignore_above":256,
-                                "type":"keyword"
-                            }
-                        }
-                    },
-                    "indices-indexing-index_time_per_doc":{
-                        "type":"double"
-                    },
-                    "search-scroll_total_rate":{
-                        "type":"double"
-                    },
-                    "segments-points_memory_in_bytes":{
-                        "type":"double"
-                    },
-                    "indices-search-fetch_avg_time":{
-                        "type":"double"
-                    },
-                    "indices-indexing-index_latency":{
-                        "type":"float"
-                    },
-                    "segments-term_vectors_memory_in_bytes":{
-                        "type":"double"
-                    },
-                    "segments-stored_fields_memory_in_bytes":{
-                        "type":"double"
-                    },
-                    "store-size_in_bytes-total":{
-                        "type":"float"
-                    },
-                    "merges-total_time_in_millis":{
-                        "type":"double"
-                    },
-                    "indices-refresh_avg_time":{
-                        "type":"double"
-                    },
-                    "indexing-index_failed_rate":{
-                        "type":"double"
-                    },
-                    "indices-search-scroll_avg_time":{
-                        "type":"double"
-                    },
-                    "indices-flush_avg_time":{
-                        "type":"double"
-                    }
-                }
+            "docs-count" : {
+              "type" : "double"
             },
-            "key":{
-                "ignore_above":512,
-                "type":"keyword"
+            "docs-count-total" : {
+              "type" : "float"
             },
-            "logicTemplateId":{
-                "type":"long"
+            "fielddata-memory_size_in_bytes" : {
+                "type" : "double"
             },
-            "timestamp":{
-                "format":"epoch_millis",
-                "type":"date"
+            "flush-total" : {
+              "type" : "double"
+            },
+            "flush-total_rate" : {
+              "type" : "double"
+            },
+            "flush-total_time_in_millis" : {
+              "type" : "double"
+            },
+            "indexing-docs-count" : {
+               "type" : "double"
+            },
+            "indexing-index_failed_rate" : {
+              "type" : "double"
+            },
+            "indexing-index_time_in_millis" : {
+              "type" : "double"
+            },
+            "indexing-index_time_in_millis_rate" : {
+              "type" : "double"
+            },
+            "indexing-index_time_per_doc" : {
+              "type" : "double"
+            },
+            "indexing-index_total" : {
+              "type" : "double"
+            },
+            "indexing-index_total_rate" : {
+              "type" : "double"
+            },
+            "indexing-index_total_times" : {
+              "type" : "double"
+            },
+            "indices-flush_avg_time" : {
+              "type" : "double"
+            },
+            "indices-indexing-index_latency" : {
+              "type" : "float"
+            },
+            "indices-indexing-index_time_per_doc" : {
+              "type" : "double"
+            },
+            "cost_merges_total_time_in_millis" : {
+              "type" : "double"
+            },
+            "indices-refresh_avg_time" : {
+              "type" : "double"
+            },
+            "indices-search-fetch_avg_time" : {
+              "type" : "double"
+            },
+            "indices-search-query_avg_time" : {
+              "type" : "double"
+            },
+            "indices-search-scroll_avg_time" : {
+              "type" : "double"
+            },
+            "merges-current" : {
+              "type" : "double"
+            },
+            "merges-total" : {
+              "type" : "double"
+            },
+            "merges-total_rate" : {
+              "type" : "double"
+            },
+            "merges-total_time_in_millis" : {
+              "type" : "double"
+            },
+            "query_cache-memory_size_in_bytes" : {
+              "type" : "double"
+            },
+            "refresh-total" : {
+              "type" : "double"
+            },
+            "refresh-total_rate" : {
+              "type" : "double"
+            },
+            "refresh-total_time_in_millis" : {
+              "type" : "double"
+            },
+            "search-fetch_time_in_millis" : {
+              "type" : "double"
+            },
+            "search-fetch_time_in_millis_rate" : {
+              "type" : "double"
+            },
+            "search-fetch_total" : {
+               "type" : "double"
+            },
+            "search-fetch_total_rate" : {
+              "type" : "double"
+            },
+            "search-query_time_in_millis" : {
+              "type" : "double"
+            },
+            "search-query_time_in_millis_rate" : {
+              "type" : "double"
+            },
+            "search-query_total" : {
+               "type" : "double"
+            },
+            "search-query_total_rate" : {
+              "type" : "double"
+            },
+            "search-scroll_time_in_millis" : {
+              "type" : "double"
+            },
+            "search-scroll_time_in_millis_rate" : {
+              "type" : "double"
+            },
+            "search-scroll_total" : {
+               "type" : "double"
+            },
+            "search-scroll_total_rate" : {
+              "type" : "double"
+            },
+            "segments-count" : {
+              "type" : "double"
+            },
+            "segments-doc_values_memory_in_bytes" : {
+              "type" : "double"
+            },
+            "segments-fixed_bit_set_memory_in_bytes" : {
+               "type" : "double"
+            },
+            "segments-index_writer_memory_in_bytes" : {
+              "type" : "double"
+            },
+            "segments-memory_in_bytes" : {
+              "type" : "double"
+            },
+            "segments-norms_memory_in_bytes" : {
+               "type" : "double"
+            },
+            "segments-points_memory_in_bytes" : {
+              "type" : "double"
+            },
+            "segments-request_cache-memory_size_in_bytes" : {
+              "type" : "double"
+            },
+            "segments-stored_fields_memory_in_bytes" : {
+              "type" : "double"
+            },
+            "segments-term_vectors_memory_in_bytes" : {
+              "type" : "double"
+            },
+            "segments-version_map_memory_in_bytes" : {
+              "type" : "double"
+            },
+            "segments_fielddata_memory_size_in_bytes" : {
+              "type" : "double"
+            },
+            "segments_fixed_bit_set_memory_in_bytes" : {
+              "type" : "double"
+            },
+            "segments_norms_memory_in_bytes" : {
+              "type" : "double"
+            },
+            "segments_segments_request_cache_memory_size_in_bytes" : {
+              "type" : "double"
+            },
+            "segments-breakers-fielddata-limit_size_in_bytes" : {
+                           "type" : "double"
+             },
+            "segments_version_map_memory_in_bytes" : {
+              "type" : "double"
+            },
+            "shardNu" : {
+              "type" : "double"
+            },
+            "store-size_in_bytes" : {
+              "type" : "double"
+            },
+            "store-size_in_bytes-total" : {
+              "type" : "float"
+            },
+            "store-size_in_bytes_rate" : {
+              "type" : "double"
+            },
+            "translog-size_in_bytes" : {
+              "type" : "double"
             }
+          }
+        },
+        "routingValue" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "shardNu" : {
+          "type" : "double"
+        },
+        "sinkTime" : {
+          "type" : "date",
+          "format" : "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis"
+        },
+        "template" : {
+          "type" : "keyword"
+        },
+        "templateId" : {
+          "type" : "long"
+        },
+        "timestamp" : {
+          "type" : "date",
+          "format" : "epoch_millis"
         }
+      }
     },
     "aliases":{
 

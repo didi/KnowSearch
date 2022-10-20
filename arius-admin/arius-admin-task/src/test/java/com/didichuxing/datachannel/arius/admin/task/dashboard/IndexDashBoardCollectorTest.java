@@ -16,13 +16,13 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @version : IndexDashBoardCollectorTest.java, v 0.1 2022年03月18日 18:27 zhangliang Exp $
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {AriusAdminTaskConfiguration.class})
+@ContextConfiguration(classes = { AriusAdminTaskConfiguration.class })
 public class IndexDashBoardCollectorTest {
 
     private static final ILog LOGGER = LogFactory.getLog(IndexDashBoardCollectorTest.class);
 
     @Autowired
-    ApplicationContext wac;
+    ApplicationContext        wac;
 
     @Test
     public void testBuildBySingleCluster() {

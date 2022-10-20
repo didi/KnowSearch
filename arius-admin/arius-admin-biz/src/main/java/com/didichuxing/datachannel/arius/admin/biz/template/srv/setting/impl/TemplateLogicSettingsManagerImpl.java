@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_SETTING;
 import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.ASYNC;
 import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.NUMBER_OF_REPLICAS_KEY;
 import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.REQUEST;
@@ -9,31 +8,37 @@ import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexT
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingsManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateSettingOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithMapping;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.event.index.ReBuildTomorrowIndexEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 索引setting服务实现
@@ -41,50 +46,33 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2020-09-09
  */
 @Service
-public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements TemplateLogicSettingsManager {
+public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implements TemplateLogicSettingsManager {
 
     @Autowired
-    private TemplatePhySettingsManager templatePhySettingsManager;
+    private TemplatePhySettingManager   templatePhySettingManager;
 
     @Autowired
     private TemplateLogicMappingManager templateLogicMappingManager;
 
     @Autowired
-    private TemplatePreCreateManager templatePreCreateManager;
+    private PreCreateManager            templatePreCreateManager;
+    @Autowired
+    private ESTemplateService           esTemplateService;
 
+    /**
+     * @return
+     */
     @Override
-    public TemplateServiceEnum templateService() {
-        return TEMPLATE_SETTING;
+    public TemplateServiceEnum templateSrv() {
+        return TemplateServiceEnum.TEMPLATE_SETTING;
     }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator) throws AdminOperateException {
-
-        LOGGER.info("class=TemplateLogicServiceImpl||method=modifySetting||operator={}||setting={}", operator,
-            JSON.toJSONString(settingDTO));
-
-        if (AriusObjUtils.isNull(operator)) {
-            return Result.buildParamIllegal("操作人为空");
-        }
-
-        if (settingDTO.getSetting() == null || settingDTO.getSetting().getAnalysis() == null) {
-            return Result.buildParamIllegal("setting信息不能为空");
-        }
-
-        Result<Void> result = updateSettings(settingDTO.getLogicId(), operator, settingDTO.getSetting());
-        if (result.success()) {
-            templatePreCreateManager.reBuildTomorrowIndex(settingDTO.getLogicId(), 3);
-        }
-
-        return result;
-    }
+    
 
     @Override
     public Result<Void> customizeSetting(TemplateSettingDTO settingDTO, String operator) throws AdminOperateException {
 
         LOGGER.info("class=TemplateLogicServiceImpl||method=modifySetting||operator={}||setting={}", operator,
-                JSON.toJSONString(settingDTO));
+            JSON.toJSONString(settingDTO));
 
         if (AriusObjUtils.isNull(operator)) {
             return Result.buildParamIllegal("操作人为空");
@@ -97,7 +85,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
 
         Result<Void> result = updateSettings(settingDTO.getLogicId(), operator, settings);
         if (result.success()) {
-            templatePreCreateManager.reBuildTomorrowIndex(settingDTO.getLogicId(), 3);
+            SpringTool.publish(new ReBuildTomorrowIndexEvent(this, settingDTO.getLogicId()));
         }
 
         return result;
@@ -111,36 +99,36 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
      * @throws AdminOperateException
      */
     @Override
-    public Result<IndexTemplatePhySettings> getSettings(Integer logicId) {
+    public Result<IndexTemplatePhySetting> getSettings(Integer logicId) {
         return getTemplateSettings(logicId);
     }
 
     @Override
     public Result<TemplateSettingVO> buildTemplateSettingVO(Integer logicId) {
         // 从es引擎中获取逻辑模板对应的settings设置
-        Result<IndexTemplatePhySettings> indexTemplateSettingsResult = getSettings(logicId);
+        Result<IndexTemplatePhySetting> indexTemplateSettingsResult = getSettings(logicId);
         if (indexTemplateSettingsResult.failed()) {
             return Result.buildFrom(indexTemplateSettingsResult);
         }
 
-        IndexTemplatePhySettings indexTemplatePhySettings = indexTemplateSettingsResult.getData();
+        IndexTemplatePhySetting indexTemplatePhySetting = indexTemplateSettingsResult.getData();
 
         //  获取模板setting的扁平化结构
-        Map<String, String> flatIndexTemplateMap = indexTemplatePhySettings.flatSettings();
+        Map<String, String> flatIndexTemplateMap = indexTemplatePhySetting.flatSettings();
 
         //模板索引setting视图构建,当副本为零时,cancelCopy为true,当translog为异步时，asyncTranslog为true
         TemplateSettingVO templateSettingVO = new TemplateSettingVO();
 
         // translog异步设置默认是request同步的
         templateSettingVO.setAsyncTranslog(flatIndexTemplateMap.containsKey(TRANSLOG_DURABILITY_KEY)
-                && flatIndexTemplateMap.get(TRANSLOG_DURABILITY_KEY).equals(ASYNC));
+                                           && flatIndexTemplateMap.get(TRANSLOG_DURABILITY_KEY).equals(ASYNC));
 
         // 获取当前模板的副本数目设置
         templateSettingVO.setCancelCopy(flatIndexTemplateMap.containsKey(NUMBER_OF_REPLICAS_KEY)
-                && Integer.parseInt(flatIndexTemplateMap.get(NUMBER_OF_REPLICAS_KEY)) == 0);
+                                        && Integer.parseInt(flatIndexTemplateMap.get(NUMBER_OF_REPLICAS_KEY)) == 0);
 
         // 获取当前模板设置的分词器，获取index.analysis下的自定义分词器设置
-        templateSettingVO.setAnalysis(getAnalysisFromTemplateSettings(indexTemplatePhySettings));
+        templateSettingVO.setAnalysis(getAnalysisFromTemplateSettings(indexTemplatePhySetting));
 
         // 获取当前模板的dynamic_templates
         templateSettingVO.setDynamicTemplates(getDynamicTemplatesByLogicTemplate(logicId));
@@ -169,13 +157,11 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
 
         List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
 
-        if (!isTemplateSrvOpen(templatePhysicals)) {
-            return Result.buildFail("集群没有开启" + templateServiceName());
-        }
+        
 
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
             try {
-                templatePhySettingsManager.mergeTemplateSettings(logicId, templatePhysical.getCluster(),
+                templatePhySettingManager.mergeTemplateSettings(logicId, templatePhysical.getCluster(),
                     templatePhysical.getName(), operator, settings.toJSON());
             } catch (AdminOperateException adminOperateException) {
                 return Result.buildFail(adminOperateException.getMessage());
@@ -186,9 +172,11 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
     }
 
     @Override
-    public Result<Void> updateSettings(Integer logicId, IndexTemplatePhySettings settings) {
+    public Result<Void> updateSettings(Integer logicId, IndexTemplatePhySetting settings, String operator,
+                                       Integer projectId) throws AdminOperateException {
+
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
-                .getLogicTemplateWithPhysicalsById(logicId);
+            .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
             return Result.buildNotExist("逻辑模板不存在, ID:" + logicId);
@@ -197,26 +185,29 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
         if (!templateLogicWithPhysical.hasPhysicals()) {
             return Result.buildNotExist("物理模板不存在，ID:" + logicId);
         }
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(IndexTemplateWithPhyTemplates::getProjectId,
+            templateLogicWithPhysical, projectId);
+        if (result.failed()) {
+            return result;
+        }
 
         List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
 
-        if (!isTemplateSrvOpen(templatePhysicals)) {
-            return Result.buildFail("集群没有开启" + templateServiceName());
-        }
-
+        //获取变更前的setting
+        final Result<IndexTemplatePhySetting> beforeSetting = getSettings(logicId);
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
-            try {
-                templatePhySettingsManager.mergeTemplateSettings(logicId, templatePhysical.getCluster(), templatePhysical.getName(),  settings);
-            } catch (AdminOperateException adminOperateException) {
-                return Result.buildFail(adminOperateException.getMessage());
-            }
+        
+            templatePhySettingManager.mergeTemplateSettingsCheckAllocationAndShard(logicId,
+                    templatePhysical.getCluster(), templatePhysical.getName(), settings);
         }
-
-        try {
-            templatePreCreateManager.reBuildTomorrowIndex(logicId, 3);
-        } catch (Exception e) {
-            LOGGER.error("class=TemplateLogicServiceImpl||method=updateSettings||logicId:{}", logicId, e);
-        }
+    
+        SpringTool.publish(new ReBuildTomorrowIndexEvent(this, logicId));
+        final Result<IndexTemplatePhySetting> afterSetting = getSettings(logicId);
+        operateRecordService.save(new OperateRecord.Builder()
+            .project(projectService.getProjectBriefByProjectId(projectId)).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+            .userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_EDIT_SETTING)
+            .content(new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData()).toString())
+            .bizId(logicId).build());
 
         return Result.buildSucc();
     }
@@ -227,7 +218,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
      * @return
      */
     @Override
-    public Result<IndexTemplatePhySettings> getTemplateSettings(Integer logicId) {
+    public Result<IndexTemplatePhySetting> getTemplateSettings(Integer logicId) {
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
 
@@ -242,8 +233,8 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
         IndexTemplatePhy indexTemplatePhy = templateLogicWithPhysical.getMasterPhyTemplate();
         if (indexTemplatePhy != null) {
             try {
-                return Result.buildSucc( templatePhySettingsManager
-                    .fetchTemplateSettings(indexTemplatePhy.getCluster(), indexTemplatePhy.getName()));
+                return Result.buildSucc(templatePhySettingManager.fetchTemplateSettings(indexTemplatePhy.getCluster(),
+                    indexTemplatePhy.getName()));
             } catch (ESOperateException e) {
                 return Result.buildFail(e.getMessage());
             }
@@ -259,10 +250,12 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
      * @return
      */
     private JSONArray getDynamicTemplatesByLogicTemplate(Integer logicId) {
-        Result<IndexTemplateWithMapping> templateWithMapping = templateLogicMappingManager.getTemplateWithMapping(logicId);
+        Result<IndexTemplateWithMapping> templateWithMapping = templateLogicMappingManager
+            .getTemplateWithMapping(logicId);
         if (templateWithMapping.failed()) {
-            LOGGER.warn("class=TemplateLogicServiceImpl||method=getDynamicTemplatesByLogicTemplate||logicTemplateId={}||msg={}",
-                    logicId, templateWithMapping.getMessage());
+            LOGGER.warn(
+                "class=TemplateLogicServiceImpl||method=getDynamicTemplatesByLogicTemplate||logicTemplateId={}||msg={}",
+                logicId, templateWithMapping.getMessage());
             return null;
         }
 
@@ -276,11 +269,12 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
         return typeProperties.get(0).getDynamicTemplates();
     }
 
-    private JSONObject getAnalysisFromTemplateSettings(IndexTemplatePhySettings indexTemplatePhySettings) {
-        JSONObject indexSettings = indexTemplatePhySettings.getSettings().getJSONObject("index");
+    private JSONObject getAnalysisFromTemplateSettings(IndexTemplatePhySetting indexTemplatePhySetting) {
+        JSONObject indexSettings = indexTemplatePhySetting.getSettings().getJSONObject("index");
         if (AriusObjUtils.isNull(indexSettings)) {
-            LOGGER.info("class=TemplateLogicServiceImpl||method=getAnalysisFromTemplateSettings||settings={}||msg= no index settings",
-                    indexTemplatePhySettings);
+            LOGGER.info(
+                "class=TemplateLogicServiceImpl||method=getAnalysisFromTemplateSettings||settings={}||msg= no index settings",
+                indexTemplatePhySetting);
             return null;
         }
 

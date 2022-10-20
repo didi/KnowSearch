@@ -15,7 +15,6 @@ public class TemplateHealthDegreeRecordPO extends TemplateHealthDegreePO {
      */
     private Long timestamp;
 
-
     /**
      * 获取主键key
      *

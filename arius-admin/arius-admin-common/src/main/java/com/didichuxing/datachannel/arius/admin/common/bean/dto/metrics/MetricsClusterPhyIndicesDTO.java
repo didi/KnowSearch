@@ -16,5 +16,5 @@ import lombok.NoArgsConstructor;
 public class MetricsClusterPhyIndicesDTO extends MetricsClusterPhyDTO {
 
     @ApiModelProperty("索引名称")
-    private String  indexName;
+    private String indexName;
 }

@@ -36,13 +36,13 @@
   },
   "sort": [
     {
-      "appid": {
+      "projectId": {
         "order": "asc"
       }
     }
   ],
   "_source": [
-    "appid",
+    "projectId",
     "dslTemplateMd5",
     "indices",
     "queryLimit",

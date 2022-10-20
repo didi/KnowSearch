@@ -1,19 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.listener;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
-
-import java.util.*;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -22,10 +12,19 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-
 import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.HISTORY_TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE_DEFAULT_VALUE;
 
 /**
  * @author didi
@@ -34,31 +33,31 @@ import lombok.Data;
 @Component
 public class RegionEditEventListener implements ApplicationListener<RegionEditEvent> {
 
-    private static final ILog      LOGGER                           = LogFactory.getLog(RegionEditEventListener.class);
+    private static final ILog       LOGGER                           = LogFactory.getLog(RegionEditEventListener.class);
 
     @Autowired
-    private ClusterRegionService   clusterRegionService;
+    private ClusterRegionService    clusterRegionService;
 
     @Autowired
-    private ClusterRoleHostService clusterRoleHostService;
+    private ClusterRoleHostService  clusterRoleHostService;
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private AriusConfigInfoService ariusConfigInfoService;
+    private AriusConfigInfoService  ariusConfigInfoService;
 
     @Autowired
-    private ESTemplateService      esTemplateService;
+    private ESTemplateService       esTemplateService;
 
     @Autowired
-    private ESIndexService         esIndexService;
+    private ESIndexService          esIndexService;
 
-    public static final String     TEMPLATE_INDEX_INCLUDE_NODE_NAME = "index.routing.allocation.include._name";
+    public static final String      TEMPLATE_INDEX_INCLUDE_NODE_NAME = "index.routing.allocation.include._name";
 
-    public static final String     NOT_BIND_LOGIC_CLUSTER_ID        = "-1";
+    public static final String      NOT_BIND_LOGIC_CLUSTER_ID        = "-1";
 
-    public static final int        RETRY_COUNT                      = 2;
+    public static final int         RETRY_COUNT                      = 2;
 
     @Override
     public void onApplicationEvent(RegionEditEvent regionEditEvent) {
@@ -122,9 +121,12 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
      */
     private void buildCluster2TemplateWithNodeNamesSetMap(Map<String, List<TemplateWithNodeNames>> cluster2TemplateWithNodeNames,
                                                           ClusterRegion clusterRegion, Set<String> nodeNames) {
-        Result<List<IndexTemplatePhy>> templatePhyListResult = indexTemplatePhyService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        Result<List<IndexTemplatePhy>> templatePhyListResult = indexTemplatePhyService
+            .listByRegionId(Math.toIntExact(clusterRegion.getId()));
         if (templatePhyListResult.failed()) {
-            LOGGER.error("class=RegionEditEventListener||method=buildCluster2TemplateWithNodeNamesSetMap||region={}||err={}", clusterRegion.getId(), "update indices setting failed");
+            LOGGER.error(
+                "class=RegionEditEventListener||method=buildCluster2TemplateWithNodeNamesSetMap||region={}||err={}",
+                clusterRegion.getId(), "update indices setting failed");
             return;
         }
 
@@ -152,8 +154,8 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
      */
     private void updateIndicesAllocationSetting(String cluster, String templateName,
                                                 Set<String> nodeNames) throws ESOperateException {
-        if (ariusConfigInfoService.booleanSetting(AriusConfigConstant.ARIUS_COMMON_GROUP,
-            AriusConfigConstant.TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE, true)) {
+        if (ariusConfigInfoService.booleanSetting(AriusConfigConstant.ARIUS_TEMPLATE_GROUP,
+            AriusConfigConstant.HISTORY_TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE, HISTORY_TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE_DEFAULT_VALUE)) {
             boolean response = esIndexService.syncPutIndexSetting(cluster,
                 Collections.singletonList(templateName + "*"), TEMPLATE_INDEX_INCLUDE_NODE_NAME,
                 String.join(COMMA, nodeNames), "", RETRY_COUNT);

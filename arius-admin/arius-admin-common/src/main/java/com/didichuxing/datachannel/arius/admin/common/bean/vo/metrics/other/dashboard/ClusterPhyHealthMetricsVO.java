@@ -17,41 +17,44 @@ import java.util.List;
 @ApiModel("dashboard物理集群健康指标信息")
 public class ClusterPhyHealthMetricsVO {
     @ApiModelProperty("当前时间")
-    private Long    timestamp;
+    private Long         timestamp;
 
     @ApiModelProperty("总物理集群数量")
-    private Integer totalNum;
+    private Integer      totalNum;
 
     @ApiModelProperty("green状态集群数")
-    private Integer greenNum;
+    private Integer      greenNum;
 
     @ApiModelProperty("yellow状态集群数")
-    private Integer yellowNum;
+    private Integer      yellowNum;
 
     @ApiModelProperty("red状态集群数")
-    private Integer redNum;
+    private Integer      redNum;
 
     @ApiModelProperty("未知状态集群数")
-    private Integer unknownNum;
+    private Integer      unknownNum;
+
+    @ApiModelProperty("green状态集群名称列表")
+    private List<String> greenClusterList;
 
     @ApiModelProperty("yellow状态集群名称列表")
     private List<String> yellowClusterList;
 
     @ApiModelProperty("red状态集群名称列表")
-    private List<String>  redClusterList;
+    private List<String> redClusterList;
 
     @ApiModelProperty("未知状态集群名称列表")
-    private List<String>  unknownClusterList;
+    private List<String> unknownClusterList;
 
     @ApiModelProperty("未知状态集群百分比")
-    private Double  unknownPercent;
+    private Double       unknownPercent;
 
     @ApiModelProperty("green状态集群百分比")
-    private Double  greenPercent;
+    private Double       greenPercent;
 
     @ApiModelProperty("yellow状态集群百分比")
-    private Double  yellowPercent;
+    private Double       yellowPercent;
 
     @ApiModelProperty("red状态集群百分比")
-    private Double  redPercent;
+    private Double       redPercent;
 }

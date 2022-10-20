@@ -1,10 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esconfig.ESConfigPO;
+import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 /**
  * @author lyn
@@ -14,9 +13,9 @@ import java.util.List;
 public interface ESClusterConfigDAO {
     List<ESConfigPO> listByClusterId(Long clusterId);
 
-    ESConfigPO getByClusterIdAndTypeAndEngin(@Param("clusterId") Long clusterId,
-                                             @Param("type") String type,
+    ESConfigPO getByClusterIdAndTypeAndEngin(@Param("clusterId") Long clusterId, @Param("type") String type,
                                              @Param("engin") String engin);
+
     int insert(ESConfigPO param);
 
     int update(ESConfigPO param);
@@ -27,8 +26,7 @@ public interface ESClusterConfigDAO {
 
     int delete(Long id);
 
-    ESConfigPO getByClusterIdAndTypeAndEnginAndVersion(@Param("clusterId") Long clusterId,
-                                                       @Param("type") String type,
+    ESConfigPO getByClusterIdAndTypeAndEnginAndVersion(@Param("clusterId") Long clusterId, @Param("type") String type,
                                                        @Param("engin") String enginName,
                                                        @Param("version") Integer version);
 
@@ -36,7 +34,8 @@ public interface ESClusterConfigDAO {
 
     int insertSelective(ESConfigPO param);
 
-    int deleteByClusterIdAndTypeAndEngin(@Param("clusterId") Long clusterId,
-                                         @Param("type") String type,
+    int deleteByClusterIdAndTypeAndEngin(@Param("clusterId") Long clusterId, @Param("type") String type,
                                          @Param("engin") String enginName);
+
+    Integer getClusterIdByConfigId(@Param("id") Long configId);
 }

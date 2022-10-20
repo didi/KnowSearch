@@ -18,13 +18,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "索引force merge")
-public class IndexForceMergeDTO extends BaseDTO{
+public class IndexForceMergeDTO extends BaseDTO {
 
     @ApiModelProperty("max_num_segments")
-    private Integer maxNumSegments;
+    private Integer               maxNumSegments;
 
     @ApiModelProperty("only_expunge_deletes")
-    private Boolean onlyExpungeDeletes;
+    private Boolean               onlyExpungeDeletes;
 
     @ApiModelProperty("index 列表")
     private List<IndexCatCellDTO> indices;

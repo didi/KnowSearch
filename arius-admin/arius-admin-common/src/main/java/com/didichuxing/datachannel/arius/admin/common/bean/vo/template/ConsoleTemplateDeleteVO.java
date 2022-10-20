@@ -20,10 +20,10 @@ import lombok.NoArgsConstructor;
 public class ConsoleTemplateDeleteVO extends BaseVO {
 
     @ApiModelProperty("索引ID")
-    private Integer            logicId;
+    private Integer              logicId;
 
     @ApiModelProperty("索引名字")
-    private String             name;
+    private String               name;
 
     /**
      * 最近一段时间有访问的app

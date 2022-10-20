@@ -20,7 +20,8 @@ import java.util.*;
 public class CompareUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompareUtil.class);
 
-    private CompareUtil() {}
+    private CompareUtil() {
+    }
 
     /**
      * src为用户传入的参数，dst为系统返回，src和dst类型不需要相同，dst中可能包含src中没有的属性
@@ -56,12 +57,16 @@ public class CompareUtil {
                     return dstValue == null;
                 }
                 if (srcValue.getClass() != dstValue.getClass()) {
-                    LOGGER.error("class=CompareUtils||method=objectEquals||msg=type not match, field name: {}, src type: {}, dst type: {}", name, srcValue.getClass(), dstValue.getClass());
+                    LOGGER.error(
+                        "class=CompareUtils||method=objectEquals||msg=type not match, field name: {}, src type: {}, dst type: {}",
+                        name, srcValue.getClass(), dstValue.getClass());
                     return false;
                 }
                 if (isJsonTypeOrObject(srcValue)) {
                     if (!srcValue.equals(dstValue)) {
-                        LOGGER.error("class=CompareUtils||method=objectEquals||errMsg=field not equals, name: {}, src: {}, dst: {}", name, srcValue, dstValue);
+                        LOGGER.error(
+                            "class=CompareUtils||method=objectEquals||errMsg=field not equals, name: {}, src: {}, dst: {}",
+                            name, srcValue, dstValue);
                         return false;
                     }
                 } else {
@@ -103,7 +108,8 @@ public class CompareUtil {
      * @param ignoreFields
      * @return
      */
-    public static boolean listEqualsIgnoreOrder(List<?> src, List<?> dst, String... ignoreFields) throws AdminOperateException {
+    public static boolean listEqualsIgnoreOrder(List<?> src, List<?> dst,
+                                                String... ignoreFields) throws AdminOperateException {
         if (src == null) {
             LOGGER.warn("class=CompareUtils||method=listEqualsIgnoreOrder||msg=src and dst is null");
             return dst == null;
@@ -111,7 +117,8 @@ public class CompareUtil {
             return false;
         }
         if (src.size() != dst.size()) {
-            LOGGER.error("class=CompareUtils||method=listEqualsIgnoreOrder||errMsg=size not equal, src: {}, dst: {}", src.size(), dst.size());
+            LOGGER.error("class=CompareUtils||method=listEqualsIgnoreOrder||errMsg=size not equal, src: {}, dst: {}",
+                src.size(), dst.size());
             return false;
         }
         for (int i = 0; i < src.size(); i++) {
@@ -123,7 +130,9 @@ public class CompareUtil {
                 }
             }
             if (!found) {
-                LOGGER.error("class=CompareUtils||method=listEqualsIgnoreOrder||errMsg=no equal element found in dst, index: {}, element: {}", i, JSON.toJSONString(src.get(i)));
+                LOGGER.error(
+                    "class=CompareUtils||method=listEqualsIgnoreOrder||errMsg=no equal element found in dst, index: {}, element: {}",
+                    i, JSON.toJSONString(src.get(i)));
                 return false;
             }
         }
@@ -154,23 +163,23 @@ public class CompareUtil {
      */
     public static boolean isJsonTypeOrObject(Object o) {
         Class<?> c = o.getClass();
-        return String.class.isAssignableFrom(c) || Number.class.isAssignableFrom(c) || Boolean.class == c || Date.class == c;
+        return String.class.isAssignableFrom(c) || Number.class.isAssignableFrom(c) || Boolean.class == c
+               || Date.class == c;
     }
-
 
     /**
      * 把类反序列化为json
      */
-    public static String serialize(Object object){
+    public static String serialize(Object object) {
         // JSON对象序列化
         String objectJson = JSON.toJSONString(object, SerializerFeature.WRITE_MAP_NULL_FEATURES);
         return objectJson;
     }
 
-    public static boolean compareJson(String templateJsonFile,String responseJsonString) throws IOException {
+    public static boolean compareJson(String templateJsonFile, String responseJsonString) throws IOException {
         //根据文件路径读取模版json
         File file = ResourceUtils.getFile(templateJsonFile);
-        if (file == null){
+        if (file == null) {
             LOGGER.error("class=CompareUtils||method=compareJson||errMsg=templateJsonFile is not found");
             return false;
         }
@@ -183,7 +192,7 @@ public class CompareUtil {
         convertJsonToMap(templateJson, "", templateMap);
         convertJsonToMap(responseJson, "", responseMap);
         //调用CompareUtil中用于对比的compareMap函数
-        return compareMap(responseMap,templateMap);
+        return compareMap(responseMap, templateMap);
     }
 
     public static void convertJsonToMap(Object json, String root, Map<String, Object> resultMap) {
@@ -214,43 +223,41 @@ public class CompareUtil {
         }
     }
 
-    public static boolean compareMap(Map<String, Object> responseMap,Map<String, Object> templateMap) {
-        for(String templateKey : templateMap.keySet()){
+    public static boolean compareMap(Map<String, Object> responseMap, Map<String, Object> templateMap) {
+        for (String templateKey : templateMap.keySet()) {
             boolean flag = false;
-            for (String responseKey : responseMap.keySet()){
-                if (isMatch(responseKey,templateKey)){
-                    if (responseMap.get(responseKey) == null && templateMap.get(templateKey) != null){
+            for (String responseKey : responseMap.keySet()) {
+                if (isMatch(responseKey, templateKey)) {
+                    if (responseMap.get(responseKey) == null && templateMap.get(templateKey) != null) {
                         return false;
-                    }
-                    else if (responseMap.get(responseKey) == "" && templateMap.get(templateKey) != ""){
+                    } else if (responseMap.get(responseKey) == "" && templateMap.get(templateKey) != "") {
                         return false;
-                    }
-                    else{
+                    } else {
                         flag = true;
                     }
                 }
             }
-            if (flag == false){
+            if (flag == false) {
                 return false;
             }
         }
         return true;
     }
 
-    public static boolean isMatch(String s,String p) {
-        boolean[][] dp = new boolean[s.length()+1][p.length()+1];
-        dp[0][0]=true;
-        for(int j = 0;j<p.length();j++) {
-            if(dp[0][j] && p.charAt(j) == '*') {
-                dp[0][j+1] = true;
+    public static boolean isMatch(String s, String p) {
+        boolean[][] dp = new boolean[s.length() + 1][p.length() + 1];
+        dp[0][0] = true;
+        for (int j = 0; j < p.length(); j++) {
+            if (dp[0][j] && p.charAt(j) == '*') {
+                dp[0][j + 1] = true;
             }
         }
-        for(int i = 0;i < s.length();i++) {
-            for(int j = 0;j < p.length();j++) {
-                if(p.charAt(j) == '*') {
-                    dp[i+1][j+1] = dp[i][j+1]|| dp[i+1][j];
-                }else if(p.charAt(j) == '.' || p.charAt(j) == s.charAt(i)) {
-                    dp[i+1][j+1] = dp[i][j];
+        for (int i = 0; i < s.length(); i++) {
+            for (int j = 0; j < p.length(); j++) {
+                if (p.charAt(j) == '*') {
+                    dp[i + 1][j + 1] = dp[i][j + 1] || dp[i + 1][j];
+                } else if (p.charAt(j) == '.' || p.charAt(j) == s.charAt(i)) {
+                    dp[i + 1][j + 1] = dp[i][j];
                 }
             }
         }

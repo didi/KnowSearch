@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 @ApiModel(description = "分页结果")
-public class PaginationResult<T> extends BaseResult{
+public class PaginationResult<T> extends BaseResult {
 
     protected PagingData<T> data;
 

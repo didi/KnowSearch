@@ -15,32 +15,32 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ClusterPhyContext {
 
-    private Long         clusterPhyId;
+    private Long          clusterPhyId;
 
-    private String       clusterName;
+    private String        clusterName;
 
     /*****************************************projectid***********************************/
-    private List<String> associatedProjectNames;
+    private List<String>  associatedProjectNames;
 
     private List<Integer> associatedProjectIds;
 
     /*****************************************clusterLogicInfo***********************************/
 
-    private Integer      associatedLogicNum;
+    private Integer       associatedLogicNum;
 
-    private Integer      associatedLogicNumMax;
+    private Integer       associatedLogicNumMax;
 
-    private List<Long>   associatedClusterLogicIds;
+    private List<Long>    associatedClusterLogicIds;
 
     /*****************************************clusterPhyNodeInfo***********************************/
 
-    private Integer      associatedDataNodeNum;
+    private Integer       associatedDataNodeNum;
 
-    private List<String> associatedDataNodeIps;
+    private List<String>  associatedDataNodeIps;
 
-    private List<String> associatedNodeIps;
+    private List<String>  associatedNodeIps;
 
     /*****************************************regionInfo********************************************/
 
-    private List<Long>   associatedRegionIds;
+    private List<Long>    associatedRegionIds;
 }

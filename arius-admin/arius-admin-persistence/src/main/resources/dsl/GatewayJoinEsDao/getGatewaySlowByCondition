@@ -1,0 +1,38 @@
+{
+  "from": %d,
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": %s,
+      "must_not": [
+        {
+          "prefix": {
+            "indices": {
+              "value": "."
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "projectId",
+    "timeStamp",
+    "indices",
+    "dsl",
+    "esCost",
+    "totalCost",
+    "totalHits",
+    "totalShards",
+    "responseLen",
+    "isTimedOut",
+    "clusterName"
+  ],
+  "sort": [
+      {
+        "%s": {
+          "order": "%s"
+        }
+      }
+  ]
+}

@@ -16,17 +16,17 @@ public class ESClusterTaskStats extends BaseESPO {
     /**
      * 集群名称，all则表示全集群信息
      */
-    private String cluster;
+    private String                     cluster;
 
     /**
      * 统计的时间戳，单位：毫秒
      */
-    private long timestamp;
+    private long                       timestamp;
 
     /**
      * 是否是物理集群 1：是；0：不是
      */
-    private long physicCluster;
+    private long                       physicCluster;
 
     /**
      * 统计信息
@@ -36,7 +36,7 @@ public class ESClusterTaskStats extends BaseESPO {
     /**
      * 数据中心
      */
-    private String dataCenter;
+    private String                     dataCenter;
 
     @Override
     public String getKey() {

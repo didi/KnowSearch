@@ -39,27 +39,27 @@ public class IndexNameAccessCountPO extends BaseESPO {
      * 索引模板名称
      */
     @ApiModelProperty("索引模板名称")
-    private String templateName;
+    private String  templateName;
     /**
      * 集群名称
      */
     @ApiModelProperty("集群名称")
-    private String clusterName;
+    private String  clusterName;
     /**
      * 索引名称
      */
     @ApiModelProperty("索引名称")
-    private String indexName;
+    private String  indexName;
     /**
      * 访问次数
      */
     @ApiModelProperty("访问次数")
-    private Long count;
+    private Long    count;
     /**
      * 统计日期
      */
     @ApiModelProperty("统计日期")
-    private String date;
+    private String  date;
 
     /**
      * 累加访问次数

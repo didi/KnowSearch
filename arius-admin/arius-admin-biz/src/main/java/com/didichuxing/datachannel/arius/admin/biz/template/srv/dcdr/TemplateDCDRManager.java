@@ -28,8 +28,8 @@ public interface TemplateDCDRManager {
      * @return Result
      * @throws AdminOperateException 管理操作Exception
      */
-    Result<Void> copyAndCreateDCDR(Integer templateId, String targetCluster, Integer regionId,
-                                   String operator, Integer projectId) throws AdminOperateException;
+    Result<Void> copyAndCreateDCDR(Integer templateId, String targetCluster, Integer regionId, String operator,
+                                   Integer projectId) throws AdminOperateException;
 
     /**
      * createPhyDCDR
@@ -49,24 +49,29 @@ public interface TemplateDCDRManager {
      * @return result
      * @throws ESOperateException
      */
-    Result<Void> deleteDCDR(Integer templateId, String operator, Integer projectId) throws ESOperateException;
+    Result<Void> deleteDCDR(Integer templateId, String operator, Integer projectId,boolean isDCDRForce) throws ESOperateException;
 
     /**
      * deletePhyDCDR
+     *
      * @param param
      * @param operator
+     * @param projectId
      * @return
      * @throws ESOperateException
      */
-    Result<Void> deletePhyDCDR(TemplatePhysicalDCDRDTO param, String operator) throws ESOperateException;
+    Result<Void> deletePhyDCDR(TemplatePhysicalDCDRDTO param, String operator, Integer projectId) throws ESOperateException;
 
     /**
      * 批量DCDR主从切换
+     *
      * @param dcdrMasterSlaveSwitchDTO
      * @param operator
+     * @param projectId
      * @return
      */
-    Result<WorkTaskVO> batchDCDRSwitchMaster2Slave(DCDRMasterSlaveSwitchDTO dcdrMasterSlaveSwitchDTO, String operator);
+    Result<WorkTaskVO> batchDCDRSwitchMaster2Slave(DCDRMasterSlaveSwitchDTO dcdrMasterSlaveSwitchDTO, String operator,
+                                                   Integer projectId);
 
     /**
      * 根据任务id和模板id取消DCDR主从切换
@@ -80,9 +85,9 @@ public interface TemplateDCDRManager {
      * @throws ESOperateException
      */
     Result<Void> cancelDCDRSwitchMasterSlaveByTaskIdAndTemplateIds(Integer taskId, List<Long> templateIds,
-                                                                   boolean fullDeleteFlag,
-                                                                   String operator, Integer projectId) throws ESOperateException;
-    
+                                                                   boolean fullDeleteFlag, String operator,
+                                                                   Integer projectId) throws ESOperateException;
+
     /**
      * 取消dcdr主从切换任务id 根据任务id取消DCDR主从切换
      *
@@ -92,17 +97,18 @@ public interface TemplateDCDRManager {
      * @return {@link Result}<{@link Void}>
      * @throws ESOperateException esoperateException
      */
-    Result<Void> cancelDCDRSwitchMasterSlaveByTaskId(Integer taskId, String operator, Integer projectId) throws ESOperateException;
+    Result<Void> cancelDCDRSwitchMasterSlaveByTaskId(Integer taskId, String operator,
+                                                     Integer projectId) throws ESOperateException;
 
-  /**
-   * 刷新dcdrChannel状态
-   *
-   * @param taskId     任务id
-   * @param templateId 模板id
-   * @param operator   操作人或角色
-   * @param projectId
-   * @return {@link Result}<{@link Void}>
-   */
+    /**
+     * 刷新dcdrChannel状态
+     *
+     * @param taskId     任务id
+     * @param templateId 模板id
+     * @param operator   操作人或角色
+     * @param projectId
+     * @return {@link Result}<{@link Void}>
+     */
     Result<Void> refreshDCDRChannelState(Integer taskId, Integer templateId, String operator, Integer projectId);
 
     /**
@@ -143,8 +149,6 @@ public interface TemplateDCDRManager {
      */
     Result<DCDRSingleTemplateMasterSlaveSwitchDetailVO> getDCDRSingleTemplateMasterSlaveSwitchDetailVO(Integer taskId,
                                                                                                        Long templateId);
-    
-   
 
     /**
      * 创建DCDR模板
@@ -172,7 +176,7 @@ public interface TemplateDCDRManager {
      * @param replicaCluster 从集群名称
      * @return true/false
      */
-    boolean syncExistTemplateDCDR(Long physicalId, String replicaCluster);
+    boolean syncExistTemplateDCDR(Long physicalId, String replicaCluster) throws ESOperateException;
 
     /**
      * 删除索引DCDR链路
@@ -210,12 +214,25 @@ public interface TemplateDCDRManager {
      * @param templateId    模板id
      * @return
      */
-    Tuple<Long/*主模板位点*/, Long/*从模板位点*/> getMasterAndSlaveTemplateCheckPoint(Integer templateId);
+    Tuple<Long/*主模板位点*/, Long/*从模板位点*/> getMasterAndSlaveTemplateCheckPoint(Integer templateId)
+		    throws ESOperateException;
 
     /**
      * 获取模板DCDR信息
      * @param templateId
      * @return
      */
-    Result<TemplateDCDRInfoVO> getTemplateDCDRInfoVO(Integer templateId);
+    Result<TemplateDCDRInfoVO> getTemplateDCDRInfoVO(Integer templateId) throws ESOperateException;
+    
+    /**
+     * 重建DCDR链路异常索引
+     *
+     * @param cluster       源集群的集群名称
+     * @param targetCluster 目标集群名称
+     * @param indices       要重建的索引
+     * @return 操作的结果。
+     */
+    Result<Void> rebuildDCDRLinkAbnormalIndices(String cluster, String targetCluster,
+                                                List<String> indices)throws ESOperateException;
+    
 }

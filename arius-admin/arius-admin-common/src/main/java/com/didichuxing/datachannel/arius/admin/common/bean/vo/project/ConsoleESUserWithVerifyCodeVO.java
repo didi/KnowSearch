@@ -36,8 +36,7 @@ public class ConsoleESUserWithVerifyCodeVO extends BaseVO {
     @Deprecated
     private String  department;
 
-    @ApiModelProperty("责任人")
-    private String  responsible;
+  
 
     @ApiModelProperty("备注")
     private String  memo;
@@ -46,5 +45,5 @@ public class ConsoleESUserWithVerifyCodeVO extends BaseVO {
     private Integer queryThreshold;
 
     @ApiModelProperty("数据中心")
-    private String dataCenter;
+    private String  dataCenter;
 }

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.task;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(V3_OP + "/dcdr/work-order/task")
+@RequestMapping(V3 + "/dcdr/work-order/task")
 @Api(tags = "DCDR任务相关接口(REST)")
 public class OpTaskDCDRController {
 
@@ -48,13 +48,13 @@ public class OpTaskDCDRController {
         return templateDCDRManager.getDCDRSingleTemplateMasterSlaveSwitchDetailVO(taskId, templateId);
     }
 
-    @PostMapping("/switchMasterSlave")
+    @PostMapping("/switch-master-slave")
     @ResponseBody
     @ApiOperation(value = "DCDR主从切换接口", notes = "")
     public Result<WorkTaskVO> dcdrSwitchMasterSlave(HttpServletRequest request,
                                                     @RequestBody DCDRMasterSlaveSwitchDTO dcdrMasterSlaveSwitchDTO) {
         return templateDCDRManager.batchDCDRSwitchMaster2Slave(dcdrMasterSlaveSwitchDTO,
-            HttpRequestUtil.getOperator(request));
+            HttpRequestUtil.getOperator(request), HttpRequestUtil.getProjectId(request));
     }
 
     @DeleteMapping("/{taskId}/{templateIds}/cancel")
@@ -73,25 +73,24 @@ public class OpTaskDCDRController {
     public Result<Void> cancelDcdrSwitchMasterSlaveByTaskId(HttpServletRequest request,
                                                             @PathVariable("taskId") Integer taskId) throws ESOperateException {
         return templateDCDRManager.cancelDCDRSwitchMasterSlaveByTaskId(taskId, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+            HttpRequestUtil.getProjectId(request));
     }
 
     @PostMapping("/{taskId}/{templateId}/refresh")
     @ResponseBody
     @ApiOperation(value = "刷新dcdr链路任务")
-    public Result<Void> refreshDcdrChannelState(HttpServletRequest request,@PathVariable("taskId") Integer taskId,
+    public Result<Void> refreshDcdrChannelState(HttpServletRequest request, @PathVariable("taskId") Integer taskId,
                                                 @PathVariable("templateId") Integer templateId) {
         return templateDCDRManager.refreshDCDRChannelState(taskId, templateId, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+            HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("/{taskId}/{templateId}/forceSwitch")
     @ResponseBody
     @ApiOperation(value = "dcdr主从强制切换接口")
-    public Result<Void> forceSwitchMasterSlave(HttpServletRequest request,
-                                               @PathVariable("taskId") Integer taskId,
-                                               @PathVariable ("templateId") Integer templateId) {
+    public Result<Void> forceSwitchMasterSlave(HttpServletRequest request, @PathVariable("taskId") Integer taskId,
+                                               @PathVariable("templateId") Integer templateId) {
         return templateDCDRManager.forceSwitchMasterSlave(taskId, templateId, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+            HttpRequestUtil.getProjectId(request));
     }
 }

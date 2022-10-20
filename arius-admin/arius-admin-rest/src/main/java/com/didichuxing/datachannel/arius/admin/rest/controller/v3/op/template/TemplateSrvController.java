@@ -1,10 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.ColdSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -28,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2022/5/18
  */
 @RestController
-@RequestMapping(V3_OP + "/template/srv")
+@RequestMapping(V3 + "/template/srv")
 @Api(tags = "模板服务接口")
 public class TemplateSrvController {
 
@@ -40,27 +41,27 @@ public class TemplateSrvController {
     @ApiOperation(value = "分页查询模板服务列表")
     public PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(HttpServletRequest request,
                                                                       @RequestBody TemplateQueryDTO condition) throws NotFindSubclassException {
-        if (condition.getProjectId()==null) {
-            condition.setProjectId(HttpRequestUtil.getProjectId(request));
-        }
-        return templateSrvManager.pageGetTemplateWithSrv(condition);
+        final Integer projectId = HttpRequestUtil.getProjectId(request);
+        
+        return templateSrvManager.pageGetTemplateWithSrv(condition,projectId);
     }
 
     @PutMapping("/{srvCode}/{templateIdList}")
     @ResponseBody
     @ApiOperation(value = "开启模板服务")
-    public Result<Void> openTemplateSrv(HttpServletRequest request,@PathVariable("srvCode") Integer srvCode,
-                                        @PathVariable("templateIdList") List<Integer> templateIdList) {
-        return templateSrvManager.openSrv(srvCode, templateIdList,HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+    public Result<Void> openTemplateSrv(HttpServletRequest request, @PathVariable("srvCode") Integer srvCode,
+                                        @PathVariable("templateIdList") List<Integer> templateIdList,
+                                        @RequestBody(required = false) ColdSrvOpenDTO data) {
+        return templateSrvManager.openSrv(srvCode, templateIdList, HttpRequestUtil.getOperator(request),
+            HttpRequestUtil.getProjectId(request), data);
     }
 
     @DeleteMapping("/{srvCode}/{templateIdList}")
     @ResponseBody
     @ApiOperation(value = "关闭模板服务")
-    public Result<Void> closeTemplateSrv(HttpServletRequest request,@PathVariable("srvCode") Integer srvCode,
+    public Result<Void> closeTemplateSrv(HttpServletRequest request, @PathVariable("srvCode") Integer srvCode,
                                          @PathVariable("templateIdList") List<Integer> templateIdList) {
-        return templateSrvManager.closeSrv(srvCode, templateIdList,HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+        return templateSrvManager.closeSrv(srvCode, templateIdList, HttpRequestUtil.getOperator(request),
+            HttpRequestUtil.getProjectId(request));
     }
 }

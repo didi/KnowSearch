@@ -14,17 +14,15 @@ import com.didiglobal.logi.job.core.job.JobContext;
  * @author didi
  * Created by d06679 on 2018/3/14.
  */
-@Task(name = "CopyIndexMapping2TemplateRandomTask",
-        description = "copyMapping任务，定期将索引中的mapping拷贝到模板中，避免大量的put-mappin",
-        cron = "0 45 9/12 * * ?",
-        autoRegister = true)
+@Task(name = "CopyIndexMapping2TemplateRandomTask", description = "copyMapping任务，定期将索引中的mapping拷贝到模板中，避免大量的put-mappin", cron = "0 45 9/12 * * ?", autoRegister = true)
 public class CopyIndexMapping2TemplateRandomTask extends BaseConcurrentClusterTask implements Job {
 
-    private static final ILog             LOGGER = LogFactory.getLog(CopyIndexMapping2TemplateRandomTask.class);
+    private static final ILog LOGGER = LogFactory.getLog(CopyIndexMapping2TemplateRandomTask.class);
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
-        LOGGER.info("class=CopyIndexMapping2TemplateRandomTask||method=execute||msg=CopyIndexMapping2TemplateRandomTask start.");
+        LOGGER.info(
+            "class=CopyIndexMapping2TemplateRandomTask||method=execute||msg=CopyIndexMapping2TemplateRandomTask start.");
         if (execute()) {
             return TaskResult.SUCCESS;
         }

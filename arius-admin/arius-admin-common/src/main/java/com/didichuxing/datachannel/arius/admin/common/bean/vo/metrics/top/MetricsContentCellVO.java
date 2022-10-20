@@ -25,7 +25,9 @@ public class MetricsContentCellVO extends BaseVO implements Comparable<MetricsCo
 
     @Override
     public int compareTo(MetricsContentCellVO o) {
-        if (null == o) {return 0;}
+        if (null == o) {
+            return 0;
+        }
 
         return this.getTimeStamp().intValue() - o.getTimeStamp().intValue();
     }

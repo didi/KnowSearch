@@ -34,8 +34,5 @@ public class LogicClusterAuthOrderDetail extends AbstractOrderDetail {
      */
     private String  memo;
 
-    /**
-     * 责任人
-     */
-    private String  responsible;
+    
 }

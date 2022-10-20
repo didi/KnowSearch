@@ -21,6 +21,7 @@ public class TemplateValueRecordPO extends TemplateValuePO {
      * 统计时间
      */
     private Long timestamp;
+
     /**
      * 获取主键key
      *

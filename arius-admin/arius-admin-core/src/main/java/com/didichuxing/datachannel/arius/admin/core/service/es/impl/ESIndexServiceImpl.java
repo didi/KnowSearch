@@ -1,20 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigIndicesRequestContent;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.BLOCKS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DEFAULTS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.READ;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.WRITE;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -23,12 +14,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESIndexDAO;
@@ -38,8 +27,6 @@ import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasT
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.AliasIndexNode;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
-import com.didiglobal.logi.elasticsearch.client.response.model.indices.CommonStat;
-import com.didiglobal.logi.elasticsearch.client.response.model.indices.Segments;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
@@ -48,6 +35,26 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -56,16 +63,12 @@ import com.google.common.collect.Sets;
 @Service
 public class ESIndexServiceImpl implements ESIndexService {
 
-    private static final ILog LOGGER = LogFactory.getLog(ESIndexServiceImpl.class);
+    private static final ILog      LOGGER = LogFactory.getLog(ESIndexServiceImpl.class);
 
     @Autowired
-    private ESIndexDAO        esIndexDAO;
+    private ESIndexDAO             esIndexDAO;
 
-    @Autowired
-    private ClusterRoleHostService clusterRoleHostService;
-
-
-
+   
 
     @Override
     public boolean syncCreateIndex(String cluster, String indexName, int retryCount) throws ESOperateException {
@@ -76,8 +79,8 @@ public class ESIndexServiceImpl implements ESIndexService {
     @Override
     public boolean syncCreateIndex(String cluster, String indexName, IndexConfig indexConfig,
                                    int retryCount) throws ESOperateException {
-        return ESOpTimeoutRetry.esRetryExecute("createIndexWithConfig", retryCount,
-            () -> esIndexDAO.createIndexWithConfig(cluster, indexName, indexConfig));
+       
+        return esIndexDAO.createIndexWithConfig(cluster, indexName, indexConfig,retryCount);
     }
 
     @Override
@@ -85,7 +88,13 @@ public class ESIndexServiceImpl implements ESIndexService {
         return ESOpTimeoutRetry.esRetryExecute("deleteIndex", retryCount,
             () -> esIndexDAO.deleteIndex(cluster, indexName));
     }
-
+    
+    @Override
+    public boolean syncDeleteByExpression(String cluster, String expression, int retryCount) throws ESOperateException {
+        return ESOpTimeoutRetry.esRetryExecute("syncDeleteByExpression", retryCount,
+                () -> esIndexDAO.deleteByExpression(cluster, expression));
+    }
+    
     /**
      * 根据表达式删除索引
      * @param cluster    集群
@@ -122,15 +131,21 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public boolean syncUpdateIndexMapping(String cluster, String index, MappingConfig mappingConfig) {
+    public boolean syncUpdateIndexMapping(String cluster, String index, MappingConfig mappingConfig) throws ESOperateException {
         return esIndexDAO.updateIndexMapping(cluster, index, mappingConfig);
     }
 
     @Override
     public Map<String, IndexConfig> syncBatchGetIndexConfig(String cluster, List<String> indexList) {
-        MultiIndexsConfig multiIndexsConfig = esIndexDAO.batchGetIndexConfig(cluster, indexList);
-        if (null == multiIndexsConfig) { return Maps.newConcurrentMap();}
-        return multiIndexsConfig.getIndexConfigMap();
+        try {
+            MultiIndexsConfig multiIndexsConfig = esIndexDAO.batchGetIndexConfig(cluster, indexList);
+            return Optional.ofNullable(multiIndexsConfig).map(MultiIndexsConfig::getIndexConfigMap)
+                    .orElse(Maps.newConcurrentMap());
+        } catch (ESOperateException e) {
+            LOGGER.error("class=ESIndexServiceImpl||method=syncBatchGetIndexConfig||index={}", cluster,
+                    String.join(",", indexList), e);
+        }
+        return Maps.newConcurrentMap();
     }
 
     /**
@@ -178,15 +193,17 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public boolean syncPutIndexSetting(String cluster, List<String> indices, Map<String, String> settingMap, Integer retryCount) throws  ESOperateException{
+    public boolean syncPutIndexSetting(String cluster, List<String> indices, Map<String, String> settingMap,
+                                       Integer retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("putIndexSettingBatch", retryCount,
-                () -> esIndexDAO.putIndexSetting(cluster, indices, settingMap));
+            () -> esIndexDAO.putIndexSetting(cluster, indices, settingMap));
     }
 
     @Override
-    public boolean syncPutIndexSettings(String cluster, List<String> indices, Map<String, String> settings, int retryCount) throws ESOperateException {
+    public boolean syncPutIndexSettings(String cluster, List<String> indices, Map<String, String> settings,
+                                        int retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("putIndexSettings", retryCount,
-                () -> esIndexDAO.putIndexSettings(cluster, indices, settings));
+            () -> esIndexDAO.putIndexSettings(cluster, indices, settings));
     }
 
     /**
@@ -209,10 +226,15 @@ public class ESIndexServiceImpl implements ESIndexService {
      * @return result
      */
     @Override
-    public Map<String, IndexNodes> syncBatchGetIndices(String cluster, Collection<String> indexNames) {
+    public Map<String, IndexNodes> syncBatchGetIndices(String cluster, Collection<String> indexNames)
+            throws ESOperateException {
         BatchProcessor.BatchProcessResult<String, Map<String, IndexNodes>> result = new BatchProcessor<String, Map<String, IndexNodes>>()
             .batchList(indexNames).batchSize(30)
             .processor(items -> esIndexDAO.getIndexStatsWithShards(cluster, String.join(",", items))).process();
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(String.format("cluster : %s get failed ; reason : %s", cluster,
+                    result.getErrorMap().values().stream().findFirst().get().getMessage()));
+        }
         return ConvertUtil.mergeMapList(result.getResultList());
     }
 
@@ -246,13 +268,14 @@ public class ESIndexServiceImpl implements ESIndexService {
 
         return ret;
     }
+
     @Override
-    public Map<String,List<String>> syncGetIndexAliasesByIndices(String cluster, String... indices) {
+    public Map<String, List<String>> syncGetIndexAliasesByIndices(String cluster, String... indices) {
         Map<String/*index*/, AliasIndexNode> aliasIndexNodeMap = esIndexDAO.getAliasesByIndices(cluster, indices);
         if (aliasIndexNodeMap == null) {
             LOGGER.warn(
-                    "class=ESIndexServiceImpl||method=syncGetIndexNameByExpression||msg=no alias||cluster={}||expression={}",
-                    cluster, indices);
+                "class=ESIndexServiceImpl||method=syncGetIndexNameByExpression||msg=no alias||cluster={}||expression={}",
+                cluster, indices);
             return new HashMap<>();
         }
 
@@ -287,31 +310,33 @@ public class ESIndexServiceImpl implements ESIndexService {
             .succChecker(succ -> succ).process();
 
         if (!result.isSucc()) {
-            LOGGER.warn("class=ESIndexServiceImpl||method=syncBatchDeleteIndices||cluster={}||shouldDels={}||result={}", cluster, shouldDels,
-                result);
+            LOGGER.warn("class=ESIndexServiceImpl||method=syncBatchDeleteIndices||cluster={}||shouldDels={}||result={}",
+                cluster, shouldDels, result);
         }
 
         return shouldDels.size() - result.getFailAndErrorCount();
     }
 
     @Override
-    public boolean syncBatchCloseIndices(String cluster, List<String> shouldCloses, int retryCount) throws ESOperateException {
+    public boolean syncBatchCloseIndices(String cluster, List<String> shouldCloses,
+                                         int retryCount) throws ESOperateException {
         if (CollectionUtils.isEmpty(shouldCloses)) {
             return true;
         }
 
         return ESOpTimeoutRetry.esRetryExecute("closeIndex", retryCount,
-                () -> esIndexDAO.closeIndex(cluster, shouldCloses));
+            () -> esIndexDAO.closeIndex(cluster, shouldCloses));
     }
 
     @Override
-    public boolean syncBatchOpenIndices(String cluster, List<String> shouldOpens, int retryCount) throws ESOperateException {
+    public boolean syncBatchOpenIndices(String cluster, List<String> shouldOpens,
+                                        int retryCount) throws ESOperateException {
         if (CollectionUtils.isEmpty(shouldOpens)) {
             return true;
         }
 
         return ESOpTimeoutRetry.esRetryExecute("openIndex", retryCount,
-                () -> esIndexDAO.openIndex(cluster, shouldOpens));
+            () -> esIndexDAO.openIndex(cluster, shouldOpens));
     }
 
     /**
@@ -330,13 +355,15 @@ public class ESIndexServiceImpl implements ESIndexService {
 
     @Override
     public boolean syncBatchUpdateRegion(String cluster, List<String> indices, Integer tgtRegionId,
-                                         int retryCount) throws ESOperateException {
+                                         int retryCount,
+                                         Function</*coldRegionId*/Integer, Result<List<ClusterRoleHost>>> coldRegionIdFunc) throws ESOperateException {
         Set<String> nodeNames = new HashSet<>();
-        Result<List<ClusterRoleHost>> clusterRoleHostResult = clusterRoleHostService.listByRegionId(tgtRegionId);
-        if (clusterRoleHostResult.failed()) {
+        final Result<List<ClusterRoleHost>> clusterRoleHostResult = coldRegionIdFunc.apply(tgtRegionId);
+        if (clusterRoleHostResult.failed() || CollectionUtils.isEmpty(clusterRoleHostResult.getData())) {
             return false;
         }
-        clusterRoleHostResult.getData().stream().forEach(clusterRoleHost -> nodeNames.add(clusterRoleHost.getNodeSet()));
+        clusterRoleHostResult.getData()
+            .forEach(clusterRoleHost -> nodeNames.add(clusterRoleHost.getNodeSet()));
 
         return ESOpTimeoutRetry.esRetryExecute("syncBatchUpdateRegion", retryCount,
             () -> esIndexDAO.batchUpdateIndexRegion(cluster, indices, nodeNames));
@@ -356,14 +383,12 @@ public class ESIndexServiceImpl implements ESIndexService {
                                             int retryCount) throws ESOperateException {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
             .batchList(indices).batchSize(30).processor(items -> {
-                try {
                     return ESOpTimeoutRetry.esRetryExecute("syncBatchBlockIndexWrite", retryCount,
                         () -> esIndexDAO.blockIndexWrite(cluster, items, block));
-                } catch (ESOperateException e) {
-                    return false;
-                }
             }).succChecker(succ -> succ).process();
-
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(result.getErrorMap().values().stream().findFirst().get().getMessage());
+        }
         return result.isSucc();
     }
 
@@ -372,27 +397,27 @@ public class ESIndexServiceImpl implements ESIndexService {
                                            int retryCount) throws ESOperateException {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
             .batchList(indices).batchSize(30).processor(items -> {
-                try {
-                    return ESOpTimeoutRetry.esRetryExecute("syncBatchBlockIndexRead", retryCount,
-                        () -> esIndexDAO.blockIndexRead(cluster, items, block));
-                } catch (ESOperateException e) {
-                    return false;
-                }
-            }).succChecker(succ -> succ).process();
-
+                        return ESOpTimeoutRetry.esRetryExecute("syncBatchBlockIndexRead", retryCount,
+                                    () -> esIndexDAO.blockIndexRead(cluster, items, block));
+                }).succChecker(succ -> succ).process();
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(result.getErrorMap().values().stream().findFirst().get().getMessage());
+        
+        }
         return result.isSucc();
     }
 
     /**
      * 校验索引数据是否一致
      *
-     * @param cluster1   集群1
-     * @param cluster2   集群2
-     * @param indexNames 索引名字
+     * @param cluster1        集群1
+     * @param cluster2        集群2
+     * @param indexNames      索引名字
+     * @param indexExpression
      * @return true/false
      */
     @Override
-    public boolean ensureDateSame(String cluster1, String cluster2, List<String> indexNames) {
+    public boolean ensureDateSame(String cluster1, String cluster2, List<String> indexNames, String indexExpression) throws ESOperateException {
         int retryCount = 1;
         while (retryCount-- > 0) {
             try {
@@ -402,7 +427,7 @@ public class ESIndexServiceImpl implements ESIndexService {
                 LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||msg=sleep interrupted", e);
             }
 
-            if (checkDateSame(cluster1, cluster2, indexNames)) {
+            if (checkDateSame(cluster1, cluster2, indexNames,indexExpression)) {
                 return true;
             }
         }
@@ -419,21 +444,20 @@ public class ESIndexServiceImpl implements ESIndexService {
      */
     @Override
     public boolean reOpenIndex(String cluster, List<String> indices, int retryCount) throws ESOperateException {
-        BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
-            .batchList(indices).batchSize(30).processor(items -> {
-                try {
-                    if (ESOpTimeoutRetry.esRetryExecute("reOpenIndex-close", retryCount,
-                        () -> esIndexDAO.closeIndex(cluster, items))) {
-                        return ESOpTimeoutRetry.esRetryExecute("reOpenIndex-open", retryCount,
-                            () -> esIndexDAO.openIndex(cluster, items));
-                    } else {
-                        return false;
-                    }
-                } catch (ESOperateException e) {
-                    return false;
-                }
-            }).succChecker(succ -> succ).process();
-
+        BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>().batchList(
+                indices).batchSize(30).processor(items -> {
+            if (ESOpTimeoutRetry.esRetryExecute("reOpenIndex-close", retryCount,
+                    () -> esIndexDAO.closeIndex(cluster, items))) {
+                return ESOpTimeoutRetry.esRetryExecute("reOpenIndex-open", retryCount,
+                        () -> esIndexDAO.openIndex(cluster, items));
+            } else {
+                return false;
+            }
+        }).succChecker(succ -> succ).process();
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(result.getErrorMap().values().stream().findFirst().get().getMessage());
+        
+        }
         return result.isSucc();
     }
 
@@ -466,37 +490,14 @@ public class ESIndexServiceImpl implements ESIndexService {
                 LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||msg=sleep interrupted", e);
             }
             catIndexResultList.addAll(esIndexDAO.catIndices(clusterPhyName));
-            if (CollectionUtils.isNotEmpty(catIndexResultList)) { break;}
+            if (CollectionUtils.isNotEmpty(catIndexResultList)) {
+                break;
+            }
         }
-
 
         return catIndexResultList.stream().filter(this::filterOriginalIndices).collect(Collectors.toList());
     }
 
-    /**
-     * 获取集群中索引segment数量
-     *
-     * @param clusterPhyName 物理集群名称
-     * @return {@link Map}<{@link String}, {@link Tuple}<{@link Long}, {@link Long}>>
-     */
-    @Override
-    public Map<String, Tuple<Long, Long>> syncGetIndicesSegmentCount(String clusterPhyName) {
-        Map<String, IndexNodes> indexNodesMap = esIndexDAO.getIndexStats(clusterPhyName, null);
-        Map<String, Tuple<Long, Long>> retMap = new HashMap<>();
-        if (MapUtils.isNotEmpty(indexNodesMap)) {
-            indexNodesMap.forEach((key, val) -> {
-                Tuple<Long, Long> tuple = new Tuple<>();
-                Optional.ofNullable(val).map(IndexNodes::getTotal).map(CommonStat::getSegments).map(Segments::getCount)
-                    .ifPresent(tuple::setV1);
-                Optional.ofNullable(val).map(IndexNodes::getPrimaries).map(CommonStat::getSegments)
-                    .map(Segments::getCount).ifPresent(tuple::setV2);
-                retMap.put(key, tuple);
-            });
-
-        }
-        return retMap;
-    }
-    
     /**
      * 过滤原始索引
      */
@@ -576,7 +577,14 @@ public class ESIndexServiceImpl implements ESIndexService {
 
     @Override
     public boolean syncIsIndexExist(String cluster, String indexName) {
-        return esIndexDAO.existByClusterAndIndexName(cluster, indexName);
+        try {
+            return ESOpTimeoutRetry.esRetryExecute("syncIsIndexExist", 3,
+                    () -> esIndexDAO.existByClusterAndIndexName(cluster, indexName));
+        } catch (ESOperateException e) {
+            LOGGER.error("class={}||method=syncIsIndexExist||indexName={}||cluster={}", getClass().getSimpleName(),
+                    indexName, cluster, e);
+            return false;
+        }
     }
 
     @Override
@@ -593,7 +601,8 @@ public class ESIndexServiceImpl implements ESIndexService {
 
             if (null == commonStat.getSeqNo()) {
                 LOGGER.warn(
-                    "class=ESIndexServiceImpl||method=syncGetTotalCheckpoint||indexName={}||shard={}||msg=commonStat seqNo is empty", index, shard);
+                    "class=ESIndexServiceImpl||method=syncGetTotalCheckpoint||indexName={}||shard={}||msg=commonStat seqNo is empty",
+                    index, shard);
                 return;
             }
 
@@ -622,7 +631,7 @@ public class ESIndexServiceImpl implements ESIndexService {
         List<PutAliasNode> putAliasNodeList = new ArrayList<>();
         Map<String, List<String>> aliasIndexNodeMap = syncGetIndexAliasesByIndices(cluster, index);
         Set<String> aliasSet = new HashSet<>();
-        Optional.ofNullable(aliasIndexNodeMap.get(index)).map(aliasSet::addAll);
+        Optional.ofNullable(aliasIndexNodeMap.get(index)).ifPresent(aliasSet::addAll);
 
         aliases.stream().filter(StringUtils::isNotBlank).forEach(aliasName -> {
             PutAliasNode putAliasNode = new PutAliasNode();
@@ -635,7 +644,11 @@ public class ESIndexServiceImpl implements ESIndexService {
         });
 
         if (CollectionUtils.isNotEmpty(putAliasNodeList)) {
-            return esIndexDAO.editAlias(cluster, putAliasNodeList);
+            try {
+                return Result.build(esIndexDAO.editAlias(cluster, putAliasNodeList));
+            } catch (ESOperateException e) {
+                return Result.buildFail(e.getMessage());
+            }
         }
         return Result.buildSucc();
     }
@@ -667,53 +680,11 @@ public class ESIndexServiceImpl implements ESIndexService {
         if (!notExistsAlias.isEmpty()) {
             return Result.buildParamIllegal(String.format("要删除的别名【%s】不存在", StringUtils.join(notExistsAlias, ",")));
         }
-        return esIndexDAO.editAlias(cluster, putAliasNodeList);
-    }
-
-    private Result<Void> checkAliases(String cluster, String index, List<String> addAliases, List<String> deleteAliases) {
-        if (!esIndexDAO.exist(cluster, index)) {
-            return Result.buildParamIllegal(String.format("索引【%s】不存在", index));
+        try {
+            return Result.build(esIndexDAO.editAlias(cluster, putAliasNodeList));
+        } catch (ESOperateException e) {
+            return Result.buildFail(e.getMessage());
         }
-        if (CollectionUtils.isEmpty(addAliases) && CollectionUtils.isEmpty(deleteAliases)) {
-            return Result.buildParamIllegal("要操作的别名不存在");
-        }
-        List<PutAliasNode> putAliasNodeList = new ArrayList<>();
-        Map<String, List<String>> aliasIndexNodeMap = syncGetIndexAliasesByIndices(cluster, index);
-        Set<String> aliasSet = new HashSet<>();
-        Optional.ofNullable(aliasIndexNodeMap.get(index)).map(aliasSet::addAll);
-        if (CollectionUtils.isNotEmpty(deleteAliases)) {
-            Set<String> notExistsAlias = new HashSet<>();
-
-            deleteAliases.stream().filter(StringUtils::isNotBlank).forEach(aliasName -> {
-                PutAliasNode putAliasNode = new PutAliasNode();
-                putAliasNode.setIndex(index);
-                putAliasNode.setAlias(aliasName);
-                putAliasNode.setType(PutAliasType.REMOVE);
-                if (aliasSet.contains(aliasName)) {
-                    notExistsAlias.add(aliasName);
-                }
-                putAliasNodeList.add(putAliasNode);
-            });
-            if (!notExistsAlias.isEmpty()) {
-                return Result.buildParamIllegal(String.format("要删除的别名【%s】不存在", StringUtils.join(notExistsAlias, ",")));
-            }
-        }
-        if (CollectionUtils.isNotEmpty(addAliases)) {
-            addAliases.stream().filter(StringUtils::isNotBlank).forEach(aliasName -> {
-                PutAliasNode putAliasNode = new PutAliasNode();
-                putAliasNode.setIndex(index);
-                putAliasNode.setAlias(aliasName);
-                putAliasNode.setType(PutAliasType.ADD);
-                if (!aliasSet.contains(aliasName)) {
-                    putAliasNodeList.add(putAliasNode);
-                }
-            });
-        }
-
-        if (CollectionUtils.isNotEmpty(putAliasNodeList)) {
-            return esIndexDAO.editAlias(cluster, putAliasNodeList);
-        }
-        return Result.buildSucc();
     }
 
     @Override
@@ -737,7 +708,7 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public List<CatIndexResult> indicesDistribution(String cluster) {
+    public List<CatIndexResult> syncIndicesDistribution(String cluster) {
         List<CatIndexResult> catIndexResultList = esIndexDAO.catIndices(cluster);
         return catIndexResultList;
     }
@@ -769,36 +740,83 @@ public class ESIndexServiceImpl implements ESIndexService {
         }
         return indexCatCellList;
     }
-
+    
+    /**
+     * @param cluster
+     * @param index
+     * @param mappingConfig
+     * @return
+     */
+    @Override
+    public boolean updateIndexMapping(String cluster, String index, MappingConfig mappingConfig)
+            throws ESOperateException {
+        return esIndexDAO.updateIndexMapping(cluster,index,mappingConfig);
+    }
+    
+    /**
+     * @param clusterName
+     * @param indexName
+     * @param indexConfig
+     * @param tryTimes
+     * @return
+     */
+    @Override
+    public boolean createIndexWithConfig(String clusterName, String indexName, IndexConfig indexConfig, int tryTimes)
+            throws ESOperateException {
+        return ESOpTimeoutRetry.esRetryExecute("createIndexWithConfig", 3,
+                () -> esIndexDAO.createIndexWithConfig(clusterName, indexName, indexConfig, tryTimes), Objects::isNull);
+    }
+    
+    /**
+     * @param clusterName
+     * @param indexName
+     * @return
+     */
+    @Override
+    public boolean deleteIndex(String clusterName, String indexName) {
+        return esIndexDAO.deleteIndex(clusterName,indexName);
+    }
+    
+    /**
+     * 返回与指定别名匹配的索引数
+     *
+     * @param cluster 集群的名称。
+     * @param alias   索引的别名
+     * @return 与别名匹配的索引数。
+     */
+    @Override
+    public Result<Integer> countIndexByAlias(String cluster, String alias) {
+        try {
+            return Result.buildSucc(esIndexDAO.countIndexByAlias(cluster, alias));
+        } catch (ESOperateException e) {
+            return Result.buildFail(e.getMessage());
+        }
+    }
+    
     /***************************************** private method ****************************************************/
-
 
     private Tuple<Boolean, Boolean> getWriteAndReadBlock(IndexConfig indexConfig) {
         Tuple<Boolean, Boolean> writeAndReadBlockFromMerge = new Tuple<>();
         //build from es setUp settings
         Tuple<Boolean, Boolean> writeAndReadBlockFromSetUpSettingTuple = new Tuple<>();
-        writeAndReadBlockFromSetUpSettingTuple.setV1(null);
-        writeAndReadBlockFromSetUpSettingTuple.setV2( null);
-        Optional.ofNullable(indexConfig.getSettings()).filter(MapUtils::isNotEmpty).map(JSON::toJSONString).map(JSON::parseObject).ifPresent(settingsObj -> {
-            writeAndReadBlockFromSetUpSettingTuple.setV1(settingsObj.getBoolean(READ));
-            writeAndReadBlockFromSetUpSettingTuple.setV2(settingsObj.getBoolean(WRITE));
-        });
-
+        Optional.ofNullable(indexConfig).map(IndexConfig::getSettings).filter(MapUtils::isNotEmpty)
+            .map(JSON::toJSONString).map(JSON::parseObject).ifPresent(settingsObj -> {
+                writeAndReadBlockFromSetUpSettingTuple.setV1(settingsObj.getBoolean(READ));
+                writeAndReadBlockFromSetUpSettingTuple.setV2(settingsObj.getBoolean(WRITE));
+            });
         //build from es default settings
         Tuple<Boolean, Boolean> writeAndReadBlockFromDefaultSettingTuple = new Tuple<>();
-        writeAndReadBlockFromDefaultSettingTuple.setV1(null);
-        writeAndReadBlockFromDefaultSettingTuple.setV2(null);
-        Optional.ofNullable(indexConfig.getOther(DEFAULTS)).map(Object::toString).map(JSON::parseObject).map(defaultObj -> defaultObj.getJSONObject(INDEX))
-                .map(indexSettings -> indexSettings.getJSONObject(BLOCKS)).ifPresent(blocksObj -> {
-                    if (null != blocksObj.get(IndexBlockEnum.READ.getType())) {
-                        writeAndReadBlockFromDefaultSettingTuple
-                                .setV1(blocksObj.getBoolean(IndexBlockEnum.READ.getType()));
-                    }
-                    if (null != blocksObj.get(IndexBlockEnum.WRITE.getType())) {
-                        writeAndReadBlockFromDefaultSettingTuple
-                                .setV2(blocksObj.getBoolean(IndexBlockEnum.WRITE.getType()));
-                    }
-                });
+        Optional.ofNullable(indexConfig).map(config -> config.getOther(DEFAULTS)).map(Object::toString)
+            .map(JSON::parseObject).map(defaultObj -> defaultObj.getJSONObject(INDEX))
+            .map(indexSettings -> indexSettings.getJSONObject(BLOCKS)).ifPresent(blocksObj -> {
+                if (null != blocksObj.get(IndexBlockEnum.READ.getType())) {
+                    writeAndReadBlockFromDefaultSettingTuple.setV1(blocksObj.getBoolean(IndexBlockEnum.READ.getType()));
+                }
+                if (null != blocksObj.get(IndexBlockEnum.WRITE.getType())) {
+                    writeAndReadBlockFromDefaultSettingTuple
+                        .setV2(blocksObj.getBoolean(IndexBlockEnum.WRITE.getType()));
+                }
+            });
 
         //set read block info
         if (null != writeAndReadBlockFromSetUpSettingTuple.getV1()) {
@@ -816,27 +834,35 @@ public class ESIndexServiceImpl implements ESIndexService {
 
         return writeAndReadBlockFromMerge;
     }
-    
-    private Result<Void> refreshIndex(String cluster, List<String> indexNames) {
+
+    private Result<Void> refreshIndex(String cluster, List<String> indexNames) throws ESOperateException {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
             .batchList(indexNames).batchSize(30).processor(items -> esIndexDAO.refreshIndex(cluster, items))
             .succChecker(succ -> succ).process();
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(String.format("cluster : %s get failed ; reason : %s", cluster,
+                    result.getErrorMap().values().stream().findFirst().get().getMessage()));
+        
+        }
         return Result.build(result.isSucc());
     }
 
-    private boolean checkDateSame(String cluster1, String cluster2, List<String> indexNames) {
-        Result<Void> refreshIndexResult1 = refreshIndex(cluster1, indexNames);
+    private boolean checkDateSame(String cluster1, String cluster2, List<String> indexNames, String indexExpression) throws ESOperateException {
+        //使用indexName*的方式进行索引关闭，避免索引数量过多，从而导致了执行时间过长
+        Result<Void> refreshIndexResult1 = refreshIndex(cluster1, Collections.singletonList(indexExpression));
         if (refreshIndexResult1.failed()) {
-            LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail", cluster1, indexNames);
+            LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail",
+                cluster1, indexNames);
             return false;
         }
-
-        Result<Void> refreshIndexResult2 = refreshIndex(cluster2, indexNames);
+        //使用indexName*的方式进行索引关闭，避免索引数量过多，从而导致了执行时间过长
+        Result<Void> refreshIndexResult2 = refreshIndex(cluster2, Collections.singletonList(indexExpression));
         if (refreshIndexResult2.failed()) {
-            LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail", cluster2, indexNames);
+            LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail",
+                cluster2, indexNames);
             return false;
         }
-
+    
         Map<String, IndexNodes> indexStat1 = syncBatchGetIndices(cluster1, indexNames);
         Map<String, IndexNodes> indexStat2 = syncBatchGetIndices(cluster2, indexNames);
 
@@ -850,7 +876,8 @@ public class ESIndexServiceImpl implements ESIndexService {
             }
 
             if (stat1.getPrimaries().getDocs().getCount() != stat2.getPrimaries().getDocs().getCount()) {
-                LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||indexName={}||msg=doc count not match, primary={}, replica={}",
+                LOGGER.warn(
+                    "class=ESIndexServiceImpl||method=ensureDateSame||indexName={}||msg=doc count not match, primary={}, replica={}",
                     index, stat1.getPrimaries().getDocs().getCount(), stat2.getPrimaries().getDocs().getCount());
                 return false;
             }
@@ -865,7 +892,8 @@ public class ESIndexServiceImpl implements ESIndexService {
             }
 
             if (totalCheckpoint1.get() != totalCheckpoint2.get()) {
-                LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||indexName={}|||msg=checkpoint not match, primary={}, replica={}",
+                LOGGER.warn(
+                    "class=ESIndexServiceImpl||method=ensureDateSame||indexName={}|||msg=checkpoint not match, primary={}, replica={}",
                     index, totalCheckpoint1.get(), totalCheckpoint2.get());
                 return false;
             }
@@ -879,9 +907,8 @@ public class ESIndexServiceImpl implements ESIndexService {
             syncDeleteIndexByExpression(cluster, indices, retryCount);
             return true;
         } catch (ESOperateException e) {
-            LOGGER.error("class=ESIndexServiceImpl||method=batchDeleteIndicesInner||cluster"
-                    + "={}||indices={}", cluster,
-                indices,e);
+            LOGGER.error("class=ESIndexServiceImpl||method=batchDeleteIndicesInner||cluster" + "={}||indices={}",
+                cluster, indices, e);
         }
         return false;
     }

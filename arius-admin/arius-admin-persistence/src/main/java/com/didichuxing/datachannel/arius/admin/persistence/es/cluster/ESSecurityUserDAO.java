@@ -43,7 +43,8 @@ public class ESSecurityUserDAO extends BaseESDAO {
         ESClient client = esOpClient.getESClient(cluster);
         ESPutSecurityUserResponse response = client.admin().indices().preparePutSecurityUser().setName(userName)
             .setUser(securityUser).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        LOGGER.info("class=ESSecurityUserDAO||method=putUser||cluster={}||roleName={}||response={}", cluster, userName, response.getCreated());
+        LOGGER.info("class=ESSecurityUserDAO||method=putUser||cluster={}||roleName={}||response={}", cluster, userName,
+            response.getCreated());
         return true;
     }
 }

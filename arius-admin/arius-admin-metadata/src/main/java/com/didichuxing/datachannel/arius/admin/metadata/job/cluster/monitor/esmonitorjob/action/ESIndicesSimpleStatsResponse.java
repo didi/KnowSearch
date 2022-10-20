@@ -33,14 +33,13 @@ import java.util.Map;
 public class ESIndicesSimpleStatsResponse extends ESActionResponse {
 
     @JSONField(name = "_shards")
-    private Shards shards;
+    private Shards                       shards;
 
     @JSONField(name = "_all")
-    private SimpleIndexNodes all;
+    private SimpleIndexNode              all;
 
     @JSONField(name = "indices")
-    private Map<String, SimpleIndexNodes> indices = new HashMap<>();
-
+    private Map<String, SimpleIndexNode> indices = new HashMap<>();
 
     public Shards getShards() {
         return shards;
@@ -50,11 +49,11 @@ public class ESIndicesSimpleStatsResponse extends ESActionResponse {
         this.shards = shards;
     }
 
-    public SimpleIndexNodes getAll() {
+    public SimpleIndexNode getAll() {
         return all;
     }
 
-    public void setAll(SimpleIndexNodes all) {
+    public void setAll(SimpleIndexNode all) {
         this.all = all;
     }
 
@@ -65,7 +64,7 @@ public class ESIndicesSimpleStatsResponse extends ESActionResponse {
 
         JSONObject ret = new JSONObject();
 
-        for(Map.Entry<String, SimpleIndexNodes> entry : indices.entrySet()){
+        for (Map.Entry<String, SimpleIndexNode> entry : indices.entrySet()) {
             String index = entry.getKey();
             ret.put(index, JSON.toJSON(indices.get(index)));
         }
@@ -79,21 +78,19 @@ public class ESIndicesSimpleStatsResponse extends ESActionResponse {
 
         for (String index : root.keySet()) {
             String str = root.getString(index);
-            indices.put(index, JSON.parseObject(str, SimpleIndexNodes.class));
+            indices.put(index, JSON.parseObject(str, SimpleIndexNode.class));
         }
     }
 
-
     @JSONField(serialize = false)
-    public Map<String, SimpleIndexNodes> getIndicesMap() {
+    public Map<String, SimpleIndexNode> getIndicesMap() {
         return indices;
     }
 
     @JSONField(serialize = false)
-    public void setIndicesMap(Map<String, SimpleIndexNodes> indicesMap) {
+    public void setIndicesMap(Map<String, SimpleIndexNode> indicesMap) {
         this.indices = indicesMap;
     }
-
 
     @Override
     public String toString() {

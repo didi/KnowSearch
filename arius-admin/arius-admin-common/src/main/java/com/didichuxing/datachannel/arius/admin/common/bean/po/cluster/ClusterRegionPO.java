@@ -20,7 +20,7 @@ public class ClusterRegionPO extends BasePO {
     /**
      * region ID
      */
-    private Long id;
+    private Long   id;
 
     /**
      * region 名称

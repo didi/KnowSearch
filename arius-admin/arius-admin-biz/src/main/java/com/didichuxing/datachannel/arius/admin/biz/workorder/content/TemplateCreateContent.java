@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -31,20 +30,11 @@ public class TemplateCreateContent extends BaseContent {
      */
     private Integer dataType;
 
-    /**
-     * 责任人
-     */
-    private String  responsible;
+    
 
-    /**
-     * 部门id
-     */
-    private String  libraDepartmentId;
+    
 
-    /**
-     * 部门名称
-     */
-    private String  libraDepartment;
+
 
     /**
      * 备注
@@ -116,12 +106,12 @@ public class TemplateCreateContent extends BaseContent {
      * dynamic_templates设置
      * {"dynamic_templates":[{"key":{}}]}
      */
-    private String dynamicTemplates;
+    private String  dynamicTemplates;
 
     /**
      * 是否取消副本
      */
-    private boolean cancelCopy = false;
+    private boolean cancelCopy    = false;
 
     /**
      * 是否开启异步translog
@@ -133,7 +123,7 @@ public class TemplateCreateContent extends BaseContent {
      * {"analyzer":{"key":{}},"tokenizer":{}...}
      * 支持 analyzer同级的可选项 analyzer、tokenizer、char_filter、filter
      */
-    private String customerAnalysis;
+    private String  customerAnalysis;
 
     /**
      * 模板服务等级

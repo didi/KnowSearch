@@ -34,7 +34,8 @@ public interface AriusMetaJobClusterDistributeDAO {
      * @param size          size
      * @return 可采集的集群信息
      */
-    List<AriusMetaJobClusterDistributePO> getTaskByHost(@Param("monitorHost") String monitorHost, @Param("size") int size);
+    List<AriusMetaJobClusterDistributePO> getTaskByHost(@Param("monitorHost") String monitorHost,
+                                                        @Param("size") int size);
 
     /**
      * 使用这个方法时要特别小心

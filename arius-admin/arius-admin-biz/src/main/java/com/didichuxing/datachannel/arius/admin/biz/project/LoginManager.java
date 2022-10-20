@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
  * @date 2022/06/16
  */
 public interface LoginManager {
-    
+
     /**
      * 验证登录信息（验证前密码先用Base64解码再用RSA解密） 登录前会检查账户激活状态
      *
@@ -27,7 +27,7 @@ public interface LoginManager {
      * @throws LogiSecurityException 登录错误
      */
     Result<UserBriefVO> verifyLogin(AccountLoginDTO loginDTO, HttpServletRequest request, HttpServletResponse response);
-    
+
     /**
      * 登出接口
      *
@@ -36,7 +36,7 @@ public interface LoginManager {
      * @return
      */
     Result<Boolean> logout(HttpServletRequest request, HttpServletResponse response);
-    
+
     /**
      * 拦截器检查 检查登陆
      *
