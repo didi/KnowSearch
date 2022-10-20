@@ -1,0 +1,25 @@
+{
+  "type": 4,
+  "resourceType": 2,
+  "dataCenter": "",
+  "platformType": "",
+  "tags": "{\"createSource\":0}",
+  "importRule": "0",
+  "projectId": 1,
+  "cluster": "logi-elasticsearch-meta",
+  "divide": true,
+  "phyClusterDesc": "",
+  "roleClusterHosts": [
+    {
+      "cluster": "logi-elasticsearch-meta",
+      "id": 0,
+      "ip": "这里填ip",
+      "nodeSet": "",
+      "port": "这里填端口号",
+      "role": 3,
+      "roleClusterId": 0,
+      "status": 0
+    }
+  ],
+  "password": "elastic:123456"
+}
