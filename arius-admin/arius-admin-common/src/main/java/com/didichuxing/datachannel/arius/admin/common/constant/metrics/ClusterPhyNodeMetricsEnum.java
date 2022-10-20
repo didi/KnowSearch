@@ -268,7 +268,7 @@ public enum ClusterPhyNodeMetricsEnum {
     /**
      * 单位：MB
      */
-    INDICES_NORMS_MEMORY_IN_BYTES("indices-segments-norMS_memory_in_bytes",
+    INDICES_NORMS_MEMORY_IN_BYTES("indices-segments-norms_memory_in_bytes",
             "索引norMS内存大小"),
 
     /**
