@@ -65,7 +65,7 @@ create table logi_security_oplog
     operate_page      varchar(16)                            null comment '操作页面',
     operate_type      varchar(16)                            not null comment '操作类型',
     target_type       varchar(16)                            not null comment '对象分类',
-    target            varchar(20)                            not null comment '操作对象',
+    target            varchar(255)                            not null comment '操作对象',
     detail            text                                   null comment '日志详情',
     create_time       timestamp    default CURRENT_TIMESTAMP null,
     update_time       timestamp    default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
@@ -1950,3 +1950,6 @@ values  (1593, '物理集群', 0, 0, 1, '物理集群', '2022-05-24 18:08:22.0',
         (1877, 'DSL', 0, 0, 1, 'DSL', '2022-05-24 18:08:24.0', '2022-09-02 19:01:17.0', 0, 'know_search'),
         (1879, 'Kibana', 0, 0, 1, 'Kibana', '2022-05-24 18:08:26.0', '2022-09-02 19:01:17.0', 0, 'know_search'),
         (1881, 'SQL', 0, 0, 1, 'SQL', '2022-05-24 18:08:26.0', '2022-09-02 19:01:17.0', 0, 'know_search');
+
+alter table logi_security_oplog
+    modify target varchar(225) not null comment '操作对象';
