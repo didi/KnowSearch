@@ -31,9 +31,13 @@ public enum ClusterPhyIndicesMetricsEnum {
      */
     INDEXING_RATE("indexing-index_total_rate", "写入速率"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
     INDEXING_LATENCY("indexing-index_time_in_millis", "写入耗时"),
+    /**
+     * 单位：MS
+     */
+    INDEXING_INDEX_TIME_PER_DOC("indexing-index_time_per_doc", "单个文档写入耗时"),
     /**
      * 单位：个/S
      */
@@ -43,31 +47,31 @@ public enum ClusterPhyIndicesMetricsEnum {
      */
     FETCH_RATE("search-fetch_total_rate", "查询Fetch速率"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
     QUERY_LATENCY("cost-query_time_in_millis", "查询Query耗时"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
     FETCH_LATENCY("cost-fetch_time_in_millis", "查询Fetch耗时"),
     /**
-     * 单位：次/分钟
+     * 单位：次/MIN
      */
     SCROLL_RATE("search-scroll_total_rate", "查询Scroll次数/分钟"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
     SCROLL_LATENCY("cost-scroll_time_in_millis", "查询Scroll耗时"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
     MERGE_LATENCY("cost-merges-total_time_in_millis", "Merge耗时"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
     REFRESH_LATENCY("cost-refresh-total_time_in_millis", "Refresh耗时"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
     FLUSH_LATENCY("cost-flush-total_time_in_millis", "Flush耗时"),
     /**
@@ -111,19 +115,19 @@ public enum ClusterPhyIndicesMetricsEnum {
      */
     TRANSLOG_SIZE("translog-size_in_bytes", "translog大小"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
     INDEXING_TIME_PER_DOC("indexing-time_per_doc", "索引单次操作文档耗时"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
     MERGES_AVG_TIME("merges_avg_time", "单次merges操作耗时"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
     REFRESH_AVG_TIME("refresh_avg_time", "单次refresh操作耗时"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
     FLUSH_AVG_TIME("flush_avg_time", "单次flush操作耗时"),
     /**
