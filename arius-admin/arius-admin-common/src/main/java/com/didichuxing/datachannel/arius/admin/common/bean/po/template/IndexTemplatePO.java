@@ -148,4 +148,9 @@ public class IndexTemplatePO extends BasePO {
      */
     private Integer health;
 
+    /**
+     * 模版恢复优先级
+     */
+    private Integer priorityLevel;
+
 }

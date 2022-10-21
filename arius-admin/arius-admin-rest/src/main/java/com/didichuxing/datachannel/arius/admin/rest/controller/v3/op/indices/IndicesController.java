@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesIncrementalSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
@@ -245,4 +246,18 @@ public class IndicesController extends BaseIndicesController {
         return indicesManager.getClusterLogicIndexName(clusterLogicName, HttpRequestUtil.getProjectId(request),index);
     }
 
+    @PutMapping("/mergeSettings")
+    @ResponseBody
+    @ApiOperation(value = "以settings增量方式批量更新索引的settings")
+    public Result<Boolean> updateIndexSettingsByMerge(@RequestBody List<IndicesIncrementalSettingDTO> params,
+                                                 HttpServletRequest request) throws ESOperateException {
+        Result<Boolean> checkClusterValidResult = checkClusterValid(
+                params.stream().map(IndicesIncrementalSettingDTO::getCluster).distinct().collect(Collectors.toList()));
+        if (checkClusterValidResult.failed()) {
+            return Result.buildFrom(checkClusterValidResult);
+        }
+        Result<Void> result = indicesManager.updateIndexSettingsByMerge(params, HttpRequestUtil.getProjectId(request),
+                HttpRequestUtil.getOperator(request));
+        return Result.buildSucc(result.success() ? Boolean.TRUE : Boolean.FALSE);
+    }
 }
