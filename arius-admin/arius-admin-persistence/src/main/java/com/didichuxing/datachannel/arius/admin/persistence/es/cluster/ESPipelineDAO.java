@@ -190,8 +190,7 @@ public class ESPipelineDAO extends BaseESDAO {
             indexNameFormat = "";
         }
 
-        JSONObject pipelineProcessors = CollectionUtils.isNotEmpty(oldProcessors) ? oldProcessors.get(0)
-            : new JSONObject();
+        JSONObject pipelineProcessors = new JSONObject();
 
         pipelineProcessors.put(INDEX_TEMPLATE_PROCESSOR, new JSONObject());
         pipelineProcessors.put(THROTTLE_PROCESSOR, new JSONObject());
