@@ -19,19 +19,41 @@ public enum OpTaskTypeEnum {
                             CLUSTER_RESTART(4, "集群重启", "cluster-restart"),
 
                             CLUSTER_UPGRADE(5, "集群升级", "cluster-upgrade"),
-
+                            @Deprecated
                             CLUSTER_PLUG_OPERATION(6, "集群插件操作", "cluster-plug-operation"),
-
+                            @Deprecated
+                            //TODO 集群下线操作不在走op-task
                             CLUSTER_OFFLINE(7, "集群下线操作", "cluster-offline"),
 
                             TEMPLATE_DCDR(10, "索引模板主从切换", "template-dcdr"),
-
+                             @Deprecated
+                            //TODO 移除：全部改走 配置编辑
                             CLUSTER_CONFIG_ADD(11, "集群配置新增", "cluster-config-add"),
 
                             CLUSTER_CONFIG_EDIT(12, "集群配置编辑", "cluster-config-edit"),
-
+                            @Deprecated
+                            //TODO 移除：全部改走 配置编辑
                             CLUSTER_CONFIG_DELETE(13, "集群配置删除", "cluster-config-delete"),
 
+                             CLUSTER_PLUG_INSTALL(14, "集群插件安装", "cluster-plug-install"),
+    CLUSTER_PLUG_UNINSTALL(15, "集群插件卸载", "cluster-plug-uninstall"),
+    CLUSTER_ROLLBACK(16, "集群回滚", "cluster-rollback"),
+    CLUSTER_CONFIG_ROLLBACK(17, "集群配置回滚", "cluster-config-rollback"),
+    GATEWAY_NEW(18, "GATEWAY集群新建", "gateway-create"),
+    GATEWAY_EXPAND(19, "GATEWAY集群扩容", "gateway-expand"),
+    
+    GATEWAY_SHRINK(20, "GATEWAY集群缩容", "gateway-shrink"),
+    
+    GATEWAY_RESTART(21, "GATEWAY集群重启", "gateway-restart"),
+    
+    GATEWAY_UPGRADE(22, "GATEWAY集群升级", "gateway-upgrade"),
+    //TODO 0.3.2 不会去实现，需等待gateway具备安装平台插件能力后进行实现
+    GATEWAY_PLUG_INSTALL(23, "GATEWAY集群插件安装", "gateway-plug-install"),
+    //TODO 0.3.2 不会去实现，需等待gateway具备安装平台插件能力后进行实现
+    GATEWAY_PLUG_UNINSTALL(24, "GATEWAY集群插件卸载", "gateway-plug-uninstall"),
+    GATEWAY_CONFIG_EDIT(25, "GATEWAY集群配置新增", "gateway-config-edit"),
+    GATEWAY_CONFIG_ROLLBACK(26, "GATEWAY集群配置回滚", "gateway-config-rollback"),
+    GATEWAY_ROLLBACK(27, "GATEWAY集群回滚", "gateway-rollback"),
                             UNKNOWN(-1, "unknown");
 
     OpTaskTypeEnum(Integer type, String message) {
