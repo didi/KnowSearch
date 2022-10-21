@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 
+import java.util.function.Predicate;
+
 public abstract class ApplicationRetryListener<E extends ApplicationEvent> implements ApplicationListener<E> {
 
     /**
@@ -15,11 +17,17 @@ public abstract class ApplicationRetryListener<E extends ApplicationEvent> imple
     @SneakyThrows
     @Override
     public void onApplicationEvent(@NotNull E event) {
-
-        EventRetryExecutor.eventRetryExecute("",  () -> onApplicationRetryEvent(event));
-
+        // onApplicationRetryEvent 如果抛出异常则进行重试
+        EventRetryExecutor.eventRetryExecute( "ApplicationRetryListener",
+                () -> {onApplicationRetryEvent(event); return null;},
+                3);
     }
 
-    public abstract boolean onApplicationRetryEvent(E event) throws EventException;
-
+    /**
+     * 支持重试的时间处理逻辑, 如果抛出异常则进行重试
+     * @param event
+     * @return
+     * @throws EventException
+     */
+    public abstract void onApplicationRetryEvent(E event) throws EventException;
 }
