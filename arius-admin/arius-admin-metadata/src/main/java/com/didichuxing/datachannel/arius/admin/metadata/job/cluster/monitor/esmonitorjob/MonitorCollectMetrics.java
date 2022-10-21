@@ -140,8 +140,8 @@ public class MonitorCollectMetrics {
             .valueRoute("segments.memory_in_bytes").computeType(NONE).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indices.indexing.index_time_per_doc")
-            .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.indexing.index_time_in_millis")
-            .deriveParam(ESDataTempBean.DIVISOR, "es.indices.indexing.index_total_times").computeType(DERIVE_DIVISION)
+            .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.indexing.docs.count_diff")
+            .deriveParam(ESDataTempBean.DIVISOR, "es.indices.indexing.index_time_in_millis").computeType(DERIVE_DIVISION)
             .build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indices.indexing.index_latency")
@@ -202,6 +202,9 @@ public class MonitorCollectMetrics {
         
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indexing.index_total_rate")
                 .valueRoute("docs.count").computeType(AVG).sendToN9e().build());
+
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indexing.docs.count_diff")
+                .valueRoute("docs.count").computeType(MINUS).build());
         
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.cost.index_time_in_millis")
                 .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.indexing.total_time_in_millis")
