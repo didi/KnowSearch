@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTem
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateIncrementalSettingsDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
@@ -216,6 +217,15 @@ public class TemplateLogicV3Controller {
     public Result<Void> read(HttpServletRequest request, @PathVariable Integer templateId,
                              @RequestParam("status") Boolean status) {
         return templateLogicManager.blockRead(templateId, status, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
+    }
+
+    @PutMapping("/template-index-setting/{templateIdList}")
+    @ResponseBody
+    @ApiOperation(value = "更新模版settings和非分区模版索引的settings")
+    public Result<Void> updateTemplateAndIndexSettings(HttpServletRequest request, @RequestBody TemplateIncrementalSettingsDTO settings,
+                                                  @PathVariable("templateIdList") List<Integer> templateIdList) throws AdminOperateException {
+        return templateLogicManager.updateTemplateAndIndexSettings(settings, templateIdList, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
 }

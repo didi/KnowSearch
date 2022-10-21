@@ -51,13 +51,11 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         .getLog(TemplateSrvManagerImpl.class);
 
     private static final String                                         NO_PERMISSION_CONTENT                                     = "只有运维或者研发才有权限操作";
-
     private static final String                                         CLUSTER_LOGIC_NOT_EXISTS                                  = "逻辑集群不存在";
     private static final String                                         PHYSICAL_CLUSTER_NOT_EXISTS                               = "物理集群不存在";
 
     private final Map<Integer, BaseTemplateSrv>                         BASE_TEMPLATE_SRV_MAP                                     = Maps
         .newConcurrentMap();
-
 
 
     @Autowired
@@ -70,10 +68,9 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     private HandleFactory                                               handleFactory;
     @Autowired
     private RoleTool                                                    roleTool;
-   
+
     @Autowired
-    private ColdManager          coldManager;
- 
+    private ColdManager                                                 coldManager;
 
     @PostConstruct
     public void init() {
@@ -140,8 +137,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
          * 预创建，过期删除（分区才可以操作），冷热分离（分区并且有冷region才能操作），dcdr和pipeline（es有对应module才能操作），rolloer没有限制但是产品侧有提示
          */
         for (TemplateServiceEnum srvEnum : allSrvList) {
-        
-           
+
             //1.非分区模版不支持：预创建、过期删除、冷热划分的能力
             if (Boolean.FALSE.equals(isPartition)&&TemplateServiceEnum.usePartitionService().contains(srvEnum)){
                 final UnavailableTemplateSrv unavailableTemplateSrv = new UnavailableTemplateSrv(srvEnum.getCode(),
@@ -155,7 +151,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                             srvEnum.getServiceName(), srvEnum.getEsClusterVersion().getVersion(),
                             "集群没有冷region，不支持此能力");
                     unavailableSrvList.add(unavailableTemplateSrv);
-                    
+
                 } else
                     //3.dcdr dcdrSupport==true支持
                     if (Boolean.FALSE.equals(dcdrSupport) && srvEnum.equals(TemplateServiceEnum.TEMPLATE_DCDR)) {
@@ -230,16 +226,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         }
     }
 
-
-    
-
-
-
-
-   
-
-
-
     /**
      * 查询开启了某个索引服务的物理集群列表
      *
@@ -248,10 +234,10 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
      */
     @Override
     public List<String> getPhyClusterByOpenTemplateSrv(int srvId) {
-        
+
         return clusterPhyService.listAllClusters().stream().map(ClusterPhy::getCluster).collect(Collectors.toList());
     }
-  
+
     /**
      * 查询开启了某个索引服务的索引模板列表
      *
@@ -266,6 +252,4 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                 .map(IndexTemplate::getName)
                 .collect(Collectors.toList());
     }
-    
-
 }

@@ -99,7 +99,12 @@ public enum TemplateServiceEnum {
                                   * 扩缩容（调整shard）
                                   */
                                  @Deprecated
-                                 TEMPLATE_ADJUST_SHARD(16, "扩缩容", ES_2_3_3_100, 0);
+                                 TEMPLATE_ADJUST_SHARD(16, "扩缩容", ES_2_3_3_100, 0),
+
+                                 /**
+                                  * 异步translog
+                                  */
+                                 TEMPLATE_TRANSLOG_ASYNC(17, "异步translog", ES_2_3_3_100, 0);
 
     private Integer              code;
 

@@ -53,7 +53,9 @@ public class TemplateWithSrvVO extends BaseVO {
     private Boolean partition;
     @ApiModelProperty("模版健康:-1：未知")
     private Integer health;
-    
+
+    @ApiModelProperty("模版恢复优先级，10：高优，5：一般，0：低优")
+    private Integer priorityLevel;
     /**
      * 指示主集群的联通状态
      */

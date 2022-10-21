@@ -43,7 +43,7 @@ public class ESClusterNodeDAO extends BaseESDAO {
      * @param nodes 节点
      * @return 个数
      */
-    public int getIndicesCount(String cluster, String nodes) throws ESOperateException {
+    public int getIndicesCount(String cluster, String nodes) {
         ESClient client = esOpClient.getESClient(cluster);
         ESClusterNodesStatsResponse response = client.admin().cluster().prepareNodeStats().setNodesIds(nodes)
             .setIndices(true).level("indices").execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);

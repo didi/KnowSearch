@@ -81,4 +81,10 @@ public class IndexCatCellDTO {
 
     @ApiModelProperty("通过平台索引创建标识 true 通过平台创建，false不是通过平台创建")
     private Boolean platformCreateFlag;
+
+    @ApiModelProperty("异步translog")
+    private Boolean translogAsync;
+
+    @ApiModelProperty("恢复优先级")
+    private Integer priorityLevel;
 }

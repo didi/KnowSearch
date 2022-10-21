@@ -158,6 +158,11 @@ public class IndexTemplate extends BaseEntity implements Comparable<IndexTemplat
      */
     private Integer health;
 
+    /**
+     * 模版恢复优先级
+     */
+    private Integer priorityLevel;
+
     @Override
     public int compareTo(IndexTemplate o) {
         if (null == o) {
