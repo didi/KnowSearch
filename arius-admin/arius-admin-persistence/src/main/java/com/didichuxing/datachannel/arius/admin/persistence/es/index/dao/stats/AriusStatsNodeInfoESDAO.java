@@ -211,7 +211,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      */
     public double getClusterSearchLatencySum(String cluster) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_INDEXING_SEARCH_TIME_SUM, cluster,
-            NOW_2M, NOW_1M, INDICES_QUERY_LATENCY.getType());
+            NOW_2M, NOW_1M, INDICES_QUERY_TIME_IN_MILLIS.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,

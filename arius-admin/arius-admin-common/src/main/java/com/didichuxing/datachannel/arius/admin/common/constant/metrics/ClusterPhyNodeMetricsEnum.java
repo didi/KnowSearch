@@ -91,9 +91,12 @@ public enum ClusterPhyNodeMetricsEnum {
     /**
      * 单位：MS
      */
-
     INDICES_QUERY_LATENCY("indices-search-query_time_per_query", "索引Query耗时"),
 
+    /**
+     * 单位：MS
+     */
+    INDICES_QUERY_TIME_IN_MILLIS("indices-search-query_time_in_millis", "索引Query耗时"),
     /**
      * 单位：个
      */
