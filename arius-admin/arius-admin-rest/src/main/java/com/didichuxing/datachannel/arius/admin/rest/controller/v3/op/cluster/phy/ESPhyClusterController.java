@@ -5,7 +5,9 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
@@ -209,7 +211,7 @@ public class ESPhyClusterController {
     //=====================0.3.2
     @PostMapping("{clusterPhyId}/{gatewayClusterId}")
     @ResponseBody
-    @ApiOperation(value = "物理集群绑定 gateway", tags = "")
+    @ApiOperation(value = "物理集群绑定 gateway",tags = "0.3.2")
     public Result<List<ClusterPhyVO>> bindGatewayCluster(@PathVariable("clusterPhyId") Integer clusterPhyId,
                                                          @PathVariable("gatewayClusterId") Integer gatewayClusterId,
                                                          HttpServletRequest request) {
@@ -218,7 +220,7 @@ public class ESPhyClusterController {
     
     @PostMapping("/{clusterPhyId}")
     @ResponseBody
-    @ApiOperation(value = "获取物理集群安装的插件列表")
+    @ApiOperation(value = "获取物理集群安装的插件列表",tags = "0.3.2")
     public Result<PluginVO> listByClusterPhyId(HttpServletRequest request,
                                                @PathVariable("clusterPhyId") Integer clusterPhyId) {
         return Result.buildSucc();
@@ -226,7 +228,7 @@ public class ESPhyClusterController {
     
     @PostMapping("/kernel/{clusterName}")
     @ResponseBody
-    @ApiOperation(value = "获取物理集群下的内核插件列表")
+    @ApiOperation(value = "获取物理集群下的内核插件列表",tags = "0.3.2")
     public Result<PluginVO> listKernelPluginByClusterName(HttpServletRequest request,
                                                           @PathVariable("clusterName") String clusterName) {
         return Result.buildSucc();
@@ -234,7 +236,7 @@ public class ESPhyClusterController {
     
     @GetMapping("/{clusterPhyId}/{configId}")
     @ResponseBody
-    @ApiOperation(value = "根据 configId 获取物理集群配置信息")
+    @ApiOperation(value = "根据 configId 获取物理集群配置信息",tags = "0.3.2")
     public Result<GeneralGroupConfigHostVO> getConfigByClusterPhyId(HttpServletRequest request,
                                                                     @PathVariable("clusterPhyId") Integer clusterPhyId,
                                                                     @PathVariable("configId") Integer configId) {

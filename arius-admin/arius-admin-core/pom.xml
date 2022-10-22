@@ -30,10 +30,7 @@
             <groupId>com.didichuxing.datachannel</groupId>
             <artifactId>arius-admin-remote</artifactId>
         </dependency>
-         <dependency>
-            <groupId>com.didichuxing.datachannel</groupId>
-            <artifactId>arius-admin-op-manager</artifactId>
-        </dependency>
+      
 
         <dependency>
             <groupId>com.didichuxing.datachannel</groupId>
