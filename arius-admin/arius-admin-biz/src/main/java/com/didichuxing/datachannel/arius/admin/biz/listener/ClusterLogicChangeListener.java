@@ -26,14 +26,12 @@ public class ClusterLogicChangeListener extends ApplicationRetryListener<Cluster
     private ClusterLogicManager   clusterLogicManager;
 
     @Override
-    public boolean onApplicationRetryEvent(ClusterLogicEvent event) throws EventException {
-        try {
-            return clusterLogicManager.updateClusterLogicHealth(event.getClusterLogicId());
-       } catch (Exception e) {
+    public void onApplicationRetryEvent(ClusterLogicEvent event) throws EventException {
+        if(!clusterLogicManager.updateClusterLogicHealth(event.getClusterLogicId())){
             LOGGER.error(
                     "class=ClusterPhyChangeListener||method=onApplicationEvent||projectId={}||clusterPhyName={}||ErrorMsg={}",
-                    event.getProjectId(), event.getClusterLogicId(), e.getMessage());
-            throw new EventException(e.getMessage(), e);
+                    event.getProjectId(), event.getClusterLogicId());
+            throw new EventException("e.getMessage(), e");
         }
     }
 

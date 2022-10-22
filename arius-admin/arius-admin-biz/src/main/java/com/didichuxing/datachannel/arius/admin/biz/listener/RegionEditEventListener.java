@@ -70,7 +70,7 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
          * key是集群名，value是TemplateWithNodeNames
          */
         Map<String, List<TemplateWithNodeNames>> cluster2TemplateWithNodeNames = new HashMap<String, List<TemplateWithNodeNames>>(
-            16);
+                16);
         try {
             regionEditEvent.getRegionIdList().forEach(regionId -> {
                 ClusterRegion clusterRegion = clusterRegionService.getRegionById(regionId);
@@ -78,7 +78,7 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
                 Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(Math.toIntExact(regionId));
                 if (result.failed()) {
                     LOGGER.error("class=RegionEditEventListener||method=onApplicationEvent,warnMsg={}",
-                        result.getMessage());
+                            result.getMessage());
                     return;
                 }
                 result.getData().stream().forEach(clusterRoleHost -> nodeNames.add(clusterRoleHost.getNodeSet()));
@@ -86,8 +86,8 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
             });
         } catch (Exception e) {
             LOGGER.error(
-                "class=RegionEditEventListener||method=onApplicationEvent,warnMsg=build cluster template map error,",
-                e);
+                    "class=RegionEditEventListener||method=onApplicationEvent,warnMsg=build cluster template map error,",
+                    e);
             return;
         }
 
@@ -96,16 +96,16 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
                 try {
                     if (templateWithNodeNames.getNodeNames().isEmpty()) {
                         LOGGER.warn("class=RegionEditEventListener||method=onApplicationEvent,template={}, errMsg={}",
-                            templateWithNodeNames.getTemplateName(), "has no node names");
+                                templateWithNodeNames.getTemplateName(), "has no node names");
                         continue;
                     }
                     updateTemplateAllocationSetting(entry.getKey(), templateWithNodeNames.getTemplateName(),
-                        templateWithNodeNames.getNodeNames());
+                            templateWithNodeNames.getNodeNames());
                     updateIndicesAllocationSetting(entry.getKey(), templateWithNodeNames.getTemplateName(),
-                        templateWithNodeNames.getNodeNames());
+                            templateWithNodeNames.getNodeNames());
                 } catch (Exception e) {
                     LOGGER.error("class=RegionEditEventListener||method=onApplicationEvent,template={}, errMsg={}",
-                        templateWithNodeNames.getTemplateName(), e.getMessage());
+                            templateWithNodeNames.getTemplateName(), e.getMessage());
                 }
             }
 
@@ -122,16 +122,16 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
     private void buildCluster2TemplateWithNodeNamesSetMap(Map<String, List<TemplateWithNodeNames>> cluster2TemplateWithNodeNames,
                                                           ClusterRegion clusterRegion, Set<String> nodeNames) {
         Result<List<IndexTemplatePhy>> templatePhyListResult = indexTemplatePhyService
-            .listByRegionId(Math.toIntExact(clusterRegion.getId()));
+                .listByRegionId(Math.toIntExact(clusterRegion.getId()));
         if (templatePhyListResult.failed()) {
             LOGGER.error(
-                "class=RegionEditEventListener||method=buildCluster2TemplateWithNodeNamesSetMap||region={}||err={}",
-                clusterRegion.getId(), "update indices setting failed");
+                    "class=RegionEditEventListener||method=buildCluster2TemplateWithNodeNamesSetMap||region={}||err={}",
+                    clusterRegion.getId(), "update indices setting failed");
             return;
         }
 
         List<TemplateWithNodeNames> templateWithNodeNamesList = cluster2TemplateWithNodeNames
-            .get(clusterRegion.getPhyClusterName());
+                .get(clusterRegion.getPhyClusterName());
         if (null == templateWithNodeNamesList) {
             templateWithNodeNamesList = new ArrayList<>();
             cluster2TemplateWithNodeNames.put(clusterRegion.getPhyClusterName(), templateWithNodeNamesList);
@@ -155,13 +155,13 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
     private void updateIndicesAllocationSetting(String cluster, String templateName,
                                                 Set<String> nodeNames) throws ESOperateException {
         if (ariusConfigInfoService.booleanSetting(AriusConfigConstant.ARIUS_TEMPLATE_GROUP,
-            AriusConfigConstant.HISTORY_TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE, HISTORY_TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE_DEFAULT_VALUE)) {
+                AriusConfigConstant.HISTORY_TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE, HISTORY_TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE_DEFAULT_VALUE)) {
             boolean response = esIndexService.syncPutIndexSetting(cluster,
-                Collections.singletonList(templateName + "*"), TEMPLATE_INDEX_INCLUDE_NODE_NAME,
-                String.join(COMMA, nodeNames), "", RETRY_COUNT);
+                    Collections.singletonList(templateName + "*"), TEMPLATE_INDEX_INCLUDE_NODE_NAME,
+                    String.join(COMMA, nodeNames), "", RETRY_COUNT);
             if (!response) {
                 LOGGER.error("class=RegionEditEventListener||method=onApplicationEvent,template={}, errMsg={}",
-                    templateName, "update indices setting failed");
+                        templateName, "update indices setting failed");
             }
         }
     }
@@ -180,7 +180,7 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
         boolean response = esTemplateService.syncUpsertSetting(cluster, templateName, setting, RETRY_COUNT);
         if (!response) {
             LOGGER.error("class=RegionEditEventListener||method=onApplicationEvent,template={}, errMsg={}",
-                templateName, "update template setting failed");
+                    templateName, "update template setting failed");
         }
     }
 

@@ -14,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexResponse;
+import com.didichuxing.datachannel.arius.admin.common.constant.ESSettingConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
@@ -737,6 +738,34 @@ public class ESIndexServiceImpl implements ESIndexService {
             LOGGER.warn(
                 "class=IndicesPageSearchHandle||method=buildBlockInfo||cluster={}||index={}||errMsg=index is empty",
                 cluster);
+        }
+        return indexCatCellList;
+    }
+
+    /**
+     * 构建索引settings相关的实时数据（包含translog和恢复优先级）
+     * @param cluster
+     * @param indexCatCellList
+     * @return
+     */
+    @Override
+    public List<IndexCatCell> buildIndexSettingsInfo(String cluster, List<IndexCatCell> indexCatCellList){
+        if (CollectionUtils.isNotEmpty(indexCatCellList)) {
+            List<String> indexNameList = indexCatCellList.stream().map(IndexCatCell::getIndex)
+                    .collect(Collectors.toList());
+            Map<String, IndexConfig> name2IndexConfigMap = this.syncGetIndexSetting(cluster, indexNameList, 3);
+
+            indexCatCellList.forEach(indexCatCell -> {
+                Map<String, String> settingsMap = name2IndexConfigMap.get(indexCatCell.getIndex()).getSettings();
+                indexCatCell.setTranslogAsync(ESSettingConstant.ASYNC.equals(settingsMap
+                        .getOrDefault(ESSettingConstant.INDEX_TRANSLOG_DURABILITY, ESSettingConstant.REQUEST)));
+                indexCatCell.setPriorityLevel(Integer.valueOf(settingsMap
+                        .getOrDefault(ESSettingConstant.INDEX_PRIORITY, "0")));
+            });
+        } else {
+            LOGGER.warn(
+                    "class=IndicesPageSearchHandle||method=buildIndexTranslogAndPriority||cluster={}||index={}||errMsg=index is empty",
+                    cluster);
         }
         return indexCatCellList;
     }

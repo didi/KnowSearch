@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesIncrementalSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexForceMergeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
@@ -25,6 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.*;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.ESSettingConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
@@ -803,12 +805,70 @@ public class IndicesManagerImpl implements IndicesManager {
             }
             
         }
-        
-        
+
+        return Result.buildSucc();
+    }
+
+    /**
+     * 以settings增量方式批量更新索引的settings
+     * @param params
+     * @param projectId
+     * @param operator
+     * @return
+     */
+    @Override
+    public Result<Void> updateIndexSettingsByMerge(List<IndicesIncrementalSettingDTO> params, Integer projectId, String operator) throws ESOperateException {
+        Result<Void> checkResult = checkUpdateIndexSettingsByMerge(params, projectId, operator);
+        if(checkResult.failed()){
+            return Result.buildFail(checkResult.getMessage());
+        }
+
+        IndicesIncrementalSettingDTO incrementalSetting =  params.stream().findFirst().orElse(null);
+        String changeKey = incrementalSetting.getKey();
+        String changeValue = incrementalSetting.getValue();
+
+        // 把param转换成以物理集群名为key的map集合(以集群为维度进行索引settings批量更新操作)
+        Map<String/*集群名称*/, List<String>/*该集群中要修改settings的index名称列表*/> cluster2indicesMap = params.stream().collect(
+                Collectors.groupingBy(IndicesIncrementalSettingDTO::getCluster,
+                Collectors.mapping(IndicesIncrementalSettingDTO::getIndex, Collectors.toList())));
+
+        for(Map.Entry<String, List<String>> entry : cluster2indicesMap.entrySet()){
+            String cluster = entry.getKey();
+            boolean response = esIndexService.syncPutIndexSetting(cluster, cluster2indicesMap.get(cluster),
+                    changeKey, changeValue, "", RETRY_COUNT);
+            if (!response) {
+                LOGGER.error("class=IndicesManagerImpl||method=updateIndexSettingsByMerge,cluster={}, errMsg={}",
+                        cluster, "update indices settings failed");
+            }
+        }
+
         return Result.buildSucc();
     }
     
     /***************************************************private**********************************************************/
+
+    private Result<Void> checkUpdateIndexSettingsByMerge(List<IndicesIncrementalSettingDTO> params, Integer projectId, String operator) {
+        final Result<Void> projectCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (projectCheck.failed()) {
+            return Result.buildFail(projectCheck.getMessage());
+        }
+        if (AriusObjUtils.isNull(operator)) {
+            return Result.buildParamIllegal("操作人为空");
+        }
+        if(AriusObjUtils.isNull(params)){
+            return Result.buildParamIllegal("参数不能为空");
+        }
+        for (IndicesIncrementalSettingDTO param : params) {
+            Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(param.getCluster(), projectId);
+            if (getClusterRet.failed()) {
+                return Result.buildFrom(getClusterRet);
+            }
+            String phyCluster = getClusterRet.getData();
+            param.setCluster(phyCluster);
+        }
+        return Result.buildSucc();
+    }
+
     private Result<Void> basicCheckParam(String cluster, String index, Integer projectId) {
         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal(String.format("当前登录项目Id[%s]不存在, 无权限操作", projectId));

@@ -54,4 +54,7 @@ public class ConsoleTemplateDetailVO extends BaseTemplateVO {
 
     @ApiModelProperty("是否开启indexRollover能力")
     private Boolean      disableIndexRollover;
+
+    @ApiModelProperty("恢复优先级")
+    private Integer      recoveryPriorityLevel;
 }

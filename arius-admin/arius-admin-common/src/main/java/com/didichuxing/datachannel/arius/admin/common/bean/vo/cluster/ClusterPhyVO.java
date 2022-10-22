@@ -104,6 +104,9 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
     @ApiModelProperty("IaaS平台类型")
     private String                                       platformType;
 
+    @ApiModelProperty("SLB地址")
+    private String                                       slbAddress;
+
     /**
      * @see ClusterResourceTypeEnum
      */

@@ -550,7 +550,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public boolean updateClusterLogicHealth(Long clusterLogicId) {
-
         ESLogicClusterDTO updateLogicClusterDTO = new ESLogicClusterDTO();
         Set<Integer> clusterHealthSet = Sets.newHashSet();
         updateLogicClusterDTO.setId(clusterLogicId);

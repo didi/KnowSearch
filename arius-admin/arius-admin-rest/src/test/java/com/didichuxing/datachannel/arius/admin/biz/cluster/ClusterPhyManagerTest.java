@@ -161,7 +161,7 @@ class ClusterPhyManagerTest {
         indexTemplate = new IndexTemplate(LOGIC_TEMPLATE_ID, "name", 0, 0, DATE_FORMAT, "dataCenter", 0, 0, 0,
            "dateField", "dateFieldFormat", "idField",
             "routingField", EXPRESSION, 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0,
-            0.0,1);
+            0.0,1,0);
         indexTemplatePhy = new IndexTemplatePhy(PHYSICAL_ID, 0, TEMPLATE, EXPRESSION, CLUSTER, "rack", 0, 0, 0, 1, 0,
             "config", 0);
         indexTemplatePhyList = Collections.singletonList(indexTemplatePhy);
