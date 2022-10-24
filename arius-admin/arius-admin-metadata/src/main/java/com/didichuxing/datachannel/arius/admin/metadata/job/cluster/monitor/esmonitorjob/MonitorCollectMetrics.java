@@ -172,7 +172,7 @@ public class MonitorCollectMetrics {
             .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.flush.total_time_in_millis")
             .deriveParam(ESDataTempBean.DIVISOR, "es.indices.flush.total").computeType(DERIVE_DIVISION).build());
 
-        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indices.cost.merges.total_time_in_millis")
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.cost.merges.total_time_in_millis")
             .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.merges.total_time_in_millis")
             .deriveParam(ESDataTempBean.DIVISOR, "es.indices.merges.total").computeType(DERIVE_DIVISION).build());
         
@@ -215,7 +215,7 @@ public class MonitorCollectMetrics {
                 .deriveParam(ESDataTempBean.DIVISOR, "es.indices.search.query_total").computeType(DERIVE_DIVISION).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.cost.fetch_time_in_millis")
-                .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.search.fetch_time_in_millis ")
+                .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.search.fetch_time_in_millis")
                 .deriveParam(ESDataTempBean.DIVISOR, "es.indices.search.fetch_total").computeType(DERIVE_DIVISION).build());
         
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.cost.scroll_time_in_millis")
