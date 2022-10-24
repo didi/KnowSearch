@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.ecm;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.software;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -14,9 +14,9 @@ import javax.servlet.http.HttpServletRequest;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 @RestController
-@RequestMapping(V3_OP + "/ecm/package")
-@Api(tags = "ECM软件中心接口(REST)")
-public class EcmPackageController {
+@RequestMapping(V3_OP + "/software/package")
+@Api(tags = "软件中心接口(REST)")
+public class PackageController {
     @GetMapping("/page")
     @ApiOperation(value = "获取安装包列表接口")
     public PaginationResult<PackageVO> pageGetPackages(@RequestBody PackageConditionDTO packageDTO) {

@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.ecm;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.script;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -14,9 +14,9 @@ import javax.servlet.http.HttpServletRequest;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 @RestController
-@RequestMapping(V3_OP + "/ecm/script")
-@Api(tags = "ECM脚本中心接口(REST)")
-public class EcmScriptController {
+@RequestMapping(V3_OP + "/script")
+@Api(tags = "脚本中心接口(REST)")
+public class ScriptController {
     @GetMapping("/page")
     @ApiOperation(value = "获取脚本列表接口")
     public PaginationResult<ScriptVO> pageGetScripts(@RequestBody ScriptConditionDTO conditionDTO) {
