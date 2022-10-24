@@ -62,4 +62,9 @@ public class ComponentRepositoryImpl implements ComponentRepository {
     public Component getDependComponentById(int id) {
         return ComponentConverter.convertComponentPO2DO(componentDao.findDependComponentById(id));
     }
+
+    @Override
+    public int deleteComponent(int componentId) {
+        return componentDao.delete(componentId);
+    }
 }

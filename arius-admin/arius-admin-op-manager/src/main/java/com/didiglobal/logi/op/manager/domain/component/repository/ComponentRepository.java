@@ -73,4 +73,11 @@ public interface ComponentRepository {
      * @return
      */
     Component getDependComponentById(int id);
+
+    /**
+     * 删除组件
+     * @param id
+     * @return
+     */
+    int deleteComponent(int componentId);
 }

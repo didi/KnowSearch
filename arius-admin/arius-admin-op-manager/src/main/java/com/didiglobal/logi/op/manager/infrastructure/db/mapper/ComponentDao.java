@@ -68,4 +68,11 @@ public interface ComponentDao {
      * @return
      */
     ComponentPO findDependComponentById(int id);
+
+    /**
+     * 删除组件
+     * @param id
+     * @return
+     */
+    int delete(int id);
 }

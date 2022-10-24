@@ -91,4 +91,10 @@
         from logi_op_component
         where find_in_set(#{id}, contain_component_ids)
     </select>
+
+    <update id="updateContainIds">
+        update logi_op_component
+        set contain_component_ids = #{containIds}
+        where id = #{componentId}
+    </update>
 </mapper>

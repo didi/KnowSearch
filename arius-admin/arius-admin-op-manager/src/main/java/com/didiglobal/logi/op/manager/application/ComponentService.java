@@ -1,6 +1,7 @@
 package com.didiglobal.logi.op.manager.application;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
@@ -142,6 +143,19 @@ public class ComponentService {
         return submitRes;
     }
 
+    public Result<Integer> uninstallComponent(Integer componentId) {
+        LOGGER.info("start uninstall component[{}]", componentId);
+        GeneralUninstallComponent uninstallComponent = new GeneralUninstallComponent();
+        uninstallComponent.setComponentId(componentId);
+        List<ComponentGroupConfig> list = componentDomainService.getComponentConfig(componentId).getData();
+        uninstallComponent.setGroupConfigList(ConvertUtil.list2List(list, GeneralGroupConfig.class));
+        Result taskCheckRes = taskDomainService.hasRepeatTask(null, componentId);
+        if (taskCheckRes.failed()) {
+            return taskCheckRes;
+        }
+        return componentDomainService.submitUninstallComponent(uninstallComponent);
+    }
+
     @Nullable
     private Result checkStatusAndType(GeneralRollbackComponent generalRollbackComponent) {
         Result<Task> taskRes = taskDomainService.getTaskById(generalRollbackComponent.getTaskId());
@@ -202,5 +216,13 @@ public class ComponentService {
             return Result.fail(ResultCode.COMPONENT_HOST_STATUS_ILLEGAL_ERROR);
         }
         return componentDomainService.reportComponentHostStatus(componentId, groupName, host, status);
+    }
+
+    public Result<Integer> offLineComponent(Integer componentId) {
+        Result<Integer> res = componentDomainService.offLine(componentId);
+        if (res.getData() != 0) {
+            return Result.fail("组件未删除或者多删除");
+        }
+        return res;
     }
 }

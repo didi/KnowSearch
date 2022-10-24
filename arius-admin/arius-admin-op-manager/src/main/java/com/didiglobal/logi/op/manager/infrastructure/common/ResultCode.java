@@ -46,6 +46,7 @@ public enum ResultCode {
     COMPONENT_EXPAND_HOST_EXIST_ERROR(5004, "扩容节点已存在"),
     COMPONENT_SHRINK_HOST_NOT_EXIST_ERROR(5005, "缩容节点不存在"),
     COMPONENT_EXPAND_DEPEND_HOST_NOT_EXIST_ERROR(5006, "扩容组件依赖其他组件，必须得其他组件扩容后才能操作"),
+    COMPONENT_NOT_EXIST_ERROR(5007, "组件不存在"),
 
     /*script操作报错 */
     SCRIPT_OPERATE_ERROR(6001, "脚本操作报错"),

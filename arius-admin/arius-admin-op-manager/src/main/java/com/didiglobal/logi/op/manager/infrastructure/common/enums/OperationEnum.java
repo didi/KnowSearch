@@ -15,6 +15,7 @@ public enum OperationEnum {
     STATUS(7, "组件状态"),
     FUNCTION_EXECUTE(8, "任务执行"),
     ROLLBACK(9, "组件回滚"),
+    UNINSTALL(10, "组件卸载"),
     UN_KNOW(-1, "未知");
 
     private int type;

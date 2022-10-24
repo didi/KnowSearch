@@ -22,7 +22,6 @@ public interface ComponentDomainService {
      */
     Result<Integer> submitInstallComponent(GeneralInstallComponent installComponent);
 
-
     /**
      * 扩缩容
      *
@@ -39,7 +38,6 @@ public interface ComponentDomainService {
      */
     Result<Integer> submitConfigChangeComponent(GeneralConfigChangeComponent changeComponent);
 
-
     /**
      * 创建组件
      * @param component 组件实体
@@ -47,7 +45,6 @@ public interface ComponentDomainService {
      * @return
      */
     Result<Void> createComponent(Component component, Map<String, Set<String>> groupName2HostNotNormalStatusMap);
-
 
     /**
      * 通过id获取Component
@@ -67,7 +64,6 @@ public interface ComponentDomainService {
      */
     Result<Void> scaleComponent(Component component, Map<String, Set<String>> groupName2HostNormalStatusMap, int type);
 
-
     /**
      * 配置变更
      *
@@ -75,7 +71,6 @@ public interface ComponentDomainService {
      * @return
      */
     Result<Void> changeComponentConfig(Component component);
-
 
     /**
      * 重启组件
@@ -125,7 +120,6 @@ public interface ComponentDomainService {
      */
     Result<Integer> updateComponent(Component component);
 
-
     /**
      * 获取所有的component
      *
@@ -150,7 +144,6 @@ public interface ComponentDomainService {
      */
     Result<Boolean> hasPackageDependComponent(int packageId);
 
-
     /**
      * 根据ComponentId和分组名获取分组信息
      *
@@ -171,4 +164,18 @@ public interface ComponentDomainService {
      */
     Result<Integer> reportComponentHostStatus(int componentId, String groupName, String host, int status);
 
+    /**
+     * 下线组件以及包含的组件
+     * @param componentId 组件id
+     * @return
+     */
+    Result<Integer> offLine(int componentId);
+
+    /**
+     * 卸载组件
+     *
+     * @param uninstallComponent 卸载组件
+     * @return 任务id
+     */
+    Result<Integer> submitUninstallComponent(GeneralUninstallComponent uninstallComponent);
 }

@@ -17,6 +17,7 @@ import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.DomainEvent;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.SpringEventPublisher;
+import com.google.common.base.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.REX;
 import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
 
 /**
@@ -95,9 +97,15 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
 
     @Override
     public Result<Integer> submitRestartComponent(GeneralRestartComponent restartComponent) {
-
         //发送事件，领域解耦
         DomainEvent domainEvent = publisher.publish(ComponentEvent.createRestartEvent(restartComponent));
+        return (Result<Integer>) domainEvent.getResult();
+    }
+
+    @Override
+    public Result<Integer> submitUninstallComponent(GeneralUninstallComponent uninstallComponent) {
+        //发送事件，领域解耦
+        DomainEvent domainEvent = publisher.publish(ComponentEvent.createUninstallEvent(uninstallComponent));
         return (Result<Integer>) domainEvent.getResult();
     }
 
@@ -215,6 +223,21 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     @Override
     public Result<Integer> reportComponentHostStatus(int componentId, String groupName, String host, int status) {
         return Result.buildSuccess(componentHostRepository.updateComponentHostStatus(componentId, host, groupName, status));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Result<Integer> offLine(int componentId) {
+        Component component = componentRepository.getComponentById(componentId);
+        if (null == component) {
+            return Result.fail(ResultCode.COMPONENT_NOT_EXIST_ERROR);
+        }
+        if(!Strings.isNullOrEmpty(component.getContainComponentIds())) {
+            Arrays.stream(component.getContainComponentIds().split(SPLIT)).forEach(id->{
+                componentRepository.deleteComponent(Integer.parseInt(id));
+            });
+        }
+        return Result.success(componentRepository.deleteComponent(componentId));
     }
 
     @Override

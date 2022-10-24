@@ -75,6 +75,13 @@ public class ComponentEvent extends DomainEvent<Result> {
         return event;
     }
 
+    public static ComponentEvent createUninstallEvent(Object source) {
+        ComponentEvent event = new ComponentEvent(source);
+        event.operateType = OperationEnum.UNINSTALL.getType();
+        event.setDescribe(OperationEnum.UNINSTALL.getDescribe());
+        return event;
+    }
+
     @Override
     public synchronized Result getResult() {
         try {

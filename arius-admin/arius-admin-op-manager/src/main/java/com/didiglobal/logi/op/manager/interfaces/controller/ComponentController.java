@@ -88,6 +88,12 @@ public class ComponentController {
         return componentService.rollbackComponent(ComponentAssembler.toRollbackComponent(generalRollbackComponentDTO));
     }
 
+    @PostMapping("/uninstall/{componentId}")
+    @ApiOperation(value = "")
+    public Result<Integer> uninstall(@PathVariable Integer componentId) {
+        return componentService.uninstallComponent(componentId);
+    }
+
     @PostMapping("/execute-function")
     @ApiOperation(value = "")
     public Result<Integer> executeFunction(@RequestBody GeneralExecuteComponentFunctionDTO executeComponentFunctionDTO) {
@@ -104,6 +110,12 @@ public class ComponentController {
             return ComponentAssembler.toGeneralGroupConfigVO((GeneralGroupConfig) res.getData(), host);
         }
         return res;
+    }
+
+    @DeleteMapping("/offLine/{componentId}")
+    @ApiOperation(value = "下线组件")
+    public Result<Integer> offLine(@PathVariable Integer componentId) {
+        return componentService.offLineComponent(componentId);
     }
 
     @PutMapping("/host/status")
