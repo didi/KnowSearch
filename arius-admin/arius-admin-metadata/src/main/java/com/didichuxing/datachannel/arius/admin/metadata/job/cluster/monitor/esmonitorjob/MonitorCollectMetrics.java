@@ -140,8 +140,8 @@ public class MonitorCollectMetrics {
             .valueRoute("segments.memory_in_bytes").computeType(NONE).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indices.indexing.index_time_per_doc")
-            .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.indexing.docs.count_diff")
-            .deriveParam(ESDataTempBean.DIVISOR, "es.indices.indexing.index_time_in_millis").computeType(DERIVE_DIVISION)
+            .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.indexing.index_time_in_millis")
+            .deriveParam(ESDataTempBean.DIVISOR, "es.indices.indexing.docs.count_diff").computeType(DERIVE_DIVISION)
             .build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indices.indexing.index_latency")
