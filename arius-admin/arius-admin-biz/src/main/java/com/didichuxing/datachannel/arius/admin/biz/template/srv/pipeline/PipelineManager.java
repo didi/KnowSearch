@@ -27,10 +27,6 @@ public interface PipelineManager {
      */
     Result<Void> editFromTemplateLogic(IndexTemplate oldTemplate, IndexTemplate newTemplate);
 
-    //////////////////////////SRV
-
-
-
     /**
      * 创建
      * @param indexTemplatePhysicalInfo 物理模板
@@ -39,8 +35,6 @@ public interface PipelineManager {
      */
     boolean createPipeline(IndexTemplatePhy indexTemplatePhysicalInfo,
                            IndexTemplateWithPhyTemplates logicWithPhysical) throws ESOperateException;
-
-
 
     /**
      * 修改物理字段
