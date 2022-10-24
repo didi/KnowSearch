@@ -225,7 +225,8 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     /**
      * 根据划分方式展示region信息
      * @param clusterName
-     * @param divideType region划分类型
+     * @param divideType region划分类型，具体类型见RegionDivideMethodEnum类
+     * @see com.didichuxing.datachannel.arius.admin.common.constant.cluster.RegionDivideMethodEnum
      * @return
      */
     @Override
