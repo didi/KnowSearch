@@ -32,4 +32,7 @@ public class TemplateConditionDTO extends IndexTemplateDTO {
 
     @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
     private Boolean      orderByDesc = true;
+
+    @ApiModelProperty("是否展示元数据模板")
+    private Boolean isShowTemplateWithMetaData;
 }

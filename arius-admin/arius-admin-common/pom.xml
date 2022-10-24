@@ -84,6 +84,17 @@
             <artifactId>swagger-annotations</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.didichuxing.datachannel</groupId>
+            <artifactId>arius-admin-op-manager</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>mybatis</artifactId>
+                    <groupId>org.mybatis</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
     </dependencies>
 
 </project>

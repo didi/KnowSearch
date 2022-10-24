@@ -20,4 +20,7 @@ public class TemplateQueryDTO extends IndexTemplateDTO {
 
     @ApiModelProperty("所属物理集群")
     private String cluster;
+
+    @ApiModelProperty("是否展示元数据模板")
+    private Boolean isShowTemplateWithMetaData;
 }
