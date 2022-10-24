@@ -225,11 +225,11 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     /**
      * 根据划分方式展示region信息
      * @param clusterName
-     * @param divideMethod
+     * @param divideType region划分类型
      * @return
      */
     @Override
-    public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionInfoWithDivideMethod(String clusterName, String divideMethod) {
+    public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionInfoWithDivideType(String clusterName, String divideType) {
         return Result.buildSucc();
     }
 

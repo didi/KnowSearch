@@ -51,10 +51,10 @@ public interface ClusterRegionManager {
     /**
      * 根据划分方式展示region信息
      * @param clusterName
-     * @param divideMethod
+     * @param divideType region划分类型
      * @return
      */
-    Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionInfoWithDivideMethod(String clusterName, String divideMethod);
+    Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionInfoWithDivideType(String clusterName, String divideType);
 
     /**
      * 获取可分配至dcdr的物理集群名称获region列表, 不包含空节点region

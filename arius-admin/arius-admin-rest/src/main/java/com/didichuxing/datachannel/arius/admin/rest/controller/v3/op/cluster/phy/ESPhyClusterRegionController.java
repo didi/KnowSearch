@@ -66,12 +66,12 @@ public class ESPhyClusterRegionController {
         return clusterRegionManager.listClusterRegionWithNodeInfoByClusterName(clusterName);
     }
 
-    @GetMapping("/{clusterName}/{divideMethod}")
+    @GetMapping("/{clusterName}/{divideType}")
     @ResponseBody
     @ApiOperation(value = "根据物理集群名称和划分方式获region信息，包含region中的数据节点信息")
-    public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionInfoWithDivideMethod(@PathVariable String clusterName,
-                                                                                           @PathVariable String divideMethod) {
-        return clusterRegionManager.listClusterRegionInfoWithDivideMethod(clusterName, divideMethod);
+    public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionInfoWithDivideType(@PathVariable String clusterName,
+                                                                                           @PathVariable String divideType) {
+        return clusterRegionManager.listClusterRegionInfoWithDivideType(clusterName, divideType);
     }
 
     @GetMapping("/{clusterName}/dcdr")
