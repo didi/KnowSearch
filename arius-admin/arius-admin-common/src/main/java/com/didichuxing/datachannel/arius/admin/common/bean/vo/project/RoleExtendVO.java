@@ -17,5 +17,5 @@ public class RoleExtendVO extends RoleVO {
      *
      */
     @ApiModelProperty(value = "是否为默认角色", dataType = "Boolean", required = false)
-    private Boolean isDefaultRole=false;
+    private Boolean isDefaultRole = false;
 }

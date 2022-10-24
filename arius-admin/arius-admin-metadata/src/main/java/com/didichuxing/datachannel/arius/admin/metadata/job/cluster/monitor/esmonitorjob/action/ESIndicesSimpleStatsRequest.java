@@ -39,26 +39,26 @@ import java.util.Set;
  * nodestats can be enabled.
  */
 public class ESIndicesSimpleStatsRequest extends ESBroadcastRequest<ESIndicesSimpleStatsRequest> {
-    public static String COMPLETION = "completion";
-    public static String STORE = "store";
-    public static String INDEXING = "indexing";
-    public static String TRANSLOG = "translog";
-    public static String REFRESH = "refresh";
-    public static String SUGGEST = "suggest";
-    public static String RECOVERY = "recovery";
-    public static String WARMER = "warmer";
-    public static String SEGMENTS = "segments";
-    public static String SEARCH = "search";
-    public static String QUERY_CACHE = "query_cache";
-    public static String DOCS = "docs";
-    public static String FLUSH = "flush";
-    public static String FIELDDATA = "fielddata";
-    public static String GET = "get";
-    public static String MERGE = "merge";
-    public static String REQUEST_CACHE = "request_cache";
+    public static String      COMPLETION    = "completion";
+    public static String      STORE         = "store";
+    public static String      INDEXING      = "indexing";
+    public static String      TRANSLOG      = "translog";
+    public static String      REFRESH       = "refresh";
+    public static String      SUGGEST       = "suggest";
+    public static String      RECOVERY      = "recovery";
+    public static String      WARMER        = "warmer";
+    public static String      SEGMENTS      = "segments";
+    public static String      SEARCH        = "search";
+    public static String      QUERY_CACHE   = "query_cache";
+    public static String      DOCS          = "docs";
+    public static String      FLUSH         = "flush";
+    public static String      FIELDDATA     = "fielddata";
+    public static String      GET           = "get";
+    public static String      MERGE         = "merge";
+    public static String      REQUEST_CACHE = "request_cache";
 
-    private Set<String> flags = new HashSet<>();
-    private IndicesStatsLevel level = null;
+    private Set<String>       flags         = new HashSet<>();
+    private IndicesStatsLevel level         = null;
 
     /**
      * Sets all flags to return all nodestats.
@@ -99,7 +99,6 @@ public class ESIndicesSimpleStatsRequest extends ESBroadcastRequest<ESIndicesSim
         return this;
     }
 
-
     public ESIndicesSimpleStatsRequest flag(String type, boolean isSet) {
         if (isSet) {
             flags.add(type);
@@ -119,13 +118,12 @@ public class ESIndicesSimpleStatsRequest extends ESBroadcastRequest<ESIndicesSim
         return flags.contains(type);
     }
 
-
     @Override
     public RestRequest toRequest() throws Exception {
         String endpoint = buildEndPoint();
         RestRequest rr = new RestRequest("GET", endpoint, null);
 
-        if(level!=null) {
+        if (level != null) {
             rr.addParam("level", level.getStr());
         }
 

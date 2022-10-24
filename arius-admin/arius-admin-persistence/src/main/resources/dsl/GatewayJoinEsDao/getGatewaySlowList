@@ -29,7 +29,7 @@
     }
   },
   "_source": [
-    "appid",
+    "projectId",
     "timeStamp",
     "indiceSample",
     "dsl",

@@ -16,8 +16,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProjectConfig extends BaseEntity {
 
-
-
     /**
      * projectId
      */
@@ -49,6 +47,6 @@ public class ProjectConfig extends BaseEntity {
     /**
      * 备注
      */
-    private String memo;
+    private String  memo;
 
 }

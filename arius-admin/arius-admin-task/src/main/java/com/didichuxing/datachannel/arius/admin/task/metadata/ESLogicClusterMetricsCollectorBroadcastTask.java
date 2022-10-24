@@ -10,7 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 //@Task(name = "ESLogicClusterMetricsCollectorBroadcastTask", description = "逻辑集群调度任务", cron = "0 0/1 * * * ? *", autoRegister = true, consensual = ConsensualEnum.BROADCAST)
 public class ESLogicClusterMetricsCollectorBroadcastTask implements Job {
-    private static final Logger LOGGER = LoggerFactory.getLogger( ESLogicClusterMetricsCollectorBroadcastTask.class);
+    private static final Logger           LOGGER = LoggerFactory
+        .getLogger(ESLogicClusterMetricsCollectorBroadcastTask.class);
 
     @Autowired
     private LogicClusterMonitorJobHandler logicClusterMonitorJobHandler;

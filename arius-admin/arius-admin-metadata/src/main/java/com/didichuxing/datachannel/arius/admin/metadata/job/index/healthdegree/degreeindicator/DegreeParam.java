@@ -17,29 +17,25 @@ import java.util.List;
 public class DegreeParam {
     IndexTemplateLogicWithClusterAndMasterTemplate indexTemplate;
 
-    long templateDocNu;
+    long                                           templateDocNu;
 
-    double templateSizeInBytes;
+    double                                         templateSizeInBytes;
 
-    long templateAccessCount;
+    long                                           templateAccessCount;
 
-    IndexRealTimeInfo todayReaTimelInfo;
+    IndexRealTimeInfo                              todayReaTimelInfo;
 
-    IndexRealTimeInfo yesdayReaTimelInfo;
+    IndexRealTimeInfo                              yesdayReaTimelInfo;
 
-    List<ESIndexToNodeStats> esIndexToNodeStats;
+    List<ESIndexToNodeStats>                       esIndexToNodeStats;
 
-    List<IndicatorChild> indicatorChilds;
+    List<IndicatorChild>                           indicatorChilds;
 
     @Override
     public String toString() {
-        return "DegreeParam" +
-                ": template="               + indexTemplate.getName()  +
-                ": templateDocNu="          + templateDocNu   +
-                ": templateSizeInBytes="    + templateSizeInBytes +
-                ": templateAccessCount="    + templateAccessCount   +
-                ": todayReaTimelInfo="      + todayReaTimelInfo.toString()   +
-                ", yesdayReaTimelInfo="     + yesdayReaTimelInfo.toString() +
-                ", esIndexToNodeStats="  + JSON.toJSONString( esIndexToNodeStats );
+        return "DegreeParam" + ": template=" + indexTemplate.getName() + ": templateDocNu=" + templateDocNu
+               + ": templateSizeInBytes=" + templateSizeInBytes + ": templateAccessCount=" + templateAccessCount
+               + ": todayReaTimelInfo=" + todayReaTimelInfo.toString() + ", yesdayReaTimelInfo="
+               + yesdayReaTimelInfo.toString() + ", esIndexToNodeStats=" + JSON.toJSONString(esIndexToNodeStats);
     }
 }

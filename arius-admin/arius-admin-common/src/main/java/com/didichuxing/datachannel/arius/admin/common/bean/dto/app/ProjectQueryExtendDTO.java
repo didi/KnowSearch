@@ -16,6 +16,6 @@ import lombok.EqualsAndHashCode;
 @Data
 @ApiModel(description = "项目查找条件扩展信息")
 public class ProjectQueryExtendDTO extends ProjectQueryDTO {
-     @ApiModelProperty(value = "查询模式（0:集群模式；1:索引模式）", dataType = "Integer", required = false)
+    @ApiModelProperty(value = "查询模式（0:集群模式；1:索引模式）", dataType = "Integer", required = false)
     private Integer searchType;
 }

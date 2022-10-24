@@ -3,13 +3,15 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
 
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterUpdateContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterUpdateContent;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord.Builder;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.elasticcloud.ElasticCloudCommonActionParam;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -19,6 +21,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpUpdateOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
@@ -30,6 +34,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackag
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,24 +51,25 @@ import org.springframework.stereotype.Service;
 public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private RoleTool roleTool;
+    private RoleTool          roleTool;
 
     @Autowired
     private ClusterPhyService esClusterPhyService;
 
     @Autowired
-    private ESPackageService     esPackageService;
+    private ESPackageService  esPackageService;
 
     @Autowired
-    private EcmHandleService ecmHandleService;
+    private EcmHandleService  ecmHandleService;
 
     @Autowired
-    private OpTaskManager opTaskManager;
+    private OpTaskManager     opTaskManager;
+    @Autowired
+    private ProjectService projectService;
 
     @Override
     protected Result<Void> validateConsoleParam(WorkOrder workOrder) throws NotFindSubclassException {
-        ClusterUpdateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterUpdateContent.class);
+        ClusterUpdateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterUpdateContent.class);
 
         if (AriusObjUtils.isNull(content.getPhyClusterId())) {
             return Result.buildParamIllegal("物理集群id为空");
@@ -88,8 +94,7 @@ public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
 
     @Override
     protected String getTitle(WorkOrder workOrder) {
-        ClusterUpdateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterUpdateContent.class);
+        ClusterUpdateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterUpdateContent.class);
         WorkOrderTypeEnum workOrderTypeEnum = WorkOrderTypeEnum.valueOfName(workOrder.getType());
         if (workOrderTypeEnum == null) {
             return "";
@@ -113,9 +118,9 @@ public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
 
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws NotFindSubclassException {
-        ClusterUpdateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterUpdateContent.class);
-
+        ClusterUpdateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterUpdateContent.class);
+        //获取物理集群名称旧版本的版本号
+        final String beforeEsVersion = esClusterPhyService.getClusterByName(content.getPhyClusterName()).getEsVersion();
         EcmTaskDTO ecmTaskDTO = new EcmTaskDTO();
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
         ecmTaskDTO.setWorkOrderId(workOrder.getId());
@@ -136,9 +141,9 @@ public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
             ESPackage esPackage = esPackageService.getByVersionAndType(content.getEsVersion(), ecmParamBase.getType());
 
             if (ecmParamBase.getType().equals(ES_HOST.getCode())) {
-                ((HostsParamBase) ecmParamBase).setEsVersion(content.getEsVersion());
+                ((HostParamBase) ecmParamBase).setEsVersion(content.getEsVersion());
                 if (!AriusObjUtils.isNull(esPackage) && !AriusObjUtils.isBlack(esPackage.getUrl())) {
-                    ((HostsParamBase) ecmParamBase).setImageName(esPackage.getUrl());
+                    ((HostParamBase) ecmParamBase).setImageName(esPackage.getUrl());
                 }
             } else {
                 ((ElasticCloudCommonActionParam) ecmParamBase).setEsVersion(content.getEsVersion());
@@ -155,11 +160,19 @@ public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
         opTaskDTO.setCreator(workOrder.getSubmitor());
         opTaskDTO.setTaskType(OpTaskTypeEnum.CLUSTER_UPGRADE.getType());
         opTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
-        Result<OpTask> result = opTaskManager.addTask(opTaskDTO);
+        Result<OpTask> result = opTaskManager.addTask(opTaskDTO, AuthConstant.SUPER_PROJECT_ID);
         if (null == result || result.failed()) {
             return Result.buildFail("生成集群新建操作任务失败!");
         }
-
+        //版本升级的操作记录
+        final OperateRecord operateRecord = new Builder().userOperation(opTaskDTO.getCreator())
+                .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
+                .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_RESTART)
+                .content(String.format("【%s】->【%s】",beforeEsVersion,
+                        content.getEsVersion()))
+                .bizId(content.getPhyClusterId())
+                .buildDefaultManualTrigger();
+        operateRecordService.save(operateRecord);
         return Result.buildSucc();
     }
 

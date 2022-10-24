@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProjectClusterPhyAuth extends BaseEntity  {
+public class ProjectClusterPhyAuth extends BaseEntity {
     /**
      * ID
      */
@@ -31,8 +31,4 @@ public class ProjectClusterPhyAuth extends BaseEntity  {
      */
     private Integer type;
 
-    /**
-     * 责任人列表
-     */
-    private String  responsible;
 }

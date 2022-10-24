@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ESUser extends BaseEntity   {
+public class ESUser extends BaseEntity {
 
     private Integer id;
 
@@ -23,11 +23,7 @@ public class ESUser extends BaseEntity   {
 
     private String  verifyCode;
 
-    private String  departmentId;
-
-    private String  department;
-
-    private String  responsible;
+ 
 
     private String  memo;
 
@@ -41,7 +37,7 @@ public class ESUser extends BaseEntity   {
 
     private String  dataCenter;
     private Integer projectId;
-     private Boolean defaultDisplay;
+    private Boolean defaultDisplay;
 
     /******************** 即将废弃字段 ***********************/
 

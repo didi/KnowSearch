@@ -1,11 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.template;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,8 +25,10 @@ public class TemplateConditionDTO extends IndexTemplateDTO {
     @ApiModelProperty("所属集群")
     private List<String> clusterPhies;
 
-    @ApiModelProperty("排序字段")
+    @ApiModelProperty("排序字段 block_read(禁读)、block_write(禁写)")
     private String       sortTerm;
+    @ApiModelProperty("模板健康度")
+    private Integer health;
 
     @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
     private Boolean      orderByDesc = true;

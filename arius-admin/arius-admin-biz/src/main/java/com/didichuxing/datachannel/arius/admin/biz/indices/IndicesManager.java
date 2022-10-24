@@ -1,23 +1,25 @@
 package com.didichuxing.datachannel.arius.admin.biz.indices;
 
-import java.util.List;
-import java.util.function.BiFunction;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesIncrementalSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexForceMergeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellWithTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import java.util.List;
+import java.util.function.BiFunction;
 
 /**
  * @author lyn
@@ -30,7 +32,8 @@ public interface IndicesManager {
      * @param projectId         项目
      * @return              List<IndexCatInfoVO>
      */
-    PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition, Integer projectId) throws NotFindSubclassException;
+    PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition,
+                                                  Integer projectId) throws NotFindSubclassException;
 
     /**
      * 创建索引
@@ -38,9 +41,9 @@ public interface IndicesManager {
      * @param indexCreateDTO
      * @param projectId
      * @param operator
-     * @return
      */
-    Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId, String operator);
+    Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId, String operator)
+            throws AdminOperateException;
 
     /**
      * 删除索引
@@ -50,7 +53,7 @@ public interface IndicesManager {
      * @return           Boolean
      */
     Result<Boolean> deleteIndex(List<IndexCatCellDTO> params, Integer projectId, String operator);
-    
+
     /**
      * 批量更新索引状态
      *
@@ -81,26 +84,27 @@ public interface IndicesManager {
      * @return {@link Result}<{@link Boolean}>
      */
     Result<Boolean> closeIndex(List<IndexCatCellDTO> params, Integer projectId, String operator);
+
     /**
      * 配合删除真实集群索引使用
+     * <p>
+     * 1. 批量设置存储索引cat/index信息的元数据索引中的文档标志位（deleteFlag）为true 2. 采集任务不采集已删除索引
      *
-     * 1. 批量设置存储索引cat/index信息的元数据索引中的文档标志位（deleteFlag）为true
-     * 2. 采集任务不采集已删除索引
-     *
-     * @param cluster          物理集群
-     * @param indexNameList    索引名称列表
+     * @param cluster       物理集群
+     * @param indexNameList 索引名称列表
      * @return
      */
-    Result<Boolean> updateIndexFlagInvalid(String cluster, List<String> indexNameList);
+    Result<Void> updateIndexFlagInvalid(String cluster, List<String> indexNameList);
 
     /**
      * 编辑索引setting阻塞信息
+     *
      * @param params    索引信息列表
-     * @param projectId     项目
+     * @param projectId 项目
      * @param operator  操作人
-     * @return          Boolean
+     * @return Boolean
      */
-    Result<Boolean> editIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer projectId, String operator);
+    Result<Void> editIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer projectId, String operator);
 
     /**
      * 获取索引mapping
@@ -114,11 +118,14 @@ public interface IndicesManager {
 
     /**
      * 更新索引mapping
+     *
      * @param param
      * @param projectId
+     * @param operate
      * @return
      */
-    Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer projectId);
+    Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer projectId, String operate)
+            throws AdminOperateException;
 
     /**
      * 获取索引setting信息
@@ -132,11 +139,14 @@ public interface IndicesManager {
 
     /**
      * 更新索引setting
+     *
      * @param param
      * @param projectId
+     * @param operator
      * @return
      */
-    Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer projectId) throws ESOperateException;
+    Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer projectId,
+                             String operator) throws ESOperateException;
 
     /**
      * 获取索引shard分配信息
@@ -158,19 +168,23 @@ public interface IndicesManager {
 
     /**
      * 新增别名
+     *
      * @param param
      * @param projectId 项目
+     * @param operator
      * @return
      */
-    Result<Void> addIndexAliases(IndexCatCellWithConfigDTO param, Integer projectId);
+    Result<Void> addIndexAliases(IndexCatCellWithConfigDTO param, Integer projectId, String operator);
 
     /**
      * 删除别名
+     *
      * @param param
      * @param projectId 项目
+     * @param operator
      * @return
      */
-    Result<Void> deleteIndexAliases(IndexCatCellWithConfigDTO param, Integer projectId);
+    Result<Void> deleteIndexAliases(IndexCatCellWithConfigDTO param, Integer projectId, String operator);
 
     /**
      * 获取索引别名
@@ -184,44 +198,58 @@ public interface IndicesManager {
 
     /**
      * rollover
+     *
      * @param param
+     * @param operator
+     * @param projectId
      * @return
      */
-    Result<Void> rollover(IndexRolloverDTO param);
+    Result<Void> rollover(IndexRolloverDTO param, String operator, Integer projectId);
 
     /**
      * shrink
+     *
      * @param param
+     * @param operator
+     * @param projectId
      * @return
      */
-    Result<Void> shrink(IndexCatCellWithConfigDTO param);
+    Result<Void> shrink(IndexCatCellWithConfigDTO param, String operator, Integer projectId);
 
     /**
      * split
+     *
      * @param param
+     * @param operator
+     * @param projectId
      * @return
      */
-    Result<Void> split(IndexCatCellWithConfigDTO param);
+    Result<Void> split(IndexCatCellWithConfigDTO param, String operator, Integer projectId);
 
     /**
      * forceMerge
+     *
      * @param param
+     * @param operator
+     * @param projectId
      * @return
      */
-    Result<Void> forceMerge(IndexForceMergeDTO param);
+    Result<Void> forceMerge(IndexForceMergeDTO param, String operator, Integer projectId);
 
     /**
      * 获取物理集群中的索引列表
      */
-    Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer projectId);
+    Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer projectId, String index);
 
     /**
      * 获取逻辑集群下的索引列表
+     *
      * @param clusterLogicName
      * @param projectId
+     * @param index
      * @return
      */
-    Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId);
+    Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId, String index);
 
     /**
      * 判断索引是否存在
@@ -239,7 +267,7 @@ public interface IndicesManager {
      * @param physicalId 物理模板id
      * @return {@link List}<{@link String}>
      */
-    List<String> listIndexNameByTemplatePhyId(Long physicalId);
+    List<IndexCatCellWithTemplateVO> listIndexCatCellWithTemplateByTemplatePhyId(Long physicalId);
 
     /**
      * 获取物理模版所有匹配的索引catinfo
@@ -248,4 +276,15 @@ public interface IndicesManager {
      * @return {@link List}<{@link CatIndexResult}>
      */
     List<CatIndexResult> listIndexCatInfoByTemplatePhyId(Long physicalId);
+    
+    Result<Void> deleteIndexByCLusterPhy(String clusterPhy, List<String> indexNameList, Integer projectId, String operator);
+
+    /**
+     * 以settings增量方式批量更新索引的settings
+     * @param params
+     * @param projectId
+     * @param operator
+     * @return
+     */
+    Result<Void> updateIndexSettingsByMerge(List<IndicesIncrementalSettingDTO> params, Integer projectId, String operator) throws ESOperateException;
 }

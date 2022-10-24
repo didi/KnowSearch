@@ -16,33 +16,33 @@ public class EcmTask {
     /**
      * ID主键自增
      */
-    private Long id;
+    private Long    id;
 
     /**
      * 标题
      */
-    private String title;
+    private String  title;
 
     /**
      * 工单ID
      */
-    private Long workOrderId;
+    private Long    workOrderId;
 
     /**
      * 物理集群ID
      */
-    private Long physicClusterId;
+    private Long    physicClusterId;
 
     /**
      * 集群节点角色 执行顺序
      */
-    private String clusterNodeRole;
+    private String  clusterNodeRole;
 
     /**
      * 状态
      * @see EcmTaskStatusEnum
      */
-    private String status;
+    private String  status;
 
     /**
      * 类型  docker容器云/host 物理机
@@ -57,10 +57,10 @@ public class EcmTask {
     /**
      *  zeus任务角色数据
      */
-    private String handleData;
+    private String  handleData;
 
     /**
      * 创建人
      */
-    private String creator;
+    private String  creator;
 }

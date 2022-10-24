@@ -19,13 +19,13 @@ import lombok.NoArgsConstructor;
 public class ProjectLogicClusterAuthVO extends BaseDTO {
 
     @ApiModelProperty("ID")
-    private Long id;
+    private Long    id;
 
     @ApiModelProperty("应用ID")
     private Integer projectId;
 
     @ApiModelProperty("逻辑集群ID")
-    private Long logicClusterId;
+    private Long    logicClusterId;
 
     /**
      * @see ProjectClusterLogicAuthEnum
@@ -33,7 +33,6 @@ public class ProjectLogicClusterAuthVO extends BaseDTO {
     @ApiModelProperty("权限类型:0：超管权限，1：配置管理权限，2：访问权限")
     private Integer type;
 
-    @ApiModelProperty("责任人")
-    private String responsible;
+   
 
 }

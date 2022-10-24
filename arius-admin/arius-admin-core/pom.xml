@@ -13,7 +13,10 @@
     <artifactId>arius-admin-core</artifactId>
 
     <dependencies>
-
+        <dependency>
+            <groupId>com.github.java-json-tools</groupId>
+            <artifactId>json-patch</artifactId>
+        </dependency>
         <dependency>
             <groupId>io.github.zqrferrari</groupId>
             <artifactId>logi-security-spring-boot-starter</artifactId>
@@ -27,6 +30,7 @@
             <groupId>com.didichuxing.datachannel</groupId>
             <artifactId>arius-admin-remote</artifactId>
         </dependency>
+      
 
         <dependency>
             <groupId>com.didichuxing.datachannel</groupId>

@@ -12,11 +12,9 @@ public class RegionDeleteEvent extends ApplicationEvent {
 
     private ClusterRegion clusterRegion;
 
-    private String operator;
+    private String        operator;
 
-    public RegionDeleteEvent(Object source,
-                             ClusterRegion clusterRegion,
-                             String operator) {
+    public RegionDeleteEvent(Object source, ClusterRegion clusterRegion, String operator) {
         super(source);
         this.clusterRegion = clusterRegion;
         this.operator = operator;

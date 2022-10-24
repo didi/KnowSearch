@@ -1,0 +1,43 @@
+{
+  "from": %d,
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": %s,
+      "must_not": [
+        {
+          "wildcard": {
+            "uri": {
+              "value": "*/_bulk"
+            }
+          }
+        },
+        {
+          "prefix": {
+            "indices": {
+              "value": "."
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "projectId",
+    "indiceSample",
+    "dsl",
+    "exceptionName",
+    "timeStamp",
+    "indices",
+    "uri",
+    "requestId",
+    "clusterName"
+  ],
+  "sort": [
+      {
+        "%s": {
+          "order": "%s"
+        }
+      }
+  ]
+}

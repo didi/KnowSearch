@@ -22,34 +22,34 @@ public class AriusTaskThreadPool {
 
     private ExecutorService     pool;
 
-    private ThreadFactory springThreadFactory = new CustomizableThreadFactory("AriusTaskThreadPool");
+    private ThreadFactory       springThreadFactory = new CustomizableThreadFactory("AriusTaskThreadPool");
 
     public void init(int poolSize, String taskName, int queueLen) {
-        this.poolSize   = poolSize;
+        this.poolSize = poolSize;
 
         LOGGER.warn("class=AriusTaskThreadPool||method=init||poolSize={}||taskName={}", poolSize, taskName);
 
         // 这里注意需要 LinkedBlockingQueue 的容量大小设置，默认为接近无限大,
         // 随着worker数量积增，会导致内存压力持续上升，若部署在容器中, 服务会被容器主动kill掉
-        pool = new ThreadPoolExecutor(poolSize, poolSize,
-                0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(queueLen),
-                springThreadFactory);
+        pool = new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(queueLen), springThreadFactory);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             pool.shutdown();
             try {
                 if (!pool.awaitTermination(20, TimeUnit.SECONDS)) {
-                    LOGGER.warn("class=AriusTaskThreadPool||method=init||msg=still some task running, force to shutdown!");
+                    LOGGER.warn(
+                        "class=AriusTaskThreadPool||method=init||msg=still some task running, force to shutdown!");
                     List<Runnable> shutDownList = pool.shutdownNow();
-                    shutDownList.forEach(e -> LOGGER.info("class=AriusTaskThreadPool||method=init||msg=Runnable forced shutdown||class={}"));
+                    shutDownList.forEach(e -> LOGGER
+                        .info("class=AriusTaskThreadPool||method=init||msg=Runnable forced shutdown||class={}"));
                 }
             } catch (InterruptedException e) {
                 pool.shutdownNow();
                 Thread.currentThread().interrupt();
             }
             LOGGER.info("class=AriusTaskThreadPool||method=init||msg={} shutdown finished", THREAD_FACTORY_NAME);
-        } ) );
+        }));
 
         LOGGER.info("class=AriusTaskThreadPool||method=init||AriusTaskThreadPool init finished.");
     }

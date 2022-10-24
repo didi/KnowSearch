@@ -20,7 +20,6 @@
         <result column="creator"                    jdbcType="VARCHAR" property="creator"/>
         <result column="ns_tree"                    jdbcType="VARCHAR" property="nsTree"/>
         <result column="image_name"                 jdbcType="VARCHAR" property="imageName"/>
-        <result column="template_srvs"              jdbcType="VARCHAR" property="templateSrvs"/>
         <result column="create_time"                jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time"                jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="run_mode"                   jdbcType="TINYINT" property="runMode"/>
@@ -38,7 +37,7 @@
 
     <sql id="Base_Column_List">
        id, cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,image_name, idc,
-        es_version, `level`, `password`, cfg_id, package_id, plug_ids, creator,ns_tree, template_srvs, create_time, update_time,
+        es_version, `level`, `password`, cfg_id, package_id, plug_ids, creator,ns_tree,  create_time, update_time,
            run_mode, write_action, health, active_shard_num, disk_total, disk_usage, disk_usage_percent, tags,platform_type,resource_type,gateway_url
     </sql>
 
@@ -46,12 +45,12 @@
             useGeneratedKeys="true" keyColumn="id" keyProperty="id">
         insert into es_cluster_phy_info
         (cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,
-         image_name, idc, es_version, `level`, package_id, plug_ids, creator, ns_tree, template_srvs, run_mode,
+         image_name, idc, es_version, `level`, package_id, plug_ids, creator, ns_tree, run_mode,
          write_action, health, `password`, active_shard_num, disk_total, disk_usage, disk_usage_percent, `tags`,
          platform_type, resource_type, gateway_url)
         values (#{cluster}, #{readAddress}, #{writeAddress}, #{httpAddress}, #{httpWriteAddress}, #{desc}, #{type},
                 #{dataCenter}, #{imageName}, #{idc}, #{esVersion}, #{level}, #{packageId}, #{plugIds}, #{creator},
-                #{nsTree}, #{templateSrvs}, #{runMode}, #{writeAction}, #{health}, #{password}, #{activeShardNum},
+                #{nsTree}, #{runMode}, #{writeAction}, #{health}, #{password}, #{activeShardNum},
                 #{diskTotal}, #{diskUsage}, #{diskUsagePercent}, #{tags}, #{platformType}, #{resourceType},
                 #{gatewayUrl})
     </insert>
@@ -76,7 +75,6 @@
             <if test="plugIds != null">,plug_ids = #{plugIds}</if>
             <if test="creator != null">,creator = #{creator}</if>
             <if test="nsTree != null">,ns_tree = #{nsTree}</if>
-            <if test="templateSrvs != null">,template_srvs = #{templateSrvs}</if>
             <if test="runMode != null">,run_mode = #{runMode}</if>
             <if test="writeAction != null">,write_action = #{writeAction}</if>
             <if test="health != null">,health = #{health}</if>
@@ -232,4 +230,5 @@
         where is_active = 1
         and package_id = #{packageId}
     </select>
+
 </mapper>

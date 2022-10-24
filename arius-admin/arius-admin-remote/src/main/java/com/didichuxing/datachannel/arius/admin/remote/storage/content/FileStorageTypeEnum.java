@@ -43,5 +43,4 @@ public enum FileStorageTypeEnum {
         return FileStorageTypeEnum.UNKNOWN;
     }
 
-
 }

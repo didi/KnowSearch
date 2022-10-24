@@ -42,6 +42,11 @@ public class ClusterPhyHealthMetrics {
      * 未知状态集群数
      */
     private Integer unknownNum;
+    
+     /**
+     * green状态集群名称列表
+     */
+    private String  greenClusterListStr;
 
     /**
      * yellow状态集群名称列表
@@ -79,11 +84,13 @@ public class ClusterPhyHealthMetrics {
     private Double  unknownPercent;
 
     public void computePercent() {
-        if (null == totalNum) { return;}
+        if (null == totalNum) {
+            return;
+        }
 
-        this.greenPercent   = CommonUtils.divideIntAndFormatDouble(greenNum, totalNum, 5,100);
-        this.yellowPercent  = CommonUtils.divideIntAndFormatDouble(yellowNum, totalNum, 5,100);
-        this.redPercent     = CommonUtils.divideIntAndFormatDouble(redNum, totalNum, 5,100);
-        this.unknownPercent = CommonUtils.divideIntAndFormatDouble(unknownNum, totalNum, 5,100);
+        this.greenPercent = CommonUtils.divideIntAndFormatDouble(greenNum, totalNum, 5, 100);
+        this.yellowPercent = CommonUtils.divideIntAndFormatDouble(yellowNum, totalNum, 5, 100);
+        this.redPercent = CommonUtils.divideIntAndFormatDouble(redNum, totalNum, 5, 100);
+        this.unknownPercent = CommonUtils.divideIntAndFormatDouble(unknownNum, totalNum, 5, 100);
     }
 }

@@ -19,7 +19,7 @@ import java.util.List;
 public class GatewayOverviewMetricsVO {
 
     @ApiModelProperty("指标类型")
-    private String type;
+    private String                     type;
 
     @ApiModelProperty("指标值")
     private List<MetricsContentCellVO> metrics;

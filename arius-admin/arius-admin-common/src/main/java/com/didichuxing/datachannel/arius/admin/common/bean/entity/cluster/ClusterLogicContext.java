@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster;
 
 import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Deprecated
 public class ClusterLogicContext {
 
     /*****************************************clusterLogicInfo*************************************/

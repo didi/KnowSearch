@@ -16,15 +16,14 @@ public class BaseResult implements Serializable {
 
     private static final long serialVersionUID = 3472961240718956029L;
 
-
     @ApiModelProperty("异常信息")
-    protected String            message;
+    protected String          message;
 
     @ApiModelProperty("提示")
-    protected String            tips;
+    protected String          tips;
 
     @ApiModelProperty("返回码，0表示成功；10000表示参数错误；10004表示重复；10005表示不存在；")
-    protected Integer           code;
+    protected Integer         code;
 
     public boolean success() {
         return getCode() != null && ResultType.SUCCESS.getCode() == getCode();

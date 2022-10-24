@@ -16,9 +16,9 @@ public class ClusterRegionFSInfo extends BaseEntity {
 
     private Integer regionId;
 
-    private Long  totalInBytes = 0L;
+    private Long    totalInBytes     = 0L;
 
-    private Long freeInBytes = 0L;
+    private Long    freeInBytes      = 0L;
 
-    private Long availableInBytes = 0L;
+    private Long    availableInBytes = 0L;
 }

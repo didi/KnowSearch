@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IndexTemplate extends BaseEntity implements  Comparable<IndexTemplate> {
+public class IndexTemplate extends BaseEntity implements Comparable<IndexTemplate> {
 
     private Integer id;
 
@@ -58,20 +58,9 @@ public class IndexTemplate extends BaseEntity implements  Comparable<IndexTempla
      */
     private Integer replicaTime;
 
-    /**
-     * 成本部门
-     */
-    private String  libraDepartmentId;
 
-    /**
-     * 成本部门
-     */
-    private String  libraDepartment;
 
-    /**
-     * 责任人
-     */
-    private String  responsible;
+
 
     /**
      * 时间字段
@@ -164,6 +153,15 @@ public class IndexTemplate extends BaseEntity implements  Comparable<IndexTempla
      * 可用磁盘容量
      */
     private Double diskSize;
+    /**
+     * 模版健康度
+     */
+    private Integer health;
+
+    /**
+     * 模版恢复优先级
+     */
+    private Integer priorityLevel;
 
     @Override
     public int compareTo(IndexTemplate o) {

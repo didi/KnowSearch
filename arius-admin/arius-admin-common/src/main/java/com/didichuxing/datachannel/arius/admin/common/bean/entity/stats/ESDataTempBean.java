@@ -13,12 +13,12 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ESDataTempBean extends BaseESPO implements CollectBean  {
+public class ESDataTempBean extends BaseESPO implements CollectBean {
     public static final Integer INDEX_TYPE = 1;
     public static final Integer NODE_TYPE  = 2;
 
-    public static final String  DIVIDEND = "Dividend";
-    public static final String  DIVISOR  = "Divisor";
+    public static final String  DIVIDEND   = "Dividend";
+    public static final String  DIVISOR    = "Divisor";
 
     public ESDataTempBean(Double value) {
         this.value = value;
@@ -97,8 +97,9 @@ public class ESDataTempBean extends BaseESPO implements CollectBean  {
     /**
      * 是否需要发送odin
      */
-    private boolean             sendToN9e = false;
+    private boolean             sendToN9e   = false;
 
+    @Override
     public String getKey() {
         return getKeyPre() + valueName;
     }
@@ -113,11 +114,11 @@ public class ESDataTempBean extends BaseESPO implements CollectBean  {
      * @return
      */
     public String getKeyPre() {
-        if (Objects.equals(dimension, INDEX_TYPE )) {
+        if (Objects.equals(dimension, INDEX_TYPE)) {
             return cluster + "@" + index + "@";
         }
 
-        if (Objects.equals(dimension, NODE_TYPE )) {
+        if (Objects.equals(dimension, NODE_TYPE)) {
             return cluster + "@" + node + "@" + port + "@";
         }
 

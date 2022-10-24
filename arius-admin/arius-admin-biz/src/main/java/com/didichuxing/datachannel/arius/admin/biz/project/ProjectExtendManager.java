@@ -19,15 +19,15 @@ import javax.servlet.http.HttpServletRequest;
  * @date 2022/06/10
  */
 public interface ProjectExtendManager {
-	    /**
-         * 创建项目
-         *
-         * @param saveDTO    项目信息
-         * @param operator   请求信息
-         * @param operatorId
-         * @return 项目信息
-         * @throws LogiSecurityException 项目相关的错误信息
-         */
+    /**
+     * 创建项目
+     *
+     * @param saveDTO    项目信息
+     * @param operator   请求信息
+     * @param operatorId
+     * @return 项目信息
+     * @throws LogiSecurityException 项目相关的错误信息
+     */
     Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator, Integer operatorId);
 
     /**
@@ -37,11 +37,8 @@ public interface ProjectExtendManager {
      * @return ProjectVo 项目信息
      * @throws LogiSecurityException 项目不存在
      */
-     Result<ProjectExtendVO> getProjectDetailByProjectId(Integer projectId) ;
+    Result<ProjectExtendVO> getProjectDetailByProjectId(Integer projectId);
 
-
-     
- 
     /**
      * 获取所有项目简要信息
      *
@@ -49,21 +46,14 @@ public interface ProjectExtendManager {
      */
     Result<List<ProjectBriefExtendVO>> getProjectBriefList();
 
-  
-
-    
-
-        /**
-         * 删除项目
-         *
-         * @param projectId 项目id
-         * @param operator  请求信息
-         * @return
-         */
+    /**
+     * 删除项目
+     *
+     * @param projectId 项目id
+     * @param operator  请求信息
+     * @return
+     */
     Result<Void> deleteProjectByProjectId(Integer projectId, String operator);
-    
-   
-
 
     /**
      * 根据项目id获取项目简要信息
@@ -82,8 +72,6 @@ public interface ProjectExtendManager {
      */
     PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO, HttpServletRequest request);
 
-  
-
     /**
      * 更新项目信息
      *
@@ -91,7 +79,7 @@ public interface ProjectExtendManager {
      * @param operator 请求信息
      * @throws LogiSecurityException 项目相关的错误信息
      */
-    Result<Void> updateProject(ProjectExtendSaveDTO saveDTO, String operator) ;
+    Result<Void> updateProject(ProjectExtendSaveDTO saveDTO, String operator);
 
     /**
      * 更改项目运行状态，旧状态取反
@@ -137,8 +125,6 @@ public interface ProjectExtendManager {
      */
     Result<Void> delProjectOwner(Integer projectId, Integer ownerId, String operator);
 
-
-
     /**
      * 项目删除前的检查
      *
@@ -147,23 +133,22 @@ public interface ProjectExtendManager {
      */
     Result<ProjectDeleteCheckVO> checkBeforeDelete(Integer projectId);
 
-
-
     /**
      * 校验项目是否存在
      * @param projectId
      * @return true:存在，false：不存在
      */
-     Result<Void> checkProjectExist(Integer projectId);
-    
+    Result<Void> checkProjectExist(Integer projectId);
+
     /**
      * 未分配项目的用户列表
      *
-     * @param projectId projectId
+     * @param projectId         projectId
+     * @param containsAdminRole 是否包含管理员
      * @return {@code Result}
      */
-    Result<List<UserBriefVO>> unassignedByProjectId(Integer projectId) ;
-    
+    Result<List<UserBriefVO>> unassignedByProjectId(Integer projectId, Boolean containsAdminRole);
+
     /**
      * 获取user下绑定的项目
      *
@@ -171,7 +156,7 @@ public interface ProjectExtendManager {
      * @return {@code Result<List<ProjectBriefVO>>}
      */
     Result<List<ProjectBriefExtendVO>> getProjectBriefByUserId(Integer userId);
-    
+
     /**
      * 用户列表按项目id列表
      *
@@ -179,4 +164,18 @@ public interface ProjectExtendManager {
      * @return {@code Result<List<UserBriefVO>>}
      */
     Result<List<UserBriefVO>> listUserListByProjectId(Integer projectId);
+    
+    
+    /**
+     * “检查一个项目的资源是否可用。”
+     *
+     * 函数定义如下：
+     *
+     * * 该函数返回一个 Result<Void> 对象。
+     * * 该函数接受一个参数，一个名为 projectId 的整数对象
+     *
+     * @param projectId 项目的 ID。
+     * @return 一个 Result 对象，里面有一个 Void 对象。
+     */
+    Result<Void> checkResourcesByProjectId(Integer projectId);
 }

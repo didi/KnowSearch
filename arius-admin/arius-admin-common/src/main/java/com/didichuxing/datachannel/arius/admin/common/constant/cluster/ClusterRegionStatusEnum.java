@@ -7,15 +7,15 @@ package com.didichuxing.datachannel.arius.admin.common.constant.cluster;
  */
 @Deprecated
 public enum ClusterRegionStatusEnum {
-    /**
-     * Region未加入容量规划
-     */
-    NOT_IN_CAPACITY_PLAN(0, "未加入容量规划"),
+                                     /**
+                                      * Region未加入容量规划
+                                      */
+                                     NOT_IN_CAPACITY_PLAN(0, "未加入容量规划"),
 
-    /**
-     * Region已经在容量规划中
-     */
-    IN_CAPACITY_PLAN(1, "容量规划中");
+                                     /**
+                                      * Region已经在容量规划中
+                                      */
+                                     IN_CAPACITY_PLAN(1, "容量规划中");
 
     ClusterRegionStatusEnum(Integer code, String message) {
         this.code = code;
@@ -31,5 +31,5 @@ public enum ClusterRegionStatusEnum {
     }
 
     private Integer code;
-    private String message;
+    private String  message;
 }

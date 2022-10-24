@@ -19,7 +19,7 @@
   "aggs": {
     "result": {
       "terms": {
-        "field": "appid",
+        "field": "projectId",
         "size": 10000
       },
       "aggs": {

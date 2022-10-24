@@ -42,7 +42,7 @@
   },
   "sort": [
     {
-      "appid": {
+      "projectId": {
         "order": "asc"
       }
     }
@@ -52,7 +52,7 @@
     "totalShardsAvg",
     "totalHitsAvg",
     "responseLenAvg",
-    "appid",
+    "projectId",
     "dslTemplateMd5"
   ]
 }

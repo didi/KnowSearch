@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary;
 
-import java.io.Serializable;
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by linyunan on 2021-08-01
@@ -18,10 +18,15 @@ public class BigIndexMetrics implements Serializable {
     /**
      * 索引名称
      */
-    private String                indexName;
+    private String               indexName;
 
     /**
      * 归属节点node名称
      */
     private List<IndexShardInfo> belongNodeInfo;
+
+    /**
+     * 文档数
+     */
+    private Long                 docsCount;
 }

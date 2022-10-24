@@ -1,11 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm;
 
-
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRolePO;
+import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 /**
  * 集群角色DAO
@@ -36,7 +34,7 @@ public interface ESClusterRoleDAO {
      * @return
      */
     ESClusterRolePO getByClusterIdAndClusterRole(@Param("clusterId") Long clusterId,
-                                                 @Param("roleClusterName")String roleClusterName);
+                                                 @Param("roleClusterName") String roleClusterName);
 
     /**
      * 根据clusterId 和 role 查询详情
@@ -66,9 +64,8 @@ public interface ESClusterRoleDAO {
      * @param esVersion
      * @return
      */
-    int updateVersionByClusterIdAndRole(@Param("elasticClusterId") Long elasticClusterId,
-                                        @Param("role")String role,
-                                        @Param("esVersion")String esVersion);
+    int updateVersionByClusterIdAndRole(@Param("elasticClusterId") Long elasticClusterId, @Param("role") String role,
+                                        @Param("esVersion") String esVersion);
 
     /**
      * 根据clusterId 和 role 查询详情
@@ -76,8 +73,7 @@ public interface ESClusterRoleDAO {
      * @param role
      * @return
      */
-    ESClusterRolePO getByClusterIdAndRole(@Param("clusterId") Long clusterId,
-                                          @Param("role")String role);
+    ESClusterRolePO getByClusterIdAndRole(@Param("clusterId") Long clusterId, @Param("role") String role);
 
     /**
      * 根据clusterId 删除记录
@@ -92,7 +88,7 @@ public interface ESClusterRoleDAO {
      * @param role
      * @return
      */
-    int deleteRoleClusterByCluterIdAndRole(@Param("clusterId") Long clusterId,
-                                           @Param("role")String role);
-
+    int deleteRoleClusterByCluterIdAndRole(@Param("clusterId") Long clusterId, @Param("role") String role);
+    
+    int countByClusterId(@Param("clusterId")Integer clusterId);
 }

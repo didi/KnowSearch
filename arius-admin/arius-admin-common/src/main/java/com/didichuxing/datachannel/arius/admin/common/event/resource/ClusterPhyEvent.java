@@ -6,7 +6,7 @@ package com.didichuxing.datachannel.arius.admin.common.event.resource;
  */
 public class ClusterPhyEvent extends ClusterEvent {
 
-    private String  clusterPhyName;
+    private String clusterPhyName;
 
     private String operator;
 

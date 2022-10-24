@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.alibaba.fastjson.JSON;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.consts.RestConsts;
 import com.didi.arius.gateway.common.enums.TemplateBlockTypeEnum;
@@ -469,7 +468,7 @@ public abstract class HttpRestHandler extends ESBase {
     }
 
     protected void handleOriginClusterRequest(QueryContext queryContext){
-        logger.info("handleOriginClusterRequest||queryContext={}", JSON.toJSONString(queryContext));
+        logger.info("handleOriginClusterRequest||uri={}||indices={}", queryContext.getUri(),queryContext.getIndices());
 
         ESClient client = esClusterService.getClient(queryContext, actionName);
         directRequest(client, queryContext);

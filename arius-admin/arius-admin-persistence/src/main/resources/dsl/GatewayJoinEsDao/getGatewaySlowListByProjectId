@@ -20,7 +20,7 @@
                     },
                     {
                         "term":{
-                            "appid":{
+                            "projectId":{
                                 "value":%d
                             }
                         }
@@ -44,7 +44,7 @@
  ],
   "_source": {
        "includes": [
-         "appid",
+         "projectId",
          "indiceSample",
          "dsl",
          "exceptionName",

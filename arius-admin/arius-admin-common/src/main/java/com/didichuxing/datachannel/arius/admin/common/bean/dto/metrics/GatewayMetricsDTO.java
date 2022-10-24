@@ -21,13 +21,13 @@ public abstract class GatewayMetricsDTO extends BaseDTO {
     private static final Long ONE_HOUR = 60 * 60 * 1000L;
 
     @ApiModelProperty("开始时间")
-    private Long startTime;
+    private Long              startTime;
 
     @ApiModelProperty("结束时间")
-    private Long endTime;
+    private Long              endTime;
 
     @ApiModelProperty("指标类型")
-    private List<String> metricsTypes;
+    private List<String>      metricsTypes;
 
     public void validParam() {
         if (endTime == null) {

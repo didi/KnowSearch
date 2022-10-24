@@ -25,7 +25,8 @@ import org.springframework.util.ObjectUtils;
  */
 public class AriusObjUtils {
 
-    private AriusObjUtils(){}
+    private AriusObjUtils() {
+    }
 
     private static final ILog LOGGER = LogFactory.getLog(AriusObjUtils.class);
 
@@ -47,7 +48,7 @@ public class AriusObjUtils {
      * @return 不一样的字段
      */
     public static String findChanged(Object src, Object dest) {
-        if(src == null || dest == null) {
+        if (src == null || dest == null) {
             return "";
         }
         StringBuilder content = new StringBuilder("");
@@ -88,7 +89,7 @@ public class AriusObjUtils {
      * @return 不一样的字段，格式更加清晰
      */
     public static String findChangedWithClear(Object src, Object dest) {
-        if(src == null || dest == null) {
+        if (src == null || dest == null) {
             return "";
         }
         StringBuilder content = new StringBuilder("");
@@ -108,9 +109,9 @@ public class AriusObjUtils {
                         Object destV = destMethod.invoke(dest);
 
                         if (isChanged(destV, srcV)) {
-                            content.append("字段").append(getPropertyName(srcMethod.getName()))
-                                    .append("的原值").append("【").append(srcV).append("】").append("修改为")
-                                    .append("【").append(destV).append("】").append("\r\n");
+                            content.append("字段").append(getPropertyName(srcMethod.getName())).append("的原值").append("【")
+                                .append(srcV).append("】").append("修改为").append("【").append(destV).append("】")
+                                .append("\r\n");
                         }
                     }
                 }
@@ -121,7 +122,7 @@ public class AriusObjUtils {
 
         return content.toString();
     }
-    
+
     /**
      * 找出两个vo中不同的值
      *
@@ -131,9 +132,9 @@ public class AriusObjUtils {
      * @return {@code String}
      */
     public static String findChangedWithClearByBeanVo(Object srcVo, Object destVo,
-                                                      Map</*apiModelPropertyValue*/String,/*修改后的apiModelPropertyValue*/String> apiModelPropertyValueModify) {
+                                                      Map</*apiModelPropertyValue*/String, /*修改后的apiModelPropertyValue*/String> apiModelPropertyValueModify) {
         if (srcVo == null || destVo == null) {
-            return  null;
+            return null;
         }
         StringJoiner content = new StringJoiner("");
         try {
@@ -147,7 +148,7 @@ public class AriusObjUtils {
                     }
                 }
             }
-    
+
             for (Field srcField : srcVo.getClass().getDeclaredFields()) {
                 if (srcField.isAnnotationPresent(ApiModelProperty.class)) {
                     String apiModelPropertyValue = srcField.getAnnotation(ApiModelProperty.class).value();
@@ -155,25 +156,24 @@ public class AriusObjUtils {
                     if (destValue != null) {
                         String srcGetValue = getInvokeValue(srcField.getName(), srcVo);
                         String finalApiModelPropertyValue = apiModelPropertyValue;
-                        final Optional<String> apiModelPropertyValueModifyOptional = Optional.ofNullable(
-                                apiModelPropertyValueModify).map(m -> m.get(finalApiModelPropertyValue));
+                        final Optional<String> apiModelPropertyValueModifyOptional = Optional
+                            .ofNullable(apiModelPropertyValueModify).map(m -> m.get(finalApiModelPropertyValue));
                         if (apiModelPropertyValueModifyOptional.isPresent()) {
                             apiModelPropertyValue = apiModelPropertyValueModifyOptional.get();
                         }
                         if (isChanged(destValue, srcGetValue)) {
-                            content.add("字段").add("【").add(apiModelPropertyValue).add("】")
-                                    .add("的原值").add("【").add(srcGetValue).add("】").add("修改为")
-                                    .add("【").add(destValue).add("】").add("\r\n");
+                            content.add("字段").add("【").add(apiModelPropertyValue).add("】").add("的原值").add("【")
+                                .add(srcGetValue).add("】").add("修改为").add("【").add(destValue).add("】").add("\r\n");
                         }
                     }
-                    
+
                 }
 
             }
         } catch (Exception e) {
             LOGGER.error("class=AriusObjUtils||method=findChangedWithClearByBeanVo||errMsg={}", e.getMessage(), e);
         }
-        
+
         return content.toString();
     }
 
@@ -207,7 +207,7 @@ public class AriusObjUtils {
     public static boolean isBlack(String str) {
         return StringUtils.isBlank(str);
     }
-    
+
     private static String getInvokeValue(String propertyName, Object bean) {
         try {
             PropertyDescriptor pd = new PropertyDescriptor(propertyName, bean.getClass());
@@ -216,7 +216,7 @@ public class AriusObjUtils {
         } catch (Exception e) {
             return null;
         }
-        
+
     }
 
     private static boolean isGetter(Method method) {
@@ -275,7 +275,7 @@ public class AriusObjUtils {
         } else if (isNull(seq1) || isNull(seq2) || seq1.size() != seq2.size()) {
             return false;
         }
-        for (Object elem: seq1) {
+        for (Object elem : seq1) {
             if (!seq2.contains(elem)) {
                 return false;
             }

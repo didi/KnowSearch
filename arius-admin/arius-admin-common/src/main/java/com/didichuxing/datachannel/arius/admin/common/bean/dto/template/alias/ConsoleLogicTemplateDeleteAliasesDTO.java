@@ -15,7 +15,7 @@ import java.util.List;
 @ApiModel(description = "删除逻辑模板别名列表DTO")
 public class ConsoleLogicTemplateDeleteAliasesDTO implements Serializable {
     @ApiModelProperty("索引ID")
-    private Integer logicId;
+    private Integer      logicId;
 
     @ApiModelProperty("索引别名列表信息")
     private List<String> aliases;

@@ -15,7 +15,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class ListUtils {
 
-    private ListUtils(){}
+    private ListUtils() {
+    }
 
     // 分隔符
     private static final String SEPARATOR = ",";

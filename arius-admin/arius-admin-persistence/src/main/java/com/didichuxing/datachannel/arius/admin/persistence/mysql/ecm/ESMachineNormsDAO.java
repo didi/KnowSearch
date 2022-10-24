@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm;
 
-
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
@@ -14,8 +13,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNorms
  */
 @Repository
 public interface ESMachineNormsDAO {
-    
-    List<ESMachineNormsPO>  listMachineNorms();
+
+    List<ESMachineNormsPO> listMachineNorms();
 
     ESMachineNormsPO getById(Long id);
 

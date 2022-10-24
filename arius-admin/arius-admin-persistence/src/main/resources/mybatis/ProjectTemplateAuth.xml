@@ -24,7 +24,7 @@
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectTemplateAuthPO">
         update project_template_info
         <trim prefix="set" prefixOverrides=",">
-            <if test="type != null">,`type` = #{type}</if>
+            <if test="type != null">`type` = #{type}</if>
         </trim>
         where id = #{id}
     </update>
@@ -121,5 +121,11 @@
         <include refid="Base_Column_List"/>
         from project_template_info
         where `type` = 1 and status = 1
+    </select>
+    <select id="getProjectIdById" resultType="java.lang.Integer">
+        select project_id
+        from project_template_info
+        where id = #{authId}
+          and status = 1
     </select>
 </mapper>

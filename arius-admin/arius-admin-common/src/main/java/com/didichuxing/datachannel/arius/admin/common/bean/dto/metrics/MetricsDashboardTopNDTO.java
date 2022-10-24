@@ -36,11 +36,11 @@ public class MetricsDashboardTopNDTO extends BaseDTO {
     public void init() {
         // 这里后端暂时写定max, 防止前端乱传聚合类型导致返回数据失真
         // aggType   = null == aggType ? "max" : aggType;
-        aggType   = "max";
-        topNu     = null == topNu ? 5 : topNu;
+        aggType = "max";
+        topNu = null == topNu ? 5 : topNu;
         long currentTimeMillis = System.currentTimeMillis();
         // 默认为最新一小时的时间区间
         startTime = null == startTime ? (currentTimeMillis - 60 * 60 * 1000) : startTime;
-        endTime   = null == endTime   ? currentTimeMillis : endTime ;
+        endTime = null == endTime ? currentTimeMillis : endTime;
     }
 }

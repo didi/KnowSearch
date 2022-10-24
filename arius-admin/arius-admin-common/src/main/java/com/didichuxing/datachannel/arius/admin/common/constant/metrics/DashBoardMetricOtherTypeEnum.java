@@ -9,8 +9,7 @@ import java.util.List;
  * Created by linyunan on 3/11/22
  */
 public enum DashBoardMetricOtherTypeEnum {
-    UNKNOWN("", "未知"),
-    CLUSTER_HEALTH("clusterPhyHealth", "健康度");
+                                          UNKNOWN("", "未知"), CLUSTER_HEALTH("clusterPhyHealth", "健康度");
 
     DashBoardMetricOtherTypeEnum(String type, String desc) {
         this.type = type;
@@ -23,24 +22,33 @@ public enum DashBoardMetricOtherTypeEnum {
     public String getType() {
         return type;
     }
+
     public String getDesc() {
         return desc;
     }
 
     public static boolean hasExist(String metricsType) {
-        if (null == metricsType) { return false;}
+        if (null == metricsType) {
+            return false;
+        }
         for (DashBoardMetricOtherTypeEnum typeEnum : DashBoardMetricOtherTypeEnum.values()) {
-            if (metricsType.equals(typeEnum.getType())) { return true;}
+            if (metricsType.equals(typeEnum.getType())) {
+                return true;
+            }
         }
 
         return false;
     }
 
     public static DashBoardMetricOtherTypeEnum valueOfType(String type) {
-        if (null == type) { return DashBoardMetricOtherTypeEnum.UNKNOWN;}
+        if (null == type) {
+            return DashBoardMetricOtherTypeEnum.UNKNOWN;
+        }
 
         for (DashBoardMetricOtherTypeEnum typeEnum : DashBoardMetricOtherTypeEnum.values()) {
-            if (type.equals(typeEnum.getType())) { return typeEnum;}
+            if (type.equals(typeEnum.getType())) {
+                return typeEnum;
+            }
         }
 
         return DashBoardMetricOtherTypeEnum.UNKNOWN;
@@ -48,13 +56,19 @@ public enum DashBoardMetricOtherTypeEnum {
 
     public static List<DashBoardMetricOtherTypeEnum> valueOfTypes(List<String> types) {
         List<DashBoardMetricOtherTypeEnum> resList = Lists.newArrayList();
-        if (CollectionUtils.isEmpty(types)) { return resList;}
+        if (CollectionUtils.isEmpty(types)) {
+            return resList;
+        }
 
         for (String s : types) {
-            if (null == s) { continue;}
+            if (null == s) {
+                continue;
+            }
 
             for (DashBoardMetricOtherTypeEnum typeEnum : DashBoardMetricOtherTypeEnum.values()) {
-                if (s.equals(typeEnum.getType())) { resList.add(typeEnum);}
+                if (s.equals(typeEnum.getType())) {
+                    resList.add(typeEnum);
+                }
             }
         }
 

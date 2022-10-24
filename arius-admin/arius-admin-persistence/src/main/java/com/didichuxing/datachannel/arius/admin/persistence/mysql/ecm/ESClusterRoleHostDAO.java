@@ -1,9 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRoleHostPO;
+import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -55,7 +54,8 @@ public interface ESClusterRoleHostDAO {
      * @param nodeSets
      * @return
      */
-    List<ESClusterRoleHostPO> listByClusterAndNodeSets(@Param("cluster") String cluster, @Param("nodeSets") List<String> nodeSets);
+    List<ESClusterRoleHostPO> listByClusterAndNodeSets(@Param("cluster") String cluster,
+                                                       @Param("nodeSets") List<String> nodeSets);
 
     /**
      * 根据条件查询符合条件的主机信息列表
@@ -78,7 +78,7 @@ public interface ESClusterRoleHostDAO {
      */
     int update(ESClusterRoleHostPO param);
 
-    int updateRegionId(@Param("ids")List<Integer> ids, @Param("regionId")Integer regionId);
+    int updateRegionId(@Param("ids") List<Integer> ids, @Param("regionId") Integer regionId);
 
     /**
      * 将所有在线的节点置为离线,在同步集群节点时调用;需要在事务内调用,保证失败后回滚
@@ -106,8 +106,7 @@ public interface ESClusterRoleHostDAO {
      * @param roleId
      * @return
      */
-    int restoreByHostNameAndRoleId(@Param("hostname") String hostname,
-                                  @Param("roleId") Long roleId);
+    int restoreByHostNameAndRoleId(@Param("hostname") String hostname, @Param("roleId") Long roleId);
 
     /**
      * 获取所有节点信息
@@ -134,6 +133,7 @@ public interface ESClusterRoleHostDAO {
      * @return
      */
     int delete(Long id);
+    int deleteByIds(@Param("ids")List<Integer> ids);
 
     /**
      * 根据主机名和roleId 删除主机信息
@@ -179,4 +179,14 @@ public interface ESClusterRoleHostDAO {
      * @return         List<ESClusterRoleHostPO>
      */
     List<ESClusterRoleHostPO> listDataNodeByCluster(String cluster);
+    
+    /**
+     * 它返回 ClusterRoleHost 对象的列表。
+     *
+     * @param ids 要查询的id列表。
+     * @return 列表<ClusterRoleHost>
+     */
+    List<ESClusterRoleHostPO> listByIds(@Param("ids") List<Integer> ids);
+    
+    
 }

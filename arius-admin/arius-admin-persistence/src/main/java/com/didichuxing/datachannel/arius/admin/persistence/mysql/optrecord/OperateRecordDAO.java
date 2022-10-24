@@ -1,7 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
+
+import java.util.Date;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -17,8 +20,8 @@ public interface OperateRecordDAO {
      * @param param OperateRecordInfoPO
      * @return List<OperateRecordPO>
      */
-    List<OperateRecordInfoPO> listByCondition( OperateRecordDTO param);
-    
+    List<OperateRecordInfoPO> listByCondition(OperateRecordDTO param);
+
     /**
      * 总数计算
      *
@@ -34,8 +37,6 @@ public interface OperateRecordDAO {
      */
     int insert(OperateRecordInfoPO po);
 
-
-
     /**
      * 通过moduleId和topN获取数据
      * @param moduleId 操作id
@@ -45,12 +46,19 @@ public interface OperateRecordDAO {
     OperateRecordInfoPO selectDescTopNByModuleId(@Param("moduleId") int moduleId, @Param("topN") int topN);
 
     /**
+     * 删除saveTime之前的数据
+     * @param saveTime 规定的保存时间
+     * @return OperateRecordPO
+     */
+     void deleteExprieData(@Param("saveTime") Date saveTime);
+
+    /**
      * 通过moduleId和id删除数据
      * @param moduleId  操作id
      * @param id        id
      */
-    void deleteByModuleIdAndLessThanId(@Param("moduleId")int moduleId, @Param("id") int id);
-    
+    void deleteByModuleIdAndLessThanId(@Param("moduleId") int moduleId, @Param("id") int id);
+
     /**
      * 获取通过id
      *
@@ -58,4 +66,18 @@ public interface OperateRecordDAO {
      * @return {@code OperateRecordInfoPO}
      */
     OperateRecordInfoPO getById(Integer id);
+
+    /**
+     * 获取一条操作记录
+     * @param operateRecordDTO
+     * @return
+     */
+    OperateRecordInfoPO selectOneOperateRecord(OperateRecordDTO operateRecordDTO);
+
+    /**
+     * 根据id更新
+     * @param convertOperateRecordInfoPO
+     * @return
+     */
+    int updateById(OperateRecordInfoPO convertOperateRecordInfoPO);
 }

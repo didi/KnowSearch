@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.constant;
 
 import com.didiglobal.logi.log.util.HostUtil;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,13 +16,13 @@ public class AdminConstant {
     private AdminConstant() {
     }
 
-    public static final String       DEFAULT_TYPE                            = "type";
+//    public static final String       DEFAULT_TYPE                            = "type";
 
     public static final String       DEFAULT_INDEX_MAPPING_TYPE              = "_doc";
+    public static final String INDEX_NUMBER_OF_SHARDS = "index.number_of_shards";
     public static final String       DEFAULT_DYNAMIC_TEMPLATES_KEY           = "dynamic_templates";
-
-    public static final String       SINGLE_TYPE_KEY                         = "index.mapping.single_type";
-    public static final String       DEFAULT_SINGLE_TYPE                     = "true";
+//    public static final String       SINGLE_TYPE_KEY                         = "index.mapping.single_type";
+//    public static final String       DEFAULT_SINGLE_TYPE                     = "true";
 
     public static final String       HOST_NAME                               = HostUtil.getHostName();
 
@@ -78,9 +77,6 @@ public class AdminConstant {
     public static final List<String> LOW_VERSION_ES_CLUSTER                  = Arrays.asList("bigdata-arius-olap",
         "bigdata-arius-arcs", "mtn-to-es", "kefu-es", "DSearch_cluster_py");
 
-
-    
-
     /**
      * 数据最短保存时长
      */
@@ -103,16 +99,15 @@ public class AdminConstant {
     /**
      * region没有被绑定到逻辑集群时的逻辑集群ID字段值
      */
-    public static final String   REGION_NOT_BOUND_LOGIC_CLUSTER_ID           = "-1";
+    public static final String  REGION_NOT_BOUND_LOGIC_CLUSTER_ID = "-1";
 
-    public static final String JOB_SUCCESS                                   = "success";
-    public static final String JOB_FAILED                                    = "failed";
+    public static final String  JOB_SUCCESS                       = "success";
+    public static final String  JOB_FAILED                        = "failed";
 
     /**
      * 端口号绑定的上限和下限数值
      */
-    public static final Integer MAX_BIND_PORT_VALUE                          =   65535;
-    public static final Integer MIN_BIND_PORT_VALUE                          =   1;
-
+    public static final Integer MAX_BIND_PORT_VALUE               = 65535;
+    public static final Integer MIN_BIND_PORT_VALUE               = 1;
 
 }

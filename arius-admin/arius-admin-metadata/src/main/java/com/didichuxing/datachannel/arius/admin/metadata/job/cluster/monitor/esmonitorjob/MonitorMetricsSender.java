@@ -32,28 +32,29 @@ import com.didiglobal.logi.log.LogFactory;
 @Component("monitorMetricsSender")
 public class MonitorMetricsSender {
 
-    protected static final ILog LOGGER = LogFactory.getLog(MonitorMetricsSender.class);
+    protected static final ILog LOGGER     = LogFactory.getLog(MonitorMetricsSender.class);
 
-    private static final int    THRESHOLD = 100;
+    private static final int    THRESHOLD  = 100;
 
-    private ThreadPoolExecutor esExecutor = new ThreadPoolExecutor(30, 60, 6000, TimeUnit.MILLISECONDS,
-            new LinkedBlockingDeque<>(4000),
-            new NamedThreadFactory("Arius-Meta-MonitorMetricsSender-ES"),
-            (r, e) -> LOGGER.warn("class=MonitorMetricsSender||msg=Arius-Meta-MonitorMetricsSender-ES Deque is blocked, taskCount:{}" + e.getTaskCount()));
+    private ThreadPoolExecutor  esExecutor = new ThreadPoolExecutor(30, 60, 6000, TimeUnit.MILLISECONDS,
+        new LinkedBlockingDeque<>(4000), new NamedThreadFactory("Arius-Meta-MonitorMetricsSender-ES"),
+        (r, e) -> LOGGER
+            .warn("class=MonitorMetricsSender||msg=Arius-Meta-MonitorMetricsSender-ES Deque is blocked, taskCount:{}"
+                  + e.getTaskCount()));
 
     public void sendNodeInfo(List<ESNodeStats> esNodeStatsList) {
-        send2es( AriusStatsEnum.NODE_INFO, esNodeStatsList);
+        send2es(AriusStatsEnum.NODE_INFO, esNodeStatsList);
     }
 
-    public void sendIndexInfo(List<ESIndexStats> esIndexStats){
+    public void sendIndexInfo(List<ESIndexStats> esIndexStats) {
         send2es(AriusStatsEnum.INDEX_INFO, esIndexStats);
     }
 
-    public void sendIndexToNodeStats(List<ESIndexToNodeStats> esIndexToNodeStats){
+    public void sendIndexToNodeStats(List<ESIndexToNodeStats> esIndexToNodeStats) {
         send2es(AriusStatsEnum.INDEX_NODE_INFO, esIndexToNodeStats);
     }
 
-    public void sendESNodeToIndexStats(List<ESNodeToIndexStats> esNodeToIndexStats){
+    public void sendESNodeToIndexStats(List<ESNodeToIndexStats> esNodeToIndexStats) {
         send2es(AriusStatsEnum.NODE_INDEX_INFO, esNodeToIndexStats);
     }
 
@@ -84,14 +85,14 @@ public class MonitorMetricsSender {
      * @param statsList
      * @return
      */
-    private boolean send2es(AriusStatsEnum ariusStats, List<? extends BaseESPO> statsList){
+    private boolean send2es(AriusStatsEnum ariusStats, List<? extends BaseESPO> statsList) {
         if (CollectionUtils.isEmpty(statsList)) {
             return true;
         }
 
         if (EnvUtil.isPre()) {
-            LOGGER.info("class=MonitorMetricsSender||method=send2es||ariusStats={}||size={}",
-                    ariusStats.getType(), statsList.size());
+            LOGGER.info("class=MonitorMetricsSender||method=send2es||ariusStats={}||size={}", ariusStats.getType(),
+                statsList.size());
         }
 
         BaseAriusStatsESDAO baseAriusStatsEsDao = BaseAriusStatsESDAO.getByStatsType(ariusStats);
@@ -101,20 +102,18 @@ public class MonitorMetricsSender {
         }
 
         int size = statsList.size();
-        int num  = (size) % THRESHOLD == 0 ? (size / THRESHOLD) : (size / THRESHOLD + 1);
+        int num = (size) % THRESHOLD == 0 ? (size / THRESHOLD) : (size / THRESHOLD + 1);
 
         if (size < THRESHOLD) {
-            esExecutor.execute(() ->
-                    baseAriusStatsEsDao.batchInsertStats(statsList));
+            esExecutor.execute(() -> baseAriusStatsEsDao.batchInsertStats(statsList));
             return true;
         }
 
         for (int i = 1; i < num + 1; i++) {
-            int end   = (i * THRESHOLD) > size ? size : (i * THRESHOLD);
+            int end = (i * THRESHOLD) > size ? size : (i * THRESHOLD);
             int start = (i - 1) * THRESHOLD;
 
-            esExecutor.execute(() ->
-                    baseAriusStatsEsDao.batchInsertStats(statsList.subList(start, end)));
+            esExecutor.execute(() -> baseAriusStatsEsDao.batchInsertStats(statsList.subList(start, end)));
         }
 
         return true;

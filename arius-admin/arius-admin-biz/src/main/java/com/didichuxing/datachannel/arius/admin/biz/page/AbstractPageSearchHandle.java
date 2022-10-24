@@ -16,9 +16,10 @@ import com.didiglobal.logi.security.service.ProjectService;
  * @date 2022-05-27
  */
 public abstract class AbstractPageSearchHandle<T extends PageDTO, R> implements BaseHandle {
-    protected final ILog           LOGGER = LogFactory.getLog(this.getClass());
+    protected final ILog     LOGGER = LogFactory.getLog(this.getClass());
     @Autowired
-    protected       ProjectService projectService;
+    protected ProjectService projectService;
+
     /**
      * 处理模糊分页查询
      * @param condition     查询条件
@@ -35,6 +36,7 @@ public abstract class AbstractPageSearchHandle<T extends PageDTO, R> implements 
 
         return buildPageData(condition, projectId);
     }
+
     /**
      * 校验模糊查询的实体参数合法性
      *
@@ -51,6 +53,7 @@ public abstract class AbstractPageSearchHandle<T extends PageDTO, R> implements 
         }
         return checkCondition(condition, projectId);
     }
+
     /**
      * 校验模糊查询的实体参数合法性
      *

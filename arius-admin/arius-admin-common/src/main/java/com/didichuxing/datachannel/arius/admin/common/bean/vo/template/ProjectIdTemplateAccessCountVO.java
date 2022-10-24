@@ -24,24 +24,24 @@ import lombok.experimental.Accessors;
 public class ProjectIdTemplateAccessCountVO {
 
     @ApiModelProperty("索引模板主键")
-    private Integer templateId;
+    private Integer                                                  templateId;
 
     @ApiModelProperty("索引逻辑id")
-    private Integer logicTemplateId;
+    private Integer                                                  logicTemplateId;
 
     @ApiModelProperty("索引模板名称")
-    private String templateName;
+    private String                                                   templateName;
 
     @ApiModelProperty("集群名称")
-    private String clusterName;
+    private String                                                   clusterName;
 
     @ApiModelProperty("应用账号")
-    private Integer projectId;
+    private Integer                                                  projectId;
     /**
      * 访问索引模板次数，为@accessDetailInfo 访问索引明细的总次数
      */
     @ApiModelProperty("访问索引模板次数")
-    private Long    count;
+    private Long                                                     count;
     /**
      *访问索引名称明细数据,key不能是.开头，否则写入es失败
      */
@@ -49,5 +49,5 @@ public class ProjectIdTemplateAccessCountVO {
     private Map<String/*indexName*/, Long/*access indexName count*/> accessDetailInfo;
 
     @ApiModelProperty("统计日期")
-    private String date;
+    private String                                                   date;
 }

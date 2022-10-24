@@ -12,7 +12,8 @@ public abstract class BaseTimeoutRequest<T extends ESActionRequest> extends ESAc
         return (T) this;
     }
 
-    protected BaseTimeoutRequest() {}
+    protected BaseTimeoutRequest() {
+    }
 
     protected BaseTimeoutRequest(ESActionRequest request) {
         super(request);

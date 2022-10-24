@@ -15,39 +15,39 @@ public class EcmTaskDetailPO extends BasePO {
     /**
      * ID主键自增
      */
-    private Long id;
+    private Long              id;
 
     /**
      *  工单任务ID
      */
-    private Long workOrderTaskId;
+    private Long              workOrderTaskId;
 
     /**
      *  所属角色
      */
-    private String role;
+    private String            role;
 
     /**
      * 节点名称/主机名成
      */
-    private String hostname;
+    private String            hostname;
 
     /**
      * 分组
      */
-    private Integer grp;
+    private Integer           grp;
     /**
      * 顺序
      */
-    private Integer idx;
+    private Integer           idx;
 
     /**
      * 状态
      */
-    private String status;
+    private String            status;
 
     /**
      * 容器云 /物理机 接口返回任务ID
      */
-    private Long taskId;
+    private Long              taskId;
 }

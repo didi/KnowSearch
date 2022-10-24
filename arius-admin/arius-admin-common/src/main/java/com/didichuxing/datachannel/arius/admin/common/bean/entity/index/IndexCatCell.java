@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.index;
 
 import java.util.List;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,28 +15,33 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class IndexCatCell {
-    private String  key;
-    private String  clusterPhy;
-    private String  clusterLogic;
-    private String  health;
-    private String  status;
-    private String  index;
-    private String  pri;
-    private String  rep;
-    private String  docsCount;
-    private String  docsDeleted;
-    private String  storeSize;
-    private String  priStoreSize;
-    private Boolean readFlag;
-    private Boolean writeFlag;
+    private String       cluster;
+    private String       clusterLogic;
+    private Long         resourceId;
+    private Integer      projectId;
+    private String       health;
+    private String       status;
+    private String       index;
+    private Long         pri;
+    private Long         rep;
+    private Long         docsCount;
+    private Long         docsDeleted;
+    private String       storeSize;
+    private String       priStoreSize;
+    private Boolean      readFlag;
+    private Boolean      writeFlag;
+    private Boolean      deleteFlag;
+    private Long         timestamp;
 
-    private String  cluster;
-    private Long    resourceId;
-    private Integer projectId;
-    private boolean deleteFlag;
-    private long    timestamp;
-    private Long    primariesSegmentCount;
-    private Long    totalSegmentCount;
-    private Integer templateId;
+    private Long         primariesSegmentCount;
+    private Long         totalSegmentCount;
+    private Integer      templateId;
+    private Boolean      platformCreateFlag;
     private List<String> aliases;
+    private Boolean      translogAsync;
+    private Integer      priorityLevel;
+
+    public String getKey() {
+        return cluster + "@" + index;
+    }
 }

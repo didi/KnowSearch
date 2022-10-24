@@ -21,26 +21,26 @@ public class IndexTemplateValue implements Serializable {
     /**
      * 索引模板id
      */
-    private Integer logicTemplateId;
+    private Integer           logicTemplateId;
 
     /**
      * 价值
      */
-    private Integer value;
+    private Integer           value;
 
     /**
      * 访问量
      */
-    private Long    accessCount;
+    private Long              accessCount;
 
     /**
      * 大小G
      */
-    private Double  sizeG;
+    private Double            sizeG;
 
     /**
      * 逻辑集群
      */
-    private String  logicCluster;
+    private String            logicCluster;
 
 }

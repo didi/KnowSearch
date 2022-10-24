@@ -61,7 +61,7 @@ public class ClusterPhyPO extends BasePO {
     /**
      * 拓展字段,这里用于存放集群展示用属性标签，如「集群所属资源类型」等等
      */
-    private String tags;
+    private String  tags;
 
     /**
      * 数据中心
@@ -103,10 +103,7 @@ public class ClusterPhyPO extends BasePO {
      */
     private String  creator;
 
-    /**
-     * 集群支持的索引服务id，英文逗号分隔
-     */
-    private String  templateSrvs;
+
 
     /**
      * 镜像名
@@ -149,19 +146,19 @@ public class ClusterPhyPO extends BasePO {
     /**
      * IaaS平台类型
      */
-    private String                    platformType;
+    private String  platformType;
 
     /**
      * 集群资源类型(-1 未知 1 共享 2 独立 3 独享)
      * @see ClusterResourceTypeEnum
      */
 
-    private Integer                    resourceType;
+    private Integer resourceType;
 
     /**
      * gateway地址
      */
-    private String                    gatewayUrl;
+    private String  gatewayUrl;
 
     @Override
     public boolean equals(Object obj) {

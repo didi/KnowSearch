@@ -18,10 +18,10 @@ import com.google.common.collect.Lists;
  * dashboard汇总多个集群健康度采集器
  */
 @Component
-public class ClusterHealthDashBoardCollector extends  BaseDashboardCollector {
-    private static final ILog LOGGER = LogFactory.getLog(ClusterHealthDashBoardCollector.class);
+public class ClusterHealthDashBoardCollector extends BaseDashboardCollector {
+    private static final ILog       LOGGER      = LogFactory.getLog(ClusterHealthDashBoardCollector.class);
 
-    private static final FutureUtil FUTURE_UTIL = FutureUtil.init("ClusterHealthDashBoardCollector",10,10,500);
+    private static final FutureUtil FUTURE_UTIL = FutureUtil.init("ClusterHealthDashBoardCollector", 10, 10, 500);
 
     @Override
     public void collectSingleCluster(String cluster, long currentTime) {
@@ -38,21 +38,24 @@ public class ClusterHealthDashBoardCollector extends  BaseDashboardCollector {
         ClusterPhyHealthMetrics clusterPhyHealthMetrics = new ClusterPhyHealthMetrics();
         clusterPhyHealthMetrics.setTimestamp(currentTime);
 
-        List<String> greenClusterList     = Lists.newCopyOnWriteArrayList();
-        List<String> yellowClusterList    = Lists.newCopyOnWriteArrayList();
-        List<String> redClusterList       = Lists.newCopyOnWriteArrayList();
-        List<String> unknownClusterList   = Lists.newCopyOnWriteArrayList();
+        List<String> greenClusterList = Lists.newCopyOnWriteArrayList();
+        List<String> yellowClusterList = Lists.newCopyOnWriteArrayList();
+        List<String> redClusterList = Lists.newCopyOnWriteArrayList();
+        List<String> unknownClusterList = Lists.newCopyOnWriteArrayList();
         for (String cluster : clusterList) {
             // do concurrent 
-            FUTURE_UTIL.runnableTask(()-> {
+            FUTURE_UTIL.runnableTask(() -> {
                 try {
                     switch (esClusterService.syncGetClusterHealthEnum(cluster)) {
                         case GREEN:
-                            greenClusterList.add(cluster); break;
+                            greenClusterList.add(cluster);
+                            break;
                         case YELLOW:
-                            yellowClusterList.add(cluster); break;
+                            yellowClusterList.add(cluster);
+                            break;
                         case RED:
-                            redClusterList.add(cluster); break;
+                            redClusterList.add(cluster);
+                            break;
                         default:
                             unknownClusterList.add(cluster);
                     }
@@ -62,7 +65,7 @@ public class ClusterHealthDashBoardCollector extends  BaseDashboardCollector {
                 }
             });
         }
-        
+
         // 阻塞等待采集结束
         FUTURE_UTIL.waitExecute();
 
@@ -75,6 +78,7 @@ public class ClusterHealthDashBoardCollector extends  BaseDashboardCollector {
         clusterPhyHealthMetrics.setYellowClusterListStr(ListUtils.strList2String(yellowClusterList));
         clusterPhyHealthMetrics.setRedClusterListStr(ListUtils.strList2String(redClusterList));
         clusterPhyHealthMetrics.setUnknownClusterListStr(ListUtils.strList2String(unknownClusterList));
+        clusterPhyHealthMetrics.setGreenClusterListStr(ListUtils.strList2String(greenClusterList));
 
         dashBoardStats.setClusterPhyHealth(clusterPhyHealthMetrics);
         monitorMetricsSender.sendDashboardStats(Lists.newArrayList(dashBoardStats));

@@ -1,22 +1,22 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler.clusterrestart;
 
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.task.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.PhyClusterPluginOperationContent;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.PhyClusterPluginOperationOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OperationTypeEnum;
@@ -45,21 +45,21 @@ import org.springframework.util.CollectionUtils;
 public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
 
     @Autowired
-    private ESPluginService esPluginService;
+    private ESPluginService    esPluginService;
 
     @Autowired
     private ClusterRoleService clusterRoleService;
 
     @Autowired
-    private OpTaskManager workTaskService;
+    private OpTaskManager      workTaskService;
 
     @Autowired
-    private EcmTaskManager ecmTaskManager;
+    private EcmTaskManager     ecmTaskManager;
 
     @Override
     protected Result<Void> validateConsoleParam(WorkOrder workOrder) throws NotFindSubclassException {
         PhyClusterPluginOperationContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-                PhyClusterPluginOperationContent.class);
+            PhyClusterPluginOperationContent.class);
 
         // 校验插件id
         if (AriusObjUtils.isNull(content.getPluginId())) {
@@ -80,7 +80,8 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
             return Result.buildParamIllegal("插件操作类型不合法(合法的操作类型包括安装和卸载)");
         }
 
-        if (opTaskManager.existUnClosedTask(Integer.parseInt(plugin.getPhysicClusterId()), OpTaskTypeEnum.CLUSTER_RESTART.getType())) {
+        if (opTaskManager.existUnClosedTask(Integer.parseInt(plugin.getPhysicClusterId()),
+            OpTaskTypeEnum.CLUSTER_RESTART.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的集群重启任务");
         }
 
@@ -95,7 +96,7 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
     @Override
     protected String getTitle(WorkOrder workOrder) {
         PhyClusterPluginOperationContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-                PhyClusterPluginOperationContent.class);
+            PhyClusterPluginOperationContent.class);
 
         WorkOrderTypeEnum workOrderTypeEnum = WorkOrderTypeEnum.valueOfName(workOrder.getType());
         if (workOrderTypeEnum == null) {
@@ -105,12 +106,12 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
         PluginPO pluginPO = esPluginService.getESPluginById(content.getPluginId());
         ClusterPhy cluster = esClusterPhyService.getClusterById(Integer.parseInt(pluginPO.getPhysicClusterId()));
         return cluster.getCluster() + " " + pluginPO.getName() + pluginPO.getVersion() + " "
-                + workOrderTypeEnum.getMessage() + "-" + operationType.getMessage();
+               + workOrderTypeEnum.getMessage() + "-" + operationType.getMessage();
     }
 
     @Override
     protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
-        if(!isOP(workOrder.getSubmitor())){
+        if (!isOP(workOrder.getSubmitor())) {
             return Result.buildOpForBidden("非运维人员不能操作物理集群插件的安装和卸载！");
         }
 
@@ -125,14 +126,13 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
         PhyClusterPluginOperationContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-                PhyClusterPluginOperationContent.class);
+            PhyClusterPluginOperationContent.class);
 
         // 当该物理集群对应的逻辑集群对应多个物理集群时，提示用户应该在逻辑侧进行操作
         PluginPO pluginPO = esPluginService.getESPluginById(content.getPluginId());
 
         ClusterPhy clusterPhy = esClusterPhyService.getClusterById(Integer.parseInt(pluginPO.getPhysicClusterId()));
-        List<ClusterRoleInfo> clusterRoleInfoList = clusterRoleService.getAllRoleClusterByClusterId(
-				clusterPhy.getId());
+        List<ClusterRoleInfo> clusterRoleInfoList = clusterRoleService.getAllRoleClusterByClusterId(clusterPhy.getId());
         if (CollectionUtils.isEmpty(clusterRoleInfoList)) {
             return Result.buildFail("物理集群角色不存在");
         }
@@ -141,8 +141,8 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
         for (ClusterRoleInfo clusterRoleInfo : clusterRoleInfoList) {
             roleNameList.add(clusterRoleInfo.getRole());
         }
-        List<EcmParamBase> ecmParamBaseList = ecmHandleService.buildEcmParamBaseListWithEsPluginAction(clusterPhy.getId(),
-                roleNameList, content.getPluginId(), content.getOperationType()).getData();
+        List<EcmParamBase> ecmParamBaseList = ecmHandleService.buildEcmParamBaseListWithEsPluginAction(
+            clusterPhy.getId(), roleNameList, content.getPluginId(), content.getOperationType()).getData();
 
         // 生成工单任务
         EcmTaskDTO ecmTaskDTO = new EcmTaskDTO();
@@ -159,8 +159,8 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
         opTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
         opTaskDTO.setTaskType(OpTaskTypeEnum.CLUSTER_RESTART.getType());
         opTaskDTO.setCreator(workOrder.getSubmitor());
-        Result<OpTask> result = workTaskService.addTask(opTaskDTO);
-        if(null == result || result.failed()){
+        Result<OpTask> result = workTaskService.addTask(opTaskDTO, AuthConstant.SUPER_PROJECT_ID);
+        if (null == result || result.failed()) {
             return Result.buildFail("生成物理集群插件操作任务失败!");
         }
 
@@ -174,8 +174,7 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
 
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
-        PhyClusterPluginOperationContent content = JSON.parseObject(extensions,
-                PhyClusterPluginOperationContent.class);
+        PhyClusterPluginOperationContent content = JSON.parseObject(extensions, PhyClusterPluginOperationContent.class);
         return ConvertUtil.obj2Obj(content, PhyClusterPluginOperationOrderDetail.class);
     }
 
@@ -189,6 +188,6 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
         if (isOP(userName)) {
             return Result.buildSucc();
         }
-        return Result.buildFail( ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
+        return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
     }
 }

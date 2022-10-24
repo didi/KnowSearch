@@ -14,9 +14,8 @@ public final class AuthConstant {
     /**
      * 超级项目
      */
-    public static final Integer SUPER_PROJECT_ID = 1;
+    public static final Integer SUPER_PROJECT_ID                     = 1;
 
-    
     /**
      * 管理角色id
      */
@@ -29,4 +28,8 @@ public final class AuthConstant {
     public static final String  GATEWAY_GET_PROJECT_TICKET_NAME      = "X-ARIUS-GATEWAY-TICKET";
     public static final String  GET_USER_PROJECT_ID_LIST_TICKET      = "xTc59aY72";
     public static final String  GET_USER_PROJECT_ID_LIST_TICKET_NAME = "X-ARIUS-APP-TICKET";
+    /**
+     * 默认元数据项目id
+     */
+    public static final Integer DEFAULT_METADATA_PROJECT_ID          = 2;
 }

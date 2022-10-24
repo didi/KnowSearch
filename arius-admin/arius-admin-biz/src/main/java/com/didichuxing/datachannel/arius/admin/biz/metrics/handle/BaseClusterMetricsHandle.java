@@ -1,9 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.handle;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.ALL_CLUSTER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_TIME_INTERVAL;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.MAX_TIME_INTERVAL;
-
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
@@ -18,10 +14,13 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.entity.user.User;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.*;
 
 /**
  * 抽象类集群指标处理
@@ -30,16 +29,16 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @date 2022/05/24
  */
 public abstract class BaseClusterMetricsHandle implements BaseHandle {
-    private static final ILog LOGGER = LogFactory.getLog(BaseClusterMetricsHandle.class);
-    
+    private static final ILog      LOGGER      = LogFactory.getLog(BaseClusterMetricsHandle.class);
+
     protected static final Integer MAX_TOP_NUM = 20;
     protected static final Integer MIN_TOP_NUM = 5;
-    
+
     @Autowired
-    private ProjectService projectService;
-    
+    private ProjectService         projectService;
+
     @Autowired
-    private UserService userService;
+    private UserService            userService;
 
     /**
      * 获取物理集群节点、节点任务、模板或者节点任务的指标信息
@@ -48,7 +47,9 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
      * @param param 物理集群指标信息
      * @return 对应视图板块下的时序指标信息列表
      */
-    public Result<List<VariousLineChartMetricsVO>> getClusterPhyRelatedCurveMetrics(MetricsClusterPhyDTO param, Integer projectId, String userName) {
+    public Result<List<VariousLineChartMetricsVO>> getClusterPhyRelatedCurveMetrics(MetricsClusterPhyDTO param,
+                                                                                    Integer projectId,
+                                                                                    String userName) {
         //1. verification
         Result<Void> checkParamResult = checkParamForClusterPhyMetrics(param, projectId, userName);
         if (checkParamResult.failed()) {
@@ -78,7 +79,8 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
      * @param userName 账号类型
      * @return 当前时刻下的集群整体指标
      */
-    public Result<MetricsVO> getOtherClusterPhyRelatedMetricsVO(MetricsClusterPhyDTO param, Integer projectId, String userName) {
+    public Result<MetricsVO> getOtherClusterPhyRelatedMetricsVO(MetricsClusterPhyDTO param, Integer projectId,
+                                                                String userName) {
         //1. verification
         Result<Void> checkParamResult = checkParamForClusterPhyMetrics(param, projectId, userName);
         if (checkParamResult.failed()) {
@@ -111,19 +113,10 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
         if (null == param) {
             return Result.buildParamIllegal("param is empty");
         }
-
-        if (null == projectId) {
-            return Result.buildParamIllegal("projectId is empty");
-        }
         final User user = userService.getUserByUserName(userName);
         if (Objects.isNull(user)) {
             return Result.buildParamIllegal("user info is empty");
         }
-
-        if (!projectService.checkProjectExist(projectId)) {
-            return Result.buildParamIllegal(String.format("There is no projectId:%s", projectId));
-        }
-
         return Result.buildSucc();
     }
 

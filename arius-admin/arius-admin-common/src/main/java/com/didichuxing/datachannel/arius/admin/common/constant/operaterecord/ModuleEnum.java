@@ -1,138 +1,101 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.operaterecord;
 
-import com.google.common.collect.Lists;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
-
-import com.google.common.collect.Maps;
+import java.util.stream.Collectors;
 
 /**
  * 操作记录模块枚举
  *
- *
- * @author d06679
- * @date 2017/7/14
+ * @author shizeying
+ * @date 2022/06/13
  */
 public enum ModuleEnum {
+                           /**
+                            * 物理集群：
+                            */
+                           PHYSICAL_CLUSTER("物理集群", 0),
 
-                        /** 模板 */
-                        TEMPLATE(1, "模板"),
+                           /**
+                            * 我的集群：
+                            */
+                           MY_CLUSTER("我的集群", 1),
 
+                           /**
+                            * 应用：
+                            */
+                           APPLICATION("应用", 2),
 
-                        WORK_ORDER(3, "工单"),
+                           /**
+                            * 租户
+                            */
+                           TENANT("租户", 3),
 
-                        DSL_ANALYZER(4, "DSL审核"),
+TEMPLATE_MANAGEMENT("模板管理", 4),
 
-                        CLUSTER(5, "集群"),
+                           /**
+                            * 模板服务:DCDR设置
+                            */
+                           TEMPLATE_SERVICE("模板服务", 5),
 
+                           /**
+                            * 索引管理:创建
+                            */
+                           INDEX_MANAGEMENT("索引管理", 6),
 
+                           /**
+                            * 索引服务:
+                            */
+                           INDEX_SERVICE("索引服务", 7),
+    /**
+     * 查询模板
+     */
+    QUERY_TEMPLATE("查询模板", 8),
 
-                        SCHEDULE(8, "定时任务"),
+    /**
+     * DSL查询
+     */
+    DSL_QUERY("DSL查询",15),
+    /**
+     * 配置
+     */
+    SETTING("配置", 9),
+    //SENSE_OP("sense操作", 10),
+    SCHEDULE("定时任务", 11),
+    ES_CLUSTER_PLUGINS("ES集群插件", 12),
+    ES_CLUSTER_CONFIG("ES集群配置", 13),
+    ROLE_MANAGER("角色管理", 14);
 
-                        ARIUS_WORK_ORDER(9, "Arius工单"),
+    /**
+     * 模块
+     */
+    private final String  module;
+    /**
+     * code
+     */
+    private final Integer code;
 
-                        MAPPING_SETTINGS(10, "mapping配置"),
-
-                        APP_CONFIG(11, "应用配置"),
-
-                        RESOURCE(12, "资源"),
-
-                        TEMPLATE_CONFIG(13, "模板配置"),
-
-                        SENSE_OP(14, "sense操作"),
-
-                        CAPACITY_PLAN_AREA(15, "容量规划集群"),
-
-                        CAPACITY_PLAN_REGION(16, "容量规划region"),
-
-                        CAPACITY_PLAN_TASK(17, "容量规划任务"),
-
-                        RESOURCE_ORDER(18, "集群创建工单"),
-
-                        PLATFORM_OP(19, "平台运维"),
-
-                        CLUSTER_REGION(20, "物理集群Region"),
-
-                        LOGIC_CLUSTER_PERMISSIONS(30, "逻辑集群权限"),
-
-                        LOGIC_TEMPLATE_PERMISSIONS(31, "逻辑模板权限"),
-
-                        ES_CLUSTER_CONFIG(21, "ES集群配置"),
-
-                        REGION(22, "region"),
-
-                        ES_CLUSTER_PLUGINS(23, "ES集群插件"),
-
-                        ES_CLUSTER_JOIN(24, "集群接入"),
-
-                        INDEX_OP(25, "索引管理"),
-
-                        INDEX_BLOCK_SETTING(26, "索引阻塞配置"),
-
-                        UNKNOWN(-1, "unknown");
-
-    ModuleEnum(int code, String desc) {
+    ModuleEnum(String module, Integer code) {
+        this.module = module;
         this.code = code;
-        this.desc = desc;
     }
 
-    private int    code;
+    public String getModule() {
+        return module;
+    }
 
-    private String desc;
-
-    public int getCode() {
+    public Integer getCode() {
         return code;
     }
 
-    public String getDesc() {
-        return desc;
+    public static Map<String, Integer> toMap() {
+        return Arrays.stream(ModuleEnum.values())
+            .collect(Collectors.toMap(ModuleEnum::getModule, ModuleEnum::getCode));
     }
 
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = Maps.newHashMap();
-        map.put("code", code);
-        map.put("desc", desc);
-        return map;
-    }
-
-    public static ModuleEnum valueOf(Integer code) {
-        if (code == null) {
-            return ModuleEnum.UNKNOWN;
-        }
-        for (ModuleEnum state : ModuleEnum.values()) {
-            if (state.getCode() == code) {
-                return state;
-            }
-        }
-
-        return ModuleEnum.UNKNOWN;
-    }
-
-    public static boolean validate(Integer code) {
-        if (code == null) {
-            return false;
-        }
-        for (ModuleEnum state : ModuleEnum.values()) {
-            if (state.getCode() == code) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public static List<Map<String, Object>> getAllAriusConfigs() {
-        List<Map<String, Object>> objects = Lists.newArrayList();
-
-        for (ModuleEnum moduleEnum : ModuleEnum.values()) {
-            if (moduleEnum.getCode() == -1) {
-                continue;
-            }
-
-            objects.add(moduleEnum.toMap());
-        }
-
-        return objects;
+    public static ModuleEnum getModuleEnum(Integer code) {
+        return Arrays.stream(ModuleEnum.values()).filter(moduleEnum -> moduleEnum.getCode().equals(code)).findFirst()
+            .orElse(null);
     }
 
 }

@@ -13,17 +13,15 @@ import java.util.List;
 @NoArgsConstructor
 public class TemplateHealthDegreePO extends BaseESPO {
 
-
     /**
      * 索引模板id
      */
-    private Integer logicTemplateId;
+    private Integer       logicTemplateId;
 
     /**
      * 健康分
      */
-    private Integer healthDegree;
-
+    private Integer       healthDegree;
 
     /**
      * 标签

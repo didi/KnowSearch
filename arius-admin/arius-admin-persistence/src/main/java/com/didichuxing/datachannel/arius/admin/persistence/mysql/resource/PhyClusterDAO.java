@@ -1,13 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.resource;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
 import java.util.List;
 import java.util.Set;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
 
 /**
  * 物理集群信息 DAO
@@ -113,4 +111,5 @@ public interface PhyClusterDAO {
      * @return  long count
      */
     long getTotalHitByPackageId(@Param("packageId") Long packageId);
+
 }

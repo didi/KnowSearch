@@ -8,7 +8,10 @@ package com.didichuxing.datachannel.arius.admin.common.constant.project;
  * @date 2017/7/14
  */
 public enum ProjectSearchTypeEnum {
-    
+    /**
+     * 集群模式
+     */
+    CLUSTER(0, "集群模式"),
     /**
      * 索引模式
      */
@@ -18,8 +21,8 @@ public enum ProjectSearchTypeEnum {
      * 原生模式
      */
     PRIMITIVE(2, "原生模式"),
-
-                               UNKNOWN(-1, "未知");
+    
+    UNKNOWN(-1, "未知");
 
     ProjectSearchTypeEnum(int code, String desc) {
         this.code = code;

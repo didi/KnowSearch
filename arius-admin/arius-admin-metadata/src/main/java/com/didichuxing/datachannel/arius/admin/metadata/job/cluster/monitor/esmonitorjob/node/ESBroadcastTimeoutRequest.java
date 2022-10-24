@@ -9,8 +9,9 @@ import org.elasticsearch.common.io.stream.StreamOutput;
 
 import java.io.IOException;
 
-public abstract class ESBroadcastTimeoutRequest<T extends ESBroadcastTimeoutRequest> extends BaseTimeoutRequest<T> implements IndicesRequest.Replaceable {
-    protected String[] indices;
+public abstract class ESBroadcastTimeoutRequest<T extends ESBroadcastTimeoutRequest> extends BaseTimeoutRequest<T>
+                                               implements IndicesRequest.Replaceable {
+    protected String[]     indices;
     private IndicesOptions indicesOptions = IndicesOptions.strictExpandOpenAndForbidClosed();
 
     protected ESBroadcastTimeoutRequest() {

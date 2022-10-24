@@ -23,18 +23,18 @@ import java.util.List;
 public class TemplatePhysicalDCDRDTO extends BaseDTO {
 
     @ApiModelProperty("物理模板ID")
-    private Long physicalId;
+    private Long         physicalId;
 
     @ApiModelProperty("目标集群")
-    private String replicaCluster;
+    private String       replicaCluster;
 
     @ApiModelProperty("物理模板ID列表")
-    private List<Long> physicalIds;
+    private List<Long>   physicalIds;
 
     @ApiModelProperty("目标集群列表")
     private List<String> replicaClusters;
 
     @ApiModelProperty("模板对应的索引上的dcdr链路是否需要删除")
-    private Boolean deleteIndexDcdr;
+    private Boolean      deleteIndexDcdr;
 
 }

@@ -37,87 +37,82 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureMockMvc
 @SpringBootTest
 class ProjectConfigServiceTest {
-    
+
     @Mock
-    private ProjectConfigDAO projectConfigDAO;
-    
+    private ProjectConfigDAO         projectConfigDAO;
+
     @InjectMocks
     private ProjectConfigServiceImpl projectConfigService;
-    
+
     @BeforeEach
     void setUp() {
         initMocks(this);
     }
-    
+
     @Test
     void testGetProjectConfig() {
         // Setup
         final ProjectConfig expectedResult = new ProjectConfig(0, 0, 0, 0, 0, 0, "memo");
-        
+
         // Configure ProjectConfigDAO.getByProjectId(...).
         final ProjectConfigPO projectConfigPO = new ProjectConfigPO(0, 0, 0, 0, 0, 0, "memo");
         when(projectConfigDAO.getByProjectId(0)).thenReturn(projectConfigPO);
-        
+
         // Run the test
         final ProjectConfig result = projectConfigService.getProjectConfig(0);
-        
+
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
     }
-    
+
     @Test
     void testProjectId2ProjectConfigMap() {
         // Setup
-        
+
         // Configure ProjectConfigDAO.listAll(...).
         final List<ProjectConfigPO> projectConfigPOS = Arrays.asList(new ProjectConfigPO(1, 0, 0, 0, 0, 0, "memo"));
         when(projectConfigDAO.listAll()).thenReturn(projectConfigPOS);
         final Map<Integer, ProjectConfig> expectedResult = Maps.newHashMap();
-        for (Entry<Integer, ProjectConfigPO> configPOEntry : ConvertUtil.list2Map(projectConfigPOS,
-                ProjectConfigPO::getProjectId).entrySet()) {
+        for (Entry<Integer, ProjectConfigPO> configPOEntry : ConvertUtil
+            .list2Map(projectConfigPOS, ProjectConfigPO::getProjectId).entrySet()) {
             expectedResult.put(configPOEntry.getKey(),
-                    ConvertUtil.obj2Obj(configPOEntry.getValue(), ProjectConfig.class));
+                ConvertUtil.obj2Obj(configPOEntry.getValue(), ProjectConfig.class));
         }
-        
+
         // Run the test
         final Map<Integer, ProjectConfig> result = projectConfigService.projectId2ProjectConfigMap();
-        
+
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
     }
-    
+
     @Test
     void testUpdateOrInitProjectConfig() {
         // Setup
         final ProjectConfigPO projectConfigPO = CustomDataSource.projectConfigPO();
         final ProjectConfigDTO projectConfigDTO = ConvertUtil.obj2Obj(projectConfigPO, ProjectConfigDTO.class);
-        
-        assertThat(projectConfigService.updateOrInitProjectConfig(null, null).v1().getMessage()).isEqualTo(
-                Result.buildParamIllegal("配置信息为空").getMessage());
+
+        assertThat(projectConfigService.updateOrInitProjectConfig(null, null).v1().getMessage())
+            .isEqualTo(Result.buildParamIllegal("配置信息为空").getMessage());
         projectConfigDTO.setProjectId(null);
-        assertThat(
-                projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().getMessage()).isEqualTo(
-                Result.buildParamIllegal("应用ID为空").getMessage());
+        assertThat(projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().getMessage())
+            .isEqualTo(Result.buildParamIllegal("应用ID为空").getMessage());
         projectConfigDTO.setProjectId(1);
         projectConfigDTO.setAnalyzeResponseEnable(23);
-        assertThat(
-                projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().getMessage()).isEqualTo(
-                Result.buildParamIllegal("解析响应结果开关非法").getMessage());
+        assertThat(projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().getMessage())
+            .isEqualTo(Result.buildParamIllegal("解析响应结果开关非法").getMessage());
         projectConfigDTO.setAnalyzeResponseEnable(1);
         projectConfigDTO.setDslAnalyzeEnable(23);
-        assertThat(
-                projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().getMessage()).isEqualTo(
-                Result.buildParamIllegal("DSL分析开关非法").getMessage());
+        assertThat(projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().getMessage())
+            .isEqualTo(Result.buildParamIllegal("DSL分析开关非法").getMessage());
         projectConfigDTO.setDslAnalyzeEnable(1);
         projectConfigDTO.setAggrAnalyzeEnable(23);
-        assertThat(
-                projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().getMessage()).isEqualTo(
-                Result.buildParamIllegal("聚合分析开关非法").getMessage());
+        assertThat(projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().getMessage())
+            .isEqualTo(Result.buildParamIllegal("聚合分析开关非法").getMessage());
         projectConfigDTO.setAggrAnalyzeEnable(1);
         projectConfigDTO.setIsSourceSeparated(23);
-        assertThat(
-                projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().getMessage()).isEqualTo(
-                Result.buildParamIllegal("索引存储分离开关非法").getMessage());
+        assertThat(projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().getMessage())
+            .isEqualTo(Result.buildParamIllegal("索引存储分离开关非法").getMessage());
         projectConfigDTO.setIsSourceSeparated(1);
         when(projectConfigDAO.checkProjectConfigByProjectId(1)).thenReturn(true);
         when(projectConfigDAO.update(any())).thenReturn(1);
@@ -127,16 +122,16 @@ class ProjectConfigServiceTest {
         assertThat(projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().success()).isTrue();
         // Verify the results
     }
-    
+
     @Test
     void testDeleteByProjectId() {
         // Setup
         when(projectConfigDAO.checkProjectConfigByProjectId(anyInt())).thenReturn(true);
         when(projectConfigDAO.deleteByProjectId(anyInt())).thenReturn(1);
-        
+
         // Run the test
         projectConfigService.deleteByProjectId(0);
-        
+
         // Verify the results
         verify(projectConfigDAO).deleteByProjectId(0);
     }

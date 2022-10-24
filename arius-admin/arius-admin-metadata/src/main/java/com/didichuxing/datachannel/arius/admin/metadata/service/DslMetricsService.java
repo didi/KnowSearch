@@ -27,7 +27,7 @@ public class DslMetricsService {
     private DslTemplateESDAO dslTemplateESDAO;
 
     @Autowired
-    private DslMetricsESDAO dslMetricsESDAO;
+    private DslMetricsESDAO  dslMetricsESDAO;
 
     public Result<List<DslTemplate>> getDSLMetricsInfoByProjectId(Integer projectId, Long startDate, Long endDate) {
         List<DslTemplatePO> dslTemplatePos = dslTemplateESDAO.getDslMetricsByProjectId(projectId, startDate, endDate);
@@ -36,7 +36,8 @@ public class DslMetricsService {
             return Result.buildSucc(new ArrayList<>());
         }
 
-        dslTemplatePos = dslTemplatePos.stream().filter(d -> !StringUtils.isBlank(d.getIndiceSample())).collect(Collectors.toList());
+        dslTemplatePos = dslTemplatePos.stream().filter(d -> !StringUtils.isBlank(d.getIndiceSample()))
+            .collect(Collectors.toList());
 
         for (DslTemplatePO dslTemplatePo : dslTemplatePos) {
             if (dslTemplatePo.getQueryLimit() == null) {
@@ -47,19 +48,20 @@ public class DslMetricsService {
         return Result.buildSucc(ConvertUtil.list2List(dslTemplatePos, DslTemplate.class));
     }
 
-    public Result<List<DslMetrics>> getDetailMetrics(int projectId, String dslTemplateMd5, Long startDate, Long endDate) {
-        return Result.buildSucc(ConvertUtil.list2List(
-                dslMetricsESDAO.getDslDetailMetricByProjectIdAndDslTemplateMd5(projectId, dslTemplateMd5, startDate, endDate),
-                DslMetrics.class));
+    public Result<List<DslMetrics>> getDetailMetrics(int projectId, String dslTemplateMd5, Long startDate,
+                                                     Long endDate) {
+        return Result
+            .buildSucc(ConvertUtil.list2List(dslMetricsESDAO.getDslDetailMetricByProjectIdAndDslTemplateMd5(projectId,
+                dslTemplateMd5, startDate, endDate), DslMetrics.class));
     }
 
-    public Result<SearchDslTemplateResponse> getDslTemplateByCondition(Integer projectId, String searchKeyword, String dslTag,
-                                                                       String sortInfo, Long from, Long size,
-                                                                       Long startDate, Long endDate) {
+    public Result<SearchDslTemplateResponse> getDslTemplateByCondition(Integer projectId, String searchKeyword,
+                                                                       String dslTag, String sortInfo, Long from,
+                                                                       Long size, Long startDate, Long endDate) {
         SearchDslTemplateResponse response = new SearchDslTemplateResponse();
 
         Tuple<Long, List<DslTemplatePO>> dslTemplatePos = dslTemplateESDAO.getDslTemplateByCondition(projectId,
-                searchKeyword, dslTag, sortInfo, from, size, startDate, endDate);
+            searchKeyword, dslTag, sortInfo, from, size, startDate, endDate);
 
         if (null == dslTemplatePos) {
             response.setTotalHits(0L);

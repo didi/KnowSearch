@@ -21,16 +21,16 @@ import lombok.NoArgsConstructor;
 public class IndexCatCellWithConfigDTO extends IndexCatCellDTO {
 
     @ApiModelProperty("mapping")
-    private String mapping;
+    private String       mapping;
 
     @ApiModelProperty("setting")
-    private String setting;
+    private String       setting;
 
     @ApiModelProperty("target index")
-    private String targetIndex;
+    private String       targetIndex;
 
     @ApiModelProperty("extra")
-    private String extra;
+    private String       extra;
 
     @ApiModelProperty("别名")
     private List<String> aliases;

@@ -27,28 +27,28 @@ public class ProjectTemplateAccessCountPO extends BaseESPO {
     /**
      * 索引模板主键
      */
-    private Integer templateId;
+    private Integer                                                  templateId;
     /**
      * 索引逻辑id
      */
-    private Integer logicTemplateId;
+    private Integer                                                  logicTemplateId;
     /**
      * 索引模板名称
      */
-    private String templateName;
+    private String                                                   templateName;
     /**
      * 集群名称
      */
-    private String  clusterName;
+    private String                                                   clusterName;
     /**
      * 应用账号
      */
 
-    private Integer projectId;
+    private Integer                                                  projectId;
     /**
      * 访问索引模板次数，为@accessDetailInfo 访问索引明细的总次数
      */
-    private Long    count;
+    private Long                                                     count;
     /**
      *访问索引名称明细数据,key不能是.开头，否则写入es失败
      */
@@ -56,7 +56,7 @@ public class ProjectTemplateAccessCountPO extends BaseESPO {
     /**
      * 统计日期
      */
-    private String date;
+    private String                                                   date;
 
     /**
      * 累加访问次数

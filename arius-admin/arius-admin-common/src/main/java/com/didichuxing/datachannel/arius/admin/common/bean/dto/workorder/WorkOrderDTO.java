@@ -20,21 +20,21 @@ public class WorkOrderDTO extends BaseDTO {
     private static final long serialVersionUID = -4536847390271645624L;
 
     @ApiModelProperty("工单类型（路径参数）")
-    private String  type;
+    private String            type;
 
     @ApiModelProperty("工单内容")
-    private Object  contentObj;
+    private Object            contentObj;
 
     @ApiModelProperty("提交人")
-    private String  submitor;
+    private String            submitor;
 
     @ApiModelProperty("提交projectID")
-    private Integer submitorProjectId;
+    private Integer           submitorProjectId;
 
     @ApiModelProperty("数据中心")
-    private String  dataCenter;
+    private String            dataCenter;
 
     @ApiModelProperty("描述")
-    private String description;
+    private String            description;
 
 }

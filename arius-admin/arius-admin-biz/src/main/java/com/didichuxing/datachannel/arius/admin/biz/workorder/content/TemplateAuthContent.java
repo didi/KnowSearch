@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -35,9 +34,6 @@ public class TemplateAuthContent extends BaseContent {
      */
     private String  memo;
 
-    /**
-     * 责任人
-     */
-    private String  responsible;
+   
 
 }

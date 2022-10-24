@@ -22,7 +22,7 @@ public class ConsoleTemplatePhyVO extends IndexTemplatePhysicalVO {
     private Integer projectId;
 
     @ApiModelProperty("归属项目名称")
-    private String projectName;
+    private String  projectName;
 
     /**
      * @see ProjectTemplateAuthEnum

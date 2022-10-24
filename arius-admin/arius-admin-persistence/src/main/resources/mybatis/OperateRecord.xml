@@ -4,7 +4,7 @@
 	<resultMap id="BaseResultMap"
 	           type="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
 		<!--@mbg.generated-->
-		<!--@Table operate_record-->
+		<!--@Table operate_record_info-->
 		<id column="id" jdbcType="BIGINT" property="id"/>
 		<result column="project_name" jdbcType="INTEGER" property="projectName"/>
 		<result column="module_id" jdbcType="INTEGER" property="moduleId"/>
@@ -20,7 +20,7 @@
 	
 	<sql id="Base_Column_List">
 		<!--@mbg.generated-->
-		<!--@Table operate_record-->    id,
+		<!--@Table operate_record_info-->    id,
 		                                project_name,
 		                                module_id,
 		                                operate_id,
@@ -36,19 +36,19 @@
 	<insert id="insert"
 	        parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO"
 	        useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-		<!--@mbg.generated-->    insert into operate_record (project_name, module_id, operate_id, trigger_way_id,
-		                                                     user_operation, operate_time, create_time, update_time,
+		<!--@mbg.generated-->    insert into operate_record_info (project_name, module_id, operate_id, trigger_way_id,
+		                                                     user_operation, operate_time,
 		                                                     content, biz_id)
 		                         values (#{projectName}, #{moduleId}, #{operateId}, #{triggerWayId}, #{userOperation},
-		                                 #{operateTime}, #{createTime}, #{updateTime}, #{content}, #{bizId})
+		                                 #{operateTime}, #{content}, #{bizId})
 	</insert>
 	
 	<select id="listByCondition" resultMap="BaseResultMap"
 	        parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO">
 		select
 		<include refid="Base_Column_List"/>
-		from operate_record
-		<trim prefix="where" prefixOverrides="and">
+		from operate_record_info
+		<where >
 			<if test="id != null">
 				and id = #{id}
 			</if>
@@ -83,10 +83,10 @@
 				                                                                                         #{content}) OR
 				     content LIKE CONCAT('%', #{content}, '%'))
 			</if>
-			 <if test="sortTerm != null">
-            order by ${sortTerm} ${sortType}
-        </if>
-		</trim>
+		</where>
+		<if test="sortTerm != null">
+			order by ${sortTerm} ${sortType}
+		</if>
 		LIMIT #{from},#{size}
 	</select>
 	
@@ -94,17 +94,17 @@
 	<select id="selectDescTopNByModuleId" resultMap="BaseResultMap"
 	        parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
 		select id, module_id
-		from operate_record
+		from operate_record_info
 		where module_id = #{moduleId}
 		order by id DESC
 		LIMIT #{topN}, 1
 	</select>
-	
+
 	<select id="countByCondition" resultType="java.lang.Long"
 	        parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO">
 		select count(id)
-		from operate_record
-		<trim prefix="where" prefixOverrides="and">
+		from operate_record_info
+		<where >
 			<if test="id != null">
 				and id = #{id}
 			</if>
@@ -139,21 +139,63 @@
 				                                                                                         #{content}) OR
 				     content LIKE CONCAT('%', #{content}, '%'))
 			</if>
-		</trim>
+		</where>
 		ORDER BY id
 	</select>
 	<select id="getById"
 	        resultType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
 		select
 		<include refid="Base_Column_List"/>
-		from operate_record
+		from operate_record_info
 		where id = #{id}
 	</select>
+
+	<select id="selectOneOperateRecord" resultMap="BaseResultMap"
+			parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO">
+		select
+		id
+		from operate_record_info
+		<where >
+			<if test="moduleId != null">
+				and module_id = #{moduleId}
+			</if>
+			<if test="operateId != null">
+				and operate_id = #{operateId}
+			</if>
+			<if test="triggerWayId != null">
+				and trigger_way_id = #{triggerWayId}
+			</if>
+			<if test="projectName != null  and projectName != ''">
+				and project_name = #{projectName}
+			</if>
+			<if test="userOperation != null  and userOperation != ''">
+				and user_operation = #{userOperation}
+			</if>
+		</where>
+	</select>
+
+	<update id="updateById"
+			parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
+		update operate_record_info
+		<trim prefix="set" prefixOverrides=",">
+			<if test="content != null">,`content` = #{content}</if>
+			<if test="operateTime != null">,`operate_time` = #{operateTime}</if>
+			<if test="updateTime != null">,`update_time` = #{updateTime}</if>
+		</trim>
+		where id = #{id}
+	</update>
 	
 	<update id="deleteByModuleIdAndLessThanId">
 		delete
-		from operate_record
+		from operate_record_info
 		where module_id = #{moduleId}
 			and id &lt; #{id}
 	</update>
+
+	<update id="deleteExprieData">
+		delete
+		from operate_record_info
+		where cast(operate_time as datetime) &lt; #{saveTime}
+	</update>
+
 </mapper>

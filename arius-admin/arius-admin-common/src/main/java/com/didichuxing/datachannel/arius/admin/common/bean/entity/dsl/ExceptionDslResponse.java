@@ -11,15 +11,15 @@ import java.text.SimpleDateFormat;
 @AllArgsConstructor
 public class ExceptionDslResponse {
 
-    public  static final String TIME_FORMAT = "yyyy-MM-dd-HH:mm:ss";
-    private static final String NEW_FORMAT_STR = "new dsl, time:%s, count:%d";
+    public static final String  TIME_FORMAT     = "yyyy-MM-dd-HH:mm:ss";
+    private static final String NEW_FORMAT_STR  = "new dsl, time:%s, count:%d";
     private static final String GROW_FORMAT_STR = "grow dsl, before:%d, after:%d, time:%s";
 
-    private int projectId;
+    private int                 projectId;
 
-    private String templateMD5;
+    private String              templateMD5;
 
-    private String reason;
+    private String              reason;
 
     public static ExceptionDslResponse buildForNew(long timeStamp, long count) {
         SimpleDateFormat format = new SimpleDateFormat(TIME_FORMAT);

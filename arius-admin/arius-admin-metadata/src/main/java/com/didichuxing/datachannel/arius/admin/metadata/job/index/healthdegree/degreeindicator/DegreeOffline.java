@@ -1,47 +1,46 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.degreeindicator;
 
-
-import com.didichuxing.datachannel.arius.admin.common.constant.IndicatorsType;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.BaseDegree;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.OffLine;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
+import com.didichuxing.datachannel.arius.admin.common.constant.IndicatorsType;
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.AbstractDegreeIndicator;
 import com.didichuxing.datachannel.arius.admin.metadata.utils.ReadExprValueUtil;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
+
 @Deprecated
 public class DegreeOffline extends AbstractDegreeIndicator {
     private static final Long GB_IN_BYTE = 1024 * 1024 * 1024L;
 
     @Override
     public <T extends BaseDegree> T execInner(DegreeParam degreeParam, T t) {
-        OffLine offLinePO = (OffLine)t;
+        OffLine offLinePO = (OffLine) t;
 
         IndexTemplateLogicWithClusterAndMasterTemplate indexTemplate = degreeParam.getIndexTemplate();
-        long templateAccessCount    = degreeParam.getTemplateAccessCount();
+        long templateAccessCount = degreeParam.getTemplateAccessCount();
 
         offLinePO.setCluster(indexTemplate.getMasterTemplate().getCluster());
-        offLinePO.setDepartment(indexTemplate.getLibraDepartment());
         offLinePO.setTemplate(indexTemplate.getName());
         offLinePO.setTemplateId(indexTemplate.getId());
         offLinePO.setZeroCount(0 == degreeParam.getTemplateDocNu());
-        offLinePO.setCostByGb(degreeParam.getTemplateSizeInBytes()/GB_IN_BYTE);
+        offLinePO.setCostByGb(degreeParam.getTemplateSizeInBytes() / GB_IN_BYTE);
         offLinePO.setYesterdayAccessNum(templateAccessCount);
 
-        if(offLinePO.getCostByGb() > 0){
-            offLinePO.setSingleGbAccess( ReadExprValueUtil.getDouble2(templateAccessCount / offLinePO.getCostByGb()));
+        if (offLinePO.getCostByGb() > 0) {
+            offLinePO.setSingleGbAccess(ReadExprValueUtil.getDouble2(templateAccessCount / offLinePO.getCostByGb()));
         }
 
         //开始计算离线健康分
         computeOfflineScore(offLinePO, templateAccessCount);
 
-        return (T)offLinePO;
+        return (T) offLinePO;
     }
 
     private void computeOfflineScore(OffLine offLinePO, long templateAccessCount) {
         StringBuilder offlineDesc = new StringBuilder();
-        double offLineScore   = 0.0;
+        double offLineScore = 0.0;
         double singleGbAccess = offLinePO.getSingleGbAccess();
 
-        if(!offLinePO.isZeroCount()){
+        if (!offLinePO.isZeroCount()) {
             if (singleGbAccess > 1) {
                 offLineScore = Math.log(singleGbAccess) / Math.log(2.0) * 10;
                 offlineDesc.append("Math.log(").append(singleGbAccess).append(")/Math.log(2.0)*10");
@@ -56,8 +55,8 @@ public class DegreeOffline extends AbstractDegreeIndicator {
             // 最高分为100分
             if (offLineScore > 100) {
                 offLineScore = 100;
-                String temp= offlineDesc.toString();
-                offlineDesc.delete(0,offlineDesc.length());
+                String temp = offlineDesc.toString();
+                offlineDesc.delete(0, offlineDesc.length());
                 offlineDesc.append("Math.min(").append(temp).append("),100)");
             }
         }
@@ -79,7 +78,7 @@ public class DegreeOffline extends AbstractDegreeIndicator {
                 addScore = 10;
             }
 
-            if(addScore > 0){
+            if (addScore > 0) {
                 offLineScore += addScore;
                 offlineDesc.append(" (+").append(addScore).append(")");
             }

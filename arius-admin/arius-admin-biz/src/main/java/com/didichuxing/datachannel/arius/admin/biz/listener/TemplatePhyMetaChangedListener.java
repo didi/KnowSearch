@@ -13,15 +13,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class TemplatePhyMetaChangedListener implements ApplicationListener<PhysicalMetaDataModifyEvent> {
 
-    private static final ILog LOGGER = LogFactory.getLog( TemplatePhyMetaChangedListener.class);
+    private static final ILog LOGGER = LogFactory.getLog(TemplatePhyMetaChangedListener.class);
 
     @Override
     public void onApplicationEvent(PhysicalMetaDataModifyEvent modifyEvent) {
         if (modifyEvent instanceof PhysicalTemplateAliasModifyEvent) {
             PhysicalTemplateAliasModifyEvent aliasModifyEvent = (PhysicalTemplateAliasModifyEvent) modifyEvent;
             LOGGER
-                .info("class=PhysicalTemplateMetaChangedListener||method=onApplicationEvent||msg=templateAliasesChanged" +
-                                "||cluster={}||templateName={}||beforeUpdateAliases={}||afterUpdateAliases={}",
+                .info("class=PhysicalTemplateMetaChangedListener||method=onApplicationEvent||msg=templateAliasesChanged"
+                      + "||cluster={}||templateName={}||beforeUpdateAliases={}||afterUpdateAliases={}",
                     aliasModifyEvent.getCluster(), aliasModifyEvent.getTemplateName(),
                     JSON.toJSONString(aliasModifyEvent.getBeforeUpdateAlias()),
                     JSON.toJSONString(aliasModifyEvent.getAfterUpdateAlias()));
@@ -29,20 +29,19 @@ public class TemplatePhyMetaChangedListener implements ApplicationListener<Physi
         } else if (modifyEvent instanceof PhysicalTemplatePropertiesTypesModifyEvent) {
             PhysicalTemplatePropertiesTypesModifyEvent typesModifyModifyEvent = (PhysicalTemplatePropertiesTypesModifyEvent) modifyEvent;
 
-            LOGGER
-                .info("class=PhysicalTemplateMetaChangedListener||method=onApplicationEvent||msg=templateTypesChanged" +
-                                "||cluster={}||templateName={}||beforeUpdateTypes={}||afterUpdateTypes={}",
-                    typesModifyModifyEvent.getCluster(), typesModifyModifyEvent.getTemplateName(),
-                    JSON.toJSONString(typesModifyModifyEvent.getBeforeUpdateTypes()),
-                    JSON.toJSONString(typesModifyModifyEvent.getAfterUpdateTypes()));
+            LOGGER.info("class=PhysicalTemplateMetaChangedListener||method=onApplicationEvent||msg=templateTypesChanged"
+                        + "||cluster={}||templateName={}||beforeUpdateTypes={}||afterUpdateTypes={}",
+                typesModifyModifyEvent.getCluster(), typesModifyModifyEvent.getTemplateName(),
+                JSON.toJSONString(typesModifyModifyEvent.getBeforeUpdateTypes()),
+                JSON.toJSONString(typesModifyModifyEvent.getAfterUpdateTypes()));
         } else if (modifyEvent instanceof PhysicalTemplateSettingsModifyEvent) {
             PhysicalTemplateSettingsModifyEvent settingsModifyEvent = (PhysicalTemplateSettingsModifyEvent) modifyEvent;
-            LOGGER
-                .info("class=PhysicalTemplateMetaChangedListener||method=onApplicationEvent||msg=templateSettingsChanged" +
-                                "||cluster={}||templateName={}||beforeChangedSettings={}||afterChangedSettings={}",
-                    settingsModifyEvent.getCluster(), settingsModifyEvent.getTemplateName(),
-                    JSON.toJSONString(settingsModifyEvent.getBeforeUpdateSettings()),
-                    JSON.toJSONString(settingsModifyEvent.getAfterUpdateSettings()));
+            LOGGER.info(
+                "class=PhysicalTemplateMetaChangedListener||method=onApplicationEvent||msg=templateSettingsChanged"
+                        + "||cluster={}||templateName={}||beforeChangedSettings={}||afterChangedSettings={}",
+                settingsModifyEvent.getCluster(), settingsModifyEvent.getTemplateName(),
+                JSON.toJSONString(settingsModifyEvent.getBeforeUpdateSettings()),
+                JSON.toJSONString(settingsModifyEvent.getAfterUpdateSettings()));
         }
     }
 

@@ -19,7 +19,7 @@ class TranslateHttpServletRequestWrapper extends HttpServletRequestWrapper {
     private String body;
     private String encoding = "UTF-8";
 
-    public TranslateHttpServletRequestWrapper(HttpServletRequest request) throws IOException{
+    public TranslateHttpServletRequestWrapper(HttpServletRequest request) throws IOException {
         super(request);
         if (StringUtils.isNotBlank(request.getCharacterEncoding())) {
             this.encoding = request.getCharacterEncoding();

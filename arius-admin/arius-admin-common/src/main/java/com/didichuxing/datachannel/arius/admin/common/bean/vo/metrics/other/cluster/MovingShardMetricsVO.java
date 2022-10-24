@@ -21,18 +21,18 @@ public class MovingShardMetricsVO implements Serializable {
     @ApiModelProperty("承载索引")
     private String i;
 
-    @ApiModelProperty("shard序号")
-    private Long   s;
-
-    @ApiModelProperty("耗时")
-    private String t;
-
     @ApiModelProperty("源节点Ip")
     private String shost;
 
     @ApiModelProperty("目标节点ip")
     private String thost;
 
-    @ApiModelProperty("状态 init、index、start、translog、finalize、done")
-    private String st;
+    @ApiModelProperty("恢复的字节数")
+    private String br;
+
+    @ApiModelProperty("字节数占比")
+    private String bp;
+
+    @ApiModelProperty("转换日志操作占比")
+    private String top;
 }

@@ -13,6 +13,14 @@
     <artifactId>arius-admin-common</artifactId>
 
     <dependencies>
+         <dependency>
+            <groupId>io.github.java-diff-utils</groupId>
+            <artifactId>java-diff-utils</artifactId>
+        </dependency>
+              <dependency>
+                <groupId>com.github.java-json-tools</groupId>
+                <artifactId>json-patch</artifactId>
+            </dependency>
 
          <dependency>
             <groupId>io.github.zqrferrari</groupId>
@@ -83,18 +91,10 @@
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.didichuxing.datachannel</groupId>
             <artifactId>arius-admin-op-manager</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>mybatis</artifactId>
-                    <groupId>org.mybatis</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
-
     </dependencies>
 
 </project>

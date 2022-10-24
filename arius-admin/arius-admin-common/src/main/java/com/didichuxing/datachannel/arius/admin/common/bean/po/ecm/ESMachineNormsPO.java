@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.ecm;
 
-
-
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,24 +15,23 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ESMachineNormsPO extends BasePO {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  private Long id;
+    private Long              id;
 
-  /**
-   * 角色(masternode/datanode/clientnode/datanode-ceph)
-   */
-  private String role;
+    /**
+     * 角色(masternode/datanode/clientnode/datanode-ceph)
+     */
+    private String            role;
 
-  /**
-   * 规格(16-48Gi-100g)
-   */
-  private String spec;
+    /**
+     * 规格(16-48Gi-100g)
+     */
+    private String            spec;
 
-  /**
-   * 标记删除
-   */
-  private Boolean deleteFlag;
-
+    /**
+     * 标记删除
+     */
+    private Boolean           deleteFlag;
 
 }

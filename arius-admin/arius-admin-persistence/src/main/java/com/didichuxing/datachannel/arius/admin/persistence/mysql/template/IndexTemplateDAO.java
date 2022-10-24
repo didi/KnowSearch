@@ -36,20 +36,29 @@ public interface IndexTemplateDAO {
 
     List<IndexTemplatePO> likeByCondition(IndexTemplatePO param);
 
-    List<IndexTemplatePO> pagingByCondition(@Param("param") IndexTemplatePO param,
-                                            @Param("from") Long from, @Param("size") Long size,
-                                            @Param("sortTerm") String sortTerm, @Param("sortType") String sortType);
+    List<IndexTemplatePO> pagingByCondition(@Param("param") IndexTemplatePO param, @Param("from") Long from,
+                                            @Param("size") Long size, @Param("sortTerm") String sortTerm,
+                                            @Param("sortType") String sortType);
+    List<IndexTemplatePO> pagingByConditionAndLogicClusterIdList(@Param("param") IndexTemplatePO param,
+                                                                 @Param("from") Long from,
+                                                                 @Param("size") Long size, @Param("sortTerm") String sortTerm,
+                                                                 @Param("sortType") String sortType, @Param("logicClusterIdList")List<Integer> logicClusterIdList);
 
     long getTotalHitByCondition(IndexTemplatePO param);
+    long getTotalHitByConditionAndLogicClusterIdList(@Param("param")IndexTemplatePO param,@Param("logicClusterIdList")List<Integer> logicClusterIdList);
 
-
-    int batchChangeHotDay(Integer days);
+    int batchChangeHotDay(@Param("days") Integer days, @Param("templateIdList") List<Integer> templateIdList);
 
     int updateBlockReadState(@Param("logicId") Integer logicId, @Param("blockRead") Boolean blockRead);
 
     int updateBlockWriteState(@Param("logicId") Integer logicId, @Param("blockWrite") Boolean blockWrite);
 
     List<String> listAllNames();
+
+    Integer getProjectIdByTemplateLogicId(@Param("logicId") Integer templateLogicId);
+
+    String getNameByTemplateLogicId(@Param("logicId") Integer logicTemplateId);
     
-    Integer getProjectIdByTemplateLogicId(@Param("logicId")Integer templateLogicId);
+    List<Integer> getLogicTemplateIdListByProjectId(@Param("projectId")Integer projectId);
+
 }

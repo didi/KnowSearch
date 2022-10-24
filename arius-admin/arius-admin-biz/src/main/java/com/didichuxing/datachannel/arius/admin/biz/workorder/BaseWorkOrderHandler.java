@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +30,14 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
     protected static final ILog    LOGGER = LogFactory.getLog(BaseWorkOrderHandler.class);
 
     @Autowired
-    private WorkOrderManager workOrderManager;
-
-   
+    private WorkOrderManager       workOrderManager;
 
     @Autowired
     protected OperateRecordService operateRecordService;
     @Autowired
-    private RoleTool roleTool;
+    protected ProjectService projectService;
+    @Autowired
+    private RoleTool               roleTool;
 
     /**
      * 创建一个工单
@@ -55,9 +56,9 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
         }
 
         Result<Void> checkDuplicateOrder = validDuplicateOrder(workOrder);
-        if(checkDuplicateOrder.failed()) {
+        if (checkDuplicateOrder.failed()) {
             LOGGER.warn("class=BaseWorkOrderHandler||method=submit||msg=checkDuplicateOrder fail||type={}||content={}",
-                    workOrder.getType(), ConvertUtil.obj2Json(workOrder.getContentObj()));
+                workOrder.getType(), ConvertUtil.obj2Json(workOrder.getContentObj()));
             return Result.buildFrom(checkDuplicateOrder);
         }
 
@@ -84,7 +85,8 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> processAgree(WorkOrder workOrder, String approver, String opinion) throws AdminOperateException {
+    public Result<Void> processAgree(WorkOrder workOrder, String approver,
+                                     String opinion) throws AdminOperateException {
         Result<Void> checkParamResult = validateParam(workOrder);
 
         if (checkParamResult.failed()) {
@@ -134,7 +136,8 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      */
     protected Result<Void> validDuplicateOrder(WorkOrder workOrder) {
         // 获取当前提交人已经提交待审批的工单列表
-        Result<List<WorkOrderVO>> orderToApproveResult = workOrderManager.getOrderApplyList(workOrder.getSubmitor(), OrderStatusEnum.WAIT_DEAL.getCode());
+        Result<List<WorkOrderVO>> orderToApproveResult = workOrderManager.getOrderApplyList(workOrder.getSubmitor(),
+            OrderStatusEnum.WAIT_DEAL.getCode());
         if (orderToApproveResult.failed()) {
             return Result.buildFrom(orderToApproveResult);
         }
@@ -148,8 +151,8 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
         // 遍历所有的工单，对于待审批的工单的内容和类型进行重复性的条件过滤
         for (WorkOrderVO param : applyListResultData) {
             if (workOrder.getType().equals(param.getType())
-                    && JSON.toJSONString(workOrder.getContentObj()).equals(param.getExtensions())) {
-                return Result.buildFail("重复性工单的提交");
+                && JSON.toJSONString(workOrder.getContentObj()).equals(param.getExtensions())) {
+                return Result.buildFail("存在重复工单，如需重新提交，需前往[工单任务-我的申请]撤回原有工单。");
             }
         }
 
@@ -183,7 +186,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      * @return result
      */
     protected abstract Result<Void> validateParam(WorkOrder workOrder);
-    
+
     /**过程是否同意
      * 处理工单
      * @param workOrder 工单
@@ -192,15 +195,11 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      @throws AdminOperateException 管理操作Exception
      */
     protected abstract Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException;
-    
-   
 
     protected List<UserBriefVO> getOPList() {
-        return  roleTool.getAdminList();
+        return roleTool.getAdminList();
     }
-    
-  
-    
+
     protected boolean isOP(String userName) {
         return roleTool.isAdmin(userName);
     }
@@ -225,7 +224,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
     }
 
     private Result<Void> handleProcessAgree(WorkOrder workOrder, String approver,
-                                      String opinion) throws AdminOperateException {
+                                            String opinion) throws AdminOperateException {
         Result<Void> result = doProcessAgree(workOrder, approver);
 
         if (result.success()) {

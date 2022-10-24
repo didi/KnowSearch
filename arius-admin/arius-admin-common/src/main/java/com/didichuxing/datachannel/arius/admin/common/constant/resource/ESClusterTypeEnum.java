@@ -16,10 +16,10 @@ public enum ESClusterTypeEnum {
                                 */
                                ES_HOST(4, "host集群"),
 
-                                /**
-                                * 虚拟机集群
-                                */
-                                ES_VM(5, "virtual machine集群"),
+                               /**
+                               * 虚拟机集群
+                               */
+                               ES_VM(5, "virtual machine集群"),
 
                                /**
                                 * 未知

@@ -13,45 +13,53 @@ public class ESHttpRequestContent {
     /**
      * 获取集群搬迁shard
      */
-    public static final String GET_MOVING_SHARD  = "_cat/recovery?v&h=i,s,t,st,shost,thost&active_only=true";
+    public static final String GET_MOVING_SHARD            = "_cat/recovery?v&h=i,shost,thost,br,bp,top&active_only=true";
 
     /**
      * 获取集群pendingTask
      */
-    public static final String GET_PENDING_TASKS = "/_cluster/pending_tasks";
+    public static final String GET_PENDING_TASKS           = "/_cluster/pending_tasks";
     /**
      * 获取集群http信息
      */
-    public static final String GET_STATS_HTTP    = "/_nodes/stats/http?level=cluster";
-    public static final String GET_STATS_FS      = "/_nodes/stats/fs?level=cluster";
+    public static final String GET_STATS_HTTP              = "/_nodes/stats/http?level=cluster";
+    public static final String GET_STATS_FS                = "/_nodes/stats/fs?level=cluster";
 
     /**
      * 获取集群索引信息
      */
-    public static final String GET_INDICES       = "/_cat/indices?v&h=index,dc";
+    public static final String GET_INDICES                 = "/_cat/indices?v&h=index,dc";
 
     /**
      * 获取集群shard
      */
-    public static final String GET_SHARDS        = "/_cat/shards/";
+    public static final String GET_SHARDS                  = "/_cat/shards/";
+
+    /**
+     * 获取json格式的集群shard
+     */
+    public static final String GET_SHARDS_JSON                  = "_cat/shards?format=json";
+
     /**
      * 获取集群shard
      */
-    public static final String GET_CLUSTER_STATS="/_cluster/stats/" ;
+    public static final String GET_CLUSTER_STATS           = "/_cluster/stats/";
 
-    public static final String GET_SHARDS_ALL    = "_cat/shards?v&h=index,prirep,shard,store,ip,node";
-    public static final String GET_SHARDS_NODE   = "_cat/shards?v&h=node";
+    public static final String GET_SHARDS_ALL              = "_cat/shards?v&h=index,prirep,shard,store,ip,node";
+    public static final String GET_SHARDS_NODE             = "_cat/shards?v&h=node";
 
-    public static final String GET_TEMPLATE_NAME = "/_cat/templates?v&h=name";
+    public static final String GET_TEMPLATE_NAME           = "/_cat/templates?v&h=name";
 
-    public static final String MASTER_TIMEOUT    = "&master_timeout=";
+    public static final String MASTER_TIMEOUT              = "&master_timeout=";
 
     /**
      * 获取集群模板segments 信息
      */
-    public static final String GET_PATH_SEGMENTS = "/_cat/segments/";
+    public static final String GET_PATH_SEGMENTS           = "/_cat/segments/";
 
     public static final String GET_PATH_SEGMENTS_PART_INFO = GET_PATH_SEGMENTS + "?v&h=size,size.memory,index";
+
+    public static final String GET_PATH_SEGMENTS_COUNT_INFO = GET_PATH_SEGMENTS + "?v&h=index,prirep";
 
     /**
      * 获取大索引请求内容
@@ -97,7 +105,7 @@ public class ESHttpRequestContent {
         return GET_TEMPLATE_NAME;
     }
 
-    public static String getSegmentsPartInfoRequestContent() {
-        return GET_PATH_SEGMENTS_PART_INFO;
-    }
+    public static String getSegmentsPartInfoRequestContent() { return GET_PATH_SEGMENTS_PART_INFO;}
+
+    public static String getSegmentsCountContent() { return GET_PATH_SEGMENTS_COUNT_INFO;}
 }

@@ -40,7 +40,7 @@ public class ESClusterPhyBasicMetricsVO implements Serializable {
     private Double  invalidNodeNuPercent;
 
     @ApiModelProperty("集群模板数")
-    private Long totalTemplateNu;
+    private Long    totalTemplateNu;
 
     @ApiModelProperty("集群索引数")
     private Long    totalIndicesNu;
@@ -52,22 +52,22 @@ public class ESClusterPhyBasicMetricsVO implements Serializable {
     private Long    totalDocNu;
 
     @ApiModelProperty("已用内存大小")
-    private Long  memUsed;
+    private Long    memUsed;
 
     @ApiModelProperty("剩余空闲内存大小")
-    private Long  memFree;
+    private Long    memFree;
 
     @ApiModelProperty("总内存大小")
-    private Long  memTotal;
+    private Long    memTotal;
 
     @ApiModelProperty("已用堆内存大小")
-    private Long heapMemUsed;
+    private Long    heapMemUsed;
 
     @ApiModelProperty("剩余堆内存大小")
-    private Long heapMemFree;
+    private Long    heapMemFree;
 
     @ApiModelProperty("总堆内存大小")
-    private Long heapMemTotal;
+    private Long    heapMemTotal;
 
     @ApiModelProperty("堆内存使用率")
     private Double  heapUsage;
@@ -76,19 +76,19 @@ public class ESClusterPhyBasicMetricsVO implements Serializable {
     private Double  heapFreeUsage;
 
     @ApiModelProperty("已用内存百分比")
-    private Double    memUsedPercent;
+    private Double  memUsedPercent;
 
     @ApiModelProperty("剩余空闲内存百分比")
-    private Double    memFreePercent;
+    private Double  memFreePercent;
 
     @ApiModelProperty("集群已使用容量，bytes 单位")
-    private Long  storeSize;
+    private Long    storeSize;
 
     @ApiModelProperty("集群总容量，bytes 单位")
-    private Long  totalStoreSize;
+    private Long    totalStoreSize;
 
     @ApiModelProperty("集群空余容量，bytes 单位")
-    private Long  freeStoreSize;
+    private Long    freeStoreSize;
 
     @ApiModelProperty("磁盘使用率")
     private Double  storeUsage;
@@ -110,4 +110,10 @@ public class ESClusterPhyBasicMetricsVO implements Serializable {
 
     @ApiModelProperty("CoordinatingOnly节点数量")
     private Long    numberCoordinatingOnlyNodes;
+
+    @ApiModelProperty("集群索引总存储量")
+    private Long    indicesStoreSize;
+
+    @ApiModelProperty("未分配shard数")
+    private Long    unassignedShardNum;
 }

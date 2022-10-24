@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.normal;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_NORMAL;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Api(tags = "Normal-工单相关接口(REST)")
 @RestController
-@RequestMapping(V3_NORMAL + "/order")
+@RequestMapping(V3 + "/order")
 public class NormalOrderController {
 
     @Autowired
@@ -54,19 +54,42 @@ public class NormalOrderController {
     @PutMapping("/{type}/submit")
     @ResponseBody
     @ApiOperation(value = "提交工单接口")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "工单类型", required = true)})
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "工单类型", required = true) })
     public Result<AriusWorkOrderInfoSubmittedVO> submit(@PathVariable(value = "type") String type,
                                                         @RequestBody WorkOrderDTO workOrderDTO) throws AdminOperateException {
-        return workOrderManager.submit( workOrderDTO );
+        return workOrderManager.submit(workOrderDTO);
+    }
+    
+    @PutMapping("/join-logic-cluster/submit")
+    @ResponseBody
+    @ApiOperation(value = "项目加入已经存在的逻辑集群",notes = "三方接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "工单类型", required = true) })
+    public Result<AriusWorkOrderInfoSubmittedVO> submitByJoinLogicCluster(@RequestBody WorkOrderDTO workOrderDTO)
+            throws AdminOperateException {
+        return workOrderManager.submitByJoinLogicCluster(workOrderDTO);
+    }
+    
+    @PutMapping("/join-logic-cluster/{orderId}")
+    @ResponseBody
+    @ApiOperation(value = "审核",notes = "三方接口")
+    public Result<Void> processByJoinLogicCluster(HttpServletRequest httpServletRequest,@PathVariable(value = "orderId") Long orderId,
+                                                  @RequestBody WorkOrderProcessDTO processDTO)
+            throws NotFindSubclassException, OperateForbiddenException {
+        //设置当前操作人
+        processDTO.setAssignee(SpringTool.getUserName());
+        return workOrderManager.processByJoinLogicCluster(processDTO,HttpRequestUtil.getProjectId(httpServletRequest));
     }
 
     @PutMapping("/{orderId}")
     @ResponseBody
     @ApiOperation(value = "审核")
-    public Result<Void> process(@PathVariable(value = "orderId") Long orderId, @RequestBody WorkOrderProcessDTO processDTO) throws NotFindSubclassException, OperateForbiddenException {
+    public Result<Void> process(HttpServletRequest httpServletRequest,@PathVariable(value = "orderId") Long orderId,
+                                @RequestBody WorkOrderProcessDTO processDTO) throws NotFindSubclassException,
+                                                                             OperateForbiddenException {
         //设置当前操作人
-        processDTO.setAssignee( SpringTool.getUserName() );
-        return workOrderManager.process(processDTO);
+        processDTO.setAssignee(SpringTool.getUserName());
+        return workOrderManager.process(processDTO,HttpRequestUtil.getProjectId(httpServletRequest));
     }
 
     @DeleteMapping("/{orderId}")
@@ -88,7 +111,7 @@ public class NormalOrderController {
     @ApiOperation(value = "工单申请列表")
     public Result<List<WorkOrderVO>> getOrderApplyList(HttpServletRequest httpServletRequest,
                                                        @RequestParam(value = "status") Integer status) throws OperateForbiddenException {
-        return workOrderManager.getOrderApplyList(SpringTool.getUserName(), status, HttpRequestUtil.getProjectId(httpServletRequest));
+        return workOrderManager.getOrderApplyList(status, HttpRequestUtil.getProjectId(httpServletRequest));
     }
 
     @GetMapping("/approvals")

@@ -10,7 +10,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,15 +18,15 @@ public class DslSearchFieldNameMetric {
     /**
      * 索引名称
      */
-    private String indexName;
+    private String            indexName;
     /**
      * 查询字段统计
      */
-    private Map<String, Long> selectFieldsCounter = Maps.newHashMap();
+    private Map<String, Long> selectFieldsCounter  = Maps.newHashMap();
     /**
      * 过滤字段统计
      */
-    private Map<String, Long> whereFieldsCounter = Maps.newHashMap();
+    private Map<String, Long> whereFieldsCounter   = Maps.newHashMap();
     /**
      * 聚合字段统计
      */
@@ -35,14 +34,14 @@ public class DslSearchFieldNameMetric {
     /**
      * 排序字段统计
      */
-    private Map<String, Long> sortByFieldsCounter = Maps.newHashMap();
+    private Map<String, Long> sortByFieldsCounter  = Maps.newHashMap();
     /**
      * 使用的字段集合
      */
-    private Set<String> useFieldSet;
+    private Set<String>       useFieldSet;
 
-    public DslSearchFieldNameMetric(String indexName){
-        this.indexName  = indexName;
+    public DslSearchFieldNameMetric(String indexName) {
+        this.indexName = indexName;
     }
 
     /**

@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class OpTaskProcessDTO extends BaseDTO {
 
     @ApiModelProperty("任务id")
-    private Integer              taskId;
+    private Integer taskId;
 
     /**
      * 执行状态
@@ -31,11 +31,11 @@ public class OpTaskProcessDTO extends BaseDTO {
      *   pause      暂停
      */
     @ApiModelProperty("执行状态")
-    private String              status;
+    private String  status;
 
     @ApiModelProperty("任务步骤")
-    private Integer              taskProgress;
+    private Integer taskProgress;
 
     @ApiModelProperty("扩展信息")
-    private String expandData;
+    private String  expandData;
 }
