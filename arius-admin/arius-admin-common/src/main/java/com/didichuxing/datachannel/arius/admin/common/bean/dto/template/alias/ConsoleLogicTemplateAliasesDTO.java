@@ -14,9 +14,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "索引模板别名创建信息")
-public class ConsoleLogicTemplateAliasesDTO  extends BaseDTO {
+public class ConsoleLogicTemplateAliasesDTO extends BaseDTO {
     @ApiModelProperty("索引ID")
-    private Integer logicId;
+    private Integer               logicId;
 
     @ApiModelProperty("索引别名列表信息")
     private List<ConsoleAliasDTO> aliases;

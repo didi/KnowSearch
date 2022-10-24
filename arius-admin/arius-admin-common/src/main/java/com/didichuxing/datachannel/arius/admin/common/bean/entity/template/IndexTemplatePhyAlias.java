@@ -20,7 +20,7 @@ public class IndexTemplatePhyAlias implements Serializable {
     /**
      * 模板别名名称
      */
-    private String alias;
+    private String     alias;
 
     /**
      * 别名过滤器

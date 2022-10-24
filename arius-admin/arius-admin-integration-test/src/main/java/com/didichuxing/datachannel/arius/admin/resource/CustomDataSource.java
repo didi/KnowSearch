@@ -29,12 +29,12 @@ public class CustomDataSource {
 
     public static final int SIZE = 10;
 
-    public static String testAdminIp;
-    public static String testAdminPort;
-    public static String testPhyClusterIp;
-    public static Integer testPhyClusterPort;
-    public static String  operator;
-    public static Integer projectId;
+    public static String    testAdminIp;
+    public static String    testAdminPort;
+    public static String    testPhyClusterIp;
+    public static Integer   testPhyClusterPort;
+    public static String    operator;
+    public static Integer   projectId;
 
     private static String generateString(Random random, int length) {
         String sources = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -62,11 +62,10 @@ public class CustomDataSource {
         param.setEsVersion("7.6.2");
         param.setPhyClusterDesc("");
         param.setPassword("");
-        param.setResponsible(operator);
         param.setImportRule(ESClusterImportRuleEnum.AUTO_IMPORT.getCode());
         param.setTags("\"createSource\":0}");
         List<ESClusterRoleHostDTO> list = new ArrayList<>();
-        for(int i = 1; i <= 3; i++) {
+        for (int i = 1; i <= 3; i++) {
             ESClusterRoleHostDTO esClusterRoleHostDTO = getESRoleClusterHostDTO();
             esClusterRoleHostDTO.setCluster(clusterName);
             esClusterRoleHostDTO.setRole(i);
@@ -153,10 +152,8 @@ public class CustomDataSource {
         return dto;
     }
 
-   
-
-    public static OpTaskDTO getworkTaskDTO(){
-        OpTaskDTO opTaskDTO =new OpTaskDTO();
+    public static OpTaskDTO getworkTaskDTO() {
+        OpTaskDTO opTaskDTO = new OpTaskDTO();
         opTaskDTO.setTaskType(1);
         opTaskDTO.setBusinessKey("1");
         opTaskDTO.setDataCenter("1");
@@ -208,69 +205,76 @@ public class CustomDataSource {
         return sourceList.subList(0, randomIndex);
     }
 
-     public static List<String> getRandomTopClusterMetrics() {
-        List<String> clusterMetrics = Lists.newArrayList("indexingLatency", "indexReqNum", "searchLatency", "gatewaySucPer", "gatewayFailedPer", "pendingTaskNum", "docUprushNum", "reqUprushNum", "shardNum");
+    public static List<String> getRandomTopClusterMetrics() {
+        List<String> clusterMetrics = Lists.newArrayList("indexingLatency", "indexReqNum", "searchLatency",
+            "gatewaySucPer", "gatewayFailedPer", "pendingTaskNum", "docUprushNum", "reqUprushNum", "shardNum");
         return getRandomItemsFromList(clusterMetrics);
-     }
+    }
 
-     public static List<String> getRandomTopNodeMetrics() {
+    public static List<String> getRandomTopNodeMetrics() {
         List<String> nodeMetrics = Lists.newArrayList("taskConsuming");
         return getRandomItemsFromList(nodeMetrics);
-     }
+    }
 
-     public static List<String> getRandomTopIndexMetrics() {
+    public static List<String> getRandomTopIndexMetrics() {
         List<String> indexMetrics = Lists.newArrayList("reqUprushNum", "docUprushNum");
         return getRandomItemsFromList(indexMetrics);
-     }
+    }
 
-     public static List<String> getRandomTopClusterThreadPoolQueueMetrics() {
-        List<String> clusterThreadPoolQueueMetrics = Lists.newArrayList("refresh", "flush", "merge", "search", "write", "management");
+    public static List<String> getRandomTopClusterThreadPoolQueueMetrics() {
+        List<String> clusterThreadPoolQueueMetrics = Lists.newArrayList("refresh", "flush", "merge", "search", "write",
+            "management");
         return getRandomItemsFromList(clusterThreadPoolQueueMetrics);
-     }
+    }
 
-     public static List<String> getRandomListTemplateMetrics() {
+    public static List<String> getRandomListTemplateMetrics() {
         List<String> templateMetrics = Lists.newArrayList("segmentMemSize", "segmentNum");
         return getRandomItemsFromList(templateMetrics);
-     }
+    }
 
-     public static List<String> getRandomListNodeMetrics() {
-        List<String> nodeMetrics = Lists.newArrayList("dead", "largeDiskUsage", "largeHead", "largeCpuUsage", "writeRejectedNum", "searchRejectedNum", "shardNum");
+    public static List<String> getRandomListNodeMetrics() {
+        List<String> nodeMetrics = Lists.newArrayList("dead", "largeDiskUsage", "largeHead", "largeCpuUsage",
+            "writeRejectedNum", "searchRejectedNum", "shardNum");
         return getRandomItemsFromList(nodeMetrics);
-     }
+    }
 
-     public static List<String> getRandomListIndexMetrics() {
-        List<String> indexMetrics = Lists.newArrayList("red", "singReplicate", "unassignedShard", "bigShard", "smallShard", "mappingNum", "segmentNum", "segmentMemSize");
+    public static List<String> getRandomListIndexMetrics() {
+        List<String> indexMetrics = Lists.newArrayList("red", "singReplicate", "unassignedShard", "bigShard",
+            "smallShard", "mappingNum", "segmentNum", "segmentMemSize");
         return getRandomItemsFromList(indexMetrics);
-     }
+    }
 
-     public static List<String> getRandomOverviewMetrics() {
-        List<String> overviewMetrics = Lists.newArrayList("writeDocCount","writeTotalCost","writeResponseLen","queryTotalHitsAvgCount","readDocCount","querySearchType","queryCostAvg","queryTotalShardsAvg","queryFailedShardsAvg","dslLen");
+    public static List<String> getRandomOverviewMetrics() {
+        List<String> overviewMetrics = Lists.newArrayList("writeDocCount", "writeTotalCost", "writeResponseLen",
+            "queryTotalHitsAvgCount", "readDocCount", "querySearchType", "queryCostAvg", "queryTotalShardsAvg",
+            "queryFailedShardsAvg", "dslLen");
         return getRandomItemsFromList(overviewMetrics);
-     }
+    }
 
-     public static List<String> getRandomGatewayNodeMetrics() {
+    public static List<String> getRandomGatewayNodeMetrics() {
         List<String> gatewayNodeMetrics = Lists.newArrayList("queryGatewayNode", "writeGatewayNode", "dslLen");
         return getRandomItemsFromList(gatewayNodeMetrics);
-     }
+    }
 
-     public static List<String> getRandomClientNodeMetrics() {
+    public static List<String> getRandomClientNodeMetrics() {
         List<String> clientNodeMetrics = Lists.newArrayList("queryClientNode", "writeClientNode", "dslLen");
         return getRandomItemsFromList(clientNodeMetrics);
-     }
+    }
 
-     public static List<String> getRandomGatewayIndexMetrics() {
-        List<String> gatewayIndexMetrics = Lists.newArrayList("searchIndexCount", "searchIndexTotalCost", "writeIndexCount", "writeIndexTotalCost");
+    public static List<String> getRandomGatewayIndexMetrics() {
+        List<String> gatewayIndexMetrics = Lists.newArrayList("searchIndexCount", "searchIndexTotalCost",
+            "writeIndexCount", "writeIndexTotalCost");
         return getRandomItemsFromList(gatewayIndexMetrics);
-     }
+    }
 
-     public static List<String> getRandomGatewayAppMetrics() {
+    public static List<String> getRandomGatewayAppMetrics() {
         List<String> gatewayAppMetrics = Lists.newArrayList("queryAppSearchCost", "queryAppTotalCost", "queryAppCount");
         return getRandomItemsFromList(gatewayAppMetrics);
-     }
+    }
 
-     public static List<String> getRandomGatewayDslMetrics() {
+    public static List<String> getRandomGatewayDslMetrics() {
         List<String> gatewayDslMetrics = Lists.newArrayList("queryDslTotalCost", "queryDslCount");
         return getRandomItemsFromList(gatewayDslMetrics);
-     }
+    }
 
 }

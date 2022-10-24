@@ -1,27 +1,31 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant.FAULT_FLAG;
-
-import java.util.List;
-
-import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.list.MetricList;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterPhyHealthMetrics;
+import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeWithExtendValueFieldEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricOtherTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsDashBoardInfoESDAO;
+import com.google.common.collect.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant.FAULT_FLAG;
 
 /**
  * Created by linyunan on 3/14/22
  */
 @Service
 public class DashBoardMetricsService {
+    //默认排序字段
+    private static final String                                 TIMESTAMP                     = "timestamp";
 
     @Autowired
     private AriusStatsDashBoardInfoESDAO ariusStatsDashBoardInfoESDAO;
@@ -36,12 +40,13 @@ public class DashBoardMetricsService {
      */
     public List<VariousLineChartMetrics> getToNMetrics(MetricsDashboardTopNDTO param, String oneLevelType) {
         List<String> metricsTypes = param.getMetricsTypes();
-        Long startTime            = param.getStartTime();
-        Long endTime              = param.getEndTime();
-        Integer topNu             = param.getTopNu();
-        String aggType            = param.getAggType();
+        Long startTime = param.getStartTime();
+        Long endTime = param.getEndTime();
+        Integer topNu = param.getTopNu();
+        String aggType = param.getAggType();
 
-        return ariusStatsDashBoardInfoESDAO.fetchTopMetric(oneLevelType, metricsTypes, topNu, aggType, startTime, endTime);
+        return ariusStatsDashBoardInfoESDAO.fetchTopMetric(oneLevelType, metricsTypes, topNu, aggType, startTime,
+            endTime);
     }
 
     /**
@@ -53,9 +58,22 @@ public class DashBoardMetricsService {
      *
      * @return MetricList
      */
-    public MetricList getListFaultMetrics(String oneLevelType, String metricsType, String aggType, Boolean orderByDesc) {
+    public MetricList getListFaultMetrics(String oneLevelType, String metricsType, String aggType,
+                                          Boolean orderByDesc) {
+        String extendValueField = "";
+        String sortItem = TIMESTAMP;
         String sortType = orderByDesc ? SortConstant.DESC : SortConstant.ASC;
-        return ariusStatsDashBoardInfoESDAO.fetchListFlagMetric(oneLevelType, metricsType, aggType, FAULT_FLAG, sortType);
+        List<String> sources = Lists.newArrayList();
+        sources.add(oneLevelType+".cluster");
+        sources.add(oneLevelType+"."+oneLevelType);
+        if (Objects.nonNull(DashBoardMetricListTypeWithExtendValueFieldEnum.valueOfMetricType(metricsType))){
+            extendValueField = DashBoardMetricListTypeWithExtendValueFieldEnum.valueOfMetricType(metricsType).getExtendValueField();
+            sources.add(oneLevelType+"."+extendValueField);
+            sortItem = extendValueField;
+        }
+
+        return ariusStatsDashBoardInfoESDAO.fetchListFlagMetric(oneLevelType, metricsType,sortItem, extendValueField, sources, FAULT_FLAG,
+            sortType);
     }
 
     /**
@@ -67,7 +85,8 @@ public class DashBoardMetricsService {
      * @see DashBoardMetricListTypeEnum
      * @return
      */
-    public MetricList getListValueMetrics(String oneLevelType, String metricsType, String aggType, Boolean orderByDesc) {
+    public MetricList getListValueMetrics(String oneLevelType, String metricsType, String aggType,
+                                          Boolean orderByDesc) {
         String sortType = orderByDesc ? SortConstant.DESC : SortConstant.ASC;
         return ariusStatsDashBoardInfoESDAO.fetchListValueMetrics(oneLevelType, metricsType, aggType, sortType);
     }
@@ -81,6 +100,14 @@ public class DashBoardMetricsService {
     public ClusterPhyHealthMetrics getClusterHealthInfo() {
         return ariusStatsDashBoardInfoESDAO.fetchClusterHealthInfo();
     }
-
-
+    
+    public MetricList getListThresholdsMetrics(String oneLevelType, String metricsType, String valueName,
+                                               String aggType,
+                                               Boolean orderByDesc) {
+        String sortType = orderByDesc ? SortConstant.DESC : SortConstant.ASC;
+        
+        return ariusStatsDashBoardInfoESDAO.fetchListThresholdsMetric(oneLevelType, metricsType,valueName, aggType,
+                FAULT_FLAG,
+            sortType);
+    }
 }

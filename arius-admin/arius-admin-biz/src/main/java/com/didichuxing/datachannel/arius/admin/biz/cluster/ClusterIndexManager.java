@@ -20,5 +20,5 @@ public interface ClusterIndexManager {
      * @param projectId 项目id
      * @return {@link Result}<{@link List}<{@link ESClusterRoleHostVO}>>
      */
-    Result<List<ESClusterRoleHostVO>> listClusterLogicIndices(Integer clusterId,Integer projectId);
+    Result<List<ESClusterRoleHostVO>> listClusterLogicIndices(Integer clusterId, Integer projectId);
 }

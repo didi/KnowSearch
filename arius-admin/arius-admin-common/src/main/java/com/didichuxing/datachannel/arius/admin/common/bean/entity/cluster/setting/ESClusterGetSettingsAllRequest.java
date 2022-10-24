@@ -13,7 +13,6 @@ public class ESClusterGetSettingsAllRequest extends ESActionRequest<ESClusterGet
         return null;
     }
 
-
     @Override
     public RestRequest toRequest() throws Exception {
         return new RestRequest("GET", "/_cluster/settings?include_defaults=true&pretty", null);

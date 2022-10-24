@@ -35,8 +35,7 @@ public interface AriusConfigInfoDAO {
      * @param status 状态
      * @return 更新数量
      */
-    int updateByIdAndStatus(@Param("id") Integer id,
-                            @Param("status") int status);
+    int updateByIdAndStatus(@Param("id") Integer id, @Param("status") int status);
 
     /**
      * 通过条件获取平台配置
@@ -58,8 +57,7 @@ public interface AriusConfigInfoDAO {
      * @param valueName 配置名称
      * @return 平台配置po
      */
-    AriusConfigInfoPO getByGroupAndName(@Param("valueGroup") String valueGroup,
-                                        @Param("valueName") String valueName);
+    AriusConfigInfoPO getByGroupAndName(@Param("valueGroup") String valueGroup, @Param("valueName") String valueName);
 
     /**
      * 通过配置组获取平台配置list

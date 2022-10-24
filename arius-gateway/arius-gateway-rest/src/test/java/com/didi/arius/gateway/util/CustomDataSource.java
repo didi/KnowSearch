@@ -1,18 +1,42 @@
 package com.didi.arius.gateway.util;
 
+import static com.didi.arius.gateway.common.metadata.AppDetail.RequestType.CLUSTER;
+
 import com.didi.arius.gateway.common.consts.QueryConsts;
-import com.didi.arius.gateway.common.metadata.*;
+import com.didi.arius.gateway.common.metadata.AppDetail;
+import com.didi.arius.gateway.common.metadata.BaseContext;
+import com.didi.arius.gateway.common.metadata.ESCluster;
+import com.didi.arius.gateway.common.metadata.IndexTemplate;
+import com.didi.arius.gateway.common.metadata.QueryContext;
+import com.didi.arius.gateway.common.metadata.TemplateClusterInfo;
+import com.didi.arius.gateway.common.metadata.TemplateInfo;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
-import com.didi.arius.gateway.elasticsearch.client.gateway.direct.DirectRequest;
-import com.didi.arius.gateway.elasticsearch.client.gateway.direct.DirectResponse;
-import com.didi.arius.gateway.remote.response.*;
+import com.didi.arius.gateway.remote.response.AliasesInfoResponse;
+import com.didi.arius.gateway.remote.response.AppDetailResponse;
+import com.didi.arius.gateway.remote.response.AppListResponse;
+import com.didi.arius.gateway.remote.response.BaseInfoResponse;
+import com.didi.arius.gateway.remote.response.DSLTemplateListResponse;
+import com.didi.arius.gateway.remote.response.DSLTemplateResponse;
+import com.didi.arius.gateway.remote.response.DSLTemplateWrapResponse;
+import com.didi.arius.gateway.remote.response.DataCenterListResponse;
+import com.didi.arius.gateway.remote.response.DataCenterResponse;
+import com.didi.arius.gateway.remote.response.DynamicConfigListResponse;
+import com.didi.arius.gateway.remote.response.DynamicConfigResponse;
+import com.didi.arius.gateway.remote.response.IndexTemplateListResponse;
+import com.didi.arius.gateway.remote.response.IndexTemplateResponse;
+import com.didi.arius.gateway.remote.response.MasterInfoResponse;
+import com.didi.arius.gateway.remote.response.SlaveInfoResponse;
+import com.didi.arius.gateway.remote.response.TempaletAliasResponse;
+import com.didi.arius.gateway.remote.response.TemplateInfoListResponse;
+import com.didi.arius.gateway.remote.response.TemplateInfoResponse;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
-import org.elasticsearch.rest.RestStatus;
-
-import java.util.*;
-
-import static com.didi.arius.gateway.common.metadata.AppDetail.RequestType.CLUSTER;
 
 /**
  * @author wuxuan
@@ -267,7 +291,7 @@ public class CustomDataSource {
         List<Integer> accessApps = new ArrayList<>();
         accessApps.add(1);
         accessApps.add(2);
-        slaveInfoResponse.setAccessApps(accessApps);
+        slaveInfoResponse.setAccessProjects(accessApps);
         slaveInfoResponse.setCluster(CLUSTER_NAME);
         slaveInfoResponse.setTopic("topic");
         slaveInfoResponse.setMappingIndexNameEnable(true);

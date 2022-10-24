@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -16,9 +16,10 @@ import com.didiglobal.logi.log.LogFactory;
  */
 public class AriusIndexMappingConfigUtils {
 
-    private AriusIndexMappingConfigUtils(){}
+    private AriusIndexMappingConfigUtils() {
+    }
 
-    private static final ILog LOGGER = LogFactory.getLog(AriusIndexMappingConfigUtils.class);
+    private static final ILog   LOGGER       = LogFactory.getLog(AriusIndexMappingConfigUtils.class);
 
     private static final String MAPPING_STR  = "mapping";
     private static final String MAPPINGS_STR = "mappings";
@@ -28,15 +29,15 @@ public class AriusIndexMappingConfigUtils {
      * @param mappingConfig mapping config JSON序列化内容
      * @return
      */
-    public static Result<MappingConfig> parseMappingConfig(String mappingConfig) {
+    public static Result<MappingConfig> parseMappingConfig(String mappingConfig) throws AdminOperateException {
         try {
             return Result.buildSucc(new MappingConfig(getMappingObj(JSON.parseObject(mappingConfig))));
         } catch (Exception t) {
             LOGGER.warn(
-                    "class=AriusIndexMappingConfigUtils||method=parseMappingConfig||" +
-                            "mappingConfig={}||exception={}", mappingConfig, t);
+                "class=AriusIndexMappingConfigUtils||method=parseMappingConfig||" + "mappingConfig={}||exception={}",
+                mappingConfig, t);
             if (t instanceof JSONException) {
-                return Result.build(ResultType.FAIL.getCode(), "json解析失败");
+                throw new AdminOperateException("mapping解析失败");
             }
             return Result.build(ResultType.FAIL.getCode(), t.getMessage());
         }

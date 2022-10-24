@@ -31,6 +31,7 @@ function build() {
     # XXX 编译命令
     cd ..
     mvn -U clean package -Dmaven.test.skip=true
+    mvn clean test org.jacoco:jacoco-maven-plugin:0.8.3:prepare-agent install -Dmaven.test.failure.ignore=true
 
     local sc=$?
     if [ $sc -ne 0 ];then
@@ -58,6 +59,8 @@ function make_output() {
         cp -rf ./APP_META $output &&
         cp -rf ./APP_META/Dockerfile $output &&
         mkdir $output/nginx && cp -rf ./APP_META/nginx/conf $output/nginx &&
+        mkdir $output/代码行统计 && cp -rf ./src/test/java/com/didichuxing/datachannel/arius/admin/statMethodLine.txt $output/代码行统计 &&
+        mkdir $output/测试覆盖率报告 && mv target/site/jacoco-aggregate output/测试覆盖率报告 &&
         mv target/${module}.jar output  #拷贝目标war包或者jar包等 至output目录下
         echo -e "make output ok."
 	) || { echo -e "make output error"; exit 2; } # 填充output目录失败后, 退出码为 非0

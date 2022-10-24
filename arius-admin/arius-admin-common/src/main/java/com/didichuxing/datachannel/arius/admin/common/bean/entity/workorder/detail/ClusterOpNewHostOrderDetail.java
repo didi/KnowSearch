@@ -16,7 +16,7 @@ public class ClusterOpNewHostOrderDetail extends BaseClusterHostOrderDetail {
     /**
      * 数据中心
      */
-    private String  dataCenter;
+    private String dataCenter;
 
     /**
      * 机器节点
@@ -26,12 +26,12 @@ public class ClusterOpNewHostOrderDetail extends BaseClusterHostOrderDetail {
     /**
      * 机房
      */
-    private String  idc;
+    private String idc;
 
     /**
      * es版本
      */
-    private String  esVersion;
+    private String esVersion;
 
     /**
      * 插件包ID列表
@@ -46,11 +46,11 @@ public class ClusterOpNewHostOrderDetail extends BaseClusterHostOrderDetail {
     /**
      * 描述
      */
-    private String  desc;
+    private String desc;
 
     /**
      * 机器规格
      */
-    private String  machineSpec;
+    private String machineSpec;
 
 }

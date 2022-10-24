@@ -61,10 +61,10 @@ public interface GatewayManager {
 
     /**
      * 获取模板信息，包含主主从结构组织
-     * @param dataCenter 数据中心
-     * @return Result<Map<String, GatewayTemplateDeployInfoVO>>
+     *
+     * @return Result<Map < String, GatewayTemplateDeployInfoVO>>
      */
-    Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo(String dataCenter);
+    Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo();
 
     /**
      * 滚动获取查询模板数据
@@ -89,11 +89,13 @@ public interface GatewayManager {
 
     /**
      * sql语句翻译
-     * @param sql sql查询语句
-     * @param projectId 项目id
+     *
+     * @param sql            sql查询语句
+     * @param phyClusterName
+     * @param projectId      项目id
      * @return 翻译结果
      */
-    Result<String> sqlExplain(String sql, Integer projectId);
+    Result<String> sqlExplain(String sql, String phyClusterName, Integer projectId);
 
     /**
      * sql语句直接查询

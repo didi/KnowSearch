@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ApiModel(description ="索引健康分离线统计信息")
+@ApiModel(description = "索引健康分离线统计信息")
 public class OffLine extends BaseDegree {
     /**
      * 模板id
@@ -20,27 +20,27 @@ public class OffLine extends BaseDegree {
      * 模板名称
      */
     @ApiModelProperty(value = "模板名称")
-    private String template;
+    private String  template;
     /**
      * 成本(单位GB)
      */
     @ApiModelProperty(value = "每GB成本")
-    private double costByGb;
+    private double  costByGb;
     /**
      * 模板天访问量(前一天)
      */
     @ApiModelProperty(value = "模板天访问量(前一天)")
-    private long yesterdayAccessNum;
+    private long    yesterdayAccessNum;
     /**
      * 单成本访问量(accessNum/costGb)
      */
     @ApiModelProperty(value = "单成本访问量(accessNum/costGb)")
-    private double singleGbAccess;
+    private double  singleGbAccess;
     /**
      * 集群
      */
     @ApiModelProperty(value = "集群")
-    private String cluster;
+    private String  cluster;
     /**
      * 是否文档数为0
      */
@@ -50,18 +50,18 @@ public class OffLine extends BaseDegree {
      * 时间字段(毫秒时间戳)
      */
     @ApiModelProperty(value = "时间字段(毫秒时间戳)")
-    private long timestamp;
+    private long    timestamp;
     /**
      * 部门
      */
     @ApiModelProperty(value = "部门")
-    private String department;
+    private String  department;
 
-    public double getOffLineSocre(){
+    public double getOffLineSocre() {
         return super.getScore();
     }
 
-    public double getOffLineWeighScore(){
+    public double getOffLineWeighScore() {
         return super.getWeightScore();
     }
 }

@@ -20,26 +20,25 @@ import org.apache.commons.lang3.StringUtils;
 public class AriusIndexTemplateSetting implements Serializable {
 
     @ApiModelProperty("分词器")
-    private JSONObject         analysis;
+    private JSONObject                analysis;
     /**
      * 副本数量
      * index.number_of_replicas:0
      * {"index": {"number_of_replicas": 0}
      */
-    private Integer replicasNum;
+    private Integer                   replicasNum;
     /**
      * 变更translog设置
      * index.translog.durability:"request"
      * "async"|"request"
      */
-    private String translogDurability;
+    private String                    translogDurability;
 
-    public static String NUMBER_OF_REPLICAS_KEY = "index.number_of_replicas";
-    public static String TRANSLOG_DURABILITY_KEY = "index.translog.durability";
+    public static String              NUMBER_OF_REPLICAS_KEY  = "index.number_of_replicas";
+    public static String              TRANSLOG_DURABILITY_KEY = "index.translog.durability";
 
-    public final static String REQUEST = "request";
-    public final static String ASYNC = "async";
-
+    public final static String        REQUEST                 = "request";
+    public final static String        ASYNC                   = "async";
 
     private static final String       ANALYSIS_KEY_PREFIX     = "index.analysis.";
 
@@ -48,8 +47,8 @@ public class AriusIndexTemplateSetting implements Serializable {
     private static final String       CHAR_FILTER_KEY         = "char_filter";
     private static final String       FILTER_KEY              = "filter";
 
-    private static final List<String> ANALYSIS_SUPPORTED_KEYS = Arrays.asList(ANALYZER_KEY, TOKENIZER_KEY, CHAR_FILTER_KEY,
-        FILTER_KEY);
+    private static final List<String> ANALYSIS_SUPPORTED_KEYS = Arrays.asList(ANALYZER_KEY, TOKENIZER_KEY,
+        CHAR_FILTER_KEY, FILTER_KEY);
 
     /**
      * to formatted json.
@@ -68,7 +67,8 @@ public class AriusIndexTemplateSetting implements Serializable {
         if (replicasNum != null && replicasNum >= 0) {
             ret.put(NUMBER_OF_REPLICAS_KEY, String.valueOf(replicasNum));
         }
-        if (StringUtils.isNotBlank(translogDurability) && (REQUEST.equals(translogDurability) || ASYNC.equals(translogDurability))) {
+        if (StringUtils.isNotBlank(translogDurability)
+            && (REQUEST.equals(translogDurability) || ASYNC.equals(translogDurability))) {
             ret.put(TRANSLOG_DURABILITY_KEY, translogDurability);
         }
         return ret;
@@ -81,7 +81,7 @@ public class AriusIndexTemplateSetting implements Serializable {
             return ret;
         }
 
-        for(Map.Entry<String, Object> entry : obj.entrySet()){
+        for (Map.Entry<String, Object> entry : obj.entrySet()) {
             String key = entry.getKey();
             Object o = obj.get(key);
 
@@ -89,7 +89,7 @@ public class AriusIndexTemplateSetting implements Serializable {
             if (json != null) {
                 Map<String, String> m = flat(json);
 
-                for(Map.Entry<String, String> fEntry : m.entrySet()){
+                for (Map.Entry<String, String> fEntry : m.entrySet()) {
                     String k = fEntry.getKey();
                     ret.put(key.replace(".", "#") + "." + k, m.get(k));
                 }

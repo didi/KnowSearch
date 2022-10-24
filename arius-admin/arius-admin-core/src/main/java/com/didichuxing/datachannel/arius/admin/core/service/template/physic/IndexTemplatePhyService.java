@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ public interface IndexTemplatePhyService {
      * @return list
      */
     List<IndexTemplatePhy> getTemplateByLogicId(Integer logicId);
+    IndexTemplatePhy getTemplateByLogicIdAndRole(Integer logicId,Integer role);
 
     /**
      * 从缓存中查询指定逻辑模板对应的物理模板
@@ -62,10 +64,12 @@ public interface IndexTemplatePhyService {
 
     /**
      * 删除
+     *
      * @param cluster 物理集群名称
-     * @param name 模板名称
+     * @param name    模板名称
+     * @return
      */
-    void deleteDirtyByClusterAndName(String cluster, String name);
+    Boolean deleteDirtyByClusterAndName(String cluster, String name);
 
     /**
      * 删除
@@ -172,6 +176,7 @@ public interface IndexTemplatePhyService {
      * @return list
      */
     List<IndexTemplatePhy> listTemplate();
+
     List<IndexTemplatePhy> listTemplateWithCache();
 
     /**
@@ -179,6 +184,7 @@ public interface IndexTemplatePhyService {
      * @return list
      */
     List<IndexTemplatePhyWithLogic> listTemplateWithLogic();
+
     List<IndexTemplatePhyWithLogic> listTemplateWithLogicWithCache();
 
     /**
@@ -272,4 +278,24 @@ public interface IndexTemplatePhyService {
      * @return    Result<List<IndexTemplatePhy>>
      */
     Result<List<IndexTemplatePhy>> listByRegionId(Integer regionId);
+
+    IndexTemplatePhyWithLogic buildIndexTemplatePhysicalWithLogicByPhysicalId(Long physicalId);
+
+    List<IndexTemplatePhyPO> getByClusterAndNameAndStatus(String cluster, String name, int code);
+
+    Collection<IndexTemplatePhyPO> getByClusterAndStatus(String cluster, int code);
+
+    boolean updateStatus(Long physicalId, int code);
+
+    boolean updateByIndexTemplatePhyPO(IndexTemplatePhyPO physicalPO);
+    
+    List<String> getPhyClusterByLogicTemplateId(Integer logicTemplateId);
+    
+    /**
+     * 通过逻辑 id 更新索引模板的分片号
+     *
+     * @param logicId  逻辑索引 ID，即 index_template_logic 表中索引的 ID。
+     * @param shardNum 要更新的分片数
+     */
+    boolean updateShardNumByLogicId(Integer logicId, Integer shardNum);
 }

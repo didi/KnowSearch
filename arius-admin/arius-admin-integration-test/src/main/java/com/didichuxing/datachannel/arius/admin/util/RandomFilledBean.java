@@ -13,11 +13,13 @@ import java.util.Map;
 
 public class RandomFilledBean {
 
-    private RandomFilledBean() {}
+    private RandomFilledBean() {
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RandomFilledBean.class);
 
-    public static <T> T construct(Class<T> cls) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    public static <T> T construct(Class<T> cls) throws NoSuchMethodException, IllegalAccessException,
+                                                InvocationTargetException, InstantiationException {
         Constructor<T> constructor = cls.getConstructor();
         return constructor.newInstance();
     }
@@ -25,7 +27,8 @@ public class RandomFilledBean {
     public static <T> void fill(T bean) {
         Field[] fields = bean.getClass().getDeclaredFields();
         for (Field field : fields) {
-            if ("createTime".equals(field.getName()) || "updateTime".equals(field.getName()) || "id".equals(field.getName())) {
+            if ("createTime".equals(field.getName()) || "updateTime".equals(field.getName())
+                || "id".equals(field.getName())) {
                 continue;
             }
             field.setAccessible(true);
@@ -64,7 +67,8 @@ public class RandomFilledBean {
         } else if (cls == Double.class) {
             field.set(bean, RandomGenerator.randomDouble(RandomConfig.DOUBLE_LOW, RandomConfig.DOUBLE_HIGH));
         } else if (cls == BigDecimal.class) {
-            field.set(bean, BigDecimal.valueOf(RandomGenerator.randomDouble(RandomConfig.DOUBLE_LOW, RandomConfig.DOUBLE_HIGH)));
+            field.set(bean,
+                BigDecimal.valueOf(RandomGenerator.randomDouble(RandomConfig.DOUBLE_LOW, RandomConfig.DOUBLE_HIGH)));
         }
     }
 

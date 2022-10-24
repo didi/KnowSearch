@@ -22,7 +22,7 @@
     }
   },
   "_source": [
-    "appid",
+    "projectId",
     "indiceSample",
     "dsl",
     "exceptionName",

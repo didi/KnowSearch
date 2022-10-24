@@ -37,18 +37,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ESUserServiceImpl implements ESUserService {
 
-    private static final ILog LOGGER = LogFactory.getLog(ESUserServiceImpl.class);
-    
-    public static final Integer VERIFY_CODE_LENGTH = 15;
-    
+    private static final ILog    LOGGER                      = LogFactory.getLog(ESUserServiceImpl.class);
+
+    public static final Integer  VERIFY_CODE_LENGTH          = 15;
+
     private static final Integer APP_QUERY_THRESHOLD_DEFAULT = 100;
-    
-    private static final String ES_USER_NOT_EXIST = "es user 不存在";
+
+    private static final String  ES_USER_NOT_EXIST           = "es user 不存在";
 
     @Autowired
-    private ESUserDAO esUserDAO;
-    
-
+    private ESUserDAO            esUserDAO;
 
     /**
      * 查询app详细信息
@@ -57,12 +55,8 @@ public class ESUserServiceImpl implements ESUserService {
      */
     @Override
     public List<ESUser> listESUsers(List<Integer> projectIds) {
-        return         ConvertUtil.list2List(esUserDAO.listByProjectIds(projectIds), ESUser.class);
+        return ConvertUtil.list2List(esUserDAO.listByProjectIds(projectIds), ESUser.class);
     }
-
-  
-
-
 
     /**
      * 新建APP
@@ -73,14 +67,13 @@ public class ESUserServiceImpl implements ESUserService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public TupleTwo<Result, ESUserPO> registerESUser(ESUserDTO esUserDTO,
-                                                     String operator) {
-       
+    public TupleTwo<Result, ESUserPO> registerESUser(ESUserDTO esUserDTO, String operator) {
+
         Result<Void> checkResult = validateESUser(esUserDTO, ADD);
-        
+
         if (checkResult.failed()) {
             LOGGER.warn("class=ESUserManagerImpl||method=addApp||fail msg={}", checkResult.getMessage());
-            return Tuples.of(checkResult,null);
+            return Tuples.of(checkResult, null);
         }
         initParam(esUserDTO);
         ESUserPO param = obj2Obj(esUserDTO, ESUserPO.class);
@@ -92,14 +85,11 @@ public class ESUserServiceImpl implements ESUserService {
         } else {
             param.setDefaultDisplay(false);
         }
-        
+
         boolean succ = (esUserDAO.insert(param) == 1);
-       
 
-        return Tuples.of(Result.build(succ, param.getId()),param);
+        return Tuples.of(Result.build(succ, param.getId()), param);
     }
-
-
 
     /**
      * 编辑APP
@@ -110,11 +100,11 @@ public class ESUserServiceImpl implements ESUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public TupleTwo<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> editUser(ESUserDTO esUserDTO) {
-        
+
         final ESUserPO param = obj2Obj(esUserDTO, ESUserPO.class);
-      
+
         return Tuples.of(Result.build((esUserDAO.update(param) == 1)), param);
-    
+
     }
 
     /**
@@ -126,17 +116,17 @@ public class ESUserServiceImpl implements ESUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public TupleTwo<Result<Void>, ESUserPO> deleteESUserById(int esUser) {
-        
+
         ESUserPO oldPO = esUserDAO.getByESUser(esUser);
         boolean succ = esUserDAO.delete(esUser) == 1;
-      
 
-        return Tuples.of(Result.build(succ),oldPO);
+        return Tuples.of(Result.build(succ), oldPO);
     }
-     /**
-      * @param projectId
-      * @return
-      */
+
+    /**
+     * @param projectId
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class)
     @Override
     public TupleTwo<Result<Void>, List<ESUserPO>> deleteByESUsers(int projectId) {
@@ -144,7 +134,7 @@ public class ESUserServiceImpl implements ESUserService {
         final int deleteByProjectId = esUserDAO.deleteByProjectId(projectId);
         return Tuples.of(Result.build(deleteByProjectId == esUserPOS.size()), esUserPOS);
     }
-    
+
     /**
      * 获取项目下es user 个数
      *
@@ -155,16 +145,6 @@ public class ESUserServiceImpl implements ESUserService {
     public int countByProjectId(int projectId) {
         return esUserDAO.countByProjectId(projectId);
     }
-    
-   
-
-
-
-   
-
-
-
-
 
     /**
      * 指定id查询
@@ -177,9 +157,6 @@ public class ESUserServiceImpl implements ESUserService {
         return obj2Obj(esUserDAO.getByESUser(esUser), ESUser.class);
     }
 
-  
-
-
     /**
      * 校验验证码
      *
@@ -190,7 +167,7 @@ public class ESUserServiceImpl implements ESUserService {
     @Override
     public Result<Void> verifyAppCode(Integer esUserName, String verifyCode) {
         final ESUserPO esUser = esUserDAO.getByESUser(esUserName);
-    
+
         if (esUser == null) {
             return Result.buildNotExist(ES_USER_NOT_EXIST);
         }
@@ -202,10 +179,6 @@ public class ESUserServiceImpl implements ESUserService {
         return Result.buildSucc();
     }
 
-
-
-    
-    
     /**
      * 验证APP参数是否合法
      *
@@ -218,33 +191,36 @@ public class ESUserServiceImpl implements ESUserService {
         if (AriusObjUtils.isNull(appDTO)) {
             return Result.buildParamIllegal("应用信息为空");
         }
-      
-       if (Objects.isNull(appDTO.getProjectId())) {
+
+        if (Objects.isNull(appDTO.getProjectId())) {
             return Result.buildParamIllegal("项目id为空");
         }
-    
+
         ESUserPO oldESUser = null;
         if (Objects.nonNull(appDTO.getId())) {
             oldESUser = esUserDAO.getByESUser(appDTO.getId());
         }
 
         if (ADD.equals(operation)) {
-            if (Objects.nonNull(oldESUser)&&!appDTO.getProjectId().equals(oldESUser.getProjectId())) {
+            if (Objects.nonNull(oldESUser) && !appDTO.getProjectId().equals(oldESUser.getProjectId())) {
                 return Result.buildParamIllegal(String.format("es user [%s] 已存在", appDTO.getId()));
             }
+            if (StringUtils.isBlank(appDTO.getVerifyCode())) {
+                return Result.buildParamIllegal("校验码不能为空");
+            }
+            
         } else if (EDIT.equals(operation)) {
-            if (AriusObjUtils.isNull(appDTO.getId())||AriusObjUtils.isNull(oldESUser)) {
+            if (AriusObjUtils.isNull(appDTO.getId()) || AriusObjUtils.isNull(oldESUser)) {
                 return Result.buildNotExist(ES_USER_NOT_EXIST);
             }
-           
+
             //判断当前es user 在同一个项目中
             if (Objects.nonNull(oldESUser) && !Objects.equals(oldESUser.getProjectId(), appDTO.getProjectId())) {
-                return Result.buildParamIllegal(
-                        String.format("es user 已经存在在项目[%s],不能为项目[%s]创建,请重新提交es user", oldESUser.getProjectId(),
-                                appDTO.getProjectId()));
+                return Result.buildParamIllegal(String.format("es user 已经存在在项目[%s],不能为项目[%s]创建,请重新提交es user",
+                    oldESUser.getProjectId(), appDTO.getProjectId()));
             }
         }
-    
+
         if (appDTO.getIsRoot() == null || !AdminConstant.yesOrNo(appDTO.getIsRoot())) {
             return Result.buildParamIllegal("超管标记非法");
         }
@@ -252,19 +228,11 @@ public class ESUserServiceImpl implements ESUserService {
         if (searchTypeEnum.equals(ProjectSearchTypeEnum.UNKNOWN)) {
             return Result.buildParamIllegal("查询模式非法");
         }
-        final int countByProjectIdAndSearchType = esUserDAO.countByProjectIdAndSearchType(appDTO.getSearchType(),
-                appDTO.getProjectId());
-        if (StringUtils.isBlank(appDTO.getVerifyCode())) {
-            return Result.buildParamIllegal("校验码不能为空");
-        }
-        if (countByProjectIdAndSearchType > 1) {
-            return Result.buildParamIllegal("当前项目已经存在相同模式的es user");
-        }
-        
-        
+       
+
         return Result.buildSucc();
     }
-    
+
     /**
      * 查询项目下可以免密登录的es user
      *
@@ -273,13 +241,11 @@ public class ESUserServiceImpl implements ESUserService {
      */
     @Override
     public List<ESUser> getProjectWithoutCodeApps(Integer projectId) {
-    
+
         return listESUsers(Collections.singletonList(projectId));
-    
+
     }
-    
-   
-    
+
     /**
      * 获取项目id通过搜索类型
      *
@@ -290,7 +256,7 @@ public class ESUserServiceImpl implements ESUserService {
     public List<Integer> getProjectIdBySearchType(Integer searchType) {
         return esUserDAO.getProjectIdBySearchType(searchType);
     }
-    
+
     /**
      *
      * @param projectId
@@ -298,9 +264,9 @@ public class ESUserServiceImpl implements ESUserService {
      */
     @Override
     public boolean checkDefaultESUserByProject(Integer projectId) {
-        return esUserDAO.countDefaultESUserByProject(projectId)==1;
+        return esUserDAO.countDefaultESUserByProject(projectId) == 1;
     }
-    
+
     /**
      *
      * @param projectId
@@ -310,9 +276,8 @@ public class ESUserServiceImpl implements ESUserService {
     public ESUser getDefaultESUserByProject(Integer projectId) {
         return esUserDAO.getDefaultESUserByProject(projectId);
     }
-    
+
     /**************************************** private method ****************************************************/
-    
 
     private void initParam(ESUserDTO esUser) {
         // 默认不是root用户
@@ -328,7 +293,7 @@ public class ESUserServiceImpl implements ESUserService {
         if (esUser.getCluster() == null) {
             esUser.setCluster("");
         }
-        
+
         // 默认索引模式
         if (esUser.getSearchType() == null) {
             esUser.setSearchType(ProjectSearchTypeEnum.TEMPLATE.getCode());
@@ -345,11 +310,4 @@ public class ESUserServiceImpl implements ESUserService {
         }
     }
 
-
-
-
-
-
-  
-   
 }

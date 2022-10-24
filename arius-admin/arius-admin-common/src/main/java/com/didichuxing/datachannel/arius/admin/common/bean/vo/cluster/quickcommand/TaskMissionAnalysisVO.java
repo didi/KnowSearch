@@ -18,13 +18,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TaskMissionAnalysisVO {
     @ApiModelProperty("节点名称")
-    private String node;
+    private String  node;
     @ApiModelProperty("活动")
-    private String action;
+    private String  action;
     @ApiModelProperty("描述")
-    private String description;
+    private String  description;
     @ApiModelProperty("开始时间")
-    private Long startTimeInMillis;
+    private Long    startTimeInMillis;
     @ApiModelProperty("运行时间")
     private Integer runningTimeInNanos;
 

@@ -28,10 +28,10 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusJSON;
 @Deprecated
 public class RestTool {
 
-    private static final ILog LOGGER  = LogFactory.getLog(RestTool.class);
+    private static final ILog LOGGER = LogFactory.getLog(RestTool.class);
 
     @Autowired
-    private RestTemplate restTemplate;
+    private RestTemplate      restTemplate;
 
     /**
      * POST请求
@@ -105,7 +105,6 @@ public class RestTool {
         return AriusJSON.toObject(result.getBody(), resultType);
     }
 
-
     /**
      * GET请求
      * @param url 请求地址
@@ -115,8 +114,8 @@ public class RestTool {
      * @param <T> 泛型T
      * @return T
      */
-    public <T> T getObjectWithParamsAndHeader(String url, Map<String, String> headers,
-                                              Map<String, ?> params, Type resultType) {
+    public <T> T getObjectWithParamsAndHeader(String url, Map<String, String> headers, Map<String, ?> params,
+                                              Type resultType) {
         ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.GET,
             new HttpEntity<>(null, getJsonContentHeaders(headers)), String.class, params);
         return AriusJSON.toObject(result.getBody(), resultType);
@@ -133,9 +132,9 @@ public class RestTool {
     public <T> T getForObject(String url, Map<String, String> headers, Type resultType) {
         try {
             ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.GET,
-                    new HttpEntity<>(null, getJsonContentHeaders(headers)), String.class);
+                new HttpEntity<>(null, getJsonContentHeaders(headers)), String.class);
             return JSON.parseObject(result.getBody(), resultType);
-        } catch (Exception e){
+        } catch (Exception e) {
             LOGGER.error("class=RestTool||method=getForObject||url={}||msg=exception!", url, e);
         }
 
@@ -166,7 +165,6 @@ public class RestTool {
         }
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
 
-
         return builder.toUriString();
     }
 
@@ -178,7 +176,6 @@ public class RestTool {
         restTemplate.delete(url);
     }
 
-
     /**
      * GET请求
      * @param url 请求地址
@@ -188,8 +185,8 @@ public class RestTool {
      * @param <T> 泛型T
      * @return T
      */
-    public <T> T deleteWithParamsAndHeader(String url, Map<String, String> headers,
-                                              Map<String, ?> params, Type resultType) {
+    public <T> T deleteWithParamsAndHeader(String url, Map<String, String> headers, Map<String, ?> params,
+                                           Type resultType) {
         ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.DELETE,
             new HttpEntity<>(params, getJsonContentHeaders(headers)), String.class);
         return AriusJSON.toObject(result.getBody(), resultType);
@@ -285,8 +282,9 @@ public class RestTool {
      * @return T
      * */
     public <T> T deleteForObject(String url, Map<String, String> headers, Type resultType) {
-        ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(null, getJsonContentHeaders(headers)),
-                String.class);    return AriusJSON.toObject(result.getBody(), resultType);
+        ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.GET,
+            new HttpEntity<>(null, getJsonContentHeaders(headers)), String.class);
+        return AriusJSON.toObject(result.getBody(), resultType);
     }
 
 }

@@ -21,9 +21,9 @@ public class TemplateConfigPO extends BasePO {
 
     private Integer isSourceSeparated;
 
-    private Double adjustTpsFactor;
+    private Double  adjustTpsFactor;
 
-    private Double adjustShardFactor;
+    private Double  adjustShardFactor;
 
     private Integer dynamicLimitEnable;
 

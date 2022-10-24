@@ -21,82 +21,82 @@ import lombok.NoArgsConstructor;
 public class DslTemplateVO {
 
     @ApiModelProperty("查询模板创建时间")
-    private String ariusCreateTime;
+    private String  ariusCreateTime;
 
     @ApiModelProperty("查询模板修改时间")
-    private String ariusModifyTime;
+    private String  ariusModifyTime;
 
     @ApiModelProperty("平均响应长度")
-    private Double responseLenAvg;
+    private Double  responseLenAvg;
 
     @ApiModelProperty("请求类型")
-    private String requestType;
+    private String  requestType;
 
     @ApiModelProperty("查询类型")
-    private String searchType;
+    private String  searchType;
 
     @ApiModelProperty("查询次数(分钟级别)")
-    private Long searchCount;
+    private Long    searchCount;
 
     @ApiModelProperty("es查询耗时")
-    private Double esCostAvg;
+    private Double  esCostAvg;
 
     @ApiModelProperty("平均查询语句长度")
-    private Double dslLenAvg;
+    private Double  dslLenAvg;
 
     @ApiModelProperty("平均命中记录数")
-    private Double totalHitsAvg;
+    private Double  totalHitsAvg;
 
     @ApiModelProperty("平均查询shard成功个数")
-    private Double successfulShardsAvg;
+    private Double  successfulShardsAvg;
 
     @ApiModelProperty("平均shard成功个数")
-    private Double totalShardsAvg;
+    private Double  totalShardsAvg;
 
     @ApiModelProperty("查询请求时刻")
-    private String logTime;
+    private String  logTime;
 
     @ApiModelProperty("查询索引示例")
-    private String indiceSample;
+    private String  indiceSample;
 
     @ApiModelProperty("查询模板")
-    private String dslTemplate;
+    private String  dslTemplate;
 
     @ApiModelProperty("查询请求时刻")
-    private Long timeStamp;
+    private Long    timeStamp;
 
     @ApiModelProperty("查询语句类型")
-    private String dslType;
+    private String  dslType;
 
     @ApiModelProperty("查询索引名称")
-    private String indices;
+    private String  indices;
 
     @ApiModelProperty("查询模板MD5")
-    private String dslTemplateMd5;
+    private String  dslTemplateMd5;
 
     @ApiModelProperty("平均查询总耗时")
-    private Double totalCostAvg;
+    private Double  totalCostAvg;
 
     @ApiModelProperty("查询shard失败个数")
-    private Double failedShardsAvg;
+    private Double  failedShardsAvg;
 
     @ApiModelProperty("dsink写入时间")
-    private Long sinkTime;
+    private Long    sinkTime;
 
     @ApiModelProperty("projectId")
     private Integer projectId;
 
     @ApiModelProperty("查询语句")
-    private String dsl;
+    private String  dsl;
 
     @ApiModelProperty("平均gateway处理耗时")
-    private Double beforeCostAvg;
+    private Double  beforeCostAvg;
 
     @ApiModelProperty("flin")
-    private String flinkTime;
+    private String  flinkTime;
 
     @ApiModelProperty("查询限流")
-    private Double queryLimit;
+    private Double  queryLimit;
 
     @ApiModelProperty("是否来自用户控制台")
     private Boolean isFromUserConsole;
@@ -108,14 +108,14 @@ public class DslTemplateVO {
     private Boolean enable;
 
     @ApiModelProperty("黑白名单 null/white表示白名单，black表示黑名单")
-    private String checkMode;
+    private String  checkMode;
 
     @ApiModelProperty("慢查dsl阈值，单位为ms")
-    private Long slowDslThreshold;
+    private Long    slowDslThreshold;
 
     @ApiModelProperty("查询模板版本号")
-    private String version;
+    private String  version;
 
     @ApiModelProperty("查询模板危害标签")
-    private String dslTag;
+    private String  dslTag;
 }

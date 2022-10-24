@@ -19,7 +19,7 @@ admin.url.kibana: http://10.160.80.135:8061/
 admin.thread.size.op: 20
 
 #gateway相关配置
-es.gateway.url: 10.190.32.30,10.190.44.150,10.190.42.122
+es.gateway.url: 10.190.44.150,10.190.42.122
 es.gateway.port: 8200
 es.user: 1
 es.password: azAWiJhxkho33ac
@@ -30,13 +30,11 @@ es.update.cluster.name: logi-elasticsearch-7.6.0
 
 #ES客户端相关配置
 es.client.cluster.port: 8061
-es.client.io.thread.count: 2
+es.client.io.thread.count: 8
 
 #可观测性相关配置
 monitorJob.threadPool.initsize: 20
 monitorJob.threadPool.maxsize: 20
-dashboard.threadPool.initsize: 5
-dashboard.threadPool.maxsize: 10
 
 #扩展服务相关配置
 extend.service:
@@ -72,7 +70,7 @@ integrate.test.admin.ip: 127.0.0.1
 integrate.test.admin.port: 8010
 integrate.test.es.ip: 10.190.55.161
 integrate.test.es.port: 8888
-integrate.test.appid: 1
+integrate.test.esuser: 1
 integrate.test.operator: admin
 
 #日志相关配置
@@ -131,7 +129,7 @@ spring:
     init-sql: true
     init-thread-num: 50
     max-thread-num: 100
-    log-exipre: 3 # 日志保存天数，以天为单位
+    log-expire: 3 # 日志保存天数，以天为单位
     app_name: arius_test03
     claim-strategy: com.didiglobal.logi.job.core.consensual.RandomConsensual
   logi-security:
@@ -141,8 +139,13 @@ spring:
     password: ${spring.datasource.druid.password}
     username: ${spring.datasource.druid.username}
     resource-extend-bean-name: resourceExtendManager
+    #    0.3.1.1新增
+    login-extend-bean-name: logiSecurityDefaultLoginExtendImpl
   application:
     admin:
       enabled:
   transaction:
     default-timeout: 60
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss

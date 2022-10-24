@@ -15,33 +15,33 @@ public class DCDRSingleTemplateMasterSlaveSwitchDetail extends AbstractTaskDetai
     /**
      * 任务标题
      */
-    private String  taskTitle;
+    private String       taskTitle;
 
     /**
      * dcdr主从切换类型 1 平滑 2 强切
      * @see DCDRSwithTypeEnum
      */
-    private Integer switchType;
+    private Integer      switchType;
 
     /**
      * 模板Id
      */
-    private Long    templateId;
+    private Long         templateId;
 
     /**
      * 主集群
      */
-    private String  masterCluster;
+    private String       masterCluster;
 
     /**
      * 从集群
      */
-    private String  slaveCluster;
+    private String       slaveCluster;
 
     /**
      * dcdr链路删除标识位
      */
-    private Boolean deleteDcdrChannelFlag;
+    private Boolean      deleteDcdrChannelFlag;
 
     /**
      * 任务执行进度
@@ -62,10 +62,10 @@ public class DCDRSingleTemplateMasterSlaveSwitchDetail extends AbstractTaskDetai
      * 任务状态: 0 取消 1 成功 2 执行中 3 失败 4 等待
      * @see DCDRStatusEnum
      */
-    private Integer taskStatus;
+    private Integer      taskStatus;
 
-    private Date    createTime;
-    private Date    updateTime;
+    private Date         createTime;
+    private Date         updateTime;
 
     public void editTaskTitle(String templateName) {
         this.taskTitle = templateName + "索引模板主从切换";

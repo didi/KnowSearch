@@ -29,7 +29,6 @@ public class ScrollDslTemplateResponse {
     /**
      * 滚动查询游标
      */
-    private String scrollId;
-
+    private String              scrollId;
 
 }

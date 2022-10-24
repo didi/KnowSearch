@@ -18,7 +18,7 @@ public class ProjectTemplateAuthPO extends BasePO {
     /**
      * 主键
      */
-    private Long id;
+    private Long    id;
 
     /**
      * project id
@@ -36,9 +36,5 @@ public class ProjectTemplateAuthPO extends BasePO {
      */
     private Integer type;
 
-    /**
-     * 责任人列表
-     */
-    private String responsible;
 
 }

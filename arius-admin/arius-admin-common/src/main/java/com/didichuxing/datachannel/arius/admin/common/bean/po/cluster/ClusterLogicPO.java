@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClusterLogicPO extends BasePO  {
+public class ClusterLogicPO extends BasePO {
 
     /**
      * 主键
@@ -30,7 +30,7 @@ public class ClusterLogicPO extends BasePO  {
     /**
      * 所属projectID
      */
-    private Integer projectId;
+    private String projectId;
 
     /**
      * 数据中心
@@ -45,15 +45,7 @@ public class ClusterLogicPO extends BasePO  {
     /**
      * dataNode的个数
      */
-    private Integer  dataNodeNu;
-
-    /**
-     * 责任人
-     */
-    @Deprecated
-    private String  responsible;
-
-
+    private Integer dataNodeNum;
 
     /**
      * 备注
@@ -79,4 +71,24 @@ public class ClusterLogicPO extends BasePO  {
      * 健康状态 1 green 2 yellow 3 red -1 未知
      */
     private Integer health;
+
+    /**
+     * 磁盘使用率
+     */
+    private Double diskUsagePercent;
+
+    /**
+     * 磁盘总量
+     */
+    private Long diskTotal;
+
+    /**
+     * 磁盘使用量
+     */
+    private Long diskUsage;
+
+    /**
+     * 集群版本
+     */
+    private String esClusterVersion;
 }

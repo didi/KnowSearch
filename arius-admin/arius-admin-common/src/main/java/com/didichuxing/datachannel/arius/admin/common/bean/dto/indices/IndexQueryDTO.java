@@ -1,13 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.indices;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
 
 /**
  * @author lyn
@@ -20,16 +18,19 @@ import java.util.List;
 public class IndexQueryDTO extends PageDTO {
 
     @ApiModelProperty("集群")
-    private String cluster;
+    private String  cluster;
 
     @ApiModelProperty("索引名称")
-    private String index;
+    private String  index;
 
     @ApiModelProperty("状态 green yellow red")
-    private String health;
+    private String  health;
 
-    @ApiModelProperty("排序字段(priStoreSize)、主分配个数(pri)、副本个数(rep)、存储大小(storeSize)、文档数量(docsCount)、删除文档数量(docsDeleted)、索引名称（index）")
-    private String sortTerm;
+    @ApiModelProperty("状态 open close")
+    private String  status;
+
+    @ApiModelProperty("排序字段(priStoreSize)、shard数(pri)、副本个数(rep)、存储大小(storeSize)、文档数量(docsCount)、删除文档数量(docsDeleted、索引名称（index）、segment数（totalSegmentCount）")
+    private String  sortTerm;
 
     @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
     private Boolean orderByDesc = true;

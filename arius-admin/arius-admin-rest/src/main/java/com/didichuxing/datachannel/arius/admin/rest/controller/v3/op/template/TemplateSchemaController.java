@@ -1,12 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateFieldConvertVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateSchemaVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.mapping.Field;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(V3_OP + "/template")
+@RequestMapping(V3 + "/template")
 @Api(tags = "Console-用户侧索引模板mapping接口(REST)")
 public class TemplateSchemaController extends BaseTemplateController {
 
@@ -37,7 +37,7 @@ public class TemplateSchemaController extends BaseTemplateController {
 
     @PutMapping("/schema/convert")
     @ResponseBody
-    @ApiOperation(value = "模板field转mapping接口【三方接口】",tags = "【三方接口】" )
+    @ApiOperation(value = "模板field转mapping接口【三方接口】", tags = "【三方接口】")
     public Result<ConsoleTemplateFieldConvertVO> convertSchema(@RequestBody List<Field> fields) {
         AriusTypeProperty typeProperty = templateLogicMappingManager.fields2Mapping(fields);
 
@@ -57,26 +57,26 @@ public class TemplateSchemaController extends BaseTemplateController {
 
     @GetMapping("/schema")
     @ResponseBody
-    @ApiOperation(value = "获取索引Schema信息接口【三方接口】",tags = "【三方接口】" )
+    @ApiOperation(value = "获取索引Schema信息接口【三方接口】", tags = "【三方接口】")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    public Result<ConsoleTemplateSchemaVO> getSchema(@RequestParam("logicId") Integer logicId) {
+    public Result<TemplateMappingVO> getSchema(@RequestParam("logicId") Integer logicId) {
         return templateLogicMappingManager.getSchema(logicId);
     }
 
     @PutMapping("/schema")
     @ResponseBody
-    @ApiOperation(value = "更新索引Schema信息接口【三方接口】",tags = "【三方接口】" )
+    @ApiOperation(value = "更新索引Schema信息接口【三方接口】", tags = "【三方接口】")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true) })
     public Result<Void> modifySchema(HttpServletRequest request,
-                               @RequestBody ConsoleTemplateSchemaDTO schemaDTO) throws AdminOperateException {
+                                     @RequestBody ConsoleTemplateSchemaDTO schemaDTO) throws AdminOperateException {
 
         Result<Void> checkAuthResult = checkProjectAuth(schemaDTO.getLogicId());
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
 
-        return templateLogicMappingManager.modifySchema(schemaDTO, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+        return templateLogicMappingManager.editMapping(schemaDTO, HttpRequestUtil.getOperator(request),
+            HttpRequestUtil.getProjectId(request));
     }
 
 }

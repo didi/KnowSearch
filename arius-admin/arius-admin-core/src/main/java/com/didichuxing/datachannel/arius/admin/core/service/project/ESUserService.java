@@ -15,7 +15,7 @@ import java.util.List;
  * @date 2022/05/25
  */
 public interface ESUserService {
-    
+
     /**
      * 指定id查询
      *
@@ -23,16 +23,14 @@ public interface ESUserService {
      * @return app  如果不存在返回null
      */
     ESUser getEsUserById(Integer esUser);
-    
+
     /**
      * 查询app详细信息
      *
      * @return 返回app列表
      */
     List<ESUser> listESUsers(List<Integer> projectIds);
-    
 
-    
     /**
      * 新建APP
      *
@@ -40,9 +38,8 @@ public interface ESUserService {
      * @param operator  操作人 邮箱前缀
      * @return 成功 true  失败 false
      */
-    TupleTwo</*创建的es user*/Result,/*创建的es user po*/ ESUserPO> registerESUser(ESUserDTO esUserDTO,
-                                                                             String operator);
-    
+    TupleTwo</*创建的es user*/Result, /*创建的es user po*/ ESUserPO> registerESUser(ESUserDTO esUserDTO, String operator);
+
     /**编辑用户
      * 编辑APP
      *
@@ -50,7 +47,7 @@ public interface ESUserService {
      * @return Tuple<Result < Void>, ESUserPO>
      */
     TupleTwo<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> editUser(ESUserDTO esUserDTO);
-    
+
     /**
      * 删除APP
      *
@@ -58,9 +55,9 @@ public interface ESUserService {
      * @return 成功 true  失败 false
      */
     TupleTwo<Result<Void>, ESUserPO> deleteESUserById(int esUser);
-    
+
     TupleTwo<Result<Void>, List<ESUserPO>> deleteByESUsers(int projectId);
-    
+
     /**
      * 获取项目下es user 个数
      *
@@ -68,14 +65,7 @@ public interface ESUserService {
      * @return int
      */
     int countByProjectId(int projectId);
-    
 
-    
-    
-
-    
-
-    
     /**
      * 校验验证码
      * @param esUserName app
@@ -83,7 +73,7 @@ public interface ESUserService {
      * @return result
      */
     Result<Void> verifyAppCode(Integer esUserName, String verifyCode);
-    
+
     /**
      * 验证APP参数是否合法
      *
@@ -92,14 +82,14 @@ public interface ESUserService {
      * @return 参数合法返回
      */
     Result<Void> validateESUser(ESUserDTO appDTO, OperationEnum operation);
-    
+
     /**
      * 查询项目下可以免密登录的es user
      * @param projectId projectId
      * @return appList
      */
     List<ESUser> getProjectWithoutCodeApps(Integer projectId);
-    
+
     /**
      * 通过project 获取默认的es user
      *
@@ -107,9 +97,9 @@ public interface ESUserService {
      * @return {@code ESUser}
      */
     ESUser getDefaultESUserByProject(Integer projectId);
-    
+
     boolean checkDefaultESUserByProject(Integer projectId);
-    
+
     /**
      * 获取项目id通过搜索类型
      *
@@ -117,6 +107,5 @@ public interface ESUserService {
      * @return {@code List<Integer>}
      */
     List<Integer> getProjectIdBySearchType(Integer searchType);
-    
-    
+
 }

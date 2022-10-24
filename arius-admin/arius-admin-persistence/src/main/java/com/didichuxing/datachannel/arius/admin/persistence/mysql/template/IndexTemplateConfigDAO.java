@@ -20,6 +20,7 @@ public interface IndexTemplateConfigDAO {
     int update(TemplateConfigPO param);
 
     int delete(Long configId);
+
     int deleteByLogicId(Integer logicId);
 
     TemplateConfigPO getById(Long configId);

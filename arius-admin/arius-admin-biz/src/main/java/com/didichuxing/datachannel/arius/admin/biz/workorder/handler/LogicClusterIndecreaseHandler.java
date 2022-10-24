@@ -7,12 +7,15 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicCluste
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterIndecreaseOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -23,10 +26,9 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,15 +40,14 @@ import org.springframework.stereotype.Service;
 public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private ClusterLogicService clusterLogicService;
+    private ClusterLogicService            clusterLogicService;
 
     @Autowired
     private ProjectClusterLogicAuthService projectClusterLogicAuthService;
 
     @Autowired
-    private ClusterNodeManager clusterNodeManager;
-    @Autowired
-    private ProjectService projectService;
+    private ClusterNodeManager             clusterNodeManager;
+  
 
     /**
      * 工单是否自动审批
@@ -62,8 +63,14 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
         LogicClusterIndecreaseContent content = JSON.parseObject(extensions, LogicClusterIndecreaseContent.class);
-
-        return ConvertUtil.obj2Obj(content, LogicClusterIndecreaseOrderDetail.class);
+        LogicClusterIndecreaseOrderDetail logicClusterIndecreaseOrderDetail = ConvertUtil.obj2Obj(content,
+                LogicClusterIndecreaseOrderDetail.class);
+        //添加原有的节点数目
+        Optional.ofNullable(content.getLogicClusterId())
+                .map(clusterLogicService::getClusterLogicByIdThatNotContainsProjectId)
+                .map(ClusterLogic::getDataNodeNum)
+                .ifPresent(logicClusterIndecreaseOrderDetail::setOldDataNodeNu);
+        return logicClusterIndecreaseOrderDetail;
     }
 
     @Override
@@ -96,8 +103,8 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("集群id为空");
         }
 
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(content.getLogicClusterId());
-        if (clusterLogic == null) {
+        
+        if (!clusterLogicService.existClusterLogicById(content.getLogicClusterId())) {
             return Result.buildParamIllegal("集群不存在");
         }
 
@@ -164,29 +171,44 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
         LogicClusterIndecreaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterIndecreaseContent.class);
-
+        //执行前的节点结果
+        final Result<List<ESClusterRoleHostVO>> resultBefore = clusterNodeManager.listClusterLogicNode(
+                content.getLogicClusterId().intValue());
+        Long beforeSize = 0L;
+        if (resultBefore.success() && CollectionUtils.isNotEmpty(resultBefore.getData())) {
+            beforeSize = resultBefore.getData().stream().map(ESClusterRoleHostVO::getId).distinct()
+                   .count();
+        
+        }
+       
+        
         List<ClusterRegionWithNodeInfoDTO> clusterRegionWithNodeInfoDTOList = content.getRegionWithNodeInfo();
 
-        Result<Boolean> regionEditResult = clusterNodeManager.editMultiNode2Region(clusterRegionWithNodeInfoDTOList, approver,
-                workOrder.getSubmitorProjectId());
-        if (regionEditResult.failed()) { return Result.buildFrom(regionEditResult);}
-         operateRecordService.save(new OperateRecord.Builder()
-                 
-                         .bizId(content.getLogicClusterId())
-                         .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_CAPACITY)
-                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                         .content(workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的扩缩容操作，具体参数："
-                                                                                           + JSON.toJSONString(content))
-                         .userOperation(approver)
-                         .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
-                 .build());
-        //operateRecordService.save(CLUSTER, OperationEnum.ADD, content.getLogicClusterId(),
-        //    workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的扩缩容操作，具体参数："
-        //                                                                                   + JSON.toJSONString(content),
-        //    approver);
-
-        List<String> administrators = getOPList().stream().map(UserBriefVO::getUserName).collect(
-                Collectors.toList());
-        return Result.buildSuccWithMsg(String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));
+        Result<Boolean> regionEditResult = clusterNodeManager.editMultiNode2Region(clusterRegionWithNodeInfoDTOList,
+            approver, workOrder.getSubmitorProjectId(), OperationEnum.EDIT );
+        if (regionEditResult.failed()) {
+            return Result.buildFrom(regionEditResult);
+        }
+       //执行后的节点结果
+         final Result<List<ESClusterRoleHostVO>> resultAfter = clusterNodeManager.listClusterLogicNode(
+                content.getLogicClusterId().intValue());
+        Long afterSize=0L;
+        if (resultAfter.success() && CollectionUtils.isNotEmpty(resultAfter.getData())) {
+            afterSize = resultAfter.getData().stream().map(ESClusterRoleHostVO::getId).distinct().count();
+            // 更新逻辑集群下的节点数目
+            Long logicClusterId = content.getLogicClusterId();
+            ESLogicClusterDTO esLogicClusterDTO = new ESLogicClusterDTO();
+            esLogicClusterDTO.setId(logicClusterId);
+            esLogicClusterDTO.setDataNodeNum(Math.toIntExact(afterSize));
+            clusterLogicService.editClusterLogicNotCheck(esLogicClusterDTO);
+        
+        }
+        
+        operateRecordService.save(new OperateRecord.Builder().bizId(content.getLogicClusterId())
+            .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_CAPACITY).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+            .content(String.format("%s：【%d】->【%d】",afterSize>beforeSize?"扩容":"缩容",beforeSize,afterSize))
+            .userOperation(workOrder.getSubmitor())
+            .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId())).build());
+        return Result.buildFrom(regionEditResult);
     }
 }

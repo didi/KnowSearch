@@ -1,22 +1,22 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatusWithTemplateEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -32,6 +32,15 @@ public interface ClusterPhyManager {
      * @return true/false
      */
     boolean copyMapping(String cluster, int retryCount);
+    TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean> getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(String clusterPhy);
+     /**
+      * 它返回集群和缓存之间的连接状态。
+      *
+      * @param clusterPhy 集群的物理名称。
+      * @return 正在返回 ClusterConnectionStatusWithTemplateEnum。
+      */
+     ClusterConnectionStatusWithTemplateEnum getClusterConnectionStatusWithCache(String clusterPhy);
+    
 
     /**
      * 同步元数据
@@ -91,11 +100,13 @@ public interface ClusterPhyManager {
 
     /**
      * 集群接入
-     * @param param 逻辑集群Id, 物理集群名称
-     * @param operator 操作人
-     * @return  ClusterPhyVO
+     *
+     * @param param     逻辑集群Id, 物理集群名称
+     * @param operator  操作人
+     * @param projectId
+     * @return ClusterPhyVO
      */
-	Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator);
+    Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator, Integer projectId);
 
     /**
      * 删除接入集群 删除顺序: region ——> clusterLogic ——> clusterHost ——> clusterRole  ——> cluster
@@ -120,7 +131,8 @@ public interface ClusterPhyManager {
      * @param cluster 物理集群的名称
      * @return 动态配置信息 Map中的String见于动态配置的字段，例如cluster.routing.allocation.awareness.attributes
      */
-    Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(String cluster);
+    Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(String cluster)
+		    throws ESOperateException;
 
     /**
      * 更新集群下的动态配置信息
@@ -130,7 +142,7 @@ public interface ClusterPhyManager {
      * @param projectId
      * @return result
      */
-    Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator, Integer projectId);
+    Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator, Integer projectId) throws ESOperateException ;
 
     /**
      * 获取集群下的属性配置
@@ -154,6 +166,9 @@ public interface ClusterPhyManager {
      * @return {@link Result}<{@link List}<{@link String}>>
      */
     Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer projectId, Integer templateId);
+    
+    Result<List<String>> getTemplateSameVersionClusterNamesByTemplateIdExistDCDR(Integer projectId, Integer templateId);
+
 
     /**
      * 获取物理集群节点名称列表
@@ -210,7 +225,15 @@ public interface ClusterPhyManager {
      * @param projectId
      * @return
      */
-    PaginationResult<ClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer projectId) throws NotFindSubclassException;
+    PaginationResult<ClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition,
+                                                      Integer projectId) throws NotFindSubclassException;
+
+    /**
+     * 根据projectId获取超级项目下的物理集群列表
+     * @param projectId 项目id
+     * @return Result<List<String>>
+     */
+    Result<List<String>> listClusterPhyNameBySuperApp(Integer projectId);
 
     /**
      * 构建物理集群角色信息
@@ -273,7 +296,8 @@ public interface ClusterPhyManager {
      *  @param clusterLogicType 逻辑集群类型
      *  @return 同版本的物理集群名称列表
      */
-    Result<List<String>> getPhyClusterNameWithSameEsVersion(Integer clusterLogicType, String hasSelectedClusterNameWhenBind);
+    Result<List<String>> getPhyClusterNameWithSameEsVersion(Integer clusterLogicType,
+                                                            String hasSelectedClusterNameWhenBind);
 
     /**
      * 根据已经创建的逻辑集群id筛选出物理集群版本一致的物理集群名称列表
@@ -300,6 +324,13 @@ public interface ClusterPhyManager {
     List<ClusterRoleInfo> listClusterRolesByClusterId(Integer clusterId);
 
     /**
+     * 根据集群名称获获取集群节点列表
+     *
+     * @param cluster 集群名称
+     * @return {@link List}<{@link ClusterRoleHost}>
+     */
+    List<ClusterRoleHost> listClusterRoleHostByCluster(String cluster);
+    /**
      * 按照资源类型查询物理集群名称列表
      *
      * @param clusterResourceType 集群资源类型
@@ -307,4 +338,36 @@ public interface ClusterPhyManager {
      * @return {@link Result}<{@link List}<{@link String}>>
      */
     Result<List<String>> listClusterPhyNameByResourceType(Integer clusterResourceType, Integer projectId);
+    
+    Result<ClusterPhy> getClusterByName(String masterCluster);
+    
+    boolean ensureDCDRRemoteCluster(String cluster, String remoteCluster) throws ESOperateException;
+    
+    /**
+     * 它返回满足条件的总数。
+     *
+     * @param condition 查询的条件。
+     * @return 长
+     */
+    Long fuzzyClusterPhyHitByCondition(ClusterPhyConditionDTO condition);
+    
+    /**
+     * 按条件获取集群物理信息
+     *
+     * @param condition 查询的条件。
+     * @return 列表<ClusterPhy>
+     */
+    List<ClusterPhy> pagingGetClusterPhyByCondition(ClusterPhyConditionDTO condition);
+
+
+    /**
+     * 批量更新物理集群的动态配置项
+     * @param clusterList  物理集群名称list
+     * @param param        要更新的配置项
+     * @param operator
+     * @param projectId
+     * @return
+     */
+    Result<Boolean> batchUpdateClusterDynamicConfig(List<String> clusterList, ClusterSettingDTO param,
+                                                 String operator, Integer projectId) throws ESOperateException;
 }

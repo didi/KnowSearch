@@ -11,7 +11,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -30,11 +34,12 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class CommonUtils {
 
-    private static final ILog LOGGER = LogFactory.getLog(CommonUtils.class);
+    private static final ILog   LOGGER = LogFactory.getLog(CommonUtils.class);
 
-    private static final String REGEX = ",";
+    private static final String REGEX  = ",";
 
-    private CommonUtils() {}
+    private CommonUtils() {
+    }
 
     /**
      * 获取MD5值
@@ -79,7 +84,9 @@ public class CommonUtils {
      * @return
      */
     public static double formatDouble(double data, int decimal) {
-        if (decimal < 0){decimal = 2;}
+        if (decimal < 0) {
+            decimal = 2;
+        }
 
         BigDecimal b = BigDecimal.valueOf(data);
         return b.setScale(decimal, BigDecimal.ROUND_HALF_UP).doubleValue();
@@ -98,8 +105,8 @@ public class CommonUtils {
         BigDecimal v1Decimal = new BigDecimal(v1);
         BigDecimal v2Decimal = new BigDecimal(v2);
         BigDecimal bigDecimal = new BigDecimal(multiply);
-
-        BigDecimal greenDivide = v1Decimal.divide(v2Decimal, scale, 1);
+  
+        BigDecimal greenDivide = v2==0?new BigDecimal(0):v1Decimal.divide(v2Decimal, scale, 1);
         return greenDivide.multiply(bigDecimal).doubleValue();
     }
 
@@ -120,7 +127,7 @@ public class CommonUtils {
         }
 
         StringBuilder sb = new StringBuilder();
-        for (String elem: strList) {
+        for (String elem : strList) {
             if (!StringUtils.hasText(elem)) {
                 continue;
             }
@@ -134,7 +141,7 @@ public class CommonUtils {
             return new ArrayList<>();
         }
         List<String> strList = new ArrayList<>();
-        for (String elem: str.split(REGEX)) {
+        for (String elem : str.split(REGEX)) {
             if (!StringUtils.hasText(elem)) {
                 continue;
             }
@@ -155,8 +162,8 @@ public class CommonUtils {
         }
         byte[] bytes = new byte[1024];
         ZipArchiveEntry zipEntry;
-        try(ZipArchiveInputStream zip = new ZipArchiveInputStream(in);
-            ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+        try (ZipArchiveInputStream zip = new ZipArchiveInputStream(in);
+                ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             while ((zipEntry = zip.getNextZipEntry()) != null) {
                 // 该 entry 在压缩包中的 完整路径 + 文件名
                 String entryName = zipEntry.getName();
@@ -165,7 +172,7 @@ public class CommonUtils {
 
                 if (targetFileName.equals(fileName)) {
                     // 找到了目标文件
-                    while(true) {
+                    while (true) {
                         int len = zip.read(bytes);
                         if (len <= 0) {
                             break;
@@ -176,7 +183,7 @@ public class CommonUtils {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("class=CommonUtils||method=unZip||msg=fail to unZip:",e);
+            LOGGER.error("class=CommonUtils||method=unZip||msg=fail to unZip:", e);
         }
         return null;
     }
@@ -193,8 +200,8 @@ public class CommonUtils {
         }
         byte[] bytes = new byte[1024];
         TarArchiveEntry tarEntry;
-        try(TarArchiveInputStream tar = new TarArchiveInputStream(new GzipCompressorInputStream(in));
-            ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+        try (TarArchiveInputStream tar = new TarArchiveInputStream(new GzipCompressorInputStream(in));
+                ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             while ((tarEntry = tar.getNextTarEntry()) != null) {
                 // 该 entry 在压缩包中的 完整路径 + 文件名
                 String entryName = tarEntry.getName();
@@ -203,7 +210,7 @@ public class CommonUtils {
 
                 if (targetFileName.equals(fileName)) {
                     // 找到了目标文件
-                    while(true) {
+                    while (true) {
                         int len = tar.read(bytes);
                         if (len <= 0) {
                             break;
@@ -214,12 +221,12 @@ public class CommonUtils {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("class=CommonUtils||method=unTar||msg=fail to unTar:",e);
+            LOGGER.error("class=CommonUtils||method=unTar||msg=fail to unTar:", e);
         }
         return null;
     }
 
-    public static Long monitorTimestamp2min(Long timestamp){
+    public static Long monitorTimestamp2min(Long timestamp) {
         return timestamp - timestamp % 60000;
     }
 
@@ -244,6 +251,7 @@ public class CommonUtils {
 
         return stringBuilder.toString();
     }
+
     /**
      * 判断是否为合法IP
      * @return the ip
@@ -286,13 +294,30 @@ public class CommonUtils {
     public static String getUniqueKey(String... arg) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < arg.length; i++) {
-            if (i == (arg.length - 1)) { sb.append(arg[i]);}
-            else { sb.append(arg[i]).append("@");}
+            if (i == (arg.length - 1)) {
+                sb.append(arg[i]);
+            } else {
+                sb.append(arg[i]).append("@");
+            }
         }
         return sb.toString();
     }
-    
+     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
+        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+    }
 
-    
+    /**
+     * 避免模糊查询把查询条件中的"% _"当作通配符处理（造成结果是全量查询）
+     */
+    public static String sqlFuzzyQueryTransfer(String str){
+        if(str.contains("%")){
+            str = str.replaceAll("%", "\\\\%");
+        }
+        if(str.contains("_")){
+            str = str.replaceAll("_","\\\\_");
+        }
+        return str;
+    }
 
 }

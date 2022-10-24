@@ -1,11 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -29,20 +28,9 @@ public class TemplateCreateOrderDetail extends AbstractOrderDetail {
      */
     private Integer      dataType;
 
-    /**
-     * 责任人
-     */
-    private String       responsible;
+   
 
-    /**
-     * 部门id
-     */
-    private String       libraDepartmentId;
-
-    /**
-     * 部门名称
-     */
-    private String       libraDepartment;
+  
 
     /**
      * 备注
@@ -57,7 +45,7 @@ public class TemplateCreateOrderDetail extends AbstractOrderDetail {
     /**
      * 热数据保存天数, 单位天
      */
-    private Integer hotTime;
+    private Integer      hotTime;
 
     /**
      * 数据总量 单位G
@@ -123,7 +111,7 @@ public class TemplateCreateOrderDetail extends AbstractOrderDetail {
     /**
      * 禁用rollover标识
      */
-    private Boolean disableIndexRollover;
+    private Boolean      disableIndexRollover;
 
     /**
      * 服务等级

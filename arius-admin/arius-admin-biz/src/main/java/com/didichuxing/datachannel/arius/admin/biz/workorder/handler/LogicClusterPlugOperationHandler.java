@@ -1,22 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.task.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterPlugOperationContent;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
@@ -32,14 +22,21 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service("logicClusterPlugOperationHandler")
 public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
@@ -48,24 +45,24 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
     private ProjectClusterLogicAuthService projectClusterLogicAuthService;
 
     @Autowired
-    private ClusterRegionService       clusterRegionService;
+    private ClusterRegionService           clusterRegionService;
 
     @Autowired
-    private ClusterPhyService          esClusterPhyService;
+    private ClusterPhyService              esClusterPhyService;
 
     @Autowired
-    private ClusterLogicService        clusterLogicService;
+    private ClusterLogicService            clusterLogicService;
 
     @Autowired
-    private EcmTaskManager             ecmTaskManager;
+    private EcmTaskManager                 ecmTaskManager;
 
     @Autowired
-    private ClusterRoleService         clusterRoleService;
+    private ClusterRoleService             clusterRoleService;
 
     @Autowired
-    private EcmHandleService           ecmHandleService;
+    private EcmHandleService               ecmHandleService;
 
-    protected static final ILog        LOGGER = LogFactory.getLog(LogicClusterPlugOperationHandler.class);
+    protected static final ILog            LOGGER = LogFactory.getLog(LogicClusterPlugOperationHandler.class);
 
     @Override
     protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
@@ -76,8 +73,7 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("物理集群id为空！");
         }
 
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(content.getLogicClusterId());
-        if (clusterLogic == null) {
+        if (!clusterLogicService.existClusterLogicById(content.getLogicClusterId())) {
             return Result.buildParamIllegal("集群不存在");
         }
 
@@ -169,8 +165,7 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
         ClusterPhy clusterPhy = esClusterPhyService.getClusterById(clusterId);
         esEcmTaskDTO.setPhysicClusterId(clusterPhy.getId().longValue());
 
-        List<ClusterRoleInfo> clusterRoleInfoList = clusterRoleService.getAllRoleClusterByClusterId(
-                clusterPhy.getId());
+        List<ClusterRoleInfo> clusterRoleInfoList = clusterRoleService.getAllRoleClusterByClusterId(clusterPhy.getId());
         if (CollectionUtils.isEmpty(clusterRoleInfoList)) {
             return Result.buildFail("物理集群角色不存在");
         }

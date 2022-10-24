@@ -36,15 +36,16 @@ public class DateTimeUtil {
 
     private static final ILog           LOGGER            = LogFactory.getLog(DateTimeUtil.class);
 
-    private static final String REGEX = "\\d{4}-\\d{2}-\\d{2}";
-    private static final String PATTERN_1 = "yyyy-MM-dd";
-    private static final String PATTERN_2 = "yyyy-MM-dd HH:mm:ss.SSS Z";
-    private static final String PATTERN_3 = "yyyy-MM-dd HH:mm:ss";
+    private static final String         REGEX             = "\\d{4}-\\d{2}-\\d{2}";
+    private static final String         PATTERN_1         = "yyyy-MM-dd";
+    private static final String         PATTERN_2         = "yyyy-MM-dd HH:mm:ss.SSS Z";
+    private static final String         PATTERN_3         = "yyyy-MM-dd HH:mm:ss";
 
     // 不同日期格式的正则匹配
     private static Map<String, Pattern> dateFormatPattern = Maps.newHashMap();
 
-    private DateTimeUtil() {}
+    private DateTimeUtil() {
+    }
 
     static {
         dateFormatPattern.put("_YYYY-MM", Pattern.compile("\\d{4}-\\d{2}"));
@@ -136,7 +137,8 @@ public class DateTimeUtil {
         // 使用正则提取时间
         Pattern pattern = dateFormatPattern.get(dateFormat);
         if (pattern == null) {
-            LOGGER.error("class=DateTimeUtil||method=getIndexDate||msg={} can't find pattern dateFormat {}, date {}", indexName, dateFormat, date);
+            LOGGER.error("class=DateTimeUtil||method=getIndexDate||msg={} can't find pattern dateFormat {}, date {}",
+                indexName, dateFormat, date);
             return indexDate;
         }
 
@@ -154,10 +156,12 @@ public class DateTimeUtil {
                     return matcher.group();
                 }
             }
-            LOGGER.error("class=DateTimeUtil||method=getIndexDate||msg={} dateFormat {} not match date {}", indexName, dateFormat, date);
+            LOGGER.error("class=DateTimeUtil||method=getIndexDate||msg={} dateFormat {} not match date {}", indexName,
+                dateFormat, date);
 
         } catch (Exception e) {
-            LOGGER.error("class=DateTimeUtil||method=getIndexDate||msg=fail to getIndexDate {}, {}, {}", indexName, dateFormat, date, e);
+            LOGGER.error("class=DateTimeUtil||method=getIndexDate||msg=fail to getIndexDate {}, {}, {}", indexName,
+                dateFormat, date, e);
         }
 
         return indexDate;
@@ -384,14 +388,14 @@ public class DateTimeUtil {
         long startTimeMilli = System.currentTimeMillis() - 43200000;
         long endTimeMilli = System.currentTimeMillis() + 43200000;
         try {
-            ZonedDateTime dateTime = ZonedDateTime.parse(ariusCreateTime,
-                DateTimeFormatter.ofPattern(PATTERN_2));
+            ZonedDateTime dateTime = ZonedDateTime.parse(ariusCreateTime, DateTimeFormatter.ofPattern(PATTERN_2));
             ZonedDateTime startDate = dateTime.minus(12, ChronoUnit.HOURS);
             ZonedDateTime endDate = dateTime.plus(12, ChronoUnit.HOURS);
             startTimeMilli = startDate.toInstant().toEpochMilli();
             endTimeMilli = endDate.toInstant().toEpochMilli();
         } catch (Exception e) {
-            LOGGER.error("class=DateTimeUtil||method=getAriusCreateTimeRange||msg=fail to parse data {}", ariusCreateTime, e);
+            LOGGER.error("class=DateTimeUtil||method=getAriusCreateTimeRange||msg=fail to parse data {}",
+                ariusCreateTime, e);
         }
 
         return new Tuple<>(startTimeMilli, endTimeMilli);

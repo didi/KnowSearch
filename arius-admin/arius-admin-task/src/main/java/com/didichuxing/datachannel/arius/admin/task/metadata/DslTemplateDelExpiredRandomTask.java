@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Task(name = "DslTemplateDelExpiredRandomTask", description = "删除过期查询模板", cron = "0 0 5 */1 * ?", autoRegister = true)
 public class DslTemplateDelExpiredRandomTask implements Job {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DslTemplateDelExpiredRandomTask.class);
+    private static final Logger      LOGGER = LoggerFactory.getLogger(DslTemplateDelExpiredRandomTask.class);
 
     @Autowired
     private DslTemplateDelExpiredJob dslTemplateDelExpiredJob;

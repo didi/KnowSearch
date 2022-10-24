@@ -46,20 +46,19 @@ public class Field {
 
         Field field = (Field) o;
 
-
-        if(!isEqual(type, field.type)) {
+        if (!isEqual(type, field.type)) {
             return false;
         }
 
-        if(!isEqual(indexType, field.indexType)) {
+        if (!isEqual(indexType, field.indexType)) {
             return false;
         }
 
-        if(!isEqual(analyzerType, field.analyzerType)) {
+        if (!isEqual(analyzerType, field.analyzerType)) {
             return false;
         }
 
-        if(!isEqual(sortType, field.sortType)) {
+        if (!isEqual(sortType, field.sortType)) {
             return false;
         }
 

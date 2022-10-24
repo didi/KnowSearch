@@ -25,8 +25,5 @@ public class TemplateTransferOrderDetail extends AbstractOrderDetail {
      */
     private String  name;
 
-    /**
-     * 目标责任人
-     */
-    private String  tgtResponsible;
+
 }

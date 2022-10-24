@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class ConsoleTemplateSettingDTO extends BaseDTO {
 
     @ApiModelProperty("索引ID")
-    private Integer logicId;
+    private Integer                   logicId;
 
     @ApiModelProperty("索引分词器")
     private AriusIndexTemplateSetting setting;

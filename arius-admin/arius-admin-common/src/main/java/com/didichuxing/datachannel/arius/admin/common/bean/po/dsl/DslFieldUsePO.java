@@ -21,26 +21,26 @@ import java.util.Set;
 @AllArgsConstructor
 public class DslFieldUsePO extends BaseESPO {
 
-    private Long id;
+    private Long              id;
 
-    private String clusterName;
+    private String            clusterName;
 
-    private String name;
+    private String            name;
 
-    private String date;
+    private String            date;
 
-    private Long fieldCount;
+    private Long              fieldCount;
     /**
      * 数据中心
      */
-    private String dataCenter;
+    private String            dataCenter;
 
-    private List<String> notUseFields;
+    private List<String>      notUseFields;
 
     /**
      * 最近创建的字段名称
      */
-    private List<String> recentCreateFields;
+    private List<String>      recentCreateFields;
 
     private Map<String, Long> selectFieldsCounter;
 

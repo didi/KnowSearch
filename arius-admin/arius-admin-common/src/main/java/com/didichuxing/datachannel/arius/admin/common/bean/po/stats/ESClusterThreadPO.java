@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,12 +18,12 @@ public class ESClusterThreadPO extends BasePO {
     private String threadName;
 
     @JSONField(name = "active")
-    private Long activeNum;
+    private Long   activeNum;
 
     @JSONField(name = "rejected")
-    private Long rejectedNum;
+    private Long   rejectedNum;
 
     @JSONField(name = "queue")
-    private Long queueNum;
+    private Long   queueNum;
 
 }

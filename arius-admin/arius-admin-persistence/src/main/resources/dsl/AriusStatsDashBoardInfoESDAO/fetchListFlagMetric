@@ -2,12 +2,12 @@
   "size": 10000,
   "sort": [
       {
-        "%s.timestamp": {
+        "%s.%s": {
           "order": "%s"
         }
       }
   ],
-  "_source": ["%s.cluster", "%s.%s"],
+  "_source": %s,
   "query": {
     "bool": {
       "filter": [

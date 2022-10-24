@@ -6,11 +6,13 @@ import java.util.Map;
 
 public class MonitorUtil {
 
-    private MonitorUtil(){}
+    private MonitorUtil() {
+    }
 
     public static final String COLLECTION_ROUTE_SPLIT            = ".";
 
     public static final String COLLECTION_ROUTE_COMPUTE_DIVISION = "/";
+    public static final String COLLECTION_ROUTE_COMPUTE_PLUS     = "+";
 
     public static Object getValueByRoute(Map map, String route) {
         if (StringUtils.isEmpty(route)) {
@@ -25,22 +27,35 @@ public class MonitorUtil {
         if (route.contains(COLLECTION_ROUTE_COMPUTE_DIVISION)) {
             String[] routers = route.split(COLLECTION_ROUTE_COMPUTE_DIVISION);
             Double dividend = obj2Double(getValueByRoute(map, routers[0]));
-            Double divisor  = obj2Double(getValueByRoute(map, routers[1]));
+            Double divisor = obj2Double(getValueByRoute(map, routers[1]));
 
-            if (dividend == null || divisor == null || divisor == 0
-                    || dividend + divisor == 0) {
+            if (dividend == null || divisor == null || divisor == 0 || dividend + divisor == 0) {
                 return 0d;
             } else {
                 return dividend / (divisor * 1.0);
             }
         }
 
+        if (route.contains(COLLECTION_ROUTE_COMPUTE_PLUS)) {
+            String[] routers = StringUtils.split(route,COLLECTION_ROUTE_COMPUTE_PLUS);
+            Double paramOne = obj2Double(getValueByRoute(map, routers[0]));
+            Double paramTwo = obj2Double(getValueByRoute(map, routers[1]));
+
+            if (paramOne == null) {
+                 paramOne = 0D;
+            }
+            if (paramTwo == null) {
+                paramTwo = 0D;
+            }
+            return paramOne + paramTwo;
+        }
+
+
         if (route.contains(COLLECTION_ROUTE_SPLIT)) {
             int offset = route.indexOf(COLLECTION_ROUTE_SPLIT);
             Object object = map.get(route.substring(0, offset));
             if (object instanceof Map) {
-                return getValueByRoute((Map) object,
-                        route.substring(offset + COLLECTION_ROUTE_SPLIT.length()));
+                return getValueByRoute((Map) object, route.substring(offset + COLLECTION_ROUTE_SPLIT.length()));
             } else {
                 return null;
             }
@@ -54,12 +69,14 @@ public class MonitorUtil {
         }
     }
 
-    public static Double obj2Double(Object obj){
-        if(null == obj){return 0d;}
+    public static Double obj2Double(Object obj) {
+        if (null == obj) {
+            return 0d;
+        }
 
-        if(obj instanceof Number){
+        if (obj instanceof Number) {
             return Double.valueOf(obj.toString());
-        }else {
+        } else {
             return 0d;
         }
     }

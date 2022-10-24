@@ -10,12 +10,15 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectExtendSaveDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectQueryExtendDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectConfigPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexDetailDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectBriefExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectExtendVO;
@@ -26,11 +29,14 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Tri
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
@@ -53,10 +59,12 @@ import com.didiglobal.logi.security.service.UserService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -77,7 +85,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ProjectExtendManagerImpl implements ProjectExtendManager {
-    
+
     @Autowired
     private ProjectConfigService projectConfigService;
     @Autowired
@@ -97,7 +105,43 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Autowired
     private RoleService          roleService;
     @Autowired
-    private RoleTool roleTool;
+    private RoleTool          roleTool;
+    @Autowired
+    private               ESIndexCatService esIndexCatService;
+    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ProjectExtendManagerImpl", 10, 10, 100);
+    
+    /**
+     * “检查一个项目的资源是否可用。”
+     * <p>
+     * 函数定义如下：
+     * <p>
+     * * 该函数返回一个 Result<Void> 对象。 * 该函数接受一个参数，一个名为 projectId 的整数对象
+     *
+     * @param projectId 项目的 ID。
+     * @return 一个 Result 对象，里面有一个 Void 对象。
+     */
+    @Override
+    public Result<Void> checkResourcesByProjectId(Integer projectId) {
+        List<ClusterLogic> clusterLogics = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
+        
+        List<ClusterLogicTemplateIndexDetailDTO> clusterLogicTemplateIndexDetailDTOS = clusterLogics.stream()
+                .map(clusterLogic -> getTemplateIndexVO(clusterLogic, projectId))
+                
+                .collect(Collectors.toList());
+        long templateSize = clusterLogicTemplateIndexDetailDTOS.stream()
+                .map(ClusterLogicTemplateIndexDetailDTO::getTemplates).filter(CollectionUtils::isNotEmpty)
+                .mapToLong(Collection::size).sum();
+        long indexSize = clusterLogicTemplateIndexDetailDTOS.stream()
+                .map(ClusterLogicTemplateIndexDetailDTO::getCatIndexResults).filter(CollectionUtils::isNotEmpty)
+                .mapToLong(Collection::size).sum();
+        if (CollectionUtils.isNotEmpty(clusterLogics) || templateSize != 0 || indexSize != 0) {
+            return Result.buildFail(String.format(
+                    "无法删除 %s！如需删除，请下线掉应用关联的全部集群、模板、索引资源。",
+                    projectService.getProjectDetailByProjectId(projectId).getProjectName()));
+        }
+        
+        return Result.buildSucc();
+    }
     
     @Override
     public Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator, Integer operatorId) {
@@ -117,130 +161,150 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     return Result.buildFail("当前操作人id为空");
                 }
                 ownerIdList.add(operatorId);
-        
+
             }
-            //谁创建、谁包含
-            if (!ownerIdList.contains(operatorId)){
-                 ownerIdList.add(operatorId);
+            // 谁创建、谁包含
+            if (!ownerIdList.contains(operatorId)) {
+                ownerIdList.add(operatorId);
             }
-            
+            if (!userIdList.contains(operatorId)) {
+                userIdList.add(operatorId);
+            }
+
             // 3. 创建项目
             ProjectVO projectVO = projectService.createProject(project, operator);
             // 4. 转换
             ProjectExtendVO projectExtendVO = ConvertUtil.obj2Obj(projectVO, ProjectExtendVO.class);
             // 5. 添加拥有者和成员
             addOwnerAndUsers(operator, ownerIdList, userIdList, projectVO, projectExtendVO);
-            
+
             //5. 设置项目id
             config.setProjectId(projectVO.getId());
             // 6. 创建项目配置
-            TupleTwo<Result<Void>, ProjectConfigPO> resultProjectConfigTuple = projectConfigService.updateOrInitProjectConfig(
-                    config, operator);
-            setAdminProjectExtendVO(projectExtendVO);
+            TupleTwo<Result<Void>, ProjectConfigPO> resultProjectConfigTuple = projectConfigService
+                .updateOrInitProjectConfig(config, operator);
+        
+            // 全量获取具有管理员角色的用户
+            final List<UserBriefVO> userBriefListWithAdminRole = userService.getUserBriefListByRoleId(AuthConstant.ADMIN_ROLE_ID);
+            buildProjectExtendVO(projectExtendVO,userBriefListWithAdminRole);
             // 设置项目配置
             if (resultProjectConfigTuple.v1().success()) {
                 projectExtendVO.setConfig(ConvertUtil.obj2Obj(resultProjectConfigTuple.v2(), ProjectConfigVO.class));
-                
+
             }
             //7. 写入操作日志
             operateRecordService.save(new OperateRecord(project.getProjectName(), OperateTypeEnum.APPLICATION_CREATE,
-                    TriggerWayEnum.MANUAL_TRIGGER, project.getProjectName(), operator));
+                TriggerWayEnum.MANUAL_TRIGGER, project.getProjectName(), operator));
             //创建es user
             createESUserDefault(projectVO, operator);
-            if (Objects.isNull(project.getId())){
+            if (Objects.isNull(project.getId())) {
                 projectExtendVO.setId(projectExtendVO.getConfig().getProjectId());
             }
-            return Result.<ProjectExtendVO>buildSucc(projectExtendVO);
+            return Result.<ProjectExtendVO> buildSucc(projectExtendVO);
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
-    
+
     private void addOwnerAndUsers(String operator, List<Integer> ownerIdList, List<Integer> userIdList,
-                               ProjectVO projectVO,
-                           ProjectExtendVO projectExtendVO) {
+                                  ProjectVO projectVO, ProjectExtendVO projectExtendVO) {
         if (CollectionUtils.isNotEmpty(ownerIdList)) {
             addProjectOwner(projectVO.getId(), ownerIdList, operator);
             Optional.ofNullable(userService.getUserBriefListByUserIdList(ownerIdList))
-                    .ifPresent(projectExtendVO::setOwnerList);
+                .ifPresent(projectExtendVO::setOwnerList);
         }
         if (CollectionUtils.isNotEmpty(userIdList)) {
             addProjectUser(projectVO.getId(), userIdList, operator);
             Optional.ofNullable(userService.getUserBriefListByUserIdList(userIdList))
-                    .ifPresent(projectExtendVO::setUserList);
+                .ifPresent(projectExtendVO::setUserList);
         }
     }
-    
+
     @Override
     public Result<ProjectExtendVO> getProjectDetailByProjectId(Integer projectId) {
         try {
             ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
             ProjectExtendVO projectExtendVO = ConvertUtil.obj2Obj(projectVO, ProjectExtendVO.class);
-            setAdminProjectExtendVO(projectExtendVO);
+            
+            // 全量获取具有管理员角色的用户
+            final List<UserBriefVO> userBriefListWithAdminRole =userService.getUserBriefListByRoleId(AuthConstant.ADMIN_ROLE_ID);
+            buildProjectExtendVO(projectExtendVO, userBriefListWithAdminRole);
             ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
             projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
-            
             return Result.buildSucc(projectExtendVO);
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
-    
+
     /**
      * 设置超级项目
      *
      * @param projectExtendVO 项目延长签证官
      */
-    private void setAdminProjectExtendVO(ProjectExtendVO projectExtendVO) {
+    private void buildProjectExtendVO(ProjectExtendVO projectExtendVO, List<UserBriefVO> userBriefListWithAdminRole) {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
+    
+            projectExtendVO.setUserList(userBriefListWithAdminRole);
+            projectExtendVO.setOwnerList(userBriefListWithAdminRole);
+            projectExtendVO.setUserListWithBelongProjectAndAdminRole(userBriefListWithAdminRole);
+            projectExtendVO.setUserListWithAdminRole(userBriefListWithAdminRole);
+            
             projectExtendVO.setIsAdmin(true);
+        } else {
+    
+            List<UserBriefVO> useList = Optional.ofNullable(projectExtendVO.getUserList()).orElse(Lists.newArrayList());
+            projectExtendVO.setUserList(useList.stream().filter(CommonUtils.distinctByKey(UserBriefVO::getId))
+                    .collect(Collectors.toList()));
+            projectExtendVO.setOwnerList(
+                    projectExtendVO.getOwnerList().stream().filter(CommonUtils.distinctByKey(UserBriefVO::getId))
+                            .collect(Collectors.toList()));
+            useList.addAll(userBriefListWithAdminRole);
+            // 具有管理员角色和持有项目用户的项目成员
+            final List<UserBriefVO> userListWithBelongProjectAndAdminRole = useList.stream()
+                    .filter(CommonUtils.distinctByKey(UserBriefVO::getId)).collect(Collectors.toList());
+            projectExtendVO.setUserListWithAdminRole(userBriefListWithAdminRole);
+            projectExtendVO.setUserListWithBelongProjectAndAdminRole(userListWithBelongProjectAndAdminRole);
+            
         }
     }
-    
+
     @Override
     public Result<List<ProjectBriefExtendVO>> getProjectBriefList() {
         List<ProjectBriefVO> projectBriefList = projectService.getProjectBriefList();
         List<ProjectBriefExtendVO> projectBriefExtendList = ConvertUtil.list2List(projectBriefList,
-                ProjectBriefExtendVO.class);
+            ProjectBriefExtendVO.class);
         return getListResult(projectBriefExtendList);
     }
-    
+
     @Override
     public Result<Void> deleteProjectByProjectId(Integer projectId, String operator) {
         //项目删除前的检查
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             return Result.buildFail("系统内置项目，不能删除");
         }
-        //校验项目绑定逻辑集群
-        List<ClusterLogic> clusterLogics = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
-        if (CollectionUtils.isNotEmpty(clusterLogics)) {
-            return Result.buildFail("项目已绑定逻辑集群，不能删除");
-        }
-        
-        //校验项目绑定模板服务
-        List<IndexTemplate> indexTemplates = indexTemplateService.listProjectLogicTemplatesByProjectId(projectId);
-        if (CollectionUtils.isNotEmpty(indexTemplates)) {
-            return Result.buildFail("项目已绑定模板服务，不能删除");
+        // 校验项目绑定逻辑集群
+        Result<Void> result = checkResourcesByProjectId(projectId);
+        if (result.failed()) {
+            return result;
         }
         ProjectBriefVO projectBriefVO = projectService.getProjectBriefByProjectId(projectId);
         projectService.deleteProjectByProjectId(projectId, operator);
         //获取全部项目配置
         List<ESUser> esUsers = esUserService.listESUsers(Collections.singletonList(projectId));
-        
+
         //删除es user
         esUserService.deleteByESUsers(projectId);
         for (ESUser esUser : esUsers) {
-            operateRecordService.save(
-                    new OperateRecord(projectBriefVO.getProjectName(), OperateTypeEnum.APPLICATION_ACCESS_MODE,
-                            TriggerWayEnum.MANUAL_TRIGGER,
-                            String.format("删除访问模式:%s", ProjectSearchTypeEnum.valueOf(esUser.getSearchType()).getDesc()),
-                            operator));
+            operateRecordService.save(new OperateRecord(projectBriefVO.getProjectName(),
+                OperateTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER,
+                String.format("删除访问模式:%s", ProjectSearchTypeEnum.valueOf(esUser.getSearchType()).getDesc()), operator));
         }
         operateRecordService.save(new OperateRecord(projectBriefVO.getProjectName(), OperateTypeEnum.APPLICATION_DELETE,
-                TriggerWayEnum.MANUAL_TRIGGER, projectBriefVO.getProjectName(), operator));
+            TriggerWayEnum.MANUAL_TRIGGER, projectBriefVO.getProjectName(), operator));
         return Result.buildSucc();
     }
-    
+
     /**
      * 根据项目id获取项目简要信息
      *
@@ -251,7 +315,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     public Result<ProjectBriefExtendVO> getProjectBriefByProjectId(Integer projectId) {
         final ProjectBriefVO projectBriefVO = projectService.getProjectBriefByProjectId(projectId);
         final ProjectBriefExtendVO projectBriefExtendVO = ConvertUtil.obj2Obj(projectBriefVO,
-                ProjectBriefExtendVO.class);
+            ProjectBriefExtendVO.class);
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectBriefExtendVO.getId())) {
             projectBriefExtendVO.setIsAdmin(true);
         }
@@ -259,7 +323,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         projectBriefExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
         return Result.buildSucc(projectBriefExtendVO);
     }
-    
+
     /**
      * 条件分页查询项目信息
      *
@@ -268,37 +332,36 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      * @return 项目分页信息
      */
     @Override
-    public PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO,
-                                                            HttpServletRequest request) {
-         final List<Integer> projectIds = Lists.newArrayList();
-         final List<Integer> esUserByProjectIds = Lists.newArrayList();
+    public PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO, HttpServletRequest request) {
+        final Set<Integer> projectIds = Sets.newHashSet();
+        final List<Integer> esUserByProjectIds = Lists.newArrayList();
         //当查询模式不为空
         if (Objects.nonNull(queryDTO.getSearchType())) {
-            final List<Integer> projectIdBySearchType = esUserService.getProjectIdBySearchType(
-                    queryDTO.getSearchType());
+            final List<Integer> projectIdBySearchType = esUserService
+                .getProjectIdBySearchType(queryDTO.getSearchType());
             if (CollectionUtils.isEmpty(projectIdBySearchType)) {
-                return PagingResult.success(new PagingData<>(Collections.emptyList(),PagingData.Pagination.builder()
-                        .build()));
+                return PagingResult
+                    .success(new PagingData<>(Collections.emptyList(), PagingData.Pagination.builder().build()));
             } else {
                 esUserByProjectIds.addAll(projectIdBySearchType);
-            
+
             }
         }
         String operator = HttpRequestUtil.getOperator(request);
         Integer operatorId = HttpRequestUtil.getOperatorId(request);
         //如果当前操作人不是管理员的角色，则只应该获取属于自己的项目，不能获取全部的项目
         if (StringUtils.isNotBlank(operator) && !roleTool.isAdmin(operator)) {
-            
-            final List<Integer> operatorIdByProjectIds = userProjectService.getProjectIdListByUserIdList(
-                    Collections.singletonList(operatorId));
+
+            final List<Integer> operatorIdByProjectIds = userProjectService
+                .getProjectIdListByUserIdList(Collections.singletonList(operatorId));
             //esUserByProjectIds、operatorIdByProjectIds取交集
             if (CollectionUtils.isNotEmpty(esUserByProjectIds)) {
-                projectIds.addAll(Sets.intersection(Sets.newHashSet(esUserByProjectIds),
-                        Sets.newHashSet(operatorIdByProjectIds)));
+                projectIds.addAll(
+                    Sets.intersection(Sets.newHashSet(esUserByProjectIds), Sets.newHashSet(operatorIdByProjectIds)));
             } else {
                 projectIds.addAll(operatorIdByProjectIds);
             }
-            
+
         } else {
             projectIds.addAll(esUserByProjectIds);
         }
@@ -317,20 +380,29 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
          * 		删除能力  :   假如A应用不属于当前的用户,是否可以被删除 (不能)
          */
         final ProjectQueryDTO projectQueryDTO = ConvertUtil.obj2Obj(queryDTO, ProjectQueryDTO.class);
-    
-        final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO, projectIds);
-        final List<ProjectExtendVO> projectExtendVOList = ConvertUtil.list2List(projectPage.getBizData(),
-                ProjectExtendVO.class);
-        for (ProjectExtendVO projectExtendVO : projectExtendVOList) {
-            setAdminProjectExtendVO(projectExtendVO);
-            final ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectExtendVO.getId());
-            projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
+        if(StringUtils.isNotBlank(projectQueryDTO.getProjectName())){
+            projectQueryDTO.setProjectName(CommonUtils.sqlFuzzyQueryTransfer(projectQueryDTO.getProjectName()));
         }
+        final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO, Lists.newArrayList(projectIds));
+        final List<ProjectExtendVO> projectExtendVOList = ConvertUtil.list2List(projectPage.getBizData(),
+            ProjectExtendVO.class);
+        //全量获取具有管理员角色的用户
+        final List<UserBriefVO> userBriefListWithAdminRole =
+                userService.getUserBriefListByRoleId(AuthConstant.ADMIN_ROLE_ID);
+        for (ProjectExtendVO projectExtendVO : projectExtendVOList) {
+            FUTURE_UTIL.runnableTask(() -> {
+                
+                buildProjectExtendVO(projectExtendVO,userBriefListWithAdminRole);
+                final ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectExtendVO.getId());
+                projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
+            });
+        }
+        FUTURE_UTIL.waitExecute();
         return PagingResult.success(new PagingData<>(projectExtendVOList, projectPage.getPagination()));
     }
-    
+
     /**
-     * 更新项目信息
+     * 更新项目信息 不支持更新责任人和成员
      *
      * @param saveDTO  项目信息
      * @param operator 请求信息
@@ -347,44 +419,22 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 projectConfigService.updateOrInitProjectConfig(config, operator);
             }
             final ProjectSaveDTO project = saveDTO.getProject();
-            List<Integer> ownerIdList = project.getOwnerIdList();
-            List<Integer> userIdList = project.getUserIdList();
+         
             project.setOwnerIdList(Collections.emptyList());
             project.setUserIdList(Collections.emptyList());
-            
+            //操作前的项目信息
             projectService.updateProject(project, operator);
-            //更新项目与用户拥有者的关联关系
-            final Result<Void> operationProjectOwnerResult = operationProjectMemberOrOwner(operator, saveDTO.getProject().getId(),
-                    ownerIdList,
-                    (projectId, userList) -> userProjectService.updateOwnerProject(projectId, userList),
-                    ProjectVO::getOwnerList, OperateTypeEnum.APPLICATION_OWNER_CHANGE,
-                    OperationEnum.EDIT
-    
-            );
-            if (operationProjectOwnerResult.failed()){
-                return operationProjectOwnerResult;
-            }
-            //更新项目与用户成员的关联关系
-            final Result<Void> operationProjectUserResult = operationProjectMemberOrOwner(operator,
-                    saveDTO.getProject().getId(),
-                    userIdList, (projectId, userList) -> userProjectService.updateUserProject(projectId, userList),
-                    ProjectVO::getUserList, OperateTypeEnum.APPLICATION_USER_CHANGE, OperationEnum.EDIT
-    
-            );
-            if (operationProjectUserResult.failed()) {
-                return operationProjectUserResult;
-            }
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
-    
+
     /**
      * 操作项目成员/项目拥有者
      *
      * @param operator        操作人或角色
-     * @param projectId         操作前的项目id
+     * @param beforeProjectVo         操作前的项目id
      * @param userOrOwnerList 添加/更新用户id列表
      * @param operationConsumerFunc    更新/添加操作
      * @param  operationFuncMapper      函数映射器 需要获取的mapper userList/ownerList
@@ -392,36 +442,33 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      * @param operation       是否是删除操作
      * @return {@code Result<Void>}
      */
-    private Result<Void> operationProjectMemberOrOwner(String operator, Integer projectId,
+    private Result<Void> operationProjectMemberOrOwner(String operator, ProjectVO beforeProjectVo,
                                                        List<Integer> userOrOwnerList,
                                                        BiConsumer<Integer, List<Integer>> operationConsumerFunc,
-                                                       Function<ProjectVO, List<UserBriefVO>>  operationFuncMapper,
-                                                       OperateTypeEnum operateTypeEnum, OperationEnum operation ) {
-        if (CollectionUtils.isNotEmpty(userOrOwnerList)) {
-           //超级项目侧校验添加的用户收否存在管理员角色
-                final Result<Void> result = checkProject(projectId, userOrOwnerList,operation);
-                if (result.failed()) {
-                    return result;
-                }
-            //操作前的项目信息
-            final ProjectVO beforeProjectVo = projectService.getProjectDetailByProjectId(projectId);
-            final String projectName = beforeProjectVo.getProjectName();
-            List<UserBriefVO> beforeProjectUserList = Lists.newArrayList();
-            //操作前的
-            Optional.ofNullable(beforeProjectVo).map(operationFuncMapper).ifPresent(beforeProjectUserList::addAll);
-            //更新/add
-            operationConsumerFunc.accept(projectId, userOrOwnerList);
-            //操作后
-            List<UserBriefVO> afterProjectUserList = Lists.newArrayList();
-            Optional.ofNullable(projectService.getProjectDetailByProjectId(projectId)).map(operationFuncMapper)
-                    .ifPresent(afterProjectUserList::addAll);
-            TupleTwo</*beforeUserStr*/String,/*afterUserStr*/String> tuple2 = projectOwnerOrMemberChangeStr(
-                    beforeProjectUserList, afterProjectUserList);
-            recordProjectOwnerOrUserChange(tuple2, projectName, operator, operateTypeEnum);
-       }
+                                                       Function<ProjectVO, List<UserBriefVO>> operationFuncMapper,
+                                                       OperateTypeEnum operateTypeEnum, OperationEnum operation) {
+        //超级项目侧校验添加的用户收否存在管理员角色
+        final Result<Void> result = checkProject(beforeProjectVo.getId(), userOrOwnerList, operation);
+        if (result.failed()) {
+            return result;
+        }
+    
+        final String projectName = beforeProjectVo.getProjectName();
+        List<UserBriefVO> beforeProjectUserList = Lists.newArrayList();
+        //操作前的
+        Optional.ofNullable(beforeProjectVo).map(operationFuncMapper).ifPresent(beforeProjectUserList::addAll);
+        //更新/add
+        operationConsumerFunc.accept(beforeProjectVo.getId(), userOrOwnerList);
+        //操作后
+        List<UserBriefVO> afterProjectUserList = Lists.newArrayList();
+        Optional.ofNullable(projectService.getProjectDetailByProjectId(beforeProjectVo.getId()))
+                .map(operationFuncMapper).ifPresent(afterProjectUserList::addAll);
+        TupleTwo</*beforeUserStr*/String, /*afterUserStr*/String> tuple2 = projectOwnerOrMemberChangeStr(
+                beforeProjectUserList, afterProjectUserList);
+        recordProjectOwnerOrUserChange(tuple2, projectName, operator, operateTypeEnum);
         return Result.buildSucc();
     }
-    
+
     /**
      * 更改项目运行状态，旧状态取反
      *
@@ -432,12 +479,12 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     public Result<Void> changeProjectStatus(Integer projectId, String operator) {
         try {
             projectService.changeProjectStatus(projectId, operator);
-        return Result.buildSucc();
-        }catch (LogiSecurityException e) {
+            return Result.buildSucc();
+        } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
-    
+
     /**
      * 增加项目成员
      *
@@ -448,26 +495,20 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Override
     public Result<Void> addProjectUser(Integer projectId, List<Integer> userIdList, String operator) {
         try {
-            final Result<Void> operationProjectUserResult = operationProjectMemberOrOwner(operator,
-                    projectId, userIdList,
-                    (id, userList) -> userProjectService.saveUserProject(id, userList), ProjectVO::getUserList,
-                    OperateTypeEnum.APPLICATION_USER_CHANGE,OperationEnum.ADD
-            );
-            if (operationProjectUserResult.failed()){
+            final ProjectVO beforeProjectVo = projectService.getProjectDetailByProjectId(projectId);
+            final Result<Void> operationProjectUserResult = operationProjectMemberOrOwner(operator, beforeProjectVo,
+                userIdList, (id, userList) -> userProjectService.updateUserProject(id, userList), ProjectVO::getUserList,
+                OperateTypeEnum.APPLICATION_USER_CHANGE, OperationEnum.ADD);
+            if (operationProjectUserResult.failed()) {
                 return operationProjectUserResult;
             }
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
-       
+
     }
-    
-    
-    
-    
-    
-    
+
     /**
      * 删除项目成员
      *
@@ -479,14 +520,14 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     public Result<Void> delProjectUser(Integer projectId, Integer userId, String operator) {
         try {
             //操作前
-            Consumer<TupleTwo</*projectId*/Integer,/*userId*/Integer>> delProjectUserConsumer = tupleTwo -> projectService.delProjectUser(
-                    tupleTwo.v1, tupleTwo.v2, operator);
-            final Result<Void> operationProjectOwnerResult = operationProjectMemberOrOwner(operator, projectId,
-                    Collections.singletonList(userId),
-                    (id, userList) -> userList.stream().map(user -> Tuples.of(id, user))
-                            .forEach(delProjectUserConsumer),
-                    ProjectVO::getOwnerList, OperateTypeEnum.APPLICATION_USER_CHANGE, OperationEnum.DELETE
-    
+            final ProjectVO beforeProjectVo = projectService.getProjectDetailByProjectId(projectId);
+            Consumer<TupleTwo</*projectId*/Integer, /*userId*/Integer>> delProjectUserConsumer = tupleTwo -> projectService
+                .delProjectUser(tupleTwo.v1, tupleTwo.v2, operator);
+            final Result<Void> operationProjectOwnerResult = operationProjectMemberOrOwner(operator, beforeProjectVo,
+                Collections.singletonList(userId),
+                (id, userList) -> userList.stream().map(user -> Tuples.of(id, user)).forEach(delProjectUserConsumer),
+                ProjectVO::getOwnerList, OperateTypeEnum.APPLICATION_USER_CHANGE, OperationEnum.DELETE
+
             );
             if (operationProjectOwnerResult.failed()) {
                 return operationProjectOwnerResult;
@@ -496,7 +537,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             return Result.buildFail(e.getMessage());
         }
     }
-    
+
     /**
      * 增加项目负责人
      *
@@ -507,22 +548,22 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Override
     public Result<Void> addProjectOwner(Integer projectId, List<Integer> ownerIdList, String operator) {
         try {
-            final Result<Void> operationProjectOwnerResult = operationProjectMemberOrOwner(operator,
-                    projectId, ownerIdList,
-                    (id, ownerList) -> userProjectService.saveOwnerProject(id, ownerList), ProjectVO::getOwnerList,
-                    OperateTypeEnum.APPLICATION_OWNER_CHANGE,OperationEnum.ADD
-    
+            final ProjectVO beforeProjectVo = projectService.getProjectDetailByProjectId(projectId);
+            final Result<Void> operationProjectOwnerResult = operationProjectMemberOrOwner(operator, beforeProjectVo,
+                ownerIdList, (id, ownerList) -> userProjectService.updateOwnerProject(id, ownerList),
+                ProjectVO::getOwnerList, OperateTypeEnum.APPLICATION_OWNER_CHANGE, OperationEnum.ADD
+
             );
             if (operationProjectOwnerResult.failed()) {
                 return operationProjectOwnerResult;
             }
-            
+
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
-    
+
     /**
      * 删除项目负责人
      *
@@ -534,25 +575,25 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     public Result<Void> delProjectOwner(Integer projectId, Integer ownerId, String operator) {
         try {
             //操作前
-            Consumer<TupleTwo</*projectId*/Integer,/*ownerId*/Integer>> delProjectUserConsumer = tupleTwo -> projectService.delProjectOwner(
-                    tupleTwo.v1, tupleTwo.v2, operator);
-            final Result<Void> operationProjectOwnerResult = operationProjectMemberOrOwner(operator, projectId,
-                    Collections.singletonList(ownerId),
-                    (id, userList) -> userList.stream().map(user -> Tuples.of(id, user))
-                            .forEach(delProjectUserConsumer), ProjectVO::getOwnerList,
-                    OperateTypeEnum.APPLICATION_USER_CHANGE, OperationEnum.DELETE
-    
+            final ProjectVO beforeProjectVo = projectService.getProjectDetailByProjectId(projectId);
+            Consumer<TupleTwo</*projectId*/Integer, /*ownerId*/Integer>> delProjectUserConsumer = tupleTwo -> projectService
+                .delProjectOwner(tupleTwo.v1, tupleTwo.v2, operator);
+            final Result<Void> operationProjectOwnerResult = operationProjectMemberOrOwner(operator, beforeProjectVo,
+                Collections.singletonList(ownerId),
+                (id, userList) -> userList.stream().map(user -> Tuples.of(id, user)).forEach(delProjectUserConsumer),
+                ProjectVO::getOwnerList, OperateTypeEnum.APPLICATION_USER_CHANGE, OperationEnum.DELETE
+
             );
             if (operationProjectOwnerResult.failed()) {
                 return operationProjectOwnerResult;
             }
-            
+
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
-    
+
     /**
      * 项目删除前的检查
      *
@@ -563,9 +604,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     public Result<ProjectDeleteCheckVO> checkBeforeDelete(Integer projectId) {
         return Result.buildSucc(projectService.checkBeforeDelete(projectId));
     }
-    
 
-    
     /**
      * 校验项目是否存在
      *
@@ -580,25 +619,39 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             return Result.buildFail("项目不存在");
         }
     }
-    
+
     /**
      * 未分配项目的用户列表
      *
-     * @param projectId projectId
+     * @param projectId         projectId
+     * @param containsAdminRole
      * @return {@code Result}
      */
     @Override
-    public Result<List<UserBriefVO>> unassignedByProjectId(Integer projectId) {
-        final com.didiglobal.logi.security.common.Result<List<UserBriefVO>> listResult = projectService.unassignedByProjectId(
-                projectId);
+    public Result<List<UserBriefVO>> unassignedByProjectId(Integer projectId, Boolean containsAdminRole) {
+        final com.didiglobal.logi.security.common.Result<List<UserBriefVO>> listResult = projectService
+            .unassignedByProjectId(projectId);
         if (listResult.successed()) {
+            //如果为false则不包含管理员角色的用户
+            if (Boolean.FALSE.equals(containsAdminRole)){
+                final List<Integer> userBriefListWithAdminRole =
+                userService.getUserBriefListByRoleId(AuthConstant.ADMIN_ROLE_ID)
+                        .stream()
+                        .map(UserBriefVO::getId).distinct().collect(Collectors.toList());
+                final List<UserBriefVO> userBriefVOList = listResult.getData().stream()
+                        .filter(i -> !userBriefListWithAdminRole.contains(i.getId()))
+                        .distinct().collect(Collectors.toList());
+                return Result.buildSucc(userBriefVOList);
+            }
+            
+            
             return Result.buildSucc(listResult.getData());
         } else {
             return Result.buildFail(listResult.getMessage());
         }
-        
+
     }
-    
+
     /**
      * @param projectId 项目id
      * @return
@@ -606,11 +659,11 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Override
     public Result<List<UserBriefVO>> listUserListByProjectId(Integer projectId) {
         final List<Integer> userIdLists = userProjectService.getUserIdListByProjectId(projectId,
-                ProjectUserCode.NORMAL);
+            ProjectUserCode.NORMAL);
         userIdLists.addAll(userProjectService.getUserIdListByProjectId(projectId, ProjectUserCode.OWNER));
         return Result.buildSucc(userService.getUserBriefListByUserIdList(userIdLists));
     }
-    
+
     /**
      * 获取user下绑定的项目
      *
@@ -619,17 +672,18 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      */
     @Override
     public Result<List<ProjectBriefExtendVO>> getProjectBriefByUserId(Integer userId) {
-        final com.didiglobal.logi.security.common.Result<List<ProjectBriefVO>> listResult = projectService.getProjectBriefByUserId(
-                userId);
+        final com.didiglobal.logi.security.common.Result<List<ProjectBriefVO>> listResult = projectService
+            .getProjectBriefByUserId(userId);
         if (listResult.successed()) {
             final List<ProjectBriefExtendVO> dtoList = ConvertUtil.list2List(listResult.getData(),
-                    ProjectBriefExtendVO.class);
+                ProjectBriefExtendVO.class).stream()
+                    .filter(CommonUtils.distinctByKey(ProjectBriefVO::getId)).collect(Collectors.toList());
             return getListResult(dtoList);
         } else {
             return Result.buildFail(listResult.getMessage());
         }
     }
-    
+
     @NotNull
     private Result<List<ProjectBriefExtendVO>> getListResult(List<ProjectBriefExtendVO> projectBriefExtendList) {
         for (ProjectBriefExtendVO projectBriefExtendVO : projectBriefExtendList) {
@@ -641,7 +695,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         }
         return Result.buildSucc(projectBriefExtendList);
     }
-    
+
     /**
      * 新增默认的es user
      *
@@ -658,19 +712,17 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         final TupleTwo<Result, ESUserPO> result = esUserService.registerESUser(esUserDTO, operator);
         if (result.v1().success()) {
             operateRecordService.save(new OperateRecord(data.getProjectName(), OperateTypeEnum.APPLICATION_ACCESS_MODE,
-                    TriggerWayEnum.MANUAL_TRIGGER, String.format("新增访问模式:%s", ProjectSearchTypeEnum.TEMPLATE.getDesc()),
-                    operator, result.v2().getId()));
-            
+                TriggerWayEnum.MANUAL_TRIGGER, String.format("新增访问模式:%s", ProjectSearchTypeEnum.TEMPLATE.getDesc()),
+                operator, result.v2().getId()));
+
         }
     }
-    
+
     private Result<Void> checkProject(Integer projectId, List<Integer> userIdList, OperationEnum operation) {
-        if (operation.equals(OperationEnum.DELETE)){
+        if (operation.equals(OperationEnum.DELETE)) {
             return Result.buildSucc();
         }
-        if (CollectionUtils.isEmpty(userIdList)) {
-            return Result.buildParamIllegal("用户id不存在");
-        }
+      
         if (Objects.isNull(projectId)) {
             return Result.buildParamIllegal("项目id不存在");
         }
@@ -679,32 +731,32 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         }
         //校验当前用户id是否存在
         final List<UserVO> userList = userIdList.stream().map(userService::getUserDetailByUserId)
-                .collect(Collectors.toList());
+            .collect(Collectors.toList());
         if (userList.size() != userIdList.size()) {
             final List<Integer> idList = userList.stream().map(UserVO::getId).collect(Collectors.toList());
             //不存在用户id集合
             String notExitsIds = userIdList.stream().filter(id -> !idList.contains(id)).distinct().map(String::valueOf)
-                    .collect(Collectors.joining("，"));
+                .collect(Collectors.joining("，"));
             return Result.buildParamIllegal(String.format("传入用户:%s不存在", notExitsIds));
         }
         //超级项目侧校验添加的用户收否存在管理员角色
         if (operation.equals(OperationEnum.EDIT)) {
             if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
                 Predicate<List<RoleBriefVO>> checkContainsAdminRoleFunc = roleBriefList -> roleBriefList.stream()
-                        .anyMatch(roleBriefVO -> AuthConstant.ADMIN_ROLE_ID.equals(roleBriefVO.getId()));
+                    .anyMatch(roleBriefVO -> AuthConstant.ADMIN_ROLE_ID.equals(roleBriefVO.getId()));
                 /*当前用户列表中存在管理员*/
-                if (userIdList.stream().map(roleService::getRoleBriefListByUserId)
-                        .noneMatch(checkContainsAdminRoleFunc)) {
+                if (CollectionUtils.isNotEmpty(userIdList)&&userIdList.stream().map(roleService::getRoleBriefListByUserId)
+                    .noneMatch(checkContainsAdminRoleFunc)) {
                     return Result.buildFail("超级项目只被允许添加拥有管理员角色的用户");
-        
+
                 }
             }
-        
+
         }
-        
+
         return Result.buildSucc();
     }
-    
+
     /**
      * 项目所有者或成员改变str
      *
@@ -712,18 +764,16 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      * @param afterProjectAddOwnerUserList    在项目添加所有者列表
      * @return {@code Tuple2<String, String>}
      */
-    private TupleTwo</*beforeOwnerUserName*/String,/*afterOwnerUserName*/String> projectOwnerOrMemberChangeStr(
-            List<UserBriefVO> beforeProjectAddOwnerOrUserList, List<UserBriefVO> afterProjectAddOwnerUserList){
-           String beforeOwnerUserName = afterProjectAddOwnerUserList.stream().map(UserBriefVO::getUserName)
-                   .sorted()
-                    .collect(Collectors.joining(","));
-            String afterOwnerUserName = beforeProjectAddOwnerOrUserList.stream().map(UserBriefVO::getUserName)
-                    .sorted()
-                    .collect(Collectors.joining(","));
-            return Tuples.of(beforeOwnerUserName,afterOwnerUserName);
-        
+    private TupleTwo</*beforeOwnerUserName*/String, /*afterOwnerUserName*/String> projectOwnerOrMemberChangeStr(List<UserBriefVO> beforeProjectAddOwnerOrUserList,
+                                                                                                                List<UserBriefVO> afterProjectAddOwnerUserList) {
+        String beforeOwnerUserName = beforeProjectAddOwnerOrUserList.stream().map(UserBriefVO::getUserName).sorted()
+            .collect(Collectors.joining(","));
+        String afterOwnerUserName = afterProjectAddOwnerUserList.stream().map(UserBriefVO::getUserName).sorted()
+            .collect(Collectors.joining(","));
+        return Tuples.of(beforeOwnerUserName, afterOwnerUserName);
+
     }
-    
+
     /**
      * 记录项目的所有者或者成员的变更
      *
@@ -731,17 +781,34 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      * @param projectName 项目名称
      * @param operator    操作人或角色
      */
-    private void recordProjectOwnerOrUserChange(TupleTwo</*beforeOwnerOrUser*/String,/*afterOwnerOrUser*/String> tuple2,
+    private void recordProjectOwnerOrUserChange(TupleTwo</*beforeOwnerOrUser*/String, /*afterOwnerOrUser*/String> tuple2,
                                                 String projectName, String operator, OperateTypeEnum operateTypeEnum) {
         if (!StringUtils.equals(tuple2.v1, tuple2.v2)) {
+            String content=StringUtils.isBlank(tuple2.v1)?String.format("新增:【%s】",tuple2.v2):
+                    StringUtils.isBlank(tuple2.v2)?String.format("删除:【%s】",tuple2.v1):String.format("【%s】-->【%s】",
+                            tuple2.v1,tuple2.v2 );
+            
             operateRecordService.save(new OperateRecord.Builder()
-                    
-                    .projectName(projectName).operationTypeEnum(operateTypeEnum)
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(tuple2.v1 + "-->" + tuple2.v2)
-                    .userOperation(operator).build());
+
+                .projectName(projectName).operationTypeEnum(operateTypeEnum)
+                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(content)
+                .userOperation(operator).build());
         }
     }
     
-
    
+    
+    private ClusterLogicTemplateIndexDetailDTO getTemplateIndexVO(ClusterLogic clusterLogic, Integer projectId) {
+        IndexTemplateDTO param = new IndexTemplateDTO();
+        param.setResourceId(clusterLogic.getId());
+        param.setProjectId(projectId);
+        List<IndexTemplate> indexTemplates = indexTemplateService.listLogicTemplates(param);
+        // 通过逻辑集群获取 index
+        List<IndexCatCellDTO> catIndexResults = esIndexCatService.syncGetIndexByCluster(clusterLogic.getName(),
+                projectId);
+        ClusterLogicTemplateIndexDetailDTO templateIndexVO = new ClusterLogicTemplateIndexDetailDTO();
+        templateIndexVO.setCatIndexResults(catIndexResults);
+        templateIndexVO.setTemplates(indexTemplates);
+        return templateIndexVO;
+    }
 }

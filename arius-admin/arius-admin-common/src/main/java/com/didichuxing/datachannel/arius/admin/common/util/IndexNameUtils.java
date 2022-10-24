@@ -11,11 +11,12 @@ import java.util.Set;
 
 public class IndexNameUtils {
 
-    private IndexNameUtils(){}
+    private IndexNameUtils() {
+    }
 
     private static final String VERSION_TAG = "_v";
 
-    private static final Long ONE_DAY = 24 * 60 * 60 * 1000L;
+    private static final Long   ONE_DAY     = 24 * 60 * 60 * 1000L;
 
     public static String removeVersion(String indexName) {
         if (indexName == null || indexName.length() < VERSION_TAG.length()) {
@@ -26,7 +27,6 @@ public class IndexNameUtils {
         if (i < 0) {
             return indexName;
         }
-
 
         String numStr = indexName.substring(i + VERSION_TAG.length());
         try {
@@ -42,46 +42,46 @@ public class IndexNameUtils {
         return indexName.substring(0, i);
     }
 
-    public static String genCurrentDailyIndexName(String templateName){
+    public static String genCurrentDailyIndexName(String templateName) {
         return templateName + "_" + DateTimeUtil.getFormatDayByOffset(0);
     }
 
-    public static String genCurrentMonthlyIndexName(String templateName){
+    public static String genCurrentMonthlyIndexName(String templateName) {
         return templateName + "_" + DateTimeUtil.getFormatMonthByOffset(0);
     }
 
     public static String genIndexNameWithVersion(String indexName, Integer version) {
-        if(version == null || version <= 0) {
+        if (version == null || version <= 0) {
             return indexName;
         }
         return indexName + "_v" + version;
     }
 
-    public static String genDailyIndexNameWithVersion(String templateName, int offsetDay, Integer version){
+    public static String genDailyIndexNameWithVersion(String templateName, int offsetDay, Integer version) {
         return genIndexNameWithVersion(genDailyIndexName(templateName, offsetDay), version);
     }
 
-    public static String genCurrentMonthlyIndexNameWithVersion(String templateName, Integer version){
+    public static String genCurrentMonthlyIndexNameWithVersion(String templateName, Integer version) {
         return genIndexNameWithVersion(genCurrentMonthlyIndexName(templateName), version);
     }
 
-    public static String genDailyIndexName(String templateName, int offsetDay){
+    public static String genDailyIndexName(String templateName, int offsetDay) {
         return templateName + "_" + DateTimeUtil.getFormatDayByOffset(offsetDay);
     }
 
     //startDate、endDate 毫秒
-    public static String genDailyIndexName(String templateName, Long startDate, Long endDate){
-        if(startDate > endDate){
+    public static String genDailyIndexName(String templateName, Long startDate, Long endDate) {
+        if (startDate > endDate) {
             return templateName + "_" + DateTimeUtil.getFormatDayByOffset(0);
         }
 
-        long currentDate     = System.currentTimeMillis();
-        long offsetFromStart = (currentDate - startDate)/ONE_DAY + 1;
-        long offsetFromEnd   = (currentDate - endDate)/ONE_DAY;
+        long currentDate = System.currentTimeMillis();
+        long offsetFromStart = (currentDate - startDate) / ONE_DAY + 1;
+        long offsetFromEnd = (currentDate - endDate) / ONE_DAY;
 
         List<String> indexList = new ArrayList<>();
-        for(; offsetFromStart >= offsetFromEnd; offsetFromStart--){
-            indexList.add(templateName + "_" + DateTimeUtil.getFormatDayByOffset((int)offsetFromStart));
+        for (; offsetFromStart >= offsetFromEnd; offsetFromStart--) {
+            indexList.add(templateName + "_" + DateTimeUtil.getFormatDayByOffset((int) offsetFromStart));
         }
 
         return StringUtils.join(indexList, ",");
@@ -167,7 +167,7 @@ public class IndexNameUtils {
      * @param templateExp
      * @return
      */
-    public static boolean isIndexNameMatchTemplateExp(final String searchIndexName,final String templateExp) {
+    public static boolean isIndexNameMatchTemplateExp(final String searchIndexName, final String templateExp) {
 
         if (StringUtils.isBlank(searchIndexName) || StringUtils.isBlank(templateExp)) {
             return false;
@@ -181,9 +181,9 @@ public class IndexNameUtils {
         }
 
         // 1. 去除索引模板表达式中的结尾*
-        tmpTemplateExp = StringUtils.removeEnd(tmpTemplateExp , "*");
+        tmpTemplateExp = StringUtils.removeEnd(tmpTemplateExp, "*");
         // 2. 用*来切分查询使用的索引名称
-        String[] indexSplits = StringUtils.split(searchIndexName , "*");
+        String[] indexSplits = StringUtils.split(searchIndexName, "*");
 
         if (indexSplits == null || indexSplits.length == 0) {
             return false;
@@ -192,7 +192,7 @@ public class IndexNameUtils {
         // 查询使用的索引名称不包含*
         if (!searchIndexName.endsWith("*") && indexSplits.length <= 1) {
 
-            String trimSearchIndexName = StringUtils.removeEnd(searchIndexName , "*");
+            String trimSearchIndexName = StringUtils.removeEnd(searchIndexName, "*");
             // 去掉_vx版本号信息
             String lastStr = removeIndexNameVersionIfHas(trimSearchIndexName);
 
@@ -224,7 +224,7 @@ public class IndexNameUtils {
 
             // lastStr是日期,除掉最后一个进行匹配
             if (isNumbericOrSpecialChar(lastStr)
-                    && isMatchIndexPartPositiveSequence(tmpTemplateExp, indexSplits, indexSplits.length - 1)) {
+                && isMatchIndexPartPositiveSequence(tmpTemplateExp, indexSplits, indexSplits.length - 1)) {
                 return true;
             }
 
@@ -257,7 +257,8 @@ public class IndexNameUtils {
      * @param partIndexName
      * @return
      */
-    public static boolean isMatchIndexPartPositiveSequence(String templateExp, String[] partIndexName, int compareCount) {
+    public static boolean isMatchIndexPartPositiveSequence(String templateExp, String[] partIndexName,
+                                                           int compareCount) {
         // 存在子字符串序号
         List<Integer> indexList = Lists.newArrayList();
 
@@ -371,7 +372,7 @@ public class IndexNameUtils {
         }
 
         // 1. 用*来切分查询使用的索引名称
-        String[] indexSplits = StringUtils.split(searchIndexName , "*");
+        String[] indexSplits = StringUtils.split(searchIndexName, "*");
 
         if (indexSplits == null || indexSplits.length == 0) {
             return false;
@@ -379,7 +380,7 @@ public class IndexNameUtils {
 
         // 查询使用的索引名称不包含*
         if (!searchIndexName.endsWith("*") && indexSplits.length <= 1) {
-            String trimSearchIndexName = StringUtils.removeEnd(searchIndexName , "*");
+            String trimSearchIndexName = StringUtils.removeEnd(searchIndexName, "*");
             // 如果查询索引名称和索引表达式相同，例如arius.dsl.template -> arius.dsl.template
             if (trimSearchIndexName.equals(templateExp)) {
                 return true;
@@ -431,7 +432,8 @@ public class IndexNameUtils {
      * @param indexTemplateList
      * @return
      */
-    public static Set<String> matchIndexTemplateBySearchIndexName(String indexName, List<IndexTemplatePhyWithLogic> indexTemplateList) {
+    public static Set<String> matchIndexTemplateBySearchIndexName(String indexName,
+                                                                  List<IndexTemplatePhyWithLogic> indexTemplateList) {
         Set<String> matchIndexTemplateNameSet = Sets.newTreeSet();
         String tmpIndexName = indexName;
         if (tmpIndexName != null && tmpIndexName.endsWith("*")) {

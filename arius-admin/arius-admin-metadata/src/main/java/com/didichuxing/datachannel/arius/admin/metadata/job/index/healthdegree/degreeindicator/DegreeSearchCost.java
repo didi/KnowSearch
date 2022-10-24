@@ -4,13 +4,15 @@ import com.didichuxing.datachannel.arius.admin.common.constant.IndicatorsType;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.BaseDegree;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.RealTimeSearchCost;
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.AbstractDegreeIndicator;
+
 @Deprecated
 public class DegreeSearchCost extends AbstractDegreeIndicator {
     @Override
     public <T extends BaseDegree> T execInner(DegreeParam degreeParam, T t) {
-        double searchCostTime = Math.floor(degreeParam.getTodayReaTimelInfo().getAvgIndicesSearchQueryTime() * 10000) / 10000;
+        double searchCostTime = Math.floor(degreeParam.getTodayReaTimelInfo().getAvgIndicesSearchQueryTime() * 10000)
+                                / 10000;
 
-        RealTimeSearchCost realTimeSearchCostPO = (RealTimeSearchCost)t;
+        RealTimeSearchCost realTimeSearchCostPO = (RealTimeSearchCost) t;
 
         realTimeSearchCostPO.setAvgSearchCostTime(searchCostTime);
 
@@ -24,7 +26,7 @@ public class DegreeSearchCost extends AbstractDegreeIndicator {
         }
 
         realTimeSearchCostPO.setScore(score);
-        return (T)realTimeSearchCostPO;
+        return (T) realTimeSearchCostPO;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
  * Created by linyunan on 2021-06-04
  */
 @Data
+@Builder()
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "集群Region")

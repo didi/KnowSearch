@@ -17,39 +17,39 @@ public class TemplateStatsInfoPO {
     /**
      * 模板id
      */
-    private Long templateId;
+    private Long         templateId;
     /**
      * 模板名称
      */
-    private String templateName;
+    private String       templateName;
     /**
      * 索引健康分
      */
-    private double indexHealthDegree;
+    private double       indexHealthDegree;
     /**
      * 索引存储容量
      */
-    private double store;
+    private double       store;
     /**
      * 索引qutoa
      */
-    private double qutoa;
+    private double       qutoa;
     /**
      * 索引成本
      */
-    private double cost;
+    private double       cost;
     /**
      * 索引昨日访问均量
      */
-    private double   accessCountPreDay;
+    private double       accessCountPreDay;
     /**
      * 索引文档数
      */
-    private long   docNu;
+    private long         docNu;
     /**
      * 索引昨日峰值写入tps
      */
-    private double   writeTps;
+    private double       writeTps;
     /**
      * 索引对应的topic
      */
@@ -57,5 +57,5 @@ public class TemplateStatsInfoPO {
     /**
      * 索引存储容量
      */
-    private double storeBytes;
+    private double       storeBytes;
 }

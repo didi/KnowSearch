@@ -1,40 +1,43 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.metrics;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.GatewayMetricsManager;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.gateway.GatewayOverviewMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.GatewayMetricsTypeEnum;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 @RestController
-@RequestMapping({V3_OP + "/gateway/metrics", V3 + "/metrics/gateway" })
+@RequestMapping({ V3 + "/metrics/gateway" })
 @Api(tags = "Gateway指标监控信息")
 public class GatewayMetricsController {
 
     @Autowired
     private GatewayMetricsManager gatewayMetricsManager;
     @Autowired
-    private GatewayManager gatewayManager;
+    private GatewayManager        gatewayManager;
 
     @GetMapping("/alive-nodes")
     @ResponseBody
-    @ApiOperation(value = "获取gateway存活节点名称列表接口" )
+    @ApiOperation(value = "获取gateway存活节点名称列表接口")
     public Result<List<String>> getGatewayAliveNodeNames(HttpServletRequest request) {
         return gatewayManager.getGatewayAliveNodeNames("Normal");
     }
@@ -77,16 +80,17 @@ public class GatewayMetricsController {
     @PostMapping("/client-node")
     @ApiOperation(value = "获取gatewayNode相关的clientNode指标信息")
     public Result<List<VariousLineChartMetricsVO>> getClientNodeMetrics(@RequestBody ClientNodeDTO dto,
-                                                                         HttpServletRequest request) {
+                                                                        HttpServletRequest request) {
         validateParam(dto);
         return gatewayMetricsManager.getClientNodeMetrics(dto, HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/client-node-ip")
     @ApiOperation(value = "获取取gatewayNode相关的clientNode ip列表")
-    public Result<List<String>> getClientNodeIpList(String gatewayNode, Long startTime,
-                                                    Long endTime, HttpServletRequest request) {
-        return gatewayMetricsManager.getClientNodeIdList(gatewayNode, startTime, endTime, HttpRequestUtil.getProjectId(request));
+    public Result<List<Tuple<String,String>>> getClientNodeIpList(String gatewayNode, Long startTime, Long endTime,
+                                                          HttpServletRequest request) {
+        return gatewayMetricsManager.getClientNodeIdList(gatewayNode, startTime, endTime,
+            HttpRequestUtil.getProjectId(request));
     }
 
     @PostMapping("/index")
@@ -116,7 +120,8 @@ public class GatewayMetricsController {
         dto.validParam();
         //检查是否有不合法的指标传过来
         List<String> metricsByGroup = GatewayMetricsTypeEnum.getMetricsByGroup(dto.getGroup());
-        String invalidMetrics = dto.getMetricsTypes().stream().filter(x -> !metricsByGroup.contains(x)).collect(Collectors.joining(","));
+        String invalidMetrics = dto.getMetricsTypes().stream().filter(x -> !metricsByGroup.contains(x))
+            .collect(Collectors.joining(","));
         if (StringUtils.isNotBlank(invalidMetrics)) {
             throw new RuntimeException("非法指标:" + invalidMetrics);
         }

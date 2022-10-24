@@ -2,16 +2,19 @@ package com.didi.arius.gateway.common.metrics.log;
 
 import com.alibaba.fastjson.JSON;
 import com.didi.arius.gateway.common.consts.QueryConsts;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.util.concurrent.ConcurrentCollections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author didi
@@ -48,7 +51,7 @@ public class DslMetricHelper {
         if (!filter(dslLogEntity)) {
             es.submit(() -> {
                 String key = String.format("%d_%s", dslLogEntity.getProjectId(), dslLogEntity.getDslTemplateMd5());
-                dslLogEntity.setAppidDslTemplateMd5(key);
+                dslLogEntity.setProjectIdDslTemplateMd5(key);
 
                 //这里由于涉及到累加所以得加锁，但是全局加锁会导致性能低，所以这里采用对单个key加锁，不同key互不影响
                 try {

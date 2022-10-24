@@ -1,12 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.setting;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
-import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
+
+import java.util.Map;
 
 /**
  * 逻辑模板settings service
@@ -15,14 +16,17 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
  */
 public interface TemplateLogicSettingsManager {
 
-    /**
-     * 修改模板Setting
-     * @param settingDTO Setting
-     * @param operator 操作者
-     * @return Result
-     * @throws AdminOperateException
-     */
-    Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator) throws AdminOperateException;
+    ///**
+    // * 修改模板Setting
+    // *
+    // * @param settingDTO Setting
+    // * @param operator   操作者
+    // * @param projectId
+    // * @return Result
+    // * @throws AdminOperateException
+    // */
+    //Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator,
+    //                           Integer projectId) throws AdminOperateException;
 
     /**
      * 修改模板Setting(仅开放对于副本设置和异步translog落盘方式的设置)
@@ -38,7 +42,7 @@ public interface TemplateLogicSettingsManager {
      * @return
      * @throws AdminOperateException
      */
-    Result<IndexTemplatePhySettings> getSettings(Integer logicId) throws AdminOperateException;
+    Result<IndexTemplatePhySetting> getSettings(Integer logicId) throws AdminOperateException;
 
     /**
      * 创建逻辑模板settings视图
@@ -57,17 +61,33 @@ public interface TemplateLogicSettingsManager {
     Result<Void> updateSettings(Integer logicId, String operator, AriusIndexTemplateSetting settings);
 
     /**
-     * 更新settings信息
-     * @param logicId 逻辑ID
-     * @param settings settings
+     * 以全量的方式更新模版settings
+     * @param logicId   逻辑模版ID
+     * @param settings  全量settings
+     * @param operator
+     * @param projectId
      * @return
+     * @throws AdminOperateException
      */
-    Result<Void> updateSettings(Integer logicId, IndexTemplatePhySettings settings);
+    Result<Void> updateSettings(Integer logicId, IndexTemplatePhySetting settings, String operator, Integer projectId)
+            throws AdminOperateException;
 
     /**
      * 更加逻辑ID获取Settings
      * @param logicId 逻辑ID
      * @return
      */
-    Result<IndexTemplatePhySettings> getTemplateSettings(Integer logicId);
+    Result<IndexTemplatePhySetting> getTemplateSettings(Integer logicId);
+
+    /**
+     * 以增量的方式更新模版settings
+     * @param logicId   模版id
+     * @param incrementalSettings  settings的增量
+     * @param operator
+     * @param projectId
+     * @return
+     * @throws AdminOperateException
+     */
+    Result<Void> updateSettingsByMerge(Integer logicId, Map<String, String> incrementalSettings, String operator,
+                                       Integer projectId) throws AdminOperateException;
 }

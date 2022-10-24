@@ -28,8 +28,8 @@ public interface ESUserDAO {
      * @return      插入成功条数
      */
     int insert(ESUserPO param);
-    
-    int countByProjectId(@Param("projectId")Integer projectId);
+
+    int countByProjectId(@Param("projectId") Integer projectId);
 
     /**
      * 根据id获取App
@@ -51,7 +51,7 @@ public interface ESUserDAO {
      * @return   删除成功条数
      */
     int delete(@Param("esUser") Integer esUser);
-    
+
     /**
      * 删除项目中所有的es user
      *
@@ -65,7 +65,7 @@ public interface ESUserDAO {
      * @param projectId  项目名称
      * @return      List<AppPO>
      */
-    List<ESUserPO> listByProjectId(@Param("projectId")Integer projectId);
+    List<ESUserPO> listByProjectId(@Param("projectId") Integer projectId);
 
     /**
      * 根据主键列表获取app信息
@@ -73,45 +73,35 @@ public interface ESUserDAO {
      * @return           List<AppPO>
      */
     List<ESUserPO> listByProjectIds(@Param("projectIds") List<Integer> projectIds);
-        /**
-     * 根据责任人获取关联的app列表信息
-     * @param responsible    责任人
-     * @return               List<AppPO>
-     */
-    List<ESUserPO> listByResponsible(String responsible);
-    
-    
+
+
+
     Integer maxById();
-    
 
-    
-
-    
-    
     /**
      * 通过项目id获取默认的es user
      *
      * @param projectId 项目id
      * @return {@code ESUser}
      */
-    ESUser getDefaultESUserByProject(@Param("projectId")Integer projectId);
-    
+    ESUser getDefaultESUserByProject(@Param("projectId") Integer projectId);
+
     /**
      * 获取项目中的默认es user
      *
      * @param projectId 项目id
      * @return int
      */
-    int countDefaultESUserByProject(@Param("projectId")Integer projectId);
-    
+    int countDefaultESUserByProject(@Param("projectId") Integer projectId);
+
     /**
      * 获取项目id通过搜索类型
      *
      * @param searchType 搜索类型
      * @return {@code List<Integer>}
      */
-    List<Integer> getProjectIdBySearchType(@Param("searchType")Integer searchType);
-    
+    List<Integer> getProjectIdBySearchType(@Param("searchType") Integer searchType);
+
     /**
      * 通过项目id和搜索类型
      *
@@ -119,6 +109,6 @@ public interface ESUserDAO {
      * @param projectId  项目id
      * @return int
      */
-    int countByProjectIdAndSearchType(@Param("searchType")Integer searchType, @Param("projectId")Integer projectId);
-    
+    int countByProjectIdAndSearchType(@Param("searchType") Integer searchType, @Param("projectId") Integer projectId);
+
 }

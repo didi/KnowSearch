@@ -27,11 +27,12 @@ public interface RoleExtendManager {
      * @return {@link Result}<{@link Void}>
      */
     Result<Void> deleteRoleByRoleId(Integer id, HttpServletRequest request);
-        /**
-     * 获取角色详情（主要是获取角色所拥有的权限信息）
-     * @param roleId 角色id
-     * @return RoleVo 角色信息
-     */
+
+    /**
+    * 获取角色详情（主要是获取角色所拥有的权限信息）
+    * @param roleId 角色id
+    * @return RoleVo 角色信息
+    */
     Result<RoleExtendVO> getRoleDetailByRoleId(Integer roleId);
 
     /**
@@ -48,9 +49,7 @@ public interface RoleExtendManager {
      * @param request 请求信息
      * @throws LogiSecurityException 参数检查错误信息
      */
-     Result<Void> createRole(RoleSaveDTO saveDTO, HttpServletRequest request);
-
-   
+    Result<Void> createRole(RoleSaveDTO saveDTO, HttpServletRequest request);
 
     /**
      * 删除角色
@@ -59,7 +58,7 @@ public interface RoleExtendManager {
      * @param request 请求信息
      * @throws LogiSecurityException 该角色已分配给用户，不能删除
      */
-     Result<Void> deleteUserFromRole(Integer roleId, Integer userId, HttpServletRequest request) ;
+    Result<Void> deleteUserFromRole(Integer roleId, Integer userId, HttpServletRequest request);
 
     /**
      * 更新角色信息
@@ -67,7 +66,7 @@ public interface RoleExtendManager {
      * @param request 请求信息
      * @throws LogiSecurityException 参数检查错误信息
      */
-     Result<Void> updateRole(RoleSaveDTO saveDTO, HttpServletRequest request) ;
+    Result<Void> updateRole(RoleSaveDTO saveDTO, HttpServletRequest request);
 
     /**
      * 分配角色给用户
@@ -75,7 +74,7 @@ public interface RoleExtendManager {
      * @param request 请求信息
      * @throws LogiSecurityException 角色分配flag不可为空
      */
-     Result<Void> assignRoles(RoleAssignDTO assignDTO, HttpServletRequest request);
+    Result<Void> assignRoles(RoleAssignDTO assignDTO, HttpServletRequest request);
 
     /**
      * 根据角色id，获取分配信息
@@ -90,6 +89,5 @@ public interface RoleExtendManager {
      * @return 角色简要信息list
      */
     Result<List<RoleBriefVO>> getRoleBriefListByRoleName(String roleName);
-
 
 }

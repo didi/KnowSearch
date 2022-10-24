@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -43,17 +42,17 @@ public class OrderInfoDetail {
     /**
      * 申请人
      */
-    private UserBriefVO applicant;
+    private UserBriefVO         applicant;
 
     /**
      * 申请人ProjectId
      */
-    private Integer applicantProjectId;
+    private Integer             applicantProjectId;
 
     /**
      * 审批人信息
      */
-    private List<UserBriefVO> approverList;
+    private List<UserBriefVO>   approverList;
 
     /**
      * 任务完成时间

@@ -5,22 +5,29 @@
                type="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO">
         <result column="id" jdbcType="BIGINT" property="id"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
-        <result column="type" jdbcType="TINYINT" property="type"/>
-        <result column="project_id" jdbcType="INTEGER" property="projectId"/>
-        <result column="data_center" jdbcType="VARCHAR" property="dataCenter"/>
-        <result column="responsible" jdbcType="VARCHAR" property="responsible"/>
-        <result column="memo" jdbcType="VARCHAR" property="memo"/>
-        <result column="quota" jdbcType="DECIMAL" property="quota"/>
-        <result column="level" jdbcType="TINYINT" property="level"/>
-        <result column="config_json" jdbcType="VARCHAR" property="configJson"/>
-        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
-        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
-        <result column="health" jdbcType="TINYINT" property="health"/>
-        <result column="data_node_spec" jdbcType="VARCHAR" property="dataNodeSpec"/>
+        <result column="type"                       jdbcType="TINYINT" property="type"/>
+        <result column="project_id"                 jdbcType="VARCHAR" property="projectId"/>
+        <result column="data_center"                jdbcType="VARCHAR" property="dataCenter"/>
+        <result column="memo"                       jdbcType="VARCHAR" property="memo"/>
+        <result column="quota"                      jdbcType="DECIMAL" property="quota"/>
+        <result column="level"                      jdbcType="TINYINT" property="level"/>
+        <result column="config_json"                jdbcType="VARCHAR" property="configJson"/>
+        <result column="create_time"                jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time"                jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="health"                     jdbcType="TINYINT" property="health"/>
+        <result column="data_node_spec"             jdbcType="VARCHAR" property="dataNodeSpec"/>
+        <result column="disk_total"                 jdbcType="BIGINT" property="diskTotal"/>
+        <result column="disk_usage"                 jdbcType="BIGINT" property="diskUsage"/>
+        <result column="disk_usage_percent"         jdbcType="DECIMAL" property="diskUsagePercent"/>
+        <result column="es_cluster_version"         jdbcType="VARCHAR" property="esClusterVersion"/>
+        <result column="data_node_num"              jdbcType="INTEGER" property="dataNodeNum"/>
+
+
     </resultMap>
 
     <sql id="Base_Column_List">
-        id , `name`, `type`, project_id, data_center, responsible, memo, quota, `level`, config_json, create_time, update_time, health,data_node_spec
+        id , `name`, `type`, project_id, data_center,  memo, quota, `level`, config_json, create_time, update_time, health,data_node_spec,
+            disk_total,disk_usage,disk_usage_percent,es_cluster_version,data_node_num
     </sql>
 
     <select id="listByCondition"
@@ -34,7 +41,7 @@
             <if test="name != null">and `name` = #{name}</if>
             <if test="type != null">and `type` = #{type}</if>
             <if test="level != null">and `level` = #{level}</if>
-            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="projectId != null">and ( project_id = #{projectId} or find_in_set(#{projectId}, project_id))</if>
             <if test="dataCenter != null">and data_center = #{dataCenter}</if>
             <if test="health != null">and health = #{health}</if>
         </trim>
@@ -47,7 +54,7 @@
         from project_arius_resource_logic
         <trim prefix="where" prefixOverrides="and">
             <if test="name != null and name != ''">and `name` LIKE CONCAT('%',#{name},'%')</if>
-            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="projectId != null">and ( project_id = #{projectId} or find_in_set(#{projectId}, project_id))</if>
         </trim>
         order by id desc
     </select>
@@ -56,10 +63,10 @@
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into project_arius_resource_logic
-        (`name`, `type`, project_id, data_center, responsible,  memo, quota, `level`, config_json,
-         health)
-        values (#{name}, #{type}, #{projectId}, #{dataCenter}, #{responsible},
-                #{memo}, #{quota}, #{level}, #{configJson}, #{health})
+        (`name`, `type`, project_id, data_center,   memo, quota, `level`, config_json,
+         health,`data_node_spec`)
+        values (#{name}, #{type}, #{projectId}, #{dataCenter},
+                #{memo}, #{quota}, #{level}, #{configJson}, #{health},#{dataNodeSpec})
     </insert>
 
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO">
@@ -68,17 +75,21 @@
             <if test="name != null">,`name` = #{name}</if>
             <if test="type != null">,`type` = #{type}</if>
             <if test="projectId != null">,project_id = #{projectId}</if>
-            <if test="responsible != null">,responsible = #{responsible}</if>
            
             <if test="memo != null">,memo = #{memo}</if>
             <if test="quota != null">,quota = #{quota}</if>
             <if test="level != null">,`level` = #{level}</if>
             <if test="configJson != null">,config_json = #{configJson}</if>
             <if test="health != null">,health = #{health}</if>
+            <if test="diskTotal != null">, disk_total = #{diskTotal}</if>
+            <if test="diskUsage != null">, disk_usage = #{diskUsage}</if>
+            <if test="diskUsagePercent != null">, disk_usage_percent = #{diskUsagePercent}</if>
+            <if test="esClusterVersion != null">, es_cluster_version = #{esClusterVersion}</if>
+            <if test="dataNodeNum != null">, data_node_num = #{dataNodeNum}</if>
         </trim>
         where id = #{id}
     </update>
-
+    
     <delete id="delete" parameterType="long">
         delete from project_arius_resource_logic
         where id = #{resourceId}
@@ -126,6 +137,7 @@
         <include refid="Base_Column_List"/>
         from project_arius_resource_logic
         where project_id = #{projectId}
+           or find_in_set(#{projectId}, project_id)
     </select>
 
     <select id="getLastCommon" parameterType="string" resultMap="BaseResultMap">
@@ -137,15 +149,7 @@
         limit 1
     </select>
 
-    <select id="listByResponsible" parameterType="string" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from project_arius_resource_logic
-        where responsible = #{responsible}
-        or responsible like concat(#{responsible},',%')
-        or responsible like concat('%,', #{responsible})
-        or responsible like concat('%,', #{responsible},',%')
-    </select>
+   
 
     <select id="pagingByCondition" resultMap="BaseResultMap"
             parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO">
@@ -155,7 +159,7 @@
         where id > 0
         <if test="id != null">and id = #{id}</if>
         <if test="name != null">and `name` LIKE CONCAT('%',#{name},'%')</if>
-        <if test="projectId != null">and project_id = #{projectId}</if>
+        <if test="projectId != null">and ( project_id = #{projectId} or find_in_set(#{projectId}, project_id))</if>
         <if test="health != null">and health = #{health}</if>
         <if test="type != null">and type = #{type}</if>
         <if test="memo != null">and `memo` LIKE CONCAT('%',#{memo},'%')</if>
@@ -166,21 +170,23 @@
     </select>
 
     <select id="getTotalHitByCondition"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO"
             resultType="long">
         select
         count(1)
         from project_arius_resource_logic
         where id > 0
+        <if test="id != null">and id = #{id}</if>
         <if test="name != null">and `name` LIKE CONCAT('%',#{name},'%')</if>
-        <if test="projectId != null">and project_id = #{projectId}</if>
+        <if test="projectId != null">and ( project_id = #{projectId} or find_in_set(#{projectId}, project_id)) </if>
         <if test="health != null">and health = #{health}</if>
         <if test="type != null">and type = #{type}</if>
+        <if test="memo != null">and `memo` LIKE CONCAT('%',#{memo},'%')</if>
     </select>
-	
-	<select id="getProjectIdById" resultType="java.lang.Integer">
-		select project_id
-		from project_arius_resource_logic
-		where id = #{resourceId}
-	</select>
+    <select id="listByLevel"
+      resultType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO">
+         select
+        <include refid="Base_Column_List"/>
+        from project_arius_resource_logic where level=#{level}
+    </select>
 </mapper>

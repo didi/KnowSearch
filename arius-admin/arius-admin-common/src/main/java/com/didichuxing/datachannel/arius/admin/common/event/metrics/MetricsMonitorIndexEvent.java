@@ -9,23 +9,24 @@ public class MetricsMonitorIndexEvent extends MetaDataMetricsEvent {
 
     private List<ESDataTempBean> esDataTempBeans;
 
-    private List<ESIndexStats> esIndexStatsList;
+    private List<ESIndexStats>   esIndexStatsList;
 
-    private Integer clusterLevel;
+    private Integer              clusterLevel;
 
-    private String hostName;
+    private String               hostName;
 
     /**
      * Create a new ApplicationEvent.
      *
      * @param source the object on which the event initially occurred (never {@code null})
      */
-    public MetricsMonitorIndexEvent(Object source, List<ESDataTempBean> esDataTempBeans, List<ESIndexStats> esIndexStatsList, Integer clusterLevel, String hostName) {
+    public MetricsMonitorIndexEvent(Object source, List<ESDataTempBean> esDataTempBeans,
+                                    List<ESIndexStats> esIndexStatsList, Integer clusterLevel, String hostName) {
         super(source);
-        this.esDataTempBeans    = esDataTempBeans;
-        this.esIndexStatsList   = esIndexStatsList;
-        this.clusterLevel       = clusterLevel;
-        this.hostName           = hostName;
+        this.esDataTempBeans = esDataTempBeans;
+        this.esIndexStatsList = esIndexStatsList;
+        this.clusterLevel = clusterLevel;
+        this.hostName = hostName;
     }
 
     public List<ESDataTempBean> getEsDataTempBeans() {

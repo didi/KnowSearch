@@ -1,0 +1,23 @@
+{
+  "size": %d,
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "term": {
+            "platformCreateFlag": {
+              "value": true
+            }
+          }
+        },
+        {
+          "term": {
+            "deleteFlag": {
+              "value": false
+            }
+          }
+        }
+      ]
+    }
+  }
+}

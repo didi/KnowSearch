@@ -78,14 +78,9 @@ public class ThirdpartTemplateVO extends BaseVO {
     @ApiModelProperty("保存天数")
     private Integer expireTime;
 
-    @ApiModelProperty("成本部门ID")
-    private String  libraDepartmentId;
+ 
 
-    @ApiModelProperty("成本部门名称")
-    private String  libraDepartment;
-
-    @ApiModelProperty("责任人")
-    private String  responsible;
+   
 
     @ApiModelProperty("时间字段")
     private String  dateField;

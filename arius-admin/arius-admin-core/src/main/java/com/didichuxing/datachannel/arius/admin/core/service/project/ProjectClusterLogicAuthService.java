@@ -14,16 +14,15 @@ import java.util.List;
 public interface ProjectClusterLogicAuthService {
 
     /**
-     * 设置 项目对某逻辑集群的权限.
-     * 封装了新增、更新、删除操作，调用接口时只需描述期望的权限状态
-     * @param projectId           项目
+     * 设置 项目对某逻辑集群的权限. 封装了新增、更新、删除操作，调用接口时只需描述期望的权限状态
+     *
+     * @param projectId      项目
      * @param logicClusterId 逻辑集群ID
      * @param auth           要设置的权限
-     * @param responsible    责任人，逗号分隔的用户名列表
      * @return 设置结果
      */
     Result<Void> ensureSetLogicClusterAuth(Integer projectId, Long logicClusterId, ProjectClusterLogicAuthEnum auth,
-                                     String responsible, String operator);
+                                           String operator);
 
     /**
      * 新增 项目逻辑集群权限
@@ -93,7 +92,8 @@ public interface ProjectClusterLogicAuthService {
      * @param clusterAuthType 逻辑集群权限类型，为null则不筛选权限类型，返回改逻辑集群的全部权限点
      * @return
      */
-    List<ProjectClusterLogicAuth> getLogicClusterAuths(Long logicClusterId, ProjectClusterLogicAuthEnum clusterAuthType);
+    List<ProjectClusterLogicAuth> getLogicClusterAuths(Long logicClusterId,
+                                                       ProjectClusterLogicAuthEnum clusterAuthType);
 
     /**
      * 判断 项目是否有在指定逻辑集群下创建索引的权限

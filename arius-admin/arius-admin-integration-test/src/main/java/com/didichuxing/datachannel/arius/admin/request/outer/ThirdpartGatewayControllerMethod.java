@@ -54,21 +54,25 @@ public class ThirdpartGatewayControllerMethod {
         String path = String.format("%s/getTemplateMap", THIRDPART_GATEWAY);
         Map<String, Object> params = new HashMap<>(1);
         params.put("cluster", cluster);
-        return JSON.parseObject(AriusClient.get(path, params), new TypeReference<Result<Map<String, GatewayTemplatePhysicalVO>>>() {
-        });
+        return JSON.parseObject(AriusClient.get(path, params),
+            new TypeReference<Result<Map<String, GatewayTemplatePhysicalVO>>>() {
+            });
     }
 
     public static Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo(String dataCenter) throws IOException {
         String path = String.format("%s/listDeployInfo", THIRDPART_GATEWAY);
         Map<String, Object> params = new HashMap<>(1);
         params.put("dataCenter", dataCenter);
-        return JSON.parseObject(AriusClient.get(path, params), new TypeReference<Result<Map<String, GatewayTemplateDeployInfoVO>>>() {
-        });
+        return JSON.parseObject(AriusClient.get(path, params),
+            new TypeReference<Result<Map<String, GatewayTemplateDeployInfoVO>>>() {
+            });
     }
 
     public static Result<ScrollDslTemplateResponse> scrollSearchDslTemplate(ScrollDslTemplateRequest request) throws IOException {
-        String path = String.format("%s/dsl/scrollDslTemplates",THIRDPART_GATEWAY);
-        return JSON.parseObject(AriusClient.post(path,request),new TypeReference<Result<ScrollDslTemplateResponse>>(){});
+        String path = String.format("%s/dsl/scrollDslTemplates", THIRDPART_GATEWAY);
+        return JSON.parseObject(AriusClient.post(path, request),
+            new TypeReference<Result<ScrollDslTemplateResponse>>() {
+            });
     }
 
 }

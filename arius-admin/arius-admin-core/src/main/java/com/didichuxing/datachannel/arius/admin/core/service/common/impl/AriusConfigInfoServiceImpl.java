@@ -1,25 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.core.service.common.impl;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.config.AriusConfigInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfigDimensionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfigStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
@@ -28,10 +18,20 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.config.AriusConfigInfoDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -44,13 +44,15 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
 
     private static final ILog                LOGGER      = LogFactory.getLog(AriusConfigInfoServiceImpl.class);
 
-    private static final String NOT_EXIST = "配置不存在";
+    private static final String              NOT_EXIST   = "配置不存在";
 
     @Autowired
     private AriusConfigInfoDAO               configInfoDAO;
 
     @Autowired
-    private OperateRecordService operateRecordService;
+    private OperateRecordService             operateRecordService;
+    @Autowired
+    private ProjectService projectService;
 
     private Cache<String, AriusConfigInfoPO> configCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
@@ -78,21 +80,15 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
         if (oldConfig != null) {
             return Result.buildDuplicate("配置重复");
         }
-
+        //TODO:对于新增的dashboard配置，需要验证格式是否正确
         AriusConfigInfoPO param = ConvertUtil.obj2Obj(configInfoDTO, AriusConfigInfoPO.class);
         boolean succ = (1 == configInfoDAO.insert(param));
         if (succ) {
-            operateRecordService.save(new OperateRecord
-                            .Builder()
-                            .operationTypeEnum(OperateTypeEnum.SETTING_ADD)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .content(String.format("新增平台配置, 配置组:%s, 配置名称%s", configInfoDTO.getValueGroup(),
-                            configInfoDTO.getValueName()))
-                            .userOperation(operator)
-                            .bizId(configInfoDTO.getId())
-                    .build());
+            operateRecordService.save(buildOperateRecord(configInfoDTO.getId(),operator,OperateTypeEnum.SETTING_ADD,
+                    String.format("新增平台配置, 配置组:%s, 配置名称%s",
+                    configInfoDTO.getValueGroup(), configInfoDTO.getValueName())));
         }
-        return Result.build(succ,param.getId());
+        return Result.build(succ, param.getId());
     }
 
     /**
@@ -111,8 +107,8 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
 
         boolean succ = (1 == configInfoDAO.updateByIdAndStatus(configId, AriusConfigStatusEnum.DELETED.getCode()));
         if (succ) {
-             operateRecordService.save(new OperateRecord(OperateTypeEnum.SETTING_DELETE, TriggerWayEnum.MANUAL_TRIGGER,
-                   String.format("删除平台配置, 配置组:%s, 配置名称%s", configInfoPO.getValueGroup(), configInfoPO.getValueName()), operator,configId));
+            operateRecordService.save(buildOperateRecord(configId,operator,OperateTypeEnum.SETTING_DELETE,
+                    String.format("删除平台配置, 配置组:%s, 配置名称%s", configInfoPO.getValueGroup(), configInfoPO.getValueName())));
         }
 
         return Result.build(succ);
@@ -139,10 +135,10 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
         boolean succ = (1 == configInfoDAO.update(ConvertUtil.obj2Obj(configInfoDTO, AriusConfigInfoPO.class)));
 
         if (succ) {
-            operateRecordService.save(new OperateRecord(OperateTypeEnum.SETTING_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
-                    String.format("编辑平台配置，配置组：%s，配置名称%s，配置值：", configInfoPO.getValueGroup(),
-                            configInfoPO.getValueName()), operator, configInfoPO.getId()));
-           
+            operateRecordService.save(buildOperateRecord(configInfoPO.getId(),operator,OperateTypeEnum.SETTING_MODIFY
+                    ,String.format("编辑平台配置，配置组：%s，配置名称%s，配置值：【%s】->【%s】", configInfoPO.getValueGroup(),
+                            configInfoPO.getValueName(),configInfoPO.getValue(),configInfoDTO.getValue())));
+
         }
 
         return Result.build(succ);
@@ -170,10 +166,9 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
 
         boolean succ = (1 == configInfoDAO.updateByIdAndStatus(configId, status));
         if (succ) {
-            operateRecordService.save(new OperateRecord(OperateTypeEnum.SETTING_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
-                    String.format("平台配置%s, 配置组:%s, 配置名称%s", statusEnum.getDesc(), configInfoPO.getValueGroup(),
-                            configInfoPO.getValueName()), operator, configInfoPO.getId()));
-        
+            operateRecordService.save(buildOperateRecord(configInfoPO.getId(),operator,OperateTypeEnum.SETTING_MODIFY,String.format("平台配置%s, 配置组:%s, 配置名称%s",
+                    statusEnum.getDesc(), configInfoPO.getValueGroup(), configInfoPO.getValueName())));
+
         }
 
         return Result.build(succ);
@@ -422,5 +417,12 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
 
     private AriusConfigInfoPO getByGroupAndNameFromDB(String group, String valueName) {
         return configInfoDAO.getByGroupAndName(group, valueName);
+    }
+    
+    private OperateRecord buildOperateRecord(Object bizId, String operator, OperateTypeEnum operationTypeEnum, String content) {
+        return new OperateRecord.Builder().content(content).bizId(bizId).operationTypeEnum(operationTypeEnum)
+                .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                .userOperation(operator)
+                .buildDefaultManualTrigger();
     }
 }

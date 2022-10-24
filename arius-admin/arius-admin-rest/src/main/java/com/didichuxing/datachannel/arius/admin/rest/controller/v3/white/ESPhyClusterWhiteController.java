@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ESPhyClusterWhiteController {
 
     @Autowired
-    private ClusterPhyManager clusterPhyManager;
+    private ClusterPhyManager  clusterPhyManager;
 
     @Autowired
     private ZeusCollectManager zeusCollectManager;
@@ -39,7 +39,7 @@ public class ESPhyClusterWhiteController {
     @ApiOperation(value = "删除接入集群")
     public Result<Void> deleteClusterJoin(HttpServletRequest request, @PathVariable Integer clusterId) {
         return clusterPhyManager.deleteClusterJoin(clusterId, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+            HttpRequestUtil.getProjectId(request));
     }
 
     @PostMapping("/updateHttpAddress")

@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsConfigInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.UserConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MultiMetricsClusterPhyNodeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterTaskDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
@@ -36,7 +36,8 @@ public interface ClusterPhyMetricsManager {
      * @param metricsTypeEnum 指标处理器类型
      * @return result
      */
-    <T> Result<T> getClusterMetricsByMetricsType(MetricsClusterPhyDTO param, Integer projectId, String userName, ClusterPhyTypeMetricsEnum metricsTypeEnum);
+    <T> Result<T> getClusterMetricsByMetricsType(MetricsClusterPhyDTO param, Integer projectId, String userName,
+                                                 ClusterPhyTypeMetricsEnum metricsTypeEnum);
 
     /**
      * 获取物理集群多个节点的指标信息
@@ -46,28 +47,29 @@ public interface ClusterPhyMetricsManager {
      * @param metricsTypeEnum 指标处理器类型
      * @return result
      */
-    Result<List<VariousLineChartMetricsVO>> getMultiClusterMetrics(MultiMetricsClusterPhyNodeDTO param, Integer projectId, String userName, ClusterPhyTypeMetricsEnum metricsTypeEnum);
+    Result<List<VariousLineChartMetricsVO>> getMultiClusterMetrics(MultiMetricsClusterPhyNodeDTO param,
+                                                                   Integer projectId, String userName,
+                                                                   ClusterPhyTypeMetricsEnum metricsTypeEnum);
 
-    
-    
     /**
      * 获取用户配置指标
      *
-     @param param 入参
-     @param userName 用户名
-     
      @return {@code List<String>}
+      * @param param 入参
+     * @param userName 用户名
+     * @param projectId
      */
-    List<String> getUserNameConfigMetrics(MetricsConfigInfoDTO param, String userName);
-    
+    List<String> listConfigMetricsByCondition(UserConfigInfoDTO param, String userName, Integer projectId);
+
     /**
      * 更新账号下已配置的指标类型
-     @param param 入参
-     @param userName 用户名
      @return {@code Result<Integer>}
+      * @param param 入参
+     * @param userName 用户名
+     * @param projectId
      */
-    Result<Integer> updateUserNameConfigMetrics(MetricsConfigInfoDTO param, String userName);
-    
+    Result<Integer> updateConfigMetricsByCondition(UserConfigInfoDTO param, String userName, Integer projectId);
+
     /**
      * 获取物理集群中的索引列表
      @param clusterPhyName 集群phy名称
@@ -77,7 +79,7 @@ public interface ClusterPhyMetricsManager {
      @param projectId 应用程序id
      @return {@code Result<List<ESClusterTaskDetailVO>>}
      */
-    Result<List<ESClusterTaskDetailVO>> getClusterPhyTaskDetail(String clusterPhyName, String node, String startTime, String endTime, Integer projectId);
-
+    Result<List<ESClusterTaskDetailVO>> getClusterPhyTaskDetail(String clusterPhyName, String node, String startTime,
+                                                                String endTime, Integer projectId);
 
 }

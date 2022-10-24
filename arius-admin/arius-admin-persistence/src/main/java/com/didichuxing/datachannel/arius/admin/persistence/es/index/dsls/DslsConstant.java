@@ -56,14 +56,7 @@ public class DslsConstant {
      * 获取网关数量
      */
     public static final String GET_GATEWAY_COUNT                                             = "AriusStatsClusterPhyInfoEsDao/getGatewayCount";
-    /**
-     * 获得网关成功数
-     */
-    public static final String GET_GATEWAY_SUCCESS_COUNT                                     = "AriusStatsClusterPhyInfoEsDao/getGatewaySuccessCount";
-    /**
-     * 获得网关失败数
-     */
-    public static final String GET_GATEWAY_FAILURE_COUNT                                     = "AriusStatsClusterPhyInfoEsDao/getGatewayFailureCount";
+
 
     /************************************************************** AriusStatsIndexInfoEsDao **************************************************************/
     /**
@@ -155,14 +148,20 @@ public class DslsConstant {
      */
     public static final String GET_MULTIPLE_INDEX_FIRST_INTERVAL_AGG_METRICS                 = "AriusStatsIndexInfoEsDao/getAggMultipleIndicesMetrics";
 
+    /**
+     * 查询第一个时间分片中指标数值的索引指标信息
+     */
+    public static final String GET_MULTIPLE_INDEX_FIRST_INTERVAL_AGG_METRICS_WITH_STEP       = "AriusStatsIndexInfoEsDao/getAggMultipleIndicesMetricsWithStep";
+    public static final String GET_AGG_MULTIPLE_INDICES_METRICS_WITH_STEP_AND_INDEX_LIST       = "AriusStatsIndexInfoEsDao/getAggMultipleIndicesMetricsWithStepAndIndexList";
+
 
     /**
      * 查询第一个时间分片中指标数值的逻辑模板指标信息
      */
-    public static final String GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS_WITH_STEP    = "AriusStatsIndexInfoEsDao/getAggMultipleIndicesMetricsWithStep";
+    public static final String GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS_WITH_STEP    = "AriusStatsIndexInfoEsDao/getAggMultipleTemplateMetricsWithStep";
 
     /**
-     * 查询topN索引聚合信息
+     * 查询topN模板聚合信息
      */
     public static final String GET_TOPN_TEMPLATE_AGG_METRICS                                 = "AriusStatsIndexInfoEsDao/getTopNTemplateAggMetrics";
 
@@ -170,6 +169,7 @@ public class DslsConstant {
      * 查询单个模板聚合信息
      */
     public static final String GET_AGG_SINGLE_TEMPLATE_METRICS                               = "AriusStatsIndexInfoEsDao/getAggSingleTemplateMetrics";
+    public static final String GET_AGG_MULTIPLE_TEMPLATE_METRICS_WITH_STEP_AND_LOGIC_IDS                               = "AriusStatsIndexInfoEsDao/getAggMultipleTemplateMetricsWithStepAndLogicIds";
 
     /**
      * 获取单个指标项
@@ -213,6 +213,11 @@ public class DslsConstant {
     public static final String AGG_CLUSTER_REAL_TIME_AVG_AND_PERCENT                         = "AriusStatsNodeInfoEsDao/aggClusterAvgAndPercentiles";
 
     /**
+     * 获取集群查询/写入总耗时
+     */
+    public static final String AGG_CLUSTER_INDEXING_SEARCH_TIME_SUM                         = "AriusStatsNodeInfoEsDao/aggClusterIndexingOrSearchTimeSum";
+
+    /**
      * 获取集群磁盘空闲率实时分位值和平均使用率
      */
     public static final String AGG_CLUSTER_AVG_AND_PERCENT_FOR_DISK_FREE_USAGE_PERCENT       = "AriusStatsNodeInfoEsDao/aggClusterAvgAndPercentilesForDiskFreeUsagePercent";
@@ -249,6 +254,12 @@ public class DslsConstant {
      * 获取某个区间范围内的某个sum聚合值
      */
     public static final String GET_FIELD_SUM_AND_RANGE_FIELD_TOTAL                           = "AriusStatsNodeInfoEsDao/getFieldSumAndRangeFieldTotal";
+
+    /**
+     * 获取某个区间范围内节点的某个sum聚合值
+     */
+    public static final String GET_NODE_FIELD_SUM_AND_RANGE_FIELD_TOTAL                      = "AriusStatsNodeInfoEsDao/getNodeFieldSumAndRangeFieldTotal";
+
     /**
      * 获取时间段内指标的最大值或平均值
      */
@@ -289,17 +300,19 @@ public class DslsConstant {
 
     /************************************************************** GatewayJoinEsDao **************************************************************/
     /**
-     * 获取dsl异常查询列表
+     * 分页获取dsl异常查询列表
      */
-    public static final String GET_GATEWAY_ERROR_LIST_BY_CONDITION                           = "GatewayJoinEsDao/getGatewayErrorListByCondition";
+    public static final String GET_GATEWAY_ERROR_BY_CONDITION                           = "GatewayJoinEsDao/getGatewayErrorByCondition";
     /**
-     * 获取dsl慢查询列表
+     * 分页获取dsl慢查询列表
      */
-    public static final String GET_GATEWAY_SLOW_LIST_BY_CONDITION                            = "GatewayJoinEsDao/getGatewaySlowListByCondition";
+    public static final String GET_GATEWAY_SLOW_BY_CONDITION                            = "GatewayJoinEsDao/getGatewaySlowByCondition";
     /**
      * 根据index获得对应的templateMD5
      */
     public static final String GET_DSLS_BY_INDEX_NAME                                        = "GatewayJoinEsDao/getTemplateMD5ByIndexName";
+    public static final String GET_ONE_DSL_BY_PROJECT_ID_AND_INDEX_NAME = "GatewayJoinEsDao/getOneDSLByProjectIdAndIndexName";
+
     /**
      * 根据index获得对应的查询请求
      */
@@ -555,6 +568,17 @@ public class DslsConstant {
     public static final String GET_GATEWAY_APP_FIELD_COUNT_BY_PROJECT_ID = "GatewayAppMetricsDao/getAggFieldCountByProjectId";
 
     /************************************************************** GatewayDslMetricsDao **************************************************************/
+    public static final String GET_TOTAL_COST_BY_FIELD = "GatewayDslMetricsDao/getTotalCostByField";
+    public static final String GET_DSL_COUNT_BY_FILELD = "GatewayDslMetricsDao/getDslCountByFileld";
+    public static final String GET_DSL_COUNT_EXTENDED_BOUNDS_BY_FILELD = "GatewayDslMetricsDao/getDslCountExtendedBoundsByFileld";
+    /**
+     * 获取某个指定字段下第一个有时间的数据
+     */
+    public static final String GET_HAS_METRIC_INFO_TIME_BY_FIELD = "GatewayDslMetricsDao/getHasMetricInfoTimeByField";
+    /**
+     * 保持和之前的结果相同
+     */
+    public static final String GET_TOTAL_COST_EXTENDED_BOUNDS_BY_FIELD = "GatewayDslMetricsDao/getTotalCostExtendedBoundsByField";
     /**
      * 获取各个查询模版访问量 topNu
      */
@@ -677,9 +701,34 @@ public class DslsConstant {
      * 条件查询索引cat/index信息
      */
     public static final String GET_CAT_INDEX_INFO_BY_CONDITION                               = "IndexCatESDAO/getCatIndexInfoByCondition";
-  
 
- 
+    /**
+     * 条件查询索引cat/index信息
+     */
+    public static final String GET_ALL_CAT_INDEX_INFO_BY_TERMS                               = "IndexCatESDAO/getAllCatIndexInfoByTerms";
+
+    public static final String GET_PLATFORM_CREATE_CAT_INDEX  = "IndexCatESDAO/getPlatformCreateCatIndex";
+    public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT  = "IndexCatESDAO/getPlatformCreateCatIndexByIndexProject";
+    public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT_AND_FUZZY_INDEX_AND_CLUSTER_LOGIC  = "IndexCatESDAO/getPlatformCreateCatIndexByIndexProjectAndFuzzyIndex";
+    public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT_AND_FUZZY_INDEX_AND_CLUSTER_PHY  =
+            "IndexCatESDAO/getPlatformCreateCatIndexByIndexProjectAndFuzzyIndexAndClusterPhy";
+    public static final String GET_PLATFORM_CREATE_CAT_INDEX_GROUP_BY_CLUSTER  = "IndexCatESDAO/getPlatformCreateCatIndexGroupByCluster";
+    
+    public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_ID  = "IndexCatESDAO/getPlatformCreateCatIndexById";
+
+    /************************************************************      ShardCatESDAO     **************************************************************/
+    /**
+     * 条件查询索引cat/shard信息
+     */
+    public static final String GET_CAT_SHARD_INFO_BY_CONDITION                               = "ShardCatESDAO/getCatShardInfoByCondition";
+
+    /**
+     * 构造多字段模糊查询
+     */
+    public static final String SHOULD_TERM_CELL                                              = "ShardCatESDAO/shouldTermCell";
+
+
+
 
     /**************************************************************  IndexNameAccessCountEsDao **************************************************************/
     /**
@@ -798,6 +847,12 @@ public class DslsConstant {
      */
     public static final String GET_HAS_CLUSTER_NODE_TASK_DATA_TIME                           = "AriusStatsClusterTaskInfoEsDao/getHasNodeTaskInfoTime";
 
+    /**
+     * 获取指定集群采集最近的时间点
+     * getTimeDifferenceBetweenNearestPointAndNow
+     */
+    public static final String GET_TIME_DIFFERENCE_BETWEEN_NEAREST_POINT_AND_NOW             = "AriusStatsClusterPhyInfoEsDao/getTimeDifferenceBetweenNearestPointAndNow";
+
     /***********************************************   AriusStatsDashBoardInfoESDAO   **************************************************************/
     public static final String FETCH_CLUSTER_HEALTH_INFO                                     = "AriusStatsDashBoardInfoESDAO/fetchClusterHealthInfo";
 
@@ -832,7 +887,14 @@ public class DslsConstant {
     /**
      * 获取List类型 Dashboard维度统计信息(带标识的类型)
      */
-    public static final String FETCH_LIST_FLAG_METRIC                                        = "AriusStatsDashBoardInfoESDAO/fetchListFlagMetric";
+    public static final String FETCH_LIST_FLAG_METRIC                                        =
+            "AriusStatsDashBoardInfoESDAO/fetchListFlagMetric";
+    
+        /**
+     * 获取List类型 Dashboard维度统计信息(阈值处理)
+     */
+    public static final String FETCH_LIST_THRESHOLDS_METRIC                                        =
+            "AriusStatsDashBoardInfoESDAO/fetchListThresholdsMetric";
 
     /**
      * 获取List类型 Dashboard维度统计信息(带数据值的类型)

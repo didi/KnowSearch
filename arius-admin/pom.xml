@@ -41,12 +41,28 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <flatten-maven-plugin.version>1.2.2</flatten-maven-plugin.version>
-         <logi-security-spring-boot-starter.version>2.10.7</logi-security-spring-boot-starter.version>
+        <logi-security-spring-boot-starter.version>2.10.15</logi-security-spring-boot-starter.version>
+        <logi-elasticsearch-client.version>1.0.24</logi-elasticsearch-client.version>
+        <java-diff-utils.version>4.11</java-diff-utils.version>
+        <json-patch.version>1.13</json-patch.version>
+        <arius-admin-op-manager.version>1.0.1-SNAPSHOT</arius-admin-op-manager.version>
     </properties>
 
     <dependencyManagement>
+    
         <!--logicommon-->
         <dependencies>
+            <!--diff文本工具-->
+            <dependency>
+                <groupId>com.github.java-json-tools</groupId>
+                <artifactId>json-patch</artifactId>
+                <version>${json-patch.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.java-diff-utils</groupId>
+                <artifactId>java-diff-utils</artifactId>
+                <version>${java-diff-utils.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.github.zqrferrari</groupId>
                 <artifactId>logi-security-spring-boot-starter</artifactId>
@@ -93,13 +109,11 @@
                 <artifactId>arius-admin-biz</artifactId>
                 <version>${revision}${sha1}${changelist}</version>
             </dependency>
-
-            <dependency>
+                 <dependency>
                 <groupId>com.didichuxing.datachannel</groupId>
-                <artifactId>arius-admin-rest-v2</artifactId>
-                <version>${revision}${sha1}${changelist}</version>
+                <artifactId>arius-admin-op-manager</artifactId>
+                <version>${arius-admin-op-manager.version}</version>
             </dependency>
-
 
 
             <dependency>
@@ -681,7 +695,7 @@
             <dependency>
                 <groupId>io.github.zqrferrari</groupId>
                 <artifactId>logi-elasticsearch-client</artifactId>
-                <version>1.0.16</version>
+                <version>${logi-elasticsearch-client.version}</version>
             </dependency>
 
             <dependency>
@@ -709,7 +723,7 @@
             <dependency>
                 <groupId>io.github.zqrferrari</groupId>
                 <artifactId>logi-job-spring-boot-starter</artifactId>
-                <version>1.0.26</version>
+                <version>1.0.27</version>
             </dependency>
 
             <dependency>
@@ -861,6 +875,38 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.3</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>net.revelc.code.formatter</groupId>-->
+<!--                <artifactId>formatter-maven-plugin</artifactId>-->
+<!--                <version>2.16.0</version>-->
+<!--            </plugin>-->
+<!--            <plugin>-->
+<!--                <groupId>net.revelc.code.formatter</groupId>-->
+<!--                <artifactId>formatter-maven-plugin</artifactId>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>format</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <configFile>${user.dir}/didi-java-code-formatter.xml</configFile>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 </project>

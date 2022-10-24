@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterLogicTransferContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterLogicTransferOrderDetail;
@@ -15,7 +14,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,11 +24,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
 
-    @Autowired
-    private ProjectService projectService;
-  
-
-  
+    
 
     @Autowired
     private ClusterLogicService clusterLogicService;
@@ -49,16 +43,13 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("目标项目Id为空");
         }
 
-       
         if (!projectService.checkProjectExist(sourceProjectId)) {
             return Result.buildParamIllegal("原项目不存在");
         }
 
-       
         if (!projectService.checkProjectExist(targetProjectId)) {
             return Result.buildParamIllegal("目标项目不存在");
         }
-        
 
         Long clusterLogicId = clusterLogicTransferContent.getClusterLogicId();
         if (Boolean.FALSE.equals(clusterLogicService.isClusterLogicExists(clusterLogicId))) {
@@ -100,9 +91,10 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
         if (projectService.checkProjectExist(workOrder.getSubmitorProjectId())) {
             return Result.buildSucc();
         }
-
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(content.getClusterLogicId());
-        if (!clusterLogic.getProjectId().equals(workOrder.getSubmitorProjectId())) {
+    
+        final boolean noneMatch = clusterLogicService.listClusterLogicByIdThatProjectIdStrConvertProjectIdList(content.getClusterLogicId()).stream()
+                .noneMatch(clusterLogic -> clusterLogic.getProjectId().equals(workOrder.getSubmitorProjectId()));
+        if (noneMatch) {
             return Result.buildOpForBidden("您无权对该集群进行转让操作");
         }
 
@@ -117,10 +109,10 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) {
         ClusterLogicTransferContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-                                              ClusterLogicTransferContent.class);
-        
+            ClusterLogicTransferContent.class);
+
         Result<Void> result = clusterLogicService.transferClusterLogic(content.getClusterLogicId(),
-            content.getTargetProjectId(), content.getTargetResponsible(), workOrder.getSubmitor());
+            content.getTargetProjectId(), workOrder.getSubmitor());
 
         return Result.buildFrom(result);
     }

@@ -7,19 +7,19 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterBaseContent;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterIndecreaseDockerContent;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterNewDockerContent;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterNewHostContent;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterBaseContent;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterIndecreaseDockerContent;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterNewDockerContent;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterNewHostContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleDocker;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.elasticcloud.ElasticCloudCommonActionParam;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.elasticcloud.ElasticCloudCreateActionParam;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.elasticcloud.ElasticCloudScaleActionParam;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsCreateActionParam;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsParamBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsScaleActionParam;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostCreateActionParam;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostScaleActionParam;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 
@@ -36,7 +36,8 @@ import java.util.*;
  */
 public class OpOrderTaskConverter {
 
-    private OpOrderTaskConverter(){}
+    private OpOrderTaskConverter() {
+    }
 
     /**
      * 工单过来的数据转list
@@ -46,8 +47,7 @@ public class OpOrderTaskConverter {
                                                               ClusterBaseContent clusterBaseContent) {
         List<EcmParamBase> ecmParamBaseList = null;
         if (ES_DOCKER.equals(clusterTypeEnum)) {
-            ecmParamBaseList = convert2ElasticCloudParamBaseList(clusterTypeEnum, opTaskTypeEnum,
-                    clusterBaseContent);
+            ecmParamBaseList = convert2ElasticCloudParamBaseList(clusterTypeEnum, opTaskTypeEnum, clusterBaseContent);
         } else if (ES_HOST.equals(clusterTypeEnum)) {
             ecmParamBaseList = convert2HostParamBaseList(opTaskTypeEnum, clusterBaseContent);
         }
@@ -58,7 +58,8 @@ public class OpOrderTaskConverter {
                                                                         OpTaskTypeEnum opTaskTypeEnum,
                                                                         ClusterBaseContent clusterBaseContent) {
         List<EcmParamBase> ecmParamBaseList = new ArrayList<>();
-        if (OpTaskTypeEnum.CLUSTER_EXPAND.equals(opTaskTypeEnum) || OpTaskTypeEnum.CLUSTER_SHRINK.equals(opTaskTypeEnum)) {
+        if (OpTaskTypeEnum.CLUSTER_EXPAND.equals(opTaskTypeEnum)
+            || OpTaskTypeEnum.CLUSTER_SHRINK.equals(opTaskTypeEnum)) {
             ClusterIndecreaseDockerContent clusterOpIndecreaseDockerContent = (ClusterIndecreaseDockerContent) clusterBaseContent;
             for (ESClusterRoleDocker esClusterRoleDocker : clusterOpIndecreaseDockerContent.getRoleClusters()) {
                 ElasticCloudScaleActionParam elasticCloudScaleActionParam = new ElasticCloudScaleActionParam();
@@ -76,7 +77,7 @@ public class OpOrderTaskConverter {
             ClusterNewDockerContent clusterOpNewDockerContent = (ClusterNewDockerContent) clusterBaseContent;
             for (String roleName : Arrays.asList(MASTER_NODE.getDesc(), CLIENT_NODE.getDesc(), DATA_NODE.getDesc())) {
                 ElasticCloudCreateActionParam elasticCloudCreateActionParam = ConvertUtil
-                        .obj2Obj(clusterOpNewDockerContent, ElasticCloudCreateActionParam.class);
+                    .obj2Obj(clusterOpNewDockerContent, ElasticCloudCreateActionParam.class);
                 elasticCloudCreateActionParam.setPhyClusterId(ClusterConstant.INVALID_VALUE);
                 elasticCloudCreateActionParam.setRoleName(roleName);
                 elasticCloudCreateActionParam.setImageName("");
@@ -107,8 +108,8 @@ public class OpOrderTaskConverter {
         if (OpTaskTypeEnum.CLUSTER_NEW.equals(opTaskTypeEnum)) {
             ClusterNewHostContent clusterOpNewHostContent = (ClusterNewHostContent) clusterBaseContent;
             for (String roleName : Arrays.asList(MASTER_NODE.getDesc(), CLIENT_NODE.getDesc(), DATA_NODE.getDesc())) {
-                HostsCreateActionParam hostCreateActionParam = ConvertUtil.obj2Obj(clusterOpNewHostContent,
-                        HostsCreateActionParam.class);
+                HostCreateActionParam hostCreateActionParam = ConvertUtil.obj2Obj(clusterOpNewHostContent,
+                    HostCreateActionParam.class);
                 hostCreateActionParam.setPhyClusterId(ClusterConstant.INVALID_VALUE);
                 hostCreateActionParam.setRoleName(roleName);
                 hostCreateActionParam.setImageName("");
@@ -123,25 +124,25 @@ public class OpOrderTaskConverter {
                     continue;
                 }
                 if (MASTER_NODE.getDesc().equals(esClusterRoleHost.getRole())) {
-                    HostsCreateActionParam masterCreateAction = (HostsCreateActionParam) ecmParamBaseList.get(0);
+                    HostCreateActionParam masterCreateAction = (HostCreateActionParam) ecmParamBaseList.get(0);
                     masterCreateAction.getHostList().add(esClusterRoleHost.getHostname());
                     masterCreateAction.setPort(esClusterRoleHost.getPort());
 
                 } else if (CLIENT_NODE.getDesc().equals(esClusterRoleHost.getRole())) {
-                    HostsCreateActionParam clientCreateAction = ((HostsCreateActionParam) ecmParamBaseList.get(1));
+                    HostCreateActionParam clientCreateAction = ((HostCreateActionParam) ecmParamBaseList.get(1));
                     clientCreateAction.getHostList().add(esClusterRoleHost.getHostname());
                     clientCreateAction.setPort(esClusterRoleHost.getPort());
 
                 } else if (DATA_NODE.getDesc().equals(esClusterRoleHost.getRole())) {
-                    HostsCreateActionParam dataCreateAction = ((HostsCreateActionParam) ecmParamBaseList.get(2));
+                    HostCreateActionParam dataCreateAction = ((HostCreateActionParam) ecmParamBaseList.get(2));
                     dataCreateAction.getHostList().add(esClusterRoleHost.getHostname());
                     dataCreateAction.setPort(esClusterRoleHost.getPort());
                 }
             }
 
-            List<String> masterHostList = ((HostsCreateActionParam) ecmParamBaseList.get(0)).getHostList();
+            List<String> masterHostList = ((HostCreateActionParam) ecmParamBaseList.get(0)).getHostList();
             for (EcmParamBase ecmParamBase : ecmParamBaseList) {
-                HostsCreateActionParam hostCreateActionParam = (HostsCreateActionParam) ecmParamBase;
+                HostCreateActionParam hostCreateActionParam = (HostCreateActionParam) ecmParamBase;
                 hostCreateActionParam.setMasterHostList(masterHostList);
                 hostCreateActionParam.setNodeNumber(hostCreateActionParam.getHostList().size());
             }
@@ -183,15 +184,15 @@ public class OpOrderTaskConverter {
     private static List<EcmParamBase> convert2ElasticCloudParamBaseList(EcmTask ecmTask) {
         List<EcmParamBase> ecmParamBaseList;
         if (Objects.equals(OpTaskTypeEnum.CLUSTER_EXPAND.getType(), ecmTask.getOrderType())
-                || Objects.equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType(), ecmTask.getOrderType())) {
+            || Objects.equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType(), ecmTask.getOrderType())) {
             ecmParamBaseList = new ArrayList<>(
-                    JSON.parseArray(ecmTask.getHandleData(), ElasticCloudScaleActionParam.class));
+                JSON.parseArray(ecmTask.getHandleData(), ElasticCloudScaleActionParam.class));
         } else if (Objects.equals(OpTaskTypeEnum.CLUSTER_NEW.getType(), ecmTask.getOrderType())) {
             ecmParamBaseList = new ArrayList<>(
-                    ConvertUtil.str2ObjArrayByJson(ecmTask.getHandleData(), ElasticCloudCreateActionParam.class));
+                ConvertUtil.str2ObjArrayByJson(ecmTask.getHandleData(), ElasticCloudCreateActionParam.class));
         } else {
             ecmParamBaseList = new ArrayList<>(
-                    JSON.parseArray(ecmTask.getHandleData(), ElasticCloudCommonActionParam.class));
+                JSON.parseArray(ecmTask.getHandleData(), ElasticCloudCommonActionParam.class));
         }
         return ecmParamBaseList;
     }
@@ -200,13 +201,12 @@ public class OpOrderTaskConverter {
         List<EcmParamBase> ecmParamBaseList;
         if (Objects.equals(OpTaskTypeEnum.CLUSTER_NEW.getType(), ecmTask.getOrderType())) {
             ecmParamBaseList = new ArrayList<>(
-                    ConvertUtil.str2ObjArrayByJson(ecmTask.getHandleData(), HostsCreateActionParam.class));
+                ConvertUtil.str2ObjArrayByJson(ecmTask.getHandleData(), HostCreateActionParam.class));
         } else if (Objects.equals(OpTaskTypeEnum.CLUSTER_EXPAND.getType(), ecmTask.getOrderType())
-                || Objects.equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType(), ecmTask.getOrderType())) {
-            ecmParamBaseList = new ArrayList<>(
-                    JSON.parseArray(ecmTask.getHandleData(), HostsScaleActionParam.class));
+                   || Objects.equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType(), ecmTask.getOrderType())) {
+            ecmParamBaseList = new ArrayList<>(JSON.parseArray(ecmTask.getHandleData(), HostScaleActionParam.class));
         } else {
-            ecmParamBaseList = new ArrayList<>(JSON.parseArray(ecmTask.getHandleData(), HostsParamBase.class));
+            ecmParamBaseList = new ArrayList<>(JSON.parseArray(ecmTask.getHandleData(), HostParamBase.class));
         }
         return ecmParamBaseList;
     }

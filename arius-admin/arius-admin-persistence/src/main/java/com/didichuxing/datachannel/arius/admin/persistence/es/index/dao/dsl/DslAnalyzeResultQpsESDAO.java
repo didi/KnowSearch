@@ -26,7 +26,7 @@ public class DslAnalyzeResultQpsESDAO extends BaseESDAO {
     private String typeName = "type";
 
     @PostConstruct
-    public void init(){
+    public void init() {
         this.indexName = dataCentreUtil.getAriusDslAnalyzeResult();
     }
 
@@ -38,7 +38,8 @@ public class DslAnalyzeResultQpsESDAO extends BaseESDAO {
      */
     public boolean bathInsert(List<DslAnalyzeResultQpsPO> projectIdTemplateQpsInfoList) {
 
-        return updateClient.batchInsert( EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, projectIdTemplateQpsInfoList);
+        return updateClient.batchInsert(EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName,
+            projectIdTemplateQpsInfoList);
     }
 
     /**
@@ -52,7 +53,8 @@ public class DslAnalyzeResultQpsESDAO extends BaseESDAO {
             return null;
         }
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_MAX_QPS_BY_PROJECT_ID_DSLTEMPLATE, dslBase.getProjectId(), dslBase.getDslTemplateMd5());
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_MAX_QPS_BY_PROJECT_ID_DSLTEMPLATE,
+            dslBase.getProjectId(), dslBase.getDslTemplateMd5());
 
         return gatewayClient.performRequestAndTakeFirst(indexName, typeName, dsl, DslAnalyzeResultQpsPO.class);
     }

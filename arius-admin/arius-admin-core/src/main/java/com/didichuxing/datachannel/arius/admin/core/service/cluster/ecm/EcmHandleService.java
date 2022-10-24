@@ -68,8 +68,8 @@ public interface EcmHandleService {
      * @param operator  操作人
      * @return Result
      */
-    Result<EcmOperateAppBase> actionUnfinishedESCluster(EcmActionEnum ecmActionEnum, EcmParamBase actionParamBase, String hostname,
-                                                        String operator);
+    Result<EcmOperateAppBase> actionUnfinishedESCluster(EcmActionEnum ecmActionEnum, EcmParamBase actionParamBase,
+                                                        String hostname, String operator);
 
     /**
      * 获取集群节点信息
@@ -118,5 +118,6 @@ public interface EcmHandleService {
     /**
      * 获取带集群Plugin的Ecm参数列表
      */
-    Result<List<EcmParamBase>> buildEcmParamBaseListWithEsPluginAction(Integer phyClusterId, List<String> roleNameList, Long EsPluginId, Integer actionType);
+    Result<List<EcmParamBase>> buildEcmParamBaseListWithEsPluginAction(Integer phyClusterId, List<String> roleNameList,
+                                                                       Long EsPluginId, Integer actionType);
 }

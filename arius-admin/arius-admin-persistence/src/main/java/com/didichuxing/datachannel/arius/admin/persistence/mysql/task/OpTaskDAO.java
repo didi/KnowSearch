@@ -16,13 +16,14 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface OpTaskDAO {
-   /**
+    /**
      * 新增
      *
      * @param param 参数
      * @return int
      */
     int insert(OpTaskPO param);
+
     /**
      * 获取通过id
      *
@@ -30,12 +31,14 @@ public interface OpTaskDAO {
      * @return {@link OpTaskPO}
      */
     OpTaskPO getById(@Param("id") Integer id);
+
     /**
      * 获取所有集合
      *
      * @return {@link List}<{@link OpTaskPO}>
      */
     List<OpTaskPO> listAll();
+
     /**
      * 通过入参条件动态获取集合
      *
@@ -43,14 +46,16 @@ public interface OpTaskDAO {
      * @return {@link List}<{@link OpTaskPO}>
      */
     List<OpTaskPO> listByCondition(OpTaskPO param);
-  /**
+
+    /**
      * 更新
      *
      * @param param 入参
      * @return int
      */
     int update(OpTaskPO param);
-   /**
+
+    /**
      * 获取最新任务
      *
      * @param businessKey 业务关键
@@ -58,8 +63,8 @@ public interface OpTaskDAO {
      *
      * @return {@link OpTaskPO}
      */
-    OpTaskPO getLatestTask(@Param("businessKey") String businessKey,
-                           @Param("taskType") Integer taskType);
+    OpTaskPO getLatestTask(@Param("businessKey") String businessKey, @Param("taskType") Integer taskType);
+
     /**
      * 获取pending任务
      *
@@ -67,15 +72,16 @@ public interface OpTaskDAO {
      * @param taskType 任务类型
      * @return {@link OpTaskPO}
      */
-    OpTaskPO getPendingTask(@Param("businessKey") String businessKey,
-                            @Param("taskType") Integer taskType);
-   /**
+    OpTaskPO getPendingTask(@Param("businessKey") String businessKey, @Param("taskType") Integer taskType);
+
+    /**
      * 通过任务类型获取pending任务
      *
      * @param taskType 任务类型
      * @return {@link List}<{@link OpTaskPO}>
      */
     List<OpTaskPO> getPendingTaskByType(@Param("taskType") Integer taskType);
+
     /**
      *  通过任务类型获取成功任务
      *

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.event.template.physical.metadata;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
 
 import java.util.List;
 
@@ -10,22 +10,16 @@ import java.util.List;
  * @date 2020/09/02
  */
 public class PhysicalTemplateSettingsModifyEvent extends PhysicalMetaDataModifyEvent {
-    private final Integer projectId;
-    private final String  cluster;
-    private final String templateName;
-    private final List<String> receivers;
-    private final IndexTemplatePhySettings beforeUpdateSettings;
-    private final IndexTemplatePhySettings afterUpdateSettings;
+    private final Integer                 projectId;
+    private final String                  cluster;
+    private final String                  templateName;
+    private final List<String>            receivers;
+    private final IndexTemplatePhySetting beforeUpdateSettings;
+    private final IndexTemplatePhySetting afterUpdateSettings;
 
-
-    public PhysicalTemplateSettingsModifyEvent(
-            Object source,
-            Integer projectId,
-            String cluster,
-            String templateName,
-            List<String> receivers,
-            IndexTemplatePhySettings beforeUpdateSettings,
-            IndexTemplatePhySettings afterUpdateSettings) {
+    public PhysicalTemplateSettingsModifyEvent(Object source, Integer projectId, String cluster, String templateName,
+                                               List<String> receivers, IndexTemplatePhySetting beforeUpdateSettings,
+                                               IndexTemplatePhySetting afterUpdateSettings) {
         super(source);
         this.projectId = projectId;
         this.cluster = cluster;
@@ -51,11 +45,11 @@ public class PhysicalTemplateSettingsModifyEvent extends PhysicalMetaDataModifyE
         return this.receivers;
     }
 
-    public IndexTemplatePhySettings getBeforeUpdateSettings() {
+    public IndexTemplatePhySetting getBeforeUpdateSettings() {
         return this.beforeUpdateSettings;
     }
 
-    public IndexTemplatePhySettings getAfterUpdateSettings() {
+    public IndexTemplatePhySetting getAfterUpdateSettings() {
         return this.afterUpdateSettings;
     }
 }

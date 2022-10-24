@@ -8,18 +8,22 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesIncrementalSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,6 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,7 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(V3 + "/indices")
 @Api(tags = "索引管理接口(REST)")
-public class IndicesController {
+public class IndicesController extends BaseIndicesController {
     @Autowired
     private IndicesManager indicesManager;
 
@@ -54,9 +59,15 @@ public class IndicesController {
     @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "创建索引")
-    public Result<Void> createIndex(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
+    public Result<Void> createIndex(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param)
+            throws AdminOperateException {
+        Result<Boolean> checkClusterValidResult = checkClusterValid(Lists.newArrayList(param.getCluster()));
+        if (checkClusterValidResult.failed()) {
+            return Result.buildFrom(checkClusterValidResult);
+        }
+
         return indicesManager.createIndex(param, HttpRequestUtil.getProjectId(request),
-                HttpRequestUtil.getOperator(request));
+            HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/{cluster}/{indexName}")
@@ -78,16 +89,29 @@ public class IndicesController {
     @DeleteMapping("")
     @ResponseBody
     @ApiOperation(value = "删除索引")
-    public Result<Boolean> deleteIndex(HttpServletRequest request, @RequestBody List<IndexCatCellDTO> param) {
-        return indicesManager.deleteIndex(param, HttpRequestUtil.getProjectId(request),
+    public Result<Boolean> deleteIndex(HttpServletRequest request, @RequestBody List<IndexCatCellDTO> params) {
+        Result<Boolean> checkClusterValidResult = checkClusterValid(
+            params.stream().map(IndexCatCellDTO::getCluster).distinct().collect(Collectors.toList()));
+        if (checkClusterValidResult.failed()) {
+            return Result.buildFrom(checkClusterValidResult);
+        }
+
+        return indicesManager.deleteIndex(params, HttpRequestUtil.getProjectId(request),
             HttpRequestUtil.getOperator(request));
     }
 
     @PutMapping("/mapping")
     @ResponseBody
     @ApiOperation(value = "编辑mapping")
-    public Result<Void> editMapping(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
-        return indicesManager.editMapping(param, HttpRequestUtil.getProjectId(request));
+    public Result<Void> editMapping(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param)
+            throws AdminOperateException {
+        Result<Boolean> checkClusterValidResult = checkClusterValid(Lists.newArrayList(param.getCluster()));
+        if (checkClusterValidResult.failed()) {
+            return Result.buildFrom(checkClusterValidResult);
+        }
+
+        return indicesManager.editMapping(param, HttpRequestUtil.getProjectId(request),
+            HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/{cluster}/{indexName}/mapping")
@@ -101,8 +125,15 @@ public class IndicesController {
     @PutMapping("/setting")
     @ResponseBody
     @ApiOperation(value = "编辑setting")
-    public Result<Void> editSetting(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) throws ESOperateException {
-        return indicesManager.editSetting(param, HttpRequestUtil.getProjectId(request));
+    public Result<Void> editSetting(HttpServletRequest request,
+                                    @RequestBody IndexCatCellWithConfigDTO param) throws ESOperateException {
+        Result<Boolean> checkClusterValidResult = checkClusterValid(Lists.newArrayList(param.getCluster()));
+        if (checkClusterValidResult.failed()) {
+            return Result.buildFrom(checkClusterValidResult);
+        }
+
+        return indicesManager.editSetting(param, HttpRequestUtil.getProjectId(request),
+            HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/{cluster}/{indexName}/setting")
@@ -117,6 +148,12 @@ public class IndicesController {
     @ResponseBody
     @ApiOperation(value = "关闭索引")
     public Result<Boolean> close(HttpServletRequest request, @RequestBody List<IndexCatCellDTO> params) {
+        Result<Boolean> checkClusterValidResult = checkClusterValid(
+            params.stream().map(IndexCatCellDTO::getCluster).distinct().collect(Collectors.toList()));
+        if (checkClusterValidResult.failed()) {
+            return Result.buildFrom(checkClusterValidResult);
+        }
+
         return indicesManager.closeIndex(params, HttpRequestUtil.getProjectId(request),
             HttpRequestUtil.getOperator(request));
     }
@@ -125,6 +162,12 @@ public class IndicesController {
     @ResponseBody
     @ApiOperation(value = "关闭索引")
     public Result<Boolean> open(HttpServletRequest request, @RequestBody List<IndexCatCellDTO> params) {
+        Result<Boolean> checkClusterValidResult = checkClusterValid(
+            params.stream().map(IndexCatCellDTO::getCluster).distinct().collect(Collectors.toList()));
+        if (checkClusterValidResult.failed()) {
+            return Result.buildFrom(checkClusterValidResult);
+        }
+
         return indicesManager.openIndex(params, HttpRequestUtil.getProjectId(request),
             HttpRequestUtil.getOperator(request));
     }
@@ -134,29 +177,48 @@ public class IndicesController {
     @ApiOperation(value = "批量编辑索引阻塞设置")
     public Result<Boolean> editIndexBlockSetting(@RequestBody List<IndicesBlockSettingDTO> params,
                                                  HttpServletRequest request) {
-        return indicesManager.editIndexBlockSetting(params, HttpRequestUtil.getProjectId(request),
+        Result<Boolean> checkClusterValidResult = checkClusterValid(
+            params.stream().map(IndicesBlockSettingDTO::getCluster).distinct().collect(Collectors.toList()));
+        if (checkClusterValidResult.failed()) {
+            return Result.buildFrom(checkClusterValidResult);
+        }
+        Result<Void> result = indicesManager.editIndexBlockSetting(params, HttpRequestUtil.getProjectId(request),
             HttpRequestUtil.getOperator(request));
+        return Result.buildSucc(result.success() ? Boolean.TRUE : Boolean.FALSE);
     }
-    
+
     @GetMapping("/{cluster}/{indexName}/alias")
     @ResponseBody
     @ApiOperation(value = "获取索引别名")
-    public Result<List<String>> getIndexAliases(HttpServletRequest request, @PathVariable String cluster, @PathVariable String indexName) {
+    public Result<List<String>> getIndexAliases(HttpServletRequest request, @PathVariable String cluster,
+                                                @PathVariable String indexName) {
         return indicesManager.getIndexAliases(cluster, indexName, HttpRequestUtil.getProjectId(request));
     }
-    
+
     @PutMapping("/alias")
     @ResponseBody
     @ApiOperation(value = "编辑别名")
     public Result<Void> alias(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
-        return indicesManager.addIndexAliases(param, HttpRequestUtil.getProjectId(request));
+        Result<Boolean> checkClusterValidResult = checkClusterValid(Lists.newArrayList(param.getCluster()));
+        if (checkClusterValidResult.failed()) {
+            return Result.buildFrom(checkClusterValidResult);
+        }
+
+        return indicesManager.addIndexAliases(param, HttpRequestUtil.getProjectId(request),
+            HttpRequestUtil.getOperator(request));
     }
 
     @DeleteMapping("/alias")
     @ResponseBody
     @ApiOperation(value = "删除别名")
     public Result<Void> deleteAlias(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
-        return indicesManager.deleteIndexAliases(param, HttpRequestUtil.getProjectId(request));
+        Result<Boolean> checkClusterValidResult = checkClusterValid(Lists.newArrayList(param.getCluster()));
+        if (checkClusterValidResult.failed()) {
+            return Result.buildFrom(checkClusterValidResult);
+        }
+
+        return indicesManager.deleteIndexAliases(param, HttpRequestUtil.getProjectId(request),
+            HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/{cluster}/{indexName}/shard")
@@ -171,16 +233,31 @@ public class IndicesController {
     @ResponseBody
     @ApiModelProperty(value = "获取物理集群索引列表")
     public Result<List<String>> getClusterPhyIndexName(@PathVariable String clusterPhyName,
+                                                       @RequestParam(value = "index",required = false) String index,
                                                        HttpServletRequest request) {
-        return indicesManager.getClusterPhyIndexName(clusterPhyName, HttpRequestUtil.getProjectId(request));
+        return indicesManager.getClusterPhyIndexName(clusterPhyName, HttpRequestUtil.getProjectId(request),index);
     }
 
     @GetMapping("/{clusterLogicName}/logic/indices")
     @ResponseBody
     @ApiModelProperty(value = "获取逻辑集群索引列表")
-    public Result<List<String>> getClusterLogicIndexName(@PathVariable String clusterLogicName,
+    public Result<List<String>> getClusterLogicIndexName(@PathVariable String clusterLogicName,  @RequestParam(value = "index",required = false) String index,
                                                          HttpServletRequest request) {
-        return indicesManager.getClusterLogicIndexName(clusterLogicName, HttpRequestUtil.getProjectId(request));
+        return indicesManager.getClusterLogicIndexName(clusterLogicName, HttpRequestUtil.getProjectId(request),index);
     }
 
+    @PutMapping("/mergeSettings")
+    @ResponseBody
+    @ApiOperation(value = "以settings增量方式批量更新索引的settings")
+    public Result<Boolean> updateIndexSettingsByMerge(@RequestBody List<IndicesIncrementalSettingDTO> params,
+                                                 HttpServletRequest request) throws ESOperateException {
+        Result<Boolean> checkClusterValidResult = checkClusterValid(
+                params.stream().map(IndicesIncrementalSettingDTO::getCluster).distinct().collect(Collectors.toList()));
+        if (checkClusterValidResult.failed()) {
+            return Result.buildFrom(checkClusterValidResult);
+        }
+        Result<Void> result = indicesManager.updateIndexSettingsByMerge(params, HttpRequestUtil.getProjectId(request),
+                HttpRequestUtil.getOperator(request));
+        return Result.buildSucc(result.success() ? Boolean.TRUE : Boolean.FALSE);
+    }
 }

@@ -12,40 +12,40 @@ public class MetaDataMonitorMetrics2PrometheusListener implements ApplicationLis
 
     @Override
     public void onApplicationEvent(MetaDataMetricsEvent event) {
-        if(event instanceof MetricsMonitorClusterEvent){
-            MetricsMonitorClusterEvent monitorClusterEvent = (MetricsMonitorClusterEvent)event;
+        if (event instanceof MetricsMonitorClusterEvent) {
+            MetricsMonitorClusterEvent monitorClusterEvent = (MetricsMonitorClusterEvent) event;
             sendMetrics(monitorClusterEvent);
         }
 
-        if(event instanceof MetricsMonitorCollectTimeEvent){
-            MetricsMonitorCollectTimeEvent collectTimeEvent = (MetricsMonitorCollectTimeEvent)event;
+        if (event instanceof MetricsMonitorCollectTimeEvent) {
+            MetricsMonitorCollectTimeEvent collectTimeEvent = (MetricsMonitorCollectTimeEvent) event;
             sendMetrics(collectTimeEvent);
         }
 
-        if(event instanceof MetricsMonitorIndexEvent){
-            MetricsMonitorIndexEvent monitorIndexEvent = (MetricsMonitorIndexEvent)event;
+        if (event instanceof MetricsMonitorIndexEvent) {
+            MetricsMonitorIndexEvent monitorIndexEvent = (MetricsMonitorIndexEvent) event;
             sendMetrics(monitorIndexEvent);
         }
 
-        if(event instanceof MetricsMonitorNodeEvent){
-            MetricsMonitorNodeEvent monitorNodeEvent = (MetricsMonitorNodeEvent)event;
+        if (event instanceof MetricsMonitorNodeEvent) {
+            MetricsMonitorNodeEvent monitorNodeEvent = (MetricsMonitorNodeEvent) event;
             sendMetrics(monitorNodeEvent);
         }
     }
 
-    private void sendMetrics(MetricsMonitorClusterEvent event){
+    private void sendMetrics(MetricsMonitorClusterEvent event) {
         //todo：实现指标吐到Prometheus的逻辑
     }
 
-    private void sendMetrics(MetricsMonitorCollectTimeEvent event){
+    private void sendMetrics(MetricsMonitorCollectTimeEvent event) {
         //todo：实现指标吐到Prometheus的逻辑
     }
 
-    private void sendMetrics(MetricsMonitorIndexEvent event){
+    private void sendMetrics(MetricsMonitorIndexEvent event) {
         //todo：实现指标吐到Prometheus的逻辑
     }
 
-    private void sendMetrics(MetricsMonitorNodeEvent event){
+    private void sendMetrics(MetricsMonitorNodeEvent event) {
         //todo：实现指标吐到Prometheus的逻辑
     }
 }

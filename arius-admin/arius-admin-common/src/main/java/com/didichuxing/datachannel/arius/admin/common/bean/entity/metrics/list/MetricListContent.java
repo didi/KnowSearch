@@ -24,5 +24,10 @@ public class MetricListContent {
     /**
      * 指标值, 某些指标项需要展示指标值, 可能为百分比, 考虑客户端做适配
      */
-        private Double value;
+    private Double value;
+
+    /**
+     * 指标值, 某些指标项需要展示指标值, 可能为百分比, 考虑客户端做适配
+     */
+    private Long indexCount;
 }

@@ -1,13 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.phy;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyQuickCommandManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandIndicesQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandShardsQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
@@ -25,10 +31,10 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 @RequestMapping({ V3 + "/cluster/phy" })
 @Api(tags = "ES物理集群集群快捷命令接口(REST)")
 public class ESPhyClusterQuickCommandController {
-    
+
     @Autowired
     private ClusterPhyQuickCommandManager clusterPhyQuickCommandManager;
-    
+
     @PutMapping("/{cluster}/node-state-analysis")
     @ResponseBody
     @ApiOperation(value = "node_state分析")
@@ -36,18 +42,21 @@ public class ESPhyClusterQuickCommandController {
         return clusterPhyQuickCommandManager.nodeStateAnalysis(cluster);
     }
 
-    @PutMapping("/{cluster}/indices-distribution")
+
+    @PostMapping("/indices-distribution")
     @ResponseBody
     @ApiOperation(value = "indices分布")
-    public Result<List<IndicesDistributionVO>> indicesDistribution(@PathVariable String cluster) {
-        return clusterPhyQuickCommandManager.indicesDistribution(cluster);
+    public PaginationResult<IndicesDistributionVO> indicesDistribution(HttpServletRequest request,
+                                                                       @RequestBody ClusterPhyQuickCommandIndicesQueryDTO condition) throws NotFindSubclassException {
+        return clusterPhyQuickCommandManager.indicesDistributionPage(condition, HttpRequestUtil.getProjectId(request));
     }
 
-    @PutMapping("/{cluster}/shard-distribution")
+    @PostMapping("/shard-distribution")
     @ResponseBody
     @ApiOperation(value = "shard分布")
-    public Result<List<ShardDistributionVO>> shardDistribution(@PathVariable String cluster) {
-        return clusterPhyQuickCommandManager.shardDistribution(cluster);
+    public PaginationResult<ShardDistributionVO> shardDistribution(HttpServletRequest request,
+                                                               @RequestBody ClusterPhyQuickCommandShardsQueryDTO condition) throws NotFindSubclassException {
+        return clusterPhyQuickCommandManager.shardDistributionPage(condition, HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("/{cluster}/pending-task-analysis")
@@ -91,5 +100,4 @@ public class ESPhyClusterQuickCommandController {
     public Result<Void> clearFieldDataMemory(@PathVariable String cluster) {
         return clusterPhyQuickCommandManager.clearFieldDataMemory(cluster);
     }
-
 }

@@ -36,11 +36,13 @@ public abstract class AbstractEcmBaseHandle {
 
     public abstract Result<EcmOperateAppBase> removeESCluster(EcmParamBase actionParamBase);
 
-    public abstract Result<EcmOperateAppBase> actionNotFinishedTask(EcmParamBase actionParamBase, EcmActionEnum ecmActionEnum, String hostname);
+    public abstract Result<EcmOperateAppBase> actionNotFinishedTask(EcmParamBase actionParamBase,
+                                                                    EcmActionEnum ecmActionEnum, String hostname);
 
     public abstract Result<String> infoESCluster(EcmParamBase actionParamBase);
 
     public abstract Result<EcmSubTaskLog> getSubTaskLog(Long taskId, String hostname, EcmParamBase actionParamBase);
 
     public abstract Result<List<EcmTaskStatus>> getTaskStatus(EcmParamBase ecmParamBase, Integer orderType);
+
 }

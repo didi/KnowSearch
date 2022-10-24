@@ -3,10 +3,11 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setti
 import org.elasticsearch.action.Action;
 import org.elasticsearch.client.ElasticsearchClient;
 
-public class ESClusterGetSettingsAllAction extends Action<ESClusterGetSettingsAllRequest, ESClusterGetSettingsAllResponse, ESClusterGetSettingsAllRequestBuilder> {
+public class ESClusterGetSettingsAllAction extends
+                                           Action<ESClusterGetSettingsAllRequest, ESClusterGetSettingsAllResponse, ESClusterGetSettingsAllRequestBuilder> {
 
     public static final ESClusterGetSettingsAllAction INSTANCE = new ESClusterGetSettingsAllAction();
-    public static final String NAME = "cluster:settings/get";
+    public static final String                        NAME     = "cluster:settings/get";
 
     private ESClusterGetSettingsAllAction() {
         super(NAME);

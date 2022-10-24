@@ -18,15 +18,15 @@ public class ClusterOpUpdateOrderDetail extends AbstractOrderDetail {
     /**
      * 物理集群id
      */
-    private Long phyClusterId;
+    private Long                    phyClusterId;
     /**
      * 物理集群名称
      */
-    private String phyClusterName;
+    private String                  phyClusterName;
     /**
      * 角色顺序，如：airepo-masternode,airepo-clientnode,airepo-datanode
      */
-    private String roleOrder;
+    private String                  roleOrder;
     /**
      * 集群角色 对应主机列表
      */
@@ -34,5 +34,5 @@ public class ClusterOpUpdateOrderDetail extends AbstractOrderDetail {
     /**
      * 集群版本
      */
-    private String esVersion;
+    private String                  esVersion;
 }

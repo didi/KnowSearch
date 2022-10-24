@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface WorkOrderDAO {
-    
+
     /**
      * 新增
      *
@@ -22,17 +22,17 @@ public interface WorkOrderDAO {
      * @return int
      */
     int insert(WorkOrderPO param);
-    
+
     /**
      * 获取通过id
      *
      * @param id id
      * @return {@link WorkOrderPO}
      */
-    WorkOrderPO getById(@Param("id")Long id);
+    WorkOrderPO getById(@Param("id") Long id);
 
     List<WorkOrderPO> list();
-    
+
     /**
      * 更新订单状态通过id
      *
@@ -40,31 +40,29 @@ public interface WorkOrderDAO {
      * @param status 状态
      * @return int
      */
-    int updateOrderStatusById(@Param("id")Long id,
-                              @Param("status")Integer status);
+    int updateOrderStatusById(@Param("id") Long id, @Param("status") Integer status);
 
     int update(WorkOrderPO param);
-    
+
     /**
      * 由申请人和状态列表
      *
-     * @param applicant 申请人
+     * @param applicantProjectId 项目id
      * @param status 状态
      * @return {@link List}<{@link WorkOrderPO}>
      */
-    List<WorkOrderPO> listByApplicantAndStatusAndProjectId(@Param("applicant")String applicant,
-                                                           @Param("status")Integer status,
-                                                           @Param("applicantProjectId")Integer applicantProjectId);
-        /**
-     * 由申请人和状态列表
-     *
-     * @param applicant 申请人
-     * @param status 状态
-     * @return {@link List}<{@link WorkOrderPO}>
-     */
-    List<WorkOrderPO> listByApplicantAndStatus(@Param("applicant")String applicant,
-                                                           @Param("status")Integer status
-                                                           );
+    List<WorkOrderPO> listByStatusAndProjectId(@Param("status") Integer status,
+                                               @Param("applicantProjectId") Integer applicantProjectId);
+
+    /**
+    * 由申请人和状态列表
+    *
+    * @param applicant 申请人
+    * @param status 状态
+    * @return {@link List}<{@link WorkOrderPO}>
+    */
+    List<WorkOrderPO> listByApplicantAndStatus(@Param("applicant") String applicant, @Param("status") Integer status);
+
     /**
      * 审批人列表
      *
@@ -72,17 +70,16 @@ public interface WorkOrderDAO {
      * @param status 状态
      * @return {@link List}<{@link WorkOrderPO}>
      */
-    List<WorkOrderPO> listByApproverAndStatus(@Param("approver")String approver,
-                                              @Param("status")Integer status);
-    
+    List<WorkOrderPO> listByApproverAndStatus(@Param("approver") String approver, @Param("status") Integer status);
+
     /**
      * 列表状态
      *
      * @param status
      * @return {@link List}<{@link WorkOrderPO}>
      */
-    List<WorkOrderPO> listByStatus(@Param("status")Integer status);
-    
+    List<WorkOrderPO> listByStatus(@Param("status") Integer status);
+
     /**
      * 更新扩展id
      *
@@ -90,7 +87,7 @@ public interface WorkOrderDAO {
      * @return int
      */
     int updateExtensionsById(WorkOrderPO param);
-    
+
     /**
      * 列表处理时间
      *
@@ -98,6 +95,5 @@ public interface WorkOrderDAO {
      * @param endTime 结束时间
      * @return {@link List}<{@link WorkOrderPO}>
      */
-    List<WorkOrderPO> listByHandleTime(@Param("startTime")Date startTime,
-                                       @Param("endTime")Date endTime);
+    List<WorkOrderPO> listByHandleTime(@Param("startTime") Date startTime, @Param("endTime") Date endTime);
 }

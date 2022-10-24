@@ -1,13 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.persistence.component;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
+import com.didichuxing.datachannel.arius.admin.common.util.RetryExecutor;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import org.apache.commons.lang3.RandomUtils;
 import org.elasticsearch.ElasticsearchTimeoutException;
 import org.elasticsearch.cluster.metadata.ProcessClusterEventTimeoutException;
-
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.RetryExecutor;
-
-import java.util.function.Function;
 
 /**
  * es操作器
@@ -20,70 +21,75 @@ import java.util.function.Function;
  * @date 2017/8/24
  */
 public class ESOpTimeoutRetry {
-    private static final int SEC_30 = 30 * 1000;
-    private static final int MIN_5  = 5 * 60 * 1000;
+    private static final int SEC_1 = 1000;
+    private static final int SEC_5 = 5000;
 
-    private ESOpTimeoutRetry(){}
+    private ESOpTimeoutRetry() {
+    }
 
-    public static boolean esRetryExecute(String methodName, int tryCount,
-                                         RetryExecutor.Handler handler) throws ESOperateException {
-        try {
-            return RetryExecutor.builder().name(methodName).retryCount(tryCount).handler(new RetryExecutor.Handler() {
-                @Override
-                public boolean process() throws BaseException {
-                    return handler.process();
-                }
+    /**
+     * 定制重试方法，不对返回判断重试
+     */
+    public static <T> T esRetryExecute(String methodName, int tryCount,
+                                       RetryExecutor.Handler<T> handler) throws ESOperateException {
+        return esRetryExecute(methodName, tryCount, handler, t -> false);
+    }
 
-                @Override
-                public boolean needRetry(Exception e) {
-                    return e instanceof ProcessClusterEventTimeoutException
-                           || e instanceof ElasticsearchTimeoutException;
-                }
-
-                @Override
-                public int retrySleepTime(int retryTims){
-                    int sleepTime       = retryTims * SEC_30;
-                    int randomSleepTime = (int)(Math.random() * 100);
-                    int totalSleepTime  = sleepTime + randomSleepTime;
-
-                    return totalSleepTime > MIN_5 ? MIN_5 : totalSleepTime;
-                }
-            }).execute();
-        } catch (Exception e) {
-            throw new ESOperateException(e.getMessage(), e);
-        }
+    /**
+     * 定制重试方法，根据返回值来判断是否需要重试
+     */
+    public static <T> T esRetryExecute(String methodName, int tryCount,
+                                       RetryExecutor.Handler<T> handler,
+                                       Predicate<T> retNeedRetry) throws ESOperateException {
+        return esRetryExecuteInner(methodName, tryCount, handler, retNeedRetry, retryTimes -> {
+            int time = retryTimes * SEC_1 + RandomUtils.nextInt(0, 100);
+            return Math.min(time, SEC_5);
+        } );
     }
 
     /**
      * 定制重试方法等待的时间
-     * @param methodName 方法名称
-     * @param tryCount 重试次数
-     * @param handler 重试的操作
-     * @param retrySleepTime 重试间隔的等待时间
-     * @return 整个重试方法执行的结果
-     * @throws ESOperateException 抛异常
      */
-    public static boolean esRetryExecuteWithGivenTime(String methodName, int tryCount,
-                                                      RetryExecutor.Handler handler, Function<Integer, Integer> retrySleepTime) throws ESOperateException {
+    public static <T> T esRetryExecuteWithGivenTime(String methodName, int tryCount,
+                                                    RetryExecutor.Handler<T> handler,
+                                                    Function<Integer, Integer> retrySleepTime) throws ESOperateException {
+        return esRetryExecuteInner(methodName, tryCount, handler, t -> false, retrySleepTime);
+    }
+
+    /**************************************** private method ***************************************************/
+    private static <T> T esRetryExecuteInner(String methodName, int tryCount,
+                                       RetryExecutor.Handler<T> handler,
+                                       Predicate<T> retNeedRetry,
+                                       Function<Integer, Integer> retrySleepTime) throws ESOperateException {
         try {
-            return RetryExecutor.builder().name(methodName).retryCount(tryCount).handler(new RetryExecutor.Handler() {
-                @Override
-                public boolean process() throws BaseException {
-                    return handler.process();
-                }
+            final RetryExecutor<T> retryExecutor = RetryExecutor.builder().name(methodName).retryCount(tryCount)
+                    .handler(new RetryExecutor.Handler() {
+                        @Override
+                        public T process() throws BaseException {
+                            return handler.process();
+                        }
 
-                @Override
-                public boolean needRetry(Exception e) {
-                    return e instanceof ProcessClusterEventTimeoutException
-                            || e instanceof ElasticsearchTimeoutException;
-                }
+                        @Override
+                        public boolean needExceptionRetry(Exception e) {
+                            return e instanceof ProcessClusterEventTimeoutException
+                                    || e instanceof ElasticsearchTimeoutException
+                                    || e instanceof NullESClientException;
+                        }
 
-                @Override
-                public int retrySleepTime(int retryTimes) {
-                    return retrySleepTime.apply(retryTimes);
-                }
-            }).execute();
-        } catch (Exception e) {
+                        @Override
+                        public boolean needReturnObjRetry(Object t) {
+                            return retNeedRetry.test((T)t);
+                        }
+
+                        @Override
+                        public int retrySleepTime(int retryTimes) {
+                            return retrySleepTime.apply(retryTimes);
+                        }
+                    });
+            return retryExecutor.execute();
+        } catch (ESOperateException e) {
+            throw new ESOperateException(e.getMessage(),e.getCause());
+        }catch (Exception e){
             throw new ESOperateException(e.getMessage(), e);
         }
     }

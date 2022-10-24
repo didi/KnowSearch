@@ -6,6 +6,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslTemplateService;
@@ -24,7 +26,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<DslTemplateConditionDTO, DslTemplateVO> {
-  
 
     @Autowired
     private DslTemplateService dslTemplateService;
@@ -47,10 +48,22 @@ public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<DslTem
 
     @Override
     protected PaginationResult<DslTemplateVO> buildPageData(DslTemplateConditionDTO condition, Integer projectId) {
+        Tuple<Long, List<DslTemplatePO>> tuple;
+        //普通项目只能查该项目下的dsl模板
+        try {
+        
+            if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+                tuple = dslTemplateService.getDslTemplatePage(projectId, condition);
+                // 超级项目不带 projectId 条件查询时，可查到所有项目的 dsl 模板
+            } else {
+                tuple = dslTemplateService.getDslTemplatePage(condition.getProjectId(), condition);
+            }
+        } catch (ESOperateException e) {
+            return PaginationResult.buildFail(e.getMessage());
+        }
 
-        Tuple<Long, List<DslTemplatePO>> tuple = dslTemplateService.getDslTemplatePage(projectId, condition);
         if (tuple == null) {
-            return PaginationResult.buildSucc( new ArrayList<>(), 0L, condition.getPage(), condition.getSize());
+            return PaginationResult.buildSucc(new ArrayList<>(), 0L, condition.getPage(), condition.getSize());
         }
         List<DslTemplateVO> dslTemplateVOList = ConvertUtil.list2List(tuple.v2(), DslTemplateVO.class);
         return PaginationResult.buildSucc(dslTemplateVOList, tuple.v1(), condition.getPage(), condition.getSize());

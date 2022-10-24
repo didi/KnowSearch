@@ -1,11 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimize;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaOptimizeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithMapping;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateSchemaVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.mapping.Field;
@@ -28,11 +27,15 @@ public interface TemplateLogicMappingManager {
 
     /**
      * 更新
-     * @param logicId 模板id
-     * @param fields fields
+     *
+     * @param logicId   模板id
+     * @param fields    fields
+     * @param projectId
+     * @param operator
      * @return result
      */
-    Result<Void> updateFields(Integer logicId, List<Field> fields, Set<String> removeFields);
+    Result<Void> updateFields(Integer logicId, List<Field> fields, Set<String> removeFields, Integer projectId,
+                              String operator);
 
     /**
      * 校验模板field
@@ -49,7 +52,7 @@ public interface TemplateLogicMappingManager {
      * @param ariusTypeProperty mapping
      * @return result
      */
-    Result<Void> updateMappingForNew(Integer logicId, AriusTypeProperty ariusTypeProperty);
+    Result<Void> updateMappingForNew(Integer logicId, AriusTypeProperty ariusTypeProperty) throws AdminOperateException;
 
     /**
      * updateProperties
@@ -67,12 +70,7 @@ public interface TemplateLogicMappingManager {
      */
     AriusTypeProperty fields2Mapping(List<Field> fields);
 
-    /**
-     * 获取mapping优化信息
-     * @param logicId logicId
-     * @return result
-     */
-    Result<List<MappingOptimize>> getTemplateMappingOptimize(Integer logicId);
+
 
     /**
      * mapping优化
@@ -90,12 +88,13 @@ public interface TemplateLogicMappingManager {
      * @param projectId
      * @return result
      */
-    Result<Void> modifySchema(ConsoleTemplateSchemaDTO schemaDTO, String operator, Integer projectId) throws AdminOperateException;
+    Result<Void> editMapping(ConsoleTemplateSchemaDTO schemaDTO, String operator,
+                             Integer projectId) throws AdminOperateException;
 
     /**
      * 获取模板schema
      * @param logicId 模板id
      * @return result
      */
-    Result<ConsoleTemplateSchemaVO> getSchema(Integer logicId);
+    Result<TemplateMappingVO> getSchema(Integer logicId);
 }

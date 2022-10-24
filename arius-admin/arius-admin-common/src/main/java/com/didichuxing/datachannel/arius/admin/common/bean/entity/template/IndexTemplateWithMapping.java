@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class IndexTemplateWithMapping extends IndexTemplate {
 
-    private List<Field>        fields;
+    private List<Field>             fields;
 
     private List<AriusTypeProperty> typeProperties;
 

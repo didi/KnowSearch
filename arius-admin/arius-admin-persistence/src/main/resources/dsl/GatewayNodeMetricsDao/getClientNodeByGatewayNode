@@ -1,15 +1,31 @@
 {
-  "size": 0,
-  "query": {
-    "bool": {
-      "must": %s
+    "size": 0,
+    "query": {
+        "bool": {
+            "filter": %s
+        }
+    },
+    "aggs": {
+        "group_by_field": {
+            "composite": {
+                "size": 2000,
+                "sources": [
+                    {
+                        "clusterName": {
+                            "terms": {
+                                "field": "clusterName"
+                            }
+                        }
+                    },
+                    {
+                        "clientNode": {
+                            "terms": {
+                                "field": "clientNode"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
     }
-  },
-  "aggs": {
-    "group_by_field": {
-      "terms": {
-        "field": "clientNode"
-      }
-    }
-  }
 }

@@ -1,10 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.project;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserExtendDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserQueryExtendDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserExtendVO;
 import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.user.UserBriefQueryDTO;
 import com.didiglobal.logi.security.common.dto.user.UserDTO;
-import com.didiglobal.logi.security.common.dto.user.UserQueryDTO;
 import com.didiglobal.logi.security.common.entity.user.User;
 import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
@@ -27,7 +29,7 @@ public interface UserExtendManager {
      * @return {@code Result<Void>}
      */
     Result<Void> addUser(UserDTO param, String operator);
-	
+
     /**
      * 用户注册信息校验
      * @param type
@@ -42,7 +44,7 @@ public interface UserExtendManager {
      * @param queryDTO 条件信息
      * @return 用户信息list
      */
-    PagingResult<UserVO> getUserPage(UserQueryDTO queryDTO);
+    PagingResult<UserExtendVO> getUserPage(UserQueryExtendDTO queryDTO);
 
     /**
      * 分页获取用户简要信息
@@ -87,7 +89,7 @@ public interface UserExtendManager {
      * @param userIdList 用户idList
      * @return 用户简要信息List
      */
-   Result< List<UserBriefVO>> getUserBriefListByUserIdList(List<Integer> userIdList);
+    Result<List<UserBriefVO>> getUserBriefListByUserIdList(List<Integer> userIdList);
 
     /**
      * 根据部门id获取用户list（获取该部门下所有的用户，包括各种子部门）
@@ -101,7 +103,7 @@ public interface UserExtendManager {
      * @param userId 用户id
      * @return 分配角色或者分配用户/列表信息
      */
-    Result<List<AssignInfoVO>> getAssignDataByUserId(Integer userId) ;
+    Result<List<AssignInfoVO>> getAssignDataByUserId(Integer userId);
 
     /**
      * 根据角色id获取用户list
@@ -138,15 +140,13 @@ public interface UserExtendManager {
      */
     Result<List<UserBriefVO>> getAllUserBriefList();
 
-    
-
     /**
      * 编辑一个用户
      * @param userDTO
      * @param operator
      * @return
      */
-    Result<Void> editUser(UserDTO userDTO, String operator);
-    
+    Result<Void> editUser(UserExtendDTO userDTO, String operator);
+
     Result<List<UserVO>> getUserDetailByUserIds(List<Integer> ids);
 }

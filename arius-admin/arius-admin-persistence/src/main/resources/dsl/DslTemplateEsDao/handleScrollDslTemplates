@@ -21,7 +21,7 @@
     }
   },
   "_source": [
-    "appid",
+    "projectId",
     "dslTemplateMd5",
     "queryLimit",
     "checkMode",

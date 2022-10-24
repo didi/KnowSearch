@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "带节点信息的集群Region实体")
-public class ClusterRegionWithNodeInfoVO extends ClusterRegionVO{
+public class ClusterRegionWithNodeInfoVO extends ClusterRegionVO {
     @ApiModelProperty("划分到region的节点名称, 用逗号分隔")
     private String nodeNames;
 }

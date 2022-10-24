@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class GatewayProjectDTO extends GatewayMetricsDTO {
 
     @ApiModelProperty("项目Id")
-    private String projectId;
+    private String  projectId;
 
     @ApiModelProperty("top数字")
     private Integer topNu;

@@ -203,6 +203,16 @@
         set delete_flag = 1
         where id = #{id}
     </update>
+    <delete id="deleteByIds" parameterType="Long">
+        update es_cluster_role_host_info
+        set delete_flag = 1
+        where id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    
+    </delete>
+
 
     <select id="getDeleteHostByHostNameAnRoleId" parameterType="map" resultMap="BaseResultMap">
         select
@@ -226,9 +236,9 @@
             <if test="status != null">, `status` = #{status}</if>
             <if test="rack != null">, rack = #{rack}</if>
             <if test="nodeSet != null">, node_set = #{nodeSet}</if>
-            <if test="machineSpec != null">and machine_spec = #{machineSpec}</if>
-            <if test="regionId != null">and region_id = #{regionId}</if>
-            <if test="attributes != null">and attributes = #{attributes}</if>
+            <if test="machineSpec != null">, machine_spec = #{machineSpec}</if>
+            <if test="regionId != null">, region_id = #{regionId}</if>
+            <if test="attributes != null">, attributes = #{attributes}</if>
              ,delete_flag = 0
         </trim>
         where id = #{id}
@@ -249,4 +259,18 @@
         from es_cluster_role_host_info
         where cluster = #{cluster} and role = 1 and delete_flag = '0'
     </select>
+    
+    <select id="listByIds" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_role_host_info
+        where id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        
+        
+        and delete_flag = '0'
+    </select>
+    
 </mapper>
