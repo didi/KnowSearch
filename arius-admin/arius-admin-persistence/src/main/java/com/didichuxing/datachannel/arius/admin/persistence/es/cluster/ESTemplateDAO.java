@@ -119,30 +119,33 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param shard shard
      * @return result
      */
-    public boolean updateShard(String cluster, String name, Integer shard, Integer shardRouting) {
+    public boolean updateShard(String cluster, String name, Integer shard, Integer shardRouting) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (client == null) {
-            LOGGER.warn("class={}||method=updateShard||clusterName={}||shardNum={}||errMsg=esClient is null",
-                    getClass().getSimpleName(), cluster, shard);
+            throw new NullESClientException(cluster);
+        }
+        try {
+            // 获取es中原来index template的配置
+            ESIndicesGetTemplateResponse getTemplateResponse = client.admin().indices().prepareGetTemplate(name).execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
+
+            if (shard != null && shard > 0) {
+                templateConfig.setSettings(INDEX_SHARD_NUM, String.valueOf(shard));
+            }
+
+            // 设置ES版本
+            templateConfig.setVersion(client.getEsVersion());
+
+            ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
+                    .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            ParsingExceptionUtils.abnormalTermination(e);
+            LOGGER.error("class=ESTemplateDAO||method=updateShard||clusterName={}||shardName={}", cluster, name, e);
             return false;
         }
-
-        // 获取es中原来index template的配置
-        ESIndicesGetTemplateResponse getTemplateResponse = client.admin().indices().prepareGetTemplate(name).execute()
-            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
-
-        if (shard != null && shard > 0) {
-            templateConfig.setSettings(INDEX_SHARD_NUM, String.valueOf(shard));
-        }
-
-        // 设置ES版本
-        templateConfig.setVersion(client.getEsVersion());
-
-        ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
-            .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        return response.getAcknowledged();
     }
 
     /**
