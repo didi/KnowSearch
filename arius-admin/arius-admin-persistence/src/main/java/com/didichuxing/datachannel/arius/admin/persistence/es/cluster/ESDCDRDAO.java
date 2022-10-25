@@ -62,12 +62,12 @@ public class ESDCDRDAO extends BaseESDAO {
             if (securityExceptionOptional.isPresent() && Boolean.TRUE.equals(securityExceptionOptional.get())) {
                 throw new ESOperateException(String.format("集群 %s 含账户名密码，创建 DCDR 链路失败", cluster));
             }
-            ParsingExceptionUtils.abnormalTermination(e);
-    
             LOGGER.error("class={}||method=putAutoReplication||clusterName={}||name={}", getClass().getSimpleName(),
                     cluster, name, e);
-            return false;
+            ParsingExceptionUtils.abnormalTermination(e);
+
         }
+        return false;
     }
 
     /**
@@ -93,9 +93,9 @@ public class ESDCDRDAO extends BaseESDAO {
             response = client.admin().indices().deleteDCDRTemplate(request)
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.warn("class={}||method=deleteReplication||clusterName={}||name={}", getClass().getSimpleName(),
                     cluster, name, e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         return Optional.ofNullable(response).map(ESDeleteDCDRTemplateResponse::getAcknowledged).orElse(false);
     }
@@ -120,9 +120,9 @@ public class ESDCDRDAO extends BaseESDAO {
             response = client.admin().indices().getDCDRTemplate(request)
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.warn("class={}||method=deleteReplication||clusterName={}||name={}", getClass().getSimpleName(),
                     cluster, name, e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         return Optional.ofNullable(response).map(ESGetDCDRTemplateResponse::getDcdrs)
                 .filter(CollectionUtils::isNotEmpty).map(dcdrTemplates -> dcdrTemplates.get(0)).orElse(null);
@@ -172,11 +172,11 @@ public class ESDCDRDAO extends BaseESDAO {
     
             return succ;
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.warn(
                     "class={}||method=deleteReplication||clusterName={}||replicaCluster={}||indices={}||errMsg=esClient is null",
                     getClass().getSimpleName(), cluster, replicaCluster, indices);
-            return false;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
+        return false;
     }
 }

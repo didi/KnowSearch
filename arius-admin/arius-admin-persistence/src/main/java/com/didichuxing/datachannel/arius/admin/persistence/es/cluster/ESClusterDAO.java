@@ -125,8 +125,8 @@ public class ESClusterDAO extends BaseESDAO {
                     .execute(ESClusterGetSettingsAllAction.INSTANCE, new ESClusterGetSettingsAllRequest())
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class=ESClusterDAO||method=getClusterSetting||clusterName={}", cluster, e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         return response;
     }
@@ -154,11 +154,10 @@ public class ESClusterDAO extends BaseESDAO {
         
             return response.getAcknowledged();
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class=ESClusterDAO||method=putPersistentRemoteClusters||clusterName={}", cluster, e);
-            return false;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
-        
+        return false;
     }
 
     /**
@@ -833,10 +832,10 @@ public class ESClusterDAO extends BaseESDAO {
             directResponse = getDirectResponse(cluster, "GET",
                     String.format(REMOTE_TARGET_CLUSTER, targetCluster, CONNECTED));
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error(
                     "class=ESClusterDAO||method=checkTargetClusterConnected||clusterName={}||errMsg=esClient is null",
                     cluster);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         Function<JSONObject,Boolean> jsonObjectFunc=jsonObject -> {
             //如果是空的，则直接为false

@@ -207,7 +207,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
     }
 
     /**************************************** private method ****************************************************/
-    private Result<Void> checkMapping(String cluster, String template, MappingConfig mappings) {
+    private Result<Void> checkMapping(String cluster, String template, MappingConfig mappings) throws ESOperateException {
         if (isLowVersionCluster(cluster) && !mappings.isEmpty()) {
             String indexName = String.format("indexforcheckmapping_%s_%s", cluster, template);
             return preCreateIndexToCheckTemplateConfig(cluster, indexName, mappings,
@@ -234,7 +234,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
      * @return
      */
     private Result<Void> preCreateIndexToCheckTemplateConfig(String cluster, String template, MappingConfig mappings,
-                                                             Map<String, String> settings) {
+                                                             Map<String, String> settings) throws ESOperateException {
 
         IndexConfig indexConfig = new IndexConfig();
         indexConfig.setMappings(mappings);
@@ -391,7 +391,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
         return obj;
     }
 
-    private Result<Void> tryCreateIndex(String clusterName, String indexName, IndexConfig indexConfig) {
+    private Result<Void> tryCreateIndex(String clusterName, String indexName, IndexConfig indexConfig) throws ESOperateException {
         try {
             indexService.deleteIndex(clusterName, indexName);
 
@@ -457,7 +457,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
     }
 
     private Result<Void> updateMapping(String cluster, String name, MappingConfig mappings, Set<String> removeFields,
-                                       boolean doMerge) {
+                                       boolean doMerge) throws ESOperateException {
         Result<Void> result = checkMapping(cluster, name, mappings);
         if (result.failed()) {
             return result;
