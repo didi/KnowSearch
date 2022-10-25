@@ -53,6 +53,10 @@ public enum ClusterPhyIndicesMetricsEnum {
     /**
      * 单位：MS
      */
+    INDEX_LATENCY("cost-index_time_in_millis", "写入耗时"),
+    /**
+     * 单位：MS
+     */
     FETCH_LATENCY("cost-fetch_time_in_millis", "查询Fetch耗时"),
     /**
      * 单位：次/MIN
@@ -117,7 +121,7 @@ public enum ClusterPhyIndicesMetricsEnum {
     /**
      * 单位：MS
      */
-    INDEXING_TIME_PER_DOC("indexing-time_per_doc", "索引单次操作文档耗时"),
+    INDEXING_TIME_PER_DOC("indices-indexing-index_time_per_doc", "索引单次操作文档耗时"),
     /**
      * 单位：MS
      */
