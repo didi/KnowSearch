@@ -513,6 +513,8 @@ public class ESTemplateDAO extends BaseESDAO {
                     .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return response.getAcknowledged();
         } catch (Exception e) {
+            LOGGER.error("class=ESTemplateDAO||method=upsertSetting||clusterName={}", cluster,
+                    e);
             ParsingExceptionUtils.abnormalTermination(e);
         }
         return false;

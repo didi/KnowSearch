@@ -114,9 +114,9 @@ public class ESShardDAO extends BaseESDAO {
             CAT_SHARD_FUTURE.waitResult().forEach(catCellList->shardCatCellPOS.addAll(catCellList));
             return shardCatCellPOS;
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class=ESShardDao||method=getLowerVersionShardCatCellPOList||clusterName={}", cluster,
                     e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         return Lists.newArrayList();
     }
