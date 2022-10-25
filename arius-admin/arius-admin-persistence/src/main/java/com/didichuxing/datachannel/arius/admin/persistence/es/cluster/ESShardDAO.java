@@ -128,9 +128,9 @@ public class ESShardDAO extends BaseESDAO {
                 return buildShardCatCellPOs(directResponse.getResponseContent(), cluster);
             }
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class=ESShardDAO||method=getShardCatCellPOS||clusterName={}||uri={}", cluster,uri,
                     e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         return Collections.emptyList();
     }
@@ -194,10 +194,10 @@ public class ESShardDAO extends BaseESDAO {
             }
             return result;
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class=ESClusterDAO||method=shardAssignment||msg=get es segments faill||cluster={}", clusterPhyName,e);
-            return null;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
+        return null;
     }
 
     /**

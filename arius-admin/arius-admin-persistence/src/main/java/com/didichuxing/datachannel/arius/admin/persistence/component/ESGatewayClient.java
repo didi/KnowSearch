@@ -172,13 +172,13 @@ public class ESGatewayClient {
 
             return gatewayClientTuple.v2().prepareSQL(sql).get(new TimeValue(120, TimeUnit.SECONDS));
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.warn(
-                "class=GatewayClient||method=performSQLRequest||dataCenter={}||gatewayClientTuple={}||clusterName={}||sql={}||md5={}||errMsg=query error. ",
-                EnvUtil.getDC(), JSON.toJSONString(gatewayClientTuple), clusterName, sql,
-                CommonUtils.getMD5(orginalQuery), e);
-            return null;
+                    "class=GatewayClient||method=performSQLRequest||dataCenter={}||gatewayClientTuple={}||clusterName={}||sql={}||md5={}||errMsg=query error. ",
+                    EnvUtil.getDC(), JSON.toJSONString(gatewayClientTuple), clusterName, sql,
+                    CommonUtils.getMD5(orginalQuery), e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
+        return null;
     }
 
     /**
