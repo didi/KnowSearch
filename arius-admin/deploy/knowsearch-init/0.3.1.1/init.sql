@@ -1379,10 +1379,11 @@ values (1, 'p14000143', 'SuperApp', '超级应用', 0, 1, '2022-05-26 05:49:08.0
 insert into arius_es_user (id, index_exp, data_center, is_root, memo, ip, verify_code, is_active,
                            query_threshold, cluster, responsible, search_type, create_time, update_time,
                            project_id, is_default_display)
-values (1, null, 'cn', 1, '管理员 APP', '', 'azAWiJhxkho33ac', 1, 100, 'logi-elasticsearch-7.6.0', 'admin', 1,
+values (1, null, 'cn', 1, '管理员 APP', '', 'azAWiJhxkho33ac', 1, 100, 'logi-elasticsearch-meta',
+        'admin', 0,
         '2022-05-26 09:35:38.0', '2022-06-23 00:16:47.0', 1, 1),
        (2, null, 'cn', 0, '元数据模版 APP', '', 'vkDgPEfD3jQJ1YY', 1, 1000, '', null, 0, '2022-07-05 08:16:17.0',
-        '2022-08-25 21:48:58.0', 2, 0);
+        '2022-08-25 21:48:58.0', 2, 1);
 
 
 ## 配置初始化数据
