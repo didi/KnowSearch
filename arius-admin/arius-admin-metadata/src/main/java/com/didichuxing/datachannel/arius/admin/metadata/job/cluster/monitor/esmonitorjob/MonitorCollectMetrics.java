@@ -59,7 +59,7 @@ public class MonitorCollectMetrics {
             .valueRoute("segments.stored_fields_memory_in_bytes").computeType(NONE).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.segments.term_vectors_memory_in_bytes")
-            .valueRoute("segments.term_vectors_memory_in_bytes").computeType(NONE).build());
+            .valueRoute("segments.terms_memory_in_bytes").computeType(NONE).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.segments.points_memory_in_bytes")
             .valueRoute("segments.points_memory_in_bytes").computeType(NONE).build());
@@ -339,7 +339,7 @@ public class MonitorCollectMetrics {
             .valueRoute("indices.segments.memory_in_bytes").computeType(NONE).build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.segments.term_vectors_memory_in_bytes")
-            .valueRoute("indices.segments.term_vectors_memory_in_bytes").computeType(NONE).build());
+            .valueRoute("indices.segments.terms_memory_in_bytes").computeType(NONE).build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.segments.points_memory_in_bytes")
             .valueRoute("indices.segments.points_memory_in_bytes").computeType(NONE).build());
