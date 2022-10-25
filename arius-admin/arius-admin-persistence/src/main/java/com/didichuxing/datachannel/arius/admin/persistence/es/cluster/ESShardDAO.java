@@ -73,7 +73,7 @@ public class ESShardDAO extends BaseESDAO {
         ESClient client = esOpClient.getESClient(clusterName);
         if (Objects.isNull(client)) {
             LOGGER.error("class=ESClusterDAO||method=catShard||clusterName={}||errMsg=esClient is null", clusterName);
-            return new ArrayList<>();
+            throw new NullESClientException(clusterName);
         }
         try {
             return getShardCatCellPOS(clusterName, client, SHARD.getUri());
@@ -84,8 +84,9 @@ public class ESShardDAO extends BaseESDAO {
                 return getLowerVersionShardCatCellPOList(clusterName);
             }
             LOGGER.warn("class=ESClusterDAO||method=catShard||cluster={}||mg=get es segments fail", clusterName, e);
-            throw new ESOperateException(e.getMessage(),e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
+        return new ArrayList<>();
     }
 
     /**
@@ -93,11 +94,14 @@ public class ESShardDAO extends BaseESDAO {
      * @param cluster 物理集群
      * @return
      */
-    private List<ShardCatCellPO> getLowerVersionShardCatCellPOList(String cluster) {
+    private List<ShardCatCellPO> getLowerVersionShardCatCellPOList(String cluster) throws ESOperateException {
 
         List<ShardCatCellPO> shardCatCellPOS = Lists.newArrayList();
         ESClient client = fetchESClientByCluster(cluster);
-        if (client != null) {
+        if (client == null) {
+            throw new NullESClientException(cluster);
+        }
+        try {
             List<CatIndexResult> catIndexResults = indexDAO.catIndices(cluster);
             List<String> openIndexNames = catIndexResults.stream().filter(index->StringUtils.equals(OPEN,index.getStatus()))
                     .map(CatIndexResult::getIndex).collect(Collectors.toList());
@@ -108,8 +112,13 @@ public class ESShardDAO extends BaseESDAO {
                 CAT_SHARD_FUTURE.callableTask(()->getShardCatCellPOS(cluster, client, uri));
             }
             CAT_SHARD_FUTURE.waitResult().forEach(catCellList->shardCatCellPOS.addAll(catCellList));
+            return shardCatCellPOS;
+        } catch (Exception e) {
+            LOGGER.error("class=ESShardDao||method=getLowerVersionShardCatCellPOList||clusterName={}", cluster,
+                    e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
-        return shardCatCellPOS;
+        return Lists.newArrayList();
     }
 
     /**

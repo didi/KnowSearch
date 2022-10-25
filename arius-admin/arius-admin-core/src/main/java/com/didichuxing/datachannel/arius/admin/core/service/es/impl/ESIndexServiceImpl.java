@@ -802,7 +802,7 @@ public class ESIndexServiceImpl implements ESIndexService {
      * @return
      */
     @Override
-    public boolean deleteIndex(String clusterName, String indexName) {
+    public boolean deleteIndex(String clusterName, String indexName) throws ESOperateException {
         return esIndexDAO.deleteIndex(clusterName,indexName);
     }
     
