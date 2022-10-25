@@ -43,18 +43,31 @@ public class ESClusterNodeDAO extends BaseESDAO {
      * @param nodes 节点
      * @return 个数
      */
-    public int getIndicesCount(String cluster, String nodes) {
+    public int getIndicesCount(String cluster, String nodes) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
-        ESClusterNodesStatsResponse response = client.admin().cluster().prepareNodeStats().setNodesIds(nodes)
-            .setIndices(true).level("indices").execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        int count = 0;
-        Map<String, ClusterNodeStats> nodeStatsMap = response.getNodes();
-        for (ClusterNodeStats nodeStats : nodeStatsMap.values()) {
-            count += nodeStats.getIndices().getIndices().size();
+        if (client == null) {
+            LOGGER.warn(
+                    "class={}||method=getIndicesCount||clusterName={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster);
+            throw new NullESClientException(cluster);
         }
+        try {
+            ESClusterNodesStatsResponse response = client.admin().cluster().prepareNodeStats().setNodesIds(nodes)
+                    .setIndices(true).level("indices").execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
-        return count;
+            int count = 0;
+            Map<String, ClusterNodeStats> nodeStatsMap = response.getNodes();
+            for (ClusterNodeStats nodeStats : nodeStatsMap.values()) {
+                count += nodeStats.getIndices().getIndices().size();
+            }
+
+            return count;
+        } catch (Exception e) {
+            LOGGER.error("class=ESClusterNodeDao||method=getIndicesCount||clusterName={}",
+                    cluster);
+            ParsingExceptionUtils.abnormalTermination(e);
+            return 0;
+        }
     }
 
     public List<ClusterNodeStats> syncGetNodesStats(String clusterName) throws ESOperateException {

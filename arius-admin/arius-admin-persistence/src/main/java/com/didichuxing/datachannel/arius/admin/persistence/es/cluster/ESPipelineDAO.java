@@ -5,6 +5,9 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ESPipelineProcessor;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
+import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.request.ingest.Pipeline;
@@ -158,22 +161,29 @@ public class ESPipelineDAO extends BaseESDAO {
 
     /**************************************** private method ****************************************************/
 
-    private Pipeline getPipeLine(String cluster, String pipelineId) {
+    private Pipeline getPipeLine(String cluster, String pipelineId) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (client == null) {
             LOGGER.warn("class={}||method=getPipeLine||clusterName={}||pipelineId={}||errMsg=esClient is null",
                     getClass().getSimpleName(), cluster, pipelineId);
+            throw new NullESClientException(cluster);
+        }
+        try{
+            ESGetPipelineResponse response = client.admin().indices().prepareGetPipeline().setPipelineId(pipelineId)
+                    .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+
+            Map<String, Pipeline> pipelineMap = response.getPipelineMap();
+            if (pipelineMap == null || !pipelineMap.containsKey(pipelineId)) {
+                return null;
+            }
+            return pipelineMap.get(pipelineId);
+        } catch (Exception e) {
+            LOGGER.error("class={}||method=getPipeLine||clusterName={}||pipelineId={}",
+                    getClass().getSimpleName(), cluster, pipelineId,e);
+            ParsingExceptionUtils.abnormalTermination(e);
             return null;
         }
-        ESGetPipelineResponse response = client.admin().indices().prepareGetPipeline().setPipelineId(pipelineId)
-            .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
-        Map<String, Pipeline> pipelineMap = response.getPipelineMap();
-        if (pipelineMap == null || !pipelineMap.containsKey(pipelineId)) {
-            return null;
-        }
-
-        return pipelineMap.get(pipelineId);
     }
 
     private List<JSONObject> buildProcessors(String dateField, String dateFieldFormat, String indexNameFormat,

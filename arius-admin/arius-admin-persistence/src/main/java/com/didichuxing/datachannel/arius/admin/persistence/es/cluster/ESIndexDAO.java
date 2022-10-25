@@ -309,17 +309,29 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indexName 索引名字
      * @return
      */
-    public boolean deleteIndex(String cluster, String indexName) {
+    public boolean deleteIndex(String cluster, String indexName) throws ESOperateException {
+        ESClient client = esOpClient.getESClient(cluster);
+        if (client == null){
+            LOGGER.warn(
+                    "class={}||method=deleteIndex||clusterName={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster);
+            throw new NullESClientException(cluster);
+        }
         if (!exist(cluster, indexName)) {
             LOGGER.warn("class=ESIndexDAO||method=deleteIndex||cluster={}||indexName={}||msg=index not exist", cluster,
                 indexName);
             return true;
         }
-
-        ESClient client = esOpClient.getESClient(cluster);
-        ESIndicesDeleteIndexResponse response = client.admin().indices().prepareDeleteIndex(indexName).execute()
-            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        return response.getAcknowledged();
+        try{
+            ESIndicesDeleteIndexResponse response = client.admin().indices().prepareDeleteIndex(indexName).execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            LOGGER.error("class=ESIndexDAO||method=deleteIndex||cluster={}||indexName={}", cluster,
+                    indexName,e);
+            ParsingExceptionUtils.abnormalTermination(e);
+            return false;
+        }
     }
     
     /**
