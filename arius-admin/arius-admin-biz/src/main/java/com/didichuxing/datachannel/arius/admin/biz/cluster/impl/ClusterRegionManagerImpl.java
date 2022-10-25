@@ -222,6 +222,17 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
             .distinct().collect(Collectors.toList()));
     }
 
+    /**
+     * 根据划分方式展示region信息
+     * @param clusterName
+     * @param divideType region划分类型
+     * @return
+     */
+    @Override
+    public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionInfoWithDivideType(String clusterName, String divideType) {
+        return Result.buildSucc();
+    }
+
     @Override
     public Result<List<ClusterRegionVO>> listNotEmptyClusterRegionByClusterName(String clusterName) {
         Result<List<ClusterRegionWithNodeInfoVO>> ret = listClusterRegionWithNodeInfoByClusterName(clusterName);
