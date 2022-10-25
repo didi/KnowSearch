@@ -17,6 +17,7 @@ public interface ClusterNodeManager {
     /**
      * 获取可划分至region的节点信息
      * @param clusterId   物理集群Id
+     * @param divideType  region划分方式
      * @return            Result<List<ESClusterRoleHostVO>>
      */
     Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(Long clusterId, String divideType);
