@@ -438,7 +438,7 @@ public interface ESIndexService {
      * @param indexName
      * @return boolean
      */
-    boolean deleteIndex(String clusterName, String indexName);
+    boolean deleteIndex(String clusterName, String indexName) throws ESOperateException;
     
     /**
      * 返回与指定别名匹配的索引数

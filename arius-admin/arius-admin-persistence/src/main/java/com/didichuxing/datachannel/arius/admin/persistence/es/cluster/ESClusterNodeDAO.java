@@ -66,8 +66,8 @@ public class ESClusterNodeDAO extends BaseESDAO {
             LOGGER.error("class=ESClusterNodeDao||method=getIndicesCount||clusterName={}",
                     cluster);
             ParsingExceptionUtils.abnormalTermination(e);
-            return 0;
         }
+        return 0;
     }
 
     public List<ClusterNodeStats> syncGetNodesStats(String clusterName) throws ESOperateException {

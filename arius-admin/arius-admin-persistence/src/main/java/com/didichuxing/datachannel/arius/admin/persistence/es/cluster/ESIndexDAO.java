@@ -330,8 +330,8 @@ public class ESIndexDAO extends BaseESDAO {
             LOGGER.error("class=ESIndexDAO||method=deleteIndex||cluster={}||indexName={}", cluster,
                     indexName,e);
             ParsingExceptionUtils.abnormalTermination(e);
-            return false;
         }
+        return false;
     }
     
     /**
