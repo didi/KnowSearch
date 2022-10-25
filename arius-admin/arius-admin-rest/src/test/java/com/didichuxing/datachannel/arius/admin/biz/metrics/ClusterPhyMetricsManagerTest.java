@@ -100,7 +100,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -169,7 +169,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(Result.buildSucc());
@@ -215,7 +215,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -263,7 +263,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -311,7 +311,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -356,7 +356,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -403,7 +403,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -450,7 +450,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -489,7 +489,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -563,7 +563,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(Result.buildSucc());
@@ -612,7 +612,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -663,7 +663,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -714,7 +714,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -762,7 +762,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -812,7 +812,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -862,7 +862,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).

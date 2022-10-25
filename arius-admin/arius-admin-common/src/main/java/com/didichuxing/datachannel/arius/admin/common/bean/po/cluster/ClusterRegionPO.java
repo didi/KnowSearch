@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,5 +42,10 @@ public class ClusterRegionPO extends BasePO {
      * 配置项
      */
     private String config;
+
+    /**
+     * Region划分方式，为空是根据节点名称划分，否则根据attribute属性划分
+     */
+    private String divideAttributeKey;
 
 }

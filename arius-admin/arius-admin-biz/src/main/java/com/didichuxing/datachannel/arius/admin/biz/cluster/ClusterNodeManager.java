@@ -19,7 +19,7 @@ public interface ClusterNodeManager {
      * @param clusterId   物理集群Id
      * @return            Result<List<ESClusterRoleHostVO>>
      */
-    Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(Long clusterId);
+    Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(Long clusterId, String divideType);
 
     /**
      * 划分指定节点至region

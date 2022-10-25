@@ -656,12 +656,12 @@ public class CustomDataSource {
     }
 
     public static ClusterRegion getClusterRegion() {
-        return new ClusterRegion(0L, "name", "logicClusterIds", PHY_CLUSTER_NAME, "config");
+        return new ClusterRegion(0L, "name", "logicClusterIds", PHY_CLUSTER_NAME, "config", "");
     }
 
     public static ESClusterRoleHostVO getESClusterRoleHostVO() {
         return new ESClusterRoleHostVO(0L, 0L, "hostname", "ip", PHY_CLUSTER_NAME, "clusterLogicNames", "port", 1, 0,
-            "rack", "machineSpec", "nodeSet", 0, "logicDepart", "attributes", "regionName", 0.0, 2L, 1L);
+            "rack", "machineSpec", "nodeSet", 0, "logicDepart", "attributes", "regionName", 0.0, 2L, 1L, "");
     }
 
     public static ClusterRoleInfo getClusterRoleInfo() {

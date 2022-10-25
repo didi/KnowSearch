@@ -19,6 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
@@ -45,12 +46,14 @@ import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl;
+import com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
@@ -132,6 +135,9 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private ProjectService                  projectService;
     @Autowired
     private ESTemplateService templateService;
+
+    @Autowired
+    private ClusterRegionService            clusterRegionService;
 
     @Override
     public boolean checkMeta() {
@@ -983,9 +989,24 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             if (CollectionUtils.isEmpty(data)) {
                 throw new AdminOperateException(String.format("获取region[%d]节点列表为空, 请检查region中是否存在数据节点", regionId));
             }
-            List<String> nodeNames = data.stream().map(ClusterRoleHost::getNodeSet)
-                .filter(nodeName -> !AriusObjUtils.isBlank(nodeName)).distinct().collect(Collectors.toList());
-            settingsMap.put(TEMPLATE_INDEX_INCLUDE_NODE_NAME, String.join(",", nodeNames));
+            // 判断region的划分方式，根据划分方式配置settings
+            ClusterRegion region = clusterRegionService.getRegionById(regionId.longValue());
+            if(StringUtils.isBlank(region.getDivideAttributeKey())) {
+                List<String> nodeNames = data.stream().map(ClusterRoleHost::getNodeSet)
+                        .filter(nodeName -> !AriusObjUtils.isBlank(nodeName)).distinct().collect(Collectors.toList());
+                settingsMap.put(TEMPLATE_INDEX_INCLUDE_NODE_NAME, String.join(",", nodeNames));
+            }else {
+                // 构建attribute属性信息（根据划分方式attribute的属性构建）
+                Set<String> attributeValueSet = Sets.newHashSet();
+                List<String> attributesList = data.stream().map(ClusterRoleHost::getAttributes)
+                        .filter(attributes -> !AriusObjUtils.isBlank(attributes)).distinct().collect(Collectors.toList());
+                for (String attributes : attributesList) {
+                    Map<String, String> attributeMap = ConvertUtil.str2Map(attributes);
+                    attributeValueSet.add(attributeMap.get(region.getDivideAttributeKey()));
+                }
+                settingsMap.put(ESOperateConstant.TEMPLATE_INDEX_INCLUDE_ATTRIBUTE_PREFIX + region.getDivideAttributeKey(),
+                        String.join(",", attributeValueSet));
+            }
         }
         return settingsMap;
     }

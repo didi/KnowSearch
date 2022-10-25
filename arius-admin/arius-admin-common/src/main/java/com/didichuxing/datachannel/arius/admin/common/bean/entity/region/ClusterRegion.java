@@ -40,4 +40,9 @@ public class ClusterRegion extends BaseEntity {
      * 配置
      */
     private String config;
+
+    /**
+     * Region划分方式，为空是根据节点名称划分，否则根据attribute属性划分
+     */
+    private String divideAttributeKey;
 }

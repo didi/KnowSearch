@@ -51,11 +51,12 @@ public class ESPhyClusterNodeController {
         return clusterNodeManager.listClusterPhyNode(clusterId);
     }
 
-    @GetMapping("/{clusterId}/region/")
+    @GetMapping("/{clusterId}/region/{divideType}")
     @ResponseBody
     @ApiOperation(value = "获取可划分至region的节点信息")
-    public Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(@PathVariable Long clusterId) {
-        return clusterNodeManager.listDivide2ClusterNodeInfo(clusterId);
+    public Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(@PathVariable Long clusterId,
+                                                                                      @PathVariable String divideType) {
+        return clusterNodeManager.listDivide2ClusterNodeInfo(clusterId, divideType);
     }
 
     @PostMapping("/divide-region-check")

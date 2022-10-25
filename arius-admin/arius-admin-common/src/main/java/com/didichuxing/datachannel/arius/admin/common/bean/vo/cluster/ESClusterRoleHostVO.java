@@ -80,4 +80,7 @@ public class ESClusterRoleHostVO extends BaseVO {
 
     @ApiModelProperty("磁盘使用大小(byte)")
     private Long    diskUsage;
+
+    @ApiModelProperty("region划分类型对应的attribute值")
+    private String  attributeValue;
 }
