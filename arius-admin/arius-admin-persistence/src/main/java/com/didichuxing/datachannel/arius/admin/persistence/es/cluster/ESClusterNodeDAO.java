@@ -84,9 +84,9 @@ public class ESClusterNodeDAO extends BaseESDAO {
             response = esClient.admin().cluster().prepareNodeStats().setFs(true).setOs(true).setJvm(true)
                     .setThreadPool(true).level("node").execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class=ESClusterNodeServiceImpl||method=syncGetNodeFsStatsMap||clusterName={}", clusterName,
                     e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         return Optional.ofNullable(response).map(ESClusterNodesStatsResponse::getNodes).filter(MapUtils::isNotEmpty)
                 .map(m->Lists.<ClusterNodeStats>newArrayList(m.values())).orElse(Lists.newArrayList());

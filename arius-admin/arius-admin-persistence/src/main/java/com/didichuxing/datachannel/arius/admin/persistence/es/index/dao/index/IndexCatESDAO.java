@@ -250,11 +250,10 @@ public class IndexCatESDAO extends BaseESDAO {
             try {
                 return esClient.direct(directRequest).actionGet(timeout, unit);
             } catch (Exception e) {
-                ParsingExceptionUtils.abnormalTermination(e);
                 LOGGER.error("class=ESIndexDAO||cluster={}||method=syncGetSegmentsIndexList", cluster, e);
-                return null;
+                ParsingExceptionUtils.abnormalTermination(e);
             }
-            
+            return null;
         };
     
         DirectResponse response = ESOpTimeoutRetry.esRetryExecute("syncGetSegmentsIndexList", 3,
