@@ -85,8 +85,8 @@ public class ESShardDAO extends BaseESDAO {
             }
             LOGGER.warn("class=ESClusterDAO||method=catShard||cluster={}||mg=get es segments fail", clusterName, e);
             ParsingExceptionUtils.abnormalTermination(e);
-            return new ArrayList<>();
         }
+        return new ArrayList<>();
     }
 
     /**
@@ -117,8 +117,8 @@ public class ESShardDAO extends BaseESDAO {
             ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class=ESShardDao||method=getLowerVersionShardCatCellPOList||clusterName={}", cluster,
                     e);
-            return Lists.newArrayList();
         }
+        return Lists.newArrayList();
     }
 
     /**

@@ -181,9 +181,8 @@ public class ESPipelineDAO extends BaseESDAO {
             LOGGER.error("class={}||method=getPipeLine||clusterName={}||pipelineId={}",
                     getClass().getSimpleName(), cluster, pipelineId,e);
             ParsingExceptionUtils.abnormalTermination(e);
-            return null;
         }
-
+        return null;
     }
 
     private List<JSONObject> buildProcessors(String dateField, String dateFieldFormat, String indexNameFormat,
