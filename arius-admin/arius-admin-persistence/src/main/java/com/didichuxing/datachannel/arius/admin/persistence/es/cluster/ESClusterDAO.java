@@ -92,7 +92,7 @@ public class ESClusterDAO extends BaseESDAO {
 
             return response.getAcknowledged();
         } catch (Exception e) {
-            LOGGER.error("class={}||method=getPipeLine||clusterName={}||value={}",
+            LOGGER.error("class={}||method=configReBalanceOperate||clusterName={}||value={}",
                     getClass().getSimpleName(), cluster, value,e);
             ParsingExceptionUtils.abnormalTermination(e);
         }
