@@ -210,21 +210,4 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
         clusterLogicFutureUtil.waitExecute();
     }
 
-    /**
-     * 测试使用接口，传入监控机器名 * * @param hostName
-     */
-    public void testHandleLogicClusterStatsByHost(String hostName) {
-        long timeMillis = System.currentTimeMillis();
-        // 获取单台机器监控采集的集群名称列表, 当分布式部署分组采集，可分摊采集压力
-        List<ClusterPhy> monitorCluster = ariusMetaJobClusterDistributeService.getSingleMachineMonitorCluster(hostName);
-        // 2. do handle
-        if (CollectionUtils.isEmpty(monitorCluster)) {
-            LOGGER.info("class=LogicClusterMonitorJobHandler||method=handleLogicClusterStats||msg=test method monitorPhyClusters is empty");
-        } else {
-            Set<String> monitorClusterSet = monitorCluster.stream().map(ClusterPhy::getCluster).collect(Collectors.toSet());
-            doHandleLogicClusterStats(monitorClusterSet);
-            String info = String.format("测试采集时间=host:%s||集群数=%d||采集时间=%s||集群名=%s", hostName, monitorClusterSet.size(), (System.currentTimeMillis() - timeMillis), Arrays.toString(monitorClusterSet.toArray()));
-            LOGGER.info(info);
-        }
-    }
 }
