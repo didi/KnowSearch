@@ -59,7 +59,7 @@ public interface ESClusterService {
      * @param settingFlatName  setting名字
      * @return true/false
      */
-    boolean hasSettingExist(String cluster, String settingFlatName);
+    boolean hasSettingExist(String cluster, String settingFlatName) throws ESOperateException;
 
     /**
      * 获取物理集群下各个节点的插件名称列表

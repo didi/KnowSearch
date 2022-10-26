@@ -104,17 +104,27 @@ public class ESClusterDAO extends BaseESDAO {
      * @param cluster 集群名称
      * @return map<flat_setting_name, setting_value>
      */
-    public Map<String, Object> getPersistentClusterSettings(String cluster) {
+    public Map<String, Object> getPersistentClusterSettings(String cluster) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (null == client) {
-            return null;
+            LOGGER.warn(
+                    "class={}||method=getPersistentClusterSettings||clusterName={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster);
+            throw new NullESClientException(cluster);
         }
 
-        ESClusterGetSettingsRequest request = new ESClusterGetSettingsRequest();
-        ESClusterGetSettingsResponse response = client.admin().cluster().getSetting(request)
-            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        try {
+            ESClusterGetSettingsRequest request = new ESClusterGetSettingsRequest();
+            ESClusterGetSettingsResponse response = client.admin().cluster().getSetting(request)
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
-        return JsonUtils.flatObject(response.getPersistentObj());
+            return JsonUtils.flatObject(response.getPersistentObj());
+        } catch (Exception e) {
+            LOGGER.error("class={}||method=getPersistentClusterSettings||clusterName={}",
+                    getClass().getSimpleName(), cluster,e);
+            ParsingExceptionUtils.abnormalTermination(e);
+        }
+        return null;
     }
 
     /**
