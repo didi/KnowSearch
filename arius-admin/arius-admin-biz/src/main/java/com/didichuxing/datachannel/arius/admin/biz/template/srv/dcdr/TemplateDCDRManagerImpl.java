@@ -408,8 +408,9 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             final Long templateId = templateIdList.get(0);
             final String templateName = indexTemplateService.getNameByTemplateLogicId(
                 Math.toIntExact(templateId));
-            String title = templateIdList.size() == 1 ? String.format("%s索引模板主从切换", templateName) : String.format("%s等%s个索引模板主从切换",
-                templateName, templateIdList.size());
+            String title = templateIdList.size() == 1 ? String.format("%s索引模板主从%s切换",
+                templateName,dcdrType) : String.format("%s等%s个索引模板主从%s切换",
+                templateName, templateIdList.size(),dcdrType);
             
             opTaskDTO.setTitle(title);
             opTaskDTO.setTaskType(OpTaskTypeEnum.TEMPLATE_DCDR.getType());
