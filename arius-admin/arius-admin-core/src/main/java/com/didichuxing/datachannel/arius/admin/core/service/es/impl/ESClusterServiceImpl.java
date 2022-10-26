@@ -241,7 +241,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public List<ESClusterTaskStatsResponse> syncGetClusterTaskStats(String clusterName) {
+    public List<ESClusterTaskStatsResponse> syncGetClusterTaskStats(String clusterName) throws ESOperateException {
         return esClusterDAO.getClusterTaskStats(clusterName);
     }
 
