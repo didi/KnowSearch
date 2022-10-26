@@ -78,16 +78,25 @@ public class ESClusterDAO extends BaseESDAO {
      * @param value  all /  none
      * @return 成功 true   失败 false
      */
-    public boolean configReBalanceOperate(String cluster, String value) {
+    public boolean configReBalanceOperate(String cluster, String value) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (null == client) {
-            return false;
+            LOGGER.warn(
+                    "class={}||method=configReBalanceOperate||clusterName={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster);
+            throw new NullESClientException(cluster);
         }
+        try {
+            ESClusterUpdateSettingsResponse response = client.admin().cluster().prepareUpdateSettings()
+                    .addPersistent(REBALANCE, value).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
-        ESClusterUpdateSettingsResponse response = client.admin().cluster().prepareUpdateSettings()
-            .addPersistent(REBALANCE, value).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        return response.getAcknowledged();
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            LOGGER.error("class={}||method=getPipeLine||clusterName={}||value={}",
+                    getClass().getSimpleName(), cluster, value,e);
+            ParsingExceptionUtils.abnormalTermination(e);
+        }
+        return false;
     }
 
     /**
