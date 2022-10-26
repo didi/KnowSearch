@@ -283,17 +283,17 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
     }
 
     @Data
-    public class TemplateWithSettingValues {
+    public class Template {
         private String      templateName;
     }
 
     @Data
-    public class TemplateWithNodeNames extends TemplateWithSettingValues{
+    public class TemplateWithNodeNames extends Template{
         private Set<String> nodeNames;
     }
 
     @Data
-    public class TemplateWithAttributeValues extends TemplateWithSettingValues{
+    public class TemplateWithAttributeValues extends Template{
         private Set<String> attributeValues;
     }
 }

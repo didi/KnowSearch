@@ -78,7 +78,8 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     private final static String HOST = "host";
 
     @Override
-    public Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(Long clusterId, String divideType) {
+    @Deprecated
+    public Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(Long clusterId) {
         List<ClusterRoleHost> clusterRoleHostList = null;
         try {
             clusterRoleHostList = clusterRoleHostService.getByRoleAndClusterId(clusterId, DATA_NODE.getDesc());
@@ -110,6 +111,43 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         for (ESClusterRoleHostWithRegionInfoVO clusterRoleHostWithRegionInfoVO : esClusterRoleHostWithRegionInfoVOS) {
             clusterRoleHostWithRegionInfoVO
                 .setRegionName(regionId2RegionNameMap.get(clusterRoleHostWithRegionInfoVO.getRegionId()));
+        }
+        return Result.buildSucc(esClusterRoleHostWithRegionInfoVOS);
+    }
+
+    @Override
+    public Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfoWithDivideType(Long clusterId, String divideType) {
+        List<ClusterRoleHost> clusterRoleHostList = null;
+        try {
+            clusterRoleHostList = clusterRoleHostService.getByRoleAndClusterId(clusterId, DATA_NODE.getDesc());
+        } catch (Exception e) {
+            LOGGER.error("class=ClusterPhyManagerImpl||method=listDivide2ClusterNodeInfo||clusterId={}||errMsg={}",
+                    clusterId, e.getMessage(), e);
+        }
+        List<ESClusterRoleHostWithRegionInfoVO> esClusterRoleHostWithRegionInfoVOS = ConvertUtil
+                .list2List(clusterRoleHostList, ESClusterRoleHostWithRegionInfoVO.class);
+
+        // 根据regionId获取region名称
+        List<Integer> regionIdList = esClusterRoleHostWithRegionInfoVOS.stream()
+                .map(ESClusterRoleHostWithRegionInfoVO::getRegionId).distinct().collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(regionIdList)) {
+            return Result.buildSucc(esClusterRoleHostWithRegionInfoVOS);
+        }
+
+        Map<Integer, String> regionId2RegionNameMap = Maps.newHashMap();
+        for (Integer regionId : regionIdList) {
+            ClusterRegion clusterRegion = clusterRegionService.getRegionById(regionId.longValue());
+            if (null == clusterRegion) {
+                continue;
+            }
+
+            regionId2RegionNameMap.put(regionId, clusterRegion.getName());
+        }
+
+        for (ESClusterRoleHostWithRegionInfoVO clusterRoleHostWithRegionInfoVO : esClusterRoleHostWithRegionInfoVOS) {
+            clusterRoleHostWithRegionInfoVO
+                    .setRegionName(regionId2RegionNameMap.get(clusterRoleHostWithRegionInfoVO.getRegionId()));
             if(!HOST.equals(divideType)){
                 String attributes = clusterRoleHostWithRegionInfoVO.getAttributes();
                 clusterRoleHostWithRegionInfoVO.setAttributeValue(ConvertUtil.str2Map(attributes).get(divideType));

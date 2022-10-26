@@ -992,23 +992,31 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             // 判断region的划分方式，根据划分方式配置settings
             ClusterRegion region = clusterRegionService.getRegionById(regionId.longValue());
             if(StringUtils.isBlank(region.getDivideAttributeKey())) {
-                List<String> nodeNames = data.stream().map(ClusterRoleHost::getNodeSet)
-                        .filter(nodeName -> !AriusObjUtils.isBlank(nodeName)).distinct().collect(Collectors.toList());
-                settingsMap.put(TEMPLATE_INDEX_INCLUDE_NODE_NAME, String.join(",", nodeNames));
+                buildSettingMapByDefault(settingsMap, data);
             }else {
-                // 构建attribute属性信息（根据划分方式attribute的属性构建）
-                Set<String> attributeValueSet = Sets.newHashSet();
-                List<String> attributesList = data.stream().map(ClusterRoleHost::getAttributes)
-                        .filter(attributes -> !AriusObjUtils.isBlank(attributes)).distinct().collect(Collectors.toList());
-                for (String attributes : attributesList) {
-                    Map<String, String> attributeMap = ConvertUtil.str2Map(attributes);
-                    attributeValueSet.add(attributeMap.get(region.getDivideAttributeKey()));
-                }
-                settingsMap.put(ESOperateConstant.TEMPLATE_INDEX_INCLUDE_ATTRIBUTE_PREFIX + region.getDivideAttributeKey(),
-                        String.join(",", attributeValueSet));
+                buildSettingMapByAttribute(settingsMap, data, region.getDivideAttributeKey());
             }
         }
         return settingsMap;
+    }
+
+    private void buildSettingMapByDefault(Map<String, String> settingsMap, List<ClusterRoleHost> data) {
+        List<String> nodeNames = data.stream().map(ClusterRoleHost::getNodeSet)
+                .filter(nodeName -> !AriusObjUtils.isBlank(nodeName)).distinct().collect(Collectors.toList());
+        settingsMap.put(TEMPLATE_INDEX_INCLUDE_NODE_NAME, String.join(",", nodeNames));
+    }
+
+    private void buildSettingMapByAttribute(Map<String, String> settingsMap, List<ClusterRoleHost> data, String divideAttributeKey) {
+        // 构建attribute属性信息（根据划分方式attribute的属性构建）
+        Set<String> attributeValueSet = Sets.newHashSet();
+        List<String> attributesList = data.stream().map(ClusterRoleHost::getAttributes)
+                .filter(attributes -> !AriusObjUtils.isBlank(attributes)).distinct().collect(Collectors.toList());
+        for (String attributes : attributesList) {
+            Map<String, String> attributeMap = ConvertUtil.str2Map(attributes);
+            attributeValueSet.add(attributeMap.get(divideAttributeKey));
+        }
+        settingsMap.put(ESOperateConstant.TEMPLATE_INDEX_INCLUDE_ATTRIBUTE_PREFIX + divideAttributeKey,
+                String.join(",", attributeValueSet));
     }
 
     private Tuple</*存放冷存索引列表*/Set<String>, /*存放热存索引列表*/Set<String>> getHotAndColdIndexSet(

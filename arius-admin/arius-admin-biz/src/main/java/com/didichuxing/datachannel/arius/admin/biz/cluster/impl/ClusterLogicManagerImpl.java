@@ -811,7 +811,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
         final Integer clusterPhyId = voResult.getData().getId();
         String regionDivideType = param.getDivideAttributeKey() == null ? "host" : param.getDivideAttributeKey();
-        final Result<List<ESClusterRoleHostWithRegionInfoVO>> listResult = clusterNodeManager.listDivide2ClusterNodeInfo(
+        final Result<List<ESClusterRoleHostWithRegionInfoVO>> listResult = clusterNodeManager.listDivide2ClusterNodeInfoWithDivideType(
                 clusterPhyId.longValue(), regionDivideType);
         if (listResult.failed()) {
             return Result.buildFrom(listResult);
