@@ -2,9 +2,11 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.software;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.ecm.PackageConditionDTO;
-import com.didiglobal.logi.op.manager.interfaces.dto.PackageDTO;
-import com.didiglobal.logi.op.manager.interfaces.vo.PackageVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageAddDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageUpdateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageQueryVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +19,9 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 @RequestMapping(V3_OP + "/software/package")
 @Api(tags = "软件中心接口(REST)")
 public class PackageController {
-    @GetMapping("/page")
-    @ApiOperation(value = "获取安装包列表接口")
-    public PaginationResult<PackageVO> pageGetPackages(@RequestBody PackageConditionDTO packageDTO) {
+    @PostMapping("/page")
+    @ApiOperation(value = "获取安装包分页列表接口")
+    public PaginationResult<PackageQueryVO> pageGetPackages(@RequestBody PackageQueryDTO packageDTO) {
         return new PaginationResult<>();
     }
 
@@ -31,19 +33,24 @@ public class PackageController {
 
     @PostMapping("")
     @ApiOperation(value = "新增安装包接口", notes = "")
-    public Result<Long> savePackage(HttpServletRequest request, PackageDTO packageDTO) {
+    public Result<Long> savePackage(HttpServletRequest request, @RequestBody PackageAddDTO packageAddDTO) {
         return new Result<>();
     }
 
-    @PutMapping("/update")
+    @PutMapping("/{id}")
     @ApiOperation(value = "修改安装包接口", notes = "")
-    public Result<PackageVO> updatePackage(HttpServletRequest request, @RequestBody PackageDTO packageDTO) {
+    public Result<Long> updatePackage(HttpServletRequest request, @RequestBody PackageUpdateDTO packageUpdateDTO) {
         return new Result<>();
     }
 
     @DeleteMapping("/{id}")
     @ApiOperation(value = "删除安装包接口", notes = "")
     public Result<Long> deletePackage(HttpServletRequest request, @PathVariable Long id) {
+        return new Result<>();
+    }
+    @GetMapping("/{id}/using")
+    @ApiOperation(value = "是否正在使用安装包", notes = "")
+    public Result<Boolean> isUsingPackage(HttpServletRequest request, @PathVariable Long id) {
         return new Result<>();
     }
 }

@@ -2,9 +2,12 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.script;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.ecm.ScriptConditionDTO;
-import com.didiglobal.logi.op.manager.interfaces.dto.ScriptDTO;
-import com.didiglobal.logi.op.manager.interfaces.vo.ScriptVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.script.ScriptAddDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.script.ScriptQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.script.ScriptUpdateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.script.ScriptListVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.script.ScriptQueryVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.script.ScriptVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +20,9 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 @RequestMapping(V3_OP + "/script")
 @Api(tags = "脚本中心接口(REST)")
 public class ScriptController {
-    @GetMapping("/page")
-    @ApiOperation(value = "获取脚本列表接口")
-    public PaginationResult<ScriptVO> pageGetScripts(@RequestBody ScriptConditionDTO conditionDTO) {
+    @PostMapping("/page")
+    @ApiOperation(value = "获取脚本分页列表接口")
+    public PaginationResult<ScriptQueryVO> pageGetScripts(@RequestBody ScriptQueryDTO conditionDTO) {
         return new PaginationResult<>();
     }
     @GetMapping("/{id}")
@@ -27,21 +30,32 @@ public class ScriptController {
     public Result<ScriptVO> getScriptByScriptId(@PathVariable Long id) {
         return new Result<>();
     }
+    @GetMapping("/list")
+    @ApiOperation(value = "获取脚本list")
+    public Result<ScriptListVO> listScript() {
+        return new Result<>();
+    }
     @PostMapping("")
     @ApiOperation(value = "新增脚本接口", notes = "")
-    public Result<Long> saveScript(HttpServletRequest request, ScriptDTO scriptDTO) {
+    public Result<Long> saveScript(HttpServletRequest request, @RequestBody ScriptAddDTO scriptAddDTO) {
         return new Result<>();
     }
 
-    @PutMapping("/update")
+    @PutMapping("/{id}")
     @ApiOperation(value = "修改脚本接口", notes = "")
-    public Result<ScriptVO> updateScript(HttpServletRequest request, @RequestBody ScriptDTO scriptDTO) {
+    public Result<Long> updateScript(HttpServletRequest request, @RequestBody ScriptUpdateDTO scriptUpdateDTO) {
         return new Result<>();
     }
 
     @DeleteMapping("/{id}")
     @ApiOperation(value = "删除脚本接口", notes = "")
     public Result<Long> deleteScript(HttpServletRequest request, @PathVariable Long id) {
+        return new Result<>();
+    }
+
+    @GetMapping("/{id}/using")
+    @ApiOperation(value = "是否正在使用脚本", notes = "")
+    public Result<Boolean> isUsingScript(HttpServletRequest request, @PathVariable Long id) {
         return new Result<>();
     }
 }
