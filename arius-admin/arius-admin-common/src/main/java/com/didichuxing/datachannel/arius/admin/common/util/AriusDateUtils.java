@@ -9,8 +9,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- *
- *
  * @author d06679
  * @date 2017/7/26
  */
@@ -96,6 +94,7 @@ public class AriusDateUtils {
 
     /**
      * 获取当前月的最后一天的
+     *
      * @param time 时间
      * @return
      */
@@ -288,6 +287,7 @@ public class AriusDateUtils {
 
     /**
      * 将时间的其他单位（s,m,h,d）转化为ms
+     *
      * @param value
      * @param unit
      * @return
@@ -297,15 +297,15 @@ public class AriusDateUtils {
         switch (unit) {
             case "s":
                 ms = value * 1000;
-            break;
+                break;
             case "min":
-                ms =  value * 1000 * 60;
-            break;
+                ms = value * 1000 * 60;
+                break;
             case "h":
-                ms =  value * 1000 * 60 * 60;
+                ms = value * 1000 * 60 * 60;
                 break;
             case "d":
-                ms =  value * 1000 * 60 * 60 * 24;
+                ms = value * 1000 * 60 * 60 * 24;
                 break;
             default:
                 ms = value;
