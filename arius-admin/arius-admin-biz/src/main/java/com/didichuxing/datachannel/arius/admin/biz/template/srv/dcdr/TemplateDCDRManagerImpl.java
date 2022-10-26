@@ -405,14 +405,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             OpTaskDTO opTaskDTO = new OpTaskDTO();
             String businessKey = getBusinessKey(templateIdList);
             opTaskDTO.setBusinessKey(businessKey);
-            final Long templateId = templateIdList.get(0);
-            final String templateName = indexTemplateService.getNameByTemplateLogicId(
-                Math.toIntExact(templateId));
-            String title = templateIdList.size() == 1 ? String.format("%s索引模板主从%s切换",
-                templateName,dcdrType) : String.format("%s等%s个索引模板主从%s切换",
-                templateName, templateIdList.size(),dcdrType);
-            
-            opTaskDTO.setTitle(title);
+            opTaskDTO.setTitle(getDCDRTaskTitle(templateIdList, dcdrType));
             opTaskDTO.setTaskType(OpTaskTypeEnum.TEMPLATE_DCDR.getType());
             opTaskDTO.setCreator(operator);
             opTaskDTO.setDeleteFlag(false);
@@ -2011,5 +2004,21 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
     private boolean hasSetNextBatch(int runingTaskSize, int failedTaskSize) {
         return dcdrConcurrent > runingTaskSize && (runingTaskSize / dcdrConcurrent) == 0
                && dcdrFaultTolerant >= failedTaskSize;
+    }
+    
+    /**
+     * 获取dcdr任务的标题
+     *
+     * @param templateIdList 模板id列表
+     * @param dcdrType       dcdr类型
+     * @return {@link String}
+     */
+    private String getDCDRTaskTitle(List<Long> templateIdList, String dcdrType) {
+        final Long templateId = templateIdList.get(0);
+        final String templateName = indexTemplateService.getNameByTemplateLogicId(
+            Math.toIntExact(templateId));
+        return templateIdList.size() == 1 ? String.format("%s索引模板主从%s切换",
+            templateName, dcdrType) : String.format("%s等%s个索引模板主从%s切换",
+            templateName, templateIdList.size(), dcdrType);
     }
 }
