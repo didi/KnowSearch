@@ -52,6 +52,7 @@ import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.dcdr.ESDCDRService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
@@ -149,6 +150,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
     @Autowired
     private OpTaskManager         opTaskManager;
+    @Autowired
+    private IndexTemplateService  indexTemplateService;
   
 
     
@@ -397,12 +400,12 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             if (batchCheckValidForDCDRSwitchResult.failed()) {
                 return Result.buildFrom(batchCheckValidForDCDRSwitchResult);
             }
-
+            
             //2.1 设置基础数据
             OpTaskDTO opTaskDTO = new OpTaskDTO();
             String businessKey = getBusinessKey(templateIdList);
             opTaskDTO.setBusinessKey(businessKey);
-            opTaskDTO.setTitle(OpTaskTypeEnum.TEMPLATE_DCDR.getMessage());
+            opTaskDTO.setTitle(getDCDRTaskTitle(templateIdList, dcdrType));
             opTaskDTO.setTaskType(OpTaskTypeEnum.TEMPLATE_DCDR.getType());
             opTaskDTO.setCreator(operator);
             opTaskDTO.setDeleteFlag(false);
@@ -2001,5 +2004,21 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
     private boolean hasSetNextBatch(int runingTaskSize, int failedTaskSize) {
         return dcdrConcurrent > runingTaskSize && (runingTaskSize / dcdrConcurrent) == 0
                && dcdrFaultTolerant >= failedTaskSize;
+    }
+    
+    /**
+     * 获取dcdr任务的标题
+     *
+     * @param templateIdList 模板id列表
+     * @param dcdrType       dcdr类型
+     * @return {@link String}
+     */
+    private String getDCDRTaskTitle(List<Long> templateIdList, String dcdrType) {
+        final Long templateId = templateIdList.get(0);
+        final String templateName = indexTemplateService.getNameByTemplateLogicId(
+            Math.toIntExact(templateId));
+        return templateIdList.size() == 1 ? String.format("%s索引模板主从%s切换",
+            templateName, dcdrType) : String.format("%s等%s个索引模板主从%s切换",
+            templateName, templateIdList.size(), dcdrType);
     }
 }
