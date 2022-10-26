@@ -70,6 +70,6 @@ join_cluster
 create_logic_template
 #执行定时任务
 perform_run_task
-sleep 10s
+sleep 10
 
 echo "请重启admin工程"
