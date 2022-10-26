@@ -13,10 +13,10 @@ join_cluster(){
  data_path=`dirname $0`
  url=$url_prefix$put_cluster_url
  data=`cat $data_path/cluster-phy-join`
- join_cluster="curl -s $header  -X POST $url -d'$data'"
+ join_cluster="curl -s $header  -XPOST $url -d '$data'"
  response=`eval $join_cluster`
  echo "response $response"
- logic_cluster_id=`echo $response | awk -F'data":' '{print $NF}'|awk -F "," '{print $1}'`
+ logic_cluster_id=`echo $response | awk -F 'data":' '{print $NF}'|awk -F "," '{print $1}'`
  echo "logic_cluster_id $logic_cluster_id"
 }
 
@@ -37,11 +37,27 @@ create_logic_template(){
     create_logic_template_exec="cat $i| sed 's/#resourceId/$logic_cluster_id/g'"
     create_logic_template_data=`eval eval $create_logic_template_exec`
     url=$url_prefix/v3/template/logic
-    create_logic_template_exec="curl -s  $header_subject  -X POST $url -d '$create_logic_template_data'"
+    create_logic_template_exec="curl -s  $header_subject  -XPOST $url -d '$create_logic_template_data'"
     result=`eval $create_logic_template_exec`
     echo "Create template results : $result ...."
   done
 }
+
+perform_run_task(){
+  task_url=$url_prefix/v1/logi-job/task/list
+  data=`cat $data_path/task`
+  echo $data
+	get_task_date="curl -s $header  -XPOST $task_url -d '$data'"
+	response=`eval $get_task_date`
+	taskCode=`echo $response |  grep  -E 'taskCode":"\d+"' -o| grep -E "\d+" -o`
+	taskCode_url=$url_prefix/v1/logi-job/task/$taskCode/do
+	echo $taskCode_url
+	taskCode_url_run="curl -s $header  -XPOST $taskCode_url -d '{}'"
+	result=`eval $taskCode_url_run`
+	echo $result
+
+}
+perform_run_task
 url_status=$(curl -s -m 5 -IL $url_prefix/health  |grep 200)
 if ["$url_status" == ""];then
 	echo "服务异常，无法执行脚本"
@@ -50,7 +66,10 @@ fi
 join_cluster
 
 
-
-
 #创建元数据模版
 create_logic_template
+#执行定时任务
+perform_run_task
+sleep 10
+
+echo "请重启admin工程"
