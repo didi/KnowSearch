@@ -473,7 +473,49 @@ public class IndexCatESDAO extends BaseESDAO {
                 .filter(Objects::nonNull).map(JSONObject.class::cast).map(jsonObject -> jsonObject.getString(INDEX))
                 .filter(Objects::nonNull).distinct().collect(Collectors.toList());
     }
-   
-    
-  
+
+
+    /**
+     * 获取未删除的逻辑集群存在的所有索引
+     *
+     * @return List<IndexCatCell>
+     */
+    public List<IndexCatCell> getAllCatIndexNameList(Integer searchSize, List<String> phyClusterNames) {
+        String clusterPhyStr = JSON.toJSONString(phyClusterNames);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ALL_CAT_INDEX_NAME_BY_CLUSTERS, searchSize,clusterPhyStr);
+        List<IndexCatCell> indexCatCellList = getIndexCellWithScroll(searchSize, dsl);
+        return indexCatCellList;
+    }
+    /**
+     * 获取某个逻辑集群的索引
+     *  @param searchSize
+     *  @param logicClusterId
+     *  @return */
+    public List<IndexCatCell> getIndexNameListByLogicCluster(Integer searchSize, Long logicClusterId) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ALL_CAT_INDEX_NAME_BY_RESOURCE_ID, searchSize, logicClusterId);
+        List<IndexCatCell> indexCatCellList = getIndexCellWithScroll(searchSize, dsl);
+        return indexCatCellList;
+    }
+
+    private List<IndexCatCell> getIndexCellWithScroll(Integer searchSize, String dsl) {
+        // 这里两个时间 用于拿到今天和昨天的数据, 否则无法个获取昨天用户创建的索引数据
+        long nowTime = System.currentTimeMillis();
+        long oneDayAgo = nowTime - 20 * 60 * 60 * 1000;
+        List<IndexCatCell> indexCatCellList = Lists.newCopyOnWriteArrayList();
+        String genDailyIndexName = IndexNameUtils.genDailyIndexName(indexName, oneDayAgo, nowTime);
+        ScrollResultVisitor<IndexCatCell> scrollResultVisitor = resultList -> {
+            if (CollectionUtils.isNotEmpty(resultList)) {
+                indexCatCellList.addAll(resultList);
+            }
+        };
+        try {
+            ESOpTimeoutRetry.esRetryExecute("getIndexCellWithScroll", 3, () -> {
+                gatewayClient.queryWithScroll(metadataClusterName, genDailyIndexName, TYPE, dsl, searchSize, null, IndexCatCell.class, scrollResultVisitor);
+                return true;
+            });
+        } catch (ESOperateException e) {
+            LOGGER.error("class=IndexCatESDAO||method=getIndexCellWithScroll", e);
+        }
+        return indexCatCellList;
+    }
 }
