@@ -109,7 +109,7 @@ public interface ESClusterService {
      * @param clusterName
      * @return
      */
-    List<ESClusterTaskStatsResponse> syncGetClusterTaskStats(String clusterName);
+    List<ESClusterTaskStatsResponse> syncGetClusterTaskStats(String clusterName) throws ESOperateException;
 
     /**
      * 获取集群健康度
