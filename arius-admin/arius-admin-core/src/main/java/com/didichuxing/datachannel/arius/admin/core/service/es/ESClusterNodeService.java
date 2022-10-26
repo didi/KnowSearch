@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordina
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ClusterMemInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.PendingTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
@@ -60,7 +61,7 @@ public interface ESClusterNodeService {
      * 获取ES集群某个节点上的索引个数
      * @param nodes 主机名或IP集合字符串 , 用逗号分隔  
      */
-    int syncGetIndicesCount(String cluster, String nodes);
+    int syncGetIndicesCount(String cluster, String nodes) throws ESOperateException;
 
     /**
      * 获取ES集群的内存使用统计信息

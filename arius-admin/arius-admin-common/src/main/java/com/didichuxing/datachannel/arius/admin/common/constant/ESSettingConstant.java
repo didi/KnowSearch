@@ -27,5 +27,14 @@ public class ESSettingConstant {
     public static final String INDEX_UUID                      = "index.uuid";
     public static final String INDEX_PROVIDED_NAME             = "index.provided_name";
     public static final String INDEX_ROUTING_ALLOCATION_PREFIX = "index.routing.allocation";
+    public static final String INDEX_PRIORITY                  = "index.priority";
 
+
+
+    public static final String ASYNC                           = "async";
+    public static final String REQUEST                         = "request";
+
+    public static final Integer HIGH_PRIORITY                  = 10;
+    public static final Integer MIDDLE_PRIORITY                = 5;
+    public static final Integer LOW_PRIORITY                   = 0;
 }

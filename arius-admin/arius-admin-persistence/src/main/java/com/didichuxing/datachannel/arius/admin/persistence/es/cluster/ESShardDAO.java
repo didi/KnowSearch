@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.ShardCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
@@ -72,7 +73,7 @@ public class ESShardDAO extends BaseESDAO {
         ESClient client = esOpClient.getESClient(clusterName);
         if (Objects.isNull(client)) {
             LOGGER.error("class=ESClusterDAO||method=catShard||clusterName={}||errMsg=esClient is null", clusterName);
-            return new ArrayList<>();
+            throw new NullESClientException(clusterName);
         }
         try {
             return getShardCatCellPOS(clusterName, client, SHARD.getUri());
@@ -83,8 +84,9 @@ public class ESShardDAO extends BaseESDAO {
                 return getLowerVersionShardCatCellPOList(clusterName);
             }
             LOGGER.warn("class=ESClusterDAO||method=catShard||cluster={}||mg=get es segments fail", clusterName, e);
-            throw new ESOperateException(e.getMessage(),e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
+        return new ArrayList<>();
     }
 
     /**
@@ -92,11 +94,14 @@ public class ESShardDAO extends BaseESDAO {
      * @param cluster 物理集群
      * @return
      */
-    private List<ShardCatCellPO> getLowerVersionShardCatCellPOList(String cluster) {
+    private List<ShardCatCellPO> getLowerVersionShardCatCellPOList(String cluster) throws ESOperateException {
 
         List<ShardCatCellPO> shardCatCellPOS = Lists.newArrayList();
         ESClient client = fetchESClientByCluster(cluster);
-        if (client != null) {
+        if (client == null) {
+            throw new NullESClientException(cluster);
+        }
+        try {
             List<CatIndexResult> catIndexResults = indexDAO.catIndices(cluster);
             List<String> openIndexNames = catIndexResults.stream().filter(index->StringUtils.equals(OPEN,index.getStatus()))
                     .map(CatIndexResult::getIndex).collect(Collectors.toList());
@@ -107,8 +112,13 @@ public class ESShardDAO extends BaseESDAO {
                 CAT_SHARD_FUTURE.callableTask(()->getShardCatCellPOS(cluster, client, uri));
             }
             CAT_SHARD_FUTURE.waitResult().forEach(catCellList->shardCatCellPOS.addAll(catCellList));
+            return shardCatCellPOS;
+        } catch (Exception e) {
+            LOGGER.error("class=ESShardDao||method=getLowerVersionShardCatCellPOList||clusterName={}", cluster,
+                    e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
-        return shardCatCellPOS;
+        return Lists.newArrayList();
     }
 
     /**
@@ -118,12 +128,18 @@ public class ESShardDAO extends BaseESDAO {
      * @param uri uri
      * @return
      */
-    private List<ShardCatCellPO> getShardCatCellPOS(String cluster, ESClient client, String uri) {
-        DirectRequest directRequest = new DirectRequest(SHARD.getMethod(), uri);
-        DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
-        if (directResponse.getRestStatus() == RestStatus.OK
-                && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
-            return buildShardCatCellPOs(directResponse.getResponseContent(), cluster);
+    private List<ShardCatCellPO> getShardCatCellPOS(String cluster, ESClient client, String uri) throws ESOperateException {
+        try{
+            DirectRequest directRequest = new DirectRequest(SHARD.getMethod(), uri);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            if (directResponse.getRestStatus() == RestStatus.OK
+                    && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+                return buildShardCatCellPOs(directResponse.getResponseContent(), cluster);
+            }
+        } catch (Exception e) {
+            LOGGER.error("class=ESShardDAO||method=getShardCatCellPOS||clusterName={}||uri={}", cluster,uri,
+                    e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         return Collections.emptyList();
     }
@@ -176,7 +192,7 @@ public class ESShardDAO extends BaseESDAO {
         String result = null;
         if (Objects.isNull(client)) {
             LOGGER.error("class=ESClusterDAO||method=shardAssignment||clusterName={}||errMsg=esClient is null", clusterPhyName);
-            return null;
+            throw new NullESClientException(clusterPhyName);
         }
         try {
             DirectRequest directRequest = new DirectRequest(SHARD_ASSIGNMENT.getMethod(), SHARD_ASSIGNMENT.getUri());
@@ -185,12 +201,12 @@ public class ESShardDAO extends BaseESDAO {
                     && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 result = directResponse.getResponseContent();
             }
+            return result;
         } catch (Exception e) {
-            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
             LOGGER.error("class=ESClusterDAO||method=shardAssignment||msg=get es segments faill||cluster={}", clusterPhyName,e);
-            throw new ESOperateException((StringUtils.isNotBlank(exception)?exception:"获取shard分配说明数据出错！"));
+            ParsingExceptionUtils.abnormalTermination(e);
         }
-        return result;
+        return null;
     }
 
     /**

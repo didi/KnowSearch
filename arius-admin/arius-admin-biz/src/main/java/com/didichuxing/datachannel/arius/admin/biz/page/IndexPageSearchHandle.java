@@ -93,9 +93,9 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
                 return PaginationResult.buildSucc(Lists.newArrayList(), 0, condition.getPage(), condition.getSize());
             }
 
-            //设置索引阻塞信息
-            List<IndexCatCell> finalIndexCatCellList = batchFetchIndexAliasesAndBlockInfo(
-                totalHitAndIndexCatCellListTuple.getV2());
+            // 构建index信息
+            List<IndexCatCell> finalIndexCatCellList = buildExtraIndexInfo(totalHitAndIndexCatCellListTuple.getV2());
+
             List<IndexCatCellVO> indexCatCellVOList = ConvertUtil.list2List(finalIndexCatCellList,
                 IndexCatCellVO.class);
 
@@ -110,11 +110,11 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
     }
 
     /**
-     * 批量构建索引实时数据(包含block和aliases)
+     * 批量构建索引实时数据(包含block、aliases、translog、恢复优先级)
      * @param catCellList    索引cat/index基本信息
      * @return               List<IndexCatCell>
      */
-    private List<IndexCatCell> batchFetchIndexAliasesAndBlockInfo(List<IndexCatCell> catCellList) {
+    private List<IndexCatCell> buildExtraIndexInfo(List<IndexCatCell> catCellList) {
         List<IndexCatCell> finalIndexCatCellList = Lists.newCopyOnWriteArrayList(catCellList);
         Map<String, List<IndexCatCell>> cluster2IndexCatCellListMap = ConvertUtil.list2MapOfList(finalIndexCatCellList,
             IndexCatCell::getCluster, indexCatCell -> indexCatCell);
@@ -125,6 +125,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
         cluster2IndexCatCellListMap.forEach((cluster, indexCatCellList) -> {
             INDEX_BUILD_FUTURE.runnableTask(() -> {
                 esIndexService.buildIndexAliasesAndBlockInfo(cluster, indexCatCellList);
+                esIndexService.buildIndexSettingsInfo(cluster, indexCatCellList);
             });
         });
         INDEX_BUILD_FUTURE.waitExecute();

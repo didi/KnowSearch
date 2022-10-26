@@ -78,16 +78,25 @@ public class ESClusterDAO extends BaseESDAO {
      * @param value  all /  none
      * @return 成功 true   失败 false
      */
-    public boolean configReBalanceOperate(String cluster, String value) {
+    public boolean configReBalanceOperate(String cluster, String value) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (null == client) {
-            return false;
+            LOGGER.warn(
+                    "class={}||method=configReBalanceOperate||clusterName={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster);
+            throw new NullESClientException(cluster);
         }
+        try {
+            ESClusterUpdateSettingsResponse response = client.admin().cluster().prepareUpdateSettings()
+                    .addPersistent(REBALANCE, value).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
-        ESClusterUpdateSettingsResponse response = client.admin().cluster().prepareUpdateSettings()
-            .addPersistent(REBALANCE, value).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        return response.getAcknowledged();
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            LOGGER.error("class={}||method=configReBalanceOperate||clusterName={}||value={}",
+                    getClass().getSimpleName(), cluster, value,e);
+            ParsingExceptionUtils.abnormalTermination(e);
+        }
+        return false;
     }
 
     /**
@@ -95,17 +104,27 @@ public class ESClusterDAO extends BaseESDAO {
      * @param cluster 集群名称
      * @return map<flat_setting_name, setting_value>
      */
-    public Map<String, Object> getPersistentClusterSettings(String cluster) {
+    public Map<String, Object> getPersistentClusterSettings(String cluster) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (null == client) {
-            return null;
+            LOGGER.warn(
+                    "class={}||method=getPersistentClusterSettings||clusterName={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster);
+            throw new NullESClientException(cluster);
         }
 
-        ESClusterGetSettingsRequest request = new ESClusterGetSettingsRequest();
-        ESClusterGetSettingsResponse response = client.admin().cluster().getSetting(request)
-            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        try {
+            ESClusterGetSettingsRequest request = new ESClusterGetSettingsRequest();
+            ESClusterGetSettingsResponse response = client.admin().cluster().getSetting(request)
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
-        return JsonUtils.flatObject(response.getPersistentObj());
+            return JsonUtils.flatObject(response.getPersistentObj());
+        } catch (Exception e) {
+            LOGGER.error("class={}||method=getPersistentClusterSettings||clusterName={}",
+                    getClass().getSimpleName(), cluster,e);
+            ParsingExceptionUtils.abnormalTermination(e);
+        }
+        return null;
     }
 
     /**
@@ -125,8 +144,8 @@ public class ESClusterDAO extends BaseESDAO {
                     .execute(ESClusterGetSettingsAllAction.INSTANCE, new ESClusterGetSettingsAllRequest())
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class=ESClusterDAO||method=getClusterSetting||clusterName={}", cluster, e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         return response;
     }
@@ -154,11 +173,10 @@ public class ESClusterDAO extends BaseESDAO {
         
             return response.getAcknowledged();
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class=ESClusterDAO||method=putPersistentRemoteClusters||clusterName={}", cluster, e);
-            return false;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
-        
+        return false;
     }
 
     /**
@@ -520,11 +538,12 @@ public class ESClusterDAO extends BaseESDAO {
         return responses;
     }
 
-    public List<ESClusterTaskStatsResponse> getClusterTaskStats(String clusterName) {
+    public List<ESClusterTaskStatsResponse> getClusterTaskStats(String clusterName) throws ESOperateException {
         List<ESClusterTaskStatsResponse> responses = Lists.newArrayList();
         ESClient esClient = esOpClient.getESClient(clusterName);
         if (null == esClient) {
-            return responses;
+            LOGGER.error("class=ESClusterDAO||method=getClusterTaskStats||clusterName={}||errMsg=esClient is null", clusterName);
+            throw new NullESClientException(clusterName);
         }
 
         try {
@@ -553,6 +572,7 @@ public class ESClusterDAO extends BaseESDAO {
         } catch (Exception e) {
             LOGGER.error("class=ESClusterDAO||method=getClusterTaskStats||clusterName={}||errMsg=fail to get",
                 clusterName, e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
 
         return responses;
@@ -833,10 +853,10 @@ public class ESClusterDAO extends BaseESDAO {
             directResponse = getDirectResponse(cluster, "GET",
                     String.format(REMOTE_TARGET_CLUSTER, targetCluster, CONNECTED));
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error(
                     "class=ESClusterDAO||method=checkTargetClusterConnected||clusterName={}||errMsg=esClient is null",
                     cluster);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         Function<JSONObject,Boolean> jsonObjectFunc=jsonObject -> {
             //如果是空的，则直接为false
