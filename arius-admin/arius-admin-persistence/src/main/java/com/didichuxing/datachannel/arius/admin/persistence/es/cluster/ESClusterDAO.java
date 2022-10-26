@@ -519,11 +519,12 @@ public class ESClusterDAO extends BaseESDAO {
         return responses;
     }
 
-    public List<ESClusterTaskStatsResponse> getClusterTaskStats(String clusterName) {
+    public List<ESClusterTaskStatsResponse> getClusterTaskStats(String clusterName) throws ESOperateException {
         List<ESClusterTaskStatsResponse> responses = Lists.newArrayList();
         ESClient esClient = esOpClient.getESClient(clusterName);
         if (null == esClient) {
-            return responses;
+            LOGGER.error("class=ESClusterDAO||method=getClusterTaskStats||clusterName={}||errMsg=esClient is null", clusterName);
+            throw new NullESClientException(clusterName);
         }
 
         try {
@@ -552,6 +553,7 @@ public class ESClusterDAO extends BaseESDAO {
         } catch (Exception e) {
             LOGGER.error("class=ESClusterDAO||method=getClusterTaskStats||clusterName={}||errMsg=fail to get",
                 clusterName, e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
 
         return responses;
