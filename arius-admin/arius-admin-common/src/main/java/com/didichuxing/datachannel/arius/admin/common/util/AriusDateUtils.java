@@ -295,16 +295,16 @@ public class AriusDateUtils {
     public static long getUnitTime(long value, String unit) {
         long ms = 0L;
         switch (unit) {
-            case "S":
+            case "s":
                 ms = value * 1000;
             break;
-            case "MIN":
+            case "min":
                 ms =  value * 1000 * 60;
             break;
-            case "H":
+            case "h":
                 ms =  value * 1000 * 60 * 60;
                 break;
-            case "D":
+            case "d":
                 ms =  value * 1000 * 60 * 60 * 24;
                 break;
             default:
