@@ -18,12 +18,12 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "gateway节点集群条件查询信息")
 public class GatewayNodeConditionDTO extends GatewayNodeDTO {
 
-    @ApiModelProperty("排序字段 ")
+    @ApiModelProperty(value = "排序字段 ",hidden = true)
     private String       sortTerm;
-
+    @ApiModelProperty(value = "排序字段 ",hidden = true)
     private String       sortType;
 
-    @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
+    @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = true)
     private Boolean      orderByDesc = true;
     
 }

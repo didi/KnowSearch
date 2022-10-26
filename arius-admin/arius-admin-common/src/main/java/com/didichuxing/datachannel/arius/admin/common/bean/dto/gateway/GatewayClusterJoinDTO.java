@@ -37,8 +37,4 @@ public class GatewayClusterJoinDTO extends BaseDTO {
     
     @ApiModelProperty("数据中心")
     private String dataCenter;
-    
-    @ApiModelProperty("IaaS 平台类型")
-    private String platformType;
-    
 }

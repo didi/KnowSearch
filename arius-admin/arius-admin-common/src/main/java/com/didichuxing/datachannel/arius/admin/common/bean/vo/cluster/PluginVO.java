@@ -58,7 +58,7 @@ public class PluginVO extends BaseVO {
     private Integer componentId;
     @ApiModelProperty("备注")
     private String  memo;
-    @ApiModelProperty("插件状态")
+    @ApiModelProperty("插件状态:-1:unknown;1.green；2.yellow;3.red")
     private Integer status;
     
     
