@@ -1180,10 +1180,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Override
     public Result<Boolean> batchUpdateClusterDynamicConfig(List<String> clusterList, ClusterSettingDTO param,
                                                         String operator, Integer projectId) {
-        final Result<Void> projectCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        Result<Void> projectCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (projectCheck.failed()) {
             return Result.buildFail(projectCheck.getMessage());
         }
+
         Result<Boolean> result = checkClusterExistAndConfigType(clusterList, param);
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
@@ -1191,39 +1192,42 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         boolean updateFail = false;
         StringBuilder updateFailClusters = new StringBuilder();
+
         // 对每个集群进行更新配置操作
         for (String cluster : clusterList) {
             Map<String, Object> persistentConfig = Maps.newHashMap();
-            String changeKey = param.getKey();
+            String changeKey   = param.getKey();
             Object changeValue = param.getValue();
             persistentConfig.put(changeKey, changeValue);
+
             boolean succ = esClusterService.syncPutPersistentConfig(cluster, persistentConfig);
             if(!succ){
                 updateFail = true;
                 updateFailClusters.append(cluster).append(",");
             }else {
                 // 记录操作
-                final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs;
-                beforeChangeConfigs = getPhyClusterDynamicConfigs(cluster);
+                Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs
+                        = getPhyClusterDynamicConfigs(cluster);
 
-                if (beforeChangeConfigs.failed() || beforeChangeConfigs.getData().values() == null){
+                if (beforeChangeConfigs.failed()
+                        || null == beforeChangeConfigs.getData()
+                        || null == beforeChangeConfigs.getData().values()){
                     updateFail = true;
                     updateFailClusters.append(cluster).append(",");
                 } else {
-
                     Object beforeValue = beforeChangeConfigs.getData().values().stream()
-                            .filter(
-                                    clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.containsKey(changeKey))
-                            .map(clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.get(changeKey))
+                            .filter(m -> m.containsKey(changeKey))
+                            .map(m -> m.get(changeKey))
                             .findFirst().orElse("");
 
-                    final ClusterPhy clusterByName = clusterPhyService.getClusterByName(cluster);
+                    final ClusterPhy clusterPhy = clusterPhyService.getClusterByName(cluster);
                     operateRecordService.saveOperateRecordWithManualTrigger(String.format("%s:%s->%s", changeKey, beforeValue, changeValue),
-                            operator, AuthConstant.SUPER_PROJECT_ID, clusterByName.getId(),
+                            operator, AuthConstant.SUPER_PROJECT_ID, null == clusterPhy ? -1 : clusterPhy.getId(),
                             OperateTypeEnum.PHYSICAL_CLUSTER_DYNAMIC_CONF_CHANGE);
                 }
             }
         }
+
         if(updateFail){
             return Result.buildFail(updateFailClusters.deleteCharAt(updateFailClusters.length()-1) + " 集群更新动态配置失败");
         }
