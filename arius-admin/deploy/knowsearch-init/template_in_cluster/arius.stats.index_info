@@ -17,33 +17,49 @@
         "_source":{
             "enabled":true
         },
-        "properties":{
-        "cleanTime" : {
-          "type" : "date",
-          "format" : "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis"
+
+    "properties": {
+        "template": {
+            "type": "keyword"
         },
-        "cluster" : {
-          "type" : "keyword"
+        "cluster": {
+            "type": "keyword"
         },
-        "collectTime" : {
-          "type" : "date",
-          "format" : "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis"
+        "collectTime": {
+            "format": "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
+            "type": "date"
         },
-        "index" : {
-          "type" : "keyword"
+        "routingValue": {
+            "type": "text",
+            "fields": {
+                "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                }
+            }
         },
-        "key" : {
-          "type" : "keyword",
-          "ignore_above" : 512
+        "index": {
+            "type": "keyword"
         },
-        "logTime" : {
-          "type" : "date",
-          "format" : "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis"
+        "templateId": {
+            "type": "long"
         },
-        "logicTemplateId" : {
-          "type" : "long"
+        "logTime": {
+            "format": "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
+            "type": "date"
         },
-        "metrics" : {
+        "cleanTime": {
+            "format": "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
+            "type": "date"
+        },
+        "shardNu": {
+            "type": "double"
+        },
+        "sinkTime": {
+            "format": "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis",
+            "type": "date"
+        },
+        "metrics": {
             "properties": {
                 "refresh-total": {
                     "type": "double"
@@ -286,35 +302,20 @@
                     "type": "double"
                 }
             }
-        
         },
-        "routingValue" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
+        "key": {
+            "ignore_above": 512,
+            "type": "keyword"
         },
-        "shardNu" : {
-          "type" : "double"
+        "logicTemplateId": {
+            "type": "long"
         },
-        "sinkTime" : {
-          "type" : "date",
-          "format" : "yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||strict_date_optional_time||epoch_millis"
-        },
-        "template" : {
-          "type" : "keyword"
-        },
-        "templateId" : {
-          "type" : "long"
-        },
-        "timestamp" : {
-          "type" : "date",
-          "format" : "epoch_millis"
+        "timestamp": {
+            "format": "epoch_millis",
+            "type": "date"
         }
-      }
+    
+}
     },
     "aliases":{
 
