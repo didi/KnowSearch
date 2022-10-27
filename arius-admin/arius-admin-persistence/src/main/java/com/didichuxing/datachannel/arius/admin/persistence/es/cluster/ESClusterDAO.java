@@ -297,10 +297,13 @@ public class ESClusterDAO extends BaseESDAO {
      * @param tryTimes
      * @return
      */
-    public ESIndicesGetAliasResponse getClusterAlias(String cluster, Integer tryTimes) {
+    public ESIndicesGetAliasResponse getClusterAlias(String cluster, Integer tryTimes) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (client == null) {
-            return null;
+            LOGGER.warn(
+                    "class=ESClusterDAO||method=getClusterAlias||clusterName={}" + "||errMsg=client is null",
+                    cluster);
+            throw new NullESClientException(cluster);
         }
         ESIndicesGetAliasResponse esIndicesGetAliasResponse = null;
         try {
@@ -308,13 +311,13 @@ public class ESClusterDAO extends BaseESDAO {
                 esIndicesGetAliasResponse = client.admin().indices().prepareAlias().execute()
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.MINUTES);
             } while (tryTimes-- > 0 && null == esIndicesGetAliasResponse);
-
+            return esIndicesGetAliasResponse;
         } catch (Exception e) {
             LOGGER.error("class=ESClusterDAO||method=getClusterAlias||clusterName={}||errMsg=query error. ", cluster,
                 e);
-            return null;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
-        return esIndicesGetAliasResponse;
+        return null;
     }
 
     /**
