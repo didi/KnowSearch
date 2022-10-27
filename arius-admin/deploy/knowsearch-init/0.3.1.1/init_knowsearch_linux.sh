@@ -62,6 +62,7 @@ perform_run_task(){
 url_status=$(curl -s -m 5 -IL $url_prefix/health  |grep 200)
 if ["$url_status" == ""];then
 	echo "服务异常，无法执行脚本" >> /vat/log/install_knowsearch.log
+	exit
 fi
 #接入物理集群
 run_join_cluster
