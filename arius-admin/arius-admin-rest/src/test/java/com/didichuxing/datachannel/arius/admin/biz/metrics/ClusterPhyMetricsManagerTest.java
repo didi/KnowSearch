@@ -100,7 +100,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -111,7 +111,7 @@ class ClusterPhyMetricsManagerTest {
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
             Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "dateField", "dateFieldFormat", "idField", "routingField",
-                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1)));
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1,0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         // Configure ESIndexService.syncCatIndexByExpression(...).
@@ -169,7 +169,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(Result.buildSucc());
@@ -177,7 +177,7 @@ class ClusterPhyMetricsManagerTest {
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
             Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0,  "dateField", "dateFieldFormat", "idField", "routingField",
-                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1)));
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1,0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         // Configure ESIndexService.syncCatIndexByExpression(...).
@@ -215,7 +215,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -225,7 +225,7 @@ class ClusterPhyMetricsManagerTest {
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
             Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "dateField", "dateFieldFormat", "idField", "routingField",
-                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1)));
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1,0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         // Configure ESIndexService.syncCatIndexByExpression(...).
@@ -263,7 +263,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -273,7 +273,7 @@ class ClusterPhyMetricsManagerTest {
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
             Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0,  "dateField", "dateFieldFormat", "idField", "routingField",
-                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1)));
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1,0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         // Configure ESIndexService.syncCatIndexByExpression(...).
@@ -311,7 +311,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -356,7 +356,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -403,7 +403,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -450,7 +450,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -461,7 +461,7 @@ class ClusterPhyMetricsManagerTest {
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
             Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0,  "dateField", "dateFieldFormat", "idField", "routingField",
-                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1)));
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1,0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         when(esIndexService.syncCatIndexByExpression("clusterPhyName", "expression"))
@@ -489,7 +489,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -500,7 +500,7 @@ class ClusterPhyMetricsManagerTest {
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
             Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0,  "dateField", "dateFieldFormat", "idField", "routingField",
-                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1)));
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1,0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         // Configure ESIndexService.syncCatIndexByExpression(...).
@@ -563,7 +563,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(Result.buildSucc());
@@ -571,7 +571,7 @@ class ClusterPhyMetricsManagerTest {
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
             Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "dateField", "dateFieldFormat", "idField", "routingField",
-                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1)));
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1,0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         // Configure ESIndexService.syncCatIndexByExpression(...).
@@ -612,7 +612,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -622,7 +622,7 @@ class ClusterPhyMetricsManagerTest {
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
             Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "dateField", "dateFieldFormat", "idField", "routingField",
-                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1)));
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1,0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         // Configure ESIndexService.syncCatIndexByExpression(...).
@@ -663,7 +663,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -673,7 +673,7 @@ class ClusterPhyMetricsManagerTest {
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
             Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "dateField", "dateFieldFormat", "idField", "routingField",
-                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1)));
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1,0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         // Configure ESIndexService.syncCatIndexByExpression(...).
@@ -714,7 +714,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -762,7 +762,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -812,7 +812,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -862,7 +862,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-            "config");
+            "config", "");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -873,7 +873,7 @@ class ClusterPhyMetricsManagerTest {
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
             Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "dateField", "dateFieldFormat", "idField", "routingField",
-                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1)));
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0,1,0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         when(esIndexService.syncCatIndexByExpression("clusterPhyName", "expression"))

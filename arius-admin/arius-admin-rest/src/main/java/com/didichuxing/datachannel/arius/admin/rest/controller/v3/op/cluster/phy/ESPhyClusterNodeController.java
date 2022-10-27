@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
@@ -50,11 +51,21 @@ public class ESPhyClusterNodeController {
         return clusterNodeManager.listClusterPhyNode(clusterId);
     }
 
+
     @GetMapping("/{clusterId}/region/")
     @ResponseBody
+    @Deprecated
     @ApiOperation(value = "获取可划分至region的节点信息")
     public Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(@PathVariable Long clusterId) {
         return clusterNodeManager.listDivide2ClusterNodeInfo(clusterId);
+    }
+
+    @GetMapping("/{clusterId}/region/{divideType}")
+    @ResponseBody
+    @ApiOperation(value = "获取可划分至region的节点信息")
+    public Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(@PathVariable Long clusterId,
+                                                                                      @PathVariable String divideType) {
+        return clusterNodeManager.listDivide2ClusterNodeInfoWithDivideType(clusterId, divideType);
     }
 
     @PostMapping("/divide-region-check")
@@ -116,5 +127,12 @@ public class ESPhyClusterNodeController {
     public Result<Void> delete(@RequestBody List<Integer> ids, HttpServletRequest request) {
         return clusterNodeManager.delete(ids, HttpRequestUtil.getProjectId(request),
                         HttpRequestUtil.getOperator(request));
+    }
+
+    @GetMapping("/{clusterPhyName}/infos")
+    @ResponseBody
+    @ApiOperation(value = "获取物理集群下的节点信息")
+    public Result<List<ClusterNodeInfoVO>> listClusterLogicNodeInfos(@PathVariable String clusterLogicName) {
+        return clusterNodeManager.listClusterLogicNodeByName(clusterLogicName);
     }
 }

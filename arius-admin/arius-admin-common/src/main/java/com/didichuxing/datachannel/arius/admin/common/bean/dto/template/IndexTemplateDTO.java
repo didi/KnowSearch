@@ -123,4 +123,7 @@ public class IndexTemplateDTO extends PageDTO {
 
     @ApiModelProperty("可用磁盘容量")
     private Double                    diskSize;
+
+    @ApiModelProperty("恢复优先级")
+    private Integer priorityLevel;
 }

@@ -404,7 +404,14 @@ public interface ESIndexService {
      * @param indexCatCellList 索引cat/index基本信息
      */
     List<IndexCatCell> buildIndexAliasesAndBlockInfo(String cluster, List<IndexCatCell> indexCatCellList);
-    
+
+    /**
+     * 构建索引实时数据（包含translog和恢复优先级）
+     * @param cluster
+     * @param indexCatCellList
+     * @return
+     */
+    List<IndexCatCell> buildIndexSettingsInfo(String cluster, List<IndexCatCell> indexCatCellList);
     /**
      * 更新索引映射
      *
@@ -431,7 +438,7 @@ public interface ESIndexService {
      * @param indexName
      * @return boolean
      */
-    boolean deleteIndex(String clusterName, String indexName);
+    boolean deleteIndex(String clusterName, String indexName) throws ESOperateException;
     
     /**
      * 返回与指定别名匹配的索引数

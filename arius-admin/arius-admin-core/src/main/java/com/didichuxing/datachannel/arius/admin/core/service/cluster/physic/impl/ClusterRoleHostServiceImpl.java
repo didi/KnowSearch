@@ -103,6 +103,12 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
     }
 
     @Override
+    public List<ClusterRoleHost> listNodesByClusters(List<String> phyClusterNames) {
+        List<ESClusterRoleHostPO> pos = clusterRoleHostDAO.listByClusters(phyClusterNames);
+        return ConvertUtil.list2List(pos,ClusterRoleHost.class);
+    }
+
+    @Override
     public List<ClusterRoleHost> getOnlineNodesByCluster(String cluster) {
         List<ClusterRoleHost> clusterRoleHosts = getNodesByCluster(cluster);
         if (CollectionUtils.isEmpty(clusterRoleHosts)) {
@@ -446,7 +452,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         
         return clusterRoleHostDAO.deleteByIds(ids)==ids.size();
     }
-    
+
     /***************************************** private method ****************************************************/
     private Result<Void> checkNodeParam(ESClusterRoleHostDTO param, OperationEnum operation) {
         if (AriusObjUtils.isNull(param)) {

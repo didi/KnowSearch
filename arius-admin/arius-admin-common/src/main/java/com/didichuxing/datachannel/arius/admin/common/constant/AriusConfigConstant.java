@@ -323,4 +323,6 @@ public class AriusConfigConstant {
      * 集群大shard阈值定义
      */
     public static final double BIG_SHARD                                                                      = 10d;
+
+    public static final String CLUSTER_REGION_UNSUPPORTED_DIVIDE_TYPE                                         = "cluster.region.unsupported_divide_type";
 }
