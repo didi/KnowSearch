@@ -66,7 +66,7 @@ public interface ESClusterService {
      * @param cluster
      * @return map
      */
-    Map<String, List<String>> syncGetNode2PluginsMap(String cluster);
+    Map<String, List<String>> syncGetNode2PluginsMap(String cluster) throws ESOperateException;
 
     /**
      * 获取某个集群内索引别名到索引名称的映射

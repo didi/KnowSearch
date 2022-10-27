@@ -3,19 +3,25 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.co
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ESClusterConfigManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.ConfigConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESConfigVO;
+import com.didiglobal.logi.op.manager.interfaces.vo.GeneralGroupConfigHostVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -75,5 +81,22 @@ public class ESClusterConfigController {
         return esClusterConfigManager.editConfigDesc(param, HttpRequestUtil.getOperator(request),
             HttpRequestUtil.getProjectId(request));
 
+    }
+    
+    @GetMapping("/{clusterPhyId}/{configId}")
+    @ResponseBody
+    @ApiOperation(value = "根据 configId 获取物理集群配置信息",tags = "")
+    public Result<GeneralGroupConfigHostVO> getConfigByClusterPhyId(HttpServletRequest request,
+                                                                    @PathVariable("clusterPhyId") Integer clusterPhyId,
+                                                                    @PathVariable("configId") Integer configId) {
+        return Result.buildSucc(new GeneralGroupConfigHostVO());
+    }
+    
+    @PostMapping("/config/page")
+    @ResponseBody
+    @ApiOperation(value = "按条件分页获取 cluster 配置列表", tags = "")
+    public PaginationResult<ClusterPhyConfigVO> pageGetGatewayConfig(HttpServletRequest request,
+                                                                     @RequestBody ConfigConditionDTO condition) {
+        return new PaginationResult<>(Collections.singletonList(new ClusterPhyConfigVO()), 10, 1, 10);
     }
 }
