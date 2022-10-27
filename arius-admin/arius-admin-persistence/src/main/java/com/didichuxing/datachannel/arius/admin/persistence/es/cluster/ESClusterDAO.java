@@ -237,7 +237,6 @@ public class ESClusterDAO extends BaseESDAO {
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             } while (tryTimes-- > 0 && null == esCatResponse);
         } catch (Exception e) {
-
             LOGGER.warn(
                 "class=ESClusterDAO||method=getNode2PluginsMap||clusterName={}" + "||errMsg=can't get node  plugin",
                 cluster);
