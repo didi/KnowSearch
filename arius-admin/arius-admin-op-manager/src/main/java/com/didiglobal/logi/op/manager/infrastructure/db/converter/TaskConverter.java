@@ -1,0 +1,25 @@
+package com.didiglobal.logi.op.manager.infrastructure.db.converter;
+
+import com.didiglobal.logi.op.manager.domain.task.entity.Task;
+import com.didiglobal.logi.op.manager.infrastructure.db.TaskPO;
+import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
+
+import java.util.List;
+
+/**
+ * @author didi
+ * @date 2022-07-13 1:47 下午
+ */
+public class TaskConverter {
+    public static TaskPO convertTaskDO2PO(Task task) {
+        return ConvertUtil.obj2Obj(task, TaskPO.class);
+    }
+
+    public static Task convertTaskPO2DO(TaskPO po) {
+        return ConvertUtil.obj2Obj(po, Task.class);
+    }
+
+    public static List<Task> convertTaskPO2DOList(List<TaskPO> poList) {
+        return ConvertUtil.list2List(poList, Task.class);
+    }
+}
