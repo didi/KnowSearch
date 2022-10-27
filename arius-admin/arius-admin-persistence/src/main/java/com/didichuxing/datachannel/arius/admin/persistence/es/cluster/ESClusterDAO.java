@@ -326,12 +326,12 @@ public class ESClusterDAO extends BaseESDAO {
     * @param cluster
     * @return
     */
-    public ESClusterHealthResponse getClusterHealth(String cluster, Integer tryTimes) {
+    public ESClusterHealthResponse getClusterHealth(String cluster, Integer tryTimes) throws ESOperateException {
         ESClient esClient = esOpClient.getESClient(cluster);
         if (esClient == null) {
             LOGGER.error("class=ESClusterDAO||method=getClusterHealth||clusterName={}||errMsg=esClient is null",
                 cluster);
-            return null;
+            throw new NullESClientException(cluster);
         }
         ESClusterHealthResponse esClusterHealthResponse = null;
         Long minTimeoutNum = 1L;
@@ -346,12 +346,13 @@ public class ESClusterDAO extends BaseESDAO {
                     minTimeoutNum = maxTimeoutNum;
                 }
             } while (tryTimes-- > 0 && null == esClusterHealthResponse);
+            return esClusterHealthResponse;
         } catch (Exception e) {
             LOGGER.error("class=ESClusterDAO||method=getClusterHealth||clusterName={}||errMsg=query error. ", cluster,
                 e);
-            return null;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
-        return esClusterHealthResponse;
+        return null;
     }
 
     public Map<String, ClusterNodeSettings> getPartOfSettingsByCluster(String cluster, Integer tryTimes) {

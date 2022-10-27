@@ -101,7 +101,7 @@ public interface ESClusterService {
      * @param clusterName
      * @return
      */
-    ESClusterHealthResponse syncGetClusterHealth(String clusterName);
+    ESClusterHealthResponse syncGetClusterHealth(String clusterName) throws ESOperateException;
 
     /**
      * 获取集群task信息
@@ -117,7 +117,7 @@ public interface ESClusterService {
      * @param clusterName
      * @return
      */
-    ClusterHealthEnum syncGetClusterHealthEnum(String clusterName);
+    ClusterHealthEnum syncGetClusterHealthEnum(String clusterName) throws ESOperateException;
 
     /**
      * 获取集群状态信息

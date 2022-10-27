@@ -236,7 +236,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public ESClusterHealthResponse syncGetClusterHealth(String clusterName) {
+    public ESClusterHealthResponse syncGetClusterHealth(String clusterName) throws ESOperateException {
         return esClusterDAO.getClusterHealth(clusterName, 3);
     }
 
@@ -246,7 +246,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public ClusterHealthEnum syncGetClusterHealthEnum(String clusterName) {
+    public ClusterHealthEnum syncGetClusterHealthEnum(String clusterName) throws ESOperateException {
         ESClusterHealthResponse clusterHealthResponse = esClusterDAO.getClusterHealth(clusterName, 3);
 
         ClusterHealthEnum clusterHealthEnum = ClusterHealthEnum.UNKNOWN;
