@@ -283,7 +283,12 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     @Override
     public boolean syncPutPersistentConfig(String cluster, Map<String, Object> configMap) {
-        return esClusterDAO.putPersistentConfig(cluster, configMap);
+        try {
+            return esClusterDAO.putPersistentConfig(cluster, configMap);
+        } catch (Exception e) {
+            LOGGER.error("class=ESClusterServiceImpl||method=syncPutPersistentConfig||clusterName={}", cluster,e);
+            return false;
+        }
     }
 
     @Override
