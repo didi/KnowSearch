@@ -259,13 +259,13 @@ public class ESClusterDAO extends BaseESDAO {
      * @param cluster 物理集群名称
      * @return 集群下的节点资源使用信息列表
      */
-    public List<NodeAllocationInfo> getNodeAllocationInfoByCluster(String cluster, Integer tryTimes) {
+    public List<NodeAllocationInfo> getNodeAllocationInfoByCluster(String cluster, Integer tryTimes) throws ESOperateException {
         ESClient esClient = esOpClient.getESClient(cluster);
         if (esClient == null) {
             LOGGER.warn(
                 "class=ESClusterDAO||method=getNodeAllocationInfoByCluster||clusterName={}" + "||errMsg=client is null",
                 cluster);
-            return null;
+            throw new NullESClientException(cluster);
         }
 
         ESCatRequest esCatRequest = new ESCatRequest();
@@ -281,7 +281,7 @@ public class ESClusterDAO extends BaseESDAO {
             LOGGER.warn("class=ESClusterDAO||method=getNodeAllocationInfoByCluster||clusterName={}"
                         + "||errMsg=can't get allocation info",
                 cluster);
-            return null;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         return Optional.ofNullable(esCatResponse).map(ESCatResponse::getResponse).map(Object::toString)
             .map(esCatResponseString2NodeAllocationInfoListFunc).orElse(null);
