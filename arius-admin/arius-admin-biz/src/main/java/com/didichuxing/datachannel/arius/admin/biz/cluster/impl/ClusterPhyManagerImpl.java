@@ -1154,20 +1154,19 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     /**
      * 批量更新物理集群的动态配置项
-     * @param clusterList  物理集群名称list
      * @param param        要更新的配置项
      * @param operator
      * @param projectId
      * @return
      */
     @Override
-    public Result<Boolean> batchUpdateClusterDynamicConfig(List<String> clusterList, ClusterSettingDTO param,
-                                                        String operator, Integer projectId) throws ESOperateException {
+    public Result<Boolean> batchUpdateClusterDynamicConfig(MultiClusterSettingDTO param, String operator,
+                                                           Integer projectId) throws ESOperateException {
         final Result<Void> projectCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (projectCheck.failed()) {
             return Result.buildFail(projectCheck.getMessage());
         }
-        Result<Boolean> result = checkClusterExistAndConfigType(clusterList, param);
+        Result<Boolean> result = checkClusterExistAndConfigType(param);
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
@@ -1175,7 +1174,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         boolean updateFail = false;
         StringBuilder updateFailClusters = new StringBuilder();
         // 对每个集群进行更新配置操作
-        for (String cluster : clusterList) {
+        for (String cluster : param.getClusterNameList()) {
             Map<String, Object> persistentConfig = Maps.newHashMap();
             String changeKey = param.getKey();
             Object changeValue = param.getValue();
@@ -1207,9 +1206,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     
     /**************************************** private method ***************************************************/
 
-    private Result<Boolean> checkClusterExistAndConfigType(List<String> clusterList, ClusterSettingDTO param) {
+    private Result<Boolean> checkClusterExistAndConfigType(MultiClusterSettingDTO param) {
         // check集群是否都存在
-        for (String cluster : clusterList) {
+        for (String cluster : param.getClusterNameList()) {
             boolean clusterExist = clusterPhyService.isClusterExists(cluster);
             if(!clusterExist) {
                 return Result.buildFail(cluster + "集群不存在");

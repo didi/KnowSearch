@@ -5,6 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.MultiClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
@@ -50,13 +51,12 @@ public class ESClusterDynamicConfigController {
         return clusterPhyManager.getRoutingAllocationAwarenessAttributes(cluster);
     }
 
-    @PutMapping("/{clusterList}")
+    @PutMapping("/multi-cluster")
     @ResponseBody
     @ApiOperation(value = "批量更新物理集群的动态配置项")
-    public Result<Boolean> batchUpdateClusterDynamicConfig(@PathVariable List<String> clusterList,
-                                                           @RequestBody ClusterSettingDTO param,
+    public Result<Boolean> batchUpdateClusterDynamicConfig(@RequestBody MultiClusterSettingDTO param,
                                                            HttpServletRequest request) throws ESOperateException {
-        return clusterPhyManager.batchUpdateClusterDynamicConfig(clusterList, param, HttpRequestUtil.getOperator(request),
+        return clusterPhyManager.batchUpdateClusterDynamicConfig(param, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
 }
