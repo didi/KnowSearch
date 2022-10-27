@@ -622,7 +622,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             clusterSetting = esClusterService.syncGetClusterSetting(cluster);
         } catch (Exception e) {
             LOGGER.error("class=ClusterPhyManagerImpl||method=getPhyClusterDynamicConfigs||clusterName={}", cluster, e);
-            return Result.buildFail(String.format("获取集群动态配置信息失败, 请确认是否集群[%s]是否正常", cluster));
+            return Result.buildFail(String.format("获取集群setting异常，请确认是否集群[%s]是否正常", cluster));
         }
         if (null == clusterSetting) {
             return Result.buildFail(String.format("获取集群动态配置信息失败, 请确认是否集群[%s]是否正常", cluster));
@@ -1198,15 +1198,18 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 // 记录操作
                 final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs;
                 beforeChangeConfigs = getPhyClusterDynamicConfigs(cluster);
-                if (beforeChangeConfigs.failed()||beforeChangeConfigs.getData().values() == null){
+
+                if (beforeChangeConfigs.failed() || beforeChangeConfigs.getData().values() == null){
                     updateFail = true;
                     updateFailClusters.append(cluster).append(",");
                 } else {
+
                     Object beforeValue = beforeChangeConfigs.getData().values().stream()
                             .filter(
                                     clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.containsKey(changeKey))
                             .map(clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.get(changeKey))
                             .findFirst().orElse("");
+
                     final ClusterPhy clusterByName = clusterPhyService.getClusterByName(cluster);
                     operateRecordService.saveOperateRecordWithManualTrigger(String.format("%s:%s->%s", changeKey, beforeValue, changeValue),
                             operator, AuthConstant.SUPER_PROJECT_ID, clusterByName.getId(),
