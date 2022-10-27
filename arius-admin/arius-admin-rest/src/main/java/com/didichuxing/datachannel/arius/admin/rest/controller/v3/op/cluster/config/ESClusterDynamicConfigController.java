@@ -58,5 +58,4 @@ public class ESClusterDynamicConfigController {
         return clusterPhyManager.batchUpdateClusterDynamicConfig(clusterList, param, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
-
 }
