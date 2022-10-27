@@ -55,7 +55,7 @@ public class ESClusterDynamicConfigController {
     @ApiOperation(value = "批量更新物理集群的动态配置项")
     public Result<Boolean> batchUpdateClusterDynamicConfig(@PathVariable List<String> clusterList,
                                                            @RequestBody ClusterSettingDTO param,
-                                                           HttpServletRequest request) throws ESOperateException {
+                                                           HttpServletRequest request) {
         return clusterPhyManager.batchUpdateClusterDynamicConfig(clusterList, param, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }

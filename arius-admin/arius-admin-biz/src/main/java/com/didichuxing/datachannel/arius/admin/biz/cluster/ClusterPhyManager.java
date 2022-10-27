@@ -369,5 +369,5 @@ public interface ClusterPhyManager {
      * @return
      */
     Result<Boolean> batchUpdateClusterDynamicConfig(List<String> clusterList, ClusterSettingDTO param,
-                                                 String operator, Integer projectId) throws ESOperateException;
+                                                 String operator, Integer projectId) ;
 }

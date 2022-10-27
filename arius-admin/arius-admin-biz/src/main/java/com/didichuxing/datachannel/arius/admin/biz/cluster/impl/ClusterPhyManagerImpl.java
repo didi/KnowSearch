@@ -1162,7 +1162,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      */
     @Override
     public Result<Boolean> batchUpdateClusterDynamicConfig(List<String> clusterList, ClusterSettingDTO param,
-                                                        String operator, Integer projectId) throws ESOperateException {
+                                                        String operator, Integer projectId) {
         final Result<Void> projectCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (projectCheck.failed()) {
             return Result.buildFail(projectCheck.getMessage());
@@ -1186,16 +1186,24 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 updateFailClusters.append(cluster).append(",");
             }else {
                 // 记录操作
-                final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs = getPhyClusterDynamicConfigs(cluster);
-                Object beforeValue = beforeChangeConfigs.getData().values().stream()
-                        .filter(
-                                clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.containsKey(changeKey))
-                        .map(clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.get(changeKey))
-                        .findFirst().orElse("");
-                final ClusterPhy clusterByName = clusterPhyService.getClusterByName(cluster);
-                operateRecordService.saveOperateRecordWithManualTrigger(String.format("%s:%s->%s", changeKey, beforeValue, changeValue),
-                        operator, AuthConstant.SUPER_PROJECT_ID, clusterByName.getId(),
-                        OperateTypeEnum.PHYSICAL_CLUSTER_DYNAMIC_CONF_CHANGE);
+                final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs;
+                try {
+                    beforeChangeConfigs = getPhyClusterDynamicConfigs(cluster);
+                    Object beforeValue = beforeChangeConfigs.getData().values().stream()
+                            .filter(
+                                    clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.containsKey(changeKey))
+                            .map(clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.get(changeKey))
+                            .findFirst().orElse("");
+                    final ClusterPhy clusterByName = clusterPhyService.getClusterByName(cluster);
+                    operateRecordService.saveOperateRecordWithManualTrigger(String.format("%s:%s->%s", changeKey, beforeValue, changeValue),
+                            operator, AuthConstant.SUPER_PROJECT_ID, clusterByName.getId(),
+                            OperateTypeEnum.PHYSICAL_CLUSTER_DYNAMIC_CONF_CHANGE);
+                } catch (Exception e) {
+                    LOGGER.error("class=ClusterPhyManagerImpl||method=batchUpdateClusterDynamicConfig||clusterName={}", cluster,e);
+                    updateFail = true;
+                    updateFailClusters.append(cluster).append(",");
+                }
+
             }
         }
         if(updateFail){

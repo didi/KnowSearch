@@ -185,24 +185,32 @@ public class ESClusterDAO extends BaseESDAO {
      * @param configMap 配置
      * @return true/false
      */
-    public boolean putPersistentConfig(String cluster, Map<String, Object> configMap) {
+    public boolean putPersistentConfig(String cluster, Map<String, Object> configMap) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (null == client) {
-            return false;
+            LOGGER.warn("class={}||method=putPersistentConfig||clusterName={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster);
+            throw new NullESClientException(cluster);
         }
 
-        ESClusterUpdateSettingsRequestBuilder updateSettingsRequestBuilder = client.admin().cluster()
-            .prepareUpdateSettings();
+        try {
+            ESClusterUpdateSettingsRequestBuilder updateSettingsRequestBuilder = client.admin().cluster()
+                    .prepareUpdateSettings();
 
-        for (Map.Entry<String, Object> entry : configMap.entrySet()) {
-            String configName = entry.getKey();
-            updateSettingsRequestBuilder.addPersistent(configName, configMap.get(configName));
+            for (Map.Entry<String, Object> entry : configMap.entrySet()) {
+                String configName = entry.getKey();
+                updateSettingsRequestBuilder.addPersistent(configName, configMap.get(configName));
+            }
+
+            ESClusterUpdateSettingsResponse response = client.admin().cluster()
+                    .updateSetting(updateSettingsRequestBuilder.request()).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            LOGGER.error("class=ESClusterDAO||method=putPersistentConfig||clusterName={}", cluster,e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
-
-        ESClusterUpdateSettingsResponse response = client.admin().cluster()
-            .updateSetting(updateSettingsRequestBuilder.request()).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        return response.getAcknowledged();
+        return false;
     }
 
     /**
