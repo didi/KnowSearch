@@ -418,7 +418,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
     private void handlePhysicalClusterStatsForSum(String clusterName, ESClusterStatsCells esClusterStats) {
         // 这里会有多次es查询，做成并发的以免http接口超时
         futureUtil.runnableTask(() -> esClusterStats.setReadTps(ariusStatsIndexInfoEsDao.getClusterQps(clusterName)))
-            .runnableTask(() -> esClusterStats.setWriteTps(ariusStatsIndexInfoEsDao.getClusterTps(clusterName)))
+            .runnableTask(() -> esClusterStats.setWriteTps(ariusStatsNodeInfoEsDao.getClusterTps(clusterName)))
             .runnableTask(() -> esClusterStats.setRecvTransSize(ariusStatsNodeInfoEsDao.getClusterRx(clusterName)))
             .runnableTask(() -> esClusterStats.setSendTransSize(ariusStatsNodeInfoEsDao.getClusterTx(clusterName)))
             .runnableTask(() -> setClusterOtherStats(clusterName, esClusterStats))
