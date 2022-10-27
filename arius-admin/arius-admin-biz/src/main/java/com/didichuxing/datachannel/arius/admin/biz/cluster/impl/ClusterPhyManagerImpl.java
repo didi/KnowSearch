@@ -1196,16 +1196,22 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             }else {
                 // 记录操作
                 final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs = getPhyClusterDynamicConfigs(cluster);
-                Object beforeValue = beforeChangeConfigs.getData().values().stream()
-                        .filter(
-                                clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.containsKey(changeKey))
-                        .map(clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.get(changeKey))
-                        .findFirst().orElse("");
+                if (beforeChangeConfigs.failed() || beforeChangeConfigs.getData().values() == null){
+                    updateFail = true;
+                    updateFailClusters.append(cluster).append(",");
+                } else {
 
-                final ClusterPhy clusterByName = clusterPhyService.getClusterByName(cluster);
-                operateRecordService.saveOperateRecordWithManualTrigger(String.format("%s:%s->%s", changeKey, beforeValue, changeValue),
-                        operator, AuthConstant.SUPER_PROJECT_ID, clusterByName.getId(),
-                        OperateTypeEnum.PHYSICAL_CLUSTER_DYNAMIC_CONF_CHANGE);
+                    Object beforeValue = beforeChangeConfigs.getData().values().stream()
+                            .filter(
+                                    clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.containsKey(changeKey))
+                            .map(clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.get(changeKey))
+                            .findFirst().orElse("");
+
+                    final ClusterPhy clusterByName = clusterPhyService.getClusterByName(cluster);
+                    operateRecordService.saveOperateRecordWithManualTrigger(String.format("%s:%s->%s", changeKey, beforeValue, changeValue),
+                            operator, AuthConstant.SUPER_PROJECT_ID, clusterByName.getId(),
+                            OperateTypeEnum.PHYSICAL_CLUSTER_DYNAMIC_CONF_CHANGE);
+                }
             }
         }
         if(updateFail){
