@@ -14,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorClusterEvent;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -198,7 +199,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
         return clusterHealthResponseMap;
     }
 
-    private void buildAndSendTaskStats(long timestamp, ClusterPhy dataSource) {
+    private void buildAndSendTaskStats(long timestamp, ClusterPhy dataSource) throws ESOperateException {
         List<ESClusterTaskStatsResponse> taskStatsResponses = esClusterService
             .syncGetClusterTaskStats(dataSource.getCluster());
 

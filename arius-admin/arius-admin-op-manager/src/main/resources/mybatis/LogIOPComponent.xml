@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didiglobal.logi.op.manager.infrastructure.db.mapper.ComponentDao">
+    <resultMap id="BaseResultMap"
+               type="com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="contain_component_ids" jdbcType="VARCHAR" property="containComponentIds"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="package_id" jdbcType="VARCHAR" property="packageId"/>
+        <result column="depend_config_component_id" jdbcType="INTEGER" property="dependConfigComponentId"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="is_open_tsl" jdbcType="INTEGER" property="isOpenTSL"/>
+        <result column="is_deleted" jdbcType="INTEGER" property="isDeleted"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, `name`, contain_component_ids, package_id, depend_config_component_id, username, password, is_open_tsl, status, is_deleted, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into logi_op_component (`name`, contain_component_ids, package_id, depend_config_component_id, username, password, is_open_tsl, status, is_deleted, create_time, update_time)
+        values (#{name}, #{containComponentIds}, #{packageId}, #{dependConfigComponentId}, #{username}, #{password}, #{isOpenTSL}, #{status}, #{isDeleted}, #{createTime}, #{updateTime})
+    </insert>
+
+    <select id="findById"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component
+        where id = #{id}
+    </select>
+
+    <update id="updateContainIds">
+        update logi_op_component
+        set contain_component_ids = #{containIds}
+        where id = #{componentId}
+    </update>
+
+    <select id="getByPackageId"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component
+        where package_id = #{packageId}
+    </select>
+
+    <update id="update" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO">
+        update logi_op_component
+        <trim prefix="set" prefixOverrides=",">
+            <if test="packageId!= null">,package_id = #{packageId}</if>
+            <if test="updateTime != null">,update_time = #{updateTime}</if>
+            <if test="status != null">,status = #{status}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="listAll"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component
+        where is_deleted = 0
+    </select>
+
+    <select id="queryComponent"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component
+        where is_deleted = 0
+        <if test="name != null">and `name` LIKE CONCAT('%', #{name}, '%')</if>
+        <if test="id != null">and id = #{id}</if>
+        order by id desc
+    </select>
+
+    <select id="findDependComponentById"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component
+        where find_in_set(#{id}, contain_component_ids)
+    </select>
+
+    <update id="updateContainIds">
+        update logi_op_component
+        set contain_component_ids = #{containIds}
+        where id = #{componentId}
+    </update>
+</mapper>

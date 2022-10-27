@@ -25,7 +25,7 @@ public class ESOperateConstant {
      * region 配置
      */
     public static final String  TEMPLATE_INDEX_INCLUDE_NODE_NAME = "index.routing.allocation.include._name";
-
+    public static final String  TEMPLATE_INDEX_INCLUDE_ATTRIBUTE_PREFIX = "index.routing.allocation.include.";
     /**
      * read-only
      */

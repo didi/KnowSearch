@@ -16,7 +16,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterR
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.event.region.RegionEditEvent;
+import com.didichuxing.datachannel.arius.admin.common.event.region.RegionEditByAttributeEvent;
+import com.didichuxing.datachannel.arius.admin.common.event.region.RegionEditByHostEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -35,13 +36,12 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,7 +75,10 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     @Autowired
     private ProjectService projectService;
 
+    private final static String HOST = "host";
+
     @Override
+    @Deprecated
     public Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(Long clusterId) {
         List<ClusterRoleHost> clusterRoleHostList = null;
         try {
@@ -113,6 +116,47 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     }
 
     @Override
+    public Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfoWithDivideType(Long clusterId, String divideType) {
+        List<ClusterRoleHost> clusterRoleHostList = null;
+        try {
+            clusterRoleHostList = clusterRoleHostService.getByRoleAndClusterId(clusterId, DATA_NODE.getDesc());
+        } catch (Exception e) {
+            LOGGER.error("class=ClusterPhyManagerImpl||method=listDivide2ClusterNodeInfo||clusterId={}||errMsg={}",
+                    clusterId, e.getMessage(), e);
+        }
+        List<ESClusterRoleHostWithRegionInfoVO> esClusterRoleHostWithRegionInfoVOS = ConvertUtil
+                .list2List(clusterRoleHostList, ESClusterRoleHostWithRegionInfoVO.class);
+
+        // 根据regionId获取region名称
+        List<Integer> regionIdList = esClusterRoleHostWithRegionInfoVOS.stream()
+                .map(ESClusterRoleHostWithRegionInfoVO::getRegionId).distinct().collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(regionIdList)) {
+            return Result.buildSucc(esClusterRoleHostWithRegionInfoVOS);
+        }
+
+        Map<Integer, String> regionId2RegionNameMap = Maps.newHashMap();
+        for (Integer regionId : regionIdList) {
+            ClusterRegion clusterRegion = clusterRegionService.getRegionById(regionId.longValue());
+            if (null == clusterRegion) {
+                continue;
+            }
+
+            regionId2RegionNameMap.put(regionId, clusterRegion.getName());
+        }
+
+        for (ESClusterRoleHostWithRegionInfoVO clusterRoleHostWithRegionInfoVO : esClusterRoleHostWithRegionInfoVOS) {
+            clusterRoleHostWithRegionInfoVO
+                    .setRegionName(regionId2RegionNameMap.get(clusterRoleHostWithRegionInfoVO.getRegionId()));
+            if(!HOST.equals(divideType)){
+                String attributes = clusterRoleHostWithRegionInfoVO.getAttributes();
+                clusterRoleHostWithRegionInfoVO.setAttributeValue(ConvertUtil.str2Map(attributes).get(divideType));
+            }
+        }
+        return Result.buildSucc(esClusterRoleHostWithRegionInfoVOS);
+    }
+
+    @Override
     public Result<Boolean> checkMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator, Integer projectId) {
         final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (result.failed()) {
@@ -140,7 +184,9 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             return Result.buildFail(result.getMessage());
         }
 
-        List<Long> regionIdLis = Lists.newArrayList();
+        // 构建divideType2regionIdList的map，不同的划分方式Listener的处理方式不同
+        Map<String/*Region划分方式*/, List<Long>/*regionId列表*/> divideType2RegionIdListMap = Maps.newHashMap();
+        List<Long> regionIdList = Lists.newArrayList();
         for (ClusterRegionWithNodeInfoDTO param : params) {
             Result<Boolean> checkRet = baseCheckParamValid(param,OperationEnum.ADD);
             if (checkRet.failed()) {
@@ -162,13 +208,37 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
                     // 2. 操作记录 :Region变更
                      operateRecordService.saveOperateRecordWithManualTrigger(String.format("新增 region[%s]", param.getName()), operator, projectId,
                             param.getId(), OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE);
-                    regionIdLis.add(addRegionRet.getData());
+
+                     // 构建多个regionId列表，把同种划分方式的regionId放在一起，发同一个事件，提高性能
+                     if(param.getDivideAttributeKey() == null || param.getDivideAttributeKey().isEmpty()){
+                         List<Long> hostRegionIdList = divideType2RegionIdListMap.getOrDefault(HOST, Lists.newArrayList());
+                         hostRegionIdList.add(addRegionRet.getData());
+                         divideType2RegionIdListMap.put(HOST, hostRegionIdList);
+                     }else {
+                         List<Long> attributeRegionIdList = divideType2RegionIdListMap
+                                 .getOrDefault(param.getDivideAttributeKey(), Lists.newArrayList());
+                         attributeRegionIdList.add(addRegionRet.getData());
+                         divideType2RegionIdListMap.put(param.getDivideAttributeKey(), attributeRegionIdList);
+                     }
+                    regionIdList.add(addRegionRet.getData());
                 } else {
                     throw new AdminOperateException(addRegionRet.getMessage());
                 }
             }
         }
-        return Result.buildSucc(regionIdLis);
+
+        // 发布事件，不同的划分方式发不同的事件
+        for(Map.Entry<String, List<Long>> entry : divideType2RegionIdListMap.entrySet()) {
+            String divideType = entry.getKey();
+            List<Long> regionIds = divideType2RegionIdListMap.get(divideType);
+            if(HOST.equals(divideType)){
+                SpringTool.publish(new RegionEditByHostEvent(this, regionIds));
+            }else {
+                SpringTool.publish(new RegionEditByAttributeEvent(this, regionIds, divideType));
+            }
+        }
+
+        return Result.buildSucc(regionIdList);
     }
 
     @Override
@@ -179,6 +249,9 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
+
+        // 构建divideType2regionIdList的map（不同的划分方式Listener的处理方式不同）
+        Map<String/*Region划分方式*/, List<Long>/*regionId列表*/> divideType2RegionIdListMap = Maps.newHashMap();
         for (ClusterRegionWithNodeInfoDTO param : params) {
             Result<Boolean> checkRet = baseCheckParamValid(param,operationEnum);
             if (checkRet.failed()) {
@@ -188,13 +261,31 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             Result<Boolean> editNode2RegionRet = editNode2Region(param);
             if (editNode2RegionRet.failed()) {
                 throw new AdminOperateException(editNode2RegionRet.getMessage(), FAIL);
+            }else {
+                // 构建多个regionId列表，把同种划分方式的regionId放在一起，发同一个事件，提高性能
+                if(param.getDivideAttributeKey() == null || param.getDivideAttributeKey().isEmpty()){
+                    List<Long> hostRegionIdList = divideType2RegionIdListMap.getOrDefault(HOST, Lists.newArrayList());
+                    hostRegionIdList.add(param.getId());
+                    divideType2RegionIdListMap.put(HOST, hostRegionIdList);
+                }else {
+                    List<Long> attributeRegionIdList = divideType2RegionIdListMap
+                            .getOrDefault(param.getDivideAttributeKey(), Lists.newArrayList());
+                    attributeRegionIdList.add(param.getId());
+                    divideType2RegionIdListMap.put(param.getDivideAttributeKey(), attributeRegionIdList);
+                }
             }
         }
 
-        // 发布region变更的事件，对模板和索引生效
-        List<Long> regionIdList = params.stream().distinct().map(ClusterRegionWithNodeInfoDTO::getId)
-            .collect(Collectors.toList());
-        SpringTool.publish(new RegionEditEvent(this, regionIdList));
+        // 发布事件，不同的划分方式发不同的事件
+        for(Map.Entry<String, List<Long>> entry : divideType2RegionIdListMap.entrySet()) {
+            String divideType = entry.getKey();
+            List<Long> regionIds = divideType2RegionIdListMap.get(divideType);
+            if(HOST.equals(divideType)){
+                SpringTool.publish(new RegionEditByHostEvent(this, regionIds));
+            }else {
+                SpringTool.publish(new RegionEditByAttributeEvent(this, regionIds, divideType));
+            }
+        }
 
         return Result.buildSucc(true);
     }
@@ -377,6 +468,34 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         if (!clusterPhyService.isClusterExists(param.getPhyClusterName())) {
             return Result.buildFail(String.format("物理集群[%s]不存在", param.getPhyClusterName()));
         }
+
+        // 检查划分方式是否合法
+        Result<Void> ret = divideTypeCheck(param);
+        if(ret.failed()){
+            return Result.buildFail(ret.getMessage());
+        }
+
+        return Result.buildSucc();
+    }
+
+    private Result<Void> divideTypeCheck(ClusterRegionWithNodeInfoDTO param) {
+        // 先获取当前集群存在的region，根据已有region来校验本次操作
+        List<ClusterRegion> clusterRegions = clusterRegionService.listRegionsByClusterName(param.getPhyClusterName());
+        ClusterRegion clusterRegion = clusterRegions.stream().findFirst().orElse(null);
+
+        if(StringUtils.isBlank(param.getDivideAttributeKey())){
+            // 根据host划分
+            if(clusterRegion != null && StringUtils.isNotBlank(clusterRegion.getDivideAttributeKey())){
+                return Result.buildParamIllegal("当前集群region已存在划分方法，不支持其他划分方法");
+            }
+        }else {
+            String divideType = param.getDivideAttributeKey();
+            if(clusterRegion != null && (StringUtils.isBlank(clusterRegion.getDivideAttributeKey())
+                    || !divideType.equals(clusterRegion.getDivideAttributeKey()))){
+                return Result.buildParamIllegal("当前集群region已存在划分方法，不支持其他划分方法");
+            }
+        }
+
         return Result.buildSucc();
     }
 

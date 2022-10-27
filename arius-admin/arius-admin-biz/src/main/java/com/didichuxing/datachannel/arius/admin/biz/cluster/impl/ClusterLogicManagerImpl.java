@@ -550,7 +550,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public boolean updateClusterLogicHealth(Long clusterLogicId) {
-
         ESLogicClusterDTO updateLogicClusterDTO = new ESLogicClusterDTO();
         Set<Integer> clusterHealthSet = Sets.newHashSet();
         updateLogicClusterDTO.setId(clusterLogicId);
@@ -811,8 +810,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             return Result.buildFrom(voResult);
         }
         final Integer clusterPhyId = voResult.getData().getId();
-        final Result<List<ESClusterRoleHostWithRegionInfoVO>> listResult = clusterNodeManager.listDivide2ClusterNodeInfo(
-                clusterPhyId.longValue());
+        String regionDivideType = param.getDivideAttributeKey() == null ? "host" : param.getDivideAttributeKey();
+        final Result<List<ESClusterRoleHostWithRegionInfoVO>> listResult = clusterNodeManager.listDivide2ClusterNodeInfoWithDivideType(
+                clusterPhyId.longValue(), regionDivideType);
         if (listResult.failed()) {
             return Result.buildFrom(listResult);
         }
@@ -821,7 +821,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         final ClusterRegionWithNodeInfoDTO clusterRegionWithNodeInfoDTO =
                 new ClusterRegionWithNodeInfoDTOBuilder()
                 .withBindingNodeIds(regionIds).withName(param.getCluster()).withLogicClusterIds("-1")
-                .withPhyClusterName(param.getCluster()).build();
+                .withPhyClusterName(param.getCluster()).withDivideAttributeKey(param.getDivideAttributeKey()).build();
     
         final Result<List<Long>> result = clusterNodeManager.createMultiNode2Region(
                 Lists.newArrayList(clusterRegionWithNodeInfoDTO), AriusUser.SYSTEM.getDesc(), projectId);
