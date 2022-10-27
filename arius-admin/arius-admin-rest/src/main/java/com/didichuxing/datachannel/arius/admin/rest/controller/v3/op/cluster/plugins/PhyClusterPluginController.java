@@ -68,4 +68,11 @@ public class PhyClusterPluginController {
         return clusterPluginManager.editPluginDesc(pluginDTO, HttpRequestUtil.getOperator(request),
             HttpRequestUtil.getProjectId(request));
     }
+    @GetMapping("/{clusterPhyId}")
+    @ResponseBody
+    @ApiOperation(value = "获取物理集群的插件列表",tags = "")
+    public Result<List<PluginVO>> listByClusterPhyId(HttpServletRequest request,
+                                               @PathVariable("clusterPhyId") Integer clusterPhyId) {
+        return Result.buildSucc();
+    }
 }

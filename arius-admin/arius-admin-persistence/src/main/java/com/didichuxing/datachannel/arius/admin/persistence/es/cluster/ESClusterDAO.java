@@ -219,10 +219,13 @@ public class ESClusterDAO extends BaseESDAO {
      * @param cluster
      * @return map
      */
-    public Map<String/*nodeName*/, List<String>/*pluginName*/> getNode2PluginsMap(String cluster, Integer tryTimes) {
+    public Map<String/*nodeName*/, List<String>/*pluginName*/> getNode2PluginsMap(String cluster, Integer tryTimes) throws ESOperateException{
         ESClient client = esOpClient.getESClient(cluster);
         if (null == client) {
-            return null;
+            LOGGER.warn(
+                    "class=ESClusterDAO||method=getNode2PluginsMap||clusterName={}||errMsg=esClient is null",
+                    cluster);
+            throw new NullESClientException(cluster);
         }
 
         ESCatRequest esCatRequest = new ESCatRequest();
@@ -237,7 +240,7 @@ public class ESClusterDAO extends BaseESDAO {
             LOGGER.warn(
                 "class=ESClusterDAO||method=getNode2PluginsMap||clusterName={}" + "||errMsg=can't get node  plugin",
                 cluster);
-            return null;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
 
         return Optional.ofNullable(esCatResponse).map(ESCatResponse::getResponse).map(Object::toString)
@@ -256,13 +259,13 @@ public class ESClusterDAO extends BaseESDAO {
      * @param cluster 物理集群名称
      * @return 集群下的节点资源使用信息列表
      */
-    public List<NodeAllocationInfo> getNodeAllocationInfoByCluster(String cluster, Integer tryTimes) {
+    public List<NodeAllocationInfo> getNodeAllocationInfoByCluster(String cluster, Integer tryTimes) throws ESOperateException {
         ESClient esClient = esOpClient.getESClient(cluster);
         if (esClient == null) {
             LOGGER.warn(
                 "class=ESClusterDAO||method=getNodeAllocationInfoByCluster||clusterName={}" + "||errMsg=client is null",
                 cluster);
-            return null;
+            throw new NullESClientException(cluster);
         }
 
         ESCatRequest esCatRequest = new ESCatRequest();
@@ -278,7 +281,7 @@ public class ESClusterDAO extends BaseESDAO {
             LOGGER.warn("class=ESClusterDAO||method=getNodeAllocationInfoByCluster||clusterName={}"
                         + "||errMsg=can't get allocation info",
                 cluster);
-            return null;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         return Optional.ofNullable(esCatResponse).map(ESCatResponse::getResponse).map(Object::toString)
             .map(esCatResponseString2NodeAllocationInfoListFunc).orElse(null);
@@ -294,10 +297,13 @@ public class ESClusterDAO extends BaseESDAO {
      * @param tryTimes
      * @return
      */
-    public ESIndicesGetAliasResponse getClusterAlias(String cluster, Integer tryTimes) {
+    public ESIndicesGetAliasResponse getClusterAlias(String cluster, Integer tryTimes) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (client == null) {
-            return null;
+            LOGGER.warn(
+                    "class=ESClusterDAO||method=getClusterAlias||clusterName={}" + "||errMsg=client is null",
+                    cluster);
+            throw new NullESClientException(cluster);
         }
         ESIndicesGetAliasResponse esIndicesGetAliasResponse = null;
         try {
@@ -305,13 +311,13 @@ public class ESClusterDAO extends BaseESDAO {
                 esIndicesGetAliasResponse = client.admin().indices().prepareAlias().execute()
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.MINUTES);
             } while (tryTimes-- > 0 && null == esIndicesGetAliasResponse);
-
+            return esIndicesGetAliasResponse;
         } catch (Exception e) {
             LOGGER.error("class=ESClusterDAO||method=getClusterAlias||clusterName={}||errMsg=query error. ", cluster,
                 e);
-            return null;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
-        return esIndicesGetAliasResponse;
+        return null;
     }
 
     /**
@@ -320,12 +326,12 @@ public class ESClusterDAO extends BaseESDAO {
     * @param cluster
     * @return
     */
-    public ESClusterHealthResponse getClusterHealth(String cluster, Integer tryTimes) {
+    public ESClusterHealthResponse getClusterHealth(String cluster, Integer tryTimes) throws ESOperateException {
         ESClient esClient = esOpClient.getESClient(cluster);
         if (esClient == null) {
             LOGGER.error("class=ESClusterDAO||method=getClusterHealth||clusterName={}||errMsg=esClient is null",
                 cluster);
-            return null;
+            throw new NullESClientException(cluster);
         }
         ESClusterHealthResponse esClusterHealthResponse = null;
         Long minTimeoutNum = 1L;
@@ -340,12 +346,13 @@ public class ESClusterDAO extends BaseESDAO {
                     minTimeoutNum = maxTimeoutNum;
                 }
             } while (tryTimes-- > 0 && null == esClusterHealthResponse);
+            return esClusterHealthResponse;
         } catch (Exception e) {
             LOGGER.error("class=ESClusterDAO||method=getClusterHealth||clusterName={}||errMsg=query error. ", cluster,
                 e);
-            return null;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
-        return esClusterHealthResponse;
+        return null;
     }
 
     public Map<String, ClusterNodeSettings> getPartOfSettingsByCluster(String cluster, Integer tryTimes) {

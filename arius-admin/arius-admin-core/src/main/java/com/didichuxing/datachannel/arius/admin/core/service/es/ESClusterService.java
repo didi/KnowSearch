@@ -66,7 +66,7 @@ public interface ESClusterService {
      * @param cluster
      * @return map
      */
-    Map<String, List<String>> syncGetNode2PluginsMap(String cluster);
+    Map<String, List<String>> syncGetNode2PluginsMap(String cluster) throws ESOperateException;
 
     /**
      * 获取某个集群内索引别名到索引名称的映射
@@ -101,7 +101,7 @@ public interface ESClusterService {
      * @param clusterName
      * @return
      */
-    ESClusterHealthResponse syncGetClusterHealth(String clusterName);
+    ESClusterHealthResponse syncGetClusterHealth(String clusterName) throws ESOperateException;
 
     /**
      * 获取集群task信息
@@ -117,7 +117,7 @@ public interface ESClusterService {
      * @param clusterName
      * @return
      */
-    ClusterHealthEnum syncGetClusterHealthEnum(String clusterName);
+    ClusterHealthEnum syncGetClusterHealthEnum(String clusterName) throws ESOperateException;
 
     /**
      * 获取集群状态信息
