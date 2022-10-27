@@ -20,9 +20,9 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "gateway集群条件查询信息")
 public class GatewayConditionDTO extends GatewayDTO {
 
-    @ApiModelProperty("排序字段 diskUsagePercent")
+    @ApiModelProperty(value = "排序字段",hidden = true)
     private String       sortTerm;
-
+    @ApiModelProperty(hidden = true)
     private String       sortType;
 
     @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)

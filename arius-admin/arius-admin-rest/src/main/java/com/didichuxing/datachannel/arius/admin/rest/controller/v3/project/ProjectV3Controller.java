@@ -218,9 +218,9 @@ public class ProjectV3Controller {
         return projectExtendManager.listUserListByProjectId(HttpRequestUtil.getProjectId(request));
     }
 
-    @GetMapping("/exist-gateway-cluster")
+    @GetMapping("/check-cluster-bind-gateway")
     @ResponseBody
-    @ApiOperation(value = "获取当前操作项目是否存在gateway集群", tags = "0.3.2")
+    @ApiOperation(value = "获取当前操作项目下的集群是否绑定gateway", tags = "")
     public Result<Boolean> projectExistenceGatewayCluster(HttpServletRequest request) {
         
         return Result.buildSucc(Boolean.TRUE);
