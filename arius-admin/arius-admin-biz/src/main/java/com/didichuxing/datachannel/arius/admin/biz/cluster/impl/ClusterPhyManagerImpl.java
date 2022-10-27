@@ -1164,7 +1164,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     /**
      * 批量更新物理集群的动态配置项
-     * @param clusterList  物理集群名称list
      * @param param        要更新的配置项
      * @param operator
      * @param projectId
@@ -1202,6 +1201,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                                 clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.containsKey(changeKey))
                         .map(clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.get(changeKey))
                         .findFirst().orElse("");
+
                 final ClusterPhy clusterByName = clusterPhyService.getClusterByName(cluster);
                 operateRecordService.saveOperateRecordWithManualTrigger(String.format("%s:%s->%s", changeKey, beforeValue, changeValue),
                         operator, AuthConstant.SUPER_PROJECT_ID, clusterByName.getId(),
