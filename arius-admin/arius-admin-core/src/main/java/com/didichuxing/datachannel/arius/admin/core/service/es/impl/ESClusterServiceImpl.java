@@ -137,7 +137,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public Map<String, List<String>> syncGetNode2PluginsMap(String cluster) {
+    public Map<String, List<String>> syncGetNode2PluginsMap(String cluster) throws ESOperateException {
         return esClusterDAO.getNode2PluginsMap(cluster, 3);
     }
 

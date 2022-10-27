@@ -219,10 +219,13 @@ public class ESClusterDAO extends BaseESDAO {
      * @param cluster
      * @return map
      */
-    public Map<String/*nodeName*/, List<String>/*pluginName*/> getNode2PluginsMap(String cluster, Integer tryTimes) {
+    public Map<String/*nodeName*/, List<String>/*pluginName*/> getNode2PluginsMap(String cluster, Integer tryTimes) throws ESOperateException{
         ESClient client = esOpClient.getESClient(cluster);
         if (null == client) {
-            return null;
+            LOGGER.warn(
+                    "class=ESClusterDAO||method=getNode2PluginsMap||clusterName={}||errMsg=esClient is null",
+                    cluster);
+            throw new NullESClientException(cluster);
         }
 
         ESCatRequest esCatRequest = new ESCatRequest();
@@ -237,7 +240,7 @@ public class ESClusterDAO extends BaseESDAO {
             LOGGER.warn(
                 "class=ESClusterDAO||method=getNode2PluginsMap||clusterName={}" + "||errMsg=can't get node  plugin",
                 cluster);
-            return null;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
 
         return Optional.ofNullable(esCatResponse).map(ESCatResponse::getResponse).map(Object::toString)
