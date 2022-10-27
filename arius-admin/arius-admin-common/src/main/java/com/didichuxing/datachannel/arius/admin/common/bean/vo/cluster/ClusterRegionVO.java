@@ -27,4 +27,7 @@ public class ClusterRegionVO extends BaseVO {
 
     @ApiModelProperty("配置项")
     private String config;
+
+    @ApiModelProperty("Region划分方式，为空是根据节点名称划分")
+    private String divideAttributeKey;
 }

@@ -227,9 +227,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
         final Map<String, String> setting = JsonUtils.flat(JSONObject.parseObject(param.getSetting()));
         if (setting.containsKey(ESSettingConstant.INDEX_NUMBER_OF_SHARDS) || setting.containsKey(
-                ESSettingConstant.INDEX_ROUTING_ALLOCATION_INCLUDE_NAME)) {
+                ESSettingConstant.INDEX_ROUTING_ALLOCATION_INCLUDE_NAME) || setting.containsKey(
+                ESSettingConstant.INDEX_ROUTING_ALLOCATION_INCLUDE_RACK)) {
             return Result.buildFail(
-                    "\"index.number_of_shards \"和 \"index.routing.allocation.include._name \"两个字段系统会自动计算，不支持用户自定义设置。");
+                    "\"index.number_of_shards \"和 \"index.routing.allocation.include._name \"和 \"index.routing.allocation.include.rack \"三个字段系统会自动计算，不支持用户自定义设置。");
         
         }
         
@@ -239,7 +240,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             if (save2DBResult.failed()) {
                 throw new AdminOperateException(String.format("创建模板失败:%s", save2DBResult.getMessage()));
             }
-        
+
+            // build模版settings，创建物理模版
             Result<Void> save2PhyTemplateResult = templatePhyManager.addTemplatesWithoutCheck(indexTemplateDTO.getId(),
                     indexTemplateDTO.getPhysicalInfos());
             if (save2PhyTemplateResult.failed()) {

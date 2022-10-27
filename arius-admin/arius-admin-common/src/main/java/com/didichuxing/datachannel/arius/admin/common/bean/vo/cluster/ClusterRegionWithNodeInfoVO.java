@@ -18,6 +18,6 @@ public class ClusterRegionWithNodeInfoVO extends ClusterRegionVO {
     @ApiModelProperty("划分到region的节点名称, 用逗号分隔")
     private String nodeNames;
 
-    @ApiModelProperty("划分到region的attribute值，用逗号分隔")
+    @ApiModelProperty("划分到region的attribute值")
     private String attributeValues;
 }

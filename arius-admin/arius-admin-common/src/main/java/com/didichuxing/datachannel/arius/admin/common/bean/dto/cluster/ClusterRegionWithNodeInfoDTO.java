@@ -29,6 +29,7 @@ public class ClusterRegionWithNodeInfoDTO extends ClusterRegionDTO {
         setConfig(clusterRegionWithNodeInfoDTOBuilder.config);
         setBindingNodeIds(clusterRegionWithNodeInfoDTOBuilder.bindingNodeIds);
         setUnBindingNodeIds(clusterRegionWithNodeInfoDTOBuilder.unBindingNodeIds);
+        setDivideAttributeKey(clusterRegionWithNodeInfoDTOBuilder.divideAttributeKey);
     }
     
     public static final class ClusterRegionWithNodeInfoDTOBuilder {
@@ -39,6 +40,7 @@ public class ClusterRegionWithNodeInfoDTO extends ClusterRegionDTO {
         private String        config;
         private List<Integer> bindingNodeIds;
         private List<Integer> unBindingNodeIds;
+        private String        divideAttributeKey;
         
         public ClusterRegionWithNodeInfoDTOBuilder() {
         }
@@ -51,6 +53,7 @@ public class ClusterRegionWithNodeInfoDTO extends ClusterRegionDTO {
             this.config = copy.getConfig();
             this.bindingNodeIds = copy.getBindingNodeIds();
             this.unBindingNodeIds = copy.getUnBindingNodeIds();
+            this.divideAttributeKey = copy.getDivideAttributeKey();
         }
         
         public ClusterRegionWithNodeInfoDTOBuilder withId(Long val) {
@@ -85,6 +88,11 @@ public class ClusterRegionWithNodeInfoDTO extends ClusterRegionDTO {
         
         public ClusterRegionWithNodeInfoDTOBuilder withUnBindingNodeIds(List<Integer> val) {
             unBindingNodeIds = val;
+            return this;
+        }
+
+        public ClusterRegionWithNodeInfoDTOBuilder withDivideAttributeKey(String val) {
+            divideAttributeKey = val;
             return this;
         }
         

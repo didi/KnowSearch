@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterReg
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import java.util.List;
+import java.util.Set;
 
 public interface ClusterRegionManager {
 
@@ -49,9 +50,15 @@ public interface ClusterRegionManager {
     Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionWithNodeInfoByClusterName(String clusterName);
 
     /**
-     * 根据划分方式展示region信息
-     * @param clusterName
-     * @param divideType region划分类型
+     * 获取当前支持的所有划分方式
+     * @return
+     */
+    Result<Set<String>> getAttributeDivideType();
+
+    /**
+     * 根据物理集群名称和划分方式获region信息，包含region中的数据节点信息
+     * @param clusterName   物理集群名称
+     * @param divideType  region划分方式
      * @return
      */
     Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionInfoWithDivideType(String clusterName, String divideType);
