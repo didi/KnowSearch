@@ -1123,15 +1123,16 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         ClusterPhyDTO clusterPhyDTO = new ClusterPhyDTO();
         clusterPhyDTO.setId(param.getId());
         clusterPhyDTO.setGatewayUrl(param.getGatewayUrl());
-        ClusterPhy oldCluster = clusterPhyService.getClusterById(param.getId());
         Result<Boolean> result = clusterPhyService.editCluster(clusterPhyDTO, operator);
         if (result.failed()) {
             return Result.buildFail("编辑gateway失败！");
         }
+
         ClusterPhy clusterPhy = clusterPhyService.getClusterById(param.getId());
-         operateRecordService.saveOperateRecordWithManualTrigger(String.format("%s, 绑定 gateway 集群 gateway_cluster:%s", oldCluster.getCluster(),
+        operateRecordService.saveOperateRecordWithManualTrigger(String.format("%s, 绑定 gateway 集群 gateway_cluster:%s", clusterPhy.getCluster(),
                         param.getGatewayUrl()), operator, AuthConstant.SUPER_PROJECT_ID, param.getId(),
                 OperateTypeEnum.PHYSICAL_CLUSTER_GATEWAY_CHANGE);
+
         return Result.buildSucc(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyVO.class));
     }
     
@@ -1297,6 +1298,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         } catch (AdminOperateException e) {
             LOGGER.error("class=ClusterPhyManagerImpl||method=deleteClusterInfo||clusterName={}||errMsg={}||e={}",
                 clusterPhy.getCluster(), e.getMessage(), e);
+
             // 这里显示回滚处理特殊异常场景
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Result.buildFail("删除物理集群失败");
@@ -1329,10 +1331,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      * @param clusterLogicType 逻辑集群类型
      * @return 可以绑定的物理集群民称列表
      */
-    Result<List<String>> validLogicAndReturnPhyNamesWhenBindPhy(Long clusterLogicId, Integer clusterLogicType) {
+    private Result<List<String>> validLogicAndReturnPhyNamesWhenBindPhy(Long clusterLogicId, Integer clusterLogicType) {
         if (clusterLogicId == null && clusterLogicType == null) {
             return Result.buildFail("传入的参数错误");
         }
+
         Result<List<String>> canBeAssociatedClustersPhyNames = Result.buildSucc(Lists.newArrayList());
         if (clusterLogicId != null) {
             ClusterLogic clusterLogicById =
@@ -1340,6 +1343,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             if (clusterLogicById == null) {
                 return Result.buildFail("选定的逻辑集群不存在");
             }
+
             clusterLogicType = clusterLogicById.getType();
             canBeAssociatedClustersPhyNames = listCanBeAssociatedRegionOfClustersPhys(clusterLogicType, clusterLogicId);
         } else {
@@ -1352,7 +1356,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         if (canBeAssociatedClustersPhyNames.failed()) {
             LOGGER.warn(
-                "class=ClusterPhyManagerImpl||method=getPhyClusterNameWithSameEsVersionAfterBuildLogic||errMsg={}",
+                "class=ClusterPhyManagerImpl||method=validLogicAndReturnPhyNamesWhenBindPhy||errMsg={}",
                 canBeAssociatedClustersPhyNames.getMessage());
             Result.buildFail("无法获取对应的物理集群名称列表");
         }
@@ -1393,19 +1397,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     /**
      * 构建物理集群详情
-     * @param phyClusters 物理集群元数据信息
-     */
-    private List<ClusterPhyVO> buildPhyClusters(List<ClusterPhyVO> phyClusters) {
-
-        phyClusters.parallelStream().forEach(this::buildPhyCluster);
-
-        Collections.sort(phyClusters);
-
-        return phyClusters;
-    }
-
-    /**
-     * 构建物理集群详情
      * @param clusterPhyVO 物理集群元数据信息
      * @return
      */
@@ -1425,6 +1416,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         if (addClusterRet.failed()) {
             return Result.buildFrom(addClusterRet);
         }
+
         return Result.buildSucc(ConvertUtil.obj2Obj(clusterDTO, ClusterPhyVO.class));
     }
 
@@ -1663,8 +1655,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     private void doDeleteClusterJoin(ClusterPhy clusterPhy, String operator,
                                      Integer projectId) throws AdminOperateException {
-        
-           // 1. set region
+        // 1. set region
         List<ClusterRegion> regions = clusterRegionService.listPhyClusterRegions(clusterPhy.getCluster());
         if (CollectionUtils.isEmpty(regions)) {
             return;
@@ -1673,21 +1664,21 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         List<Long> associatedRegionIds = regions.stream().map(ClusterRegion::getId).collect(Collectors.toList());
         for (Long associatedRegionId : associatedRegionIds) {
             final ClusterRegion region = clusterRegionService.getRegionById(associatedRegionId);
+
             Result<Void> unbindRegionResult = clusterRegionService.unbindRegion(associatedRegionId, null, operator);
             if (unbindRegionResult.failed()) {
                 throw new AdminOperateException(String.format("解绑region(%s)失败", associatedRegionId));
             } else {
-                
                 //解绑region
                  operateRecordService.saveOperateRecordWithManualTrigger(String.format("解绑 region：%s", region.getName()), operator, projectId,
                         clusterPhy.getId(), OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE);
             }
+
             Result<Void> deletePhyClusterRegionResult = clusterRegionService.deletePhyClusterRegion(associatedRegionId,
                 operator);
             if (deletePhyClusterRegionResult.failed()) {
                 throw new AdminOperateException(String.format("删除region(%s)失败", associatedRegionId));
             } else {
-                
                 //删除region
                  operateRecordService.saveOperateRecordWithManualTrigger(String.format("删除 region：%s", region.getName()), operator, projectId,
                         clusterPhy.getId(), OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE);
@@ -1698,14 +1689,15 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 .filter(clusterRegion -> Objects.nonNull(clusterRegion.getLogicClusterIds()))
                 .map(clusterRegion -> ListUtils.string2LongList(clusterRegion.getLogicClusterIds()))
                 .filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream)
-                .filter(logicId -> Objects.equals(logicId,
-                        Long.parseLong(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID))).distinct()
+                .filter(logicId -> Objects.equals(logicId, Long.parseLong(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID))).distinct()
                 .collect(Collectors.toList());
+
         for (Long clusterLogicId : clusterLogicIds) {
             final ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(clusterLogicId);
             if (Objects.isNull(clusterLogic)){
                 continue;
             }
+
             Result<Void> deleteLogicClusterResult = clusterLogicService.deleteClusterLogicById(clusterLogicId, operator,
                 projectId);
             if (deleteLogicClusterResult.failed()) {
@@ -1856,9 +1848,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 : ClusterConnectionStatusWithTemplateEnum.DISCONNECTED;
     }
     
-   
-    
-     public List<ClusterRegion> getColdRegionByPhyCluster(String phyCluster) {
+    public List<ClusterRegion> getColdRegionByPhyCluster(String phyCluster) {
         List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster);
         //冷region是不会保存在逻辑集群侧的，所以这里关联的region肯定是大于1的，如果是小于1，那么是一定不会具备的
         if (clusterRegions.size()<=1){
@@ -1866,21 +1856,21 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
           return clusterRegions.stream().filter(coldTruePreByClusterRegion).collect(Collectors.toList());
     }
-     private final static Predicate<ClusterRegion> coldTruePreByClusterRegion = clusterRegion -> {
+
+    private final static Predicate<ClusterRegion> coldTruePreByClusterRegion = clusterRegion -> {
         if (StringUtils.isBlank(clusterRegion.getConfig())) {
             return Boolean.FALSE;
         }
+
         try {
             return JSON.parseObject(clusterRegion.getConfig()).getBoolean(COLD);
-        
         } catch (Exception e) {
             return Boolean.FALSE;
         }
-    
     };
     
     /**
-     * > 该函数用于获取存储 zeus 部署的 ip 列表的缓存 return List<String>
+     * 该函数用于获取存储 zeus 部署的 ip 列表的缓存 return List<String>
      */
     private List<String> ipListWithCache() {
         return ZEUS_AGENTS_LIST_CACHE.getIfPresent(ZEUS_AGENTS_LIST);
@@ -1891,8 +1881,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     /**
-     * > 该函数用于缓存初次获取zeus部署的agents list
-     *return List<String>
+     * 该函数用于缓存初次获取zeus部署的agents list
+     * return List<String>
      */
     private List<String> getIpList() {
         Result<List<String>> result = zeusClusterRemoteService.getAgentsList();
@@ -1902,15 +1892,16 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         return result.getData();
     }
-        /**
-     * > 该函数用于构建支持zeus by cluster phy
+
+    /**
+     * 该函数用于构建支持zeus by cluster phy
      *
      * @param clusterPhyVO 集群物理信息
      */
-        private void buildSupportZeusByClusterPhy(ClusterPhyVO clusterPhyVO, List<String> ipList,
-                                                  List<String> zeusAgentsList) {
-            // 物理集群上所有的节点都需要在 zeus 的 ip 列表上，那么它才属于支持 zeus 的，一旦发现有一个不在就是不支持，不再遍历
-            clusterPhyVO.setSupportZeus(
-                    CollectionUtils.isNotEmpty(ipList) && Sets.newHashSet(zeusAgentsList).containsAll(ipList));
-        }
+    private void buildSupportZeusByClusterPhy(ClusterPhyVO clusterPhyVO, List<String> ipList,
+                                              List<String> zeusAgentsList) {
+        // 物理集群上所有的节点都需要在 zeus 的 ip 列表上，那么它才属于支持 zeus 的，一旦发现有一个不在就是不支持，不再遍历
+        clusterPhyVO.setSupportZeus(
+                CollectionUtils.isNotEmpty(ipList) && Sets.newHashSet(zeusAgentsList).containsAll(ipList));
+    }
 }
