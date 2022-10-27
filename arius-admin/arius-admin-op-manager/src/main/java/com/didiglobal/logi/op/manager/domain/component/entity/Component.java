@@ -102,7 +102,7 @@ public class Component {
 
 
     public Component create() {
-        this.status = ComponentStatusEnum.UN_KNOW.getStatus();
+        this.status = ComponentStatusEnum.GREEN.getStatus();
         this.isDeleted = DeleteEnum.NORMAL.getType();
         this.createTime = new Timestamp(System.currentTimeMillis());
         this.updateTime = new Timestamp(System.currentTimeMillis());

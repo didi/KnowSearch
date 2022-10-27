@@ -49,4 +49,9 @@ public class TaskDetailRepositoryImpl implements TaskDetailRepository {
         return taskDetailDao.updateStatusByExecuteId(taskId, executeId, status, hosts);
     }
 
+    @Override
+    public int resetExecuteId(int taskId) {
+        return taskDetailDao.resetExecuteId(taskId);
+    }
+
 }

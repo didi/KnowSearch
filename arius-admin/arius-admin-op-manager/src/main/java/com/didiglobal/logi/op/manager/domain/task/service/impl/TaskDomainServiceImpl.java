@@ -183,10 +183,10 @@ public class TaskDomainServiceImpl implements TaskDomainService {
         if (checkRes.failed()) {
             return checkRes;
         }
-        //删除detail任务信息
-        taskDetailRepository.deleteByTaskId(taskId);
+        //重置detail任务信息
+        taskDetailRepository.resetExecuteId(taskId);
         //更新任务状态
-        taskRepository.updateTaskStatus(taskId, TaskStatusEnum.WAITING.getStatus());
+        taskRepository.updateTaskStatusAndIsFinish(taskId, TaskStatusEnum.WAITING.getStatus(), 0);
         return Result.success();
     }
 

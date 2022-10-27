@@ -63,4 +63,11 @@ public interface TaskDetailRepository {
      * @return 更新条数
      */
     int updateStatusByExecuteTaskId(int taskId, int executeId, int status, List<String> hosts);
+
+    /**
+     * 重置执行id
+     * @param taskId 任务id
+     * @return
+     */
+    int resetExecuteId(int taskId);
 }

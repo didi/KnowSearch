@@ -143,11 +143,11 @@ public class TaskService {
         } else {
             Integer componentId = JSON.parseObject(task.getContent()).getInteger("componentId");
             Component component = componentDomainService.getComponentById(componentId).getData();
+            configResult.getData().setUrl(packageDomainService.getPackageById(component.getPackageId()).getData().getUrl());
             //如果是回滚，设置回滚类型以及url
             if (task.getType() == OperationEnum.ROLLBACK.getType()) {
                 GeneralRollbackComponent rollbackComponent = ConvertUtil.str2ObjByJson(task.getContent(), GeneralRollbackComponent.class);
                 configResult.getData().setType(rollbackComponent.getType());
-                configResult.getData().setUrl(packageDomainService.getPackageById(component.getPackageId()).getData().getUrl());
             }
             configResult.getData().setUsername(component.getUsername());
             configResult.getData().setPassword(component.getPassword());

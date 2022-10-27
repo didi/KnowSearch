@@ -38,7 +38,7 @@ public class TaskController {
     @PostMapping("/{action}/{taskId}")
     @ApiOperation(value = "对主任务进行相应的操作")
     public Result<Void> operateTask(@PathVariable String action, @PathVariable Integer taskId) {
-        return taskService.operateTask(taskId, action);
+        return taskService. operateTask(taskId, action);
     }
 
     @PostMapping("/retry/{taskId}")

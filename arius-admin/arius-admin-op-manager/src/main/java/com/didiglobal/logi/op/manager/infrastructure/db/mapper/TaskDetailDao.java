@@ -68,4 +68,11 @@ public interface TaskDetailDao {
      */
     int updateStatusByExecuteId(@Param("taskId") int taskId, @Param("executeId") int executeId,
                                 @Param("status") int status, @Param("hosts") List<String> hosts);
+
+    /**
+     * 重置任务id
+     * @param taskId 任务id
+     * @return
+     */
+    int resetExecuteId(@Param("taskId") int taskId);
 }

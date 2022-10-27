@@ -77,4 +77,9 @@
         where id = #{taskId}
     </delete>
 
+    <update id="resetExecuteId">
+        update logi_op_task_detail set status = 0,execute_task_id = null
+        where id = #{taskId}
+    </update>
+
 </mapper>
