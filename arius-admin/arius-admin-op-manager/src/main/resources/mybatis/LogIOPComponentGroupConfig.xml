@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didiglobal.logi.op.manager.infrastructure.db.mapper.ComponentGroupConfigDao">
+    <resultMap id="BaseResultMap"
+               type="com.didiglobal.logi.op.manager.infrastructure.db.ComponentGroupConfigPO">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="component_id" jdbcType="INTEGER" property="componentId"/>
+        <result column="group_name" jdbcType="VARCHAR" property="groupName"/>
+        <result column="system_config" jdbcType="VARCHAR" property="systemConfig"/>
+        <result column="running_config" jdbcType="VARCHAR" property="runningConfig"/>
+        <result column="file_config" jdbcType="VARCHAR" property="fileConfig"/>
+        <result column="install_directory_config" jdbcType="VARCHAR" property="installDirectoryConfig"/>
+        <result column="process_num_config" jdbcType="VARCHAR" property="processNumConfig"/>
+        <result column="hosts" jdbcType="VARCHAR" property="hosts"/>
+        <result column="version" jdbcType="VARCHAR" property="version"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, component_id, group_name, system_config, running_config, file_config, install_directory_config, process_num_config, hosts, version, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentGroupConfigPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into logi_op_component_group_config (component_id, group_name, system_config, running_config, file_config, install_directory_config, process_num_config, hosts, version, create_time, update_time)
+        values (#{componentId}, #{groupName}, #{systemConfig}, #{runningConfig}, #{fileConfig}, #{installDirectoryConfig}, #{processNumConfig}, #{hosts}, #{version}, #{createTime}, #{updateTime})
+    </insert>
+
+    <select id="getByComponentId"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentGroupConfigPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component_group_config
+        where component_id = #{componentId}
+    </select>
+
+    <update id="update" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentGroupConfigPO">
+        update logi_op_component_group_config
+        <trim prefix="set" prefixOverrides=",">
+            <if test="installDirectoryConfig != null">,install_directory_config = #{installDirectoryConfig}</if>
+            <if test="processNumConfig != null">,process_num_config = #{processNumConfig}</if>
+            <if test="hosts != null">,hosts = #{hosts}</if>
+            <if test="updateTime != null">,update_time = #{updateTime}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="listAll"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentGroupConfigPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component_group_config
+    </select>
+</mapper>
