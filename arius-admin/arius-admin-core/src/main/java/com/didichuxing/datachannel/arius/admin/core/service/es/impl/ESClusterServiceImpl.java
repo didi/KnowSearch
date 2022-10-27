@@ -128,7 +128,7 @@ public class ESClusterServiceImpl implements ESClusterService {
      * @return true/false
      */
     @Override
-    public boolean hasSettingExist(String cluster, String settingFlatName) {
+    public boolean hasSettingExist(String cluster, String settingFlatName) throws ESOperateException {
         Map<String, Object> clusterSettingMap = esClusterDAO.getPersistentClusterSettings(cluster);
         if (null == clusterSettingMap) {
             return false;
@@ -137,7 +137,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public Map<String, List<String>> syncGetNode2PluginsMap(String cluster) {
+    public Map<String, List<String>> syncGetNode2PluginsMap(String cluster) throws ESOperateException {
         return esClusterDAO.getNode2PluginsMap(cluster, 3);
     }
 
@@ -241,7 +241,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public List<ESClusterTaskStatsResponse> syncGetClusterTaskStats(String clusterName) {
+    public List<ESClusterTaskStatsResponse> syncGetClusterTaskStats(String clusterName) throws ESOperateException {
         return esClusterDAO.getClusterTaskStats(clusterName);
     }
 
@@ -283,7 +283,12 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     @Override
     public boolean syncPutPersistentConfig(String cluster, Map<String, Object> configMap) {
-        return esClusterDAO.putPersistentConfig(cluster, configMap);
+        try {
+            return esClusterDAO.putPersistentConfig(cluster, configMap);
+        } catch (Exception e) {
+            LOGGER.error("class=ESClusterServiceImpl||method=syncPutPersistentConfig||clusterName={}", cluster,e);
+            return false;
+        }
     }
 
     @Override

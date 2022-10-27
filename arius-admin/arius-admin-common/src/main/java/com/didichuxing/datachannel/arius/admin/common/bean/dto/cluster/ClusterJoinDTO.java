@@ -29,6 +29,8 @@ public class ClusterJoinDTO extends BaseDTO {
     @ApiModelProperty("集群名字")
     private String                     cluster;
 
+    
+
     @ApiModelProperty("es版本")
     private String                     esVersion;
 
@@ -56,6 +58,6 @@ public class ClusterJoinDTO extends BaseDTO {
     @ApiModelProperty("集群资源类型(-1 未知 1 共享 2 独立 3 独享)")
     private Integer                    resourceType;
 
-    @ApiModelProperty("SLB地址")
-    private String                     slbAddress;
+    @ApiModelProperty("region划分方式，为空代表根据节点名称划分，否则为attribute属性")
+    private String                     divideAttributeKey;
 }

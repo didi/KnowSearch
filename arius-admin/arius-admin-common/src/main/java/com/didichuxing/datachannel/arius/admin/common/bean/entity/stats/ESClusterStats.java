@@ -16,33 +16,31 @@ public class ESClusterStats extends BaseESPO {
     /**
      * 集群名称，all则表示全集群信息
      */
-    private String              cluster;
-
+    private String cluster;
+    /**
+     * 逻辑集群ID或者物理集群ID
+     */
+    private String clusterId;
     /**
      * 统计的时间戳，单位：毫秒
      */
-    private long                timestamp;
-
+    private long timestamp;
     /**
      * 是否是物理集群 1：是；0：不是
      */
-    private long                physicCluster;
-
+    private long physicCluster;
     /**
-     * 分位类型
-     * @see PercentilesEnum
+     * 分位类型 * @see PercentilesEnum
      */
-    private String              percentilesType;
-
+    private String percentilesType;
     /**
      * 统计信息
      */
     private ESClusterStatsCells statis;
-
     /**
      * 数据中心
      */
-    private String              dataCenter;
+    private String dataCenter;
 
     @Override
     public String getKey() {

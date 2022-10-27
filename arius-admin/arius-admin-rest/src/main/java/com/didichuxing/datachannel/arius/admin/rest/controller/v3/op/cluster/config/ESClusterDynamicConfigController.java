@@ -32,14 +32,13 @@ public class ESClusterDynamicConfigController {
 
     @GetMapping("/{cluster}")
     @ApiOperation(value = "获取当前集群下的动态配置项信息")
-    public Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(@PathVariable String cluster)
-            throws ESOperateException {
+    public Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(@PathVariable String cluster) {
         return clusterPhyManager.getPhyClusterDynamicConfigs(cluster);
     }
 
     @PutMapping("")
     @ApiOperation(value = "更新集群配置项的信息")
-    public Result<Boolean> updateDynamicConfig(HttpServletRequest request, @RequestBody ClusterSettingDTO param) throws ESOperateException {
+    public Result<Boolean> updateDynamicConfig(HttpServletRequest request, @RequestBody ClusterSettingDTO param) {
         return clusterPhyManager.updatePhyClusterDynamicConfig(param, HttpRequestUtil.getOperator(request),
             HttpRequestUtil.getProjectId(request));
     }
@@ -55,7 +54,7 @@ public class ESClusterDynamicConfigController {
     @ApiOperation(value = "批量更新物理集群的动态配置项")
     public Result<Boolean> batchUpdateClusterDynamicConfig(@PathVariable List<String> clusterList,
                                                            @RequestBody ClusterSettingDTO param,
-                                                           HttpServletRequest request) throws ESOperateException {
+                                                           HttpServletRequest request) {
         return clusterPhyManager.batchUpdateClusterDynamicConfig(clusterList, param, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }

@@ -187,6 +187,11 @@ public interface ESClusterRoleHostDAO {
      * @return 列表<ClusterRoleHost>
      */
     List<ESClusterRoleHostPO> listByIds(@Param("ids") List<Integer> ids);
-    
-    
+
+    /**
+     * 物理集群下的节点
+     * @param phyClusterNames
+     * @return
+     */
+    List<ESClusterRoleHostPO> listByClusters(List<String> phyClusterNames);
 }

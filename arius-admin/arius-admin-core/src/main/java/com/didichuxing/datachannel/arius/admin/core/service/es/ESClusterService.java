@@ -59,14 +59,14 @@ public interface ESClusterService {
      * @param settingFlatName  setting名字
      * @return true/false
      */
-    boolean hasSettingExist(String cluster, String settingFlatName);
+    boolean hasSettingExist(String cluster, String settingFlatName) throws ESOperateException;
 
     /**
      * 获取物理集群下各个节点的插件名称列表
      * @param cluster
      * @return map
      */
-    Map<String, List<String>> syncGetNode2PluginsMap(String cluster);
+    Map<String, List<String>> syncGetNode2PluginsMap(String cluster) throws ESOperateException;
 
     /**
      * 获取某个集群内索引别名到索引名称的映射
@@ -109,7 +109,7 @@ public interface ESClusterService {
      * @param clusterName
      * @return
      */
-    List<ESClusterTaskStatsResponse> syncGetClusterTaskStats(String clusterName);
+    List<ESClusterTaskStatsResponse> syncGetClusterTaskStats(String clusterName) throws ESOperateException;
 
     /**
      * 获取集群健康度

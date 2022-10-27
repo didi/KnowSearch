@@ -242,4 +242,6 @@ public interface ClusterRoleHostService {
     List<ClusterRoleHost> listById(List<Integer> ids);
     
     boolean deleteByIds(List<Integer> ids);
+
+    List<ClusterRoleHost> listNodesByClusters(List<String> phyClusterNames);
 }
