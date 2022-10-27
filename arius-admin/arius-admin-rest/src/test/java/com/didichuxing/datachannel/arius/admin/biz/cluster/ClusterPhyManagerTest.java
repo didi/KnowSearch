@@ -34,7 +34,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
@@ -218,7 +217,7 @@ class ClusterPhyManagerTest {
 
         clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0,
            "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        region = new ClusterRegion(0L, "name", "logicClusterIds", CLUSTER, "config");
+        region = new ClusterRegion(0L, "name", "logicClusterIds", CLUSTER, "config","");
 
         roleHostList = Collections.singletonList(new ClusterRoleHost(0L, 0L, "hostname", "ip", CLUSTER, "port", 0, 0,
             "rack", "nodeSet", "machineSpec", -1, "attributes"));
@@ -655,11 +654,7 @@ class ClusterPhyManagerTest {
             .thenReturn(Result.buildFail(false));
         Integer projectId = 1;
         final Result<Boolean> result;
-        try {
-            result = clusterPhyManager.updatePhyClusterDynamicConfig(param, "operator", projectId);
-        } catch (ESOperateException e) {
-            throw new RuntimeException(e);
-        }
+        result = clusterPhyManager.updatePhyClusterDynamicConfig(param, "operator", projectId);
     
         assertEquals(expectedResult, result);
     }
