@@ -612,13 +612,18 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(String cluster)
-            throws ESOperateException {
+    public Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(String cluster) {
         if (!isClusterExists(cluster)) {
             return Result.buildFail(String.format("集群[%s]不存在", cluster));
         }
 
-        ESClusterGetSettingsAllResponse clusterSetting = esClusterService.syncGetClusterSetting(cluster);
+        ESClusterGetSettingsAllResponse clusterSetting = null;
+        try {
+            clusterSetting = esClusterService.syncGetClusterSetting(cluster);
+        } catch (Exception e) {
+            LOGGER.error("class=ClusterPhyManagerImpl||method=getPhyClusterDynamicConfigs||clusterName={}", cluster, e);
+            return Result.buildFail(String.format("获取集群动态配置信息失败, 请确认是否集群[%s]是否正常", cluster));
+        }
         if (null == clusterSetting) {
             return Result.buildFail(String.format("获取集群动态配置信息失败, 请确认是否集群[%s]是否正常", cluster));
         }
@@ -641,15 +646,20 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator, Integer projectId)
-            throws ESOperateException {
+    public Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator, Integer projectId) {
         final Result<Void> resultCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (resultCheck.failed()) {
             return Result.buildFail(resultCheck.getMessage());
         }
         final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs = getPhyClusterDynamicConfigs(
             param.getClusterName());
+        if (beforeChangeConfigs.failed()) {
+            return Result.buildFail(beforeChangeConfigs.getMessage());
+        }
         String changeKey = param.getKey();
+        if (beforeChangeConfigs.getData().values() == null) {
+            return Result.buildFail("获取要更新的集群配置项的信息失败");
+        }
         Object beforeValue = beforeChangeConfigs.getData().values().stream()
             .filter(
                 clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.containsKey(changeKey))
@@ -1187,8 +1197,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             }else {
                 // 记录操作
                 final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs;
-                try {
-                    beforeChangeConfigs = getPhyClusterDynamicConfigs(cluster);
+                beforeChangeConfigs = getPhyClusterDynamicConfigs(cluster);
+                if (beforeChangeConfigs.failed()||beforeChangeConfigs.getData().values() == null){
+                    updateFail = true;
+                    updateFailClusters.append(cluster).append(",");
+                } else {
                     Object beforeValue = beforeChangeConfigs.getData().values().stream()
                             .filter(
                                     clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.containsKey(changeKey))
@@ -1198,12 +1211,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                     operateRecordService.saveOperateRecordWithManualTrigger(String.format("%s:%s->%s", changeKey, beforeValue, changeValue),
                             operator, AuthConstant.SUPER_PROJECT_ID, clusterByName.getId(),
                             OperateTypeEnum.PHYSICAL_CLUSTER_DYNAMIC_CONF_CHANGE);
-                } catch (Exception e) {
-                    LOGGER.error("class=ClusterPhyManagerImpl||method=batchUpdateClusterDynamicConfig||clusterName={}", cluster,e);
-                    updateFail = true;
-                    updateFailClusters.append(cluster).append(",");
                 }
-
             }
         }
         if(updateFail){

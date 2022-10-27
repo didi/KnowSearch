@@ -655,11 +655,7 @@ class ClusterPhyManagerTest {
             .thenReturn(Result.buildFail(false));
         Integer projectId = 1;
         final Result<Boolean> result;
-        try {
-            result = clusterPhyManager.updatePhyClusterDynamicConfig(param, "operator", projectId);
-        } catch (ESOperateException e) {
-            throw new RuntimeException(e);
-        }
+        result = clusterPhyManager.updatePhyClusterDynamicConfig(param, "operator", projectId);
     
         assertEquals(expectedResult, result);
     }
