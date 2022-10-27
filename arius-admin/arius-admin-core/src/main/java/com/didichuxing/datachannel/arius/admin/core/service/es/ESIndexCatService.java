@@ -107,4 +107,5 @@ public interface ESIndexCatService {
     List<String> syncGetIndexListByProjectIdAndFuzzyIndexAndClusterPhy( String clusterPhyName,
                                                                        String index);
 
+    List<IndexCatCell> syncGetAllCatIndexNameListByClusters(Integer searchSize,List<String> phyClusterNames);
 }
