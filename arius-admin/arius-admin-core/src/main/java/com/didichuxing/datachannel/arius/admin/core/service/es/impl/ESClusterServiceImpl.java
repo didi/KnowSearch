@@ -128,7 +128,7 @@ public class ESClusterServiceImpl implements ESClusterService {
      * @return true/false
      */
     @Override
-    public boolean hasSettingExist(String cluster, String settingFlatName) {
+    public boolean hasSettingExist(String cluster, String settingFlatName) throws ESOperateException {
         Map<String, Object> clusterSettingMap = esClusterDAO.getPersistentClusterSettings(cluster);
         if (null == clusterSettingMap) {
             return false;

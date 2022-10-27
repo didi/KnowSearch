@@ -12,73 +12,60 @@ public class ClusterLogicStatsPO {
      * 逻辑集群名称
      */
     private String name;
-
     /**
      * 逻辑集群id
      */
-    private long   id;
-
+    private Long id;
     /**
      * 逻辑集群状态
      */
     private String status;
-
     /**
      * 逻辑集群状态
      */
-    private int    statusType;
-
+    private Integer statusType;
     /**
      * docNu
      */
-    private double docNu;
-
+    private Long docNu;
     /**
      * 总的磁盘容量
      */
-    private double totalDisk;
-
+    private Double totalDisk;
     /**
      * 已使用的磁盘容量
      */
-    private double usedDisk;
-
+    private Double usedDisk;
     /**
      * 空闲的磁盘容量
      */
-    private double freeDisk;
-
+    private Double freeDisk;
     /**
      * 索引数量
      */
-    private long   indexNu;
-
+    private Long indexNu;
     /**
      * dataNode个数
      */
-    private long   numberDataNodes;
-
+    private Long numberDataNodes;
     /**
      * masterNode个数
      */
-    private long   masterNodeNu;
-
+    private Long masterNodeNu;
     /**
      * 未分配shard
      */
-    private long   unAssignedShards;
-
+    private Long unAssignedShards;
     /**
      * pengdingtask梳理
      */
-    private long   numberPendingTasks;
-
+    private Long numberPendingTasks;
+    /**
+     * cpu最大使用率
+     */
+    private Double cpuUsedPercent;
     /**
      * 节点存活率
      */
-    private int    alivePercent;
-    /**
-     * cpu相关
-     */
-    private double cpuUsedPercent;
+    private Integer alivePercent;
 }

@@ -1,0 +1,23 @@
+{
+"size": %d,
+    "query": {
+        "bool": {
+            "filter": [
+                {
+                    "term": {
+                        "deleteFlag": false
+                    }
+                },
+                {
+                    "term": {
+                        "resourceId": %d
+                    }
+                }
+            ]
+        }
+    },
+    "_source": [
+    "index",
+    "cluster",
+    "resourceId"
+    ]}

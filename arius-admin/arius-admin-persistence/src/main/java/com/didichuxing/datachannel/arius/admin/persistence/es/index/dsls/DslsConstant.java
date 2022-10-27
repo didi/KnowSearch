@@ -708,6 +708,8 @@ public class DslsConstant {
     public static final String GET_ALL_CAT_INDEX_INFO_BY_TERMS                               = "IndexCatESDAO/getAllCatIndexInfoByTerms";
 
     public static final String GET_PLATFORM_CREATE_CAT_INDEX  = "IndexCatESDAO/getPlatformCreateCatIndex";
+    public static final String GET_ALL_CAT_INDEX_NAME_BY_CLUSTERS  = "IndexCatESDAO/getAllCatIndexNameByClusters";
+    public static final String GET_ALL_CAT_INDEX_NAME_BY_RESOURCE_ID  = "IndexCatESDAO/getAllCatIndexNameByResourceId";
     public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT  = "IndexCatESDAO/getPlatformCreateCatIndexByIndexProject";
     public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT_AND_FUZZY_INDEX_AND_CLUSTER_LOGIC  = "IndexCatESDAO/getPlatformCreateCatIndexByIndexProjectAndFuzzyIndex";
     public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT_AND_FUZZY_INDEX_AND_CLUSTER_PHY  =

@@ -139,4 +139,16 @@ public class ESClusterNodeDAO extends BaseESDAO {
     
     }
 
+    public List<ClusterNodeStats> syncGetNodesStatsWithIndices(String clusterName) {
+        ESClient esClient = esOpClient.getESClient(clusterName);
+        if (esClient == null) {
+            LOGGER.error("class=ESClusterNodeServiceImpl||method=syncGetNodeFsStatsMap||clusterName={}||errMsg=esClient is null", clusterName);
+            return Lists.newArrayList();
+        }
+        ESClusterNodesStatsResponse response = esClient.admin().cluster().prepareNodeStats().setFs(true).setOs(true).setIndices(true).setJvm(true).setThreadPool(true).level("node").execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        if (response.getNodes() != null) {
+            return new ArrayList<>(response.getNodes().values());
+        }
+        return Lists.newArrayList();
+    }
 }
