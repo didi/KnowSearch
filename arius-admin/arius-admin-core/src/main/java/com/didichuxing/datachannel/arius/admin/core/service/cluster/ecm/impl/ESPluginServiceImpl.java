@@ -17,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.PluginTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
@@ -419,7 +420,14 @@ public class ESPluginServiceImpl implements ESPluginService {
         }
 
         // 从es集群获取实时生效的版本号
-        String esVersionFromESClient = esClusterService.synGetESVersionByCluster(clusterPhy.getCluster());
+        String esVersionFromESClient = null;
+        try {
+            esVersionFromESClient = esClusterService.synGetESVersionByCluster(clusterPhy.getCluster());
+        } catch (ESOperateException e) {
+            LOGGER.error("class=ESClusterServiceImpl||method=verifyESPluginFileAndModifyPluginName||clusterName={}",
+                    clusterPhy.getCluster(),e);
+            return Result.buildFail("获取物理集群版本出现异常");
+        }
         if (esVersionFromESClient == null) {
             return Result.buildFail("无法从物理集群获取版本");
         }

@@ -168,7 +168,7 @@ public interface ESClusterService {
      * @param cluster 物理集群名称
      * @return 物理集群es版本号
      */
-    String synGetESVersionByCluster(String cluster);
+    String synGetESVersionByCluster(String cluster) throws ESOperateException;
 
     /**
      * 检测是否为同一个集群

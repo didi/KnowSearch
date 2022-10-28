@@ -292,7 +292,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public String synGetESVersionByCluster(String cluster) {
+    public String synGetESVersionByCluster(String cluster) throws ESOperateException {
         return esClusterDAO.getESVersionByCluster(cluster, 3);
     }
 
