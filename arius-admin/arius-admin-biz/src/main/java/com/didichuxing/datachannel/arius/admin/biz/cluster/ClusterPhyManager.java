@@ -254,7 +254,7 @@ public interface ClusterPhyManager {
      * @param operator         操作者
      * @return
      */
-    boolean updateClusterHealth(String clusterPhyName, String operator);
+    boolean updateClusterHealth(String clusterPhyName, String operator) throws ESOperateException;
 
     /**
      * 更新集群资源信息
