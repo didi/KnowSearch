@@ -156,7 +156,7 @@ public interface ESClusterService {
     /**
      * 获取全量集群节点Setting配置; key ——> 节点uuid ,value ——> ClusterNodeInfo
      */
-    Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster);
+    Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster) throws ESOperateException;
 
     /**
      * 获取部分集群节点Setting配置; key ——> 节点uuid ,value ——> ClusterNodeSettings

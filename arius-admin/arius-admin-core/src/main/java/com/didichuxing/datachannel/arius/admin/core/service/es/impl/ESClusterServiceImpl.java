@@ -297,7 +297,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster) {
+    public Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster) throws ESOperateException {
         return esClusterDAO.getAllSettingsByCluster(cluster, 3);
     }
 
