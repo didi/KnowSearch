@@ -355,14 +355,17 @@ public class ESClusterDAO extends BaseESDAO {
         return null;
     }
 
-    public Map<String, ClusterNodeSettings> getPartOfSettingsByCluster(String cluster, Integer tryTimes) {
+    public Map<String, ClusterNodeSettings> getPartOfSettingsByCluster(String cluster, Integer tryTimes) throws ESOperateException {
         ESClusterNodesSettingResponse response = null;
 
+        ESClient client = esOpClient.getESClient(cluster);
+        if (null == client) {
+            LOGGER.error("class=ESClusterDAO||method=getPartOfSettingsByCluster||clusterName={}||errMsg=esClient is null",
+                    cluster);
+            throw new NullESClientException(cluster);
+        }
+
         try {
-            ESClient client = esOpClient.getESClient(cluster);
-            if (null == client) {
-                return null;
-            }
 
             do {
                 response = client.admin().cluster().prepareNodesSetting().execute().actionGet(ES_OPERATE_TIMEOUT,
@@ -372,7 +375,7 @@ public class ESClusterDAO extends BaseESDAO {
         } catch (Exception e) {
             LOGGER.warn("class=ESClusterDAO||method=getPartOfSettingsByCluster||cluster={}||mg=get es setting fail",
                 cluster, e);
-            return null;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         return Optional.ofNullable(response).map(ESClusterNodesSettingResponse::getNodes).orElse(null);
     }
@@ -382,15 +385,17 @@ public class ESClusterDAO extends BaseESDAO {
     * @param cluster
     * @return
     */
-    public Map<String, ClusterNodeInfo> getAllSettingsByCluster(String cluster, Integer tryTimes) {
+    public Map<String, ClusterNodeInfo> getAllSettingsByCluster(String cluster, Integer tryTimes) throws ESOperateException {
         ESClusterNodesResponse response = null;
-        try {
-            ESClient client = esOpClient.getESClient(cluster);
-            if (null == client) {
-                LOGGER.warn("class=ESClusterDAO||method=getAllSettingsByCluster||cluster={}||mg=ESClient is empty",
+
+        ESClient client = esOpClient.getESClient(cluster);
+        if (null == client) {
+            LOGGER.warn("class=ESClusterDAO||method=getAllSettingsByCluster||cluster={}||mg=ESClient is empty",
                     cluster);
-                return null;
-            }
+            throw new NullESClientException(cluster);
+        }
+
+        try {
             do {
                 response = client.admin().cluster().prepareNodes().execute().actionGet(ES_OPERATE_TIMEOUT,
                     TimeUnit.SECONDS);
@@ -398,7 +403,7 @@ public class ESClusterDAO extends BaseESDAO {
         } catch (Exception e) {
             LOGGER.warn("class=ESClusterDAO||method=getAllSettingsByCluster||cluster={}||mg=get es setting fail",
                 cluster, e);
-            return null;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         return Optional.ofNullable(response).map(ESClusterNodesResponse::getNodes).orElse(null);
     }
