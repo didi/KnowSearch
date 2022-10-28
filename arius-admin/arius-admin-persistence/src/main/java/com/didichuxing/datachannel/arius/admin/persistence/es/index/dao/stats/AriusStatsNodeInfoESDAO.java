@@ -66,7 +66,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      */
     public double getClusterTps(String cluster) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_REAL_TIME_TPS_QPS_INFO, cluster,
-                "now-2m", "now-1m", INDEXING_RATE.getType());
+                "now-2m", "now-1m", INDICES_INDEXING_RATE.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "sum"), 3);
@@ -177,7 +177,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      */
     public double getClusterIndexingLatency(String cluster) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_INDEXING_LATENCY_MAX, cluster,
-            NOW_2M, NOW_1M, INDICES_INDEXING_LATENCY.getType());
+            NOW_2M, NOW_1M, INDICES_INDEXING_INDEX_TIME_PER_DOC.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "max"), 3);
