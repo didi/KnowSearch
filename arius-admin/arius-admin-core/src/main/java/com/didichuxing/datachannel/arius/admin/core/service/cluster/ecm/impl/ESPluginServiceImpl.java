@@ -424,7 +424,7 @@ public class ESPluginServiceImpl implements ESPluginService {
         try {
             esVersionFromESClient = esClusterService.synGetESVersionByCluster(clusterPhy.getCluster());
         } catch (ESOperateException e) {
-            LOGGER.error("class=ESClusterServiceImpl||method=verifyESPluginFileAndModifyPluginName||clusterName={}",
+            LOGGER.error("class=ESClusterServiceImpl||method=verifyESPluginFileAndModifyPluginName||clusterName={}||errMsg=fail to get esversion",
                     clusterPhy.getCluster(),e);
             return Result.buildFail("获取物理集群版本出现异常");
         }
