@@ -177,6 +177,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         try {
             nodesFromEs = getClusterHostFromEsAndCreateRoleClusterIfNotExist(cluster);
         } catch (ESOperateException e) {
+
             LOGGER.warn(
                     "class=RoleClusterHostServiceImpl||method=collectClusterNodeSettings||clusterPhyName={}||errMag=fail to get cluster host",
                     cluster);
