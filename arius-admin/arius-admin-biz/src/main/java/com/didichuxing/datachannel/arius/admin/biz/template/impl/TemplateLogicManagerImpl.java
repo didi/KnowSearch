@@ -186,9 +186,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     @Autowired
     private TemplateLogicSettingsManager    templateLogicSettingsManager;
 
-    @Autowired
-    private BaseTemplateSrv                 baseTemplateSrv;
-
     public static final int                 MAX_PERCENT           = 10000;
     public static final int                 MIN_PERCENT           = -99;
 
