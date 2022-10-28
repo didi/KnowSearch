@@ -986,7 +986,15 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         ClusterPhyDTO esClusterDTO = new ClusterPhyDTO();
-        ClusterHealthEnum clusterHealthEnum = esClusterService.syncGetClusterHealthEnum(clusterPhyName);
+        ClusterHealthEnum clusterHealthEnum = null;
+        try {
+            clusterHealthEnum = esClusterService.syncGetClusterHealthEnum(clusterPhyName);
+        } catch (ESOperateException e) {
+            LOGGER.error(
+                    "class=ClusterPhyManagerImpl||method=updateClusterHealth||clusterPhyName={}||msg=fail to get clusterHealthEnum",
+                    clusterPhyName);
+            return false;
+        }
 
         esClusterDTO.setId(clusterPhy.getId());
         esClusterDTO.setHealth(clusterHealthEnum.getCode());
