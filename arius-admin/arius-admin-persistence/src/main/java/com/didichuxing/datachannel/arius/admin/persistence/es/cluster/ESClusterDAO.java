@@ -408,13 +408,13 @@ public class ESClusterDAO extends BaseESDAO {
         return Optional.ofNullable(response).map(ESClusterNodesResponse::getNodes).orElse(null);
     }
 
-    public String getESVersionByCluster(String cluster, Integer tryTimes) {
+    public String getESVersionByCluster(String cluster, Integer tryTimes) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         String esVersion = null;
         if (Objects.isNull(client)) {
             LOGGER.error("class=ESClusterDAO||method=getESVersionByCluster||clusterName={}||errMsg=esClient is null",
                 cluster);
-            return null;
+            throw new NullESClientException(cluster);
         }
         DirectResponse directResponse = null;
         try {
@@ -426,7 +426,7 @@ public class ESClusterDAO extends BaseESDAO {
         } catch (Exception e) {
             LOGGER.warn("class=ESClusterDAO||method=getESVersionByCluster||cluster={}||mg=get es segments fail",
                 cluster, e);
-            return null;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         if (directResponse.getRestStatus() == RestStatus.OK
             && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
