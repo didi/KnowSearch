@@ -10,6 +10,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum.OWN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum.isTemplateAuthExitByCode;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateSettingEnum.INDEX_PRIORITY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateSettingEnum.INDEX_TRANSLOG_DURABILITY;
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl.NOT_CHECK;
 
 import com.alibaba.fastjson.JSON;
@@ -18,6 +20,7 @@ import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
@@ -58,10 +61,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.*;
 import com.didichuxing.datachannel.arius.admin.common.event.index.IndexDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateCreatePipelineEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -185,6 +185,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Autowired
     private TemplateLogicSettingsManager    templateLogicSettingsManager;
+
+    @Autowired
+    private BaseTemplateSrv                 baseTemplateSrv;
 
     public static final int                 MAX_PERCENT           = 10000;
     public static final int                 MIN_PERCENT           = -99;
@@ -1339,27 +1342,48 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             String key = entry.getKey();
             String value = param.getIncrementalSettings().get(key);
 
-            if(ESSettingConstant.INDEX_TRANSLOG_DURABILITY.equals(key)){
-                if(!(ESSettingConstant.ASYNC.equals(value) || ESSettingConstant.REQUEST.equals(value))) {
-                    return Result.buildParamIllegal("setting [index.translog.durability] must be 'request' or 'async'");
-                }
-            }else if (ESSettingConstant.INDEX_PRIORITY.equals(key)){
-                if(!StringUtils.isNumeric(value)){
-                    return Result.buildParamIllegal("setting [index.priority] must be numeric");
-                }
-                Integer priorityLevel = Integer.valueOf(value);
-                if(priorityLevel < 0){
-                    return Result.buildParamIllegal("setting [index.priority] must be >= 0");
-                }
-                if(!(ESSettingConstant.HIGH_PRIORITY.equals(priorityLevel) || ESSettingConstant.MIDDLE_PRIORITY
-                        .equals(priorityLevel) || ESSettingConstant.LOW_PRIORITY.equals(priorityLevel))){
-                    return Result.buildParamIllegal("setting [index.priority] must be 10,5,0");
-                }
-            }else {
+            if (TemplateSettingEnum.stream().noneMatch(settingEnum -> settingEnum.getSetting().equals(key))) {
                 return Result.buildParamIllegal("模版settings的key取值有误");
+            }
+
+            Result<Void> result;
+            switch (TemplateSettingEnum.getBySetting(key)){
+                case INDEX_PRIORITY:
+                    result = checkPriorityValid(value, INDEX_PRIORITY);
+                    break;
+                case INDEX_TRANSLOG_DURABILITY:
+                    result = checkTranslogValid(value, INDEX_TRANSLOG_DURABILITY);
+                    break;
+                default:
+                    result = Result.buildFail("模版settings的key取值有误");
+            }
+            if (result.failed()){
+                return Result.buildFrom(result);
             }
         }
 
+        return Result.buildSucc();
+    }
+
+    private Result<Void> checkPriorityValid(String value, TemplateSettingEnum templateSettingEnum) {
+        if (!StringUtils.isNumeric(value)){
+            return Result.buildParamIllegal("setting [index.priority] must be numeric");
+        }
+        Integer priorityLevel = Integer.valueOf(value);
+        if (priorityLevel < 0){
+            return Result.buildParamIllegal("setting [index.priority] must be >= 0");
+        }
+
+        if(templateSettingEnum.getValueList().stream().noneMatch(needValue -> needValue.equals(value))) {
+            return Result.buildParamIllegal("setting [index.priority] must be " + templateSettingEnum.getValues());
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> checkTranslogValid(String value, TemplateSettingEnum templateSettingEnum) {
+        if (templateSettingEnum.getValueList().stream().noneMatch(needValue -> needValue.equals(value))) {
+            return Result.buildParamIllegal("setting [index.translog.durability] must be " + templateSettingEnum.getValues());
+        }
         return Result.buildSucc();
     }
 
@@ -1377,22 +1401,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             String value = param.getIncrementalSettings().get(key);
 
             if(ESSettingConstant.INDEX_TRANSLOG_DURABILITY.equals(key)){
-                String srvCodeStr = indexTemplate.getOpenSrv();
-                List<String> srvCodeList = ListUtils.string2StrList(srvCodeStr);
                 String updateSrvCode = TemplateServiceEnum.TEMPLATE_TRANSLOG_ASYNC.getCode().toString();
                 if(ESSettingConstant.ASYNC.equals(value)){
-                    if (srvCodeList.isEmpty()) {
-                        indexTemplate.setOpenSrv(updateSrvCode);
-                    } else {
-                        if (!srvCodeList.contains(updateSrvCode)) {
-                            indexTemplate.setOpenSrv(srvCodeStr + "," + updateSrvCode);
-                        }
-                    }
+                    buildTemplateOpenSrv(indexTemplate, updateSrvCode, Boolean.TRUE);
                 }else {
-                    if (srvCodeList.contains(updateSrvCode)) {
-                        srvCodeList.remove(updateSrvCode);
-                        indexTemplate.setOpenSrv(ListUtils.strList2String(srvCodeList));
-                    }
+                    buildTemplateOpenSrv(indexTemplate, updateSrvCode, Boolean.FALSE);
                 }
             }else if (ESSettingConstant.INDEX_PRIORITY.equals(key)){
                 indexTemplate.setPriorityLevel(Integer.valueOf(value));
@@ -1405,6 +1418,21 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         return Result.buildSucc();
+    }
+
+    private void buildTemplateOpenSrv(IndexTemplate indexTemplate, String updateSrvCode, Boolean status) {
+        String srvCodeStr = indexTemplate.getOpenSrv();
+        List<String> srvCodeList = ListUtils.string2StrList(srvCodeStr);
+        if(Boolean.TRUE.equals(status)) {
+            if (srvCodeList.isEmpty()) {
+                indexTemplate.setOpenSrv(updateSrvCode);
+            }else if (!srvCodeList.contains(updateSrvCode)) {
+                indexTemplate.setOpenSrv(srvCodeStr + "," + updateSrvCode);
+            }
+        }else if (srvCodeList.contains(updateSrvCode)) {
+            srvCodeList.remove(updateSrvCode);
+            indexTemplate.setOpenSrv(ListUtils.strList2String(srvCodeList));
+        }
     }
 
     /**
