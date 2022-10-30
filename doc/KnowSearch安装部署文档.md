@@ -2,16 +2,16 @@
 
 + 本文以Centos7系统为例，系统基础配置要求：4核8G
 
-+ 按照本文可以快速部署一套单机模式的LogiEM环境
++ 按照本文可以快速部署一套单机模式的 KnowSearch 环境
 
-+ LogiEM同样支持分布式集群模式，如需部署高可用集群，请提前准备VIP环境
++ KnowSearch 同样支持分布式集群模式，如需部署高可用集群，请提前准备VIP环境
 
 + 在部署高可用集群时，请参考部署步骤中的提示，主要注意接入IP应为VIP
 
 
-# 一、LogiEM架构图
+# 一、KnowSearch架构图
 
- + LogiEM核心模块：arius-admin和arius-gateway以及前端应用
+ + KnowSearch 核心模块：arius-admin和arius-gateway以及前端应用
 
  + 基础依赖应用：Elasticsearch、Kibana、Mysql、Nginx、JDK
 
@@ -21,7 +21,7 @@
 
 ## 1. 部署流程
 
-基础依赖服务部署 ——>  LogiEM各个模块部署
+基础依赖服务部署 ——>  KnowSearch各个模块部署
 
 ## 2. 基础依赖服务部署
  ###如现有环境中已经有相关服务，可跳过对其的安装
@@ -153,8 +153,8 @@
 	cd /data/arius-kibana-release/
 	sh control.sh start
 	
-## 3、LogiEM服务部署
- ###以LogiEM 0.2.3版本为例，如需其他版本可自行打包，打包方法参加第三节 
+## 3、KnowSearch 服务部署
+ ###以KnowSearch 0.2.3版本为例，如需其他版本可自行打包，打包方法参加第三节 
  
  ###如需部署集群模式，在其他节点重复操作即可，但请先准备好所需VIP
  
@@ -251,7 +251,7 @@
 
  ###打开浏览器输入NginxIP地址测试，用户名密码（admin/admin）
  
-# 三、LogiEM其他版本打包
+# 三、KnowSearch其他版本打包
   
 ## [arius-admin模块打包](https://github.com/didi/LogiEM/tree/master/arius-admin)
  	
