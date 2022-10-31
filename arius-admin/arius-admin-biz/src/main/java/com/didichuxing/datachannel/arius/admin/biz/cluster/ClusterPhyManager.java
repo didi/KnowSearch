@@ -361,12 +361,10 @@ public interface ClusterPhyManager {
 
     /**
      * 批量更新物理集群的动态配置项
-     * @param clusterList  物理集群名称list
      * @param param        要更新的配置项
      * @param operator
      * @param projectId
      * @return
      */
-    Result<Boolean> batchUpdateClusterDynamicConfig(List<String> clusterList, ClusterSettingDTO param,
-                                                 String operator, Integer projectId) ;
+    Result<Boolean> batchUpdateClusterDynamicConfig(MultiClusterSettingDTO param, String operator, Integer projectId) throws ESOperateException;
 }
