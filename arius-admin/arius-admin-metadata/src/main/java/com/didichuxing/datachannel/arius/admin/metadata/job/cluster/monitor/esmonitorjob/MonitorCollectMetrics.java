@@ -157,8 +157,8 @@ public class MonitorCollectMetrics {
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.search.fetch_total")
                 .valueRoute("search.fetch_total").computeType(MINUS).build());
 
-        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.segments.request_cache.memory_size_in_bytes")
-                .valueRoute("segments.request_cache.memory_size_in_bytes").computeType(NONE).build());
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.request_cache.memory_size_in_bytes")
+                .valueRoute("request_cache.memory_size_in_bytes").computeType(NONE).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indexing.index_time_in_millis")
                 .valueRoute(INDEXING_INDEX_TIME_IN_MILLIS).computeType(MINUS).sendToN9e().build());
