@@ -10,6 +10,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum.OWN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum.isTemplateAuthExitByCode;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateSettingEnum.INDEX_PRIORITY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateSettingEnum.INDEX_TRANSLOG_DURABILITY;
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl.NOT_CHECK;
 
 import com.alibaba.fastjson.JSON;
@@ -18,6 +20,7 @@ import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
@@ -58,10 +61,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.*;
 import com.didichuxing.datachannel.arius.admin.common.event.index.IndexDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateCreatePipelineEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -1245,16 +1245,15 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     /**
      * 更新模版settings和非分区模版索引的settings(可以用来实现部分模版服务，如异步translog、恢复优先级)
-     * @param settings 模版增量settings
-     * @param templateIdList  模版id列表
+     * @param param 模版增量settings
      * @param operator
      * @param projectId
      * @return
      */
     @Override
-    public Result<Void> updateTemplateAndIndexSettings(TemplateIncrementalSettingsDTO settings, List<Integer> templateIdList, String operator, Integer projectId) throws AdminOperateException {
+    public Result<Void> updateTemplateAndIndexSettings(TemplateIncrementalSettingsDTO param, String operator, Integer projectId) throws AdminOperateException {
 
-        Result<Void> checkResult = checkParam(projectId, operator, settings);
+        Result<Void> checkResult = checkParam(projectId, operator, param);
         if(checkResult.failed()){
             return Result.buildFail(checkResult.getMessage());
         }
@@ -1264,12 +1263,12 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         StringBuilder updateFailTemplates = new StringBuilder();
         // 构造模版的增量settings
         Map<String, String> incrementalSettings = Maps.newHashMap();
-        incrementalSettings.put(settings.getKey(), settings.getValue());
+        incrementalSettings.putAll(param.getIncrementalSettings());
 
         // indicesIncrementalSettingList 存储需要更新settings的索引
         List<IndicesIncrementalSettingDTO> indicesIncrementalSettingList = Lists.newArrayList();
 
-        for (Integer logicId : templateIdList) {
+        for (Integer logicId : param.getTemplateIdList()) {
             // 增量方式修改每个模版的settings
             Result<Void> result = templateLogicSettingsManager.updateSettingsByMerge(logicId, incrementalSettings, operator, projectId);
             if(result.failed()){
@@ -1279,7 +1278,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                         logicId, "update settings failed");
             } else {
                 // 更新状态到DB中，以便page查询数据时获取到服务的状态：对于translog功能，更新srvCode字段；对于恢复优先级功能，要更新字段priority_level
-                Result<Void> updateDBResult = updateStatusToDB(logicId, settings);
+                Result<Void> updateDBResult = updateStatusToDB(logicId, param);
                 if(updateDBResult.failed()){
                     LOGGER.error("class=TemplateLogicManagerImpl||method=updateTemplateAndIndexSettings,templateId={}, errMsg={}",
                             logicId, "update db failed");
@@ -1300,8 +1299,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                     IndicesIncrementalSettingDTO indicesIncrementalSettingDTO = new IndicesIncrementalSettingDTO();
                     indicesIncrementalSettingDTO.setCluster(physicalMaster.getCluster());
                     indicesIncrementalSettingDTO.setIndex(catIndexResult.getIndex());
-                    indicesIncrementalSettingDTO.setKey(settings.getKey());
-                    indicesIncrementalSettingDTO.setValue(settings.getValue());
+                    indicesIncrementalSettingDTO.setIncrementalSettings(param.getIncrementalSettings());
 
                     indicesIncrementalSettingList.add(indicesIncrementalSettingDTO);
                 }
@@ -1325,7 +1323,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     /**************************************** private method ***************************************************/
 
-    private Result<Void> checkParam(Integer projectId, String operator, TemplateIncrementalSettingsDTO settings){
+    private Result<Void> checkParam(Integer projectId, String operator, TemplateIncrementalSettingsDTO param){
         final Result<Void> projectCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (projectCheck.failed()) {
             return Result.buildFail(projectCheck.getMessage());
@@ -1333,27 +1331,56 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (AriusObjUtils.isNull(operator)) {
             return Result.buildParamIllegal("操作人为空");
         }
-
-        if(ESSettingConstant.INDEX_TRANSLOG_DURABILITY.equals(settings.getKey())){
-            if(!(ESSettingConstant.ASYNC.equals(settings.getValue()) || ESSettingConstant.REQUEST.equals(settings.getValue()))) {
-                return Result.buildParamIllegal("setting [index.translog.durability] must be 'request' or 'async'");
-            }
-        }else if (ESSettingConstant.INDEX_PRIORITY.equals(settings.getKey())){
-            if(!StringUtils.isNumeric(settings.getValue())){
-                return Result.buildParamIllegal("setting [index.priority] must be numeric");
-            }
-            Integer priorityLevel = Integer.valueOf(settings.getValue());
-            if(priorityLevel < 0){
-                return Result.buildParamIllegal("setting [index.priority] must be >= 0");
-            }
-            if(!(ESSettingConstant.HIGH_PRIORITY.equals(priorityLevel) || ESSettingConstant.MIDDLE_PRIORITY
-                    .equals(priorityLevel) || ESSettingConstant.LOW_PRIORITY.equals(priorityLevel))){
-                return Result.buildParamIllegal("setting [index.priority] must be 10,5,0");
-            }
-        }else {
-            return Result.buildParamIllegal("模版settings的key取值有误");
+        if(param.getIncrementalSettings() == null || param.getIncrementalSettings().isEmpty()){
+            return Result.buildParamIllegal("参数为空");
         }
 
+        for(Map.Entry<String, String> entry : param.getIncrementalSettings().entrySet()){
+            String key = entry.getKey();
+            String value = param.getIncrementalSettings().get(key);
+
+            if (TemplateSettingEnum.stream().noneMatch(settingEnum -> settingEnum.getSetting().equals(key))) {
+                return Result.buildParamIllegal("模版settings的key取值有误");
+            }
+
+            Result<Void> result;
+            switch (TemplateSettingEnum.getBySetting(key)){
+                case INDEX_PRIORITY:
+                    result = checkPriorityValid(value, INDEX_PRIORITY);
+                    break;
+                case INDEX_TRANSLOG_DURABILITY:
+                    result = checkTranslogValid(value, INDEX_TRANSLOG_DURABILITY);
+                    break;
+                default:
+                    result = Result.buildFail("模版settings的key取值有误");
+            }
+            if (result.failed()){
+                return Result.buildFrom(result);
+            }
+        }
+
+        return Result.buildSucc();
+    }
+
+    private Result<Void> checkPriorityValid(String value, TemplateSettingEnum templateSettingEnum) {
+        if (!StringUtils.isNumeric(value)){
+            return Result.buildParamIllegal("setting [index.priority] must be numeric");
+        }
+        Integer priorityLevel = Integer.valueOf(value);
+        if (priorityLevel < 0){
+            return Result.buildParamIllegal("setting [index.priority] must be >= 0");
+        }
+
+        if(templateSettingEnum.getValueList().stream().noneMatch(needValue -> needValue.equals(value))) {
+            return Result.buildParamIllegal("setting [index.priority] must be " + templateSettingEnum.getValues());
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> checkTranslogValid(String value, TemplateSettingEnum templateSettingEnum) {
+        if (templateSettingEnum.getValueList().stream().noneMatch(needValue -> needValue.equals(value))) {
+            return Result.buildParamIllegal("setting [index.translog.durability] must be " + templateSettingEnum.getValues());
+        }
         return Result.buildSucc();
     }
 
@@ -1361,38 +1388,48 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      * 更新状态到数据库中
      * 对于异步translog功能，更新srvCode字段；对于恢复优先级功能，要更新字段priority_level
      * @param logicId
-     * @param settings
+     * @param param
      * @return
      */
-    private Result<Void> updateStatusToDB(Integer logicId, TemplateIncrementalSettingsDTO settings){
+    private Result<Void> updateStatusToDB(Integer logicId, TemplateIncrementalSettingsDTO param){
         IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(logicId);
-        if(ESSettingConstant.INDEX_TRANSLOG_DURABILITY.equals(settings.getKey())){
-            String srvCodeStr = indexTemplate.getOpenSrv();
-            List<String> srvCodeList = ListUtils.string2StrList(srvCodeStr);
-            String updateSrvCode = TemplateServiceEnum.TEMPLATE_TRANSLOG_ASYNC.getCode().toString();
-            if(ESSettingConstant.ASYNC.equals(settings.getValue())){
-                if (srvCodeList.isEmpty()) {
-                    indexTemplate.setOpenSrv(updateSrvCode);
-                } else {
-                    if (!srvCodeList.contains(updateSrvCode)) {
-                        indexTemplate.setOpenSrv(srvCodeStr + "," + updateSrvCode);
-                    }
+        for (Map.Entry<String, String> entry : param.getIncrementalSettings().entrySet()) {
+            String key = entry.getKey();
+            String value = param.getIncrementalSettings().get(key);
+
+            if(ESSettingConstant.INDEX_TRANSLOG_DURABILITY.equals(key)){
+                String updateSrvCode = TemplateServiceEnum.TEMPLATE_TRANSLOG_ASYNC.getCode().toString();
+                if(ESSettingConstant.ASYNC.equals(value)){
+                    buildTemplateOpenSrv(indexTemplate, updateSrvCode, Boolean.TRUE);
+                }else {
+                    buildTemplateOpenSrv(indexTemplate, updateSrvCode, Boolean.FALSE);
                 }
-            }else {
-                if (srvCodeList.contains(updateSrvCode)) {
-                    srvCodeList.remove(updateSrvCode);
-                    indexTemplate.setOpenSrv(ListUtils.strList2String(srvCodeList));
-                }
+            }else if (ESSettingConstant.INDEX_PRIORITY.equals(key)){
+                indexTemplate.setPriorityLevel(Integer.valueOf(value));
             }
-        }else if (ESSettingConstant.INDEX_PRIORITY.equals(settings.getKey())){
-            indexTemplate.setPriorityLevel(Integer.valueOf(settings.getValue()));
         }
         IndexTemplatePO indexTemplatePO = ConvertUtil.obj2Obj(indexTemplate, IndexTemplatePO.class);
         boolean update = indexTemplateService.update(indexTemplatePO);
         if(!update){
             return Result.buildFail(logicId + "模版更新db失败");
         }
+
         return Result.buildSucc();
+    }
+
+    private void buildTemplateOpenSrv(IndexTemplate indexTemplate, String updateSrvCode, Boolean status) {
+        String srvCodeStr = indexTemplate.getOpenSrv();
+        List<String> srvCodeList = ListUtils.string2StrList(srvCodeStr);
+        if(Boolean.TRUE.equals(status)) {
+            if (srvCodeList.isEmpty()) {
+                indexTemplate.setOpenSrv(updateSrvCode);
+            }else if (!srvCodeList.contains(updateSrvCode)) {
+                indexTemplate.setOpenSrv(srvCodeStr + "," + updateSrvCode);
+            }
+        }else if (srvCodeList.contains(updateSrvCode)) {
+            srvCodeList.remove(updateSrvCode);
+            indexTemplate.setOpenSrv(ListUtils.strList2String(srvCodeList));
+        }
     }
 
     /**

@@ -257,11 +257,10 @@ public interface TemplateLogicManager {
 
     /**
      * 更新模版settings和非分区模版索引的settings(可以用来实现部分模版服务，如异步translog、恢复优先级)
-     * @param  settingsDTO 模版增量settings
-     * @param templateIdList  模版id列表
+     * @param param 模版增量settings
      * @param operator
      * @param projectId
      * @return
      */
-    Result<Void> updateTemplateAndIndexSettings(TemplateIncrementalSettingsDTO settingsDTO, List<Integer> templateIdList, String operator, Integer projectId) throws AdminOperateException;
+    Result<Void> updateTemplateAndIndexSettings(TemplateIncrementalSettingsDTO param, String operator, Integer projectId) throws AdminOperateException;
 }
