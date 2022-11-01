@@ -156,19 +156,19 @@ public interface ESClusterService {
     /**
      * 获取全量集群节点Setting配置; key ——> 节点uuid ,value ——> ClusterNodeInfo
      */
-    Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster);
+    Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster) throws ESOperateException;
 
     /**
      * 获取部分集群节点Setting配置; key ——> 节点uuid ,value ——> ClusterNodeSettings
      */
-    Map<String, ClusterNodeSettings> syncGetPartOfSettingsByCluster(String cluster);
+    Map<String, ClusterNodeSettings> syncGetPartOfSettingsByCluster(String cluster) throws ESOperateException;
 
     /**
      * 获取运行集群的es版本号
      * @param cluster 物理集群名称
      * @return 物理集群es版本号
      */
-    String synGetESVersionByCluster(String cluster);
+    String synGetESVersionByCluster(String cluster) throws ESOperateException;
 
     /**
      * 检测是否为同一个集群

@@ -469,6 +469,10 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             return Result.buildFail(String.format("物理集群[%s]不存在", param.getPhyClusterName()));
         }
 
+        if(operationEnum.equals(OperationEnum.DELETE)){
+            return Result.buildSucc();
+        }
+
         // 检查划分方式是否合法
         Result<Void> ret = divideTypeCheck(param);
         if(ret.failed()){

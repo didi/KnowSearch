@@ -173,14 +173,16 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
     public boolean collectClusterNodeSettings(String cluster) throws AdminTaskException {
         // get node information from ES engine
         List<ESClusterRoleHostPO> nodesFromEs = null;
+
         try {
             nodesFromEs = getClusterHostFromEsAndCreateRoleClusterIfNotExist(cluster);
         } catch (ESOperateException e) {
-            LOGGER.error(
-                    "class=RoleClusterHostServiceImpl||method=collectClusterNodeSettings||clusterPhyName={}||errMag=fail to getClusterHostFromEsAndCreateRoleClusterIfNotExist",
+            LOGGER.warn(
+                    "class=RoleClusterHostServiceImpl||method=collectClusterNodeSettings||clusterPhyName={}||errMag=fail to get cluster host",
                     cluster);
             return false;
         }
+
         if (CollectionUtils.isEmpty(nodesFromEs)) {
             clusterRoleHostDAO.offlineByCluster(cluster);
             LOGGER.warn(
@@ -570,7 +572,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         return nodePOList;
     }
 
-    private Map<String, String> buildESClusterNodeMachineSpecMap(String cluster) throws ESOperateException {
+    private Map<String, String> buildESClusterNodeMachineSpecMap(String cluster) {
         Map<String, String> node2machineSpecMap = Maps.newHashMap();
         Map<String, Integer> node2CpuNum = esClusterNodeService.syncGetNodesCpuNum(cluster);
         Map<String, Tuple<Long, Long>> node2MemAndDisk = esClusterNodeService.syncGetNodesMemoryAndDisk(cluster);
@@ -595,7 +597,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
      * @param cluster 集群名称
      * @return
      */
-    private List<ClusterNodeInfo> buildAllClusterNodeInfoFromES(String cluster) {
+    private List<ClusterNodeInfo> buildAllClusterNodeInfoFromES(String cluster) throws ESOperateException {
         List<ClusterNodeInfo> clusterNodeInfoListFromES = Lists.newArrayList();
 
         // 从ES集群获取节点全量的信息

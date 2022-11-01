@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @Authoer: zyl
  * @Date: 2022/10/13
@@ -17,12 +20,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @ApiModel(description = "模版增量settings实体")
 public class TemplateIncrementalSettingsDTO {
-    // "index.translog.durability" : "async" ? "request"
-    // "index.priority" : "10"、"5"、"0"
 
-    @ApiModelProperty("要修改的settings的key")
-    private String key;
+    @ApiModelProperty("要修改的settings的模版id列表")
+    private List<Integer> templateIdList;
 
-    @ApiModelProperty("要修改的settings的value")
-    private String value;
+    /**
+     * "index.translog.durability" : "async" ? "request"
+     * "index.priority" : "10"、"5"、"0"
+     */
+    @ApiModelProperty("要修改的settings")
+    Map<String, String> incrementalSettings;
 }

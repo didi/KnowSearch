@@ -292,17 +292,17 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public String synGetESVersionByCluster(String cluster) {
+    public String synGetESVersionByCluster(String cluster) throws ESOperateException {
         return esClusterDAO.getESVersionByCluster(cluster, 3);
     }
 
     @Override
-    public Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster) {
+    public Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster) throws ESOperateException {
         return esClusterDAO.getAllSettingsByCluster(cluster, 3);
     }
 
     @Override
-    public Map<String, ClusterNodeSettings> syncGetPartOfSettingsByCluster(String cluster) {
+    public Map<String, ClusterNodeSettings> syncGetPartOfSettingsByCluster(String cluster) throws ESOperateException {
         return esClusterDAO.getPartOfSettingsByCluster(cluster, 3);
     }
 

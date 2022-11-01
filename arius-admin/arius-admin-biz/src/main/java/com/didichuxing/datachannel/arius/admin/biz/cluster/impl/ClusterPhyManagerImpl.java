@@ -144,10 +144,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      */
     private static final Map<String, Triple<Long, Long, Double>> CLUSTER_NAME_TO_ES_CLUSTER_STATS_TRIPLE_MAP = Maps
         .newConcurrentMap();
-
     public static final String                                   SEPARATOR_CHARS                             = ",";
     private static final String COLD             = "cold";
     public static final  String ZEUS_AGENTS_LIST = "zeus_agents_list";
+
+    
 
     @Autowired
     private ESGatewayClient                                      esGatewayClient;
@@ -185,6 +186,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Autowired
     private ClusterRegionService                                 clusterRegionService;
 
+    
+
     @Autowired
     private ProjectService                                       projectService;
 
@@ -207,30 +210,39 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private ESOpClient                                           esOpClient;
     
     @Autowired
-    private RoleTool                                             roleTool;
-
+    private RoleTool                 roleTool;
     @Autowired
-    private ZeusClusterRemoteService                             zeusClusterRemoteService;
+    private ZeusClusterRemoteService zeusClusterRemoteService;
     
-    private static final FutureUtil<Void>                        FUTURE_UTIL = FutureUtil.init(
-                                                                "ClusterPhyManagerImpl", 20, 40, 100);
-
+    private static final FutureUtil<Void>         FUTURE_UTIL               = FutureUtil.init(
+            "ClusterPhyManagerImpl", 20, 40, 100);
     private static final Cache</*clusterPhy*/String, TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean>> CLUSTER_PHY_DCDR_PIPELINE   = CacheBuilder.newBuilder()
             .expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
-
     private static final Cache</*clusterPhy*/String, ClusterConnectionStatusWithTemplateEnum> CLUSTER_PHY_CONNECTION_ENUM = CacheBuilder.newBuilder()
             .expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
-
     public static final Cache</*zeus_agents_list*/String, /*agents_list*/ List<String>> ZEUS_AGENTS_LIST_CACHE = CacheBuilder.newBuilder()
             .expireAfterWrite(45, TimeUnit.MINUTES).build();
-
     @PostConstruct
     private void init() {
         ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshClusterDistInfo, 60, 180);
         ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshClusterPhyInfoWithCache, 60, 10 * 60L);
         ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshWhitIpList, 60, 45 * 60L);
+    
+    }
+    
+    /**
+     * 每45分钟全量更新一遍集群
+     */
+    private synchronized void refreshClusterPhyInfoWithCache() {
+    
+        for (String clusterName : clusterPhyService.listClusterNames()) {
+            CLUSTER_PHY_DCDR_PIPELINE.put(clusterName, getDCDRAndPipelineTupleByClusterPhy(clusterName));
+            CLUSTER_PHY_CONNECTION_ENUM.put(clusterName, getClusterConnectionStatus(clusterName));
+        }
     }
 
+  
+    
     /**
      * @param clusterPhy
      */
@@ -253,7 +265,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return ClusterConnectionStatusWithTemplateEnum.DISCONNECTED;
         }
     }
-
+    
+   
+    
     @Override
     public boolean copyMapping(String cluster, int retryCount) {
         // 获取物理集群下的所有物理模板
@@ -366,6 +380,68 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return clusterPhyVOList;
     }
 
+    private long buildClusterPhyWithLogicAndRegion(List<ClusterPhyVO> clusterPhyVOList) {
+        List<ClusterRegion> regions = clusterRegionService.listRegionByPhyClusterNames(
+            clusterPhyVOList.stream().map(ClusterPhyVO::getCluster).distinct().collect(Collectors.toList()));
+        Map<String, Set<Long>> phyCluster2logicClusterIds = Maps.newHashMap();
+        final List<ProjectBriefVO> projectBriefList = projectService.getProjectBriefList();
+        final Map<Integer, String> projectId2ProjectNameMap = ConvertUtil.list2Map(projectBriefList, ProjectBriefVO::getId,
+                ProjectBriefVO::getProjectName);
+        Map<Long,  List<ClusterLogicVO>> logicClusterId2LogicClusterList = Maps.newHashMap();
+        Map<Long, ClusterRegionVO> logicClusterId2Region = Maps.newHashMap();
+        List<Long> logicIds = Lists.newArrayList();
+        regions.stream()
+            .filter(region -> StringUtils.isNotBlank(region.getPhyClusterName())
+                              && StringUtils.isNotBlank(region.getLogicClusterIds())
+                              && !AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID.equals(region.getLogicClusterIds()))
+            .forEach(region -> {
+                String idStr = region.getLogicClusterIds();
+                List<Long> list = Lists.newArrayList();
+                for (String id : StringUtils.split(idStr, SEPARATOR_CHARS)) {
+                    if (StringUtils.isNumeric(id)) {
+                        list.add(Long.valueOf(id));
+                    }
+                }
+                Set<Long> ids = phyCluster2logicClusterIds.getOrDefault(region.getPhyClusterName(), Sets.newHashSet());
+                ids.addAll(list);
+                phyCluster2logicClusterIds.put(region.getPhyClusterName(), ids);
+                list.forEach(id -> logicClusterId2Region.put(id, ConvertUtil.obj2Obj(region, ClusterRegionVO.class, regionVO -> regionVO.setClusterName(region.getPhyClusterName()))));
+                logicIds.addAll(list);
+            });
+        if (CollectionUtils.isNotEmpty(logicIds)) {
+            List<ClusterLogic> clusterLogicList = clusterLogicService.getClusterLogicListByIds(logicIds);
+    
+            logicClusterId2LogicClusterList = ConvertUtil.list2MapOfList(clusterLogicList, ClusterLogic::getId,
+                    clusterLogic -> ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class,
+                            clusterLogicVO -> clusterLogicVO.setProjectName(
+                                    projectId2ProjectNameMap.get(clusterLogicVO.getProjectId()))));
+        }
+        
+        //3. 设置集群基本统计信息：磁盘使用信息
+        long timeForBuildClusterDiskInfo = System.currentTimeMillis();
+        for (ClusterPhyVO clusterPhyVO : clusterPhyVOList) {
+            Set<Long> set = phyCluster2logicClusterIds.getOrDefault(clusterPhyVO.getCluster(), Sets.newHashSet());
+            Map<Long, List<ClusterLogicVO>> finalLogicClusterId2Vo = logicClusterId2LogicClusterList;
+            FUTURE_UTIL.runnableTask(()-> {
+                set.forEach(id -> {
+                    List<ClusterLogicVO> clusterLogicVOList = finalLogicClusterId2Vo.get(id);
+                    if (CollectionUtils.isNotEmpty(clusterLogicVOList)) {
+                        List<String> projectNames = clusterLogicVOList.stream().map(ClusterLogicVO::getProjectName).collect(Collectors.toList());
+                        ClusterLogicVOWithProjects clusterLogicVOWithProjects = ConvertUtil.obj2Obj(clusterLogicVOList.get(0),
+                                ClusterLogicVOWithProjects.class, cp -> cp.setProjectNameList(projectNames));
+                        clusterPhyVO.addLogicCluster(clusterLogicVOWithProjects, logicClusterId2Region.get(id));
+                    }
+        
+                });
+                Optional.ofNullable(clusterPhyVO.getLogicClusterAndRegionList())
+                        .map(logicClusterAndRegionList -> logicClusterAndRegionList.stream().map(Tuple::getV1).map(ClusterLogicVOWithProjects::getName).distinct().collect(Collectors.toList()))
+                        .ifPresent(clusterPhyVO::setBindLogicCluster);
+            });
+        }
+        FUTURE_UTIL.waitExecute();
+        return timeForBuildClusterDiskInfo;
+    }
+
     @Override
     public ClusterPhyVO getClusterPhyOverview(Integer clusterId, Integer currentProjectId) {
         // 获取基本信息
@@ -435,20 +511,26 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return Result.buildSucc(clusters);
     }
 
+    private final Consumer<ESClusterRoleHostDTO> roleClusterHostsTrimHostnameAndPort = esClusterRoleHostDTO -> {
+        esClusterRoleHostDTO.setCluster(StringUtils.trim(esClusterRoleHostDTO.getCluster()));
+        esClusterRoleHostDTO.setHostname(StringUtils.trim(esClusterRoleHostDTO.getHostname()));
+        esClusterRoleHostDTO.setIp(StringUtils.trim(esClusterRoleHostDTO.getIp()));
+        esClusterRoleHostDTO.setPort(StringUtils.trim(esClusterRoleHostDTO.getPort()));
+
+    };
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator, Integer projectId) {
         if (param.getProjectId() == null) {
             param.setProjectId(projectId);
         }
-
         //这里其实是需要一个内置trim 用来保证传输进行的roleClusterHosts是正确的
         param.getRoleClusterHosts().forEach(roleClusterHostsTrimHostnameAndPort);
         Result<Void> checkResult = checkClusterJoin(param, operator);
         if (checkResult.failed()) {
             return Result.buildFail(checkResult.getMessage());
         }
-
         String esClientHttpAddressesStr = clusterRoleHostService
             .buildESClientHttpAddressesStr(param.getRoleClusterHosts());
         for (ESClusterRoleHostDTO roleClusterHost : param.getRoleClusterHosts()) {
@@ -462,6 +544,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         try {
+
             // 1.保存物理集群信息(集群、角色、节点)
             Result<ClusterPhyVO> saveClusterResult = saveClusterPhy(param, operator);
 
@@ -475,6 +558,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                         AuthConstant.SUPER_PROJECT_ID, saveClusterResult.getData().getId(),
                         OperateTypeEnum.PHYSICAL_CLUSTER_JOIN);
             }
+
             return saveClusterResult;
         } catch (AdminOperateException | ElasticsearchTimeoutException e) {
             LOGGER.error("class=ClusterPhyManagerImpl||method=clusterJoin||clusterPhy={}||es operation errMsg={}",
@@ -496,6 +580,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Result.buildFail("操作失败,请联系管理员");
         }
+
     }
 
     @Override
@@ -634,6 +719,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     
     @Override
     public Result<List<String>> listClusterPhyNameByResourceType(Integer clusterResourceType, Integer projectId) {
+
         if (null != clusterResourceType && !ClusterResourceTypeEnum.isExist(clusterResourceType)) {
             return Result.buildParamIllegal("集群资源类型非法");
         }
@@ -647,7 +733,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         } else {
             clusterPhyList = clusterPhyService.listAllClusters();
         }
-
         Set<String> clusterNameSet = ConvertUtil.list2Set(clusterPhyList, ClusterPhy::getCluster);
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             clusters = clusterPhyList.stream().map(ClusterPhy::getCluster).distinct().sorted(Comparator.naturalOrder())
@@ -905,8 +990,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         try {
             clusterHealthEnum = esClusterService.syncGetClusterHealthEnum(clusterPhyName);
         } catch (ESOperateException e) {
-            LOGGER.error("class=ClusterPhyManagerImpl||method=updateClusterHealth||clusterPhyName={}||errMsg={}",
-                    clusterPhyName,e.getMessage());
+            LOGGER.error(
+                    "class=ClusterPhyManagerImpl||method=updateClusterHealth||clusterPhyName={}||msg=fail to get clusterHealthEnum",
+                    clusterPhyName);
             return false;
         }
 
@@ -1038,19 +1124,20 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         ClusterPhyDTO clusterPhyDTO = new ClusterPhyDTO();
         clusterPhyDTO.setId(param.getId());
         clusterPhyDTO.setGatewayUrl(param.getGatewayUrl());
+        ClusterPhy oldCluster = clusterPhyService.getClusterById(param.getId());
         Result<Boolean> result = clusterPhyService.editCluster(clusterPhyDTO, operator);
         if (result.failed()) {
             return Result.buildFail("编辑gateway失败！");
         }
-
         ClusterPhy clusterPhy = clusterPhyService.getClusterById(param.getId());
-        operateRecordService.saveOperateRecordWithManualTrigger(String.format("%s, 绑定 gateway 集群 gateway_cluster:%s", clusterPhy.getCluster(),
+         operateRecordService.saveOperateRecordWithManualTrigger(String.format("%s, 绑定 gateway 集群 gateway_cluster:%s", oldCluster.getCluster(),
                         param.getGatewayUrl()), operator, AuthConstant.SUPER_PROJECT_ID, param.getId(),
                 OperateTypeEnum.PHYSICAL_CLUSTER_GATEWAY_CHANGE);
-
         return Result.buildSucc(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyVO.class));
     }
-
+    
+   
+    
     @Override
     public List<ClusterRoleInfo> listClusterRolesByClusterId(Integer clusterId) {
         return clusterRoleService.getAllRoleClusterByClusterId(clusterId);
@@ -1085,63 +1172,56 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     /**
      * 批量更新物理集群的动态配置项
-     * @param clusterList  物理集群名称list
      * @param param        要更新的配置项
      * @param operator
      * @param projectId
      * @return
      */
     @Override
-    public Result<Boolean> batchUpdateClusterDynamicConfig(List<String> clusterList, ClusterSettingDTO param,
-                                                        String operator, Integer projectId) {
-        Result<Void> projectCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+    public Result<Boolean> batchUpdateClusterDynamicConfig(MultiClusterSettingDTO param, String operator,
+                                                           Integer projectId) throws ESOperateException {
+        final Result<Void> projectCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (projectCheck.failed()) {
             return Result.buildFail(projectCheck.getMessage());
         }
-
-        Result<Boolean> result = checkClusterExistAndConfigType(clusterList, param);
+        Result<Boolean> result = checkClusterExistAndConfigType(param);
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
 
         boolean updateFail = false;
         StringBuilder updateFailClusters = new StringBuilder();
-
         // 对每个集群进行更新配置操作
-        for (String cluster : clusterList) {
+        for (String cluster : param.getClusterNameList()) {
             Map<String, Object> persistentConfig = Maps.newHashMap();
-            String changeKey   = param.getKey();
+            String changeKey = param.getKey();
             Object changeValue = param.getValue();
             persistentConfig.put(changeKey, changeValue);
-
             boolean succ = esClusterService.syncPutPersistentConfig(cluster, persistentConfig);
             if(!succ){
                 updateFail = true;
                 updateFailClusters.append(cluster).append(",");
             }else {
                 // 记录操作
-                Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs
-                        = getPhyClusterDynamicConfigs(cluster);
-
-                if (beforeChangeConfigs.failed()
-                        || null == beforeChangeConfigs.getData()
-                        || null == beforeChangeConfigs.getData().values()){
+                final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs = getPhyClusterDynamicConfigs(cluster);
+                if (beforeChangeConfigs.failed() || beforeChangeConfigs.getData().values() == null){
                     updateFail = true;
                     updateFailClusters.append(cluster).append(",");
                 } else {
+
                     Object beforeValue = beforeChangeConfigs.getData().values().stream()
-                            .filter(m -> m.containsKey(changeKey))
-                            .map(m -> m.get(changeKey))
+                            .filter(
+                                    clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.containsKey(changeKey))
+                            .map(clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.get(changeKey))
                             .findFirst().orElse("");
 
-                    final ClusterPhy clusterPhy = clusterPhyService.getClusterByName(cluster);
+                    final ClusterPhy clusterByName = clusterPhyService.getClusterByName(cluster);
                     operateRecordService.saveOperateRecordWithManualTrigger(String.format("%s:%s->%s", changeKey, beforeValue, changeValue),
-                            operator, AuthConstant.SUPER_PROJECT_ID, null == clusterPhy ? -1 : clusterPhy.getId(),
+                            operator, AuthConstant.SUPER_PROJECT_ID, clusterByName.getId(),
                             OperateTypeEnum.PHYSICAL_CLUSTER_DYNAMIC_CONF_CHANGE);
                 }
             }
         }
-
         if(updateFail){
             return Result.buildFail(updateFailClusters.deleteCharAt(updateFailClusters.length()-1) + " 集群更新动态配置失败");
         }
@@ -1151,9 +1231,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     
     /**************************************** private method ***************************************************/
 
-    private Result<Boolean> checkClusterExistAndConfigType(List<String> clusterList, ClusterSettingDTO param) {
+    private Result<Boolean> checkClusterExistAndConfigType(MultiClusterSettingDTO param) {
         // check集群是否都存在
-        for (String cluster : clusterList) {
+        for (String cluster : param.getClusterNameList()) {
             boolean clusterExist = clusterPhyService.isClusterExists(cluster);
             if(!clusterExist) {
                 return Result.buildFail(cluster + "集群不存在");
@@ -1211,7 +1291,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         } catch (AdminOperateException e) {
             LOGGER.error("class=ClusterPhyManagerImpl||method=deleteClusterInfo||clusterName={}||errMsg={}||e={}",
                 clusterPhy.getCluster(), e.getMessage(), e);
-
             // 这里显示回滚处理特殊异常场景
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Result.buildFail("删除物理集群失败");
@@ -1244,11 +1323,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      * @param clusterLogicType 逻辑集群类型
      * @return 可以绑定的物理集群民称列表
      */
-    private Result<List<String>> validLogicAndReturnPhyNamesWhenBindPhy(Long clusterLogicId, Integer clusterLogicType) {
+    Result<List<String>> validLogicAndReturnPhyNamesWhenBindPhy(Long clusterLogicId, Integer clusterLogicType) {
         if (clusterLogicId == null && clusterLogicType == null) {
             return Result.buildFail("传入的参数错误");
         }
-
         Result<List<String>> canBeAssociatedClustersPhyNames = Result.buildSucc(Lists.newArrayList());
         if (clusterLogicId != null) {
             ClusterLogic clusterLogicById =
@@ -1256,7 +1334,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             if (clusterLogicById == null) {
                 return Result.buildFail("选定的逻辑集群不存在");
             }
-
             clusterLogicType = clusterLogicById.getType();
             canBeAssociatedClustersPhyNames = listCanBeAssociatedRegionOfClustersPhys(clusterLogicType, clusterLogicId);
         } else {
@@ -1269,7 +1346,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         if (canBeAssociatedClustersPhyNames.failed()) {
             LOGGER.warn(
-                "class=ClusterPhyManagerImpl||method=validLogicAndReturnPhyNamesWhenBindPhy||errMsg={}",
+                "class=ClusterPhyManagerImpl||method=getPhyClusterNameWithSameEsVersionAfterBuildLogic||errMsg={}",
                 canBeAssociatedClustersPhyNames.getMessage());
             Result.buildFail("无法获取对应的物理集群名称列表");
         }
@@ -1310,6 +1387,19 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     /**
      * 构建物理集群详情
+     * @param phyClusters 物理集群元数据信息
+     */
+    private List<ClusterPhyVO> buildPhyClusters(List<ClusterPhyVO> phyClusters) {
+
+        phyClusters.parallelStream().forEach(this::buildPhyCluster);
+
+        Collections.sort(phyClusters);
+
+        return phyClusters;
+    }
+
+    /**
+     * 构建物理集群详情
      * @param clusterPhyVO 物理集群元数据信息
      * @return
      */
@@ -1329,7 +1419,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         if (addClusterRet.failed()) {
             return Result.buildFrom(addClusterRet);
         }
-
         return Result.buildSucc(ConvertUtil.obj2Obj(clusterDTO, ClusterPhyVO.class));
     }
 
@@ -1568,7 +1657,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     private void doDeleteClusterJoin(ClusterPhy clusterPhy, String operator,
                                      Integer projectId) throws AdminOperateException {
-        // 1. set region
+        
+           // 1. set region
         List<ClusterRegion> regions = clusterRegionService.listPhyClusterRegions(clusterPhy.getCluster());
         if (CollectionUtils.isEmpty(regions)) {
             return;
@@ -1577,21 +1667,21 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         List<Long> associatedRegionIds = regions.stream().map(ClusterRegion::getId).collect(Collectors.toList());
         for (Long associatedRegionId : associatedRegionIds) {
             final ClusterRegion region = clusterRegionService.getRegionById(associatedRegionId);
-
             Result<Void> unbindRegionResult = clusterRegionService.unbindRegion(associatedRegionId, null, operator);
             if (unbindRegionResult.failed()) {
                 throw new AdminOperateException(String.format("解绑region(%s)失败", associatedRegionId));
             } else {
+                
                 //解绑region
                  operateRecordService.saveOperateRecordWithManualTrigger(String.format("解绑 region：%s", region.getName()), operator, projectId,
                         clusterPhy.getId(), OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE);
             }
-
             Result<Void> deletePhyClusterRegionResult = clusterRegionService.deletePhyClusterRegion(associatedRegionId,
                 operator);
             if (deletePhyClusterRegionResult.failed()) {
                 throw new AdminOperateException(String.format("删除region(%s)失败", associatedRegionId));
             } else {
+                
                 //删除region
                  operateRecordService.saveOperateRecordWithManualTrigger(String.format("删除 region：%s", region.getName()), operator, projectId,
                         clusterPhy.getId(), OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE);
@@ -1602,15 +1692,14 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 .filter(clusterRegion -> Objects.nonNull(clusterRegion.getLogicClusterIds()))
                 .map(clusterRegion -> ListUtils.string2LongList(clusterRegion.getLogicClusterIds()))
                 .filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream)
-                .filter(logicId -> Objects.equals(logicId, Long.parseLong(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID))).distinct()
+                .filter(logicId -> Objects.equals(logicId,
+                        Long.parseLong(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID))).distinct()
                 .collect(Collectors.toList());
-
         for (Long clusterLogicId : clusterLogicIds) {
             final ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(clusterLogicId);
             if (Objects.isNull(clusterLogic)){
                 continue;
             }
-
             Result<Void> deleteLogicClusterResult = clusterLogicService.deleteClusterLogicById(clusterLogicId, operator,
                 projectId);
             if (deleteLogicClusterResult.failed()) {
@@ -1761,7 +1850,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 : ClusterConnectionStatusWithTemplateEnum.DISCONNECTED;
     }
     
-    public List<ClusterRegion> getColdRegionByPhyCluster(String phyCluster) {
+   
+    
+     public List<ClusterRegion> getColdRegionByPhyCluster(String phyCluster) {
         List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster);
         //冷region是不会保存在逻辑集群侧的，所以这里关联的region肯定是大于1的，如果是小于1，那么是一定不会具备的
         if (clusterRegions.size()<=1){
@@ -1769,21 +1860,21 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
           return clusterRegions.stream().filter(coldTruePreByClusterRegion).collect(Collectors.toList());
     }
-
-    private final static Predicate<ClusterRegion> coldTruePreByClusterRegion = clusterRegion -> {
+     private final static Predicate<ClusterRegion> coldTruePreByClusterRegion = clusterRegion -> {
         if (StringUtils.isBlank(clusterRegion.getConfig())) {
             return Boolean.FALSE;
         }
-
         try {
             return JSON.parseObject(clusterRegion.getConfig()).getBoolean(COLD);
+        
         } catch (Exception e) {
             return Boolean.FALSE;
         }
+    
     };
     
     /**
-     * 该函数用于获取存储 zeus 部署的 ip 列表的缓存 return List<String>
+     * > 该函数用于获取存储 zeus 部署的 ip 列表的缓存 return List<String>
      */
     private List<String> ipListWithCache() {
         return ZEUS_AGENTS_LIST_CACHE.getIfPresent(ZEUS_AGENTS_LIST);
@@ -1794,8 +1885,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     /**
-     * 该函数用于缓存初次获取zeus部署的agents list
-     * return List<String>
+     * > 该函数用于缓存初次获取zeus部署的agents list
+     *return List<String>
      */
     private List<String> getIpList() {
         Result<List<String>> result = zeusClusterRemoteService.getAgentsList();
@@ -1805,95 +1896,15 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         return result.getData();
     }
-
-    /**
-     * 该函数用于构建支持zeus by cluster phy
+        /**
+     * > 该函数用于构建支持zeus by cluster phy
      *
      * @param clusterPhyVO 集群物理信息
      */
-    private void buildSupportZeusByClusterPhy(ClusterPhyVO clusterPhyVO, List<String> ipList,
-                                              List<String> zeusAgentsList) {
-        // 物理集群上所有的节点都需要在 zeus 的 ip 列表上，那么它才属于支持 zeus 的，一旦发现有一个不在就是不支持，不再遍历
-        clusterPhyVO.setSupportZeus(
-                CollectionUtils.isNotEmpty(ipList) && Sets.newHashSet(zeusAgentsList).containsAll(ipList));
-    }
-
-    /**
-     * 每45分钟全量更新一遍集群
-     */
-    private synchronized void refreshClusterPhyInfoWithCache() {
-        for (String clusterName : clusterPhyService.listClusterNames()) {
-            CLUSTER_PHY_DCDR_PIPELINE.put(clusterName, getDCDRAndPipelineTupleByClusterPhy(clusterName));
-            CLUSTER_PHY_CONNECTION_ENUM.put(clusterName, getClusterConnectionStatus(clusterName));
+        private void buildSupportZeusByClusterPhy(ClusterPhyVO clusterPhyVO, List<String> ipList,
+                                                  List<String> zeusAgentsList) {
+            // 物理集群上所有的节点都需要在 zeus 的 ip 列表上，那么它才属于支持 zeus 的，一旦发现有一个不在就是不支持，不再遍历
+            clusterPhyVO.setSupportZeus(
+                    CollectionUtils.isNotEmpty(ipList) && Sets.newHashSet(zeusAgentsList).containsAll(ipList));
         }
-    }
-
-    private long buildClusterPhyWithLogicAndRegion(List<ClusterPhyVO> clusterPhyVOList) {
-        List<ClusterRegion> regions = clusterRegionService.listRegionByPhyClusterNames(
-                clusterPhyVOList.stream().map(ClusterPhyVO::getCluster).distinct().collect(Collectors.toList()));
-        Map<String, Set<Long>> phyCluster2logicClusterIds = Maps.newHashMap();
-        final List<ProjectBriefVO> projectBriefList = projectService.getProjectBriefList();
-        final Map<Integer, String> projectId2ProjectNameMap = ConvertUtil.list2Map(projectBriefList, ProjectBriefVO::getId,
-                ProjectBriefVO::getProjectName);
-        Map<Long,  List<ClusterLogicVO>> logicClusterId2LogicClusterList = Maps.newHashMap();
-        Map<Long, ClusterRegionVO> logicClusterId2Region = Maps.newHashMap();
-        List<Long> logicIds = Lists.newArrayList();
-        regions.stream()
-                .filter(region -> StringUtils.isNotBlank(region.getPhyClusterName())
-                        && StringUtils.isNotBlank(region.getLogicClusterIds())
-                        && !AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID.equals(region.getLogicClusterIds()))
-                .forEach(region -> {
-                    String idStr = region.getLogicClusterIds();
-                    List<Long> list = Lists.newArrayList();
-                    for (String id : StringUtils.split(idStr, SEPARATOR_CHARS)) {
-                        if (StringUtils.isNumeric(id)) {
-                            list.add(Long.valueOf(id));
-                        }
-                    }
-                    Set<Long> ids = phyCluster2logicClusterIds.getOrDefault(region.getPhyClusterName(), Sets.newHashSet());
-                    ids.addAll(list);
-                    phyCluster2logicClusterIds.put(region.getPhyClusterName(), ids);
-                    list.forEach(id -> logicClusterId2Region.put(id, ConvertUtil.obj2Obj(region, ClusterRegionVO.class, regionVO -> regionVO.setClusterName(region.getPhyClusterName()))));
-                    logicIds.addAll(list);
-                });
-        if (CollectionUtils.isNotEmpty(logicIds)) {
-            List<ClusterLogic> clusterLogicList = clusterLogicService.getClusterLogicListByIds(logicIds);
-
-            logicClusterId2LogicClusterList = ConvertUtil.list2MapOfList(clusterLogicList, ClusterLogic::getId,
-                    clusterLogic -> ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class,
-                            clusterLogicVO -> clusterLogicVO.setProjectName(
-                                    projectId2ProjectNameMap.get(clusterLogicVO.getProjectId()))));
-        }
-
-        //3. 设置集群基本统计信息：磁盘使用信息
-        long timeForBuildClusterDiskInfo = System.currentTimeMillis();
-        for (ClusterPhyVO clusterPhyVO : clusterPhyVOList) {
-            Set<Long> set = phyCluster2logicClusterIds.getOrDefault(clusterPhyVO.getCluster(), Sets.newHashSet());
-            Map<Long, List<ClusterLogicVO>> finalLogicClusterId2Vo = logicClusterId2LogicClusterList;
-            FUTURE_UTIL.runnableTask(()-> {
-                set.forEach(id -> {
-                    List<ClusterLogicVO> clusterLogicVOList = finalLogicClusterId2Vo.get(id);
-                    if (CollectionUtils.isNotEmpty(clusterLogicVOList)) {
-                        List<String> projectNames = clusterLogicVOList.stream().map(ClusterLogicVO::getProjectName).collect(Collectors.toList());
-                        ClusterLogicVOWithProjects clusterLogicVOWithProjects = ConvertUtil.obj2Obj(clusterLogicVOList.get(0),
-                                ClusterLogicVOWithProjects.class, cp -> cp.setProjectNameList(projectNames));
-                        clusterPhyVO.addLogicCluster(clusterLogicVOWithProjects, logicClusterId2Region.get(id));
-                    }
-
-                });
-                Optional.ofNullable(clusterPhyVO.getLogicClusterAndRegionList())
-                        .map(logicClusterAndRegionList -> logicClusterAndRegionList.stream().map(Tuple::getV1).map(ClusterLogicVOWithProjects::getName).distinct().collect(Collectors.toList()))
-                        .ifPresent(clusterPhyVO::setBindLogicCluster);
-            });
-        }
-        FUTURE_UTIL.waitExecute();
-        return timeForBuildClusterDiskInfo;
-    }
-
-    private final Consumer<ESClusterRoleHostDTO> roleClusterHostsTrimHostnameAndPort = esClusterRoleHostDTO -> {
-        esClusterRoleHostDTO.setCluster(StringUtils.trim(esClusterRoleHostDTO.getCluster()));
-        esClusterRoleHostDTO.setHostname(StringUtils.trim(esClusterRoleHostDTO.getHostname()));
-        esClusterRoleHostDTO.setIp(StringUtils.trim(esClusterRoleHostDTO.getIp()));
-        esClusterRoleHostDTO.setPort(StringUtils.trim(esClusterRoleHostDTO.getPort()));
-    };
 }

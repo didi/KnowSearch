@@ -220,12 +220,11 @@ public class TemplateLogicV3Controller {
                 HttpRequestUtil.getProjectId(request));
     }
 
-    @PutMapping("/template-index-setting/{templateIdList}")
+    @PutMapping("/template-index-setting")
     @ResponseBody
     @ApiOperation(value = "更新模版settings和非分区模版索引的settings")
-    public Result<Void> updateTemplateAndIndexSettings(HttpServletRequest request, @RequestBody TemplateIncrementalSettingsDTO settings,
-                                                  @PathVariable("templateIdList") List<Integer> templateIdList) throws AdminOperateException {
-        return templateLogicManager.updateTemplateAndIndexSettings(settings, templateIdList, HttpRequestUtil.getOperator(request),
+    public Result<Void> updateTemplateAndIndexSettings(HttpServletRequest request, @RequestBody TemplateIncrementalSettingsDTO param) throws AdminOperateException {
+        return templateLogicManager.updateTemplateAndIndexSettings(param, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
 }
