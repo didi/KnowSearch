@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentileMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterNodeDAO;
@@ -200,7 +201,7 @@ public class ESClusterPhyStatsService {
     /**
      * _cluster/stats 耗时
      */
-    public Long getClusterStatusElapsedTime(String cluster) {
+    public Long getClusterStatusElapsedTime(String cluster) throws ESOperateException {
         long startTime = System.currentTimeMillis();
         esClusterDAO.getClusterStats(cluster);
         long endTime = System.currentTimeMillis();

@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 
 import java.util.List;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ public class ClusterHealthDashBoardCollector extends BaseDashboardCollector {
     private static final FutureUtil FUTURE_UTIL = FutureUtil.init("ClusterHealthDashBoardCollector", 10, 10, 500);
 
     @Override
-    public void collectSingleCluster(String cluster, long currentTime) {
+    public void collectSingleCluster(String cluster, long currentTime) throws ESOperateException {
     }
 
     @Override

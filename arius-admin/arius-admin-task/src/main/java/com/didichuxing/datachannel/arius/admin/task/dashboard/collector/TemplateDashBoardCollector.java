@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboar
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.TemplateMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
@@ -33,7 +34,7 @@ public class TemplateDashBoardCollector extends BaseDashboardCollector {
     ESShardService            esShardService;
 
     @Override
-    public void collectSingleCluster(String cluster, long currentTime) {
+    public void collectSingleCluster(String cluster, long currentTime) throws ESOperateException {
         List<IndexTemplatePhyWithLogic> logicTemplates = indexTemplatePhyService.getTemplateByPhyCluster(cluster);
         if (logicTemplates.isEmpty()) {
             LOGGER.error(
