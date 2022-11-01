@@ -465,13 +465,13 @@ public class ESClusterDAO extends BaseESDAO {
         return ecSegmentOnIps;
     }
 
-    public ESClusterStatsResponse getClusterStats(String clusterName) {
+    public ESClusterStatsResponse getClusterStats(String clusterName) throws ESOperateException {
         ESClusterStatsResponse responses = initESClusterStatsResponse();
         ESClient esClient = esOpClient.getESClient(clusterName);
         if (Objects.isNull(esClient)) {
             LOGGER.error("class=ESClusterDAO||method=getClusterStats||clusterName={}||errMsg=esClient is null",
                 clusterName);
-            return responses;
+            throw new NullESClientException(clusterName);
         }
 
         try {
@@ -553,6 +553,7 @@ public class ESClusterDAO extends BaseESDAO {
         } catch (Exception e) {
             LOGGER.error("class=ESClusterDAO||method=getClusterStats||clusterName={}||errMsg=fail to get", clusterName,
                 e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
 
         return responses;

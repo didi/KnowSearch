@@ -258,7 +258,13 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     @Override
     public ESClusterStatsResponse syncGetClusterStats(String clusterName) {
-        return esClusterDAO.getClusterStats(clusterName);
+        try {
+            return esClusterDAO.getClusterStats(clusterName);
+        } catch (ESOperateException e) {
+            LOGGER.error("class=ESClusterServiceImpl||method=syncGetClusterStats||clusterName={}||errMsg=fail to get cluster stats",
+                    clusterName);
+            return null;
+        }
     }
 
     @Override

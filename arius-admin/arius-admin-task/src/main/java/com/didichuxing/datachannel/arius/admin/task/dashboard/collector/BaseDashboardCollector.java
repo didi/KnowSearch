@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.DashBoardMetricThresholdDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -62,7 +63,7 @@ public abstract class BaseDashboardCollector {
      * @param cluster 集群名称
      * @param currentTime   当前时间戳
      */
-    public abstract void collectSingleCluster(String cluster, long currentTime);
+    public abstract void collectSingleCluster(String cluster, long currentTime) throws ESOperateException;
 
     /**
      * 采集多个集群
