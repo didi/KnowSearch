@@ -250,7 +250,7 @@ public interface ESIndexService {
      * @param indexExpression
      * @return true/false
      */
-    boolean ensureDateSame(String cluster1, String cluster2, List<String> indexNames, String indexExpression) throws ESOperateException;
+    boolean ensureDataSame(String cluster1, String cluster2, List<String> indexNames, String indexExpression) throws ESOperateException;
 
     /**
      * close and open index

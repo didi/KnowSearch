@@ -417,11 +417,11 @@ public class ESIndexServiceImpl implements ESIndexService {
      * @return true/false
      */
     @Override
-    public boolean ensureDateSame(String cluster1, String cluster2, List<String> indexNames, String indexExpression) throws ESOperateException {
-        int retryCount = 1;
+    public boolean ensureDataSame(String cluster1, String cluster2, List<String> indexNames, String indexExpression) throws ESOperateException {
+        int retryCount = 20;
         while (retryCount-- > 0) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||msg=sleep interrupted", e);
