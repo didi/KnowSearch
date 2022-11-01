@@ -69,6 +69,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
 import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.knowframework.log.ILog;
@@ -115,9 +116,12 @@ public class ClusterOverviewMetricsHandle {
     private ESTemplateService             esTemplateService;
 
     @Autowired
-    private AriusConfigInfoService ariusConfigInfoService;
+    private AriusConfigInfoService        ariusConfigInfoService;
     @Autowired
-    private ESIndexCatService      esIndexCatService;
+    private ESIndexCatService             esIndexCatService;
+
+    @Autowired
+    private IndexTemplatePhyService       indexTemplatePhyService;
 
     private static final FutureUtil<Void> getMultipleMetricFutureUtil   = FutureUtil.init("getMultipleMetricFutureUtil",
         10, 10, 100);
@@ -492,11 +496,7 @@ public class ClusterOverviewMetricsHandle {
      * @param clusterName
      */
     private void buildBasicMetricsFromEsClusterTemplate(ESClusterPhyBasicMetricsVO basicVO, String clusterName) {
-        try {
-            basicVO.setTotalTemplateNu(esTemplateService.synGetTemplateNumForAllVersion(clusterName));
-        } catch (ESOperateException e) {
-            LOGGER.error("class={}||method=buildBasicMetricsFromEsClusterTemplate||clusterName={} ", getClass().getSimpleName(),clusterName, e);
-        }
+        basicVO.setTotalTemplateNu((long) indexTemplatePhyService.getNormalTemplateByCluster(clusterName).size());
     }
 
     /**
