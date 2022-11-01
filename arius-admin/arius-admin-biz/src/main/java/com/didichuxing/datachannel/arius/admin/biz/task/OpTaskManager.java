@@ -1,9 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.task;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProcessDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.OpTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import java.util.List;
@@ -94,4 +97,12 @@ public interface OpTaskManager {
      * @return
      */
     List<OpTask> getSuccessTaskByType(Integer taskType);
+
+    /**
+     * 任务中心分页查询
+     * @param projectId
+     * @param queryDTO
+     * @return
+     */
+    PaginationResult<OpTaskVO> pageGetTasks(Integer projectId, OpTaskQueryDTO queryDTO) throws NotFindSubclassException;
 }
