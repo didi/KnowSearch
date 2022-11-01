@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterThreadPoolQueueMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -19,7 +20,7 @@ public class ClusterThreadPoolDashBoardCollector extends BaseDashboardCollector 
     private static final ILog LOGGER = LogFactory.getLog(ClusterThreadPoolDashBoardCollector.class);
 
     @Override
-    public void collectSingleCluster(String cluster, long currentTime) {
+    public void collectSingleCluster(String cluster, long currentTime) throws ESOperateException {
         DashBoardStats dashBoardStats = buildInitDashBoardStats(currentTime);
         ClusterThreadPoolQueueMetrics clusterThreadPoolQueueMetrics = new ClusterThreadPoolQueueMetrics();
         clusterThreadPoolQueueMetrics.setTimestamp(currentTime);
