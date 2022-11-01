@@ -116,4 +116,11 @@ public interface ClusterNodeManager {
      * @return
      */
     Result<Boolean> checkMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator, Integer projectId);
+
+    /**
+     * 通过物理集群获取带角色的节点信息
+     * @param clusterPhyName
+     * @return
+     */
+    Result<List<ClusterNodeInfoVO>> listClusterPhyNodeInfosByName(String clusterPhyName);
 }

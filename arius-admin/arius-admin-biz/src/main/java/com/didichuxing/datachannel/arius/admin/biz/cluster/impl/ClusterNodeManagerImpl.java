@@ -31,6 +31,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
+import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
@@ -174,6 +175,18 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             }
         }
         return Result.buildSucc(true);
+    }
+
+    @Override
+    public Result<List<ClusterNodeInfoVO>> listClusterPhyNodeInfosByName(String clusterPhyName) {
+        if (null == clusterPhyName) {
+            LOGGER.error("class=ClusterPhyManagerImpl||method=getAppClusterPhyNodeNames||errMsg=集群名称为空");
+            return Result.buildFail("集群名称为空");
+        }
+        List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.getNodesByCluster(clusterPhyName);
+        //节点信息列表
+        return Result.buildSucc(clusterRoleHosts.stream().map(clusterRoleHost->new ClusterNodeInfoVO(clusterRoleHost.getNodeSet(),clusterRoleHost.getRole()))
+                .collect(Collectors.toList()));
     }
 
     @Override
@@ -355,7 +368,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
-        //节点名称列表
+        //节点信息列表
         return Result.buildSucc(result.getData().stream().map(clusterRoleHost->new ClusterNodeInfoVO(clusterRoleHost.getNodeSet(),clusterRoleHost.getRole()))
                 .collect(Collectors.toList()));
     }
