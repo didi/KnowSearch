@@ -56,7 +56,7 @@ public class NormalOrderController {
     @ApiOperation(value = "提交工单接口")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "工单类型", required = true) })
     public Result<AriusWorkOrderInfoSubmittedVO> submit(@PathVariable(value = "type") String type,
-                                                        @RequestBody WorkOrderDTO workOrderDTO) throws AdminOperateException {
+                                                        @RequestBody WorkOrderDTO workOrderDTO) {
         return workOrderManager.submit(workOrderDTO);
     }
     

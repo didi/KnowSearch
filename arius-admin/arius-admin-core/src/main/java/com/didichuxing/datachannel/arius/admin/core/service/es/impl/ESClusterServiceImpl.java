@@ -273,7 +273,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public Map<String, Integer> synGetSegmentsOfIpByCluster(String clusterName) {
+    public Map<String, Integer> synGetSegmentsOfIpByCluster(String clusterName) throws ESOperateException {
         Map<String, Integer> segmentsOnIpMap = Maps.newHashMap();
         for (ECSegmentOnIp ecSegmentsOnIp : esClusterDAO.getSegmentsOfIpByCluster(clusterName)) {
             if (segmentsOnIpMap.containsKey(ecSegmentsOnIp.getIp())) {

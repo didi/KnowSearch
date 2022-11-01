@@ -106,23 +106,45 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     
     
     @Override
-    public Result<AriusWorkOrderInfoSubmittedVO> submit(WorkOrderDTO workOrderDTO) throws AdminOperateException {
+    public Result<AriusWorkOrderInfoSubmittedVO> submit(WorkOrderDTO workOrderDTO){
 
         String workOrderJsonString = JSON.toJSONString(workOrderDTO);
         LOGGER.info(
             "class=WorkOrderManagerImpl||method=WorkOrderController.process||workOrderDTO={}||envInfo={}||dataCenter={}",
             workOrderJsonString, EnvUtil.getStr(), workOrderDTO.getDataCenter());
 
-        initWorkOrderDTO(workOrderDTO);
+        try {
+            initWorkOrderDTO(workOrderDTO);
+        } catch (OperateForbiddenException e) {
+            LOGGER.error(
+                    "class=WorkOrderManagerImpl||method=submit||workOrderDTO={}||envInfo={}||dataCenter={}||errMsg=fail to init workOrderDTO",
+                    workOrderJsonString, EnvUtil.getStr(), workOrderDTO.getDataCenter(),e.getMessage(),e);
+            Result.buildFail("初始化工单异常");
+        }
 
         Result<Void> submitValidResult = checkSubmitValid(workOrderDTO);
         if (submitValidResult.failed()) {
             return Result.buildFrom(submitValidResult);
         }
 
-        WorkOrderHandler handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(workOrderDTO.getType());
+        WorkOrderHandler handler = null;
+        try {
+            handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(workOrderDTO.getType());
+        } catch (NotFindSubclassException e) {
+            LOGGER.error(
+                    "class=WorkOrderManagerImpl||method=submit||workOrderDTO={}||envInfo={}||dataCenter={}||errMsg=fail to get WorkOrderHandler",
+                    workOrderJsonString, EnvUtil.getStr(), workOrderDTO.getDataCenter(),e.getMessage(),e);
+            Result.buildFail("获取WorkOrderHandler异常");
+        }
 
-        Result<WorkOrderPO> submitResult = handler.submit(ConvertUtil.obj2Obj(workOrderDTO, WorkOrder.class));
+        Result<WorkOrderPO> submitResult = null;
+        try {
+            submitResult = handler.submit(ConvertUtil.obj2Obj(workOrderDTO, WorkOrder.class));
+        } catch (AdminOperateException e) {
+            LOGGER.error("class=WorkOrderManagerImpl||method=submit||workOrderDTO={}||envInfo={}||dataCenter={}||errMsg=fail to get WorkOrderHandler",
+                    workOrderJsonString, EnvUtil.getStr(), workOrderDTO.getDataCenter(),e);
+            Result.buildFail("工单提交异常");
+        }
         if (submitResult.failed()) {
             return Result.buildFail(submitResult.getMessage());
         }

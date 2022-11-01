@@ -32,7 +32,7 @@ public interface WorkOrderManager {
       * @return {@link Result}<{@link AriusWorkOrderInfoSubmittedVO}>
      @throws AdminOperateException 管理操作Exception
      */
-    Result<AriusWorkOrderInfoSubmittedVO> submit(WorkOrderDTO workOrderDTO) throws AdminOperateException;
+    Result<AriusWorkOrderInfoSubmittedVO> submit(WorkOrderDTO workOrderDTO);
 
     /**
      * 过程 工单处理流程
