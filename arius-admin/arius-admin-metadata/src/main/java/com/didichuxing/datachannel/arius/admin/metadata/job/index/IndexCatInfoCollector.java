@@ -420,7 +420,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
     }
 
     private boolean filterNotCollectorIndexCat(IndexCatCellDTO indexCatCellDTO) {
-        return notCollectorIndexNameCache.getIfPresent(indexCatCellDTO.getKey()) == null;
+        return notCollectorIndexNameCache.getIfPresent(indexCatCellDTO.getKey()) == null&&indexCatCellDTO.getDeleteFlag();
     }
 
     private void sleep(Long millis) {

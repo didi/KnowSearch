@@ -33,7 +33,10 @@ import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
+import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
@@ -58,6 +61,8 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
     private PreCreateManager            templatePreCreateManager;
     @Autowired
     private ESTemplateService           esTemplateService;
+    @Autowired
+    private ESIndexService esIndexService;
 
     /**
      * @return
@@ -200,8 +205,12 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
             templatePhySettingManager.mergeTemplateSettingsCheckAllocationAndShard(logicId,
                     templatePhysical.getCluster(), templatePhysical.getName(), settings);
         }
-    
-        SpringTool.publish(new ReBuildTomorrowIndexEvent(this, logicId));
+        //分区索引会自动重建
+        if (templateLogicWithPhysical.getMasterPhyTemplate().getExpression().endsWith("*")) {
+            SpringTool.publish(new ReBuildTomorrowIndexEvent(this, logicId));
+        } else {
+            noPartitioningIndexSettingChanges(settings,templateLogicWithPhysical);
+        }
         final Result<IndexTemplatePhySetting> afterSetting = getSettings(logicId);
         operateRecordService.save(new OperateRecord.Builder()
             .project(projectService.getProjectBriefByProjectId(projectId)).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
@@ -279,5 +288,32 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
         }
 
         return indexSettings.getJSONObject("analysis");
+    }
+    
+    /**
+     * 修改不分区索引的setting，尝试性修改，对错误结果不做返回
+     *
+     * @param settings 索引模板设置。
+     * @param templateLogicWithPhysical 带有物理模板的逻辑索引模板
+     */
+    private void noPartitioningIndexSettingChanges(IndexTemplatePhySetting settings,
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical) {
+        // 同步修改不分区索引
+        final Map<String, String> settingMap = JsonUtils.flat(settings.getSettings());
+        // 删除 index.routing.allocation.include._name 和 index.number_of_shards 因为会导致更新索引 setting 失效
+        settingMap.remove("index.routing.allocation.include._name");
+        settingMap.remove("index.number_of_shards");
+        // 更新索引 setting
+        for (IndexTemplatePhy physical : templateLogicWithPhysical.getPhysicals()) {
+            try {
+                esIndexService.syncPutIndexSettings(physical.getCluster(), Collections.singletonList(physical.getName()),
+                    settingMap,3);
+            } catch (ESOperateException e) {
+               LOGGER.error(
+                "class=TemplateLogicServiceImpl||method=noPartitioningIndexSettingChanges||IndexTemplate={}",
+                templateLogicWithPhysical.getName(),e);
+            }
+        }
+        
     }
 }
