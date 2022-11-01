@@ -414,11 +414,14 @@ public class ESIndexServiceImpl implements ESIndexService {
      * @param cluster2        集群2
      * @param indexNames      索引名字
      * @param indexExpression
+     * @param timeout
      * @return true/false
      */
     @Override
-    public boolean ensureDataSame(String cluster1, String cluster2, List<String> indexNames, String indexExpression) throws ESOperateException {
-        int retryCount = 20;
+    public boolean ensureDataSame(String cluster1, String cluster2, List<String> indexNames, String indexExpression,
+        Integer timeout) throws ESOperateException {
+        int retryCount = timeout != null ? (int) Math.ceil(timeout.doubleValue() / 5) : 20;
+        
         while (retryCount-- > 0) {
             try {
                 Thread.sleep(5000);

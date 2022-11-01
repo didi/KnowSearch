@@ -1220,7 +1220,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                     checkDataResult = Result.buildFail(TASK_IS_CANCEL);
                 } else {
                     if (!esIndexService.ensureDataSame(masterTemplate.getCluster(), slaveTemplate.getCluster(),
-                        matchIndexNames,indexExpression)) {
+                        matchIndexNames,indexExpression,switchDetail.getTimeout())) {
                         checkDataResult = Result.buildFail("校验索引数据不一致!");
                         // 恢复实时数据写入：使用indexName*的方式进行索引关闭，避免索引数量过多，从而导致了执行时间过长
                         Result<Void> sttartMasterIndexResult = Result.build(esIndexService
