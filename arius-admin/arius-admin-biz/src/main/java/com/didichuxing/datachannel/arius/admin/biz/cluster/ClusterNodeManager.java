@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
@@ -75,6 +76,18 @@ public interface ClusterNodeManager {
      */
     Result listClusterLogicNodeByName(String clusterLogicName);
 
+    /**
+     * 通过逻辑集群名称获取节点信息
+     * @param clusterLogicName
+     * @return
+     */
+    Result<List<ClusterNodeInfoVO>> listClusterLogicNodeInfosByName(String clusterLogicName);
+
+    /**
+     * 通过逻辑集群ID获取节点信息
+     * @param regionId
+     * @return
+     */
     Result<List<ESClusterRoleHostVO>> listClusterRoleHostByRegionId(Long regionId);
 
     /**
