@@ -69,11 +69,12 @@ public class OpTaskController {
     @ApiOperation(value = "任务列表", notes = "")
     @GetMapping(value = "tasks")
     @ResponseBody
+    @Deprecated
     public Result<List<WorkTaskVO>> getTaskList() {
         return Result.buildSucc(ConvertUtil.list2List(opTaskManager.list().getData(), WorkTaskVO.class));
     }
 
-    @ApiOperation(value = "任务列表", notes = "")
+    @ApiOperation(value = "任务中心分页列表", notes = "")
     @PostMapping(value = "page")
     @ResponseBody
     public PaginationResult<OpTaskVO> pageGetTasks(@RequestBody OpTaskQueryDTO queryDTO, HttpServletRequest request) throws NotFindSubclassException {
