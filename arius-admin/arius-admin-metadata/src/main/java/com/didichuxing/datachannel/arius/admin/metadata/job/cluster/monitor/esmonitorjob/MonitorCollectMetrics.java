@@ -448,7 +448,7 @@ public class MonitorCollectMetrics {
         /**********************************node -> thread_pool************************************/
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.thread_pool.bulk.rejected")
-            .valueRoute("thread_pool.bulk.rejected").computeType(AVG).bIndexToNodeMetrics().sendToN9e().build());
+            .valueRoute("thread_pool.bulk.rejected").computeType(AVG_MIN).bIndexToNodeMetrics().sendToN9e().build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.thread_pool.bulk.completed")
             .valueRoute("thread_pool.bulk.completed").computeType(MINUS).build());
