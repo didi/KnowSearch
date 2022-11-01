@@ -134,6 +134,18 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     }
 
     @Override
+    public Result<List<ClusterNodeInfoVO>> listClusterPhyNodeInfosByName(String clusterPhyName) {
+        if (null == clusterPhyName) {
+            LOGGER.error("class=ClusterPhyManagerImpl||method=getAppClusterPhyNodeNames||errMsg=集群名称为空");
+            return Result.buildFail("集群名称为空");
+        }
+        List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.getNodesByCluster(clusterPhyName);
+        //节点信息列表
+        return Result.buildSucc(clusterRoleHosts.stream().map(clusterRoleHost->new ClusterNodeInfoVO(clusterRoleHost.getNodeSet(),clusterRoleHost.getRole()))
+                .collect(Collectors.toList()));
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<List<Long>> createMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator,
                                                      Integer projectId) throws AdminOperateException {
@@ -265,7 +277,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
-        //节点名称列表
+        //节点信息列表
         return Result.buildSucc(result.getData().stream().map(clusterRoleHost->new ClusterNodeInfoVO(clusterRoleHost.getNodeSet(),clusterRoleHost.getRole()))
                 .collect(Collectors.toList()));
     }
