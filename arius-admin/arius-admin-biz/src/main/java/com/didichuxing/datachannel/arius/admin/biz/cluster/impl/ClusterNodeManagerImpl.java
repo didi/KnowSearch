@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
@@ -248,6 +249,26 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             .buildSucc(result.getData().stream().map(ClusterRoleHost::getNodeSet).collect(Collectors.toList()));
     }
 
+    @Override
+    public Result<List<ClusterNodeInfoVO>> listClusterLogicNodeInfosByName(String clusterLogicName) {
+        ClusterLogic clusterLogic =
+                clusterLogicService.listClusterLogicByNameThatProjectIdStrConvertProjectIdList(clusterLogicName).stream().findFirst().orElse(null);
+        if (AriusObjUtils.isNull(clusterLogic)) {
+            return Result.buildFail(String.format("集群[%s]不存在", clusterLogicName));
+        }
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
+        if (clusterRegion == null) {
+            return Result.buildFail(String.format("集群[%s]未绑定region", clusterLogic.getId()));
+        }
+        Result<List<ClusterRoleHost>> result = clusterRoleHostService
+                .listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+        //节点名称列表
+        return Result.buildSucc(result.getData().stream().map(clusterRoleHost->new ClusterNodeInfoVO(clusterRoleHost.getNodeSet(),clusterRoleHost.getRole()))
+                .collect(Collectors.toList()));
+    }
     @Override
     public boolean collectNodeSettings(String cluster) throws AdminTaskException {
         return clusterRoleHostService.collectClusterNodeSettings(cluster);
