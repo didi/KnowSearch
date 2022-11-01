@@ -24,6 +24,7 @@ public class ClusterNodeInfoVO {
     @ApiModelProperty("节点名称")
     private String                                       nodeName;
 
-    @ApiModelProperty("节点类型")
-    private String                                       nodeType;
+    @ApiModelProperty("节点类型,角色信息， 1data 2client 3master 4tribe")
+    private Integer                                       nodeType;
+
 }

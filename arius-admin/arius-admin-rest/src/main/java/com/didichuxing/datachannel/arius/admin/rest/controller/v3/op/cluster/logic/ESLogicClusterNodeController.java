@@ -46,6 +46,6 @@ public class ESLogicClusterNodeController {
     @ResponseBody
     @ApiOperation(value = "获取逻辑集群下的节点信息")
     public Result<List<ClusterNodeInfoVO>> listClusterLogicNodeInfos(@PathVariable String clusterLogicName) {
-        return clusterNodeManager.listClusterLogicNodeByName(clusterLogicName);
+        return clusterNodeManager.listClusterLogicNodeInfosByName(clusterLogicName);
     }
 }
