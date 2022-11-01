@@ -136,7 +136,7 @@ public interface ESClusterService {
      * @param clusterName 物理集群名称
      * @return Map<String, Integer> String表示的是实例所在的ip值，Integer表示该ip上的总的segment数目
      */
-    Map<String, Integer> synGetSegmentsOfIpByCluster(String clusterName);
+    Map<String, Integer> synGetSegmentsOfIpByCluster(String clusterName) throws ESOperateException;
 
     /**
      * 集群的持久化操作

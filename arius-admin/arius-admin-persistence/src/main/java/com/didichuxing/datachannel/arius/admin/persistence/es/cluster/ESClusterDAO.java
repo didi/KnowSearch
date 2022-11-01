@@ -442,13 +442,13 @@ public class ESClusterDAO extends BaseESDAO {
      * @param clusterName 集群名称
      * @return
      */
-    public List<ECSegmentOnIp> getSegmentsOfIpByCluster(String clusterName) {
+    public List<ECSegmentOnIp> getSegmentsOfIpByCluster(String clusterName) throws ESOperateException{
         ESClient client = esOpClient.getESClient(clusterName);
         List<ECSegmentOnIp> ecSegmentOnIps = null;
         if (Objects.isNull(client)) {
             LOGGER.error("class=ESClusterDAO||method=getClusterStats||clusterName={}||errMsg=esClient is null",
                 clusterName);
-            return new ArrayList<>();
+            throw new NullESClientException(clusterName);
         }
         try {
             DirectRequest directRequest = new DirectRequest("GET", "_cat/nodes?v&h=sc,ip&format=json");
@@ -457,12 +457,13 @@ public class ESClusterDAO extends BaseESDAO {
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 ecSegmentOnIps = JSONArray.parseArray(directResponse.getResponseContent(), ECSegmentOnIp.class);
             }
+            return ecSegmentOnIps;
         } catch (Exception e) {
             LOGGER.warn("class=ESClusterDAO||method=getSegmentsOfIpByCluster||cluster={}||mg=get es segments fail",
                 clusterName, e);
-            return new ArrayList<>();
+            ParsingExceptionUtils.abnormalTermination(e);
         }
-        return ecSegmentOnIps;
+        return new ArrayList<>();
     }
 
     public ESClusterStatsResponse getClusterStats(String clusterName) throws ESOperateException {
