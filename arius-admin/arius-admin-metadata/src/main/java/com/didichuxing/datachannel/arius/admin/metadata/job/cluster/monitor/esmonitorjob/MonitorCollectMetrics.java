@@ -157,8 +157,8 @@ public class MonitorCollectMetrics {
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.search.fetch_total")
                 .valueRoute("search.fetch_total").computeType(MINUS).build());
 
-        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.segments.request_cache.memory_size_in_bytes")
-                .valueRoute("segments.request_cache.memory_size_in_bytes").computeType(NONE).build());
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.request_cache.memory_size_in_bytes")
+                .valueRoute("request_cache.memory_size_in_bytes").computeType(NONE).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indexing.index_time_in_millis")
                 .valueRoute(INDEXING_INDEX_TIME_IN_MILLIS).computeType(MINUS).sendToN9e().build());
@@ -167,7 +167,7 @@ public class MonitorCollectMetrics {
                 .valueRoute("docs.count").computeType(AVG).sendToN9e().build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indexing.docs.count_diff")
-                .valueRoute("docs.count").computeType(MINUS).build());
+                .valueRoute(INDEXING_INDEX_TOTAL).computeType(MINUS).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indices.indexing.index_time_per_doc")
             .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.indexing.index_time_in_millis")
@@ -296,7 +296,7 @@ public class MonitorCollectMetrics {
             .valueRoute("indices.query_cache.miss_count").computeType(MINUS).build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.request_cache.total_count")
-            .valueRoute("indices.request_cache.hit_count+indices.request_cache.miss_count").computeType(NONE)
+            .valueRoute("indices.request_cache.hit_count+indices.request_cache.miss_count").computeType(MINUS)
                 .bIndexToNodeMetrics().build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.query_cache.total_count")
@@ -354,7 +354,7 @@ public class MonitorCollectMetrics {
             .valueRoute("indices.docs.count").computeType(NONE).build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.docs.count_diff")
-            .valueRoute("indices.docs.count").computeType(MINUS).build());
+            .valueRoute("indices.indexing.index_total").computeType(MINUS).build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.translog.operations_rate")
             .valueRoute("indices.translog.operations").computeType(AVG).build());
@@ -448,7 +448,7 @@ public class MonitorCollectMetrics {
         /**********************************node -> thread_pool************************************/
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.thread_pool.bulk.rejected")
-            .valueRoute("thread_pool.bulk.rejected").computeType(AVG).bIndexToNodeMetrics().sendToN9e().build());
+            .valueRoute("thread_pool.bulk.rejected").computeType(AVG_MIN).bIndexToNodeMetrics().sendToN9e().build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.thread_pool.bulk.completed")
             .valueRoute("thread_pool.bulk.completed").computeType(MINUS).build());
@@ -575,7 +575,7 @@ public class MonitorCollectMetrics {
         /**********************************node -> script************************************/
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.script.compilations")
-                .valueRoute("breakers.script.compilations").computeType(AVG_MIN).build());
+                .valueRoute("script.compilations").computeType(AVG_MIN).build());
 
         /**********************************node -> 复合指标************************************/
 

@@ -278,7 +278,7 @@ public enum ClusterPhyNodeMetricsEnum {
     /**
      * 单位：MB
      */
-    INDICES_BREAKERS_FIELDDATA_LIMIT_SIZE_IN_BYTES("indices-segments-breakers-fielddata-limit_size_in_bytes",
+    INDICES_BREAKERS_FIELDDATA_LIMIT_SIZE_IN_BYTES("breakers-fielddata-estimated_size_in_bytes",
             "索引Fielddata内存大小"),
 
     /**
