@@ -60,7 +60,7 @@ public class ESShardServiceImpl implements ESShardService {
     private AriusConfigInfoService ariusConfigInfoService;
 
     @Override
-    public List<MovingShardMetrics> syncGetMovingShards(String clusterName) {
+    public List<MovingShardMetrics> syncGetMovingShards(String clusterName) throws ESOperateException {
         DirectResponse directResponse = esShardDAO.getDirectResponse(clusterName, "Get", GET_MOVING_SHARD);
 
         List<MovingShardMetrics> movingShardsMetrics = Lists.newArrayList();
@@ -75,7 +75,7 @@ public class ESShardServiceImpl implements ESShardService {
     }
 
     @Override
-    public List<UnAssignShardMetrics> syncGetUnAssignShards(String clusterName) {
+    public List<UnAssignShardMetrics> syncGetUnAssignShards(String clusterName) throws ESOperateException {
         DirectResponse directResponse = esShardDAO.getDirectResponse(clusterName, "Get", GET_SHARDS_JSON);
 
         if (directResponse.getRestStatus() == RestStatus.OK

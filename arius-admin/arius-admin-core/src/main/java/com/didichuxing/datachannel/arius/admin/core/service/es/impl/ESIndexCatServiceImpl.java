@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatC
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -98,7 +99,7 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     }
 
     @Override
-    public List<IndexShardInfo> syncGetIndexShardInfo(String clusterPhyName, String indexName) {
+    public List<IndexShardInfo> syncGetIndexShardInfo(String clusterPhyName, String indexName) throws ESOperateException {
         String shards2NodeInfoRequestContent = getShards2NodeInfoRequestContent(indexName, "20s");
         DirectResponse shardNodeResponse = indexCatESDAO.getDirectResponse(clusterPhyName, "Get",
             shards2NodeInfoRequestContent);
