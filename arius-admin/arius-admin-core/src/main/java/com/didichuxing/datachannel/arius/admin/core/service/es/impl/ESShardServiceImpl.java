@@ -106,7 +106,7 @@ public class ESShardServiceImpl implements ESShardService {
             tuple.setV2(shardsMetrics.stream().filter(s->filterSmallShard(configSmallShard,s,indexAndShardMetricsMap)).collect(Collectors.toList()));
             return tuple;
         } catch (ESOperateException e) {
-            LOGGER.error("class=ESShardServiceImpl||method=syncGetBigAndSmallShards||cluster={}||errMsg=fail to get shard metrics",
+            LOGGER.error("class=ESShardServiceImpl||method=syncGetBigAndSmallShards||cluster={}||errMsg=fail to get ShardMetrics",
                     clusterName, e);
            return tuple;
         }
