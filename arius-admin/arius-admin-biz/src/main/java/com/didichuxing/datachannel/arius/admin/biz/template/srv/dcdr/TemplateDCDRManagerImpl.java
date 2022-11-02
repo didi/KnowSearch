@@ -436,6 +436,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         } catch (Exception e) {
             LOGGER.error("method=batchDCDRSwitchMaster2Slave||templateIds={}||msg={}",
                 dcdrMasterSlaveSwitchDTO.getTemplateIds(), e.getMessage(), e);
+            return Result.buildFail("工单提交失败");
         }
 
         return Result.buildSucc(ConvertUtil.obj2Obj(workTaskResult.getData(), WorkTaskVO.class));
