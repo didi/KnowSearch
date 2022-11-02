@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
@@ -92,7 +93,7 @@ public class AriusStatsClusterInfoESDAO extends BaseAriusStatsESDAO {
      * @param cluster 集群
      * @return {@code Long}
      */
-    public Long getClustersShardTotal(String cluster) {
+    public Long getClustersShardTotal(String cluster) throws ESOperateException {
         Long value = null;
         int tryTimes = 3;
         do {
@@ -112,7 +113,7 @@ public class AriusStatsClusterInfoESDAO extends BaseAriusStatsESDAO {
      * @param cluster 集群
      * @return {@code Long}
      */
-    public Long getPendingTaskTotal(String cluster) {
+    public Long getPendingTaskTotal(String cluster) throws ESOperateException {
 
         Long value = null;
         int tryTimes = 3;

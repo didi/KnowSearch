@@ -1,6 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESUpdateClient;
@@ -55,14 +58,13 @@ public class BaseESDAO {
     @Autowired
     protected ESOpClient        esOpClient;
 
-    public DirectResponse getDirectResponse(String clusterName, String methodType, String url) {
+    public DirectResponse getDirectResponse(String clusterName, String methodType, String url) throws ESOperateException {
         ESClient esClient = esOpClient.getESClient(clusterName);
         DirectResponse directResponse = new DirectResponse();
         if (esClient == null) {
             LOGGER.error("class=BaseESDAO||method=getDirectResponse||clusterName={}||errMsg=esClient is null",
                 clusterName);
-            directResponse.setRestStatus(RestStatus.SERVICE_UNAVAILABLE);
-            return directResponse;
+            throw new NullESClientException(clusterName);
         }
 
         DirectRequest directRequest = new DirectRequest(methodType, url);
@@ -71,13 +73,21 @@ public class BaseESDAO {
         } catch (Exception e) {
             LOGGER.error("class=BaseESDAO||method=getDirectResponse||clusterName={}||errMsg=esClient is null",
                 clusterName, e.getMessage(), e);
-            directResponse.setRestStatus(RestStatus.SERVICE_UNAVAILABLE);
-            return directResponse;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
+        directResponse.setRestStatus(RestStatus.SERVICE_UNAVAILABLE);
+        return directResponse;
     }
 
     public <T> List<T> commonGet(String clusterName, String directRequestContent, Class<T> clazz) {
-        DirectResponse directResponse = getDirectResponse(clusterName, "Get", directRequestContent);
+        DirectResponse directResponse = null;
+        try {
+            directResponse = getDirectResponse(clusterName, "Get", directRequestContent);
+        } catch (ESOperateException e) {
+            LOGGER.error("class=BaseESDAO||method=commonGet||cluster={}||directRequestContent={}||"
+                            + "clazzName={}||errMsg=fail to get DirectResponse",
+                    clusterName, directRequestContent, clazz.getName(), e.getMessage(), e);
+        }
         List<T> list = Lists.newArrayList();
         if (directResponse.getRestStatus() == RestStatus.OK
             && StringUtils.isNoneBlank(directResponse.getResponseContent())) {

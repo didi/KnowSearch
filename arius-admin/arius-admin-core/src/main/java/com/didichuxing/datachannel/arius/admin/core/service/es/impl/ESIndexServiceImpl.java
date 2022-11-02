@@ -561,7 +561,7 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public List<String> syncGetIndexName(String clusterName) {
+    public List<String> syncGetIndexName(String clusterName) throws ESOperateException {
         String indicesRequestContent = getBigIndicesRequestContent("20s");
 
         DirectResponse directResponse = esIndexDAO.getDirectResponse(clusterName, "Get", indicesRequestContent);

@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linech
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicDiskUsedInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
@@ -601,14 +602,14 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
         return clusterLogicDiskUsedInfoPO;
     }
 
-    public Long getClusterStatusElapsedTime(String cluster) {
+    public Long getClusterStatusElapsedTime(String cluster) throws ESOperateException {
         long startTime = System.currentTimeMillis();
         getDirectResponse(cluster, "GET","_cluster/stats");
         long endTime = System.currentTimeMillis();
         return endTime-startTime;
     }
 
-    public Long getNodeStatusElapsedTime(String cluster) {
+    public Long getNodeStatusElapsedTime(String cluster) throws ESOperateException {
         long startTime = System.currentTimeMillis();
         getDirectResponse(cluster, "GET","_nodes/stats");
         long endTime = System.currentTimeMillis();
