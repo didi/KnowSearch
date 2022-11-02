@@ -233,7 +233,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     /**
      * 每45分钟全量更新一遍集群
      */
-    private synchronized void refreshClusterPhyInfoWithCache(){
+    private synchronized void refreshClusterPhyInfoWithCache() {
     
         for (String clusterName : clusterPhyService.listClusterNames()) {
             try {

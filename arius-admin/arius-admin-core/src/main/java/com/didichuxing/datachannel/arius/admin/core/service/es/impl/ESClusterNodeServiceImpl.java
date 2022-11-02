@@ -195,7 +195,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     }
 
     @Override
-    public Map<String/*node*/, Long /*shardNum*/> syncGetNode2ShardNumMap(String clusterName){
+    public Map<String/*node*/, Long /*shardNum*/> syncGetNode2ShardNumMap(String clusterName) {
         String bigShardsRequestContent = getShards2NodeRequestContent("20s");
         DirectResponse directResponse = null;
         try {
