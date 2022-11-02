@@ -209,6 +209,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
      */
     private Result<Integer> insertOperateRecordInfoWithoutCheck(OperateRecordDTO operateRecordDTO) {
         OperateRecordInfoPO operateRecordInfoPO = ConvertUtil.obj2Obj(operateRecordDTO, OperateRecordInfoPO.class);
+        operateRecordInfoPO.setOperateTime(new Date());
         boolean succ = (1 == operateRecordDAO.insert(operateRecordInfoPO));
         return Result.build(succ, operateRecordInfoPO.getId());
     }
