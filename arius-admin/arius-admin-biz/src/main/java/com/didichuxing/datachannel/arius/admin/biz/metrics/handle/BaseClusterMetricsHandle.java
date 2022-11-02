@@ -90,7 +90,9 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
 
         //2. initialization
         init(param);
-
+        if (param.getItemNamesUnderClusterLogic().size()!=0){
+            return Result.buildSucc(buildClusterLogicMetricsVO(param));
+        }
         return Result.buildSucc(buildClusterPhyMetricsVO(param));
     }
 
@@ -162,6 +164,16 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
      * @return 集群指标类型视图
      */
     protected MetricsVO buildClusterPhyMetricsVO(MetricsClusterPhyDTO param) {
+        return null;
+    }
+
+    /**
+     * 构建逻辑集群的整体指标
+     *
+     * @param param 物理集群指标
+     * @return 集群指标类型视图
+     */
+    protected MetricsVO buildClusterLogicMetricsVO(MetricsClusterPhyDTO param) {
         return null;
     }
 
