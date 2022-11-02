@@ -436,6 +436,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         } catch (Exception e) {
             LOGGER.error("method=batchDCDRSwitchMaster2Slave||templateIds={}||msg={}",
                 dcdrMasterSlaveSwitchDTO.getTemplateIds(), e.getMessage(), e);
+            return Result.buildFail("工单提交失败");
         }
 
         return Result.buildSucc(ConvertUtil.obj2Obj(workTaskResult.getData(), WorkTaskVO.class));
@@ -1172,7 +1173,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                                                       Long expectMasterPhysicalId, int step,
                                                       IndexTemplatePhy masterTemplate, IndexTemplatePhy slaveTemplate,
                                                       String operator) {
-        List<String> matchIndexNames = indexTemplatePhyService.getMatchIndexNames(slaveTemplate.getId());
+        List<String> matchIndexNames = indexTemplatePhyService.getMatchIndexNames(masterTemplate.getId());
         String indexExpression=slaveTemplate.getExpression();
         
         int templateId = switchDetail.getTemplateId().intValue();
@@ -1220,7 +1221,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                     checkDataResult = Result.buildFail(TASK_IS_CANCEL);
                 } else {
                     if (!esIndexService.ensureDataSame(masterTemplate.getCluster(), slaveTemplate.getCluster(),
-                        matchIndexNames,indexExpression)) {
+                        matchIndexNames,indexExpression,switchDetail.getTimeout())) {
                         checkDataResult = Result.buildFail("校验索引数据不一致!");
                         // 恢复实时数据写入：使用indexName*的方式进行索引关闭，避免索引数量过多，从而导致了执行时间过长
                         Result<Void> sttartMasterIndexResult = Result.build(esIndexService

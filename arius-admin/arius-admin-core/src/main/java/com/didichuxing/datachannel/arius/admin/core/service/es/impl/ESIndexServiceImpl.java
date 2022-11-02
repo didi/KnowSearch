@@ -414,11 +414,14 @@ public class ESIndexServiceImpl implements ESIndexService {
      * @param cluster2        集群2
      * @param indexNames      索引名字
      * @param indexExpression
+     * @param timeout
      * @return true/false
      */
     @Override
-    public boolean ensureDataSame(String cluster1, String cluster2, List<String> indexNames, String indexExpression) throws ESOperateException {
-        int retryCount = 20;
+    public boolean ensureDataSame(String cluster1, String cluster2, List<String> indexNames, String indexExpression,
+        Integer timeout) throws ESOperateException {
+        int retryCount = getRetryCountByTimeout(timeout);
+        
         while (retryCount-- > 0) {
             try {
                 Thread.sleep(5000);
@@ -863,8 +866,8 @@ public class ESIndexServiceImpl implements ESIndexService {
             return false;
         }
     
-        Map<String, IndexNodes> indexStat1 = syncBatchGetIndices(cluster1, indexNames);
-        Map<String, IndexNodes> indexStat2 = syncBatchGetIndices(cluster2, indexNames);
+        Map<String, IndexNodes> indexStat1 = syncBatchGetIndices(cluster1, Collections.singletonList(indexExpression));
+        Map<String, IndexNodes> indexStat2 = syncBatchGetIndices(cluster2, Collections.singletonList(indexExpression));
 
         for (String index : indexNames) {
             IndexNodes stat1 = indexStat1.get(index);
@@ -922,5 +925,19 @@ public class ESIndexServiceImpl implements ESIndexService {
             primaryShardNumber = Math.max(primaryShardNumber, shardNo);
         }
         return primaryShardNumber;
+    }
+    
+    /**
+     * > 此函数返回给定超时的重试次数
+     *
+     * @param timeout 请求的超时。
+     * @return 放弃前应尝试的重试次数。
+     */
+    private int getRetryCountByTimeout(Integer timeout) {
+        if (timeout == null) {
+            return 20;
+        }
+        int retryCount = (int) Math.ceil(timeout.doubleValue() / 5);
+        return retryCount == 0 ? 1 : retryCount;
     }
 }

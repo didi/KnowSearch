@@ -195,9 +195,17 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
         if (result.failed()) {
             return result;
         }
-
+        //如果是非分区模版
+        if (!templateLogicWithPhysical.getMasterPhyTemplate().getExpression().endsWith("*")){
+            final Result<Void> voidResult = noPartitioningIndexSettingChanges(settings,
+                templateLogicWithPhysical);
+            if (voidResult.failed()){
+                return Result.buildFrom(voidResult);
+            }
+        }
+        
         List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
-
+        
         //获取变更前的setting
         final Result<IndexTemplatePhySetting> beforeSetting = getSettings(logicId);
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
@@ -208,8 +216,6 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
         //分区索引会自动重建
         if (templateLogicWithPhysical.getMasterPhyTemplate().getExpression().endsWith("*")) {
             SpringTool.publish(new ReBuildTomorrowIndexEvent(this, logicId));
-        } else {
-            noPartitioningIndexSettingChanges(settings,templateLogicWithPhysical);
         }
         final Result<IndexTemplatePhySetting> afterSetting = getSettings(logicId);
         operateRecordService.save(new OperateRecord.Builder()
@@ -296,7 +302,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
      * @param settings 索引模板设置。
      * @param templateLogicWithPhysical 带有物理模板的逻辑索引模板
      */
-    private void noPartitioningIndexSettingChanges(IndexTemplatePhySetting settings,
+    private Result<Void> noPartitioningIndexSettingChanges(IndexTemplatePhySetting settings,
         IndexTemplateWithPhyTemplates templateLogicWithPhysical) {
         // 同步修改不分区索引
         final Map<String, String> settingMap = JsonUtils.flat(settings.getSettings());
@@ -306,14 +312,14 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
         // 更新索引 setting
         for (IndexTemplatePhy physical : templateLogicWithPhysical.getPhysicals()) {
             try {
-                esIndexService.syncPutIndexSettings(physical.getCluster(), Collections.singletonList(physical.getName()),
-                    settingMap,3);
+                esIndexService.syncPutIndexSettings(physical.getCluster(),
+                    Collections.singletonList(physical.getName()),
+                    settingMap, 3);
             } catch (ESOperateException e) {
-               LOGGER.error(
-                "class=TemplateLogicServiceImpl||method=noPartitioningIndexSettingChanges||IndexTemplate={}",
-                templateLogicWithPhysical.getName(),e);
+                return Result.buildFail(String.format("非分区模版setting修改错误，原因：%s",e.getMessage()));
             }
         }
-        
+        return Result.buildSucc();
+    
     }
 }
