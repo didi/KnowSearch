@@ -79,15 +79,8 @@ public class BaseESDAO {
         return directResponse;
     }
 
-    public <T> List<T> commonGet(String clusterName, String directRequestContent, Class<T> clazz) {
-        DirectResponse directResponse = null;
-        try {
-            directResponse = getDirectResponse(clusterName, "Get", directRequestContent);
-        } catch (ESOperateException e) {
-            LOGGER.error("class=BaseESDAO||method=commonGet||cluster={}||directRequestContent={}||"
-                            + "clazzName={}||errMsg=fail to get DirectResponse",
-                    clusterName, directRequestContent, clazz.getName(), e.getMessage(), e);
-        }
+    public <T> List<T> commonGet(String clusterName, String directRequestContent, Class<T> clazz) throws ESOperateException {
+        DirectResponse directResponse = getDirectResponse(clusterName, "Get", directRequestContent);
         List<T> list = Lists.newArrayList();
         if (directResponse.getRestStatus() == RestStatus.OK
             && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
@@ -96,8 +89,9 @@ public class BaseESDAO {
                 list.addAll(resList);
             } catch (Exception e) {
                 LOGGER.error("class=BaseESDAO||method=commonGet||cluster={}||directRequestContent={}||"
-                             + "clazzName={}||errMst=str convert obj error:{}",
+                             + "clazzName={}||errMsg=str convert obj error:{}",
                     clusterName, directRequestContent, clazz.getName(), e.getMessage(), e);
+                ParsingExceptionUtils.abnormalTermination(e);
             }
         }
         return list;

@@ -87,7 +87,7 @@ public class ESShardServiceImpl implements ESShardService {
         return Lists.newArrayList();
     }
     @Override
-    public List<ShardMetrics> syncGetBigShards(String clusterName) {
+    public List<ShardMetrics> syncGetBigShards(String clusterName) throws ESOperateException {
         List<ShardMetrics> shardsMetrics = getShardMetrics(clusterName);
         long configBigShard = SizeUtil.getUnitSize(ariusConfigInfoService.doubleSetting(ARIUS_COMMON_GROUP,BIG_SHARD_THRESHOLD,BIG_SHARD)+"g");
         return shardsMetrics.stream().filter(s->filterBigShard(configBigShard,s)).sorted(Comparator.comparing(s->SizeUtil.getUnitSize(s.getStore())))
@@ -96,24 +96,37 @@ public class ESShardServiceImpl implements ESShardService {
 
     @Override
     public Tuple</*大shard列表*/List<ShardMetrics>, /*小shard列表*/List<ShardMetrics>> syncGetBigAndSmallShards(String clusterName,long configBigShard,long configSmallShard) {
-        List<ShardMetrics> shardsMetrics = getShardMetrics(clusterName);
+        List<ShardMetrics> shardsMetrics = null;
         Tuple<List<ShardMetrics>, List<ShardMetrics>> tuple = new Tuple<>();
-        Map<String, List<ShardMetrics>> indexAndShardMetricsMap =  ConvertUtil.list2MapOfList(
-                shardsMetrics, ShardMetrics::getIndex, shardMetrics -> shardMetrics);
-        tuple.setV1(shardsMetrics.stream().filter(s->filterBigShard(configBigShard,s)).collect(Collectors.toList()));
-        tuple.setV2(shardsMetrics.stream().filter(s->filterSmallShard(configSmallShard,s,indexAndShardMetricsMap)).collect(Collectors.toList()));
-        return tuple;
+        try {
+            shardsMetrics = getShardMetrics(clusterName);
+            Map<String, List<ShardMetrics>> indexAndShardMetricsMap =  ConvertUtil.list2MapOfList(
+                    shardsMetrics, ShardMetrics::getIndex, shardMetrics -> shardMetrics);
+            tuple.setV1(shardsMetrics.stream().filter(s->filterBigShard(configBigShard,s)).collect(Collectors.toList()));
+            tuple.setV2(shardsMetrics.stream().filter(s->filterSmallShard(configSmallShard,s,indexAndShardMetricsMap)).collect(Collectors.toList()));
+            return tuple;
+        } catch (ESOperateException e) {
+            LOGGER.error("class=ESShardServiceImpl||method=syncGetBigAndSmallShards||cluster={}||errMsg=fail to get shard metrics",
+                    clusterName, e);
+           return tuple;
+        }
     }
 
     @Override
     public List<Segment> syncGetSegments(String clusterName) {
         String segmentsPartInfoRequestContent = getSegmentsPartInfoRequestContent();
-        List<SegmentPO> segmentPOS = esShardDAO.commonGet(clusterName, segmentsPartInfoRequestContent, SegmentPO.class);
-        return ConvertUtil.list2List(segmentPOS, Segment.class);
+        List<SegmentPO> segmentPOS = null;
+        try {
+            segmentPOS = esShardDAO.commonGet(clusterName, segmentsPartInfoRequestContent, SegmentPO.class);
+            return ConvertUtil.list2List(segmentPOS, Segment.class);
+        } catch (ESOperateException e) {
+            LOGGER.error("class=ESShardServiceImpl||method=syncGetSegments||cluster={}||errMsg=fail to commonGet",clusterName,e);
+        }
+        return new ArrayList<>();
     }
 
     @Override
-    public List<Segment> syncGetSegmentsCountInfo(String clusterName) {
+    public List<Segment> syncGetSegmentsCountInfo(String clusterName) throws ESOperateException {
         String segmentsCountContent = getSegmentsCountContent();
         List<SegmentPO> segmentPOS = esShardDAO.commonGet(clusterName, segmentsCountContent, SegmentPO.class);
         return ConvertUtil.list2List(segmentPOS, Segment.class);
@@ -135,7 +148,7 @@ public class ESShardServiceImpl implements ESShardService {
 
 
     @NotNull
-    private List<ShardMetrics> getShardMetrics(String clusterName) {
+    private List<ShardMetrics> getShardMetrics(String clusterName) throws ESOperateException {
         String shardsRequestContent = getShardsAllInfoRequestContent("20s");
         return esShardDAO.commonGet(clusterName, shardsRequestContent, ShardMetrics.class);
     }

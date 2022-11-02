@@ -342,7 +342,7 @@ public class ClusterOverviewMetricsHandle {
         metrics.setInvalidNodes(invalidNodeIps);
     }
 
-    private void getBigShardsMetrics(ESClusterOverviewMetricsVO metrics) {
+    private void getBigShardsMetrics(ESClusterOverviewMetricsVO metrics) throws ESOperateException {
         List<ShardMetrics> shardMetrics = esShardService.syncGetBigShards(metrics.getClusterName());
         metrics.setBigShards(ConvertUtil.list2List(shardMetrics, BigShardMetricsVO.class));
     }

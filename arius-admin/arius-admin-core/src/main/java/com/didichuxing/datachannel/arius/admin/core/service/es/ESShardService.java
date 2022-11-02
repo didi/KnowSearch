@@ -28,7 +28,7 @@ public interface ESShardService {
     /**
      * 获取ES集群大Shard(平台可配置，默认50G)信息
      */
-    List<ShardMetrics> syncGetBigShards(String clusterName);
+    List<ShardMetrics> syncGetBigShards(String clusterName) throws ESOperateException;
 
     /**
      * 获取ES集群大Shard(50G)信息 和 小Shard(1G以内)信息
@@ -47,7 +47,7 @@ public interface ESShardService {
      * @param clusterName
      * @return
      */
-    List<Segment> syncGetSegmentsCountInfo(String clusterName);
+    List<Segment> syncGetSegmentsCountInfo(String clusterName) throws ESOperateException;
 
 
     /**
