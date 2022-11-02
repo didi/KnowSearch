@@ -420,10 +420,17 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
      * @return
      */
     @Override
-    public TupleTwo<Boolean, Boolean> existDCDRAndPipelineModule(String phyClusterName) throws ESOperateException {
+    public TupleTwo<Boolean, Boolean> existDCDRAndPipelineModule(String phyClusterName) {
         //获取物理集群侧的插件列表
-        final List<TupleTwo<String, List<String>>> syncGetNodePluginTupleList = syncGetNodePluginTupleList(
-                phyClusterName);
+        final List<TupleTwo<String, List<String>>> syncGetNodePluginTupleList;
+        try {
+            syncGetNodePluginTupleList = syncGetNodePluginTupleList(
+                    phyClusterName);
+        } catch (ESOperateException e) {
+            LOGGER.error("class=ESClusterNodeServiceImpl||method=existDCDRAndPipelineModule||clusterName={}||errMsg=fail to syncGetNodePluginTupleList",
+                    phyClusterName,e);
+            return Tuples.of(Boolean.FALSE, Boolean.FALSE);
+        }
         if (CollectionUtils.isEmpty(syncGetNodePluginTupleList)) {
             return Tuples.of(Boolean.FALSE, Boolean.FALSE);
         }

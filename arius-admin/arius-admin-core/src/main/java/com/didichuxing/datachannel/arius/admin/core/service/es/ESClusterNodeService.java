@@ -116,7 +116,7 @@ public interface ESClusterNodeService {
      * @param phyClusterName phy集群名称
      * @return {@code TupleTwo<Boolean, Boolean>}
      */
-    public TupleTwo</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean> existDCDRAndPipelineModule(String phyClusterName) throws ESOperateException;
+    public TupleTwo</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean> existDCDRAndPipelineModule(String phyClusterName);
 
     /**
      * WriteRejected数
