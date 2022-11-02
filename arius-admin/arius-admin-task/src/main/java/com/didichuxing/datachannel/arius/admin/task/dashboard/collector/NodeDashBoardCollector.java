@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.NodeMetrics;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -77,7 +78,7 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
         .init("NodeDashBoardCollector", 10, 10, 100);
 
     @Override
-    public void collectSingleCluster(String cluster, long startTime) {
+    public void collectSingleCluster(String cluster, long startTime) throws ESOperateException {
         List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getNodesByCluster(cluster);
         if (CollectionUtils.isEmpty(clusterRoleHostList)) {
             return;

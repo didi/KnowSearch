@@ -132,7 +132,7 @@ public class ESPhyClusterNodeController {
     @GetMapping("/{clusterPhyName}/infos")
     @ResponseBody
     @ApiOperation(value = "获取物理集群下的节点信息")
-    public Result<List<ClusterNodeInfoVO>> listClusterLogicNodeInfos(@PathVariable String clusterLogicName) {
-        return clusterNodeManager.listClusterLogicNodeByName(clusterLogicName);
+    public Result<List<ClusterNodeInfoVO>> listClusterLogicNodeInfos(@PathVariable String clusterPhyName) {
+        return clusterNodeManager.listClusterPhyNodeInfosByName(clusterPhyName);
     }
 }

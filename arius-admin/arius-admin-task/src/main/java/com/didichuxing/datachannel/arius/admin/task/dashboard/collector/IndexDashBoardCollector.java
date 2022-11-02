@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.IndexMetrics;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
@@ -56,7 +57,7 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
         .init("IndexDashBoardCollector", 10, 10, 100);
 
     @Override
-    public void collectSingleCluster(String cluster, long currentTime) {
+    public void collectSingleCluster(String cluster, long currentTime) throws ESOperateException {
         List<CatIndexResult> catIndexResults = esIndexService.syncCatIndex(cluster, 2);
         if (CollectionUtils.isEmpty(catIndexResults)) {
             return;
