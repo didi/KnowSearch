@@ -37,7 +37,9 @@ public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<DslTem
         if (!AriusObjUtils.isBlack(queryIndex) && (queryIndex.startsWith("*") || queryIndex.startsWith("?"))) {
             return Result.buildParamIllegal("查询索引名称不允许带类似*, ?等通配符");
         }
-
+        if(AriusObjUtils.isNull(condition.getShowMetadata())){
+            return Result.buildParamIllegal("是否展示元信息参数不能为空");
+        }
         return Result.buildSucc(true);
     }
 
@@ -51,12 +53,15 @@ public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<DslTem
         Tuple<Long, List<DslTemplatePO>> tuple;
         //普通项目只能查该项目下的dsl模板
         try {
-        
             if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
                 tuple = dslTemplateService.getDslTemplatePage(projectId, condition);
                 // 超级项目不带 projectId 条件查询时，可查到所有项目的 dsl 模板
             } else {
-                tuple = dslTemplateService.getDslTemplatePage(condition.getProjectId(), condition);
+                if(condition.getShowMetadata()){
+                    tuple = dslTemplateService.getDslTemplatePage(condition.getProjectId(), condition);
+                }else{
+                    tuple = dslTemplateService.getDslTemplatePageWithoutMetadataCluster(condition.getProjectId(), condition);
+                }
             }
         } catch (ESOperateException e) {
             return PaginationResult.buildFail(e.getMessage());

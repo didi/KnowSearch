@@ -4,24 +4,39 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.DslQueryLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslQueryLimit;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.dsl.DslTemplateESDAO;
-import java.util.ArrayList;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author cjm
  */
 @Service
 public class DslTemplateService {
-
+    @Value("${es.update.cluster.name}")
+    private String metadataClusterName;
     @Autowired
     private DslTemplateESDAO dslTemplateESDAO;
+    @Autowired
+    private IndexTemplateService indexTemplateService;
+    @Autowired
+    private ClusterRegionService clusterRegionService;
 
     public Boolean updateDslTemplateQueryLimit(List<DslQueryLimitDTO> dslQueryLimitDTOList) {
 
@@ -61,5 +76,26 @@ public class DslTemplateService {
     public Tuple<Long, List<DslTemplatePO>> getDslTemplatePage(Integer projectId, DslTemplateConditionDTO queryDTO)
             throws ESOperateException {
         return dslTemplateESDAO.getDslTemplatePage(projectId, queryDTO);
+    }
+
+    public Tuple<Long, List<DslTemplatePO>> getDslTemplatePageWithoutMetadataCluster(Integer projectId, DslTemplateConditionDTO queryDTO) throws ESOperateException {
+        List<Long> logicClusterIds = getLogicClusterIds(metadataClusterName);
+        List<String> templateNameList = indexTemplateService.listByResourceIds(logicClusterIds).stream()
+                .map(IndexTemplate::getName).filter(indexName -> !indexName.startsWith("arius")).collect(Collectors.toList());
+        return dslTemplateESDAO.getDslTemplatePageWithoutMetadataCluster(projectId, queryDTO,templateNameList);
+    }
+
+    /**
+     * 获取逻辑集群ids
+     *
+     * @param phyClusterName
+     * @return
+     */
+    private List<Long> getLogicClusterIds(String phyClusterName) {
+        List<Long> logicClusterIdList = clusterRegionService.listPhyClusterRegions(phyClusterName)
+                .stream().map(ClusterRegion::getLogicClusterIds)
+                .filter(clusterLogicId -> !AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID.equals(clusterLogicId))
+                .map(ListUtils::string2LongList).flatMap(Collection::stream).distinct().collect(Collectors.toList());
+        return logicClusterIdList;
     }
 }
