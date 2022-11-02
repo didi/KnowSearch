@@ -146,7 +146,7 @@ public class TemplateLogicV3Controller {
     @ResponseBody
     @ApiOperation(value = "创建逻辑模板")
     public Result<Void> createTemplate(HttpServletRequest request,
-                                       @RequestBody IndexTemplateWithCreateInfoDTO param) {
+                                       @RequestBody IndexTemplateWithCreateInfoDTO param)  throws AdminOperateException {
         return templateLogicManager.create(param, HttpRequestUtil.getOperator(request),
             HttpRequestUtil.getProjectId(request));
     }
