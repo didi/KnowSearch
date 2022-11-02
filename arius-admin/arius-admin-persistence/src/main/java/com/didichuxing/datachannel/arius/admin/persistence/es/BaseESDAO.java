@@ -71,7 +71,7 @@ public class BaseESDAO {
         try {
             return esClient.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
         } catch (Exception e) {
-            LOGGER.error("class=BaseESDAO||method=getDirectResponse||clusterName={}||errMsg=esClient is null",
+            LOGGER.error("class=BaseESDAO||method=getDirectResponse||clusterName={}||errMsg=fail to direct",
                 clusterName, e.getMessage(), e);
             ParsingExceptionUtils.abnormalTermination(e);
         }
