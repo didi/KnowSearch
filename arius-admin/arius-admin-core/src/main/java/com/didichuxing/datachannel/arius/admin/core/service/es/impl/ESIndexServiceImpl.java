@@ -420,8 +420,8 @@ public class ESIndexServiceImpl implements ESIndexService {
     @Override
     public boolean ensureDataSame(String cluster1, String cluster2, List<String> indexNames, String indexExpression,
         Integer timeout) throws ESOperateException {
-        int retryCount =getRetryCountByTimeout(timeout);
-        retryCount=retryCount==0?1:retryCount;
+        int retryCount = getRetryCountByTimeout(timeout);
+        
         while (retryCount-- > 0) {
             try {
                 Thread.sleep(5000);
