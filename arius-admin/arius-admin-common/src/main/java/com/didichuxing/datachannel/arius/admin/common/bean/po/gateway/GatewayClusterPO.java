@@ -19,12 +19,43 @@ public class GatewayClusterPO extends BasePO {
 
     private Integer id;
     
+    /**
+     * 集群名称
+     */
     private String clusterName;
+    
+    /**
+     * 健康
+     */
     private Integer health;
+    
+    /**
+     * 接入ecm
+     */
     private Boolean ecmAccess;
+    
+    /**
+     * 备忘录
+     */
     private String memo;
+    
+    /**
+     * 组件id
+     */
     private Integer componentId;
+    
+    /**
+     * 版本
+     */
     private String version;
+    
+    /**
+     * 代理地址
+     */
     private String proxyAddress;
+    
+    /**
+     * 数据中心
+     */
     private String dataCenter;
 }

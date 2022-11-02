@@ -6,7 +6,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayCl
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterBriefVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterVO;
-import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import java.util.List;
 
 /**
@@ -42,5 +41,5 @@ public interface GatewayClusterManager {
      * @return PaginationResult<GatewayClusterVO>
      */
     PaginationResult<GatewayClusterVO> pageGetCluster(GatewayConditionDTO condition,
-        Integer projectId) throws NotFindSubclassException;
+        Integer projectId) ;
 }

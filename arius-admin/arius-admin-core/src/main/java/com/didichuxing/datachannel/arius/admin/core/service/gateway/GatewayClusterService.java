@@ -35,7 +35,7 @@ public interface GatewayClusterService {
 	 *
 	 * @param gatewayDTO GatewayDTO 对象
 	 */
-	boolean insert(GatewayClusterDTO gatewayDTO);
+	boolean insertOne(GatewayClusterDTO gatewayDTO);
 	
 	/**
 	 * > 列出所有符合给定条件的网关集群
@@ -43,7 +43,7 @@ public interface GatewayClusterService {
 	 * @param condition 网关条件DTO
 	 * @return List<GatewayClusterVO>
 	 */
-	List<GatewayClusterVO> listByCondition(GatewayConditionDTO condition);
+	List<GatewayClusterVO> pageByCondition(GatewayConditionDTO condition);
 	/**
 	 * > 计算符合给定条件的记录数
 	 *

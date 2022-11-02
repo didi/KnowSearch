@@ -10,7 +10,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayCl
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterBriefVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterVO;
-import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -58,14 +57,9 @@ public class GatewayV3Controller {
     @ResponseBody
     @ApiOperation(value = "按条件分页获取 gateway 集群集群列表",tags = "")
     public PaginationResult<GatewayClusterVO> pageGetGatewayCluster(HttpServletRequest request,
-                                                                    @RequestBody GatewayConditionDTO condition)
-        throws NotFindSubclassException {
+                                                                    @RequestBody GatewayConditionDTO condition) {
         return gatewayClusterManager.pageGetCluster(condition,HttpRequestUtil.getProjectId(request));
     }
-    
-    
-    
-    
     
     @GetMapping("/{gatewayClusterId}")
     @ResponseBody
@@ -74,9 +68,6 @@ public class GatewayV3Controller {
                                                @PathVariable("gatewayClusterId") Integer gatewayClusterId) {
         return Result.buildSucc(new GatewayClusterVO());
     }
-    
-    
-  
     
     @DeleteMapping("/{gatewayClusterId}")
     @ResponseBody

@@ -14,7 +14,6 @@ import java.util.Objects;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 网关集群service
@@ -40,8 +39,7 @@ public class GatewayClusterServiceImpl implements GatewayClusterService {
 	}
 	
 	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public boolean insert(GatewayClusterDTO gatewayDTO) {
+	public boolean insertOne(GatewayClusterDTO gatewayDTO) {
 		final GatewayClusterPO gatewayCluster = ConvertUtil.obj2Obj(gatewayDTO,
 				GatewayClusterPO.class);
 		boolean add = gatewayClusterDAO.insert(gatewayCluster) == 1;
@@ -50,7 +48,7 @@ public class GatewayClusterServiceImpl implements GatewayClusterService {
 	}
 	
 	@Override
-	public List<GatewayClusterVO> listByCondition(GatewayConditionDTO condition) {
+	public List<GatewayClusterVO> pageByCondition(GatewayConditionDTO condition) {
 		String sortTerm = null == condition.getSortTerm() ? SortConstant.ID : condition.getSortTerm();
 		String sortType = condition.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
 		condition.setSortTerm(sortTerm);

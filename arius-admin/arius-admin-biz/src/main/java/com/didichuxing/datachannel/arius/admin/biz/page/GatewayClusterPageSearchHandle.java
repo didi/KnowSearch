@@ -58,7 +58,7 @@ public class GatewayClusterPageSearchHandle extends
 	@Override
 	protected PaginationResult<GatewayClusterVO> buildPageData(GatewayConditionDTO condition,
 			Integer projectId) {
-		List<GatewayClusterVO> pagingGatewayClusterList = gatewayClusterService.listByCondition(
+		List<GatewayClusterVO> pagingGatewayClusterList = gatewayClusterService.pageByCondition(
 				condition);
 		final Long totalHit = gatewayClusterService.countByCondition(condition);
 		final List<String> clusterNames =

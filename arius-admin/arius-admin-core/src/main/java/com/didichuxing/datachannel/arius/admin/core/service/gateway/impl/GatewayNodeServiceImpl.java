@@ -32,7 +32,13 @@ public class GatewayNodeServiceImpl implements GatewayNodeService {
 						== gatewayNodeHosts.size();
 	}
 	
-	/**
+	@Override
+	public List<GatewayClusterNodeVO> selectByBatchClusterName(List<String> clusterName) {
+		return ConvertUtil.list2List(gatewayClusterNodeDAO.selectByBatchClusterName(clusterName),
+				GatewayClusterNodeVO.class);
+	}
+	
+		/**
 	 * > 在数据库中插入一条记录
 	 *
 	 * @param gatewayNodeHostDTO 要插入的对象。
@@ -44,11 +50,5 @@ public class GatewayNodeServiceImpl implements GatewayNodeService {
 		final int i = gatewayClusterNodeDAO.insert(gatewayClusterNode);
 		gatewayClusterNode.setId(gatewayClusterNode.getId());
 		return i;
-	}
-	
-	@Override
-	public List<GatewayClusterNodeVO> selectByBatchClusterName(List<String> clusterName) {
-		return ConvertUtil.list2List(gatewayClusterNodeDAO.selectByBatchClusterName(clusterName),
-				GatewayClusterNodeVO.class);
 	}
 }

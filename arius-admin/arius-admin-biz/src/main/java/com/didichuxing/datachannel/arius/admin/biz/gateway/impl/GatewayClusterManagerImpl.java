@@ -65,7 +65,7 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		final GatewayClusterDTO gatewayDTO = ConvertUtil.obj2Obj(param, GatewayClusterDTO.class);
 		//3. 初始化一些信息
 		initGatewayCluster(gatewayDTO);
-		final boolean addGatewayCluster = gatewayClusterService.insert(gatewayDTO);
+		final boolean addGatewayCluster = gatewayClusterService.insertOne(gatewayDTO);
 		//4. 写入节点信息
 		final boolean addGatewayNode = gatewayNodeService.insertBatch(param.getGatewayNodeHosts());
 		if (addGatewayCluster && addGatewayNode) {
@@ -82,8 +82,13 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 	
 	@Override
 	public PaginationResult<GatewayClusterVO> pageGetCluster(GatewayConditionDTO condition,
-			Integer projectId) throws NotFindSubclassException {
-		BaseHandle baseHandle = handleFactory.getByHandlerNamePer(GATEWAY_CLUSTER.getPageSearchType());
+			Integer projectId) {
+		BaseHandle baseHandle = null;
+		try {
+			baseHandle = handleFactory.getByHandlerNamePer(GATEWAY_CLUSTER.getPageSearchType());
+		} catch (NotFindSubclassException e) {
+			return PaginationResult.buildFail("没有找到对应的处理器");
+		}
 		if (baseHandle instanceof GatewayClusterPageSearchHandle) {
 		
 			GatewayClusterPageSearchHandle handler = (GatewayClusterPageSearchHandle) baseHandle;
@@ -100,7 +105,7 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 	 * @return Result<Void>
 	 */
 	private Result<Void> checkGatewayJoinParam(GatewayClusterJoinDTO param, Integer projectId) {
-		if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+		if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
 			return Result.buildFail("非超级项目无权限");
 		}
 		if (Objects.isNull(param)) {
