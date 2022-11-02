@@ -420,8 +420,8 @@ public class ESIndexServiceImpl implements ESIndexService {
     @Override
     public boolean ensureDataSame(String cluster1, String cluster2, List<String> indexNames, String indexExpression,
         Integer timeout) throws ESOperateException {
-        int retryCount = timeout != null ? (int) Math.ceil(timeout.doubleValue() / 5) : 20;
-        
+        int retryCount =getRetryCountByTimeout(timeout);
+        retryCount=retryCount==0?1:retryCount;
         while (retryCount-- > 0) {
             try {
                 Thread.sleep(5000);
@@ -925,5 +925,19 @@ public class ESIndexServiceImpl implements ESIndexService {
             primaryShardNumber = Math.max(primaryShardNumber, shardNo);
         }
         return primaryShardNumber;
+    }
+    
+    /**
+     * > 此函数返回给定超时的重试次数
+     *
+     * @param timeout 请求的超时。
+     * @return 放弃前应尝试的重试次数。
+     */
+    private int getRetryCountByTimeout(Integer timeout) {
+        if (timeout == null) {
+            return 20;
+        }
+        int retryCount = (int) Math.ceil(timeout.doubleValue() / 5);
+        return retryCount == 0 ? 1 : retryCount;
     }
 }
