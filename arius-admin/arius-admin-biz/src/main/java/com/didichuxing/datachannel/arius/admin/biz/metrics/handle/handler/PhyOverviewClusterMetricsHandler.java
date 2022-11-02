@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.metrics.handle.handler;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.getDefaultClusterPhyMetricsCode;
 
 import com.didichuxing.datachannel.arius.admin.biz.metrics.handle.BaseClusterMetricsHandle;
+import com.didichuxing.datachannel.arius.admin.biz.metrics.handle.ClusterLogicOverviewMetricsHandle;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.handle.ClusterOverviewMetricsHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
@@ -23,6 +24,9 @@ import org.springframework.stereotype.Service;
 public class PhyOverviewClusterMetricsHandler extends BaseClusterMetricsHandle {
     @Autowired
     private ClusterOverviewMetricsHandle clusterOverviewMetricsHandle;
+
+    @Autowired
+    private ClusterLogicOverviewMetricsHandle clusterLogicOverviewMetricsHandle;
 
     @Override
     protected Result<Void> checkSpecialParam(MetricsClusterPhyDTO param) {
@@ -47,5 +51,10 @@ public class PhyOverviewClusterMetricsHandler extends BaseClusterMetricsHandle {
     @Override
     protected MetricsVO buildClusterPhyMetricsVO(MetricsClusterPhyDTO param) {
         return clusterOverviewMetricsHandle.buildClusterPhyOverviewMetrics(param);
+    }
+
+    @Override
+    protected MetricsVO buildClusterLogicMetricsVO(MetricsClusterPhyDTO param) {
+        return clusterLogicOverviewMetricsHandle.buildClusterLogicOverviewMetrics(param);
     }
 }
