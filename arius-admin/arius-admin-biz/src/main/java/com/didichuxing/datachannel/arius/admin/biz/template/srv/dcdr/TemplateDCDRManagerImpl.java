@@ -1173,7 +1173,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                                                       Long expectMasterPhysicalId, int step,
                                                       IndexTemplatePhy masterTemplate, IndexTemplatePhy slaveTemplate,
                                                       String operator) {
-        List<String> matchIndexNames = indexTemplatePhyService.getMatchIndexNames(slaveTemplate.getId());
+        List<String> matchIndexNames = indexTemplatePhyService.getMatchIndexNames(masterTemplate.getId());
         String indexExpression=slaveTemplate.getExpression();
         
         int templateId = switchDetail.getTemplateId().intValue();

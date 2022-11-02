@@ -866,8 +866,8 @@ public class ESIndexServiceImpl implements ESIndexService {
             return false;
         }
     
-        Map<String, IndexNodes> indexStat1 = syncBatchGetIndices(cluster1, indexNames);
-        Map<String, IndexNodes> indexStat2 = syncBatchGetIndices(cluster2, indexNames);
+        Map<String, IndexNodes> indexStat1 = syncBatchGetIndices(cluster1, Collections.singletonList(indexExpression));
+        Map<String, IndexNodes> indexStat2 = syncBatchGetIndices(cluster2, Collections.singletonList(indexExpression));
 
         for (String index : indexNames) {
             IndexNodes stat1 = indexStat1.get(index);
