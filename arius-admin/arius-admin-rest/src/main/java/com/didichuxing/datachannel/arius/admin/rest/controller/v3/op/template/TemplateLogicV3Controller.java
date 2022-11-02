@@ -55,7 +55,7 @@ public class TemplateLogicV3Controller {
     @ResponseBody
     @ApiOperation(value = "获取逻辑模版创建的类型")
     public Result<Map<Integer, String>> templateLogicDataType(HttpServletRequest request) {
-        return Result.buildSucc(DataTypeEnum.code2DescMap());
+        return Result.buildSucc(templateLogicManager.getDataTypeCode2DescMap());
     }
 
     @GetMapping("/names")

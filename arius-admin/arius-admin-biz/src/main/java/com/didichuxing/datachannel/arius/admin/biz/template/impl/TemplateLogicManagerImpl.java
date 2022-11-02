@@ -85,6 +85,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.DataTypeService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
@@ -94,15 +95,8 @@ import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -127,6 +121,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Autowired
     private TemplateStatsService            templateStatsService;
+
+    @Autowired
+    private DataTypeService                 dataTypeService;
 
     @Autowired
     private ColdManager                     templateColdManager;
@@ -431,6 +428,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     public List<String> getTemplateLogicNames(Integer projectId) {
         List<IndexTemplate> templateLogics = indexTemplateService.listProjectLogicTemplatesByProjectId(projectId);
         return templateLogics.stream().map(IndexTemplate::getName).collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<Integer, String> getDataTypeCode2DescMap() {
+        return dataTypeService.code2DescMap();
     }
 
     @Override

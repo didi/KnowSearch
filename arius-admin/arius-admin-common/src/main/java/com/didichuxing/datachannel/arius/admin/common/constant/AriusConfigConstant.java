@@ -232,7 +232,33 @@ public class AriusConfigConstant {
     public static final String LOGIC_TEMPLATE_TIME_FORMAT_LIST_DEFAULT_VALUE           = "yyyy-MM-dd HH:mm:ss,yyyy-MM-dd HH:mm:ss.SSS,yyyy-MM-dd HH:mm:ss.SSS Z," +
             "                                                                               yyyy-MM-dd'T'HH:mm:ss,yyyy-MM-dd'T'HH:mm:ss.SSS,yyyy-MM-dd'T'HH:mm:ssZ,yyyy-MM-dd'T'HH:mm:ss.SSSZ,yyyy/MM/dd HH:mm:ss,epoch_second,epoch_millis,yyyy-MM-dd";
 
-    public static final String LOGIC_TEMPLATE_BUSINESS_TYPE_LIST_DEFAULT_VALUE         = "系统数据,日志数据,业务上报数据,RDS数据,离线导入数据";
+    public static final String LOGIC_TEMPLATE_BUSINESS_TYPE_LIST_DEFAULT_VALUE         = "[\n" +
+            "    {\n" +
+            "        \"code\":0,\n" +
+            "        \"desc\":\"系统日志\",\n" +
+            "        \"label\":\"system\"\n" +
+            "    },\n" +
+            "    {\n" +
+            "        \"code\":1,\n" +
+            "        \"desc\":\"日志数据\",\n" +
+            "        \"label\":\"log\"\n" +
+            "    },\n" +
+            "    {\n" +
+            "        \"code\":2,\n" +
+            "        \"desc\":\"用户上报数据\",\n" +
+            "        \"label\":\"olap\"\n" +
+            "    },\n" +
+            "    {\n" +
+            "        \"code\":3,\n" +
+            "        \"desc\":\"RDS数据\",\n" +
+            "        \"label\":\"binlog\"\n" +
+            "    },\n" +
+            "    {\n" +
+            "        \"code\":4,\n" +
+            "        \"desc\":\"RDS数据\",\n" +
+            "        \"label\":\"binlog\"\n" +
+            "    }\n" +
+            "]";
 
     public static final String CLUSTER_NODE_SPECIFICATION_LIST_DEFAULT_VALUE           = "16c-64g-3072g,16c-48g-3072g";
 
