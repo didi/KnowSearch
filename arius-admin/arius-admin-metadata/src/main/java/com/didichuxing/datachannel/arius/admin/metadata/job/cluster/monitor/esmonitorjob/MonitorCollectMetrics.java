@@ -227,7 +227,7 @@ public class MonitorCollectMetrics {
                 .deriveParam(ESDataTempBean.DIVISOR, "es.indices.refresh.total").computeType(DERIVE_DIVISION).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.cost.flush.total_time_in_millis")
-                .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.flush.total_time_in_millis ")
+                .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.flush.total_time_in_millis")
                 .deriveParam(ESDataTempBean.DIVISOR, "es.indices.flush.total").computeType(DERIVE_DIVISION).build());
 
         return indexWorkOrders;
