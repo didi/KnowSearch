@@ -8,12 +8,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.DataTypeService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
@@ -35,20 +35,27 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Temp
     private IndexTemplateService          indexTemplateService;
 
     @Autowired
+    private DataTypeService               dataTypeService;
+
+    @Autowired
     private ClusterLogicService           clusterLogicService;
 
     private static final FutureUtil<Void> BUILD_BELONG_CLUSTER_FUTURE_UTIL = FutureUtil
         .init("BUILD_BELONG_CLUSTER_FUTURE_UTIL", 10, 10, 100);
 
-
+    //未知的数据类型代码
+    private static final Integer UNKNOW_BUSINESS_TYPE = -1;
 
     @Override
     protected Result<Boolean> checkCondition(TemplateConditionDTO templateConditionDTO, Integer projectId) {
 
-        if (null != templateConditionDTO.getDataType() && !DataTypeEnum.isExit(templateConditionDTO.getDataType())) {
+        if (null != templateConditionDTO.getDataType() && !dataTypeService.isExit(templateConditionDTO.getDataType())) {
             return Result.buildParamIllegal("数据类型不存在");
         }
 
+        if (UNKNOW_BUSINESS_TYPE.equals(templateConditionDTO.getDataType())) {
+            return Result.buildParamIllegal("数据类型非法");
+        }
         String templateName = templateConditionDTO.getName();
         if (!AriusObjUtils.isBlack(templateName) && (templateName.startsWith("*") || templateName.startsWith("?"))) {
             return Result.buildParamIllegal("模板名称不允许带类似*, ?等通配符查询");

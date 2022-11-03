@@ -39,7 +39,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.LevelEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -123,6 +122,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     private Cache<String, List<IndexTemplate>> templateListCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
+
+    private static final Integer UNKNOW_BUSINESS_TYPE = -1;
 
     /**
      * 条件查询
@@ -1393,7 +1394,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (param.getProjectId() != null && !projectService.checkProjectExist(param.getProjectId())) {
             return Result.buildParamIllegal("所属应用不存在");
         }
-        if (param.getDataType() != null && DataTypeEnum.UNKNOWN.equals(DataTypeEnum.valueOf(param.getDataType()))) {
+        if (param.getDataType() != null && UNKNOW_BUSINESS_TYPE.equals(param.getDataType())) {
             return Result.buildParamIllegal("数据类型非法");
         }
         if (param.getShardNum() != null && param.getShardNum() <= 0) {

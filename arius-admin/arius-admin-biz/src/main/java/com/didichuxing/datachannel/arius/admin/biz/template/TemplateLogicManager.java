@@ -112,6 +112,9 @@ public interface TemplateLogicManager {
      */
     List<String> getTemplateLogicNames(Integer projectId);
 
+    /**
+     * 获取模板的业务类型
+     */
     Map<Integer, String> getDataTypeCode2DescMap();
 
     Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId);
