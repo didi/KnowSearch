@@ -58,7 +58,7 @@ public interface TemplateLogicManager {
      */
     @Transactional(rollbackFor = Exception.class)
     Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator,
-                        Integer projectId) throws AdminOperateException;
+                        Integer projectId);
 
     /**
      * 获取所有逻辑模板聚合

@@ -144,7 +144,7 @@ public class ESClusterPhyStatsService {
      * @param cluster 集群
      * @return {@code Long}
      */
-    public Long getClustersShardTotal(String cluster) {
+    public Long getClustersShardTotal(String cluster) throws ESOperateException {
         return  ariusStatsClusterInfoEsDao.getClustersShardTotal(cluster);
     }
 
@@ -154,7 +154,7 @@ public class ESClusterPhyStatsService {
      * @param cluster 集群
      * @return {@code Long}
      */
-    public Long getPendingTaskTotal(String cluster) {
+    public Long getPendingTaskTotal(String cluster) throws ESOperateException {
         return ariusStatsClusterInfoEsDao.getPendingTaskTotal(cluster);
     }
 

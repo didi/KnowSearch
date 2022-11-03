@@ -572,7 +572,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         return nodePOList;
     }
 
-    private Map<String, String> buildESClusterNodeMachineSpecMap(String cluster) {
+    private Map<String, String> buildESClusterNodeMachineSpecMap(String cluster) throws ESOperateException {
         Map<String, String> node2machineSpecMap = Maps.newHashMap();
         Map<String, Integer> node2CpuNum = esClusterNodeService.syncGetNodesCpuNum(cluster);
         Map<String, Tuple<Long, Long>> node2MemAndDisk = esClusterNodeService.syncGetNodesMemoryAndDisk(cluster);

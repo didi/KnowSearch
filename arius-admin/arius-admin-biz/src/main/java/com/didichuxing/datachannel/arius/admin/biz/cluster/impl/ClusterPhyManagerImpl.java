@@ -236,7 +236,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private synchronized void refreshClusterPhyInfoWithCache() {
     
         for (String clusterName : clusterPhyService.listClusterNames()) {
-            CLUSTER_PHY_DCDR_PIPELINE.put(clusterName, getDCDRAndPipelineTupleByClusterPhy(clusterName));
+            try {
+                CLUSTER_PHY_DCDR_PIPELINE.put(clusterName, getDCDRAndPipelineTupleByClusterPhy(clusterName));
+            } catch (ESOperateException e) {
+                LOGGER.error("class=ClusterPhyManagerImpl||method=refreshClusterPhyInfoWithCache||clusterName={}||errMsg=fail to getDCDRAndPipelineTupleByClusterPhy",
+                        clusterName);
+            }
             CLUSTER_PHY_CONNECTION_ENUM.put(clusterName, getClusterConnectionStatus(clusterName));
         }
     }
@@ -1839,7 +1844,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
     
     private TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean> getDCDRAndPipelineTupleByClusterPhy(
-            String clusterPhy) {
+            String clusterPhy) throws ESOperateException {
         TupleTwo<Boolean, Boolean> tupleTwo = esClusterNodeService.existDCDRAndPipelineModule(clusterPhy);
         return Tuples.of(tupleTwo.v1,tupleTwo.v2,CollectionUtils.isNotEmpty(getColdRegionByPhyCluster(clusterPhy)));
     }

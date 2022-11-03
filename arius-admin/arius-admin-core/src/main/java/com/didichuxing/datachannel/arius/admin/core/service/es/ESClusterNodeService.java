@@ -48,14 +48,14 @@ public interface ESClusterNodeService {
     /**
      * 获取ES集群PendingTask
      */
-    List<PendingTask> syncGetPendingTask(String clusterName);
+    List<PendingTask> syncGetPendingTask(String clusterName) throws ESOperateException;
 
     Map<String/*node*/, Long /*shardNum*/> syncGetNode2ShardNumMap(String clusterName);
 
     /**
      * 获取ES集群大索引(大于10亿文档数)信息
      */
-    List<BigIndexMetrics> syncGetBigIndices(String clusterName);
+    List<BigIndexMetrics> syncGetBigIndices(String clusterName) throws ESOperateException;
 
     /**
      * 获取ES集群某个节点上的索引个数
@@ -100,7 +100,7 @@ public interface ESClusterNodeService {
      * @param cluster 集群
      * @return {@link Map}<{@link String}, {@link Integer}>
      */
-    Map<String, Integer> syncGetNodesCpuNum(String cluster);
+    Map<String, Integer> syncGetNodesCpuNum(String cluster) throws ESOperateException;
     
     /**
      * 同步获取节点插件元组列表
@@ -108,7 +108,7 @@ public interface ESClusterNodeService {
      * @param phyCluster phy集群
      * @return {@code List<TupleTwo<String, List<String>>>}
      */
-    public List<TupleTwo</*node name*/String,/*plugin names*/List<String>>> syncGetNodePluginTupleList(String phyCluster);
+    public List<TupleTwo</*node name*/String,/*plugin names*/List<String>>> syncGetNodePluginTupleList(String phyCluster) throws ESOperateException;
     
     /**
      * 确定dcdr 和pipeline存在于集群中
