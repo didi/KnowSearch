@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
@@ -19,8 +20,16 @@ public interface ClusterNodeManager {
      * @param clusterId   物理集群Id
      * @return            Result<List<ESClusterRoleHostVO>>
      */
+    @Deprecated
     Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(Long clusterId);
 
+    /**
+     * 获取可划分至region的节点信息
+     * @param clusterId   物理集群Id
+     * @param divideType  region划分方式
+     * @return            Result<List<ESClusterRoleHostVO>>
+     */
+    Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfoWithDivideType(Long clusterId, String divideType);
     /**
      * 划分指定节点至region
      *
@@ -67,6 +76,18 @@ public interface ClusterNodeManager {
      */
     Result listClusterLogicNodeByName(String clusterLogicName);
 
+    /**
+     * 通过逻辑集群名称获取节点信息
+     * @param clusterLogicName
+     * @return
+     */
+    Result<List<ClusterNodeInfoVO>> listClusterLogicNodeInfosByName(String clusterLogicName);
+
+    /**
+     * 通过逻辑集群ID获取节点信息
+     * @param regionId
+     * @return
+     */
     Result<List<ESClusterRoleHostVO>> listClusterRoleHostByRegionId(Long regionId);
 
     /**
@@ -95,4 +116,11 @@ public interface ClusterNodeManager {
      * @return
      */
     Result<Boolean> checkMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator, Integer projectId);
+
+    /**
+     * 通过物理集群获取带角色的节点信息
+     * @param clusterPhyName
+     * @return
+     */
+    Result<List<ClusterNodeInfoVO>> listClusterPhyNodeInfosByName(String clusterPhyName);
 }

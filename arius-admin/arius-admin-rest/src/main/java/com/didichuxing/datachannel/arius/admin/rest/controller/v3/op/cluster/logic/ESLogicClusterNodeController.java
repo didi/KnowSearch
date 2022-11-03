@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.lo
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -39,5 +40,12 @@ public class ESLogicClusterNodeController {
     @ApiOperation(value = "获取逻辑集群下的节点名称")
     public Result<List<String>> listClusterLogicNodeName(@PathVariable String clusterLogicName) {
         return clusterNodeManager.listClusterLogicNodeByName(clusterLogicName);
+    }
+
+    @GetMapping("/{clusterLogicName}/infos")
+    @ResponseBody
+    @ApiOperation(value = "获取逻辑集群下的节点信息")
+    public Result<List<ClusterNodeInfoVO>> listClusterLogicNodeInfos(@PathVariable String clusterLogicName) {
+        return clusterNodeManager.listClusterLogicNodeInfosByName(clusterLogicName);
     }
 }

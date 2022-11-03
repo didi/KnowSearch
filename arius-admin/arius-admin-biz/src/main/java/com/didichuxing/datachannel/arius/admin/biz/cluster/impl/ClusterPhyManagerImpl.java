@@ -12,6 +12,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterPhyPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
@@ -21,11 +22,7 @@ import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -239,7 +236,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private synchronized void refreshClusterPhyInfoWithCache() {
     
         for (String clusterName : clusterPhyService.listClusterNames()) {
-            CLUSTER_PHY_DCDR_PIPELINE.put(clusterName, getDCDRAndPipelineTupleByClusterPhy(clusterName));
+            try {
+                CLUSTER_PHY_DCDR_PIPELINE.put(clusterName, getDCDRAndPipelineTupleByClusterPhy(clusterName));
+            } catch (ESOperateException e) {
+                LOGGER.error("class=ClusterPhyManagerImpl||method=refreshClusterPhyInfoWithCache||clusterName={}||errMsg=fail to getDCDRAndPipelineTupleByClusterPhy",
+                        clusterName);
+            }
             CLUSTER_PHY_CONNECTION_ENUM.put(clusterName, getClusterConnectionStatus(clusterName));
         }
     }
@@ -615,13 +617,18 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(String cluster)
-            throws ESOperateException {
+    public Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(String cluster) {
         if (!isClusterExists(cluster)) {
             return Result.buildFail(String.format("集群[%s]不存在", cluster));
         }
 
-        ESClusterGetSettingsAllResponse clusterSetting = esClusterService.syncGetClusterSetting(cluster);
+        ESClusterGetSettingsAllResponse clusterSetting = null;
+        try {
+            clusterSetting = esClusterService.syncGetClusterSetting(cluster);
+        } catch (Exception e) {
+            LOGGER.error("class=ClusterPhyManagerImpl||method=getPhyClusterDynamicConfigs||clusterName={}", cluster, e);
+            return Result.buildFail(String.format("获取集群setting异常，请确认是否集群[%s]是否正常", cluster));
+        }
         if (null == clusterSetting) {
             return Result.buildFail(String.format("获取集群动态配置信息失败, 请确认是否集群[%s]是否正常", cluster));
         }
@@ -644,15 +651,20 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator, Integer projectId)
-            throws ESOperateException {
+    public Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator, Integer projectId) {
         final Result<Void> resultCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (resultCheck.failed()) {
             return Result.buildFail(resultCheck.getMessage());
         }
         final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs = getPhyClusterDynamicConfigs(
             param.getClusterName());
+        if (beforeChangeConfigs.failed()) {
+            return Result.buildFail(beforeChangeConfigs.getMessage());
+        }
         String changeKey = param.getKey();
+        if (beforeChangeConfigs.getData().values() == null) {
+            return Result.buildFail("获取要更新的集群配置项的信息失败");
+        }
         Object beforeValue = beforeChangeConfigs.getData().values().stream()
             .filter(
                 clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.containsKey(changeKey))
@@ -979,7 +991,15 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         ClusterPhyDTO esClusterDTO = new ClusterPhyDTO();
-        ClusterHealthEnum clusterHealthEnum = esClusterService.syncGetClusterHealthEnum(clusterPhyName);
+        ClusterHealthEnum clusterHealthEnum = null;
+        try {
+            clusterHealthEnum = esClusterService.syncGetClusterHealthEnum(clusterPhyName);
+        } catch (ESOperateException e) {
+            LOGGER.error(
+                    "class=ClusterPhyManagerImpl||method=updateClusterHealth||clusterPhyName={}||msg=fail to get clusterHealthEnum",
+                    clusterPhyName);
+            return false;
+        }
 
         esClusterDTO.setId(clusterPhy.getId());
         esClusterDTO.setHealth(clusterHealthEnum.getCode());
@@ -1154,8 +1174,88 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     public List<ClusterPhy> pagingGetClusterPhyByCondition(ClusterPhyConditionDTO condition) {
         return  clusterPhyService.pagingGetClusterPhyByCondition(condition);
     }
+
+    /**
+     * 批量更新物理集群的动态配置项
+     * @param param        要更新的配置项
+     * @param operator
+     * @param projectId
+     * @return
+     */
+    @Override
+    public Result<Boolean> batchUpdateClusterDynamicConfig(MultiClusterSettingDTO param, String operator,
+                                                           Integer projectId) throws ESOperateException {
+        final Result<Void> projectCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (projectCheck.failed()) {
+            return Result.buildFail(projectCheck.getMessage());
+        }
+        Result<Boolean> result = checkClusterExistAndConfigType(param);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+
+        boolean updateFail = false;
+        StringBuilder updateFailClusters = new StringBuilder();
+        // 对每个集群进行更新配置操作
+        for (String cluster : param.getClusterNameList()) {
+            Map<String, Object> persistentConfig = Maps.newHashMap();
+            String changeKey = param.getKey();
+            Object changeValue = param.getValue();
+            persistentConfig.put(changeKey, changeValue);
+            boolean succ = esClusterService.syncPutPersistentConfig(cluster, persistentConfig);
+            if(!succ){
+                updateFail = true;
+                updateFailClusters.append(cluster).append(",");
+            }else {
+                // 记录操作
+                final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs = getPhyClusterDynamicConfigs(cluster);
+                if (beforeChangeConfigs.failed() || beforeChangeConfigs.getData().values() == null){
+                    updateFail = true;
+                    updateFailClusters.append(cluster).append(",");
+                } else {
+
+                    Object beforeValue = beforeChangeConfigs.getData().values().stream()
+                            .filter(
+                                    clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.containsKey(changeKey))
+                            .map(clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.get(changeKey))
+                            .findFirst().orElse("");
+
+                    final ClusterPhy clusterByName = clusterPhyService.getClusterByName(cluster);
+                    operateRecordService.saveOperateRecordWithManualTrigger(String.format("%s:%s->%s", changeKey, beforeValue, changeValue),
+                            operator, AuthConstant.SUPER_PROJECT_ID, clusterByName.getId(),
+                            OperateTypeEnum.PHYSICAL_CLUSTER_DYNAMIC_CONF_CHANGE);
+                }
+            }
+        }
+        if(updateFail){
+            return Result.buildFail(updateFailClusters.deleteCharAt(updateFailClusters.length()-1) + " 集群更新动态配置失败");
+        }
+
+        return Result.buildSucc();
+    }
     
     /**************************************** private method ***************************************************/
+
+    private Result<Boolean> checkClusterExistAndConfigType(MultiClusterSettingDTO param) {
+        // check集群是否都存在
+        for (String cluster : param.getClusterNameList()) {
+            boolean clusterExist = clusterPhyService.isClusterExists(cluster);
+            if(!clusterExist) {
+                return Result.buildFail(cluster + "集群不存在");
+            }
+        }
+
+        // check配置项是否合规
+        ClusterDynamicConfigsEnum clusterSettingEnum = ClusterDynamicConfigsEnum.valueCodeOfName(param.getKey());
+        if (clusterSettingEnum.equals(ClusterDynamicConfigsEnum.UNKNOWN)) {
+            return Result.buildFail("传入的字段类型未知");
+        }
+        if (!clusterSettingEnum.getCheckFun().apply(String.valueOf(param.getValue())).booleanValue()) {
+            return Result.buildFail("传入的字段参数格式有误");
+        }
+
+        return Result.buildSucc();
+    }
 
     private Result<Boolean> deleteClusterInner(Integer clusterPhyId, Integer projectId) {
         ClusterPhy clusterPhy = clusterPhyService.getClusterById(clusterPhyId);
@@ -1744,7 +1844,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
     
     private TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean> getDCDRAndPipelineTupleByClusterPhy(
-            String clusterPhy) {
+            String clusterPhy) throws ESOperateException {
         TupleTwo<Boolean, Boolean> tupleTwo = esClusterNodeService.existDCDRAndPipelineModule(clusterPhy);
         return Tuples.of(tupleTwo.v1,tupleTwo.v2,CollectionUtils.isNotEmpty(getColdRegionByPhyCluster(clusterPhy)));
     }

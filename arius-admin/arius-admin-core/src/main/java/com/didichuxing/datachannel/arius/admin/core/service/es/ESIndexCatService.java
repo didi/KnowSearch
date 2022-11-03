@@ -5,6 +5,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +55,7 @@ public interface ESIndexCatService {
      * @param indexName 索引名称
      * @return
      */
-    List<IndexShardInfo> syncGetIndexShardInfo(String cluster, String indexName);
+    List<IndexShardInfo> syncGetIndexShardInfo(String cluster, String indexName) throws ESOperateException;
 
 
     /**
@@ -107,4 +109,5 @@ public interface ESIndexCatService {
     List<String> syncGetIndexListByProjectIdAndFuzzyIndexAndClusterPhy( String clusterPhyName,
                                                                        String index);
 
+    List<IndexCatCell> syncGetAllCatIndexNameListByClusters(Integer searchSize,List<String> phyClusterNames);
 }

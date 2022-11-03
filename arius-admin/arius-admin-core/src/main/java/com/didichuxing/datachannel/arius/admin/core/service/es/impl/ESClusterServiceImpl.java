@@ -128,7 +128,7 @@ public class ESClusterServiceImpl implements ESClusterService {
      * @return true/false
      */
     @Override
-    public boolean hasSettingExist(String cluster, String settingFlatName) {
+    public boolean hasSettingExist(String cluster, String settingFlatName) throws ESOperateException {
         Map<String, Object> clusterSettingMap = esClusterDAO.getPersistentClusterSettings(cluster);
         if (null == clusterSettingMap) {
             return false;
@@ -137,7 +137,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public Map<String, List<String>> syncGetNode2PluginsMap(String cluster) {
+    public Map<String, List<String>> syncGetNode2PluginsMap(String cluster) throws ESOperateException {
         return esClusterDAO.getNode2PluginsMap(cluster, 3);
     }
 
@@ -236,17 +236,17 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public ESClusterHealthResponse syncGetClusterHealth(String clusterName) {
+    public ESClusterHealthResponse syncGetClusterHealth(String clusterName) throws ESOperateException {
         return esClusterDAO.getClusterHealth(clusterName, 3);
     }
 
     @Override
-    public List<ESClusterTaskStatsResponse> syncGetClusterTaskStats(String clusterName) {
+    public List<ESClusterTaskStatsResponse> syncGetClusterTaskStats(String clusterName) throws ESOperateException {
         return esClusterDAO.getClusterTaskStats(clusterName);
     }
 
     @Override
-    public ClusterHealthEnum syncGetClusterHealthEnum(String clusterName) {
+    public ClusterHealthEnum syncGetClusterHealthEnum(String clusterName) throws ESOperateException {
         ESClusterHealthResponse clusterHealthResponse = esClusterDAO.getClusterHealth(clusterName, 3);
 
         ClusterHealthEnum clusterHealthEnum = ClusterHealthEnum.UNKNOWN;
@@ -258,7 +258,13 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     @Override
     public ESClusterStatsResponse syncGetClusterStats(String clusterName) {
-        return esClusterDAO.getClusterStats(clusterName);
+        try {
+            return esClusterDAO.getClusterStats(clusterName);
+        } catch (ESOperateException e) {
+            LOGGER.error("class=ESClusterServiceImpl||method=syncGetClusterStats||clusterName={}||errMsg=fail to get cluster stats",
+                    clusterName);
+            return null;
+        }
     }
 
     @Override
@@ -267,7 +273,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public Map<String, Integer> synGetSegmentsOfIpByCluster(String clusterName) {
+    public Map<String, Integer> synGetSegmentsOfIpByCluster(String clusterName) throws ESOperateException {
         Map<String, Integer> segmentsOnIpMap = Maps.newHashMap();
         for (ECSegmentOnIp ecSegmentsOnIp : esClusterDAO.getSegmentsOfIpByCluster(clusterName)) {
             if (segmentsOnIpMap.containsKey(ecSegmentsOnIp.getIp())) {
@@ -283,21 +289,26 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     @Override
     public boolean syncPutPersistentConfig(String cluster, Map<String, Object> configMap) {
-        return esClusterDAO.putPersistentConfig(cluster, configMap);
+        try {
+            return esClusterDAO.putPersistentConfig(cluster, configMap);
+        } catch (Exception e) {
+            LOGGER.error("class=ESClusterServiceImpl||method=syncPutPersistentConfig||clusterName={}", cluster,e);
+            return false;
+        }
     }
 
     @Override
-    public String synGetESVersionByCluster(String cluster) {
+    public String synGetESVersionByCluster(String cluster) throws ESOperateException {
         return esClusterDAO.getESVersionByCluster(cluster, 3);
     }
 
     @Override
-    public Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster) {
+    public Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster) throws ESOperateException {
         return esClusterDAO.getAllSettingsByCluster(cluster, 3);
     }
 
     @Override
-    public Map<String, ClusterNodeSettings> syncGetPartOfSettingsByCluster(String cluster) {
+    public Map<String, ClusterNodeSettings> syncGetPartOfSettingsByCluster(String cluster) throws ESOperateException {
         return esClusterDAO.getPartOfSettingsByCluster(cluster, 3);
     }
 

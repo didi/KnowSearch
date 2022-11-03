@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesIncrementalSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexForceMergeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
@@ -277,4 +278,13 @@ public interface IndicesManager {
     List<CatIndexResult> listIndexCatInfoByTemplatePhyId(Long physicalId);
     
     Result<Void> deleteIndexByCLusterPhy(String clusterPhy, List<String> indexNameList, Integer projectId, String operator);
+
+    /**
+     * 以settings增量方式批量更新索引的settings
+     * @param params
+     * @param projectId
+     * @param operator
+     * @return
+     */
+    Result<Void> updateIndexSettingsByMerge(List<IndicesIncrementalSettingDTO> params, Integer projectId, String operator) throws ESOperateException;
 }

@@ -11,10 +11,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didiglobal.logi.op.manager.interfaces.vo.GeneralGroupConfigHostVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -206,4 +208,14 @@ public class ESPhyClusterController {
         return clusterPhyManager.addCluster(param, HttpRequestUtil.getOperator(request),
             HttpRequestUtil.getProjectId(request));
     }
+ 
+    @PostMapping("{clusterPhyId}/{gatewayClusterId}")
+    @ResponseBody
+    @ApiOperation(value = "物理集群绑定 gateway",tags = "")
+    public Result<List<ClusterPhyVO>> bindGatewayCluster(@PathVariable("clusterPhyId") Integer clusterPhyId,
+                                                         @PathVariable("gatewayClusterId") Integer gatewayClusterId,
+                                                         HttpServletRequest request) {
+        return Result.buildSucc();
+    }
+    
 }

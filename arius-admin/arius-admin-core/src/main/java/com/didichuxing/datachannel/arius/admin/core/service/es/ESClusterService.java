@@ -59,14 +59,14 @@ public interface ESClusterService {
      * @param settingFlatName  setting名字
      * @return true/false
      */
-    boolean hasSettingExist(String cluster, String settingFlatName);
+    boolean hasSettingExist(String cluster, String settingFlatName) throws ESOperateException;
 
     /**
      * 获取物理集群下各个节点的插件名称列表
      * @param cluster
      * @return map
      */
-    Map<String, List<String>> syncGetNode2PluginsMap(String cluster);
+    Map<String, List<String>> syncGetNode2PluginsMap(String cluster) throws ESOperateException;
 
     /**
      * 获取某个集群内索引别名到索引名称的映射
@@ -101,7 +101,7 @@ public interface ESClusterService {
      * @param clusterName
      * @return
      */
-    ESClusterHealthResponse syncGetClusterHealth(String clusterName);
+    ESClusterHealthResponse syncGetClusterHealth(String clusterName) throws ESOperateException;
 
     /**
      * 获取集群task信息
@@ -109,7 +109,7 @@ public interface ESClusterService {
      * @param clusterName
      * @return
      */
-    List<ESClusterTaskStatsResponse> syncGetClusterTaskStats(String clusterName);
+    List<ESClusterTaskStatsResponse> syncGetClusterTaskStats(String clusterName) throws ESOperateException;
 
     /**
      * 获取集群健康度
@@ -117,7 +117,7 @@ public interface ESClusterService {
      * @param clusterName
      * @return
      */
-    ClusterHealthEnum syncGetClusterHealthEnum(String clusterName);
+    ClusterHealthEnum syncGetClusterHealthEnum(String clusterName) throws ESOperateException;
 
     /**
      * 获取集群状态信息
@@ -136,7 +136,7 @@ public interface ESClusterService {
      * @param clusterName 物理集群名称
      * @return Map<String, Integer> String表示的是实例所在的ip值，Integer表示该ip上的总的segment数目
      */
-    Map<String, Integer> synGetSegmentsOfIpByCluster(String clusterName);
+    Map<String, Integer> synGetSegmentsOfIpByCluster(String clusterName) throws ESOperateException;
 
     /**
      * 集群的持久化操作
@@ -156,19 +156,19 @@ public interface ESClusterService {
     /**
      * 获取全量集群节点Setting配置; key ——> 节点uuid ,value ——> ClusterNodeInfo
      */
-    Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster);
+    Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster) throws ESOperateException;
 
     /**
      * 获取部分集群节点Setting配置; key ——> 节点uuid ,value ——> ClusterNodeSettings
      */
-    Map<String, ClusterNodeSettings> syncGetPartOfSettingsByCluster(String cluster);
+    Map<String, ClusterNodeSettings> syncGetPartOfSettingsByCluster(String cluster) throws ESOperateException;
 
     /**
      * 获取运行集群的es版本号
      * @param cluster 物理集群名称
      * @return 物理集群es版本号
      */
-    String synGetESVersionByCluster(String cluster);
+    String synGetESVersionByCluster(String cluster) throws ESOperateException;
 
     /**
      * 检测是否为同一个集群

@@ -176,6 +176,15 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
         return Result.buildSucc();
     }
 
+    /**
+     * 以全量的方式更新模版settings
+     * @param logicId   逻辑模版ID
+     * @param settings  全量settings
+     * @param operator
+     * @param projectId
+     * @return
+     * @throws AdminOperateException
+     */
     @Override
     public Result<Void> updateSettings(Integer logicId, IndexTemplatePhySetting settings, String operator,
                                        Integer projectId) throws AdminOperateException {
@@ -256,6 +265,51 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
         }
 
         return Result.buildFail("不存在Master角色物理模板，ID：" + logicId);
+    }
+
+    /**
+     * 以增量的方式更新模版settings
+     * @param logicId   模版id
+     * @param incrementalSettings  settings的增量
+     * @param operator
+     * @param projectId
+     * @return
+     * @throws AdminOperateException
+     */
+    @Override
+    public Result<Void> updateSettingsByMerge(Integer logicId, Map<String, String> incrementalSettings, String operator,
+                                       Integer projectId) throws AdminOperateException {
+
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(logicId);
+
+        if (templateLogicWithPhysical == null) {
+            return Result.buildNotExist("逻辑模板不存在, ID:" + logicId);
+        }
+        if (!templateLogicWithPhysical.hasPhysicals()) {
+            return Result.buildNotExist("物理模板不存在，ID:" + logicId);
+        }
+
+        List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+
+        // 获取变更前的setting
+        final IndexTemplatePhySetting beforeSetting = getSettings(logicId).getData();
+        // merge增量settings信息
+        Map<String, String> settingsMap = beforeSetting.flatSettings();
+        IndexTemplatePhySetting afterSetting = new IndexTemplatePhySetting(settingsMap);
+        afterSetting.merge(incrementalSettings);
+        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+            templatePhySettingManager.mergeTemplateSettingsCheckAllocationAndShard(logicId,
+                    templatePhysical.getCluster(), templatePhysical.getName(), afterSetting);
+        }
+
+        SpringTool.publish(new ReBuildTomorrowIndexEvent(this, logicId));
+        operateRecordService.save(new OperateRecord.Builder()
+                .project(projectService.getProjectBriefByProjectId(projectId)).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                .userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_EDIT_SETTING)
+                .content(new TemplateSettingOperateRecord(beforeSetting, afterSetting).toString())
+                .bizId(logicId).build());
+
+        return Result.buildSucc();
     }
 
     /**************************************** private method ****************************************************/

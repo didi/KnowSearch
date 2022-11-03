@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Set;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
@@ -63,6 +64,21 @@ public class ESPhyClusterRegionController {
     public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionWithNodeInfoByClusterName(HttpServletRequest request,
                                                                                                 @PathVariable String clusterName) {
         return clusterRegionManager.listClusterRegionWithNodeInfoByClusterName(clusterName);
+    }
+
+    @GetMapping("/divideType")
+    @ResponseBody
+    @ApiOperation(value = "获取当前支持的所有attribute划分方式")
+    public Result<Set<String>> getAttributeDivideType() {
+        return clusterRegionManager.getAttributeDivideType();
+    }
+
+    @GetMapping("/divide/{divideType}/{clusterName}")
+    @ResponseBody
+    @ApiOperation(value = "根据物理集群名称和划分方式获region信息，包含region中的数据节点信息")
+    public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionInfoWithDivideType(@PathVariable String clusterName,
+                                                                                              @PathVariable String divideType) {
+        return clusterRegionManager.listClusterRegionInfoWithDivideType(clusterName, divideType);
     }
 
     @GetMapping("/{clusterName}/dcdr")

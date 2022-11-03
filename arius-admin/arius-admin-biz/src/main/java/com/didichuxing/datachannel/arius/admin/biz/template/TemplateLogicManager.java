@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTem
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateIncrementalSettingsDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
@@ -57,7 +58,7 @@ public interface TemplateLogicManager {
      */
     @Transactional(rollbackFor = Exception.class)
     Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator,
-                        Integer projectId) throws AdminOperateException;
+                        Integer projectId);
 
     /**
      * 获取所有逻辑模板聚合
@@ -253,4 +254,13 @@ public interface TemplateLogicManager {
      * @return Result<Void>
      */
     Result<Void> blockRead(Integer templateId, Boolean status, String operator, Integer projectId);
+
+    /**
+     * 更新模版settings和非分区模版索引的settings(可以用来实现部分模版服务，如异步translog、恢复优先级)
+     * @param param 模版增量settings
+     * @param operator
+     * @param projectId
+     * @return
+     */
+    Result<Void> updateTemplateAndIndexSettings(TemplateIncrementalSettingsDTO param, String operator, Integer projectId) throws AdminOperateException;
 }

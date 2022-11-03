@@ -19,6 +19,8 @@
         <module>arius-admin-biz</module>
         <module>arius-admin-metadata</module>
         <module>arius-admin-integration-test</module>
+        <module>arius-admin-extend/arius-admin-rest-v2</module>
+        <module>arius-admin-op-manager</module>
     </modules>
 
     <properties>
@@ -104,6 +106,11 @@
             <dependency>
                 <groupId>com.didichuxing.datachannel</groupId>
                 <artifactId>arius-admin-biz</artifactId>
+                <version>${revision}${sha1}${changelist}</version>
+            </dependency>
+                 <dependency>
+                <groupId>com.didichuxing.datachannel</groupId>
+                <artifactId>arius-admin-op-manager</artifactId>
                 <version>${revision}${sha1}${changelist}</version>
             </dependency>
 

@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesIncrementalSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexForceMergeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
@@ -25,6 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.*;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.ESSettingConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
@@ -554,7 +556,14 @@ public class IndicesManagerImpl implements IndicesManager {
             return Result.buildFrom(ret);
         }
 
-        List<IndexShardInfo> indexShardInfoList = esIndexCatService.syncGetIndexShardInfo(phyCluster, indexName);
+        List<IndexShardInfo> indexShardInfoList = null;
+        try {
+            indexShardInfoList = esIndexCatService.syncGetIndexShardInfo(phyCluster, indexName);
+        } catch (ESOperateException e) {
+            LOGGER.error("class=IndicesManagerImpl||method=getIndexShardsInfo||clusterName={}||errMsg=fail to get indexShardInfo",
+                    cluster);
+            return Result.buildFail("获取索引shard(主)在节点中的分布详情异常");
+        }
         List<IndexShardInfoVO> indexNodeShardVOList = indexShardInfoList.stream().filter(this::filterPrimaryShard)
             .map(this::coverUnit).collect(Collectors.toList());
         return Result.buildSucc(indexNodeShardVOList);
@@ -803,12 +812,63 @@ public class IndicesManagerImpl implements IndicesManager {
             }
             
         }
-        
-        
+
+        return Result.buildSucc();
+    }
+
+    /**
+     * 以settings增量方式批量更新索引的settings
+     * @param params
+     * @param projectId
+     * @param operator
+     * @return
+     */
+    @Override
+    public Result<Void> updateIndexSettingsByMerge(List<IndicesIncrementalSettingDTO> params, Integer projectId, String operator) throws ESOperateException {
+        Result<Void> checkResult = checkUpdateIndexSettingsByMerge(params, projectId, operator);
+        if(checkResult.failed()){
+            return Result.buildFail(checkResult.getMessage());
+        }
+
+        for (IndicesIncrementalSettingDTO indicesIncrementalSettingDTO : params) {
+            boolean response = esIndexService.syncPutIndexSettings(indicesIncrementalSettingDTO.getCluster(), Collections.singletonList(indicesIncrementalSettingDTO.getIndex()),
+                    indicesIncrementalSettingDTO.getIncrementalSettings(), RETRY_COUNT);
+            if (!response) {
+                LOGGER.error("class=IndicesManagerImpl||method=updateIndexSettingsByMerge,cluster={}, errMsg={}",
+                        indicesIncrementalSettingDTO.getCluster(), "update indices settings failed");
+            }
+        }
+
         return Result.buildSucc();
     }
     
     /***************************************************private**********************************************************/
+
+    private Result<Void> checkUpdateIndexSettingsByMerge(List<IndicesIncrementalSettingDTO> params, Integer projectId, String operator) {
+        final Result<Void> projectCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (projectCheck.failed()) {
+            return Result.buildFail(projectCheck.getMessage());
+        }
+        if (AriusObjUtils.isNull(operator)) {
+            return Result.buildParamIllegal("操作人为空");
+        }
+        if(AriusObjUtils.isNull(params)){
+            return Result.buildParamIllegal("参数不能为空");
+        }
+        for (IndicesIncrementalSettingDTO param : params) {
+            if(param.getIncrementalSettings() == null || param.getIncrementalSettings().isEmpty()){
+                return Result.buildParamIllegal("参数不能为空");
+            }
+            Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(param.getCluster(), projectId);
+            if (getClusterRet.failed()) {
+                return Result.buildFrom(getClusterRet);
+            }
+            String phyCluster = getClusterRet.getData();
+            param.setCluster(phyCluster);
+        }
+        return Result.buildSucc();
+    }
+
     private Result<Void> basicCheckParam(String cluster, String index, Integer projectId) {
         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal(String.format("当前登录项目Id[%s]不存在, 无权限操作", projectId));
