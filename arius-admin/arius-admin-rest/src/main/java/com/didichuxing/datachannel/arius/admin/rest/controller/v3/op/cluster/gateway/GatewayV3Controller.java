@@ -84,9 +84,12 @@ public class GatewayV3Controller {
         return gatewayClusterManager.editOne(data,HttpRequestUtil.getProjectId(request),
             HttpRequestUtil.getOperator(request));
     }
-    
-   
-    
-    
+    @GetMapping("/{gatewayClusterId}/last-version")
+    @ResponseBody
+    @ApiOperation(value = "获取上个版本号",tags = "")
+    public Result<String> getBeforeVersionByGatewayClusterId(HttpServletRequest request,
+                                               @PathVariable("gatewayClusterId") Integer gatewayClusterId) {
+        return gatewayClusterManager.getBeforeVersionByGatewayClusterId(gatewayClusterId);
+    }
     
 }
