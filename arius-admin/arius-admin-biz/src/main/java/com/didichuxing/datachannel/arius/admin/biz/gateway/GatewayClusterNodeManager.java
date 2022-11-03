@@ -18,8 +18,9 @@ public interface GatewayClusterNodeManager {
 	 *
 	 * @param condition 查询的条件，它是一个 GatewayNodeConditionDTO 对象。
 	 * @param projectId
+	 * @param gatewayClusterId
 	 * @return 网关集群节点VO
 	 */
 	PaginationResult<GatewayClusterNodeVO> pageGetNode(GatewayNodeConditionDTO condition,
-			Integer projectId);
+			Integer projectId, Integer gatewayClusterId);
 }

@@ -74,7 +74,12 @@
         FROM gateway_cluster_node_info
         WHERE
         <if test="nodeName != null and nodeName != ''">
-            AND node_name like  CONCAT('%',#{nodeName},'%')
+            AND node_name like CONCAT('%'
+              , #{nodeName}
+              , '%')
+        </if>
+        <if test="clusterName != null and clusterName != ''">
+            AND cluster_name =#{clusterName}
         </if>
          <if test="sortTerm != null">
             order by ${sortTerm} ${sortType}
@@ -86,6 +91,9 @@
         SELECT COUNT(1)
         FROM gateway_cluster_node_info
         WHERE
+        <if test="clusterName != null and clusterName != ''">
+            AND cluster_name =#{clusterName}
+        </if>
         <if test="nodeName != null and nodeName != ''">
             AND node_name LIKE CONCAT('%'
               , #{nodeName}

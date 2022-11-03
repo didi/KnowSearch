@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiOperation;
 import javax.servlet.http.HttpServletRequest;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,11 +33,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class GatewayNodeV3Controller {
     @Autowired
     private GatewayClusterNodeManager gatewayClusterNodeManager;
-    @PostMapping("/page")
+    @PostMapping("/{gatewayClusterId}/page")
     @ResponseBody
     @ApiOperation(value = "按条件分页获取 gateway 节点集群列表",tags = "")
     public PaginationResult<GatewayClusterNodeVO> pageGetGatewayNodes(HttpServletRequest request,
-                                                                      @RequestBody GatewayNodeConditionDTO condition) {
-        return gatewayClusterNodeManager.pageGetNode(condition, HttpRequestUtil.getProjectId(request));
+        @PathVariable("gatewayClusterId")Integer gatewayClusterId, @RequestBody GatewayNodeConditionDTO condition) {
+        return gatewayClusterNodeManager.pageGetNode(condition, gatewayClusterId,
+            HttpRequestUtil.getProjectId(request));
     }
 }
