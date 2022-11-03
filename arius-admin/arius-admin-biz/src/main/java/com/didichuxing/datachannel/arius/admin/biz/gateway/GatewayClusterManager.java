@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.gateway;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterBriefVO;
@@ -42,4 +43,31 @@ public interface GatewayClusterManager {
      */
     PaginationResult<GatewayClusterVO> pageGetCluster(GatewayConditionDTO condition,
         Integer projectId) ;
+    
+    /**
+     * 通过id获取一个网关集群
+     *
+     * @param gatewayClusterId 要查询的网关集群ID。
+     * @return 网关集群VO
+     */
+    Result<GatewayClusterVO> getOneById(Integer gatewayClusterId);
+    
+    /**
+     * 按 id 删除网关集群
+     *
+     * @param gatewayClusterId 要删除的网关集群的ID。
+     * @param projectId
+     * @return 一个 CompletableFuture<Void>
+     */
+    Result<Void> deleteById(Integer gatewayClusterId, Integer projectId);
+    
+    /**
+     * 编辑一个网关集群
+     *
+     * @param data      要编辑的数据。
+     * @param projectId
+     * @param operator
+     * @return 一个 Result<Void> 对象。
+     */
+    Result<Void> editOne(GatewayClusterDTO data, Integer projectId, String operator);
 }

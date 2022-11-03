@@ -55,4 +55,16 @@
             #{clusterName}
         </foreach>
     </select>
+    
+    <select id="selectByClusterName" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM gateway_cluster_node_info WHERE   cluster_name=#{clusterName}
+    </select>
+    
+    <delete id="deleteByClusterName">
+        DELETE
+        FROM gateway_cluster_node_info
+        WHERE cluster_name = #{clusterName}
+    </delete>
 </mapper>

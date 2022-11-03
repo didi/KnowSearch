@@ -66,7 +66,7 @@ public class GatewayV3Controller {
     @ApiOperation(value = "根据 gatewayClusterId 获取 gateway 集群信息",tags = "")
     public Result<GatewayClusterVO> getGateway(HttpServletRequest request,
                                                @PathVariable("gatewayClusterId") Integer gatewayClusterId) {
-        return Result.buildSucc(new GatewayClusterVO());
+        return gatewayClusterManager.getOneById(gatewayClusterId);
     }
     
     @DeleteMapping("/{gatewayClusterId}")
@@ -74,14 +74,15 @@ public class GatewayV3Controller {
     @ApiOperation(value = "gateway 集群下线",tags = "")
     public Result<Void> deleteById(HttpServletRequest request,
                                                        @PathVariable("gatewayClusterId") Integer gatewayClusterId) {
-        return Result.buildSucc();
+        return gatewayClusterManager.deleteById(gatewayClusterId,HttpRequestUtil.getProjectId(request));
     }
     
     @PutMapping("/{gatewayClusterId}")
     @ResponseBody
     @ApiOperation(value = "gateway 编辑",tags = "")
     public Result<Void> edit(HttpServletRequest request, @PathVariable("gatewayClusterId") Integer gatewayClusterId, @RequestBody GatewayClusterDTO data) {
-        return Result.buildSucc();
+        return gatewayClusterManager.editOne(data,HttpRequestUtil.getProjectId(request),
+            HttpRequestUtil.getOperator(request));
     }
     
    

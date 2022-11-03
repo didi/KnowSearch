@@ -77,4 +77,33 @@
             AND cluster_name like CONCAT('%', #{clusterName}, '%')
         </if>
     </select>
+    
+    <select id="getOneById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM gateway_cluster_info
+        WHERE id = #{id}
+    </select>
+    
+    <delete id="deleteOneById">
+        DELETE
+        FROM gateway_cluster_info
+        WHERE id = #{id}
+    </delete>
+    
+    <update id="updateOne" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO">
+        UPDATE gateway_cluster_info
+        <trim prefix="set" prefixOverrides=",">
+            <if test="memo != null and memo != ''">
+                ,memo = #{memo}
+            </if>
+            <if test="proxyAddress != null and proxyAddress != ''">
+                , proxy_address=#{proxyAddress}
+            </if>
+            <if test="dataCenter != null and dataCenter != ''">
+                , data_center=#{dataCenter}
+            </if>
+        </trim>
+        WHERE id = #{id}
+    </update>
 </mapper>

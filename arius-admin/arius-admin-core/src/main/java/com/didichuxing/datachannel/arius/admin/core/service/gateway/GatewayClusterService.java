@@ -2,8 +2,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.gateway;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterBriefVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
 import java.util.List;
 
 /**
@@ -20,7 +19,7 @@ public interface GatewayClusterService {
 	 *
 	 * @return GatewayClusterBriefVO 对象的列表。
 	 */
-	List<GatewayClusterBriefVO> listAll();
+	List<GatewayClusterPO> listAll();
 	
 	/**
 	 * > 该函数检查集群名称是否有效
@@ -43,7 +42,7 @@ public interface GatewayClusterService {
 	 * @param condition 网关条件DTO
 	 * @return List<GatewayClusterVO>
 	 */
-	List<GatewayClusterVO> pageByCondition(GatewayConditionDTO condition);
+	List<GatewayClusterPO> pageByCondition(GatewayConditionDTO condition);
 	/**
 	 * > 计算符合给定条件的记录数
 	 *
@@ -51,4 +50,28 @@ public interface GatewayClusterService {
 	 * @return 符合条件的行数。
 	 */
 	Long countByCondition(GatewayConditionDTO condition);
+	
+	/**
+	 * 通过 id 获取一个 GatewayClusterVO
+	 *
+	 * @param gatewayClusterId 网关集群的 ID。
+	 * @return 一个 GatewayClusterVO 对象。
+	 */
+	GatewayClusterPO getOneById(Integer gatewayClusterId);
+	
+	/**
+	 * 按 id 删除网关集群
+	 *
+	 * @param gatewayClusterId 要删除的网关集群的id。
+	 * @return 一个布尔值。
+	 */
+	boolean deleteOneById(Integer gatewayClusterId);
+	
+	/**
+	 * 它编辑一个网关集群。
+	 *
+	 * @param data 要编辑的数据。
+	 * @return 布尔值
+	 */
+	boolean editOne(GatewayClusterDTO data);
 }
