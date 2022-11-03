@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.clus
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
@@ -21,12 +22,17 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Inde
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
+import com.didiglobal.logi.elasticsearch.client.response.model.fs.FSNode;
+import com.didiglobal.logi.elasticsearch.client.response.model.fs.FSTotal;
 import com.didiglobal.logi.elasticsearch.client.response.model.indices.CommonStat;
 import com.didiglobal.logi.elasticsearch.client.response.model.indices.Docs;
 import com.didiglobal.logi.elasticsearch.client.response.model.indices.Segments;
+import com.didiglobal.logi.elasticsearch.client.response.model.jvm.JvmMem;
+import com.didiglobal.logi.elasticsearch.client.response.model.jvm.JvmNode;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+import io.swagger.models.auth.In;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -98,7 +104,8 @@ public class ClusterLogicOverviewMetricsHandle {
         for (String metricsType : metricsClusterPhyDTO.getMetricsTypes()) {
             getMultipleMetricFutureUtil.runnableTask(() -> aggClusterLogicOverviewMetrics(esClusterOverviewMetricsVO,
                 metricsType, metricsClusterPhyDTO.getAggType(), metricsClusterPhyDTO.getStartTime(),
-                metricsClusterPhyDTO.getEndTime(),metricsClusterPhyDTO.getItemNamesUnderClusterLogic()));
+                metricsClusterPhyDTO.getEndTime(),metricsClusterPhyDTO.getItemNamesUnderClusterLogic(),
+                    metricsClusterPhyDTO.getClusterLogicName(),metricsClusterPhyDTO.getProjectId()));
         }
         getMultipleMetricFutureUtil.waitExecute();
         //3.非超级项目进行大索引过滤
@@ -188,12 +195,12 @@ public class ClusterLogicOverviewMetricsHandle {
     }
 
     private void aggClusterLogicOverviewMetrics(ESClusterOverviewMetricsVO metrics, String metricsType, String aggType,
-                                              Long startTime, Long endTime,List<String> itemNamesUnderClusterLogic) {
+                                                Long startTime, Long endTime, List<String> itemNamesUnderClusterLogic, String clusterLogic, Integer projectId) {
         try {
             switch (ClusterPhyClusterMetricsEnum.valueOfType(metricsType)) {
                 /*************************基本状态指标(状态类型)***************************/
                 case BASIC:
-                    getBasicMetrics(metrics,itemNamesUnderClusterLogic);
+                    getBasicMetrics(metrics,itemNamesUnderClusterLogic,clusterLogic,projectId);
                     return;
                 case ELAPSEDTIME:
                     getElapsedTimeMetrics(metrics);
@@ -300,27 +307,27 @@ public class ClusterLogicOverviewMetricsHandle {
         metrics.setInvalidNodes(invalidNodeIps);
     }
 
-    private void getBigShardsMetrics(ESClusterOverviewMetricsVO metrics) {
+    private void getBigShardsMetrics(ESClusterOverviewMetricsVO metrics) throws ESOperateException {
         List<ShardMetrics> shardMetrics = esShardService.syncGetBigShards(metrics.getClusterName());
         metrics.setBigShards(ConvertUtil.list2List(shardMetrics, BigShardMetricsVO.class));
     }
 
-    private void getBigIndicesMetrics(ESClusterOverviewMetricsVO metrics) {
+    private void getBigIndicesMetrics(ESClusterOverviewMetricsVO metrics) throws ESOperateException {
         List<BigIndexMetrics> bigIndexMetrics = esClusterNodeService.syncGetBigIndices(metrics.getClusterName());
         metrics.setBigIndices(ConvertUtil.list2List(bigIndexMetrics, BigIndexMetricsVO.class));
     }
 
-    private void getMovingShardsMetrics(ESClusterOverviewMetricsVO metrics) {
+    private void getMovingShardsMetrics(ESClusterOverviewMetricsVO metrics) throws ESOperateException {
         List<MovingShardMetrics> movingShardsMetrics = esShardService.syncGetMovingShards(metrics.getClusterName());
         metrics.setMovingShards(ConvertUtil.list2List(movingShardsMetrics, MovingShardMetricsVO.class));
     }
 
-    private void getUnassignedShardsMetrics(ESClusterOverviewMetricsVO metrics) {
+    private void getUnassignedShardsMetrics(ESClusterOverviewMetricsVO metrics) throws ESOperateException {
         List<UnAssignShardMetrics> unAssignShardMetrics = esShardService.syncGetUnAssignShards(metrics.getClusterName());
         metrics.setUnAssignShards(ConvertUtil.list2List(unAssignShardMetrics, UnAssignShardMetricsVO.class));
     }
 
-    private void getPendingTasksMetrics(ESClusterOverviewMetricsVO metrics) {
+    private void getPendingTasksMetrics(ESClusterOverviewMetricsVO metrics) throws ESOperateException {
         List<PendingTask> pendingTaskFromES = esClusterNodeService.syncGetPendingTask(metrics.getClusterName());
         metrics.setPendingTasks(ConvertUtil.list2List(pendingTaskFromES, PendingTaskVO.class));
     }
@@ -328,16 +335,15 @@ public class ClusterLogicOverviewMetricsHandle {
     private void getElapsedTimeMetrics(ESClusterOverviewMetricsVO metrics) {
         ESClusterPhyBasicMetricsVO basic = metrics.getBasic();
         getClusterBasicInfoFutureUtil
-            .runnableTask(() -> buildBasicMetricsFromClusterStats(basic, metrics.getClusterName(),null))
             .runnableTask(() -> buildBasicMetricsFromEsClusterTemplate(basic, metrics.getClusterName()))
             .runnableTask(() -> buildBasicMetricsFromEsClusterNodeInfo(basic, metrics.getClusterName()))
             .runnableTask(() -> buildBasicMetricsFromEsClusterMemInfo(basic, metrics.getClusterName())).waitExecute();
     }
 
-    private void getBasicMetrics(ESClusterOverviewMetricsVO metrics,List<String> itemNamesUnderClusterLogic) {
+    private void getBasicMetrics(ESClusterOverviewMetricsVO metrics,List<String> itemNamesUnderClusterLogic,String clusterLogic, Integer projectId) {
         ESClusterPhyBasicMetricsVO basic = metrics.getBasic();
         getClusterBasicInfoFutureUtil
-            .runnableTask(() -> buildBasicMetricsFromClusterStats(basic, metrics.getClusterName(),itemNamesUnderClusterLogic))
+            .runnableTask(() -> buildBasicMetricsFromClusterStats(basic, metrics.getClusterName(),itemNamesUnderClusterLogic,clusterLogic,projectId))
             .runnableTask(() -> buildBasicMetricsFromEsClusterTemplate(basic, metrics.getClusterName()))
             .runnableTask(() -> buildBasicMetricsFromEsClusterNodeInfo(basic, metrics.getClusterName()))
             .runnableTask(() -> buildBasicMetricsFromEsClusterMemInfo(basic, metrics.getClusterName())).waitExecute();
@@ -369,20 +375,40 @@ public class ClusterLogicOverviewMetricsHandle {
      * @param basicVO
      * @param clusterName
      */
-    private void buildBasicMetricsFromClusterStats(ESClusterPhyBasicMetricsVO basicVO, String clusterName,List<String> itemNamesUnderClusterLogic) {
+    private void buildBasicMetricsFromClusterStats(ESClusterPhyBasicMetricsVO basicVO, String clusterName,
+                                                   List<String> itemNamesUnderClusterLogic,String clusterLogic, Integer projectId) {
         List<ClusterNodeStats> nodeStats = esClusterNodeService.syncGetNodeStats(clusterName);
-//        eSShardCatService.s()
+        //shard数
+        int shardNum = 0;
+        Map<String/*node*/, Long /*shardNum*/> node2ShardNum = esClusterNodeService.syncGetNode2ShardNumMap(clusterName);
+        for (String node:itemNamesUnderClusterLogic) {
+            shardNum+=node2ShardNum.get(node);
+        }
+
+        //索引数量
+        int indexCount = esIndexCatService.syncGetIndexListByProjectId(projectId,clusterLogic).size();
         ClusterNodeStats clusterNodeStats = new ClusterNodeStats();
-        int indexCount = 0;
+        //文档数量
+        int docCount = 0;
+        //磁盘信息
+        long totalInBytes = 0;
+        long availableInBytes = 0;
+        long freeInBytes = 0;
+        //设置堆内存使用率信息
+        long heapUsedInBytes = 0;
+        long nonHeapUsedInBytes = 0;
+
         for (ClusterNodeStats nodeStat:nodeStats) {
             if (itemNamesUnderClusterLogic.contains(nodeStat.getName())){
-                indexCount+= Optional.of(nodeStat).map(ClusterNodeStats::getIndices).map(CommonStat::getDocs).map(Docs::getCount).orElse(0L);
+                docCount+= Optional.of(nodeStat).map(ClusterNodeStats::getIndices).map(CommonStat::getDocs).map(Docs::getCount).orElse(0L);
+                totalInBytes += Optional.of(nodeStat).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getTotalInBytes).orElse(0L);
+                availableInBytes+= Optional.of(nodeStat).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getAvailableInBytes).orElse(0L);
+                freeInBytes+= Optional.of(nodeStat).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getFreeInBytes).orElse(0L);
 
+                heapUsedInBytes+= Optional.of(nodeStat).map(ClusterNodeStats::getJvm).map(JvmNode::getMem).map(JvmMem::getHeapUsedInBytes).orElse(0L);
+                nonHeapUsedInBytes+= Optional.of(nodeStat).map(ClusterNodeStats::getJvm).map(JvmNode::getMem).map(JvmMem::getNonHeapUsedInBytes).orElse(0L);
             }
         }
-//        nodeStats.stream().filter(n->itemNamesUnderClusterLogic.equals(n.getName())).map(n->
-//                )
-//        itemNamesUnderClusterLogic.stream()
         ESClusterStatsResponse clusterStats = esClusterService.syncGetClusterStats(clusterName);
         if (null == clusterStats) {
             return;
@@ -394,36 +420,35 @@ public class ClusterLogicOverviewMetricsHandle {
         //设置基础信息
         basicVO.setNumberNodes((long) itemNamesUnderClusterLogic.size());
         basicVO.setTotalIndicesNu((long) indexCount);
-        basicVO.setShardNu(clusterStats.getTotalShard());
-        basicVO.setTotalDocNu(clusterStats.getDocsCount());
+        basicVO.setShardNu((long) shardNum);
+        basicVO.setTotalDocNu((long) docCount);
+
         basicVO.setIndicesStoreSize(clusterStats.getIndicesStoreSize().getBytes());
         basicVO.setUnassignedShardNum(clusterStats.getUnassignedShardNum());
 
         //设置集群磁盘信息
-        long storeSize = clusterStats.getTotalFs().getBytes() - clusterStats.getFreeFs().getBytes();
-        basicVO.setStoreSize(storeSize);
-        basicVO.setTotalStoreSize(clusterStats.getTotalFs().getBytes());
-        basicVO.setFreeStoreSize(clusterStats.getFreeFs().getBytes());
+        basicVO.setStoreSize(availableInBytes);
+        basicVO.setTotalStoreSize(totalInBytes);
+        basicVO.setFreeStoreSize(freeInBytes);
         //保留小数点后3位
-        BigDecimal storeSizeDec = new BigDecimal(storeSize);
-        BigDecimal totalSizeDec = new BigDecimal(clusterStats.getTotalFs().getBytes());
+        BigDecimal storeSizeDec = new BigDecimal(availableInBytes);
+        BigDecimal totalSizeDec = new BigDecimal(totalInBytes);
         basicVO.setStoreUsage(storeSizeDec.divide(totalSizeDec, 5, 1).doubleValue() * 100);
         basicVO.setStoreFreeUsage((100 - basicVO.getStoreUsage()));
 
         //设置堆内存使用率信息
-        long heapFreeSize = clusterStats.getTotalHeapMem().getBytes() - clusterStats.getUsedHeapMem().getBytes();
-        basicVO.setHeapMemFree(heapFreeSize);
-        basicVO.setHeapMemTotal(clusterStats.getTotalHeapMem().getBytes());
-        basicVO.setHeapMemUsed(clusterStats.getUsedHeapMem().getBytes());
+        long heapTotalSize = nonHeapUsedInBytes + heapUsedInBytes;
+        basicVO.setHeapMemFree(nonHeapUsedInBytes);
+        basicVO.setHeapMemTotal(heapTotalSize);
+        basicVO.setHeapMemUsed(heapUsedInBytes);
         //保留小数点后3位
-        BigDecimal storeHeapMemSizeDec = new BigDecimal(clusterStats.getUsedHeapMem().getBytes());
-        BigDecimal totalHeapMemSizeDec = new BigDecimal(clusterStats.getTotalHeapMem().getBytes());
+        BigDecimal storeHeapMemSizeDec = new BigDecimal(heapUsedInBytes);
+        BigDecimal totalHeapMemSizeDec = new BigDecimal(heapTotalSize);
         basicVO.setHeapUsage(storeHeapMemSizeDec.divide(totalHeapMemSizeDec, 5, 1).doubleValue() * 100);
         basicVO.setHeapFreeUsage((100 - basicVO.getHeapUsage()));
-
         //设置集群节点信息
         basicVO.setNumberMasterNodes(clusterStats.getNumberMasterNodes());
-        basicVO.setNumberDataNodes(clusterStats.getNumberDataNodes());
+        basicVO.setNumberDataNodes((long) itemNamesUnderClusterLogic.size());
         basicVO.setNumberClientNodes(clusterStats.getNumberClientNodes());
         basicVO.setNumberIngestNodes(clusterStats.getNumberIngestNodes());
         basicVO.setNumberCoordinatingOnlyNodes(clusterStats.getNumberCoordinatingOnly());
