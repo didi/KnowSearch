@@ -19,14 +19,9 @@ public class DataTypeServiceImpl implements DataTypeService {
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
 
-    public static final String LOGIC_TEMPLATE_BUSINESS_TYPE_LIST_UNKNOW_VALUE = "[\n" +
-            "    {\n" +
-            "        \"code\":-1,\n" +
-            "        \"desc\":\"未知数据\",\n" +
-            "        \"label\":\"\"\n" +
-            "    }\n" +
-            "]";
     public static final String UNKNOW = "未知数据";
+
+    private static final DataType unknowDataType = new DataType(-1, "未知数据", "unknow");
 
     @Override
     public Map<Integer, String> code2DescMap() {
@@ -62,16 +57,27 @@ public class DataTypeServiceImpl implements DataTypeService {
         return UNKNOW;
     }
 
+    private List<DataType> getDefaultDataType() {
+        List<DataType> dataTypeList = new ArrayList<>();
+        dataTypeList.add(new DataType(0,"系统日志","system"));
+        dataTypeList.add(new DataType(1,"日志数据","log"));
+        dataTypeList.add(new DataType(2,"用户上报数据","olap"));
+        dataTypeList.add(new DataType(3,"RDS数据","binlog"));
+        dataTypeList.add(new DataType(4,"离线导入数据","offline"));
+        return dataTypeList;
+    }
+
     private List<DataType> getDataTypeList() {
 
         List<DataType> dataTypeList = new ArrayList<>();
         try {
             //从平台配置中获取业务类型并转换
+            String defaultValue = JSON.toJSONString(getDefaultDataType());
             dataTypeList = JSON.parseArray(ariusConfigInfoService.stringSetting(AriusConfigConstant.ARIUS_TEMPLATE_GROUP, AriusConfigConstant.LOGIC_TEMPLATE_BUSINESS_TYPE_LIST,
-                    AriusConfigConstant.LOGIC_TEMPLATE_BUSINESS_TYPE_LIST_DEFAULT_VALUE), DataType.class);
+                    defaultValue), DataType.class);
         } catch (Exception e) {
             //若平台配置获取的业务类型转换失败，则返回未知业务类型
-            dataTypeList = JSON.parseArray(LOGIC_TEMPLATE_BUSINESS_TYPE_LIST_UNKNOW_VALUE,DataType.class);
+            dataTypeList.add(unknowDataType);
         }
 
         return dataTypeList;
