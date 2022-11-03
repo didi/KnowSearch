@@ -45,7 +45,6 @@
         <logi-elasticsearch-client.version>1.0.24</logi-elasticsearch-client.version>
         <java-diff-utils.version>4.11</java-diff-utils.version>
         <json-patch.version>1.13</json-patch.version>
-        <arius-admin-op-manager.version>1.0.1-SNAPSHOT</arius-admin-op-manager.version>
     </properties>
 
     <dependencyManagement>
@@ -112,7 +111,7 @@
                  <dependency>
                 <groupId>com.didichuxing.datachannel</groupId>
                 <artifactId>arius-admin-op-manager</artifactId>
-                <version>${arius-admin-op-manager.version}</version>
+                <version>${revision}${sha1}${changelist}</version>
             </dependency>
 
 
