@@ -6,9 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * 网关 dto
@@ -30,8 +28,8 @@ public class GatewayDTO extends PageDTO {
     private String  clusterName;
     @ApiModelProperty("集群健康")
     private Integer health;
-    @ApiModelProperty("是否为 ecm 接入")
-    private Boolean whetherECMAccess;
-    @ApiModelProperty("备注")
+    @ApiModelProperty(value = "是否为 ecm 接入",hidden = true)
+    private Boolean ecmAccess;
+    @ApiModelProperty(value = "备注",hidden = true)
     private String memo;
 }
