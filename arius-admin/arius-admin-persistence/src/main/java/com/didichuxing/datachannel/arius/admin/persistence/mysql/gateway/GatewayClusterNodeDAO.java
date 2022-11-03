@@ -51,4 +51,19 @@ public interface GatewayClusterNodeDAO {
      * @return 列表<GatewayClusterNodePO>
      */
     List<GatewayClusterNodePO> selectByBatchClusterName(@Param("clusterNames") List<String> clusterNames);
+    
+    /**
+     * 按 clusterName 选择所有 GatewayClusterNodePO 记录
+     *
+     * @param clusterName 集群名称
+     * @return GatewayClusterNodePO 对象列表
+     */
+    List<GatewayClusterNodePO> selectByClusterName(@Param("clusterName") String clusterName);
+    
+    /**
+     * 从表中删除 cluster_name 列等于 clusterName 参数的所有记录
+     *
+     * @param clusterName 要删除的集群的名称。
+     */
+    boolean deleteByClusterName(@Param("clusterName") String clusterName);
 }

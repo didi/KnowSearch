@@ -62,4 +62,19 @@ public class GatewayClusterServiceImpl implements GatewayClusterService {
 	public Long countByCondition(GatewayConditionDTO condition) {
 		return gatewayClusterDAO.countByCondition(condition);
 	}
+	
+	@Override
+	public GatewayClusterVO getOneById(Integer gatewayClusterId) {
+		return ConvertUtil.obj2Obj(gatewayClusterDAO.getOneById(gatewayClusterId),GatewayClusterVO.class);
+	}
+	
+	@Override
+	public boolean deleteOneById(Integer gatewayClusterId) {
+		return gatewayClusterDAO.deleteOneById(gatewayClusterId);
+	}
+	
+	@Override
+	public boolean editOne(GatewayClusterDTO data) {
+		return gatewayClusterDAO.updateOne(ConvertUtil.obj2Obj(data, GatewayClusterPO.class));
+	}
 }

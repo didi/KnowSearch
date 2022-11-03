@@ -29,4 +29,20 @@ public interface  GatewayNodeService {
 	 * @return 列表<GatewayClusterNodeVO>
 	 */
 	List<GatewayClusterNodeVO> selectByBatchClusterName(List<String> clusterName);
+	
+	/**
+	 * 列出集群中的所有节点
+	 *
+	 * @param clusterName 集群的名称。
+	 * @return GatewayClusterNodeVO 对象列表
+	 */
+	List<GatewayClusterNodeVO> listByClusterName(String clusterName);
+	
+	/**
+	 * 删除具有给定名称的所有集群
+	 *
+	 * @param clusterName 要删除的集群的名称。
+	 * @return 一个布尔值。
+	 */
+	boolean deleteByClusterName(String clusterName);
 }

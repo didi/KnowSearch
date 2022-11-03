@@ -38,7 +38,18 @@ public class GatewayNodeServiceImpl implements GatewayNodeService {
 				GatewayClusterNodeVO.class);
 	}
 	
-		/**
+	@Override
+	public List<GatewayClusterNodeVO> listByClusterName(String clusterName) {
+		return ConvertUtil.list2List(gatewayClusterNodeDAO.selectByClusterName(clusterName),
+				GatewayClusterNodeVO.class);
+	}
+	
+	@Override
+	public boolean deleteByClusterName(String clusterName) {
+		return gatewayClusterNodeDAO.deleteByClusterName(clusterName);
+	}
+	
+	/**
 	 * > 在数据库中插入一条记录
 	 *
 	 * @param gatewayNodeHostDTO 要插入的对象。
