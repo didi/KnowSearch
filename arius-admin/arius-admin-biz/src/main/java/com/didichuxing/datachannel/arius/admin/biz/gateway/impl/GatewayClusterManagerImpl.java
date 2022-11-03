@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayCl
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterBriefVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterNodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterVO;
@@ -52,7 +53,7 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 	
 	@Override
 	public Result<List<GatewayClusterBriefVO>> listBriefInfo() {
-		return Result.buildSucc(gatewayClusterService.listAll());
+		return Result.buildSucc(ConvertUtil.list2List(gatewayClusterService.listAll(), GatewayClusterBriefVO.class));
 	}
 	
 	@Override
@@ -106,14 +107,16 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 	
 	@Override
 	public Result<GatewayClusterVO> getOneById(Integer gatewayClusterId) {
-		final GatewayClusterVO gatewayClusterVO = gatewayClusterService.getOneById(gatewayClusterId);
+		final GatewayClusterVO gatewayClusterVO = ConvertUtil.obj2Obj(gatewayClusterService.getOneById(gatewayClusterId),
+						GatewayClusterVO.class);
 		if (Objects.isNull(gatewayClusterId)) {
 			return Result.buildFail(String.format("id:%s 不存在", gatewayClusterId));
 		}
 		final String clusterName = gatewayClusterVO.getClusterName();
 		// 获取 node 列表
-		final List<GatewayClusterNodeVO> clusterNodeVOList = gatewayNodeService.listByClusterName(
-				clusterName);
+		final List<GatewayClusterNodeVO> clusterNodeVOList = ConvertUtil.list2List(
+				gatewayNodeService.listByClusterName(
+						clusterName), GatewayClusterNodeVO.class);
 		gatewayClusterVO.setNodes(clusterNodeVOList);
 		
 		return Result.buildSucc(gatewayClusterVO);
@@ -126,16 +129,17 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		if (result.failed()) {
 			return result;
 		}
-		final GatewayClusterVO gatewayClusterVO = gatewayClusterService.getOneById(gatewayClusterId);
-		if (Objects.isNull(gatewayClusterVO)) {
+		final GatewayClusterPO gatewayCluster = gatewayClusterService.getOneById(gatewayClusterId);
+		if (Objects.isNull(gatewayCluster)) {
 			return Result.buildSucc();
 		}
 		// 先下线 node
 		boolean deleteByClusterName =
-				gatewayNodeService.deleteByClusterName(gatewayClusterVO.getClusterName());
+				gatewayNodeService.deleteByClusterName(gatewayCluster.getClusterName());
 		final boolean deleteOneById = gatewayClusterService.deleteOneById(gatewayClusterId);
 		if (deleteByClusterName && deleteOneById) {
-			String content = String.format("gateway 集群 %s 下线成功", gatewayClusterVO.getClusterName());
+			//TODO 后续补齐操作记录
+			String content = String.format("gateway 集群 %s 下线成功", gatewayCluster.getClusterName());
 			//operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,
 			//		data.getId(), OperateTypeEnum.TEMPLATE_SERVICE);
 			return Result.buildSuccWithMsg("下线gateway集群成功");
@@ -149,11 +153,12 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		if (voidResult.failed()) {
 			return voidResult;
 		}
-		final GatewayClusterVO gatewayClusterVO = gatewayClusterService.getOneById(data.getId());
+		final GatewayClusterPO gatewayCluster =gatewayClusterService.getOneById(data.getId());
 		boolean edit = gatewayClusterService.editOne(data);
 		if (edit) {
+			//TODO 后续补齐操作记录
 			String content = String.format("编辑 gateway 集群 %s 的备注:【%s】->【%s】",
-					gatewayClusterVO.getClusterName(),gatewayClusterVO.getMemo(),data.getMemo());
+					gatewayCluster.getClusterName(),gatewayCluster.getMemo(),data.getMemo());
 			//operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,
 			//		data.getId(), OperateTypeEnum.TEMPLATE_SERVICE);
 		}
