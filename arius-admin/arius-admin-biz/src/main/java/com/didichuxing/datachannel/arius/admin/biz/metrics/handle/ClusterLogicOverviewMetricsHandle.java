@@ -22,6 +22,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Inde
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.model.fs.FSNode;
 import com.didiglobal.logi.elasticsearch.client.response.model.fs.FSTotal;
 import com.didiglobal.logi.elasticsearch.client.response.model.indices.CommonStat;
@@ -81,7 +82,7 @@ public class ClusterLogicOverviewMetricsHandle {
     @Autowired
     private IndexTemplatePhyService       indexTemplatePhyService;
     @Autowired
-    private ESShardCatService             eSShardCatService;
+    private ESIndexService                esIndexService;
 
     private static final FutureUtil<Void> getMultipleMetricFutureUtil   = FutureUtil.init("getMultipleMetricFutureUtil",
         10, 10, 100);
@@ -386,10 +387,10 @@ public class ClusterLogicOverviewMetricsHandle {
         }
 
         //索引数量
+        List<CatIndexResult> catIndexResults = esIndexService.syncCatIndex(clusterName, 3);
         int indexCount = esIndexCatService.syncGetIndexListByProjectId(projectId,clusterLogic).size();
-        ClusterNodeStats clusterNodeStats = new ClusterNodeStats();
         //文档数量
-        int docCount = 0;
+        long docCount = 0;
         //磁盘信息
         long totalInBytes = 0;
         long availableInBytes = 0;
@@ -401,6 +402,7 @@ public class ClusterLogicOverviewMetricsHandle {
         for (ClusterNodeStats nodeStat:nodeStats) {
             if (itemNamesUnderClusterLogic.contains(nodeStat.getName())){
                 docCount+= Optional.of(nodeStat).map(ClusterNodeStats::getIndices).map(CommonStat::getDocs).map(Docs::getCount).orElse(0L);
+
                 totalInBytes += Optional.of(nodeStat).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getTotalInBytes).orElse(0L);
                 availableInBytes+= Optional.of(nodeStat).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getAvailableInBytes).orElse(0L);
                 freeInBytes+= Optional.of(nodeStat).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getFreeInBytes).orElse(0L);
