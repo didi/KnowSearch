@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.core.service.gateway.impl;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterNodeVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterNodeDAO;
@@ -33,12 +32,21 @@ public class GatewayNodeServiceImpl implements GatewayNodeService {
 	}
 	
 	@Override
-	public List<GatewayClusterNodeVO> selectByBatchClusterName(List<String> clusterName) {
-		return ConvertUtil.list2List(gatewayClusterNodeDAO.selectByBatchClusterName(clusterName),
-				GatewayClusterNodeVO.class);
+	public List<GatewayClusterNodePO> selectByBatchClusterName(List<String> clusterName) {
+		return gatewayClusterNodeDAO.selectByBatchClusterName(clusterName);
 	}
 	
-		/**
+	@Override
+	public List<GatewayClusterNodePO> listByClusterName(String clusterName) {
+		return gatewayClusterNodeDAO.selectByClusterName(clusterName);
+	}
+	
+	@Override
+	public boolean deleteByClusterName(String clusterName) {
+		return gatewayClusterNodeDAO.deleteByClusterName(clusterName);
+	}
+	
+	/**
 	 * > 在数据库中插入一条记录
 	 *
 	 * @param gatewayNodeHostDTO 要插入的对象。

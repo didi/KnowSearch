@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayCl
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterBriefVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterNodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterVO;
@@ -18,6 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeService;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
@@ -46,9 +48,12 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 	@Autowired
 	private HandleFactory handleFactory;
 	
+	@Autowired
+	private OperateRecordService operateRecordService;
+	
 	@Override
 	public Result<List<GatewayClusterBriefVO>> listBriefInfo() {
-		return Result.buildSucc(gatewayClusterService.listAll());
+		return Result.buildSucc(ConvertUtil.list2List(gatewayClusterService.listAll(), GatewayClusterBriefVO.class));
 	}
 	
 	@Override
@@ -73,6 +78,9 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 					GatewayClusterVO.class);
 			gatewayClusterVO.setNodes(
 					ConvertUtil.list2List(gatewayNodeHosts, GatewayClusterNodeVO.class));
+			String content = String.format("gateway 集群 %s 接入成功", gatewayClusterVO.getClusterName());
+			//operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,
+			//		data.getId(), OperateTypeEnum.TEMPLATE_SERVICE);
 			return Result.buildSucc(gatewayClusterVO);
 		}
 		
@@ -97,6 +105,66 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		return PaginationResult.buildFail("没有找到对应的处理器");
 	}
 	
+	@Override
+	public Result<GatewayClusterVO> getOneById(Integer gatewayClusterId) {
+		final GatewayClusterVO gatewayClusterVO = ConvertUtil.obj2Obj(gatewayClusterService.getOneById(gatewayClusterId),
+						GatewayClusterVO.class);
+		if (Objects.isNull(gatewayClusterId)) {
+			return Result.buildFail(String.format("id:%s 不存在", gatewayClusterId));
+		}
+		final String clusterName = gatewayClusterVO.getClusterName();
+		// 获取 node 列表
+		final List<GatewayClusterNodeVO> clusterNodeVOList = ConvertUtil.list2List(
+				gatewayNodeService.listByClusterName(
+						clusterName), GatewayClusterNodeVO.class);
+		gatewayClusterVO.setNodes(clusterNodeVOList);
+		
+		return Result.buildSucc(gatewayClusterVO);
+	}
+	
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public Result<Void> deleteById(Integer gatewayClusterId, Integer projectId) {
+		Result<Void> result = checkDeleteById(gatewayClusterId, projectId);
+		if (result.failed()) {
+			return result;
+		}
+		final GatewayClusterPO gatewayCluster = gatewayClusterService.getOneById(gatewayClusterId);
+		if (Objects.isNull(gatewayCluster)) {
+			return Result.buildSucc();
+		}
+		// 先下线 node
+		boolean deleteByClusterName =
+				gatewayNodeService.deleteByClusterName(gatewayCluster.getClusterName());
+		final boolean deleteOneById = gatewayClusterService.deleteOneById(gatewayClusterId);
+		if (deleteByClusterName && deleteOneById) {
+			//TODO 后续补齐操作记录
+			String content = String.format("gateway 集群 %s 下线成功", gatewayCluster.getClusterName());
+			//operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,
+			//		data.getId(), OperateTypeEnum.TEMPLATE_SERVICE);
+			return Result.buildSuccWithMsg("下线gateway集群成功");
+		}
+		return Result.buildFail("下线失败，请联系管理员");
+	}
+	
+	@Override
+	public Result<Void> editOne(GatewayClusterDTO data, Integer projectId, String operator) {
+		final Result<Void> voidResult = checkEditData(data, projectId);
+		if (voidResult.failed()) {
+			return voidResult;
+		}
+		final GatewayClusterPO gatewayCluster =gatewayClusterService.getOneById(data.getId());
+		boolean edit = gatewayClusterService.editOne(data);
+		if (edit) {
+			//TODO 后续补齐操作记录
+			String content = String.format("编辑 gateway 集群 %s 的备注:【%s】->【%s】",
+					gatewayCluster.getClusterName(),gatewayCluster.getMemo(),data.getMemo());
+			//operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,
+			//		data.getId(), OperateTypeEnum.TEMPLATE_SERVICE);
+		}
+		return Result.build(edit);
+	}
+	
 	/**
 	 * > 检查网关集群加入的参数
 	 *
@@ -106,7 +174,7 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 	 */
 	private Result<Void> checkGatewayJoinParam(GatewayClusterJoinDTO param, Integer projectId) {
 		if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-			return Result.buildFail("非超级项目无权限");
+			return Result.buildFail(AuthConstant.PROJECT_WITHOUT_PERMISSION);
 		}
 		if (Objects.isNull(param)) {
 			return Result.buildFail("传入实体不可为空");
@@ -137,5 +205,54 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		gatewayClusterDTO.setEcmAccess(Boolean.FALSE);
 		gatewayClusterDTO.setHealth(ClusterHealthEnum.UNKNOWN.getCode());
 		gatewayClusterDTO.setComponentId(-1);
+	}
+	/**
+	 * > 该功能检查网关集群的数据
+	 *
+	 * @param data      要检查的数据。
+	 * @param projectId 项目ID
+	 */
+	private Result<Void> checkEditData(GatewayClusterDTO data, Integer projectId) {
+		if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+			return Result.buildFail(AuthConstant.PROJECT_WITHOUT_PERMISSION);
+		}
+		if (Objects.isNull(data)) {
+			return Result.buildFail("传入的实体不能为 NULL");
+		}
+		if (Objects.isNull(data.getId())) {
+			return Result.buildFail("传入的编辑 ID 不能为 NULL");
+		}
+		if (StringUtils.isNotBlank(data.getClusterName())) {
+			return Result.buildFail("不可编辑集群名称");
+		}
+		if (Objects.nonNull(data.getEcmAccess())) {
+			return Result.buildFail("不可编辑 ECM 接入的参数");
+		}
+		if (Objects.nonNull(data.getHealth())) {
+			return Result.buildFail("不可编辑集群健康状态");
+		}
+		if (Objects.nonNull(data.getComponentId())) {
+			return Result.buildFail("不可编辑组建 ID");
+		}
+		if (Objects.nonNull(data.getVersion())) {
+			return Result.buildFail("不可编辑版本号");
+		}
+		return Result.buildSucc();
+		
+	}
+	/**
+	 * > 检查用户是否有权通过id删除网关集群
+	 *
+	 * @param gatewayClusterId 要删除的网关集群的id。
+	 * @param projectId 项目ID
+	 * @return 一个 Result<Void> 对象。
+	 */
+	private Result<Void> checkDeleteById(Integer gatewayClusterId, Integer projectId) {
+		if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+			return Result.buildFail(AuthConstant.PROJECT_WITHOUT_PERMISSION);
+		}
+		//TODO 校验网关是否被物理集群绑定
+		//TODO 校验网关是否是 admin 绑定的网关
+		return Result.buildSucc();
 	}
 }

@@ -58,14 +58,14 @@ public class GatewayClusterPageSearchHandle extends
 	@Override
 	protected PaginationResult<GatewayClusterVO> buildPageData(GatewayConditionDTO condition,
 			Integer projectId) {
-		List<GatewayClusterVO> pagingGatewayClusterList = gatewayClusterService.pageByCondition(
-				condition);
+		List<GatewayClusterVO> pagingGatewayClusterList = ConvertUtil.list2List(gatewayClusterService.pageByCondition(
+				condition),GatewayClusterVO.class);
 		final Long totalHit = gatewayClusterService.countByCondition(condition);
 		final List<String> clusterNames =
 				pagingGatewayClusterList.stream().map(GatewayClusterVO::getClusterName)
 						.collect(Collectors.toList());
-		List<GatewayClusterNodeVO> nodes =
-				gatewayNodeService.selectByBatchClusterName(clusterNames);
+		List<GatewayClusterNodeVO> nodes = ConvertUtil.list2List(gatewayNodeService.selectByBatchClusterName(clusterNames),
+						GatewayClusterNodeVO.class);
 		final Map<String, List<GatewayClusterNodeVO>> clusterName2GatewayNodesMap = ConvertUtil.list2MapOfList(
 				nodes,
 				GatewayClusterNodeVO::getClusterName, i -> i);

@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.core.service.gateway;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeHostDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterNodeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
 import java.util.List;
 
 /**
@@ -28,5 +28,21 @@ public interface  GatewayNodeService {
 	 * @param clusterName 集群名称
 	 * @return 列表<GatewayClusterNodeVO>
 	 */
-	List<GatewayClusterNodeVO> selectByBatchClusterName(List<String> clusterName);
+	List<GatewayClusterNodePO> selectByBatchClusterName(List<String> clusterName);
+	
+	/**
+	 * 列出集群中的所有节点
+	 *
+	 * @param clusterName 集群的名称。
+	 * @return GatewayClusterNodeVO 对象列表
+	 */
+	List<GatewayClusterNodePO> listByClusterName(String clusterName);
+	
+	/**
+	 * 删除具有给定名称的所有集群
+	 *
+	 * @param clusterName 要删除的集群的名称。
+	 * @return 一个布尔值。
+	 */
+	boolean deleteByClusterName(String clusterName);
 }

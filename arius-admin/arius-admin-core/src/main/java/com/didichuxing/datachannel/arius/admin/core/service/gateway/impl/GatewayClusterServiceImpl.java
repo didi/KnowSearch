@@ -3,8 +3,6 @@ package com.didichuxing.datachannel.arius.admin.core.service.gateway.impl;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterBriefVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClusterService;
@@ -29,8 +27,8 @@ public class GatewayClusterServiceImpl implements GatewayClusterService {
 	private GatewayClusterDAO gatewayClusterDAO;
 	
 	@Override
-	public List<GatewayClusterBriefVO> listAll() {
-		return ConvertUtil.list2List(gatewayClusterDAO.listAll(), GatewayClusterBriefVO.class);
+	public List<GatewayClusterPO> listAll() {
+		return gatewayClusterDAO.listAll();
 	}
 	
 	@Override
@@ -48,18 +46,32 @@ public class GatewayClusterServiceImpl implements GatewayClusterService {
 	}
 	
 	@Override
-	public List<GatewayClusterVO> pageByCondition(GatewayConditionDTO condition) {
+	public List<GatewayClusterPO> pageByCondition(GatewayConditionDTO condition) {
 		String sortTerm = null == condition.getSortTerm() ? SortConstant.ID : condition.getSortTerm();
 		String sortType = condition.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
 		condition.setSortTerm(sortTerm);
 		condition.setSortType(sortType);
 		condition.setFrom((condition.getPage() - 1) * condition.getSize());
-		return ConvertUtil.list2List(gatewayClusterDAO.listByCondition(condition),
-				GatewayClusterVO.class);
+		return gatewayClusterDAO.listByCondition(condition);
 	}
 	
 	@Override
 	public Long countByCondition(GatewayConditionDTO condition) {
 		return gatewayClusterDAO.countByCondition(condition);
+	}
+	
+	@Override
+	public GatewayClusterPO getOneById(Integer gatewayClusterId) {
+		return gatewayClusterDAO.getOneById(gatewayClusterId);
+	}
+	
+	@Override
+	public boolean deleteOneById(Integer gatewayClusterId) {
+		return gatewayClusterDAO.deleteOneById(gatewayClusterId);
+	}
+	
+	@Override
+	public boolean editOne(GatewayClusterDTO data) {
+		return gatewayClusterDAO.updateOne(ConvertUtil.obj2Obj(data, GatewayClusterPO.class));
 	}
 }
