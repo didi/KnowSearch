@@ -36,5 +36,35 @@
         from gateway_cluster_node_info
         where cluster_name = #{clusterName} AND heartbeat_time > #{time}
     </select>
-
+    
+    <insert
+      id="insert"
+      parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into gateway_cluster_node_info
+            (cluster_name, host_name, port)
+        values (#{clusterName}, #{hostName}, #{port})
+    </insert>
+    
+    <select id="selectByBatchClusterName" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM gateway_cluster_node_info WHERE   cluster_name IN
+        <foreach collection="clusterNames" separator="," item="clusterName" close=")" open="(">
+            #{clusterName}
+        </foreach>
+    </select>
+    
+    <select id="selectByClusterName" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM gateway_cluster_node_info WHERE   cluster_name=#{clusterName}
+    </select>
+    
+    <delete id="deleteByClusterName">
+        DELETE
+        FROM gateway_cluster_node_info
+        WHERE cluster_name = #{clusterName}
+    </delete>
 </mapper>
