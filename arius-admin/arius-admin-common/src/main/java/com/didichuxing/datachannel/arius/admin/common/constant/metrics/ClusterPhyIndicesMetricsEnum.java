@@ -157,7 +157,7 @@ public enum ClusterPhyIndicesMetricsEnum {
     /**
      * 单位：MB
      */
-    SEGMENTS_REQUEST_CACHE_MEM_SIZE("segments-request_cache-memory_size_in_bytes","Request Cache内存大小");
+    SEGMENTS_REQUEST_CACHE_MEM_SIZE("request_cache-memory_size_in_bytes","Request Cache内存大小");
 
     ClusterPhyIndicesMetricsEnum(String type, String desc) {
         this.type = type;
