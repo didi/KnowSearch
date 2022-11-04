@@ -13,15 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.UNKNOW_DATA_TYPE;
+
 @Service
 public class DataTypeServiceImpl implements DataTypeService {
 
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
-
-    public static final String UNKNOW = "未知数据";
-
-    private static final DataType unknowDataType = new DataType(-1, "未知数据", "unknow");
 
     @Override
     public Map<Integer, String> code2DescMap() {
@@ -46,7 +44,7 @@ public class DataTypeServiceImpl implements DataTypeService {
     @Override
     public String descOfCode(Integer code) {
         if (code == null) {
-            return UNKNOW;
+            return UNKNOW_DATA_TYPE.getDesc();
         }
         for (DataType dataType : getDataTypeList()) {
             if (dataType.getCode().equals(code)) {
@@ -54,7 +52,7 @@ public class DataTypeServiceImpl implements DataTypeService {
             }
         }
 
-        return UNKNOW;
+        return UNKNOW_DATA_TYPE.getDesc();
     }
 
     private List<DataType> getDefaultDataType() {
@@ -77,7 +75,7 @@ public class DataTypeServiceImpl implements DataTypeService {
                     defaultValue), DataType.class);
         } catch (Exception e) {
             //若平台配置获取的业务类型转换失败，则返回未知业务类型
-            dataTypeList.add(unknowDataType);
+            dataTypeList.add(UNKNOW_DATA_TYPE);
         }
 
         return dataTypeList;

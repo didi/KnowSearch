@@ -25,6 +25,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.UNKNOW_DATA_TYPE;
+
 /**
  * Created by linyunan on 2021-10-14
  */
@@ -43,9 +45,6 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Temp
     private static final FutureUtil<Void> BUILD_BELONG_CLUSTER_FUTURE_UTIL = FutureUtil
         .init("BUILD_BELONG_CLUSTER_FUTURE_UTIL", 10, 10, 100);
 
-    //未知的数据类型代码
-    private static final Integer UNKNOW_BUSINESS_TYPE = -1;
-
     @Override
     protected Result<Boolean> checkCondition(TemplateConditionDTO templateConditionDTO, Integer projectId) {
 
@@ -53,7 +52,7 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Temp
             return Result.buildParamIllegal("数据类型不存在");
         }
 
-        if (UNKNOW_BUSINESS_TYPE.equals(templateConditionDTO.getDataType())) {
+        if (UNKNOW_DATA_TYPE.getCode().equals(templateConditionDTO.getDataType())) {
             return Result.buildParamIllegal("数据类型非法");
         }
         String templateName = templateConditionDTO.getName();
