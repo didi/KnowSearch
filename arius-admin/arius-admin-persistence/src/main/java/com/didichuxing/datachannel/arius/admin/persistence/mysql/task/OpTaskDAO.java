@@ -3,6 +3,7 @@
  */
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.task;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.OpTaskPO;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
@@ -89,4 +90,23 @@ public interface OpTaskDAO {
      * @return {@link List}<{@link OpTaskPO}>
      */
     List<OpTaskPO> getSuccessTaskByType(@Param("taskType") Integer taskType);
+
+    /**
+     * 任务中心分页查询数据
+     * @param queryDTO
+     * @param from
+     * @param size
+     * @param sortTerm
+     * @param sortType
+     * @return
+     */
+    List<OpTaskPO> pagingByCondition(@Param("param")OpTaskQueryDTO queryDTO, @Param("from")Long from,
+                                     @Param("size")Long size, @Param("sortTerm")String sortTerm, @Param("sortType")String sortType);
+
+    /**
+     * 任务中心分页查询条数
+     * @param queryDTO
+     * @return
+     */
+    Long countByCondition(OpTaskQueryDTO queryDTO);
 }

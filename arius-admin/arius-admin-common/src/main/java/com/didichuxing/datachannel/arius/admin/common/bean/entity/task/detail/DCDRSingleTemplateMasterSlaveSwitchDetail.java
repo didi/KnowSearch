@@ -66,6 +66,10 @@ public class DCDRSingleTemplateMasterSlaveSwitchDetail extends AbstractTaskDetai
 
     private Date         createTime;
     private Date         updateTime;
+    /**
+     * 位点差超时时间
+     */
+    private Integer      timeout;
 
     public void editTaskTitle(String templateName) {
         this.taskTitle = templateName + "索引模板主从切换";
