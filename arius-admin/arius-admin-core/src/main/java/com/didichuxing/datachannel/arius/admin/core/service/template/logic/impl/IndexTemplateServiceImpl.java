@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_CHAR_SET;
 import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MAX;
 import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MIN;
@@ -122,8 +121,6 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     private Cache<String, List<IndexTemplate>> templateListCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
-
-    private static final Integer UNKNOW_BUSINESS_TYPE = -1;
 
     /**
      * 条件查询
@@ -1394,7 +1391,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (param.getProjectId() != null && !projectService.checkProjectExist(param.getProjectId())) {
             return Result.buildParamIllegal("所属应用不存在");
         }
-        if (param.getDataType() != null && UNKNOW_BUSINESS_TYPE.equals(param.getDataType())) {
+        if (param.getDataType() != null && UNKNOW_DATA_TYPE.getCode().equals(param.getDataType())) {
             return Result.buildParamIllegal("数据类型非法");
         }
         if (param.getShardNum() != null && param.getShardNum() <= 0) {
