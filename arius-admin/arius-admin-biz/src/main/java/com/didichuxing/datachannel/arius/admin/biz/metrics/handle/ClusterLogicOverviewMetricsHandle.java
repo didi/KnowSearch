@@ -290,7 +290,7 @@ public class ClusterLogicOverviewMetricsHandle {
                 default:
             }
         } catch (Exception e) {
-            LOGGER.error("class=ClusterPhyOverviewMetricsHandle||method=aggClusterLogicOverviewMetrics||errMsg={}",
+            LOGGER.error("class=ClusterLogicOverviewMetricsHandle||method=aggClusterLogicOverviewMetrics||errMsg={}",
                 e.getMessage());
         }
     }
@@ -359,7 +359,7 @@ public class ClusterLogicOverviewMetricsHandle {
         ClusterMemInfo clusterMemInfo = esClusterNodeService.synGetClusterMem(clusterName);
         if (AriusObjUtils.isNull(clusterMemInfo)) {
             LOGGER.warn(
-                "class=ClusterPhyOverviewMetricsHandle||method=buildBasicMetricsFromEsClusterMemInfo||mem info is empty");
+                "class=ClusterLogicOverviewMetricsHandle||method=buildBasicMetricsFromEsClusterMemInfo||mem info is empty");
             return;
         }
 
@@ -382,53 +382,27 @@ public class ClusterLogicOverviewMetricsHandle {
         Map<String, Long> node2ShardNum = esClusterNodeService.syncGetNode2ShardNumMap(clusterName);
         List<String> indies = esIndexCatService.syncGetIndexListByProjectId(projectId,clusterLogic);
         List<CatIndexResult> catIndexResults = esIndexService.syncCatIndex(clusterName, 3);
+        ESClusterStatsResponse clusterStats = esClusterService.syncGetClusterStats(clusterName);
 
         //shard数
-        int shardNum = 0;
-        for (String node:itemNamesUnderClusterLogic) {
-            shardNum+=node2ShardNum.get(node);
-        }
-
-        long indicesStoreSize = 0;
-        long docCount = 0;
-        for (CatIndexResult index:catIndexResults) {
-            if (indies.contains(index.getIndex())){
-                indicesStoreSize+=SizeUtil.getUnitSize(index.getStoreSize());
-                docCount+=Long.valueOf(index.getDocsCount());
-            }
-        }
-
+        long shardNum = itemNamesUnderClusterLogic.stream().mapToLong(node2ShardNum::get).filter(Objects::nonNull).sum();
+        long indicesStoreSize = catIndexResults.stream().filter(index->indies.contains(index.getIndex())).mapToLong(index->SizeUtil.getUnitSize(index.getStoreSize())).sum();
+        long docCount =  catIndexResults.stream().filter(index->indies.contains(index.getIndex())).mapToLong(index->Long.parseLong(index.getDocsCount())).sum();
         //磁盘信息
-        long totalInBytes = 0;
-        long availableInBytes = 0;
-        long freeInBytes = 0;
+        long totalInBytes = nodeStats.stream().filter(nodeStat->itemNamesUnderClusterLogic.contains(nodeStat.getName())).mapToLong(this::getTotalInBytes).sum();
+        long availableInBytes = nodeStats.stream().filter(nodeStat->itemNamesUnderClusterLogic.contains(nodeStat.getName())).mapToLong(this::getAvailableInBytes).sum();
+        long freeInBytes = nodeStats.stream().filter(nodeStat->itemNamesUnderClusterLogic.contains(nodeStat.getName())).mapToLong(this::getFreeInBytes).sum();
         //设置堆内存使用率信息
-        long heapUsedInBytes = 0;
-        long nonHeapUsedInBytes = 0;
-
-        for (ClusterNodeStats nodeStat:nodeStats) {
-            if (itemNamesUnderClusterLogic.contains(nodeStat.getName())){
-                totalInBytes += Optional.of(nodeStat).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getTotalInBytes).orElse(0L);
-                availableInBytes+= Optional.of(nodeStat).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getAvailableInBytes).orElse(0L);
-                freeInBytes+= Optional.of(nodeStat).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getFreeInBytes).orElse(0L);
-                heapUsedInBytes+= Optional.of(nodeStat).map(ClusterNodeStats::getJvm).map(JvmNode::getMem).map(JvmMem::getHeapUsedInBytes).orElse(0L);
-                nonHeapUsedInBytes+= Optional.of(nodeStat).map(ClusterNodeStats::getJvm).map(JvmNode::getMem).map(JvmMem::getNonHeapUsedInBytes).orElse(0L);
-            }
-        }
-        ESClusterStatsResponse clusterStats = esClusterService.syncGetClusterStats(clusterName);
-        if (null == clusterStats) {
-            return;
-        }
+        long heapUsedInBytes = nodeStats.stream().filter(nodeStat->itemNamesUnderClusterLogic.contains(nodeStat.getName())).mapToLong(this::getHeapUsedInBytes).sum();
+        long nonHeapUsedInBytes =  nodeStats.stream().filter(nodeStat->itemNamesUnderClusterLogic.contains(nodeStat.getName())).mapToLong(this::getNonHeapUsedInBytes).sum();
 
         //设置状态
         basicVO.setStatus(clusterStats.getStatus());
-
         //设置基础信息
         basicVO.setNumberNodes((long) itemNamesUnderClusterLogic.size());
         basicVO.setTotalIndicesNu((long) indies.size());
         basicVO.setShardNu((long) shardNum);
         basicVO.setTotalDocNu(docCount);
-
         basicVO.setIndicesStoreSize(indicesStoreSize);
         basicVO.setUnassignedShardNum(clusterStats.getUnassignedShardNum());
 
@@ -605,5 +579,58 @@ public class ClusterLogicOverviewMetricsHandle {
                 .collect(Collectors.toList());
 
         return nodeInfoForDiskUsageGte75PercentVOS;
+    }
+
+
+    /**
+     * > 从集群节点统计中获取以字节为单位使用的非堆内存
+     *
+     * @param clusterNodeStats 包含 JVM 统计信息的 ClusterNodeStats 对象。
+     * @return 以字节为单位使用的非堆内存。
+     */
+    private long getNonHeapUsedInBytes(ClusterNodeStats clusterNodeStats) {
+        return Optional.of(clusterNodeStats).map(ClusterNodeStats::getJvm).map(JvmNode::getMem).map(JvmMem::getNonHeapUsedInBytes).orElse(0L);
+    }
+
+    /**
+     * > 从集群节点统计中获取堆使用的字节数
+     *
+     * @param clusterNodeStats 包含 JVM 统计信息的 ClusterNodeStats 对象。
+     * @return 以字节为单位使用的堆。
+     */
+    private long getHeapUsedInBytes(ClusterNodeStats clusterNodeStats) {
+        return Optional.of(clusterNodeStats).map(ClusterNodeStats::getJvm).map(JvmNode::getMem).map(JvmMem::getHeapUsedInBytes).orElse(0L);
+    }
+
+    /**
+     * > 从集群节点统计中获取可用空间（以字节为单位）
+     *
+     * @param clusterNodeStats 包含节点信息的 ClusterNodeStats 对象。
+     * @return 集群节点的可用空间（以字节为单位）。
+     */
+    private long getFreeInBytes(ClusterNodeStats clusterNodeStats) {
+        return Optional.of(clusterNodeStats).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getFreeInBytes).orElse(0L);
+    }
+
+    /**
+     * > 从集群节点统计中获取可用空间（以字节为单位）
+     *
+     * @param clusterNodeStats 包含节点信息的 ClusterNodeStats 对象。
+     * @return 可用空间（以字节为单位）。
+     */
+    private long getAvailableInBytes(ClusterNodeStats clusterNodeStats) {
+        return Optional.of(clusterNodeStats).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getAvailableInBytes).orElse(0L);
+    }
+
+    /**
+     * “获取集群节点统计信息的总字节数，如果集群节点统计信息为空，则为 0。”
+     *
+     * 该函数比这要复杂一些，但这就是它的要点
+     *
+     * @param clusterNodeStats 包含节点信息的 ClusterNodeStats 对象。
+     * @return 文件系统中的总字节数。
+     */
+    private long getTotalInBytes(ClusterNodeStats clusterNodeStats) {
+        return Optional.of(clusterNodeStats).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getTotalInBytes).orElse(0L);
     }
 }
