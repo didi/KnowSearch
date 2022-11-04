@@ -379,18 +379,25 @@ public class ClusterLogicOverviewMetricsHandle {
     private void buildBasicMetricsFromClusterStats(ESClusterPhyBasicMetricsVO basicVO, String clusterName,
                                                    List<String> itemNamesUnderClusterLogic,String clusterLogic, Integer projectId) {
         List<ClusterNodeStats> nodeStats = esClusterNodeService.syncGetNodeStats(clusterName);
+        Map<String, Long> node2ShardNum = esClusterNodeService.syncGetNode2ShardNumMap(clusterName);
+        List<String> indies = esIndexCatService.syncGetIndexListByProjectId(projectId,clusterLogic);
+        List<CatIndexResult> catIndexResults = esIndexService.syncCatIndex(clusterName, 3);
+
         //shard数
         int shardNum = 0;
-        Map<String/*node*/, Long /*shardNum*/> node2ShardNum = esClusterNodeService.syncGetNode2ShardNumMap(clusterName);
         for (String node:itemNamesUnderClusterLogic) {
             shardNum+=node2ShardNum.get(node);
         }
 
-        //索引数量
-        List<CatIndexResult> catIndexResults = esIndexService.syncCatIndex(clusterName, 3);
-        int indexCount = esIndexCatService.syncGetIndexListByProjectId(projectId,clusterLogic).size();
-        //文档数量
+        long indicesStoreSize = 0;
         long docCount = 0;
+        for (CatIndexResult index:catIndexResults) {
+            if (indies.contains(index.getIndex())){
+                indicesStoreSize+=SizeUtil.getUnitSize(index.getStoreSize());
+                docCount+=Long.valueOf(index.getDocsCount());
+            }
+        }
+
         //磁盘信息
         long totalInBytes = 0;
         long availableInBytes = 0;
@@ -401,12 +408,9 @@ public class ClusterLogicOverviewMetricsHandle {
 
         for (ClusterNodeStats nodeStat:nodeStats) {
             if (itemNamesUnderClusterLogic.contains(nodeStat.getName())){
-                docCount+= Optional.of(nodeStat).map(ClusterNodeStats::getIndices).map(CommonStat::getDocs).map(Docs::getCount).orElse(0L);
-
                 totalInBytes += Optional.of(nodeStat).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getTotalInBytes).orElse(0L);
                 availableInBytes+= Optional.of(nodeStat).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getAvailableInBytes).orElse(0L);
                 freeInBytes+= Optional.of(nodeStat).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getFreeInBytes).orElse(0L);
-
                 heapUsedInBytes+= Optional.of(nodeStat).map(ClusterNodeStats::getJvm).map(JvmNode::getMem).map(JvmMem::getHeapUsedInBytes).orElse(0L);
                 nonHeapUsedInBytes+= Optional.of(nodeStat).map(ClusterNodeStats::getJvm).map(JvmNode::getMem).map(JvmMem::getNonHeapUsedInBytes).orElse(0L);
             }
@@ -421,11 +425,11 @@ public class ClusterLogicOverviewMetricsHandle {
 
         //设置基础信息
         basicVO.setNumberNodes((long) itemNamesUnderClusterLogic.size());
-        basicVO.setTotalIndicesNu((long) indexCount);
+        basicVO.setTotalIndicesNu((long) indies.size());
         basicVO.setShardNu((long) shardNum);
-        basicVO.setTotalDocNu((long) docCount);
+        basicVO.setTotalDocNu(docCount);
 
-        basicVO.setIndicesStoreSize(clusterStats.getIndicesStoreSize().getBytes());
+        basicVO.setIndicesStoreSize(indicesStoreSize);
         basicVO.setUnassignedShardNum(clusterStats.getUnassignedShardNum());
 
         //设置集群磁盘信息
