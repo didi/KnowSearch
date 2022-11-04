@@ -24,6 +24,8 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -109,6 +111,11 @@ public interface TemplateLogicManager {
      * 根据项目获取有管理\读写\读权限的逻辑模版
      */
     List<String> getTemplateLogicNames(Integer projectId);
+
+    /**
+     * 获取模板的业务类型
+     */
+    Map<Integer, String> getDataTypeCode2DescMap();
 
     Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId);
 

@@ -20,7 +20,6 @@ import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
@@ -83,6 +82,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.DataTypeService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
@@ -94,15 +94,8 @@ import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -127,6 +120,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Autowired
     private TemplateStatsService            templateStatsService;
+
+    @Autowired
+    private DataTypeService                 dataTypeService;
 
     @Autowired
     private ColdManager                     templateColdManager;
@@ -434,6 +430,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     @Override
+    public Map<Integer, String> getDataTypeCode2DescMap() {
+        return dataTypeService.code2DescMap();
+    }
+
+    @Override
     public Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId) {
         try {
             final IndexTemplate oldIndexTemplate = indexTemplateService.getLogicTemplateById(param.getId());
@@ -444,8 +445,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             }
             final Result<Void> voidResult = indexTemplateService.editTemplateInfoTODB(param);
             if (voidResult.success()) {
-                String dataTypeBefore= DataTypeEnum.valueOf(oldIndexTemplate.getDataType()).getDesc();
-                String dataTypeAfter= DataTypeEnum.valueOf(param.getDataType()).getDesc();
+                String dataTypeBefore= dataTypeService.descOfCode(oldIndexTemplate.getDataType());
+                String dataTypeAfter= dataTypeService.descOfCode(param.getDataType());
                 String descBefore=oldIndexTemplate.getDesc();
                 String descAfter=param.getDesc();
     
