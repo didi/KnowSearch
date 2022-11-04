@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.DataT
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,10 +22,22 @@ public class DataTypeServiceImpl implements DataTypeService {
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
 
+    private List<DataType>         defaultDataTypeList;
     @Override
     public Map<Integer, String> code2DescMap() {
         List<DataType> dataTypeList = getDataTypeList();
         return dataTypeList.stream().collect(Collectors.toMap(DataType::getCode, DataType::getDesc));
+    }
+
+    @PostConstruct
+    private List<DataType> getDefaultDataType() {
+        defaultDataTypeList = new ArrayList<>();
+        defaultDataTypeList.add(new DataType(0,"系统日志","system"));
+        defaultDataTypeList.add(new DataType(1,"日志数据","log"));
+        defaultDataTypeList.add(new DataType(2,"用户上报数据","olap"));
+        defaultDataTypeList.add(new DataType(3,"RDS数据","binlog"));
+        defaultDataTypeList.add(new DataType(4,"离线导入数据","offline"));
+        return defaultDataTypeList;
     }
 
     @Override
@@ -55,22 +68,12 @@ public class DataTypeServiceImpl implements DataTypeService {
         return UNKNOW_DATA_TYPE.getDesc();
     }
 
-    private List<DataType> getDefaultDataType() {
-        List<DataType> dataTypeList = new ArrayList<>();
-        dataTypeList.add(new DataType(0,"系统日志","system"));
-        dataTypeList.add(new DataType(1,"日志数据","log"));
-        dataTypeList.add(new DataType(2,"用户上报数据","olap"));
-        dataTypeList.add(new DataType(3,"RDS数据","binlog"));
-        dataTypeList.add(new DataType(4,"离线导入数据","offline"));
-        return dataTypeList;
-    }
-
     private List<DataType> getDataTypeList() {
 
         List<DataType> dataTypeList = new ArrayList<>();
         try {
             //从平台配置中获取业务类型并转换
-            String defaultValue = JSON.toJSONString(getDefaultDataType());
+            String defaultValue = JSON.toJSONString(defaultDataTypeList);
             dataTypeList = JSON.parseArray(ariusConfigInfoService.stringSetting(AriusConfigConstant.ARIUS_TEMPLATE_GROUP, AriusConfigConstant.LOGIC_TEMPLATE_BUSINESS_TYPE_LIST,
                     defaultValue), DataType.class);
         } catch (Exception e) {
