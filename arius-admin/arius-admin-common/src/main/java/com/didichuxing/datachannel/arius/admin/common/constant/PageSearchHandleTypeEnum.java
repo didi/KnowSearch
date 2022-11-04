@@ -13,8 +13,8 @@ public enum PageSearchHandleTypeEnum {
         QUICK_COMMAND_SHARD("quickCommandShardsDistributionPageSearch"),
         OPERATE_RECORD("operateRecordPageSearch"),
         GATEWAY_JOIN("gatewayJoinPageSearch"),
-        GATEWAY_CLUSTER("GatewayClusterPageSearchHandle")
-        ;
+        GATEWAY_CLUSTER("GatewayClusterPageSearchHandle"),
+        TASK("taskPageSearch");
        private String pageSearchType;
 
         public String getPageSearchType(){

@@ -172,8 +172,4 @@ public class ClusterDynamicConfigTypeCheckFunUtil {
         }
         return bandwidth != null;
     }
-
-    public static boolean stringListCheck(String value) {
-        return true;
-    }
 }
