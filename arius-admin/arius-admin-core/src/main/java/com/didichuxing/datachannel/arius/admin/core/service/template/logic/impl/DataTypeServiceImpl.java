@@ -23,11 +23,6 @@ public class DataTypeServiceImpl implements DataTypeService {
     private AriusConfigInfoService ariusConfigInfoService;
 
     private List<DataType>         defaultDataTypeList;
-    @Override
-    public Map<Integer, String> code2DescMap() {
-        List<DataType> dataTypeList = getDataTypeList();
-        return dataTypeList.stream().collect(Collectors.toMap(DataType::getCode, DataType::getDesc));
-    }
 
     @PostConstruct
     private List<DataType> getDefaultDataType() {
@@ -38,6 +33,12 @@ public class DataTypeServiceImpl implements DataTypeService {
         defaultDataTypeList.add(new DataType(3,"RDS数据","binlog"));
         defaultDataTypeList.add(new DataType(4,"离线导入数据","offline"));
         return defaultDataTypeList;
+    }
+
+    @Override
+    public Map<Integer, String> code2DescMap() {
+        List<DataType> dataTypeList = getDataTypeList();
+        return dataTypeList.stream().collect(Collectors.toMap(DataType::getCode, DataType::getDesc));
     }
 
     @Override
