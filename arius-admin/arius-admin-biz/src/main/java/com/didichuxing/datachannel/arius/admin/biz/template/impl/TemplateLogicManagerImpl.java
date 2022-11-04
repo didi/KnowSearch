@@ -425,7 +425,13 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Override
     public List<String> getTemplateLogicNames(Integer projectId) {
-        List<IndexTemplate> templateLogics = indexTemplateService.listProjectLogicTemplatesByProjectId(projectId);
+        List<IndexTemplate> templateLogics;
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            templateLogics = indexTemplateService.listAllLogicTemplates();
+        } else {
+            templateLogics = indexTemplateService.listProjectLogicTemplatesByProjectId(projectId);
+        }
+
         return templateLogics.stream().map(IndexTemplate::getName).collect(Collectors.toList());
     }
 
