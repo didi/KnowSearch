@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.DataType;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,9 +27,9 @@ public class BaseTemplateVO extends BaseEntity implements Comparable<BaseTemplat
     /**
      * 用户数据类型
      *
-     * @see DataTypeEnum
+     * @see DataType
      */
-    @ApiModelProperty("数据类型（0: 系统 1: 日志；2: 用户上报；3:RDS 数据；4：离线导入数据）")
+    @ApiModelProperty("数据类型，默认为（0: 系统 1: 日志；2: 用户上报；3:RDS 数据；4：离线导入数据）")
     private Integer dataType;
     
     /**

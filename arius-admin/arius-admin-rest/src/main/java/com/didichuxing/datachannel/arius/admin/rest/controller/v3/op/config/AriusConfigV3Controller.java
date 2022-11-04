@@ -100,15 +100,6 @@ public class AriusConfigV3Controller {
             AriusConfigConstant.CLUSTER_RESOURCE_TYPE_LIST_DEFAULT_VALUE, COMMA)));
     }
 
-    @GetMapping("/logic-template-business-type")
-    @ResponseBody
-    @ApiOperation(value = "获取模板业务类型")
-    public Result<List<String>> listLogicTemplateBusinessType() {
-        return Result.buildSucc(new ArrayList<>(ariusConfigInfoService.stringSettingSplit2Set(
-                AriusConfigConstant.ARIUS_TEMPLATE_GROUP, AriusConfigConstant.LOGIC_TEMPLATE_BUSINESS_TYPE_LIST,
-                AriusConfigConstant.LOGIC_TEMPLATE_BUSINESS_TYPE_LIST_DEFAULT_VALUE, COMMA)));
-    }
-
     @GetMapping("/cluster-node-count")
     @ResponseBody
     @ApiOperation(value = "获取集群节点数")

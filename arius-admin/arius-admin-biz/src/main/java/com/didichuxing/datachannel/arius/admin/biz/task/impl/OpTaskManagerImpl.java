@@ -1,11 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.biz.task.impl;
 
+import com.didichuxing.datachannel.arius.admin.biz.page.TaskPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskHandler;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProcessDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.OpTaskVO;
+import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskHandleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
@@ -20,6 +25,8 @@ import com.didiglobal.logi.security.service.UserService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TASK;
 
 /**
  * @author d06679
@@ -90,6 +97,19 @@ public class OpTaskManagerImpl implements OpTaskManager {
             return Result.buildFail(ResultType.NOT_EXIST.getMessage());
         }
         return Result.buildSucc(opTask);
+    }
+
+    @Override
+    public PaginationResult<OpTaskVO> pageGetTasks(Integer projectId, OpTaskQueryDTO queryDTO) throws NotFindSubclassException {
+        BaseHandle baseHandle = handleFactory.getByHandlerNamePer(TASK.getPageSearchType());
+        if (baseHandle instanceof TaskPageSearchHandle) {
+            TaskPageSearchHandle handle = (TaskPageSearchHandle) baseHandle;
+            return handle.doPage(queryDTO, projectId);
+        }
+        LOGGER.warn(
+                "class=OpTaskManagerImpl||method=pageGetTasks||msg=failed to get the TaskPageSearchHandle");
+
+        return PaginationResult.buildFail("分页获取任务中心信息失败");
     }
 
     @Override

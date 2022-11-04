@@ -44,7 +44,6 @@ public class ESPhyClusterRegionController {
     @GetMapping("/{regionId}/nodes")
     @ResponseBody
     @ApiOperation(value = "获取region下的节点列表", notes = "")
-    @Deprecated
     public Result<List<ESClusterRoleHostVO>> getRegionNodes(@PathVariable Long regionId) {
 
         return clusterNodeManager.listClusterRoleHostByRegionId(regionId);
