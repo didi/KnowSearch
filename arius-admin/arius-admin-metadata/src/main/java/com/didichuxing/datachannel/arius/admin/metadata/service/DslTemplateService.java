@@ -82,7 +82,7 @@ public class DslTemplateService {
         List<Long> logicClusterIds = getLogicClusterIds(metadataClusterName);
         List<String> templateNameList = indexTemplateService.listByResourceIds(logicClusterIds).stream()
                 .map(IndexTemplate::getName).filter(indexName -> !indexName.startsWith("arius")).collect(Collectors.toList());
-        return dslTemplateESDAO.getDslTemplatePageWithoutMetadataCluster(projectId, queryDTO,templateNameList);
+        return dslTemplateESDAO.getDslTemplatePageWithoutMetadataCluster(projectId, queryDTO, templateNameList);
     }
 
     /**

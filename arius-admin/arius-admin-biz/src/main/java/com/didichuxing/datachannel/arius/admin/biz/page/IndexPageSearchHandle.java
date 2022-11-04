@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatus
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.MetadataControlUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.google.common.collect.Lists;
@@ -50,9 +51,6 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
         if(startNum >= QUERY_COUNT_THRESHOLD) {
             return Result.buildParamIllegal(String.format("查询条数不能超过%d条", QUERY_COUNT_THRESHOLD));
         }
-        if(AriusObjUtils.isNull(condition.getShowMetadata())){
-            return Result.buildParamIllegal("是否展示元信息参数不能为空");
-        }
         return Result.buildSucc(true);
     }
 
@@ -69,6 +67,10 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
         if (AriusObjUtils.isBlack(condition.getSortTerm())) {
             condition.setSortTerm(DEFAULT_SORT_TERM);
         }
+        //默认展示元数据集群的信息
+        if(AriusObjUtils.isNull(condition.getShowMetadata())){
+            condition.setShowMetadata(true);
+        }
     }
 
     /**
@@ -83,8 +85,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
             // 使用超级项目访问时，queryProjectId为null
             Integer queryProjectId = null;
             if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) { queryProjectId = projectId;}
-            //false 为展示元数据信息 true为展示元数据信息 默认索引服务和索引管理不展示元数据信息
-            Boolean showMetadata = condition.getShowMetadata() && AuthConstant.SUPER_PROJECT_ID.equals(projectId);
+            Boolean showMetadata = MetadataControlUtils.showMetadataInfo(condition.getShowMetadata(),projectId);
 
             Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(queryCluster,
                     condition.getIndex(), condition.getHealth(), condition.getStatus(), queryProjectId,
