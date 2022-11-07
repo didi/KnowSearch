@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
+import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.TopMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
@@ -627,5 +628,78 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
         getDirectResponse(cluster, "GET","_nodes/stats");
         long endTime = System.currentTimeMillis();
         return endTime-startTime;
+    }
+
+    /**
+     * 获取逻辑集群实时cpu分位值(统计节点维度)和平均使用率
+     *
+     * @param cluster
+     * @return
+     */
+    public Map<String, Double> getClusterLogicCpuAvgAndPercentiles(List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_REAL_TIME_AVG_AND_PERCENT, JSON.toJSONString(nodes),
+                NOW_2M, NOW_1M, CPU_USAGE_PERCENT.getType(), CPU_USAGE_PERCENT.getType());
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
+                this::getAvgAndPercentilesFromESQueryResponse, 3);
+    }
+
+    /**
+     * 获取逻辑集群磁盘空闲使用率分位值(统计节点维度)和平均使用率
+     */
+    public Map<String, Double> getClusterLogicDiskFreeUsagePercentAvgAndPercentiles(List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(
+                DslsConstant.AGG_CLUSTER_LOGIC_AVG_AND_PERCENT_FOR_DISK_FREE_USAGE_PERCENT, JSON.toJSONString(nodes), NOW_2M, NOW_1M);
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
+                this::getAvgAndPercentilesFromESQueryResponse, 3);
+    }
+
+    /**
+     * 获取逻辑集群实时cpu load 1m分位值(统计节点维度)和平均使用率
+     *
+     * @param nodes
+     * @return
+     */
+    public Map<String, Double> getClusterLogicCpuLoad1MinAvgAndPercentiles(List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_REAL_TIME_AVG_AND_PERCENT, JSON.toJSONString(nodes),
+                NOW_2M, NOW_1M, CPU_LOAD_AVERAGE_1M.getType(), CPU_LOAD_AVERAGE_1M.getType());
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
+                this::getAvgAndPercentilesFromESQueryResponse, 3);
+    }
+
+    /**
+     * 获取集群实时cpu load 5m分位值(统计节点维度)和平均使用率
+     *
+     * @param nodes
+     * @return
+     */
+    public Map<String, Double> getClusterLogicCpuLoad5MinAvgAndPercentiles(List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_REAL_TIME_AVG_AND_PERCENT, JSON.toJSONString(nodes),
+                NOW_2M, NOW_1M, CPU_LOAD_AVERAGE_5M.getType(), CPU_LOAD_AVERAGE_5M.getType());
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
+                this::getAvgAndPercentilesFromESQueryResponse, 3);
+    }
+
+    /**
+     * 获取集群实时cpu load 15m分位值(统计节点维度)和平均使用率
+     *
+     * @param nodes
+     * @return
+     */
+    public Map<String, Double> getClusterLogicCpuLoad15MinAvgAndPercentiles(List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_REAL_TIME_AVG_AND_PERCENT, JSON.toJSONString(nodes),
+                NOW_2M, NOW_1M, CPU_LOAD_AVERAGE_15M.getType(), CPU_LOAD_AVERAGE_15M.getType());
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
+                this::getAvgAndPercentilesFromESQueryResponse, 3);
+
     }
 }
