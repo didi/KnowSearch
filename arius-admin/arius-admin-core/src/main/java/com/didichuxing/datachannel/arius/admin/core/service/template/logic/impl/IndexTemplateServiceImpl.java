@@ -72,6 +72,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -119,7 +120,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     @Autowired
     private ClusterRegionService               clusterRegionService;
 
-    private Cache<String, List<IndexTemplate>> templateListCache = CacheBuilder.newBuilder()
+    private final Cache<String, List<IndexTemplate>> templateListCache = CacheBuilder.newBuilder()
+        .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
+    private final Cache<String, Map<Integer, IndexTemplate>> INDEX_TEMPLATE_SERVICE_CACHE = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
 
     /**
@@ -510,7 +513,17 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return listAllLogicTemplates().stream()
             .collect(Collectors.toMap(IndexTemplate::getId, indexTemplateLogic -> indexTemplateLogic));
     }
-
+    
+    @Override
+    public Map<Integer, IndexTemplate> getAllLogicTemplatesMapWithCache() {
+        try {
+            return (Map<Integer, IndexTemplate>) INDEX_TEMPLATE_SERVICE_CACHE.get(
+                "getAllLogicTemplatesMapWithCache", this::getAllLogicTemplatesMap);
+        } catch (ExecutionException e) {
+            return getAllLogicTemplatesMap();
+        }
+    }
+    
     @Override
     public List<IndexTemplate> listLogicTemplatesByIds(List<Integer> logicTemplateIds) {
         if (CollectionUtils.isEmpty(logicTemplateIds)) {

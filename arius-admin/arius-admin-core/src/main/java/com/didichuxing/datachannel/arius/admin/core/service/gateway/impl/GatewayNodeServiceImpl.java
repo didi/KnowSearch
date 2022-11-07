@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.core.service.gateway.impl;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
+import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterNodeDAO;
@@ -44,6 +46,21 @@ public class GatewayNodeServiceImpl implements GatewayNodeService {
 	@Override
 	public boolean deleteByClusterName(String clusterName) {
 		return gatewayClusterNodeDAO.deleteByClusterName(clusterName);
+	}
+	
+	@Override
+	public List<GatewayClusterNodePO> pageByCondition(GatewayNodeConditionDTO condition) {
+		String sortTerm = null == condition.getSortTerm() ? SortConstant.ID : condition.getSortTerm();
+		String sortType = condition.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
+		condition.setSortTerm(sortTerm);
+		condition.setSortType(sortType);
+		condition.setFrom((condition.getPage() - 1) * condition.getSize());
+		return gatewayClusterNodeDAO.listByCondition(condition);
+	}
+	
+	@Override
+	public Long countByCondition(GatewayNodeConditionDTO condition) {
+		return gatewayClusterNodeDAO.countByCondition(condition);
 	}
 	
 	/**

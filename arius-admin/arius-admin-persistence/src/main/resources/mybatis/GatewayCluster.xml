@@ -106,4 +106,10 @@
         </trim>
         WHERE id = #{id}
     </update>
+    
+    <select id="getClusterNameById" resultType="java.lang.String">
+        SELECT cluster_name
+        FROM gateway_cluster_info
+        WHERE id = #{id}
+    </select>
 </mapper>
