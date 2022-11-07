@@ -90,4 +90,20 @@ public interface ESUserManager {
      */
     Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(Integer projectId, String operator);
 
+    /**
+     * 获取原生模式下项目的访问集群列表
+     *
+     * @param projectId
+     * @return {@code Result<List<String>> }
+     */
+    Result<List<String>> listClusterByAppInPrimitiveType(Integer projectId);
+
+    /**
+     * 获取集群模式下项目的访问集群列表
+     *
+     * @param projectId
+     * @return {@code Result<List<String>> }
+     */
+    Result<List<String>> listClusterByAppInClusterType(Integer projectId);
+
 }

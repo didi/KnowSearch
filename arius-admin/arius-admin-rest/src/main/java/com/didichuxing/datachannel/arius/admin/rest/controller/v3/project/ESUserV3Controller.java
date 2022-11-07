@@ -94,4 +94,22 @@ public class ESUserV3Controller {
         return esUserManager.get(esUser);
     }
 
+    @GetMapping("primitive-search-type/search-cluster-list/{projectId}")
+    @ResponseBody
+    @ApiOperation(value = "获取原生模式下项目对应的访问集群列表")
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "projectId", value = "projectId", required = true) })
+    public Result<List<String>> listClusterByAppInPrimitiveType(HttpServletRequest request,
+                                                                @PathVariable("projectId") Integer projectId) {
+        return esUserManager.listClusterByAppInPrimitiveType(projectId);
+    }
+
+    @GetMapping("cluster-search-type/search-cluster-list/{projectId}")
+    @ResponseBody
+    @ApiOperation(value = "获取集群模式下项目对应的访问集群列表")
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "projectId", value = "projectId", required = true) })
+    public Result<List<String>> listClusterByAppInClusterType(HttpServletRequest request,
+                                                              @PathVariable("projectId") Integer projectId) {
+        return esUserManager.listClusterByAppInClusterType(projectId);
+    }
+
 }

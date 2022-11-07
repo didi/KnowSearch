@@ -8,13 +8,17 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
@@ -23,6 +27,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
@@ -32,6 +37,7 @@ import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -66,6 +72,8 @@ public class ESUserManagerImpl implements ESUserManager {
     private RoleTool            roleTool;
     @Autowired
     private ClusterLogicService  clusterLogicService;
+    @Autowired
+    private ClusterPhyService    clusterPhyService;
     @Autowired
     private ClusterRegionService clusterRegionService;
 
@@ -280,7 +288,71 @@ public class ESUserManagerImpl implements ESUserManager {
                                    OperateTypeEnum operateTypeEnum) {
         operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,projectId,operateTypeEnum);
     }
-    
+
+    /**
+     * 获取原生模式下项目的访问集群列表
+     * @param projectId
+     * @return Result<List<String>>
+     */
+    @Override
+    public Result<List<String>> listClusterByAppInPrimitiveType(Integer projectId) {
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            //超级projectId返回对应的独立的物理集群
+            List<String> clusterPhyList = clusterPhyService.listAllClusters().stream()
+                    .filter(clusterPhy -> ClusterResourceTypeEnum.PRIVATE.getCode() == clusterPhy.getResourceType())
+                    .map(ClusterPhy::getCluster)
+                    .distinct()
+                    .collect(Collectors.toList());
+            if (clusterPhyList.isEmpty()) {
+                return Result.buildFail("超级项目下无独立类型集群，无法新增原生模式的ES_User");
+            } else {
+                return Result.buildSucc(clusterPhyList);
+            }
+        } else {
+            //普通项目返回对应的独立的逻辑集群
+            List<String> clusterLogicList = clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId).stream()
+                    .filter(clusterLogic -> ClusterResourceTypeEnum.PRIVATE.getCode() == clusterLogic.getType())
+                    .map(ClusterLogic::getName)
+                    .distinct().collect(Collectors.toList());
+            if (clusterLogicList.isEmpty()) {
+                return Result.buildFail("该项目下无独立类型集群，无法新增原生模式的ES_User");
+            } else {
+                return Result.buildSucc(clusterLogicList);
+            }
+        }
+    }
+
+    /**
+     * 获取集群模式下项目的访问集群列表
+     * @param projectId
+     * @return Result<List<String>>
+     */
+    @Override
+    public Result<List<String>> listClusterByAppInClusterType(Integer projectId) {
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            //超级projectId返回对应的物理集群
+            List<String> clusterPhyList = clusterPhyService.listAllClusters().stream()
+                    .map(ClusterPhy::getCluster)
+                    .distinct()
+                    .collect(Collectors.toList());
+            if (clusterPhyList.isEmpty()) {
+                return Result.buildFail("超级项目下无可用集群，无法新增集群模式的ES_User");
+            } else {
+                return Result.buildSucc(clusterPhyList);
+            }
+        } else {
+            //普通项目返回对应的逻辑集群
+            List<String> clusterLogicList = clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId).stream()
+                    .map(ClusterLogic::getName)
+                    .distinct().collect(Collectors.toList());
+            if (clusterLogicList.isEmpty()) {
+                return Result.buildFail("该项目下无可用集群，无法新增原生模式的ES_User");
+            } else {
+                return Result.buildSucc(clusterLogicList);
+            }
+        }
+    }
+
     /**
      *  检查集群并设置集群
      *
