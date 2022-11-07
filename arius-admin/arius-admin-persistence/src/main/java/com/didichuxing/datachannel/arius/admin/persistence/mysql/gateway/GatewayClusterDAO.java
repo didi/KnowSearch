@@ -80,4 +80,12 @@ public interface GatewayClusterDAO {
      * @return 包含集群名称的字符串。
      */
     String getClusterNameById(@Param("id") Integer id);
+    
+    /**
+     * > 该函数返回给定 id 的组件的组件 id
+     *
+     * @param id 组件的id
+     * @return 具有给定 id 的组件的组件 id。
+     */
+    Integer getComponentIdById(@Param("id")Integer id);
 }
