@@ -51,7 +51,7 @@ public class ComponentStatusScheduler {
     public final String key = "packageId2TemplateIdMap";
 
     //TODO 这里是否需要考虑分布式处理组件的监控
-    @Scheduled(initialDelay = 10000, fixedDelay = 300000)
+    //@Scheduled(initialDelay = 10000, fixedDelay = 300000)
     public void monitor() {
         try {
             LOGGER.info("start monitor task");
