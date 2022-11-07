@@ -43,7 +43,7 @@ public class AriusStatsClusterInfoESDAO extends BaseAriusStatsESDAO {
      * @param endTime             结束时间
      * @return
      */
-    public Map<Long, Double> getAggSinglePercentilesMetrics(String clusterName, String clusterMetricsType,
+    public Map<Long, Double> getAggSinglePercentilesMetrics(String clusterName,long clusterType, String clusterMetricsType,
                                                             String aggType, String percentilesType, Long startTime,
                                                             Long endTime) {
         Map<Long, Double> resultMap = Maps.newHashMap();
@@ -51,7 +51,7 @@ public class AriusStatsClusterInfoESDAO extends BaseAriusStatsESDAO {
         String interval = MetricsUtils.getInterval(endTime - startTime);
         try {
             String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_CLUSTER_PHY_AGG_PERCENTILES_METRICS_BY_AGG_PARAM, clusterName, percentilesType,
+                DslsConstant.GET_CLUSTER_PHY_AGG_PERCENTILES_METRICS_BY_AGG_PARAM, clusterName,clusterType, percentilesType,
                 startTime, endTime, interval, clusterMetricsType, aggType, clusterMetricsType);
 
             resultMap = gatewayClient.performRequestWithRouting(metadataClusterName, clusterName, realIndexName, TYPE,
@@ -72,7 +72,7 @@ public class AriusStatsClusterInfoESDAO extends BaseAriusStatsESDAO {
     /**
      * 获取物理集群其他统计信息
      */
-    public <T> List<T> getAggClusterPhyMetrics(String clusterName, String aggType, Long startTime, Long endTime,
+    public <T> List<T> getAggClusterPhyMetrics(String clusterName,long clusterType, String aggType, Long startTime, Long endTime,
                                                Class<T> clazz) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
 
@@ -81,7 +81,7 @@ public class AriusStatsClusterInfoESDAO extends BaseAriusStatsESDAO {
         String interval = MetricsUtils.getInterval(intervalTime);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_METRICS_BY_RANGE_AND_INTERVAL,
-            clusterName, startTime, endTime, interval, buildAggsDSL(clazz, aggType));
+            clusterName,clusterType, startTime, endTime, interval, buildAggsDSL(clazz, aggType));
 
         return gatewayClient.performRequest(metadataClusterName, realIndexName, TYPE, dsl,
             (ESQueryResponse response) -> fetchAggClusterPhyMetrics(response, clazz), 3);

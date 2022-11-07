@@ -1,0 +1,34 @@
+{
+	"size": 0,
+	"query": {
+		"bool": {
+			"must": [{
+					"terms": {
+						"node": %s
+					}
+				},
+				{
+					"range": {
+						"timestamp": {
+							"gte": "%s",
+							"lte": "%s"
+						}
+					}
+				}
+			]
+		}
+	},
+	"aggs": {
+		"percentiles": {
+			"percentiles": {
+				"field": "metrics.%s",
+				"percents": [55, 75, 95, 99]
+			}
+		},
+		"avg": {
+			"avg": {
+				"field": "metrics.%s"
+			}
+		}
+	}
+}

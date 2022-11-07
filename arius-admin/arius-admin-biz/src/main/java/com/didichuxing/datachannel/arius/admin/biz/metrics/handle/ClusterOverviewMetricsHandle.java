@@ -267,63 +267,63 @@ public class ClusterOverviewMetricsHandle {
 
                 /********************************分位图类型*******************************/
                 case CPU_USAGE:
-                    aggPercentilesMetrics(metrics, CPU_USAGE.getType(), aggType, startTime, endTime,
+                    aggPercentilesMetrics(metrics,PHY_CLUSTER, CPU_USAGE.getType(), aggType, startTime, endTime,
                         b -> metrics.setCpuUsage(ConvertUtil.list2List(b, CpuUsageMetricsVO.class)));
                     return;
                 case CPU_LOAD_1M:
-                    aggPercentilesMetrics(metrics, CPU_LOAD_1M.getType(), aggType, startTime, endTime,
+                    aggPercentilesMetrics(metrics,PHY_CLUSTER, CPU_LOAD_1M.getType(), aggType, startTime, endTime,
                         b -> metrics.setCpuLoad1M(ConvertUtil.list2List(b, CpuLoadFor1MinMetricsVO.class)));
                     return;
                 case CPU_LOAD_5M:
-                    aggPercentilesMetrics(metrics, CPU_LOAD_5M.getType(), aggType, startTime, endTime,
+                    aggPercentilesMetrics(metrics,PHY_CLUSTER, CPU_LOAD_5M.getType(), aggType, startTime, endTime,
                         b -> metrics.setCpuLoad5M(ConvertUtil.list2List(b, CpuLoadFor5MinMetricsVO.class)));
                     return;
                 case CPU_LOAD_15M:
-                    aggPercentilesMetrics(metrics, CPU_LOAD_15M.getType(), aggType, startTime, endTime,
+                    aggPercentilesMetrics(metrics,PHY_CLUSTER, CPU_LOAD_15M.getType(), aggType, startTime, endTime,
                         b -> metrics.setCpuLoad15M(ConvertUtil.list2List(b, CpuLoadFor15MinMetricsVO.class)));
                     return;
                 case DISK_USAGE:
-                    aggPercentilesMetrics(metrics, DISK_USAGE.getType(), aggType, startTime, endTime,
+                    aggPercentilesMetrics(metrics,PHY_CLUSTER, DISK_USAGE.getType(), aggType, startTime, endTime,
                         b -> metrics.setDiskUsage(ConvertUtil.list2List(b, DiskUsageMetricsVO.class)));
                     return;
                 case SEARCH_LATENCY:
-                    aggPercentilesMetrics(metrics, SEARCH_LATENCY.getType(), aggType, startTime, endTime,
+                    aggPercentilesMetrics(metrics,PHY_CLUSTER, SEARCH_LATENCY.getType(), aggType, startTime, endTime,
                         b -> metrics.setSearchLatency(ConvertUtil.list2List(b, SearchLatencyMetricsVO.class)));
                     return;
                 case INDEXING_LATENCY:
-                    aggPercentilesMetrics(metrics, INDEXING_LATENCY.getType(), aggType, startTime, endTime,
+                    aggPercentilesMetrics(metrics,PHY_CLUSTER, INDEXING_LATENCY.getType(), aggType, startTime, endTime,
                         b -> metrics.setIndexingLatency(ConvertUtil.list2List(b, IndexingLatencyMetricsVO.class)));
                     return;
 
                 case TASK_COST:
-                    aggPercentilesMetrics(metrics, TASK_COST.getType(), aggType, startTime, endTime,
+                    aggPercentilesMetrics(metrics,PHY_CLUSTER, TASK_COST.getType(), aggType, startTime, endTime,
                         b -> metrics.setTaskCost(ConvertUtil.list2List(b, TaskCostMetricVO.class)));
                     return;
 
                 /********************************普通指标(折线图)*******************************/
                 case DISK_INFO:
-                    aggDiskInfoMetrics(metrics, aggType, startTime, endTime);
+                    aggDiskInfoMetrics(metrics,PHY_CLUSTER, aggType, startTime, endTime);
                     return;
                 case SHARD_NUM:
-                    aggShardNuMetrics(metrics, aggType, startTime, endTime);
+                    aggShardNuMetrics(metrics,PHY_CLUSTER, aggType, startTime, endTime);
                     return;
                 case READ_QPS:
-                    aggReadTpsMetrics(metrics, aggType, startTime, endTime);
+                    aggReadTpsMetrics(metrics,PHY_CLUSTER, aggType, startTime, endTime);
                     return;
                 case WRITE_TPS:
-                    aggWriteTpsMetrics(metrics, aggType, startTime, endTime);
+                    aggWriteTpsMetrics(metrics,PHY_CLUSTER, aggType, startTime, endTime);
                     return;
                 case RECV_TRANS_SIZE:
-                    aggRecvTransMetrics(metrics, aggType, startTime, endTime);
+                    aggRecvTransMetrics(metrics,PHY_CLUSTER, aggType, startTime, endTime);
                     return;
                 case SEND_TRANS_SIZE:
-                    aggSendTransMetrics(metrics, aggType, startTime, endTime);
+                    aggSendTransMetrics(metrics,PHY_CLUSTER, aggType, startTime, endTime);
                     return;
                 case NODES_FOR_DISK_USAGE_GTE_75PERCENT:
                     aggNodesForDiskUsageGte75PercentMetrics(metrics);
                     return;
                 case TASK_NUM:
-                    aggTaskCount(metrics, aggType, startTime, endTime);
+                    aggTaskCount(metrics,PHY_CLUSTER, aggType, startTime, endTime);
                     return;
                 default:
             }
@@ -502,11 +502,11 @@ public class ClusterOverviewMetricsHandle {
     /**
      * 获取集群维度分位统计信息
      */
-    private void aggPercentilesMetrics(ESClusterOverviewMetricsVO metrics, String clusterMetricsType, String aggType,
+    private void aggPercentilesMetrics(ESClusterOverviewMetricsVO metrics,long clusterType, String clusterMetricsType, String aggType,
                                        Long startTime, Long endTime, Consumer<List<BasePercentileMetrics>> function) {
 
         List<BasePercentileMetrics> aggPercentilesMetrics = esClusterPhyStatsService
-            .getAggPercentilesMetrics(metrics.getClusterName(), clusterMetricsType, aggType, startTime, endTime);
+            .getAggPercentilesMetrics(metrics.getClusterName(),clusterType, clusterMetricsType, aggType, startTime, endTime);
 
         Collections.sort(aggPercentilesMetrics);
 
@@ -517,17 +517,17 @@ public class ClusterOverviewMetricsHandle {
         metrics.setNodesForDiskUsageGte75Percent(getNodeInfoForDiskUsageGte75Percent(metrics.getClusterName()));
     }
 
-    private void aggDiskInfoMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime, Long endTime) {
+    private void aggDiskInfoMetrics(ESClusterOverviewMetricsVO metrics,long clusterType, String aggType, Long startTime, Long endTime) {
         List<DiskInfoMetrics> diskInfoMetrics = esClusterPhyStatsService
-            .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, DiskInfoMetrics.class);
+            .getAggClusterPhyMetrics(metrics.getClusterName(),clusterType, aggType, startTime, endTime, DiskInfoMetrics.class);
         List<DiskInfoMetricsVO> diskInfoMetricsVOS = ConvertUtil.list2List(diskInfoMetrics, DiskInfoMetricsVO.class);
         Collections.sort(diskInfoMetricsVOS);
         metrics.setDiskInfo(diskInfoMetricsVOS);
     }
 
-    private void aggShardNuMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime, Long endTime) {
+    private void aggShardNuMetrics(ESClusterOverviewMetricsVO metrics,long clusterType, String aggType, Long startTime, Long endTime) {
         List<ShardInfoMetrics> shardInfoMetrics = esClusterPhyStatsService
-            .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, ShardInfoMetrics.class);
+            .getAggClusterPhyMetrics(metrics.getClusterName(),clusterType, aggType, startTime, endTime, ShardInfoMetrics.class);
 
         List<ShardInfoMetricsVO> shardInfoMetricsVOS = ConvertUtil.list2List(shardInfoMetrics,
             ShardInfoMetricsVO.class);
@@ -535,26 +535,26 @@ public class ClusterOverviewMetricsHandle {
         metrics.setShardNu(shardInfoMetricsVOS);
     }
 
-    private void aggTaskCount(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime, Long endTime) {
+    private void aggTaskCount(ESClusterOverviewMetricsVO metrics,long clusterType, String aggType, Long startTime, Long endTime) {
         List<TaskCountMetrics> taskCountMetrics = esClusterPhyStatsService
-            .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, TaskCountMetrics.class);
+            .getAggClusterPhyMetrics(metrics.getClusterName(),clusterType, aggType, startTime, endTime, TaskCountMetrics.class);
 
         List<TaskCountMetricVO> taskCountMetricVOS = ConvertUtil.list2List(taskCountMetrics, TaskCountMetricVO.class);
         Collections.sort(taskCountMetricVOS);
         metrics.setTaskCount(taskCountMetricVOS);
     }
 
-    private void aggWriteTpsMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime, Long endTime) {
+    private void aggWriteTpsMetrics(ESClusterOverviewMetricsVO metrics,long clusterType, String aggType, Long startTime, Long endTime) {
         List<WriteTPSMetrics> writeTPSMetrics = esClusterPhyStatsService
-            .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, WriteTPSMetrics.class);
+            .getAggClusterPhyMetrics(metrics.getClusterName(), clusterType,aggType, startTime, endTime, WriteTPSMetrics.class);
 
         List<WriteTPSMetricsVO> writeTPSMetricsVOS = ConvertUtil.list2List(writeTPSMetrics, WriteTPSMetricsVO.class);
         Collections.sort(writeTPSMetricsVOS);
         metrics.setWriteTps(writeTPSMetricsVOS);
     }
 
-    private void aggReadTpsMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime, Long endTime) {
-        List<ReadQPSMetrics> readQPSMetrics = esClusterPhyStatsService.getAggClusterPhyMetrics(metrics.getClusterName(),
+    private void aggReadTpsMetrics(ESClusterOverviewMetricsVO metrics,long clusterType, String aggType, Long startTime, Long endTime) {
+        List<ReadQPSMetrics> readQPSMetrics = esClusterPhyStatsService.getAggClusterPhyMetrics(metrics.getClusterName(),clusterType,
             aggType, startTime, endTime, ReadQPSMetrics.class);
 
         List<ReadQPSMetricsVO> readQPSMetricsVOS = ConvertUtil.list2List(readQPSMetrics, ReadQPSMetricsVO.class);
@@ -562,18 +562,18 @@ public class ClusterOverviewMetricsHandle {
         metrics.setReadTps(readQPSMetricsVOS);
     }
 
-    private void aggSendTransMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime, Long endTime) {
+    private void aggSendTransMetrics(ESClusterOverviewMetricsVO metrics,long clusterType, String aggType, Long startTime, Long endTime) {
         List<SendTransMetrics> readQPSMetrics = esClusterPhyStatsService
-            .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, SendTransMetrics.class);
+            .getAggClusterPhyMetrics(metrics.getClusterName(),clusterType, aggType, startTime, endTime, SendTransMetrics.class);
 
         List<SendTransMetricsVO> sendTransMetricsVOS = ConvertUtil.list2List(readQPSMetrics, SendTransMetricsVO.class);
         Collections.sort(sendTransMetricsVOS);
         metrics.setSendTransSize(sendTransMetricsVOS);
     }
 
-    private void aggRecvTransMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime, Long endTime) {
+    private void aggRecvTransMetrics(ESClusterOverviewMetricsVO metrics,long clusterType, String aggType, Long startTime, Long endTime) {
         List<RecvTransMetrics> readQPSMetrics = esClusterPhyStatsService
-            .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, RecvTransMetrics.class);
+            .getAggClusterPhyMetrics(metrics.getClusterName(),clusterType, aggType, startTime, endTime, RecvTransMetrics.class);
 
         List<RecvTransMetricsVO> recvTransMetricsVOS = ConvertUtil.list2List(readQPSMetrics, RecvTransMetricsVO.class);
         Collections.sort(recvTransMetricsVOS);
