@@ -11,14 +11,13 @@ import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeService;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * 网关集群节点经理实现
+ * 网关集群节点管理器
  *
  * @author shizeying
  * @date 2022/11/03
@@ -27,8 +26,6 @@ import org.springframework.stereotype.Component;
 @Component
 @NoArgsConstructor
 public class GatewayClusterNodeManagerImpl implements GatewayClusterNodeManager {
-	@Autowired
-	private GatewayNodeService gatewayNodeService;
 	@Autowired
 	private GatewayClusterService gatewayClusterService;
 	@Autowired
