@@ -409,15 +409,16 @@ CREATE TABLE `es_cluster_phy_info`
 -- ----------------------------
 CREATE TABLE `es_cluster_region`
 (
-    `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键自增',
-    `logic_cluster_id` varchar(200)        NOT NULL DEFAULT '-1' COMMENT '逻辑集群 ID',
-    `phy_cluster_name` varchar(128)        NOT NULL DEFAULT '' COMMENT ' 物理集群名 ',
-    `racks`            varchar(2048)                DEFAULT '' COMMENT 'region 的 rack，逗号分隔 ',
-    `create_time`      timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`      timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `delete_flag`      tinyint(1)          NOT NULL DEFAULT '0' COMMENT '删除标记，1- 已删除，0- 未删除',
-    `name`             varchar(100)        NOT NULL DEFAULT '' COMMENT 'region 名称 ',
-    `config`           varchar(1024)                DEFAULT '' COMMENT 'region 配置项 ',
+    `id`                    bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键自增',
+    `logic_cluster_id`      varchar(200)        NOT NULL DEFAULT '-1' COMMENT '逻辑集群 ID',
+    `phy_cluster_name`      varchar(128)        NOT NULL DEFAULT '' COMMENT ' 物理集群名 ',
+    `racks`                 varchar(2048)                DEFAULT '' COMMENT 'region 的 rack，逗号分隔 ',
+    `create_time`           timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`           timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `delete_flag`           tinyint(1)          NOT NULL DEFAULT '0' COMMENT '删除标记，1- 已删除，0- 未删除',
+    `name`                  varchar(100)        NOT NULL DEFAULT '' COMMENT 'region 名称 ',
+    `config`                varchar(1024)                DEFAULT '' COMMENT 'region 配置项 ',
+    `divide_attribute_key`  varchar(100)                 DEFAULT '' COMMENT 'region划分方式，为空是根据节点名称划分',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 4008
