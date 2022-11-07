@@ -190,7 +190,7 @@ public class GatewayManagerImpl implements GatewayManager {
 
         // 查询出所有的权限
         Map<Integer/*projectId*/, Collection<ProjectTemplateAuth>> projectId2ProjectTemplateAuthsMap = projectLogicTemplateAuthService
-            .getAllProjectTemplateAuths();
+            .getAllProjectTemplateAuthsWithCache();
         Map<Integer/*es user*/, Collection<ProjectTemplateAuth>> esUser2ProjectTemplateAuthsMap = Maps.newHashMap();
         Map<Integer/*es user*/, String/*projectName*/> esUser2ProjectNameMap = Maps.newHashMap();
         Map<Integer/*es user*/, ProjectConfig> esUser2ESUserConfigMap = Maps.newHashMap();
@@ -208,7 +208,7 @@ public class GatewayManagerImpl implements GatewayManager {
         }
 
         Map<Integer/*id*/, IndexTemplate> templateId2IndexTemplateLogicMap = indexTemplateService
-            .getAllLogicTemplatesMap();
+            .getAllLogicTemplatesMapWithCache();
 
         Map<Integer/*logicId*/, List<String>> aliasMap = templateLogicAliasService.listAliasMapWithCache();
 

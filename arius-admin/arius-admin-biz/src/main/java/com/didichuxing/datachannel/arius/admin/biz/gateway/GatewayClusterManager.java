@@ -70,4 +70,13 @@ public interface GatewayClusterManager {
      * @return 一个 Result<Void> 对象。
      */
     Result<Void> editOne(GatewayClusterDTO data, Integer projectId, String operator);
+    
+    
+    /**
+     * 通过网关集群id获取上一个版本号
+     *
+     * @param gatewayClusterId 网关集群 ID。
+     * @return 更新前的网关集群版本。
+     */
+    Result<String> getBeforeVersionByGatewayClusterId(Integer gatewayClusterId);
 }
