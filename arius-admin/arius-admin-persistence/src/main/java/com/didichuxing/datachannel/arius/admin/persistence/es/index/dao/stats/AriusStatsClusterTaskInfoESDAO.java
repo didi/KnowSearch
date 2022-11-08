@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.TopMetrics;
@@ -54,6 +55,15 @@ public class AriusStatsClusterTaskInfoESDAO extends BaseAriusStatsESDAO {
 
         return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
             this::getAvgAndPercentilesFromESQueryResponse, 3);
+    }
+
+    public Map<String, Double> getTaskCostMinAvgAndPercentilesWithNodes(List<String> nodes,String cluster) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_TASK_REAL_TIME_AVG_AND_PERCENT,
+                JSON.toJSONString(nodes), NOW_2M, NOW_1M, RUNNING_TIME, RUNNING_TIME);
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
+                this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 
     public long getTaskCount(String cluster) {
