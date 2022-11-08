@@ -165,6 +165,12 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		return Result.build(edit);
 	}
 	
+	@Override
+	public Result<String> getBeforeVersionByGatewayClusterId(Integer gatewayClusterId) {
+		//TODO 后续实现
+		return Result.buildSucc("3.1");
+	}
+	
 	/**
 	 * > 检查网关集群加入的参数
 	 *

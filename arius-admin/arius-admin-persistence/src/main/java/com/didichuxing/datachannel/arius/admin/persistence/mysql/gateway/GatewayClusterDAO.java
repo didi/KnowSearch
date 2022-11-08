@@ -72,4 +72,12 @@ public interface GatewayClusterDAO {
      * @return 布尔值
      */
     boolean updateOne(GatewayClusterPO obj2Obj);
+    
+    /**
+     * 它返回具有给定 id 的集群的名称。
+     *
+     * @param id 网关集群的 ID。
+     * @return 包含集群名称的字符串。
+     */
+    String getClusterNameById(@Param("id") Integer id);
 }

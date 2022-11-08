@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
 import java.util.Date;
 import java.util.List;
@@ -66,4 +67,20 @@ public interface GatewayClusterNodeDAO {
      * @param clusterName 要删除的集群的名称。
      */
     boolean deleteByClusterName(@Param("clusterName") String clusterName);
+    
+    /**
+     * > 按条件查询网关集群节点列表
+     *
+     * @param condition 条件对象是查询的条件对象。
+     * @return List<GatewayClusterNodePO>
+     */
+    List<GatewayClusterNodePO> listByCondition(GatewayNodeConditionDTO condition);
+    
+    /**
+     * > 按指定条件统计GatewayNode记录数
+     *
+     * @param condition 查询的条件。
+     * @return Long
+     */
+    Long countByCondition(GatewayNodeConditionDTO condition);
 }

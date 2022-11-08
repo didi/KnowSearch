@@ -27,6 +27,8 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -35,6 +37,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -64,6 +68,8 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 
     @Autowired
     private OperateRecordService           operateRecordService;
+    private final Cache<String, Object> PROJECT_LOGIC_TEMPLATE_AUTH_CACHE = CacheBuilder.newBuilder()
+        .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
 
     @Override
     public boolean deleteRedundancyTemplateAuths(boolean shouldDeleteFlags) {
@@ -321,7 +327,16 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 
         return ConvertUtil.list2MulMap(authTemplates, ProjectTemplateAuth::getProjectId).asMap();
     }
-
+    
+    @Override
+    public Map<Integer, Collection<ProjectTemplateAuth>> getAllProjectTemplateAuthsWithCache() {
+        try {
+            return (Map<Integer, Collection<ProjectTemplateAuth>>) PROJECT_LOGIC_TEMPLATE_AUTH_CACHE.get("getAllProjectTemplateAuthsWithCache", this::getAllProjectTemplateAuths);
+        } catch (ExecutionException e) {
+            return getAllProjectTemplateAuths();
+        }
+    }
+    
     @Override
     public ProjectTemplateAuthEnum getAuthEnumByProjectIdAndLogicId(Integer projectId, Integer logicId) {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
