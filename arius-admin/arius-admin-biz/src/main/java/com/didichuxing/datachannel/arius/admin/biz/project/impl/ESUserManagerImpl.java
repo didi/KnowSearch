@@ -210,8 +210,7 @@ public class ESUserManagerImpl implements ESUserManager {
         final ESUser oldESUser = esUserService.getEsUserById(esUserDTO.getId());
         //校验当前esUserDTO中的projectId是否存在于esUser
         //更新之后的结果获取
-        final TupleTwo<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> resultESUserTuple = esUserService
-                .editUser(esUserDTO);
+        final TupleTwo<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> resultESUserTuple = esUserService.editUser(esUserDTO);
 
         if (resultESUserTuple.v1().success()) {
             // 操作记录
