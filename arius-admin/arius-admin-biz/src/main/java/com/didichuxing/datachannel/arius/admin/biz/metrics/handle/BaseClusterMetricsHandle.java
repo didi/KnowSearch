@@ -14,6 +14,7 @@ import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.security.common.entity.user.User;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.didiglobal.knowframework.security.service.UserService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -90,7 +91,7 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
 
         //2. initialization
         init(param);
-        if (param.getItemNamesUnderClusterLogic().size()!=0){
+        if (StringUtils.isNotBlank(param.getClusterLogicName())){
             return Result.buildSucc(buildClusterLogicMetricsVO(param));
         }
         return Result.buildSucc(buildClusterPhyMetricsVO(param));

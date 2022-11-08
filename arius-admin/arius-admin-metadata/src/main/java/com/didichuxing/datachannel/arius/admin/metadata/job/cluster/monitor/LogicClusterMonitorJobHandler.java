@@ -20,9 +20,12 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitortask.
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.MonitorMetricsSender;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterLogicStatsService;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsClusterTaskInfoESDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIndexInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
 import com.google.common.collect.Lists;
 import java.util.HashSet;
@@ -61,11 +64,11 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
     @Autowired
     private ClusterRegionService                 clusterRegionService;
     @Autowired
-    private ClusterPhyService                    clusterPhyService;
-    @Autowired
     private ClusterRoleHostService               clusterRoleHostService;
     @Autowired
     private AriusStatsNodeInfoESDAO              ariusStatsNodeInfoEsDao;
+    @Autowired
+    private AriusStatsClusterTaskInfoESDAO ariusStatsClusterTaskInfoESDAO;
 
     private final String hostName = HttpHostUtil.HOST_NAME;
 
@@ -90,7 +93,7 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
     private void handleLogicClusterStats() {
         // 获取单台机器监控采集的集群名称列表, 当分布式部署分组采集，可分摊采集压力
         List<ClusterPhy> monitorCluster = ariusMetaJobClusterDistributeService.getSingleMachineMonitorCluster(hostName);
-        monitorCluster = clusterPhyService.listAllClusters();
+//        monitorCluster = clusterPhyService.listAllClusters();
         // 2. do handle
         if (CollectionUtils.isNotEmpty(monitorCluster)) {
             Set<String> monitorClusterSet = monitorCluster.stream().map(ClusterPhy::getCluster)
@@ -174,6 +177,53 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
         }
     }
 
+    private void handlePhysicalClusterStatsForSum(List<String> nodes, ESClusterStatsCells esClusterStats) {
+        // 这里会有多次es查询，做成并发的以免http接口超时
+        clusterLogicFutureUtil.runnableTask(() -> esClusterStats.setReadTps(ariusStatsNodeInfoEsDao.getClusterLogicQps(nodes)))
+                .runnableTask(() -> esClusterStats.setWriteTps(ariusStatsNodeInfoEsDao.getClusterLogicTps(nodes)))
+                .runnableTask(() -> esClusterStats.setRecvTransSize(ariusStatsNodeInfoEsDao.getClusterLogicRx(nodes)))
+                .runnableTask(() -> esClusterStats.setSendTransSize(ariusStatsNodeInfoEsDao.getClusterLogicTx(nodes)))
+                .runnableTask(() -> esClusterStats.setSearchLatency(calcSearchLatencyAvg(nodes)))
+                .runnableTask(() -> esClusterStats.setIndexingLatency(calcIndexingLatencyAvg(nodes)))
+                .waitExecute();
+    }
+
+    /**
+     * 计算SearchLatency
+     *    计算逻辑：
+     *    （集群下的所有节点,间隔时间内通过_node/stats命令获取nodes.{nodeName}.indices.search.query_time_in_millis差值累加值）
+     *        除以
+     *    （节点间隔时间nodes.{nodeName}.indices.search.query_total差值累加值）
+     *
+     * @param nodes   集群下的节点
+     * @return
+     */
+    private double calcSearchLatencyAvg(List<String> nodes){
+        // 获取分子：所有节点的indices.search.query_time_in_millis差值累加值
+        double searchLatencySum = ariusStatsNodeInfoEsDao.getClusterLogicSearchLatencySum(nodes);
+        // 获取分母：所有节点indices.search.query_total差值累加值
+        double searchQueryTotal = ariusStatsNodeInfoEsDao.getClusterLogicSearchQueryTotal(nodes);
+        return searchQueryTotal == 0 ? 0 : (searchLatencySum / searchQueryTotal);
+    }
+
+    /**
+     * 计算IndexingLatency
+     *    计算逻辑：
+     *    （集群下的所有节点,间隔时间内通过_node/stats命令获取nodes.{nodeName}.indices.indexing.index_time_in_millis差值累加值）
+     *         除以
+     *    （节点间隔时间nodes.{nodeName}.indices.docs.count差值累加值）
+     *
+     * @return
+     */
+    private double calcIndexingLatencyAvg(List<String> nodes){
+        // 获取分子：所有节点的indices.indexing.index_time_in_millis差值累加值
+        double indexingLatencySum = ariusStatsNodeInfoEsDao.getClusterLogicIndexingLatencySum(nodes);
+        // 获取分母：所有节点的indices.docs.count差值累加值
+        double indexingDocSum = ariusStatsNodeInfoEsDao.getClusterLogicIndexingDocSum(nodes);
+        return indexingDocSum == 0 ? 0 : (indexingLatencySum / indexingDocSum);
+    }
+
+
     /**
      * 获取逻辑集群下的nodes
      * @param clusterLogicId
@@ -191,7 +241,7 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
      * 采集不同分位图的指标数据
      * @return  Map<String, ESClusterStatsCells>
      */
-    private Map<String, ESClusterStatsCells> getPhysicalClusterStatsPercentiles(String clusterLogicName,List<String> nodes,ESClusterStatsCells esClusterStatsCells) {
+    private Map<String, ESClusterStatsCells> getPhysicalClusterStatsPercentiles(String clusterLogicName,List<String> nodes,ESClusterStatsCells esClusterStatsCells,String phyClusterName) {
         Map<String, ESClusterStatsCells> percentilesType2ESClusterStatsCellsMap = Maps.newHashMap();
         if (AriusObjUtils.isNull(clusterLogicName)) {
             LOGGER.warn(
@@ -216,8 +266,8 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
                         .set(ariusStatsNodeInfoEsDao.getClusterLogicCpuLoad5MinAvgAndPercentiles(nodes)))
                 .runnableTask(() -> clusterCpuLoad15MinAvgAndPercentilesAtomic
                         .set(ariusStatsNodeInfoEsDao.getClusterLogicCpuLoad15MinAvgAndPercentiles(nodes)))
-//                .runnableTask(() -> clusterTaskCostMinAvgAndPercentilesAtomic
-//                        .set(ariusStatsClusterTaskInfoESDAO.getTaskCostMinAvgAndPercentiles(clusterName)))
+                .runnableTask(() -> clusterTaskCostMinAvgAndPercentilesAtomic
+                        .set(ariusStatsClusterTaskInfoESDAO.getTaskCostMinAvgAndPercentilesWithNodes(nodes,phyClusterName)))
                 .waitExecute();
 
         for (String type : PercentilesEnum.listUsefulType()) {
@@ -299,14 +349,5 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
         }
 
         return PercentilesEnum.AVG.getType();
-    }
-
-
-
-    public static void main(String[] args) {
-        List<String> nodes = new ArrayList<>();
-        nodes.add("123");
-        nodes.add("abc");
-        System.out.println(JSON.toJSONString(nodes));
     }
 }

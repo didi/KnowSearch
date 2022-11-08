@@ -1,0 +1,29 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "terms": {
+              "node": %s
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": "%s",
+              "lte": "%s"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "sum": {
+      "sum": {
+        "field": "metrics.%s"
+      }
+    }
+  }
+}

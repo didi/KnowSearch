@@ -702,4 +702,108 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                 this::getAvgAndPercentilesFromESQueryResponse, 3);
 
     }
+
+    /**
+     * 获取逻辑集群QPS
+     * @param nodes
+     * @return
+     */
+    public Double getClusterLogicQps(List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_LOGIC_REAL_TIME_TPS_QPS_INFO, JSON.toJSONString(nodes),
+                "now-2m", "now-1m", INDICES_QUERY_RATE.getType());
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "sum"), 3);
+    }
+
+    /**
+     * 根据逻辑集群名称，获取集群[now-2m, now-1m]总的tps
+     * @param cluster
+     * @return
+     */
+    public double getClusterLogicTps(List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_LOGIC_REAL_TIME_TPS_QPS_INFO, JSON.toJSONString(nodes),
+                "now-2m", "now-1m", INDICES_INDEXING_RATE.getType());
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "sum"), 3);
+    }
+
+    /**
+     * 根据逻辑集群名称，获取集群[now-2m, now-1m]总的接收的流量
+     * @param nodes 集群
+     * @return
+     */
+    public Double getClusterLogicRx(List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_LOGIC_REAL_TIME_RX_TX_INFO, JSON.toJSONString(nodes),
+                NOW_2M, NOW_1M, TRANS_RX_SIZE.getType());
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "sum"), 3);
+    }
+
+    /**
+     * 根据逻辑集群名称，获取集群[now-2m, now-1m]总的发送的流量
+     * @param nodes
+     * @return
+     */
+    public Double getClusterLogicTx(List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_LOGIC_REAL_TIME_RX_TX_INFO, JSON.toJSONString(nodes),
+                NOW_2M, NOW_1M, TRANS_TX_SIZE.getType());
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "sum"), 3);
+    }
+
+    /**
+     * 获取集群查询耗时分位值(统计节点维度)和平均使用率
+     */
+    public double getClusterLogicSearchLatencySum(List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_INDEXING_SEARCH_TIME_SUM, JSON.toJSONString(nodes),
+                NOW_2M, NOW_1M, INDICES_QUERY_TIME_IN_MILLIS.getType());
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
+                s -> getSumFromESQueryResponse(s, "sum"), 3);
+    }
+
+    /**
+     * 获取集群所有节点间隔时间nodes.{nodeName}.indices.search.query_total差值累加值
+     * @param cluster 集群名称
+     * @return
+     */
+    public double getClusterLogicSearchQueryTotal(List<String> nodes){
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_INDEXING_SEARCH_TIME_SUM, JSON.toJSONString(nodes),
+                NOW_2M, NOW_1M, INDICES_QUERY_TOTAL.getType());
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
+                s -> getSumFromESQueryResponse(s, "sum"), 3);
+    }
+
+    /**
+     * 获取集群写入耗时分位值(统计节点维度)和平均使用率
+     */
+    public double getClusterLogicIndexingLatencySum(List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_INDEXING_SEARCH_TIME_SUM, JSON.toJSONString(nodes),
+                NOW_2M, NOW_1M, INDICES_INDEXING_LATENCY.getType());
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
+                s -> getSumFromESQueryResponse(s, "sum"), 3);
+    }
+
+    /**
+     * 获取集群所有节点间隔时间nodes.{nodeName}.indices.docs.count差值累加值
+     * @param nodes 集群下的节点
+     * @return
+     */
+    public double getClusterLogicIndexingDocSum(List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_INDEXING_SEARCH_TIME_SUM, JSON.toJSONString(nodes),
+                NOW_2M, NOW_1M, INDICES_NUM_DIFF.getType());
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
+                s -> getSumFromESQueryResponse(s, "sum"), 3);
+    }
 }
