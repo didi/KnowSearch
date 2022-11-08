@@ -4,6 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil.obj2Obj;
 import static com.didichuxing.datachannel.arius.admin.core.service.project.impl.ESUserServiceImpl.VERIFY_CODE_LENGTH;
 
+import com.baomidou.mybatisplus.extension.api.R;
 import com.didichuxing.datachannel.arius.admin.biz.project.ESUserManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
@@ -162,6 +163,10 @@ public class ESUserManagerImpl implements ESUserManager {
         if (esUserService.getEsUserById(esUserName) == null) {
             return Result.buildFail("es User不存在");
         }
+        if (esUserService.getEsUserById(esUserName).getDefaultDisplay() == true) {
+            return Result.buildFail("该es User是应用默认es User，无需进行设置");
+        }
+
         //获取当前应用下所有的esuser，并将之前应用默认的es user进行解绑
         List<ESUser> esUsers = esUserService.listESUsers(Collections.singletonList(projectId));
         for (ESUser esUser : esUsers) {
