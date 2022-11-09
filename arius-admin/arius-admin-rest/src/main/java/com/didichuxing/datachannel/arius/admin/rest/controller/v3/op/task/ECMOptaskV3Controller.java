@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping({V3 + "/ecm/op-task"})
 @NoArgsConstructor
-public class ECMOptaskController {
+public class ECMOptaskV3Controller {
 		
 		@Autowired
 		private OpTaskManager opTaskManager;
