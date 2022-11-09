@@ -135,6 +135,12 @@ public interface ComponentDomainService {
      * @return 组件列表
      */
     Result<List<Component>> queryComponent(Component component);
+    /**
+     * 按名称查询组件。
+     * @param name 要查询的组件的名称。
+     * @return  Result<Component>。
+     */
+    Result<Component> queryComponentByName(String name);
 
     /**
      * 是否包含对该package依赖的组件
@@ -178,4 +184,12 @@ public interface ComponentDomainService {
      * @return 任务id
      */
     Result<Integer> submitUninstallComponent(GeneralUninstallComponent uninstallComponent);
+    
+    /**
+     * 给定组件 ID，返回组件的查询。
+     *
+     * @param componentId 您要查询的组件的 id。
+     * @return  Result<String>
+     */
+    Result<String> queryComponentById(Integer componentId);
 }

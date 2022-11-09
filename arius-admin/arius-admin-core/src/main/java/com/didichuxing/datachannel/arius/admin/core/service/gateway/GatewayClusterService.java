@@ -91,4 +91,13 @@ public interface GatewayClusterService {
 	 * @return 网关集群的组件 ID。
 	 */
 	Integer getComponentIdById(Integer gatewayClusterId);
+		
+		
+		/**
+		 * 按名称获取一个 GatewayClusterPO
+		 *
+		 * @param name 网关集群的名称。
+		 * @return GatewayClusterPO 对象
+		 */
+		GatewayClusterPO getOneByName(String name);
 }

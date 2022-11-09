@@ -84,4 +84,9 @@ public class GatewayClusterServiceImpl implements GatewayClusterService {
 	public Integer getComponentIdById(Integer gatewayClusterId) {
 		return gatewayClusterDAO.getComponentIdById(gatewayClusterId);
 	}
+		
+		@Override
+		public GatewayClusterPO getOneByName(String name) {
+				return gatewayClusterDAO.getOneByName(name);
+		}
 }

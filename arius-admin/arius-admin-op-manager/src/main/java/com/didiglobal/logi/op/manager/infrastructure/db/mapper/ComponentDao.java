@@ -75,4 +75,20 @@ public interface ComponentDao {
      * @return
      */
     int delete(int id);
+    
+    /**
+     * 按名称查询组件。
+     *
+     * @param name 要查询的组件的名称。
+     * @return 一个 ComponentPO 对象
+     */
+    ComponentPO queryComponentByName(@Param("name") String name);
+    
+    /**
+     * > 通过id查询组件
+     *
+     * @param id 要查询的组件的id
+     * @return 一个 ComponentPO 对象
+     */
+    ComponentPO queryComponentById(@Param("id")Integer id);
 }
