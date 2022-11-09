@@ -61,7 +61,7 @@ public enum TemplateSettingEnum {
 
     public static TemplateSettingEnum getBySetting(String setting){
         for (TemplateSettingEnum contain : values()) {
-            if (contain.equals(setting)){
+            if (contain.getSetting().equals(setting)){
                 return contain;
             }
         }
