@@ -48,4 +48,6 @@ public class ESUserDTO extends BaseDTO {
     @ApiModelProperty("项目id")
     private Integer projectId;
 
+    @ApiModelProperty("项目默认使用的es user")
+    private Boolean defaultDisplay;
 }

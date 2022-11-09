@@ -86,6 +86,16 @@ public class ESUserV3Controller {
         return esUserManager.editESUser(esUserDTO, userName);
     }
 
+    @PutMapping("/{projectId}/{esUser}/defaultDisplay")
+    @ResponseBody
+    @ApiOperation(value = "设置es User为应用默认es User")
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "projectId", value = "projectId", required = true),
+                         @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "esUser", value = "es user", required = true) })
+    public Result<Void> setDefaultDisplay(HttpServletRequest request, @PathVariable("projectId") Integer projectId,
+                                          @PathVariable("esUser") Integer esUserName) {
+        return esUserManager.setDefaultDisplay(esUserName, projectId, HttpRequestUtil.getOperator(request));
+    }
+
     @GetMapping("/{esUser}")
     @ResponseBody
     @ApiOperation(value = "获取es user详情接口")
