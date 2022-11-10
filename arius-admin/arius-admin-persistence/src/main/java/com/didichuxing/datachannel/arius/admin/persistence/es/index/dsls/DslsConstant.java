@@ -618,6 +618,10 @@ public class DslsConstant {
      */
     public static final String GET_DSL_TEMPLATE_BY_CONDITION                                 = "DslTemplateEsDao/getDslTemplateByCondition";
     /**
+     * 根据指定条件分页获取没有元数据集群的dsl查询模版数据
+     */
+    public static final String GET_DSL_TEMPLATE_BY_CONDITION_WITHOUT_METADATA_CLUSTER        = "DslTemplateEsDao/getDslTemplateByConditionWithoutMetadataCluster";
+    /**
      * 获取所有查询模板最近修改时间在(now-1d,now)范围内，并且不启用的查询模板，然后删除过期的查询模板数据
      */
     public static final String GET_EXPIRED_DSL_TEMPLATE       = "DslTemplateEsDao/deleteExpiredDslTemplate";
