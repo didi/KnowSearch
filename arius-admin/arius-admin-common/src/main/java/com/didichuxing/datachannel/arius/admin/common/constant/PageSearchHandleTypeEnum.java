@@ -15,6 +15,7 @@ public enum PageSearchHandleTypeEnum {
         GATEWAY_JOIN("gatewayJoinPageSearch"),
         GATEWAY_CLUSTER("GatewayClusterPageSearchHandle"),
         GATEWAY_NODE("GatewayNodePageSearchHandle"),
+        GATEWAY_CLUSTER_CONFIG("GatewayClusterConfigPageSearchHandle"),
         TASK("taskPageSearch");
        private String pageSearchType;
 

@@ -63,6 +63,11 @@ public class GatewayNodeServiceImpl implements GatewayNodeService {
 		return gatewayClusterNodeDAO.countByCondition(condition);
 	}
 	
+	@Override
+	public List<GatewayClusterNodePO> listByHosts(List<String> hosts) {
+		return gatewayClusterNodeDAO.listByHosts(hosts);
+	}
+	
 	/**
 	 * > 在数据库中插入一条记录
 	 *

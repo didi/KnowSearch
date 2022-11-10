@@ -100,4 +100,13 @@
               , '%')
         </if>
     </select>
+    
+    <select id="listByHosts" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM gateway_cluster_node_info WHERE
+            host_name IN
+        <foreach collection="hosts" separator="," item="host" close=")" open="(">
+            #{host}
+        </foreach>
+    </select>
 </mapper>

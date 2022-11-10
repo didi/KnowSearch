@@ -22,6 +22,7 @@ import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeService;
+import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import java.util.List;
 import java.util.Objects;
@@ -40,16 +41,18 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Component
 public class GatewayClusterManagerImpl implements GatewayClusterManager {
-	
-	@Autowired
-	private GatewayClusterService gatewayClusterService;
-	@Autowired
-	private GatewayNodeService gatewayNodeService;
-	@Autowired
-	private HandleFactory handleFactory;
-	
-	@Autowired
-	private OperateRecordService operateRecordService;
+		
+		@Autowired
+		private GatewayClusterService gatewayClusterService;
+		@Autowired
+		private GatewayNodeService    gatewayNodeService;
+		@Autowired
+		private HandleFactory         handleFactory;
+		
+		@Autowired
+		private ComponentService     componentService;
+		@Autowired
+		private OperateRecordService operateRecordService;
 	
 	@Override
 	public Result<List<GatewayClusterBriefVO>> listBriefInfo() {
@@ -170,8 +173,14 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		//TODO 后续实现
 		return Result.buildSucc("3.1");
 	}
-	
-	/**
+		
+		@Override
+		public Result<Boolean> verifyNameUniqueness(String name) {
+				return Result.build(gatewayClusterService.checkNameCluster(name) ||
+						Objects.nonNull(componentService.queryComponentByName(name)));
+		}
+		
+		/**
 	 * > 检查网关集群加入的参数
 	 *
 	 * @param param     GatewayClusterJoinDTO
@@ -188,7 +197,9 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		if (StringUtils.isEmpty(param.getClusterName())) {
 			return Result.buildFail("集群名称不可为空");
 		}
-		if (!gatewayClusterService.checkNameCluster(param.getClusterName())) {
+		final Result<Boolean> result = verifyNameUniqueness(param.getClusterName());
+			//这里不能存在op侧相同的名称或者admin侧相同的名称
+		if (Boolean.TRUE.equals(result.getData())) {
 			return Result.buildFail("集群名称已存在，不可创建同名集群");
 		}
 		if (CollectionUtils.isEmpty(param.getGatewayNodeHosts())) {
