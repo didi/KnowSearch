@@ -15,3 +15,7 @@ alter table gateway_cluster_info
     add proxy_address varchar(255) default '' null comment '代理地址';
 alter table gateway_cluster_info
     add data_center varchar(255) default '' null comment ' 数据中心 ';
+
+# admin表修改
+alter table es_cluster_region
+    add divide_attribute_key varchar(100) default '' null comment 'region划分方式，为空是根据节点名称划分';
