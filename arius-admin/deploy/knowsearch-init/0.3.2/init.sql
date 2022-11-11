@@ -1970,78 +1970,119 @@ alter table logi_security_oplog
     modify target varchar(225) not null comment '操作对象';
 ######0.3.2初始化阶段
 -- auto-generated definition
-create table logi_op_component
+CREATE TABLE logi_op_component
 (
-    id                         int(11) unsigned auto_increment comment '组件自增id'
-        primary key,
-    status                     int          not null comment '状态(0 green,1 yellow,2 red,3 unKnow)',
-    contain_component_ids      varchar(200) null comment '包含组件id列表',
-    name                       varchar(100) null comment '组件名',
-    package_id                 int          null comment '关联安装包id',
-    depend_config_component_id int          null comment '配置依赖组件',
-    username                   varchar(50)  null comment '用户名',
-    password                   varchar(50)  null comment '密码',
-    is_open_tsl                tinyint      null comment '是否开启tsl',
-    create_time                timestamp    null comment '创建时间',
-    update_time                timestamp    null comment '更新时间',
-    is_deleted                 int          null comment '0未删除1删除'
-);
-
+    id                         INT(11) UNSIGNED AUTO_INCREMENT COMMENT '组件自增id'
+        PRIMARY KEY,
+    status                     INT          NOT NULL COMMENT '状态(0 green,1 yellow,2 red,3 unKnow)',
+    contain_component_ids      VARCHAR(200) NULL COMMENT '包含组件id列表',
+    name                       VARCHAR(100) NULL COMMENT '组件名',
+    package_id                 INT          NULL COMMENT '关联安装包id',
+    depend_config_component_id INT          NULL COMMENT '配置依赖组件',
+    username                   VARCHAR(50)  NULL COMMENT '用户名',
+    password                   VARCHAR(50)  NULL COMMENT '密码',
+    is_open_tsl                TINYINT      NULL COMMENT '是否开启tsl',
+    create_time                TIMESTAMP    NULL COMMENT '创建时间',
+    update_time                TIMESTAMP    NULL COMMENT '更新时间',
+    is_deleted                 INT          NULL COMMENT '0未删除1删除'
+)
+    CHARSET = utf8mb4;
 -- auto-generated definition
-create table logi_op_component_group_config
+CREATE TABLE logi_op_component_group_config
 (
-    id                       int(11) unsigned auto_increment comment '自增id'
-        primary key,
-    component_id             int           null comment '关联组件id',
-    group_name               varchar(50)   null comment '分组名',
-    system_config            varchar(5000) null comment '系统配置',
-    running_config           varchar(5000) null comment '运行时配置',
-    file_config              varchar(5000) null comment '文件配置',
-    install_directory_config varchar(200)  null comment '安装目录',
-    process_num_config       varchar(200)  null comment '进程数',
-    hosts                    varchar(200)  null comment '分组下的ip',
-    version                  varchar(50)   null comment '版本',
-    create_time              timestamp     null comment '创建时间',
-    update_time              timestamp     null comment '更新时间'
-);
+    id                       INT(11) UNSIGNED AUTO_INCREMENT COMMENT '自增id'
+        PRIMARY KEY,
+    component_id             INT           NULL COMMENT '关联组件id',
+    group_name               VARCHAR(50)   NULL COMMENT '分组名',
+    system_config            VARCHAR(5000) NULL COMMENT '系统配置',
+    running_config           VARCHAR(5000) NULL COMMENT '运行时配置',
+    file_config              VARCHAR(5000) NULL COMMENT '文件配置',
+    install_directory_config VARCHAR(200)  NULL COMMENT '安装目录',
+    process_num_config       VARCHAR(200)  NULL COMMENT '进程数',
+    hosts                    VARCHAR(200)  NULL COMMENT '分组下的ip',
+    version                  VARCHAR(50)   NULL COMMENT '版本',
+    create_time              TIMESTAMP     NULL COMMENT '创建时间',
+    update_time              TIMESTAMP     NULL COMMENT '更新时间'
+)
+    CHARSET = utf8mb4;
 -- auto-generated definition
-create table logi_op_component_host
+CREATE TABLE logi_op_component_host
 (
-    host         varchar(11) default '' not null comment '主机',
-    component_id int                    not null comment '关联组件id',
-    status       int                    null comment '状态（在线或离线）',
-    group_name   varchar(11)            null comment '分组名',
-    process_num  int                    null comment '进程数',
-    is_deleted   int                    null comment '是否卸载',
-    create_time  timestamp              null comment '创建时间',
-    update_time  timestamp              null comment '更新时间'
-);
+    host         VARCHAR(11) DEFAULT '' NOT NULL COMMENT '主机',
+    component_id INT                    NOT NULL COMMENT '关联组件id',
+    status       INT                    NULL COMMENT '状态（在线或离线）',
+    group_name   VARCHAR(11)            NULL COMMENT '分组名',
+    process_num  INT                    NULL COMMENT '进程数',
+    is_deleted   INT                    NULL COMMENT '是否卸载',
+    create_time  TIMESTAMP              NULL COMMENT '创建时间',
+    update_time  TIMESTAMP              NULL COMMENT '更新时间'
+)
+    CHARSET = utf8mb4;
 -- auto-generated definition
-create table logi_op_package
+CREATE TABLE logi_op_package
 (
-    id          bigint auto_increment
-        primary key,
-    name        varchar(255) not null,
-    url         varchar(255) null,
-    version     varchar(255) not null,
-    `describe`  varchar(255) null,
-    type        tinyint      null,
-    script_id   bigint       not null,
-    create_time timestamp    null,
-    update_time timestamp    null,
-    creator     varchar(255) null
-);
-
+    id          BIGINT AUTO_INCREMENT
+        PRIMARY KEY,
+    name        VARCHAR(255) NOT NULL,
+    url         VARCHAR(255) NULL,
+    version     VARCHAR(255) NOT NULL,
+    `describe`  VARCHAR(255) NULL,
+    type        TINYINT      NULL,
+    script_id   BIGINT       NOT NULL,
+    create_time TIMESTAMP    NULL,
+    update_time TIMESTAMP    NULL,
+    creator     VARCHAR(255) NULL
+)CHARSET = utf8mb4;
 -- auto-generated definition
-create table logi_op_package_group_config
+CREATE TABLE logi_op_package_group_config
 (
-    id             bigint auto_increment
-        primary key,
-    group_name     varchar(5000) default '' not null,
-    system_config  varchar(5000)            null,
-    running_config varchar(5000)            null,
-    file_config    varchar(255)             null,
-    package_id     bigint                   null,
-    create_time    timestamp                null,
-    update_time    timestamp                null
-);
+    id             BIGINT AUTO_INCREMENT
+        PRIMARY KEY,
+    group_name     VARCHAR(5000) DEFAULT '' NOT NULL,
+    system_config  VARCHAR(5000)            NULL,
+    running_config VARCHAR(5000)            NULL,
+    file_config    VARCHAR(255)             NULL,
+    package_id     BIGINT                   NULL,
+    create_time    TIMESTAMP                NULL,
+    update_time    TIMESTAMP                NULL
+)
+    CHARSET = utf8mb4;
+-- auto-generated definition
+CREATE TABLE logi_op_script
+(
+    id          BIGINT AUTO_INCREMENT
+        PRIMARY KEY,
+    name        VARCHAR(255) NOT NULL,
+    template_id VARCHAR(255) NULL,
+    content_url VARCHAR(255) NULL,
+    `describe`  VARCHAR(255) NULL,
+    create_time TIMESTAMP    NULL,
+    update_time TIMESTAMP    NULL
+)CHARSET = utf8mb4;
+-- auto-generated definition
+CREATE TABLE logi_op_task
+(
+    id          INT(11) UNSIGNED AUTO_INCREMENT COMMENT '任务id自增'
+        PRIMARY KEY,
+    status      INT           NULL COMMENT '任务状态',
+    `describe`  VARCHAR(200)  NULL COMMENT '描述',
+    type        INT           NULL COMMENT '任务类型',
+    is_finish   INT           NULL COMMENT '是否结束',
+    content     VARCHAR(5000) NULL COMMENT '任务内容',
+    create_time TIMESTAMP     NULL COMMENT '创建时间',
+    update_time TIMESTAMP     NULL COMMENT '更新时间'
+)
+    CHARSET = utf8mb4;
+-- auto-generated definition
+CREATE TABLE logi_op_task_detail
+(
+    id              INT(11) UNSIGNED NOT NULL COMMENT '关联任务id',
+    execute_task_id INT              NULL COMMENT 'zeus的执行任务id',
+    status          INT              NULL COMMENT '状态',
+    host            VARCHAR(50)      NULL COMMENT '主机',
+    group_name      VARCHAR(100)     NULL COMMENT '关联分组名',
+    process_num     INT              NULL COMMENT '进程数',
+    create_time     TIMESTAMP        NULL COMMENT '创建时间',
+    update_time     TIMESTAMP        NULL COMMENT '更新时间'
+)
+    CHARSET = utf8mb4;

@@ -24,7 +24,7 @@ import java.util.List;
 @RestController
 @Api(value = "任务中心api")
 @RequestMapping(Constants.API_PREFIX_V3 + "/task")
-public class TaskController {
+public class OpManagerTaskController {
 
     @Autowired
     private TaskService taskService;
@@ -92,4 +92,3 @@ public class TaskController {
         return res;
     }
 }
-

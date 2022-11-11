@@ -5,6 +5,7 @@
         <result column="id" jdbcType="BIGINT" property="id"/>
         <result column="cluster_name" jdbcType="VARCHAR" property="clusterName"/>
         <result column="host_name" jdbcType="VARCHAR" property="hostName"/>
+        <result column="node_name" jdbcType="VARCHAR" property="nodeName"/>
         <result column="port" jdbcType="INTEGER" property="port"/>
         <result column="heartbeat_time" jdbcType="TIMESTAMP" property="heartbeatTime"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
@@ -12,7 +13,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, cluster_name, host_name, port, heartbeat_time, create_time, update_time
+        id, cluster_name, host_name, port, heartbeat_time, create_time, update_time,node_name
     </sql>
 
     <insert id="recordGatewayNode"
@@ -72,15 +73,16 @@
          SELECT
         <include refid="Base_Column_List"/>
         FROM gateway_cluster_node_info
-        WHERE
-        <if test="nodeName != null and nodeName != ''">
-            AND node_name like CONCAT('%'
-              , #{nodeName}
-              , '%')
-        </if>
-        <if test="clusterName != null and clusterName != ''">
-            AND cluster_name =#{clusterName}
-        </if>
+        <where>
+            <if test="nodeName != null and nodeName != ''">
+                AND node_name LIKE CONCAT('%'
+                , #{nodeName}
+                , '%')
+            </if>
+            <if test="clusterName != null and clusterName != ''">
+                AND cluster_name = #{clusterName}
+            </if>
+        </where>
          <if test="sortTerm != null">
             order by ${sortTerm} ${sortType}
         </if>
@@ -90,15 +92,16 @@
     <select id="countByCondition" resultType="java.lang.Long">
         SELECT COUNT(1)
         FROM gateway_cluster_node_info
-        WHERE
-        <if test="clusterName != null and clusterName != ''">
-            AND cluster_name =#{clusterName}
-        </if>
-        <if test="nodeName != null and nodeName != ''">
-            AND node_name LIKE CONCAT('%'
-              , #{nodeName}
-              , '%')
-        </if>
+        <where>
+            <if test="clusterName != null and clusterName != ''">
+                AND cluster_name = #{clusterName}
+            </if>
+            <if test="nodeName != null and nodeName != ''">
+                AND node_name LIKE CONCAT('%'
+                    , #{nodeName}
+                    , '%')
+            </if>
+        </where>
     </select>
     
     <select id="listByHosts" resultMap="BaseResultMap">

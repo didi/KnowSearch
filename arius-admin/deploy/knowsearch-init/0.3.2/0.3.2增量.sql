@@ -22,3 +22,6 @@ alter table es_cluster_region
 
 alter table index_template_info
     add priority_level tinyint(4) default 0 null comment '恢复优先级';
+
+ALTER TABLE gateway_cluster_node_info
+    ADD node_name VARCHAR(50) DEFAULT '' NULL COMMENT '节点名称';

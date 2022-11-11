@@ -18,6 +18,7 @@ import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerF
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import javax.servlet.*;
@@ -29,6 +30,7 @@ import java.io.IOException;
  */
 @NoArgsConstructor
 @EnableScheduling
+@EnableAsync
 @EnableCaching
 @ServletComponentScan
 @SpringBootApplication(scanBasePackages = { "com.didichuxing.datachannel.arius.admin" })
