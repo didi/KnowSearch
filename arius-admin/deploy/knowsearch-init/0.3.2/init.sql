@@ -2058,3 +2058,30 @@ CREATE TABLE logi_op_script
     create_time TIMESTAMP    NULL,
     update_time TIMESTAMP    NULL
 )CHARSET = utf8mb4;
+-- auto-generated definition
+CREATE TABLE logi_op_task
+(
+    id          INT(11) UNSIGNED AUTO_INCREMENT COMMENT '任务id自增'
+        PRIMARY KEY,
+    status      INT           NULL COMMENT '任务状态',
+    `describe`  VARCHAR(200)  NULL COMMENT '描述',
+    type        INT           NULL COMMENT '任务类型',
+    is_finish   INT           NULL COMMENT '是否结束',
+    content     VARCHAR(5000) NULL COMMENT '任务内容',
+    create_time TIMESTAMP     NULL COMMENT '创建时间',
+    update_time TIMESTAMP     NULL COMMENT '更新时间'
+)
+    CHARSET = utf8mb4;
+-- auto-generated definition
+CREATE TABLE logi_op_task_detail
+(
+    id              INT(11) UNSIGNED NOT NULL COMMENT '关联任务id',
+    execute_task_id INT              NULL COMMENT 'zeus的执行任务id',
+    status          INT              NULL COMMENT '状态',
+    host            VARCHAR(50)      NULL COMMENT '主机',
+    group_name      VARCHAR(100)     NULL COMMENT '关联分组名',
+    process_num     INT              NULL COMMENT '进程数',
+    create_time     TIMESTAMP        NULL COMMENT '创建时间',
+    update_time     TIMESTAMP        NULL COMMENT '更新时间'
+)
+    CHARSET = utf8mb4;
