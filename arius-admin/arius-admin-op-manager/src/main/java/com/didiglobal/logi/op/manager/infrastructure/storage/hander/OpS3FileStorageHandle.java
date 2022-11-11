@@ -24,9 +24,9 @@ import java.util.List;
  */
 @Component
 @NoArgsConstructor
-public class S3FileStorageHandle implements FileStorageHandle {
+public class OpS3FileStorageHandle implements FileStorageHandle {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(S3FileStorageHandle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpS3FileStorageHandle.class);
 
     @Value("${s3.endpoint:}")
     private String endpoint;

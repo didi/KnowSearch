@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.software;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageAddDTO;
@@ -9,16 +11,20 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageQu
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpServletRequest;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(V3_OP + "/software/package")
 @Api(tags = "软件中心接口(REST)")
-public class PackageController {
+public class PackageV3Controller {
     @PostMapping("/page")
     @ApiOperation(value = "获取安装包分页列表接口")
     public PaginationResult<PackageQueryVO> pageGetPackages(@RequestBody PackageQueryDTO packageDTO) {
