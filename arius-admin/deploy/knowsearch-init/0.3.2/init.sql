@@ -720,6 +720,7 @@ CREATE TABLE `index_template_info`
     `open_srv`          varchar(255)                          DEFAULT NULL COMMENT '已开启的模板服务',
     `disk_size`         decimal(10, 3)                        DEFAULT '-1.000' COMMENT '可用磁盘容量',
     `health`            int(11)                               DEFAULT '-1' COMMENT '模版健康；-1 是 UNKNOW',
+    `priority_level`    tinyint(4)                            DEFAULT '0' COMMENT '恢复优先级',
     PRIMARY KEY (`id`),
     KEY `idx_data_center` (`data_center`),
     KEY `idx_is_active` (`is_active`),
