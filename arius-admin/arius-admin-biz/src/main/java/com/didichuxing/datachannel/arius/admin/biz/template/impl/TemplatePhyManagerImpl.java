@@ -222,11 +222,11 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             Map<String, String> settings = templateConfig.getSetttings();
             String shardNum = settings.get(INDEX_SHARD_NUM);
 
-            // 校验shard个数
-            if (!String.valueOf(indexTemplatePhy.getShard()).equals(shardNum)) {
-                shardNum = String.valueOf(indexTemplatePhy.getShard());
+            // 校验shard个数:如果相等就跳过 无需进行一次es操作
+            if (String.valueOf(indexTemplatePhy.getShard()).equals(shardNum)) {
+                return;
             }
-
+            shardNum = String.valueOf(indexTemplatePhy.getShard());
             if (esTemplateService.syncUpdateShard(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(),
                 Integer.valueOf(shardNum), indexTemplatePhy.getShardRouting(), retryCount)) {
                 // 同步变化到ES集群

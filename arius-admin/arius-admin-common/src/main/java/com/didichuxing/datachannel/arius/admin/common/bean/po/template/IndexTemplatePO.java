@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * @author chengxiang
  * @date 2022/5/9
@@ -152,5 +154,10 @@ public class IndexTemplatePO extends BasePO {
      * 模版恢复优先级
      */
     private Integer priorityLevel;
+
+    /**
+     * 元数据集群ids
+     */
+    private List<Integer> metadataLogicClusterIds;
 
 }

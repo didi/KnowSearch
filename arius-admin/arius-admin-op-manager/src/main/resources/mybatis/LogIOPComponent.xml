@@ -97,4 +97,24 @@
         set contain_component_ids = #{containIds}
         where id = #{componentId}
     </update>
+    
+    <select id="queryComponentByName" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM logi_op_component
+        WHERE name = #{name}
+    </select>
+    
+    <delete id="delete">
+        DELETE
+        FROM logi_op_component
+        WHERE id = #{id}
+    </delete>
+    
+    <select id="queryComponentById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM logi_op_component
+        WHERE name = #{id}
+    </select>
 </mapper>

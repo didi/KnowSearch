@@ -112,4 +112,17 @@
         FROM gateway_cluster_info
         WHERE id = #{id}
     </select>
+    
+    <select id="getComponentIdById" resultType="java.lang.Integer">
+        SELECT component_id
+        FROM gateway_cluster_info
+        WHERE id = #{id}
+    </select>
+    
+    <select id="getOneByName" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM gateway_cluster_info
+        WHERE cluster_name = #{name}
+    </select>
 </mapper>

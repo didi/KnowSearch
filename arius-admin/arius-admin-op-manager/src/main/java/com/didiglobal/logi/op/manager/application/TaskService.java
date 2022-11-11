@@ -18,6 +18,7 @@ import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.ComponentHandlerFactory;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.google.common.base.Strings;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -55,6 +56,19 @@ public class TaskService {
         //执行任务，根据类型进行相应的处理
         return componentHandlerFactory.getByType(result.getData().getType()).execute(result.getData());
     }
+    
+    /**
+     * 任务重试
+     *
+     * @param taskId 任务id
+     * @return
+     */
+    public Result<Void> retryTask(Integer taskId) {
+        if (null == taskId) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "task id为空");
+        }
+        return taskDomainService.retryTask(taskId);
+    }
 
     /**
      * 对任务执行相应的操作，暂停，取消，杀死，继续
@@ -72,19 +86,6 @@ public class TaskService {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "action未知");
         }
         return taskDomainService.actionTask(taskId, taskAction);
-    }
-
-    /**
-     * 任务重试
-     *
-     * @param taskId 任务id
-     * @return
-     */
-    public Result<Void> retryTask(Integer taskId) {
-        if (null == taskId) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "task id为空");
-        }
-        return taskDomainService.retryTask(taskId);
     }
 
     /**
@@ -183,5 +184,16 @@ public class TaskService {
         }
         Result<List<TaskDetail>> taskDetailListResult = taskDomainService.listTaskDetailByTaskId(taskId);
         return taskDetailListResult;
+    }
+    
+    /**
+     * > 如果任务不为 null 且任务已经完成，则返回 true
+     *
+     * @param taskId 任务编号
+     * @return Result<Boolean>
+     */
+    public Result<Boolean> tasksToBeAchieved(Integer taskId) {
+        final Result<Task> taskRes = taskDomainService.getTaskById(taskId);
+        return Result.build(Objects.isNull(taskRes.getData()) || taskRes.getData().getIsFinish() == 1);
     }
 }
