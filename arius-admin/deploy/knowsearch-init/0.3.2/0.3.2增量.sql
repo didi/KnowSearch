@@ -19,3 +19,6 @@ alter table gateway_cluster_info
 # admin表修改
 alter table es_cluster_region
     add divide_attribute_key varchar(100) default '' null comment 'region划分方式，为空是根据节点名称划分';
+
+ALTER TABLE gateway_cluster_node_info
+    ADD node_name VARCHAR(50) DEFAULT '' NULL COMMENT '节点名称';
