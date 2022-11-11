@@ -19,3 +19,6 @@ alter table gateway_cluster_info
 # admin表修改
 alter table es_cluster_region
     add divide_attribute_key varchar(100) default '' null comment 'region划分方式，为空是根据节点名称划分';
+
+alter table index_template_info
+    add priority_level tinyint(4) default 0 null comment '恢复优先级';
