@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCell
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -208,7 +209,16 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
 
         List<List<IndexCatCellPO>> lists = INDEX_CAT_INFO_COLLECTOR_FUTURE_UTIL.waitResult();
         List<IndexCatCellDTO> res =  Lists.newArrayList();
-        for (List<IndexCatCellPO> list : lists) { res.addAll(ConvertUtil.list2List(list, IndexCatCellDTO.class));}
+        for (List<IndexCatCellPO> list : lists) {
+            for (IndexCatCellPO indexCatCellPO:list) {
+                IndexCatCellDTO indexCatCellDTO = ConvertUtil.obj2Obj(indexCatCellPO,IndexCatCellDTO.class);
+                indexCatCellDTO.setPriStoreSize(SizeUtil.getUnitSize(indexCatCellPO.getPriStoreSize()));
+                indexCatCellDTO.setStoreSize(SizeUtil.getUnitSize(indexCatCellPO.getStoreSize()));
+                res.add(indexCatCellDTO);
+            }
+//            List<IndexCatCellDTO> indexCatCellPOs =  ConvertUtil.list2List(list, IndexCatCellDTO.class);
+//            res.addAll(ConvertUtil.list2List(list, IndexCatCellDTO.class));
+        }
 
         LOGGER.info("class=IndexCatInfoCollector||method=handleJobTask||timeOut={}", System.currentTimeMillis() - currentTimeMillis);
 

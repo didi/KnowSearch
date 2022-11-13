@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellUpdatePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
@@ -97,7 +98,7 @@ public class IndexCatESDAO extends BaseESDAO {
         }
         return false;
     }
-    public boolean batchUpsert(List<IndexCatCellPO> list, int retryCount) {
+    public boolean batchUpsert(List<IndexCatCellUpdatePO> list, int retryCount) {
         try {
             return ESOpTimeoutRetry.esRetryExecute("batchInsert", retryCount,
                     () -> updateClient.batchUpdate(IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, list));
@@ -129,10 +130,10 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param orderByDesc  是否降序
      * @return             Tuple<Long, List<IndexCatCellPO>> 命中数 具体数据
      */
-    public Tuple<Long, List<IndexCatCellPO>> getCatIndexInfo(String cluster, String index, String health, String status,
+    public Tuple<Long, List<IndexCatCellUpdatePO>> getCatIndexInfo(String cluster, String index, String health, String status,
                                                              Integer projectId, Long from, Long size, String sortTerm,
                                                              Boolean orderByDesc) {
-        Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple;
+        Tuple<Long, List<IndexCatCellUpdatePO>> totalHitAndIndexCatCellListTuple;
         String queryTermDsl = buildQueryTermDsl(cluster, index, health, status, projectId);
         String sortType = buildSortType(orderByDesc);
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CAT_INDEX_INFO_BY_CONDITION, queryTermDsl,
@@ -140,7 +141,7 @@ public class IndexCatESDAO extends BaseESDAO {
         int retryTime = 3;
         do {
             totalHitAndIndexCatCellListTuple = gatewayClient.performRequestListAndGetTotalCount(metadataClusterName,
-                IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, dsl, IndexCatCellPO.class);
+                IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, dsl, IndexCatCellUpdatePO.class);
         } while (retryTime-- > 0 && null == totalHitAndIndexCatCellListTuple);
 
         return totalHitAndIndexCatCellListTuple;
