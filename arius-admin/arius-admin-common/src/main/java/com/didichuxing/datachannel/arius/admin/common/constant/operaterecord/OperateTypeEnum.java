@@ -187,6 +187,10 @@ public enum OperateTypeEnum {
      */
     QUERY_TEMPLATE_DISABLE(ModuleEnum.QUERY_TEMPLATE, "DSL查询模板禁用", 41),
     /**
+     * 查询模板:查询模板状态变更
+     */
+    QUERY_TEMPLATE_STATUS_CHANGE(ModuleEnum.QUERY_TEMPLATE, "查询模板状态变更", 67),
+    /**
      * DSL查询:查询记录
      */
     DSL_QUERY_RECORD(ModuleEnum.DSL_QUERY, "DSL查询记录", 66),
