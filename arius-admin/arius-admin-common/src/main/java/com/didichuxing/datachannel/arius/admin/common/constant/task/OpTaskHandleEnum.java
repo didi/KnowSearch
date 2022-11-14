@@ -35,7 +35,19 @@ public enum OpTaskHandleEnum {
                                                   OpTaskConstant.ECM_WORK_TASK),
 
                               CLUSTER_CONFIG_DELETE(OpTaskTypeEnum.CLUSTER_CONFIG_DELETE.getType(),
-                                                    OpTaskConstant.ECM_WORK_TASK),
+                                  OpTaskConstant.ECM_WORK_TASK),
+    //gateway相关操作
+    GATEWAY_NEW(OpTaskTypeEnum.GATEWAY_NEW.getType(), OpTaskConstant.GATEWAY_CREATE),
+    GATEWAY_EXPAND(OpTaskTypeEnum.GATEWAY_EXPAND.getType(), OpTaskConstant.GATEWAY_EXPAND),
+    GATEWAY_SHRINK(OpTaskTypeEnum.GATEWAY_SHRINK.getType(), OpTaskConstant.GATEWAY_SHRINK),
+    GATEWAY_RESTART(OpTaskTypeEnum.GATEWAY_RESTART.getType(), OpTaskConstant.GATEWAY_RESTART),
+    GATEWAY_UPGRADE(OpTaskTypeEnum.GATEWAY_UPGRADE.getType(), OpTaskConstant.GATEWAY_UPGRADE),
+    GATEWAY_CONFIG_EDIT(OpTaskTypeEnum.GATEWAY_CONFIG_EDIT.getType(),
+        OpTaskConstant.GATEWAY_CONFIG_EDIT),
+    GATEWAY_CONFIG_ROLLBACK(OpTaskTypeEnum.GATEWAY_CONFIG_ROLLBACK.getType(),
+        OpTaskConstant.GATEWAY_CONFIG_ROLLBACK),
+    GATEWAY_ROLLBACK(OpTaskTypeEnum.GATEWAY_NEW.getType(),
+        OpTaskConstant.GATEWAY_ROLLBACK),
 
                               UNKNOWN(OpTaskTypeEnum.UNKNOWN.getType(), OpTaskConstant.UNKNOWN);
 
@@ -72,8 +84,11 @@ public enum OpTaskHandleEnum {
 }
 
 class OpTaskConstant {
-
-    private OpTaskConstant() {
+  
+  
+  
+  
+  private OpTaskConstant() {
     }
 
     public static final String ECM_WORK_TASK               = "ecmOpTask";
@@ -90,5 +105,15 @@ class OpTaskConstant {
     public static final String CLUSTER_CONFIG_RESTART_TASK = "clusterConfigRestartTask";
 
     public static final String DCDR_WORK_TASK              = "dcdrOpTask";
+    public static final String GATEWAY_CREATE             = "gatewayCreate";
+    public static final String GATEWAY_EXPAND = "gatewayExpand";
+    public static final String GATEWAY_SHRINK = "gatewayShrink";
+    public static final String GATEWAY_RESTART = "gatewayRestart";
+    public static final String GATEWAY_UPGRADE = "gatewayUpgrade";
+    public static final String GATEWAY_CONFIG_EDIT = "gatewayConfigEdit";
+    public static final String GATEWAY_CONFIG_ROLLBACK = "gatewayConfigRollback";
+    public static final String GATEWAY_ROLLBACK = "gatewayRollback";
+
+
     public static final String UNKNOWN                     = "unknown";
 }

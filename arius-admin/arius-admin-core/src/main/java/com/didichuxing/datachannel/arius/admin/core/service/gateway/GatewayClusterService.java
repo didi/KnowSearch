@@ -74,4 +74,30 @@ public interface GatewayClusterService {
 	 * @return 布尔值
 	 */
 	boolean editOne(GatewayClusterDTO data);
+	
+	/**
+	 * 它返回具有给定 id 的集群的名称。
+	 *
+	 * @param gatewayClusterId 网关集群的 ID。
+	 * @return 包含集群名称的字符串。
+	 */
+	String getClusterNameById(Integer gatewayClusterId);
+	
+	
+	/**
+	 * 它返回具有给定 id 的网关集群的组件 id。
+	 *
+	 * @param gatewayClusterId 网关集群的 ID。
+	 * @return 网关集群的组件 ID。
+	 */
+	Integer getComponentIdById(Integer gatewayClusterId);
+		
+		
+		/**
+		 * 按名称获取一个 GatewayClusterPO
+		 *
+		 * @param name 网关集群的名称。
+		 * @return GatewayClusterPO 对象
+		 */
+		GatewayClusterPO getOneByName(String name);
 }

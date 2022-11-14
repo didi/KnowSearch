@@ -8,35 +8,56 @@ import com.baomidou.mybatisplus.core.config.GlobalConfig;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
+import com.didiglobal.logi.op.manager.infrastructure.common.properties.OpManagerProper;
+import java.sql.SQLException;
+import javax.sql.DataSource;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-
-import javax.sql.DataSource;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * @author d06679
  */
-@Configuration
-@MapperScan(value = "com.didiglobal.logi.op.manager.infrastructure.db.mapper",
-        sqlSessionFactoryRef = "opSqlSessionFactory")
-public class DruidDbConfig {
+@EnableTransactionManagement
+@Configuration("opManagerDataSourceConfig")
+@MapperScan(value = "com.didiglobal.logi.op.manager.infrastructure.db.mapper",sqlSessionFactoryRef = "opSqlSessionFactory")
+public class OpManagerDruidDbConfig {
 
     @Bean("opDataSource")
-    @Primary
-    @ConfigurationProperties(prefix = "spring.datasource.druid")
-    public DataSource dataSource() {
-        return new DruidDataSource();
+    public DataSource dataSource(OpManagerProper proper) throws SQLException {
+        final DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setName(proper.getDataSourceName());
+        dataSource.setUsername(proper.getUsername());
+        dataSource.setPassword(proper.getPassword());
+        dataSource.setDriverClassName(proper.getDriverClassName());
+        dataSource.setUrl(proper.getUrl());
+        dataSource.setInitialSize(proper.getInitialSize());
+        dataSource.setValidationQueryTimeout(proper.getValidationQueryTimeout());
+        dataSource.setTransactionQueryTimeout(proper.getTransactionQueryTimeout());
+        dataSource.setMinIdle(proper.getMinIdle());
+        dataSource.setKeepAlive(proper.getKeepAlive());
+        dataSource.setMaxActive(proper.getMaxActive());
+        dataSource.setTimeBetweenEvictionRunsMillis(proper.getTimeBetweenEvictionRunsMillis());
+        dataSource.setMinEvictableIdleTimeMillis(proper.getMinEvictableIdleTimeMillis());
+        dataSource.setDefaultAutoCommit(proper.getDefaultAutoCommit());
+        dataSource.setValidationQuery(proper.getValidationQuery());
+        dataSource.setTestWhileIdle(proper.getTestWhileIdle());
+        dataSource.setTestOnReturn(proper.getTestOnReturn());
+        dataSource.setTestOnBorrow(proper.getTestOnBorrow());
+        dataSource.setLogAbandoned(proper.getLogAbandoned());
+        dataSource.setPoolPreparedStatements(proper.getPoolPreparedStatements());
+        dataSource.setMaxOpenPreparedStatements(proper.getMaxOpenPreparedStatements());
+        dataSource.setFilters(proper.getFilters());
+        return dataSource;
     }
 
-    @Bean
-    public GlobalConfig globalConfigByArius() {
+    @Bean("globalConfigByOpManager")
+    public GlobalConfig globalConfigByOpManager() {
         GlobalConfig globalConfig = new GlobalConfig();
         globalConfig.setBanner(false);
         GlobalConfig.DbConfig dbConfig = new GlobalConfig.DbConfig();
@@ -48,7 +69,7 @@ public class DruidDbConfig {
     /**
      * 分页插件
      */
-    @Bean
+    @Bean("paginationInterceptorByOpManager")
     public MybatisPlusInterceptor paginationInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MARIADB));
@@ -63,15 +84,16 @@ public class DruidDbConfig {
      * @throws Exception Exception
      */
     @Bean("opSqlSessionFactory")
-    @Primary
     public SqlSessionFactory sqlSessionFactory(
             @Qualifier("opDataSource") DataSource dataSource) throws Exception {
         //将SqlSessionFactoryBean 替换为 MybatisSqlSessionFactoryBean， 否则mybatis-plus 提示 Invalid bound statement (not found)
+        
         MybatisSqlSessionFactoryBean bean = new MybatisSqlSessionFactoryBean();
         bean.setDataSource(dataSource);
         bean.setMapperLocations(new PathMatchingResourcePatternResolver()
-                .getResources("classpath:mybatis/*.xml"));
-        bean.setGlobalConfig(globalConfigByArius());
+            
+                .getResources("classpath:mybatis/op-manager/*.xml"));
+        bean.setGlobalConfig(globalConfigByOpManager());
         MybatisConfiguration mc = new MybatisConfiguration();
         //查看打印sql日志
         //org.apache.ibatis.logging.stdout.StdOutImpl.class 只能打印到控制台
@@ -85,7 +107,6 @@ public class DruidDbConfig {
     }
 
     @Bean({"opSqlSessionTemplate"})
-    @Primary
     public SqlSessionTemplate primarySqlSessionTemplate(@Qualifier("opSqlSessionFactory") SqlSessionFactory sessionFactory) {
         return new SqlSessionTemplate(sessionFactory);
     }

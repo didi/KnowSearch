@@ -36,5 +36,5 @@ public class IndexQueryDTO extends PageDTO {
     private Boolean orderByDesc = true;
 
     @ApiModelProperty("是否展示元数据索引")
-    private Boolean isShowIndicesWithMetaData;
+    private Boolean showMetadata;
 }

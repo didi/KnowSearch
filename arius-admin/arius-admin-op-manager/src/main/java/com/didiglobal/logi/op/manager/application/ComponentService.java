@@ -225,4 +225,18 @@ public class ComponentService {
         }
         return res;
     }
+    
+    /**
+     * > 按名称查询组件
+     *
+     * @param name 要查询的组件的名称。
+     * @return 包含 Component 对象的 Result 对象。
+     */
+    public Result<Component> queryComponentByName(String name) {
+        return componentDomainService.queryComponentByName(name);
+    }
+    
+    public Result<String> queryComponentById(Integer componentId) {
+        return componentDomainService.queryComponentById(componentId);
+    }
 }

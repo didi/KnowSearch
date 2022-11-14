@@ -17,13 +17,30 @@ import lombok.NoArgsConstructor;
 public class GatewayClusterNodePO extends BasePO {
 
     private Integer id;
-
+    
+    /**
+     * 集群名称
+     */
     private String  clusterName;
-
+    
+    /**
+     * 主机名
+     */
     private String  hostName;
-
+    
+    /**
+     * 港口
+     */
     private Integer port;
-
+    
+    /**
+     * 心跳时间
+     */
     private Date    heartbeatTime;
+    
+    /**
+     * 节点名称
+     */
+    private String nodeName;
 
 }

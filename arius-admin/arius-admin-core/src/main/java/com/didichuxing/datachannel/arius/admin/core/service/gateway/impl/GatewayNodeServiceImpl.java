@@ -1,12 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.core.service.gateway.impl;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
+import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterNodeDAO;
+import java.util.Collections;
 import java.util.List;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,17 +38,43 @@ public class GatewayNodeServiceImpl implements GatewayNodeService {
 	
 	@Override
 	public List<GatewayClusterNodePO> selectByBatchClusterName(List<String> clusterName) {
+			if (CollectionUtils.isEmpty(clusterName)) {
+					return Collections.emptyList();
+			}
 		return gatewayClusterNodeDAO.selectByBatchClusterName(clusterName);
 	}
 	
 	@Override
 	public List<GatewayClusterNodePO> listByClusterName(String clusterName) {
+			if (StringUtils.isBlank(clusterName)) {
+					return Collections.emptyList();
+			}
 		return gatewayClusterNodeDAO.selectByClusterName(clusterName);
 	}
 	
 	@Override
 	public boolean deleteByClusterName(String clusterName) {
 		return gatewayClusterNodeDAO.deleteByClusterName(clusterName);
+	}
+	
+	@Override
+	public List<GatewayClusterNodePO> pageByCondition(GatewayNodeConditionDTO condition) {
+		String sortTerm = null == condition.getSortTerm() ? SortConstant.ID : condition.getSortTerm();
+		String sortType = condition.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
+		condition.setSortTerm(sortTerm);
+		condition.setSortType(sortType);
+		condition.setFrom((condition.getPage() - 1) * condition.getSize());
+		return gatewayClusterNodeDAO.listByCondition(condition);
+	}
+	
+	@Override
+	public Long countByCondition(GatewayNodeConditionDTO condition) {
+		return gatewayClusterNodeDAO.countByCondition(condition);
+	}
+	
+	@Override
+	public List<GatewayClusterNodePO> listByHosts(List<String> hosts) {
+		return gatewayClusterNodeDAO.listByHosts(hosts);
 	}
 	
 	/**

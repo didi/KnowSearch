@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.page;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.impl.ClusterPhyManagerImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
@@ -16,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.Templ
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.UnavailableTemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatusWithTemplateEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -54,6 +57,11 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
     
     private static final String HEALTH      = "health";
     private static final String CHECK_POINT_DIFF = "check_point_diff";
+    /**
+     * 元数据集群名称
+     */
+    @Value("${es.update.cluster.name}")
+    private String                        metadataClusterName;
     @Autowired
     private IndexTemplateService          indexTemplateService;
 
@@ -74,47 +82,90 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         if (!AriusObjUtils.isBlack(templateName) && (templateName.startsWith("*") || templateName.startsWith("?"))) {
             return Result.buildParamIllegal("模板名称不能以*或者?开头");
         }
-
+        if(AriusObjUtils.isNull(metadataClusterName)){
+            return Result.buildParamIllegal("元数据集群配置名称为空");
+        }
         return Result.buildSucc(Boolean.TRUE);
     }
 
     @Override
     protected void initCondition(TemplateQueryDTO condition, Integer projectId) {
-        // nothing to do
+        //默认展示元数据集群的信息
+        if(AriusObjUtils.isNull(condition.getShowMetadata())){
+            condition.setShowMetadata(true);
+        }
     }
 
     @Override
     protected PaginationResult<TemplateWithSrvVO> buildPageData(TemplateQueryDTO condition, Integer projectId) {
-        Integer totalHit ;
-        List<IndexTemplate> matchIndexTemplateList;
-        if(StringUtils.isNotBlank(condition.getName())){
-            condition.setName(CommonUtils.sqlFuzzyQueryTransfer(condition.getName()));
-        }
-        // 如果存物理集群，则需要通过物理集群找到指定的逻辑集群
+        Tuple<Integer, List<IndexTemplate>> indexTemplateTuple;
         if (StringUtils.isNotBlank(condition.getCluster())) {
-            List<Integer> logicClusterIdList = clusterRegionService.listPhyClusterRegions(condition.getCluster())
-                    .stream().map(ClusterRegion::getLogicClusterIds)
-                    .filter(clusterLogicId -> !AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID.equals(clusterLogicId))
-                    .map(ListUtils::string2IntList).flatMap(Collection::stream).distinct().collect(Collectors.toList());
-            if (CollectionUtils.isEmpty(logicClusterIdList)) {
-                return PaginationResult.buildSucc(Collections.emptyList(),0,condition.getPage(),condition.getSize());
-            }
-            totalHit = indexTemplateService.fuzzyLogicTemplatesHitByConditionAndLogicClusterIdList(condition,
-                    logicClusterIdList).intValue();
-            matchIndexTemplateList =
-                    indexTemplateService.pagingGetTemplateSrvByConditionAndLogicClusterIdList(condition,logicClusterIdList);
+            indexTemplateTuple = pagingGetTemplateSrvByConditionAndLogicClusterIdList(condition,projectId);
         } else {
-            totalHit = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
-            matchIndexTemplateList = indexTemplateService.pagingGetTemplateSrvByCondition(condition);
+            indexTemplateTuple = pagingGetTemplateSrvByCondition(condition, projectId);
         }
-        List<TemplateWithSrvVO> templateWithSrvVOList = buildExtraAttribute(matchIndexTemplateList);
-        
-        
-        
-        return PaginationResult.buildSucc(templateWithSrvVOList, totalHit, condition.getPage(), condition.getSize());
+        List<TemplateWithSrvVO> templateWithSrvVOList = buildExtraAttribute(indexTemplateTuple.getV2());
+        return PaginationResult.buildSucc(templateWithSrvVOList, indexTemplateTuple.getV1(), condition.getPage(), condition.getSize());
     }
 
- 
+    /**************************************** private method ****************************************************/
+
+    /**
+     * 条件分页查询
+     *
+     * @param condition
+     * @param projectId
+     * @return
+     */
+    private Tuple<Integer, List<IndexTemplate>> pagingGetTemplateSrvByCondition(TemplateQueryDTO condition, Integer projectId) {
+        if (MetadataControlUtils.showMetadataInfo(!condition.getShowMetadata(), projectId)) {
+            List<Integer> metadataLogicClusterIds = getLogicClusterIds(metadataClusterName);
+            condition.setMetadataLogicClusterIds(metadataLogicClusterIds);
+        }
+        Integer totalHit = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
+        List<IndexTemplate> matchIndexTemplateList = indexTemplateService.pagingGetTemplateSrvByCondition(condition);
+        return new Tuple<>(totalHit, matchIndexTemplateList);
+    }
+
+    /**
+     * 如果存在物理集群，则需要通过物理集群找到指定的逻辑集群
+     *
+     * @param condition
+     * @param projectId
+     * @return
+     */
+    private Tuple<Integer, List<IndexTemplate>> pagingGetTemplateSrvByConditionAndLogicClusterIdList(TemplateQueryDTO condition, Integer projectId) {
+        Tuple<Integer, List<IndexTemplate>> indexTemplateTuple = new Tuple<>(0, Collections.emptyList());
+        if (MetadataControlUtils.showMetadataInfo(!condition.getShowMetadata(), projectId)
+                && condition.getCluster().equals(metadataClusterName)) {
+            return indexTemplateTuple;
+        } else {
+            List<Integer> logicClusterIdList = getLogicClusterIds(condition.getCluster());
+            if (CollectionUtils.isEmpty(logicClusterIdList)) {
+                return indexTemplateTuple;
+            }
+            Integer totalHit = indexTemplateService.fuzzyLogicTemplatesHitByConditionAndLogicClusterIdList(condition,
+                    logicClusterIdList).intValue();
+            List<IndexTemplate> matchIndexTemplateList =
+                    indexTemplateService.pagingGetTemplateSrvByConditionAndLogicClusterIdList(condition, logicClusterIdList);
+            return new Tuple<>(totalHit, matchIndexTemplateList);
+        }
+    }
+
+    /**
+     * 获取逻辑集群ids
+     *
+     * @param phyClusterName
+     * @return
+     */
+    private List<Integer> getLogicClusterIds(String phyClusterName) {
+        List<Integer> logicClusterIdList = clusterRegionService.listPhyClusterRegions(phyClusterName)
+                .stream().map(ClusterRegion::getLogicClusterIds)
+                .filter(clusterLogicId -> !AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID.equals(clusterLogicId))
+                .map(ListUtils::string2IntList).flatMap(Collection::stream).distinct().collect(Collectors.toList());
+        return logicClusterIdList;
+    }
+
     private List<TemplateWithSrvVO> buildExtraAttribute(List<IndexTemplate> templateList) {
         if (CollectionUtils.isEmpty(templateList)) {
             return Lists.newArrayList();
