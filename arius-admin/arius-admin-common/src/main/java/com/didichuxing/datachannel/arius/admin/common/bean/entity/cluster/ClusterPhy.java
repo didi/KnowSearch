@@ -181,6 +181,16 @@ public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy> {
      */
     private String                gatewayUrl;
 
+    /**
+     * kibana外链地址
+     */
+    private String                    kibanaAddress;
+
+    /**
+     * cerebro外链地址
+     */
+    private String                    cerebroAddress;
+
     @Override
     public int compareTo(ClusterPhy o) {
         if (null == o) {
