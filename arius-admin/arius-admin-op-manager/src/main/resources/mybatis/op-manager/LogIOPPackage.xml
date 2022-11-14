@@ -9,6 +9,7 @@
         <result column="version" jdbcType="VARCHAR" property="version"/>
         <result column="describe" jdbcType="VARCHAR" property="describe"/>
         <result column="type" jdbcType="INTEGER" property="type"/>
+        <result column="package_type" jdbcType="INTEGER" property="packageType"/>
         <result column="script_id" jdbcType="INTEGER" property="scriptId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
@@ -90,4 +91,35 @@
         where id = #{id}
     </delete>
 
+    <select id="listPackageVersionByPackageType"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO"
+            resultMap="BaseResultMap">
+        select
+            version
+        from logi_op_package
+        where package_type = #{packageType}
+    </select>
+
+    <select id="pagingByCondition"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_package
+        where 1 = 1
+        <if test="param.name != null">and `name` LIKE CONCAT('%', #{param.name}, '%')</if>
+        <if test="param.id != null">and id = #{param.id}</if>
+        order by  create_time desc
+        limit #{from}, #{size}
+    </select>
+
+    <select id="countByCondition"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO" resultType="long">
+        select
+        count(1)
+        from logi_op_package
+        where 1 = 1
+        <if test="param.name != null">and `name` LIKE CONCAT('%', #{param.name}, '%')</if>
+        <if test="param.id != null">and id = #{param.id}</if>
+    </select>
 </mapper>

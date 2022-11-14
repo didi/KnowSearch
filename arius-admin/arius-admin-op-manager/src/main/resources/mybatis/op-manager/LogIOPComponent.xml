@@ -117,4 +117,16 @@
         FROM logi_op_component
         WHERE name = #{id}
     </select>
+
+    <select id="getByPackageIds"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component
+        where package_id in
+        <foreach collection="packageIds" item="packageId" open="(" separator="," close=")">
+            #{packageId}
+        </foreach>
+    </select>
 </mapper>

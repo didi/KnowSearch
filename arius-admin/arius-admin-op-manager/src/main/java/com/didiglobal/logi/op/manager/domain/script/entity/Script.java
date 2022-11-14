@@ -8,8 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.*;
 import java.sql.Timestamp;
+import java.util.Objects;
 
 /**
  * @author didi
@@ -85,7 +85,9 @@ public class Script {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "请指定要修改的值（脚本或者描述）");
         }
 
+        if(Objects.isNull(uploadFile)){
+            return Result.buildParamIllegal("脚本内容不存在");
+        }
         return Result.success();
     }
-
 }

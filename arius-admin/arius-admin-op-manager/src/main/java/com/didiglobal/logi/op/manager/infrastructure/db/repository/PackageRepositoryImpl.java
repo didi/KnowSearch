@@ -59,6 +59,23 @@ public class PackageRepositoryImpl implements PackageRepository {
     }
 
     @Override
+    public List<Package> pagingByCondition(Package pagingPackage, Long page, Long size) {
+        PackagePO packagePO = PackageConverter.convertPackageDO2PO(pagingPackage);
+        return PackageConverter.convertPackagePO2DOList(packageDao.pagingByCondition(packagePO,page,size));
+    }
+
+    @Override
+    public List<String> listPackageVersionByPackageType(Integer packageType) {
+        return packageDao.listPackageVersionByPackageType(packageType);
+    }
+
+    @Override
+    public Long countByCondition(Package pagingPackage) {
+        PackagePO packagePO = PackageConverter.convertPackageDO2PO(pagingPackage);
+        return packageDao.countByCondition(packagePO);
+    }
+
+    @Override
     public int deletePackage(int id) {
         return packageDao.delete(id);
     }

@@ -1,6 +1,7 @@
 package com.didiglobal.logi.op.manager.infrastructure.db.mapper;
 
 import com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -60,4 +61,26 @@ public interface ScriptDao {
      */
     int delete(int id);
 
+    /**
+     * 分页查询脚本列表
+     * @param scriptPO
+     * @param from
+     * @param size
+     * @return
+     */
+    List<ScriptPO> pagingByCondition(@Param("param") ScriptPO scriptPO, @Param("from") Long from, @Param("size") Long size);
+
+    /**
+     * 查询脚本列表总数
+     * @param scriptPO
+     * @return
+     */
+    Long countByCondition(ScriptPO scriptPO);
+
+    /**
+     * 根据脚本id获取脚本
+     * @param id
+     * @return
+     */
+    ScriptPO findById(Long id);
 }
