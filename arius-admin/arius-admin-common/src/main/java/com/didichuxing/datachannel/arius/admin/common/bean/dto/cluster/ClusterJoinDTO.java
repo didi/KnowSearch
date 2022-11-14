@@ -57,4 +57,10 @@ public class ClusterJoinDTO extends BaseDTO {
 
     @ApiModelProperty("集群资源类型(-1 未知 1 共享 2 独立 3 独享)")
     private Integer                    resourceType;
+
+    @ApiModelProperty("kibana外链地址")
+    private String                    kibanaAddress;
+
+    @ApiModelProperty("cerebro外链地址")
+    private String                    cerebroAddress;
 }

@@ -160,6 +160,16 @@ public class ClusterPhyPO extends BasePO {
      */
     private String  gatewayUrl;
 
+    /**
+     * kibana外链地址
+     */
+    private String                    kibanaAddress;
+
+    /**
+     * cerebro外链地址
+     */
+    private String                    cerebroAddress;
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null || obj.getClass() != this.getClass()) {

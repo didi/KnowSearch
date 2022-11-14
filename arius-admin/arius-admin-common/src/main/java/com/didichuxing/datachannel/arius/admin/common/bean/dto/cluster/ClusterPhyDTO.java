@@ -132,4 +132,10 @@ public class ClusterPhyDTO extends PageDTO {
 
     @ApiModelProperty("gateway地址")
     private String                     gatewayUrl;
+
+    @ApiModelProperty("kibana外链地址")
+    private String                    kibanaAddress;
+
+    @ApiModelProperty("cerebro外链地址")
+    private String                    cerebroAddress;
 }

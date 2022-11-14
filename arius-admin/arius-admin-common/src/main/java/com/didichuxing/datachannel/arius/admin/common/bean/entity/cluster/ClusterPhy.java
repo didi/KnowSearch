@@ -6,6 +6,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Cl
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import java.util.List;
+
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -180,6 +182,16 @@ public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy> {
      * 网关地址
      */
     private String                gatewayUrl;
+
+    /**
+     * kibana外链地址
+     */
+    private String                    kibanaAddress;
+
+    /**
+     * cerebro外链地址
+     */
+    private String                    cerebroAddress;
 
     @Override
     public int compareTo(ClusterPhy o) {
