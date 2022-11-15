@@ -196,4 +196,16 @@ public class TaskService {
         final Result<Task> taskRes = taskDomainService.getTaskById(taskId);
         return Result.build(Objects.isNull(taskRes.getData()) || taskRes.getData().getIsFinish() == 1);
     }
+    
+   
+    /**
+     * 如果任务存在，则返回真，否则返回假。
+     *
+     * @param taskId 任务 ID。
+     * @return Result<Boolean>
+     */
+    public Result<Boolean> hasTask(Integer taskId) {
+        final Result<Task> taskRes = taskDomainService.getTaskById(taskId);
+        return Result.build(Objects.nonNull(taskRes.getData()));
+    }
 }
