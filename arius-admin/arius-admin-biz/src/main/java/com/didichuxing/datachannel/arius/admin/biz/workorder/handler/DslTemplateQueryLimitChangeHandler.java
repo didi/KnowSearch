@@ -3,15 +3,13 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.dsl.DslTemplateManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.content.DslTemplateQueryLimitContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.DslTemplateStatusContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateQueryDslContent;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.DslTemplateStatusDetail;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.DslTemplateQueryLimitDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -25,10 +23,10 @@ import java.util.List;
 
 /**
  * @author wuxuan
- * @date 2022/11/14
+ * @date 2022/11/15
  */
-@Service("dslTemplateStatusHandler")
-public class DslTemplateStatusHandler extends BaseWorkOrderHandler {
+@Service("dslTemplateQueryLimitChangeHandler")
+public class DslTemplateQueryLimitChangeHandler extends BaseWorkOrderHandler {
 
     @Autowired
     private DslTemplateManager dslTemplateManager;
@@ -46,9 +44,9 @@ public class DslTemplateStatusHandler extends BaseWorkOrderHandler {
 
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
-        DslTemplateStatusContent content = JSON.parseObject(extensions, DslTemplateStatusContent.class);
+        DslTemplateQueryLimitContent content = JSON.parseObject(extensions, DslTemplateQueryLimitContent.class);
 
-        return ConvertUtil.obj2Obj(content, DslTemplateStatusDetail.class);
+        return ConvertUtil.obj2Obj(content, DslTemplateQueryLimitDetail.class);
     }
 
     @Override
@@ -72,14 +70,14 @@ public class DslTemplateStatusHandler extends BaseWorkOrderHandler {
      */
     @Override
     protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
-        DslTemplateStatusContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),DslTemplateStatusContent.class);
+        DslTemplateQueryLimitContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),DslTemplateQueryLimitContent.class);
 
         if (AriusObjUtils.isNull(content.getProjectId())) {
             return Result.buildParamIllegal("项目id为空");
         }
 
-        if (AriusObjUtils.isNull(content.getDslTemplateMd5())) {
-            return Result.buildParamIllegal("dslTemplateMd5为空");
+        if (AriusObjUtils.isNull(content.getDslQueryLimitDTOList())) {
+            return Result.buildParamIllegal("查询语句限流值相关参数为空");
         }
 
         if (AriusObjUtils.isNull(content.getOperator())) {
@@ -134,21 +132,11 @@ public class DslTemplateStatusHandler extends BaseWorkOrderHandler {
      */
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
-        DslTemplateStatusContent dslTemplateStatusContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-                DslTemplateStatusContent.class);
+        DslTemplateQueryLimitContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+                DslTemplateQueryLimitContent.class);
 
-        Result<Boolean> result = dslTemplateManager.changeDslTemplateStatus(dslTemplateStatusContent.getProjectId(),
-                dslTemplateStatusContent.getOperator(), dslTemplateStatusContent.getDslTemplateMd5());
-
-        if (result.success()) {
-            //操作记录
-            //查询模板读写变更记录
-            operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_STATUS_CHANGE)
-                    .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
-                    .content(String.format("项目%d的查询模板%s启用/禁用状态变更", dslTemplateStatusContent.getProjectId(),dslTemplateStatusContent.getDslTemplateMd5()))
-                    .userOperation(workOrder.getSubmitor())
-                    .buildDefaultManualTrigger());
-        }
+        Result<Boolean> result = dslTemplateManager.updateDslTemplateQueryLimit(content.getProjectId(),
+                content.getOperator(), content.getDslQueryLimitDTOList());
 
         return Result.buildFrom(result);
     }
