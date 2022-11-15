@@ -39,6 +39,10 @@ public enum WorkOrderTypeEnum {
 
                                TEMPLATE_TRANSFER("templateTransfer", "模版转移"),
 
+                               DSL_TEMPLATE_STATUS_CHANGE("dslTemplateStatusChange", "查询模板状态变更"),
+
+                               DSL_TEMPLATE_QUERY_LIMIT_CHANGE("dslTemplateQueryLimitChange", "查询模板限流值变更"),
+
                                QUERY_DSL_LIMIT_EDIT("queryDslLimitEdit", "查询语句编辑"),
 
                                CLUSTER_OP_INDECREASE("clusterOpIndecrease", "集群扩缩(OP)"),
