@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.ph
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicSpecCondition;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
@@ -32,12 +33,22 @@ public class ESPhyClusterRegionController {
     @Autowired
     private ClusterNodeManager   clusterNodeManager;
 
+    @Deprecated
     @GetMapping("{cluster}/{clusterLogicType}")
     @ResponseBody
     @ApiOperation(value = "获取物理集群region列表接口，不包含cold region", notes = "支持各种纬度检索集群Region信息")
     public Result<List<ClusterRegionVO>> listPhyClusterRegionsByLogicClusterTypeAndCluster(@PathVariable("cluster") String cluster,
                                                                                            @PathVariable("clusterLogicType") Integer clusterLogicType) {
         return clusterRegionManager.listPhyClusterRegionsByLogicClusterTypeAndCluster(cluster, clusterLogicType);
+    }
+
+    @PutMapping("{cluster}/{clusterLogicType}")
+    @ResponseBody
+    @ApiOperation(value = "根据申请的逻辑集群规格获取满足条件的物理集群region列表，不包含cold region", notes = "支持各种纬度检索集群Region信息")
+    public Result<List<ClusterRegionVO>> listPhyClusterRegionsByCondition(@PathVariable("cluster") String cluster,
+                                                                          @PathVariable("clusterLogicType") Integer clusterLogicType,
+                                                                          @RequestBody ClusterLogicSpecCondition condition) {
+        return clusterRegionManager.listPhyClusterRegionsByCondition(cluster, clusterLogicType, condition);
     }
 
     @GetMapping("/{regionId}/nodes")
