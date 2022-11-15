@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.SCRIPT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
@@ -96,7 +97,7 @@ public class ScriptManagerImpl implements ScriptManager {
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
-        return Result.build(scriptService.usingScript(Math.toIntExact(id)));
+        return Result.buildSucc(scriptService.usingScript(Math.toIntExact(id)));
     }
 
     @Override
@@ -145,14 +146,16 @@ public class ScriptManagerImpl implements ScriptManager {
                 return Result.buildFail("脚本[" + script.getName() + "]文件的大小超过限制，不能超过"
                         + MULTI_PART_FILE_SIZE_MAX / 1024 / 1024 + "M");
             }
-        } else if (operation.getCode() == EDIT.getCode()) {
-            com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> checkCreateParam = script.checkUpdateParam();
-            if (checkCreateParam.failed()) {
-                return Result.buildFrom(checkCreateParam);
+            if (!script.getUploadFile().getOriginalFilename().endsWith(".sh")) {
+                return Result.buildFail("必须上传sh格式文件");
             }
-            if (script.getUploadFile().getSize() > MULTI_PART_FILE_SIZE_MAX) {
+        } else if (operation.getCode() == EDIT.getCode()) {
+            if (Objects.nonNull(script.getUploadFile()) && script.getUploadFile().getSize() > MULTI_PART_FILE_SIZE_MAX) {
                 return Result.buildFail("脚本[" + script.getName() + "]文件的大小超过限制，不能超过"
                         + MULTI_PART_FILE_SIZE_MAX / 1024 / 1024 + "M");
+            }
+            if (Objects.nonNull(script.getUploadFile()) && !script.getUploadFile().getOriginalFilename().endsWith(".sh")) {
+                return Result.buildFail("必须上传sh格式文件");
             }
         }
         return Result.buildSucc();

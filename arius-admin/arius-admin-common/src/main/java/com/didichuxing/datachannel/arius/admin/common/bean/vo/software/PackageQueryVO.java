@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.software;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-import com.didiglobal.logi.op.manager.interfaces.vo.PackageGroupConfigVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -44,7 +43,7 @@ public class PackageQueryVO extends BaseVO {
      * 是否引擎插件
      */
     @ApiModelProperty("是否引擎插件")
-    private String isEnginePlugin;
+    private Integer isEnginePlugin;
     /**
      * 脚本id
      */
@@ -54,5 +53,5 @@ public class PackageQueryVO extends BaseVO {
      * 关联的默认安装包分组配置
      */
     @ApiModelProperty("关联的默认安装包分组配置")
-    private List<PackageGroupConfigVO> groupConfigList;
+    private List<PackageGroupConfigQueryVO> groupConfigList;
 }

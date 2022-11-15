@@ -72,7 +72,6 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
             return Result.fail(deployRes.getCode(), deployRes.getMessage());
         }
         script.setTemplateId(deployRes.getData());
-
         //入库
         scriptRepository.insertScript(script);
         return Result.success();

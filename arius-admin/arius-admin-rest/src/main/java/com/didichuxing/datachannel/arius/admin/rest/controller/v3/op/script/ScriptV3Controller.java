@@ -47,14 +47,14 @@ public class ScriptV3Controller {
 
     @PostMapping("")
     @ApiOperation(value = "新增脚本接口", notes = "")
-    public Result<Boolean> addScript(HttpServletRequest request, @RequestBody ScriptAddDTO scriptAddDTO) {
+    public Result<Boolean> addScript(HttpServletRequest request, ScriptAddDTO scriptAddDTO) {
         return scriptManager.addScript(scriptAddDTO, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
 
-    @PutMapping("/{id}")
+    @PostMapping("/update")
     @ApiOperation(value = "修改脚本接口", notes = "")
-    public Result<Boolean> editScript(HttpServletRequest request, @RequestBody ScriptUpdateDTO scriptUpdateDTO) {
+    public Result<Boolean> editScript(HttpServletRequest request, ScriptUpdateDTO scriptUpdateDTO) {
         return scriptManager.editScript(scriptUpdateDTO, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }

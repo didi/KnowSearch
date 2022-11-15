@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author didi
@@ -66,7 +67,8 @@ public class PackageRepositoryImpl implements PackageRepository {
 
     @Override
     public List<String> listPackageVersionByPackageType(Integer packageType) {
-        return packageDao.listPackageVersionByPackageType(packageType);
+        List<PackagePO> packageList = packageDao.listPackageVersionByPackageType(packageType);
+        return packageList.stream().map(PackagePO::getVersion).collect(Collectors.toList());
     }
 
     @Override

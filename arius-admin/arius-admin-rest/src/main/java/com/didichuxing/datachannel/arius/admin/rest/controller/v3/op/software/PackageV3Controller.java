@@ -42,14 +42,14 @@ public class PackageV3Controller {
 
     @PostMapping("")
     @ApiOperation(value = "新增安装包接口", notes = "")
-    public Result<Boolean> addPackage(HttpServletRequest request, @RequestBody PackageAddDTO packageAddDTO) {
+    public Result<Boolean> addPackage(HttpServletRequest request, PackageAddDTO packageAddDTO) {
         return packageManager.addPackage(packageAddDTO, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
 
-    @PutMapping("/{id}")
+    @PostMapping("/update")
     @ApiOperation(value = "修改安装包接口", notes = "")
-    public Result<Boolean> updatePackage(HttpServletRequest request, @RequestBody PackageUpdateDTO packageUpdateDTO) {
+    public Result<Boolean> updatePackage(HttpServletRequest request, PackageUpdateDTO packageUpdateDTO) {
         return packageManager.updatePackage(packageUpdateDTO, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }

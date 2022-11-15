@@ -73,7 +73,7 @@ public interface PackageDao {
      * @param packageType
      * @return
      */
-    List<String> listPackageVersionByPackageType(Integer packageType);
+    List<PackagePO> listPackageVersionByPackageType(Integer packageType);
 
     /**
      * 分页查询软件包列表

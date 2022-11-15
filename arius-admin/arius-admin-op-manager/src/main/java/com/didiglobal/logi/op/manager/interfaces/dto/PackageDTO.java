@@ -90,6 +90,6 @@ public class PackageDTO {
     /**
      * 软件包类型，1-es安装包、2-gateway安装包、3-es引擎插件、4-gateway引擎插件、5-es平台插件、6-gateway平台插件
      */
-    @ApiModelProperty("软件包类型")
+    @ApiModelProperty("软件包类型,1-es安装包、2-gateway安装包、3-es引擎插件、4-gateway引擎插件、5-es平台插件、6-gateway平台插件")
     private Integer packageType;
 }

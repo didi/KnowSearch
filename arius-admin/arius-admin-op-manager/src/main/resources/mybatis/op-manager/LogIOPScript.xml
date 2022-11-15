@@ -89,7 +89,7 @@
         count(1)
         from logi_op_script
         where 1 = 1
-        <if test="param.name != null">and `name` LIKE CONCAT('%', #{param.name}, '%')</if>
-        <if test="param.id != null">and id = #{param.id}</if>
+        <if test="name != null">and `name` LIKE CONCAT('%', #{name}, '%')</if>
+        <if test="id != null">and id = #{id}</if>
     </select>
 </mapper>

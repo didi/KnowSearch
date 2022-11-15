@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author didi
@@ -111,7 +112,7 @@ public class Package {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "未绑定脚本");
         }
 
-        if (uploadFile.isEmpty()) {
+        if (Objects.isNull(uploadFile)) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "安装包内容缺失");
         }
         return Result.success();
@@ -125,10 +126,6 @@ public class Package {
 
         if (null == scriptId) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "未绑定脚本");
-        }
-
-        if (uploadFile.isEmpty()) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "安装包内容缺失");
         }
         return Result.success();
     }

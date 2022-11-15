@@ -23,10 +23,12 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.op.manager.application.PackageService;
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
+import com.didiglobal.logi.op.manager.domain.packages.entity.value.PackageGroupConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.PACKAGE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
@@ -55,11 +57,16 @@ public class PackageManagerImpl implements PackageManager {
 
     @Override
     public Result<PackageQueryVO> getPackageById(Long id) {
-        com.didiglobal.logi.op.manager.infrastructure.common.Result<Package> packageByIdResult = packageService.getPackageById(id);
+        Package packageId = new Package();
+        packageId.setId(Math.toIntExact(id));
+        com.didiglobal.logi.op.manager.infrastructure.common.Result<List<Package>> packageByIdResult = packageService.queryPackage(packageId);
         if (packageByIdResult.getData() == null) {
             return Result.buildNotExist(ResultType.NOT_EXIST.getMessage());
         }
-        return Result.buildSucc(ConvertUtil.obj2Obj(packageByIdResult.getData(),PackageQueryVO.class));
+        Package queryPackageById = packageByIdResult.getData().stream().findFirst().get();
+        PackageQueryVO packageQueryVO = ConvertUtil.obj2Obj(queryPackageById, PackageQueryVO.class);
+        packageQueryVO.setIsEnginePlugin(queryPackageById.getType());
+        return Result.buildSucc(packageQueryVO);
     }
 
     @Override
@@ -75,6 +82,9 @@ public class PackageManagerImpl implements PackageManager {
         }
         addPackage.setCreator(operator);
         addPackage.setType(packageAddDTO.getIsEnginePlugin());
+        List<PackageGroupConfig> packageGroupConfigs = ConvertUtil.str2ObjArrayByJson(packageAddDTO.getGroupConfigList()
+                                                                                         , PackageGroupConfig.class);
+        addPackage.setGroupConfigList(packageGroupConfigs);
         com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> addPackageResult = packageService.createPackage(addPackage);
         return Result.buildFrom(addPackageResult);
     }
@@ -90,7 +100,11 @@ public class PackageManagerImpl implements PackageManager {
         if (checkResult.failed()) {
             return Result.buildFrom(checkResult);
         }
+        editPackage.setCreator(operator);
         editPackage.setType(packageUpdateDTO.getIsEnginePlugin());
+        List<PackageGroupConfig> packageGroupConfigs = ConvertUtil.str2ObjArrayByJson(packageUpdateDTO.getGroupConfigList()
+                                                                                            , PackageGroupConfig.class);
+        editPackage.setGroupConfigList(packageGroupConfigs);
         com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> editPackageResult = packageService.updatePackage(editPackage);
         return Result.buildFrom(editPackageResult);
     }
@@ -153,14 +167,16 @@ public class PackageManagerImpl implements PackageManager {
                 return Result.buildFail("软件包[" + checkPackage.getName() + "]文件的大小超过限制，不能超过"
                         + MULTI_PART_FILE_SIZE_MAX / 1024 / 1024 + "M");
             }
-        } else if (operation.getCode() == EDIT.getCode()) {
-            com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> checkUpdateParam = checkPackage.checkUpdateParam();
-            if (checkUpdateParam.failed()) {
-                return Result.buildFrom(checkUpdateParam);
+            if (!checkPackage.getUploadFile().getOriginalFilename().endsWith(".gz")) {
+                return Result.buildFail("必须上传gz格式文件");
             }
-            if (checkPackage.getUploadFile().getSize() > MULTI_PART_FILE_SIZE_MAX) {
+        } else if (operation.getCode() == EDIT.getCode()) {
+            if (Objects.nonNull(checkPackage.getUploadFile()) && checkPackage.getUploadFile().getSize() > MULTI_PART_FILE_SIZE_MAX) {
                 return Result.buildFail("软件包[" + checkPackage.getName() + "]文件的大小超过限制，不能超过"
                         + MULTI_PART_FILE_SIZE_MAX / 1024 / 1024 + "M");
+            }
+            if (Objects.nonNull(checkPackage.getUploadFile()) && !checkPackage.getUploadFile().getOriginalFilename().endsWith(".gz")) {
+                return Result.buildFail("必须上传gz格式文件");
             }
         }
         return Result.buildSucc();
