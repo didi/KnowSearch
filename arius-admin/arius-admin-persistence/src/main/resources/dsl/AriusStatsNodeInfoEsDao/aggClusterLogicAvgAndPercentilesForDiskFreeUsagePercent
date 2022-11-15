@@ -2,7 +2,14 @@
 	"size": 0,
 	"query": {
 		"bool": {
-			"must": [{
+			"must": [
+			{
+                        		"term": {
+                        			"cluster": {
+                        				"value": "%s"
+                        			}
+                        		}
+                        	},{
 					"terms": {
                     	"node": %s
                     }

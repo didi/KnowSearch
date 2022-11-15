@@ -61,6 +61,6 @@ public class ClusterJoinDTO extends BaseDTO {
     @ApiModelProperty("region划分方式，为空代表根据节点名称划分，否则为attribute属性")
     private String                     divideAttributeKey;
 
-    @ApiModelProperty("SLB地址")
-    private String                     slbAddress;
+    @ApiModelProperty("代理地址")
+    private String                     proxyAddress;
 }

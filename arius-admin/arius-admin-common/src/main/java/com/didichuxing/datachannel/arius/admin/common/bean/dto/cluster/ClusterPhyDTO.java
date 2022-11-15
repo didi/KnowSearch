@@ -133,6 +133,6 @@ public class ClusterPhyDTO extends PageDTO {
     @ApiModelProperty("gateway地址")
     private String                     gatewayUrl;
 
-    @ApiModelProperty("SLB地址")
-    private String                     slbAddress;
+    @ApiModelProperty("代理地址")
+    private String                     proxyAddress;
 }

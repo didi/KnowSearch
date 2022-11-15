@@ -162,9 +162,9 @@ public class ClusterPhyPO extends BasePO {
     private String  gatewayUrl;
 
     /**
-     * SLB地址
+     * 代理地址
      */
-    private String  slbAddress;
+    private String  proxyAddress;
 
     @Override
     public boolean equals(Object obj) {

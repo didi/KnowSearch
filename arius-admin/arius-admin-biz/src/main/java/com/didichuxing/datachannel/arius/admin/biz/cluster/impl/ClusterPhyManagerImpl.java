@@ -1430,8 +1430,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private ClusterPhyDTO buildPhyClusters(ClusterJoinDTO param, String operator) {
         ClusterPhyDTO clusterDTO = ConvertUtil.obj2Obj(param, ClusterPhyDTO.class);
         String clientAddress = "";
-        if (StringUtils.isNotBlank(param.getSlbAddress())){
-            clientAddress = param.getSlbAddress();
+        if (StringUtils.isNotBlank(param.getProxyAddress())){
+            clientAddress = param.getProxyAddress();
         }else {
             clientAddress = clusterRoleHostService.buildESClientHttpAddressesStr(param.getRoleClusterHosts());
         }

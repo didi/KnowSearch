@@ -632,13 +632,13 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     }
 
     /**
-     * 获取逻辑集群实时cpu分位值(统计节点维度)和平均使用率
-     *
-     * @param cluster
+     * 取逻辑集群实时cpu分位值(统计节点维度)和平均使用率
+     * @param nodes
+     * @param phyClusterName
      * @return
      */
-    public Map<String, Double> getClusterLogicCpuAvgAndPercentiles(List<String> nodes) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_REAL_TIME_AVG_AND_PERCENT, JSON.toJSONString(nodes),
+    public Map<String, Double> getClusterLogicCpuAvgAndPercentiles(List<String> nodes,String phyClusterName) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_REAL_TIME_AVG_AND_PERCENT, phyClusterName,JSON.toJSONString(nodes),
                 NOW_2M, NOW_1M, CPU_USAGE_PERCENT.getType(), CPU_USAGE_PERCENT.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
@@ -649,9 +649,9 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     /**
      * 获取逻辑集群磁盘空闲使用率分位值(统计节点维度)和平均使用率
      */
-    public Map<String, Double> getClusterLogicDiskFreeUsagePercentAvgAndPercentiles(List<String> nodes) {
+    public Map<String, Double> getClusterLogicDiskFreeUsagePercentAvgAndPercentiles(List<String> nodes,String phyClusterName) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.AGG_CLUSTER_LOGIC_AVG_AND_PERCENT_FOR_DISK_FREE_USAGE_PERCENT, JSON.toJSONString(nodes), NOW_2M, NOW_1M);
+                DslsConstant.AGG_CLUSTER_LOGIC_AVG_AND_PERCENT_FOR_DISK_FREE_USAGE_PERCENT,phyClusterName, JSON.toJSONString(nodes), NOW_2M, NOW_1M);
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
@@ -664,8 +664,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      * @param nodes
      * @return
      */
-    public Map<String, Double> getClusterLogicCpuLoad1MinAvgAndPercentiles(List<String> nodes) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_REAL_TIME_AVG_AND_PERCENT, JSON.toJSONString(nodes),
+    public Map<String, Double> getClusterLogicCpuLoad1MinAvgAndPercentiles(List<String> nodes,String phyClusterName) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_REAL_TIME_AVG_AND_PERCENT, phyClusterName,JSON.toJSONString(nodes),
                 NOW_2M, NOW_1M, CPU_LOAD_AVERAGE_1M.getType(), CPU_LOAD_AVERAGE_1M.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
@@ -679,8 +679,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      * @param nodes
      * @return
      */
-    public Map<String, Double> getClusterLogicCpuLoad5MinAvgAndPercentiles(List<String> nodes) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_REAL_TIME_AVG_AND_PERCENT, JSON.toJSONString(nodes),
+    public Map<String, Double> getClusterLogicCpuLoad5MinAvgAndPercentiles(List<String> nodes,String phyClusterName) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_REAL_TIME_AVG_AND_PERCENT,phyClusterName, JSON.toJSONString(nodes),
                 NOW_2M, NOW_1M, CPU_LOAD_AVERAGE_5M.getType(), CPU_LOAD_AVERAGE_5M.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
@@ -694,8 +694,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      * @param nodes
      * @return
      */
-    public Map<String, Double> getClusterLogicCpuLoad15MinAvgAndPercentiles(List<String> nodes) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_REAL_TIME_AVG_AND_PERCENT, JSON.toJSONString(nodes),
+    public Map<String, Double> getClusterLogicCpuLoad15MinAvgAndPercentiles(List<String> nodes,String phyClusterName) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_REAL_TIME_AVG_AND_PERCENT,phyClusterName, JSON.toJSONString(nodes),
                 NOW_2M, NOW_1M, CPU_LOAD_AVERAGE_15M.getType(), CPU_LOAD_AVERAGE_15M.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
@@ -709,8 +709,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      * @param nodes
      * @return
      */
-    public Double getClusterLogicQps(List<String> nodes) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_LOGIC_REAL_TIME_TPS_QPS_INFO, JSON.toJSONString(nodes),
+    public Double getClusterLogicQps(String phyClusterName,List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_LOGIC_REAL_TIME_TPS_QPS_INFO, phyClusterName,JSON.toJSONString(nodes),
                 "now-2m", "now-1m", INDICES_QUERY_RATE.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
@@ -719,11 +719,11 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
 
     /**
      * 根据逻辑集群名称，获取集群[now-2m, now-1m]总的tps
-     * @param cluster
+     * @param phyClusterName
      * @return
      */
-    public double getClusterLogicTps(List<String> nodes) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_LOGIC_REAL_TIME_TPS_QPS_INFO, JSON.toJSONString(nodes),
+    public double getClusterLogicTps(String phyClusterName,List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_LOGIC_REAL_TIME_TPS_QPS_INFO, phyClusterName,JSON.toJSONString(nodes),
                 "now-2m", "now-1m", INDICES_INDEXING_RATE.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
@@ -735,8 +735,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      * @param nodes 集群
      * @return
      */
-    public Double getClusterLogicRx(List<String> nodes) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_LOGIC_REAL_TIME_RX_TX_INFO, JSON.toJSONString(nodes),
+    public Double getClusterLogicRx(String phyClusterName,List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_LOGIC_REAL_TIME_RX_TX_INFO, phyClusterName,JSON.toJSONString(nodes),
                 NOW_2M, NOW_1M, TRANS_RX_SIZE.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
@@ -748,8 +748,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      * @param nodes
      * @return
      */
-    public Double getClusterLogicTx(List<String> nodes) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_LOGIC_REAL_TIME_RX_TX_INFO, JSON.toJSONString(nodes),
+    public Double getClusterLogicTx(String phyClusterName,List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_LOGIC_REAL_TIME_RX_TX_INFO, phyClusterName,JSON.toJSONString(nodes),
                 NOW_2M, NOW_1M, TRANS_TX_SIZE.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
@@ -759,8 +759,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     /**
      * 获取集群查询耗时分位值(统计节点维度)和平均使用率
      */
-    public double getClusterLogicSearchLatencySum(List<String> nodes) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_INDEXING_SEARCH_TIME_SUM, JSON.toJSONString(nodes),
+    public double getClusterLogicSearchLatencySum(String phyClusterName,List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_INDEXING_SEARCH_TIME_SUM, phyClusterName,JSON.toJSONString(nodes),
                 NOW_2M, NOW_1M, INDICES_QUERY_TIME_IN_MILLIS.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
@@ -773,8 +773,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      * @param cluster 集群名称
      * @return
      */
-    public double getClusterLogicSearchQueryTotal(List<String> nodes){
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_INDEXING_SEARCH_TIME_SUM, JSON.toJSONString(nodes),
+    public double getClusterLogicSearchQueryTotal(String phyClusterName,List<String> nodes){
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_INDEXING_SEARCH_TIME_SUM, phyClusterName,JSON.toJSONString(nodes),
                 NOW_2M, NOW_1M, INDICES_QUERY_TOTAL.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
@@ -785,8 +785,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     /**
      * 获取集群写入耗时分位值(统计节点维度)和平均使用率
      */
-    public double getClusterLogicIndexingLatencySum(List<String> nodes) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_INDEXING_SEARCH_TIME_SUM, JSON.toJSONString(nodes),
+    public double getClusterLogicIndexingLatencySum(String phyClusterName,List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_INDEXING_SEARCH_TIME_SUM,phyClusterName, JSON.toJSONString(nodes),
                 NOW_2M, NOW_1M, INDICES_INDEXING_LATENCY.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
@@ -799,8 +799,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      * @param nodes 集群下的节点
      * @return
      */
-    public double getClusterLogicIndexingDocSum(List<String> nodes) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_INDEXING_SEARCH_TIME_SUM, JSON.toJSONString(nodes),
+    public double getClusterLogicIndexingDocSum(String phyClusterName,List<String> nodes) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_LOGIC_INDEXING_SEARCH_TIME_SUM,phyClusterName, JSON.toJSONString(nodes),
                 NOW_2M, NOW_1M, INDICES_NUM_DIFF.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
