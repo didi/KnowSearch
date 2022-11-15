@@ -1,6 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.core.service.task;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.OpTaskVO;
+
 import java.util.List;
 
 /**
@@ -65,4 +69,11 @@ public interface OpTaskService {
      * @return boolean
      */
     boolean insert(OpTask task);
+
+    /**
+     * 任务中心分页查询
+     * @param queryDTO
+     * @return
+     */
+    Tuple<Long, List<OpTaskVO>> pagingGetTasksByCondition(OpTaskQueryDTO queryDTO);
 }

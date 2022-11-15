@@ -24,11 +24,12 @@ public interface ESIndexCatService {
      * @param size        当前页数量
      * @param sortTerm    排序字段
      * @param orderByDesc 降序标识
+     * @param showMetadata 是否展示元数据信息
      * @return Tuple<Long, List < IndexCatCell>>   key1 -> 命中总数, key2 索引列表
      */
     Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String cluster, String index, String health, String status,
                                                         Integer projectId, Long from, Long size, String sortTerm,
-                                                        Boolean orderByDesc);
+                                                        Boolean orderByDesc, Boolean showMetadata);
 
     /**
      * 更新索引删除标识

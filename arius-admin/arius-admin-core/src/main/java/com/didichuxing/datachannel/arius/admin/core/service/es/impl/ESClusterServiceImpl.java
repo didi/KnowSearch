@@ -258,7 +258,13 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     @Override
     public ESClusterStatsResponse syncGetClusterStats(String clusterName) {
-        return esClusterDAO.getClusterStats(clusterName);
+        try {
+            return esClusterDAO.getClusterStats(clusterName);
+        } catch (ESOperateException e) {
+            LOGGER.error("class=ESClusterServiceImpl||method=syncGetClusterStats||clusterName={}||errMsg=fail to get cluster stats",
+                    clusterName);
+            return null;
+        }
     }
 
     @Override
@@ -267,7 +273,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public Map<String, Integer> synGetSegmentsOfIpByCluster(String clusterName) {
+    public Map<String, Integer> synGetSegmentsOfIpByCluster(String clusterName) throws ESOperateException {
         Map<String, Integer> segmentsOnIpMap = Maps.newHashMap();
         for (ECSegmentOnIp ecSegmentsOnIp : esClusterDAO.getSegmentsOfIpByCluster(clusterName)) {
             if (segmentsOnIpMap.containsKey(ecSegmentsOnIp.getIp())) {

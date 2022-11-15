@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
@@ -332,7 +333,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         return res;
     }
 
-    private Map<String, Tuple<Long /*totalSegmentCount*/, Long /*primarySegmentCount*/>> getIndex2SegmentCountMap(String clusterName) {
+    private Map<String, Tuple<Long /*totalSegmentCount*/, Long /*primarySegmentCount*/>> getIndex2SegmentCountMap(String clusterName) throws ESOperateException {
         Map<String, Tuple<Long/*totalSegmentCount*/, Long/*primarySegmentCount*/>> index2SegmentCountMap = Maps.newHashMap();
 
         List<Segment> segments = esShardService.syncGetSegmentsCountInfo(clusterName);
@@ -420,7 +421,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
     }
 
     private boolean filterNotCollectorIndexCat(IndexCatCellDTO indexCatCellDTO) {
-        return notCollectorIndexNameCache.getIfPresent(indexCatCellDTO.getKey()) == null;
+        return indexCatCellDTO.getDeleteFlag().equals(Boolean.FALSE) || notCollectorIndexNameCache.getIfPresent(indexCatCellDTO.getKey()) == null;
     }
 
     private void sleep(Long millis) {

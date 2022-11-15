@@ -100,17 +100,16 @@ public class ESShardServiceImpl implements ESShardService {
         Tuple<List<ShardMetrics>, List<ShardMetrics>> tuple = new Tuple<>();
         try {
             shardsMetrics = getShardMetrics(clusterName);
-        } catch (ESOperateException e) {
-            LOGGER.error(
-                    "class=ESShardServiceImpl||method=syncGetBigAndSmallShards||clusterName={}||errMsg={}",
-                    clusterName,e.getMessage());
+            Map<String, List<ShardMetrics>> indexAndShardMetricsMap =  ConvertUtil.list2MapOfList(
+                    shardsMetrics, ShardMetrics::getIndex, shardMetrics -> shardMetrics);
+            tuple.setV1(shardsMetrics.stream().filter(s->filterBigShard(configBigShard,s)).collect(Collectors.toList()));
+            tuple.setV2(shardsMetrics.stream().filter(s->filterSmallShard(configSmallShard,s,indexAndShardMetricsMap)).collect(Collectors.toList()));
             return tuple;
+        } catch (ESOperateException e) {
+            LOGGER.error("class=ESShardServiceImpl||method=syncGetBigAndSmallShards||cluster={}||errMsg=fail to get ShardMetrics",
+                    clusterName, e);
+           return tuple;
         }
-        Map<String, List<ShardMetrics>> indexAndShardMetricsMap =  ConvertUtil.list2MapOfList(
-                shardsMetrics, ShardMetrics::getIndex, shardMetrics -> shardMetrics);
-        tuple.setV1(shardsMetrics.stream().filter(s->filterBigShard(configBigShard,s)).collect(Collectors.toList()));
-        tuple.setV2(shardsMetrics.stream().filter(s->filterSmallShard(configSmallShard,s,indexAndShardMetricsMap)).collect(Collectors.toList()));
-        return tuple;
     }
 
     @Override
@@ -119,27 +118,17 @@ public class ESShardServiceImpl implements ESShardService {
         List<SegmentPO> segmentPOS = null;
         try {
             segmentPOS = esShardDAO.commonGet(clusterName, segmentsPartInfoRequestContent, SegmentPO.class);
+            return ConvertUtil.list2List(segmentPOS, Segment.class);
         } catch (ESOperateException e) {
-            LOGGER.error(
-                    "class=ESShardServiceImpl||method=syncGetSegments||clusterName={}||errMsg={}",
-                    clusterName,e.getMessage());
-            return null;
+            LOGGER.error("class=ESShardServiceImpl||method=syncGetSegments||cluster={}||errMsg=fail to commonGet",clusterName,e);
         }
-        return ConvertUtil.list2List(segmentPOS, Segment.class);
+        return new ArrayList<>();
     }
 
     @Override
-    public List<Segment> syncGetSegmentsCountInfo(String clusterName) {
+    public List<Segment> syncGetSegmentsCountInfo(String clusterName) throws ESOperateException {
         String segmentsCountContent = getSegmentsCountContent();
-        List<SegmentPO> segmentPOS = null;
-        try {
-            segmentPOS = esShardDAO.commonGet(clusterName, segmentsCountContent, SegmentPO.class);
-        } catch (ESOperateException e) {
-            LOGGER.error(
-                    "class=ESShardServiceImpl||method=syncGetSegmentsCountInfo||clusterName={}||errMsg={}",
-                    clusterName,e.getMessage());
-            return null;
-        }
+        List<SegmentPO> segmentPOS = esShardDAO.commonGet(clusterName, segmentsCountContent, SegmentPO.class);
         return ConvertUtil.list2List(segmentPOS, Segment.class);
     }
 

@@ -517,7 +517,7 @@ public class MonitorClusterJob {
 
                     base.setShardNu(null == indexStats.getShards() ? 0 : indexStats.getShards().size());
 
-                    Map map = JSON.parseObject(JSON.toJSONString(indexStats.getPrimaries()), Map.class);
+                    Map map = JSON.parseObject(JSON.toJSONString(indexStats.getTotal()), Map.class);
                     List<ESDataTempBean> esDataTempBeans = aggrAndComputeData(map, indexWorkOrders, base,
                         metricsRegister);
 

@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ public class DCDROpTaskHandler extends AbstractOpTaskHandler {
         opTask.setCreateTime(new Date());
         opTask.setUpdateTime(new Date());
         opTaskManager.insert(opTask);
-        boolean succ = 0 < opTask.getId();
+        boolean succ = Objects.nonNull(opTask.getId());
         if (!succ) {
             LOGGER.error(
                 "class=DCDRWorkTaskHandler||method=addTask||taskType={}||businessKey={}||errMsg=failed to insert",

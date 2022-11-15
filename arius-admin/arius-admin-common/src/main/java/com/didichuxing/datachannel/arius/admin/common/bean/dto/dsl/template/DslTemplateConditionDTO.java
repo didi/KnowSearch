@@ -37,5 +37,5 @@ public class DslTemplateConditionDTO extends PageDTO {
     @ApiModelProperty(value = "DSL模版最近使用时间end（时间戳ms）", dataType = "Long", required = true)
     private Long    endTime;
     @ApiModelProperty("是否展示元数据查询模板")
-    private Boolean isShowQueryTemplateWithMetaData;
+    private Boolean showMetadata;
 }

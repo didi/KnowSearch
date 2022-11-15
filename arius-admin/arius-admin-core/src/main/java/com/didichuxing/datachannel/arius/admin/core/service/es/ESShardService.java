@@ -47,7 +47,7 @@ public interface ESShardService {
      * @param clusterName
      * @return
      */
-    List<Segment> syncGetSegmentsCountInfo(String clusterName);
+    List<Segment> syncGetSegmentsCountInfo(String clusterName) throws ESOperateException;
 
 
     /**

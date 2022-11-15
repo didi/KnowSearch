@@ -78,7 +78,7 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
         .init("NodeDashBoardCollector", 10, 10, 100);
 
     @Override
-    public void collectSingleCluster(String cluster, long startTime) {
+    public void collectSingleCluster(String cluster, long startTime) throws ESOperateException {
         List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getNodesByCluster(cluster);
         if (CollectionUtils.isEmpty(clusterRoleHostList)) {
             return;

@@ -6,19 +6,26 @@
         <result column="cluster_name" jdbcType="VARCHAR" property="clusterName" />
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+        <result column="component_id" jdbcType="INTEGER" property="componentId"/>
+        <result column="ecm_access" jdbcType="TINYINT" property="ecmAccess"/>
+        <result column="memo" jdbcType="VARCHAR" property="memo"/>
+        <result column="version" jdbcType="VARCHAR" property="version"/>
+        <result column="proxy_address" jdbcType="VARCHAR" property="proxyAddress"/>
+        <result column="data_center" jdbcType="VARCHAR" property="dataCenter"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, cluster_name, create_time, update_time
+        id, cluster_name, create_time,
+        update_time,component_id,ecm_access,memo,version,health,proxy_address,data_center
     </sql>
 
     <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert ignore into gateway_cluster_info
-        (cluster_name)
+        (cluster_name,component_id,ecm_access,health,proxy_address,memo,data_center)
         values
-        (#{clusterName})
+        (#{clusterName},#{componentId},#{ecmAccess},#{health},#{proxyAddress},#{memo},#{dataCenter})
     </insert>
 
     <select id="getByClusterName" parameterType="string" resultMap="BaseResultMap">
@@ -33,5 +40,91 @@
         <include refid="Base_Column_List"/>
         from gateway_cluster_info
     </select>
-
+    
+    <select id="selectOneByClusterName" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from gateway_cluster_info;
+    </select>
+    
+    <select id="listByCondition"
+      resultType="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM gateway_cluster_info
+        <where>
+            <if test="health != null">
+                health = #{health}
+            </if>
+            <if test="clusterName != null and clusterName != ''">
+                AND cluster_name like CONCAT('%', #{clusterName}, '%')
+            </if>
+        </where>
+        <if test="sortTerm != null">
+            order by ${sortTerm} ${sortType}
+        </if>
+        limit #{from}, #{size}
+    </select>
+    
+    
+    <select id="countByCondition" resultType="long">
+        SELECT COUNT(1)
+        FROM gateway_cluster_info
+        <where>
+            <if test="health != null">
+                health = #{health}
+            </if>
+            <if test="clusterName != null and clusterName != ''">
+                AND cluster_name like CONCAT('%', #{clusterName}, '%')
+            </if>
+        </where>
+    </select>
+    
+    <select id="getOneById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM gateway_cluster_info
+        WHERE id = #{id}
+    </select>
+    
+    <delete id="deleteOneById">
+        DELETE
+        FROM gateway_cluster_info
+        WHERE id = #{id}
+    </delete>
+    
+    <update id="updateOne" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO">
+        UPDATE gateway_cluster_info
+        <trim prefix="set" prefixOverrides=",">
+            <if test="memo != null and memo != ''">
+                ,memo = #{memo}
+            </if>
+            <if test="proxyAddress != null and proxyAddress != ''">
+                , proxy_address=#{proxyAddress}
+            </if>
+            <if test="dataCenter != null and dataCenter != ''">
+                , data_center=#{dataCenter}
+            </if>
+        </trim>
+        WHERE id = #{id}
+    </update>
+    
+    <select id="getClusterNameById" resultType="java.lang.String">
+        SELECT cluster_name
+        FROM gateway_cluster_info
+        WHERE id = #{id}
+    </select>
+    
+    <select id="getComponentIdById" resultType="java.lang.Integer">
+        SELECT component_id
+        FROM gateway_cluster_info
+        WHERE id = #{id}
+    </select>
+    
+    <select id="getOneByName" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM gateway_cluster_info
+        WHERE cluster_name = #{name}
+    </select>
 </mapper>

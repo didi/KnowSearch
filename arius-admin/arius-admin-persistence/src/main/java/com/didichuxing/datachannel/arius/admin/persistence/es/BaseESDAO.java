@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.persistence.es;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESUpdateClient;
@@ -59,6 +60,7 @@ public class BaseESDAO {
 
     public DirectResponse getDirectResponse(String clusterName, String methodType, String url) throws ESOperateException {
         ESClient esClient = esOpClient.getESClient(clusterName);
+        DirectResponse directResponse = new DirectResponse();
         if (esClient == null) {
             LOGGER.error("class=BaseESDAO||method=getDirectResponse||clusterName={}||errMsg=esClient is null",
                 clusterName);
@@ -69,10 +71,12 @@ public class BaseESDAO {
         try {
             return esClient.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
         } catch (Exception e) {
-            LOGGER.error("class=BaseESDAO||method=getDirectResponse||clusterName={}||errMsg=esClient is null",
+            LOGGER.error("class=BaseESDAO||method=getDirectResponse||clusterName={}||errMsg=fail to direct",
                 clusterName, e.getMessage(), e);
-            throw new ESOperateException(e.getMessage());
+            ParsingExceptionUtils.abnormalTermination(e);
         }
+        directResponse.setRestStatus(RestStatus.SERVICE_UNAVAILABLE);
+        return directResponse;
     }
 
     public <T> List<T> commonGet(String clusterName, String directRequestContent, Class<T> clazz) throws ESOperateException {
@@ -85,9 +89,9 @@ public class BaseESDAO {
                 list.addAll(resList);
             } catch (Exception e) {
                 LOGGER.error("class=BaseESDAO||method=commonGet||cluster={}||directRequestContent={}||"
-                             + "clazzName={}||errMst=str convert obj error:{}",
+                             + "clazzName={}||errMsg=str convert obj error:{}",
                     clusterName, directRequestContent, clazz.getName(), e.getMessage(), e);
-                throw new ESOperateException(e.getMessage());
+                ParsingExceptionUtils.abnormalTermination(e);
             }
         }
         return list;

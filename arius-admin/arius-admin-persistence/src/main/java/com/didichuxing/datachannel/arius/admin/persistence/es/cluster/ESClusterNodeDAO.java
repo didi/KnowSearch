@@ -113,7 +113,7 @@ public class ESClusterNodeDAO extends BaseESDAO {
         return Lists.newArrayList();
     }
     
-    public List<TupleTwo</*node name*/String,/*plugin names*/List<String>>> syncGetNodesPlugins(String clusterName) throws ESOperateException{
+    public List<TupleTwo</*node name*/String,/*plugin names*/List<String>>> syncGetNodesPlugins(String clusterName) throws ESOperateException {
         final DirectResponse directResponse = getDirectResponse(clusterName, "GET", GET_NODE_PLUGINS);
         if (directResponse == null) {
             return Lists.newArrayList();

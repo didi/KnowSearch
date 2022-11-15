@@ -201,7 +201,7 @@ public class ESClusterPhyStatsService {
     /**
      * _cluster/stats 耗时
      */
-    public Long getClusterStatusElapsedTime(String cluster) {
+    public Long getClusterStatusElapsedTime(String cluster) throws ESOperateException {
         long startTime = System.currentTimeMillis();
         esClusterDAO.getClusterStats(cluster);
         long endTime = System.currentTimeMillis();

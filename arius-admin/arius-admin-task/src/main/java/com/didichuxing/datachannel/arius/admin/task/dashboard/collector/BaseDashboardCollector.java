@@ -63,7 +63,7 @@ public abstract class BaseDashboardCollector {
      * @param cluster 集群名称
      * @param currentTime   当前时间戳
      */
-    public abstract void collectSingleCluster(String cluster, long currentTime);
+    public abstract void collectSingleCluster(String cluster, long currentTime) throws ESOperateException;
 
     /**
      * 采集多个集群

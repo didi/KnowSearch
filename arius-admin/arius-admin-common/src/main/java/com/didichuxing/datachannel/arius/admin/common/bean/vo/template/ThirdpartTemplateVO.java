@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.DataType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
@@ -58,9 +58,9 @@ public class ThirdpartTemplateVO extends BaseVO {
 
     /**
      * 用户数据类型
-     * @see DataTypeEnum
+     * @see DataType
      */
-    @ApiModelProperty("数据类型（0:系统 1:日志；2:上报；3:rds；4:离线）")
+    @ApiModelProperty("数据类型，默认为（0:系统 1:日志；2:上报；3:rds；4:离线）")
     private Integer dataType;
 
     /**

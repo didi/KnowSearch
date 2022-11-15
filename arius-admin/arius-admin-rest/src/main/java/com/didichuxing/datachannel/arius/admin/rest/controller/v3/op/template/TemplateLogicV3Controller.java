@@ -14,7 +14,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateIncrementalSettingsDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
@@ -55,7 +54,7 @@ public class TemplateLogicV3Controller {
     @ResponseBody
     @ApiOperation(value = "获取逻辑模版创建的类型")
     public Result<Map<Integer, String>> templateLogicDataType(HttpServletRequest request) {
-        return Result.buildSucc(DataTypeEnum.code2DescMap());
+        return Result.buildSucc(templateLogicManager.getDataTypeCode2DescMap());
     }
 
     @GetMapping("/names")
@@ -146,7 +145,7 @@ public class TemplateLogicV3Controller {
     @ResponseBody
     @ApiOperation(value = "创建逻辑模板")
     public Result<Void> createTemplate(HttpServletRequest request,
-                                       @RequestBody IndexTemplateWithCreateInfoDTO param) throws AdminOperateException {
+                                       @RequestBody IndexTemplateWithCreateInfoDTO param) {
         return templateLogicManager.create(param, HttpRequestUtil.getOperator(request),
             HttpRequestUtil.getProjectId(request));
     }

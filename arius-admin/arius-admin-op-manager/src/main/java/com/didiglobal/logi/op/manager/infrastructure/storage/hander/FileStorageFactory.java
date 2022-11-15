@@ -14,7 +14,7 @@ public class FileStorageFactory {
     private LocalFileStorageHandle localFileStorageHandle;
 
     @Autowired
-    private S3FileStorageHandle s3FileStorageHandle;
+    private OpS3FileStorageHandle s3FileStorageHandle;
 
     public FileStorageHandle getHandlerByType(String type) {
         FileStorageTypeEnum fileStorageTypeEnum = FileStorageTypeEnum.valueOfType(type);
