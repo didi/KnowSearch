@@ -140,6 +140,13 @@ public class ESLogicClusterOpV3Controller {
         return clusterLogicManager.estimatedDiskSize(clusterLogicId, count);
     }
 
+    @GetMapping("/dataNodeSpec/{clusterLogicId}")
+    @ResponseBody
+    @ApiOperation(value = "获取逻辑集群对应region的机器规格")
+    public Result<String> getClusterDataNodeSpec(@PathVariable Long clusterLogicId) {
+        return clusterLogicManager.getClusterDataNodeSpec(clusterLogicId);
+    }
+
     //超级应展示全部物理集群、普通应用展示普通应用有权限的逻辑集群
     @GetMapping("/cluster-phy-relation")
     @ResponseBody
