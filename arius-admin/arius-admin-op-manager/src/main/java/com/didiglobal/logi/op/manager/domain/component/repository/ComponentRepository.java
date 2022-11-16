@@ -1,8 +1,8 @@
 package com.didiglobal.logi.op.manager.domain.component.repository;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
-
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author didi
@@ -76,8 +76,31 @@ public interface ComponentRepository {
 
     /**
      * 删除组件
-     * @param id
+     * @param componentId
      * @return
      */
     int deleteComponent(int componentId);
+
+    /**
+     * 给定一个名称，返回具有该名称的组件。
+     *
+     * @param name 要查询的组件的名称。
+     * @return 一个组件对象
+     */
+    Component queryComponentByName(String name);
+
+    /**
+     * 给定组件 ID，返回组件的查询。
+     *
+     * @param componentId 您要查询的组件的 id。
+     * @return Optional<String>
+     */
+    Optional<String> queryComponentById(Integer componentId);
+
+    /**
+     *
+     * @param packageIds
+     * @return
+     */
+    List<Component> getComponentByPackageIds(List<Integer> packageIds);
 }

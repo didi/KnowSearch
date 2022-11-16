@@ -79,4 +79,13 @@ public interface GatewayClusterManager {
      * @return 更新前的网关集群版本。
      */
     Result<String> getBeforeVersionByGatewayClusterId(Integer gatewayClusterId);
+		
+	
+		/**
+		 * 验证给定的名称是唯一的。
+		 *
+		 * @param name 资源的名称。
+		 * @return Result<Void>
+		 */
+		Result<Boolean> verifyNameUniqueness(String name);
 }

@@ -62,4 +62,12 @@ public interface  GatewayNodeService {
 	 * @return 沿着
 	 */
 	Long countByCondition(GatewayNodeConditionDTO condition);
+	
+	/**
+	 * 它返回具有指定主机的 GatewayClusterNodePO 对象列表。
+	 *
+	 * @param hosts 网关集群节点的主机名。
+	 * @return 列表<GatewayClusterNodePO>
+	 */
+	List<GatewayClusterNodePO> listByHosts(List<String> hosts);
 }

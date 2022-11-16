@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatC
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellUpdatePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellUpdatePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
@@ -128,13 +129,15 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param size         每页大小
      * @param sortTerm     排序字段
      * @param orderByDesc  是否降序
+     * @param showMetadata 是否展示元数据信息
      * @return             Tuple<Long, List<IndexCatCellPO>> 命中数 具体数据
      */
     public Tuple<Long, List<IndexCatCellUpdatePO>> getCatIndexInfo(String cluster, String index, String health, String status,
                                                              Integer projectId, Long from, Long size, String sortTerm,
-                                                             Boolean orderByDesc) {
-        Tuple<Long, List<IndexCatCellUpdatePO>> totalHitAndIndexCatCellListTuple;
-        String queryTermDsl = buildQueryTermDsl(cluster, index, health, status, projectId);
+                                                             Boolean orderByDesc, Boolean showMetadata) {
+        Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple;
+        String queryTermDsl = showMetadata ? buildQueryTermDsl(cluster, index, health, status, projectId) :
+                buildQueryTermDslWithMustNot(cluster, index, health, status, projectId);
         String sortType = buildSortType(orderByDesc);
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CAT_INDEX_INFO_BY_CONDITION, queryTermDsl,
             sortTerm, sortType, from, size);
@@ -356,6 +359,21 @@ public class IndexCatESDAO extends BaseESDAO {
 
     /**************************************************private******************************************************/
     /**
+     * 构建带有must not的DSL,为了过滤元数据集群的索引
+     * @param cluster
+     * @param index
+     * @param health
+     * @param status
+     * @param projectId
+     * @return
+     */
+    private String buildQueryTermDslWithMustNot(String cluster, String index, String health, String status, Integer projectId) {
+        List<String> termCellList = Lists.newArrayList();
+        termCellList.add(DSLSearchUtils.getTermCellForExactSearch(metadataClusterName, "cluster"));
+        return "[" + buildTermCell(cluster, index, health, status, projectId) + "],\"must_not\":["+ListUtils.strList2String(termCellList)+"]";
+    }
+
+    /**
      * 构建模糊查询dsl语法, 如下
      * {
      * 	"term": {
@@ -477,11 +495,11 @@ public class IndexCatESDAO extends BaseESDAO {
 
 
     /**
-     * 获取未删除的逻辑集群存在的所有索引
+     * 获取多个物理集群下的索引名称
      *
      * @return List<IndexCatCell>
      */
-    public List<IndexCatCell> getAllCatIndexNameList(Integer searchSize, List<String> phyClusterNames) {
+    public List<IndexCatCell> getAllCatIndexNameListByClusters(Integer searchSize, List<String> phyClusterNames) {
         String clusterPhyStr = JSON.toJSONString(phyClusterNames);
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ALL_CAT_INDEX_NAME_BY_CLUSTERS, searchSize,clusterPhyStr);
         List<IndexCatCell> indexCatCellList = getIndexCellWithScroll(searchSize, dsl);

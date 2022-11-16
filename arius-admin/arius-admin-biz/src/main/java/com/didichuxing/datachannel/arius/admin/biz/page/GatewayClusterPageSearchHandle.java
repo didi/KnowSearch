@@ -13,6 +13,7 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,8 +70,9 @@ public class GatewayClusterPageSearchHandle extends
 		final Map<String, List<GatewayClusterNodeVO>> clusterName2GatewayNodesMap = ConvertUtil.list2MapOfList(
 				nodes,
 				GatewayClusterNodeVO::getClusterName, i -> i);
-		pagingGatewayClusterList.forEach(gatewayClusterVO -> gatewayClusterVO.setNodes(
-				clusterName2GatewayNodesMap.get(gatewayClusterVO.getClusterName())));
+		pagingGatewayClusterList.forEach(gatewayClusterVO ->
+						Optional.ofNullable(clusterName2GatewayNodesMap.get(gatewayClusterVO.getClusterName()))
+										.ifPresent(gatewayClusterVO::setNodes));
 		return PaginationResult.buildSucc(pagingGatewayClusterList, totalHit, condition.getPage(),
 				condition.getSize());
 	}

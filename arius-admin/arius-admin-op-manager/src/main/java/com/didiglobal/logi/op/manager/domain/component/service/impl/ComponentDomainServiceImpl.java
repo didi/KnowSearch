@@ -1,5 +1,7 @@
 package com.didiglobal.logi.op.manager.domain.component.service.impl;
 
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
+
 import com.alibaba.fastjson.JSON;
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
@@ -13,23 +15,30 @@ import com.didiglobal.logi.op.manager.domain.component.service.handler.ScaleHand
 import com.didiglobal.logi.op.manager.domain.component.service.handler.ScaleHandlerFactory;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralConfigChangeComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralExecuteComponentFunction;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralRestartComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralRollbackComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralScaleComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralUninstallComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralUpgradeComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.DomainEvent;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.SpringEventPublisher;
 import com.google.common.base.Strings;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import com.google.common.collect.Lists;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.REX;
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
 
 /**
  * @author didi
@@ -185,6 +194,12 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
         List<Component> componentList = componentRepository.queryComponent(queryComponent);
         return Result.success(componentList);
     }
+    
+    @Override
+    public Result<Component> queryComponentByName(String name) {
+        return Result.buildSuccess(componentRepository.queryComponentByName(name));
+    }
+    
     /**
      * 获取组件下，最新的分组配置信息
      *
@@ -362,5 +377,20 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
         return Result.success();
     }
 
+    @Override
+    public List<Integer> hasPackagesDependComponent(List<Integer> packageIds) {
+        List<Component> componentByPackageIds = componentRepository.getComponentByPackageIds(packageIds);
+        List<Integer> usingPackageIds = Lists.newArrayList();
+        if(!componentByPackageIds.isEmpty()){
+            usingPackageIds = componentByPackageIds.stream().map(Component::getPackageId).collect(Collectors.toList());
+        }
+        return usingPackageIds;
+    }
 
+    @Override
+    public Result<String> queryComponentById(Integer componentId) {
+        final Optional<String> nameOpt = componentRepository.queryComponentById(componentId);
+        return nameOpt.map(Result::buildSuccess)
+            .orElseGet(() -> Result.fail(ResultCode.COMPONENT_NOT_EXIST_ERROR));
+    }
 }

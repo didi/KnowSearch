@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.config;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -15,10 +14,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @ApiModel("configDTO")
 public class ConfigConditionDTO extends PageDTO {
-    @ApiModelProperty(value = "绑定 ecm 的组件 id")
-    private Integer componentId;
+   @ApiModelProperty(value = "集群ID：gateway/es",hidden = true)
+    private Integer clusterId;
     @ApiModelProperty("配置名称")
-    private String  configName;
+    private String  groupName;
     @ApiModelProperty(value = "排序字段",hidden = true)
     private String  sortTerm;
     

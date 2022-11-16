@@ -6,19 +6,13 @@ import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.DeploymentService;
 import com.didiglobal.logi.op.manager.infrastructure.storage.StorageService;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Random;
-import java.util.UUID;
 
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SLASH;
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.UNDER_SCORE;
 import static com.didiglobal.logi.op.manager.infrastructure.util.FileUtil.getDeleteFileName;
 import static com.didiglobal.logi.op.manager.infrastructure.util.FileUtil.getUniqueFileName;
 
@@ -78,7 +72,6 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
             return Result.fail(deployRes.getCode(), deployRes.getMessage());
         }
         script.setTemplateId(deployRes.getData());
-
         //入库
         scriptRepository.insertScript(script);
         return Result.success();
@@ -107,6 +100,16 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
         //更新
         scriptRepository.updateScript(script);
         return Result.success();
+    }
+
+    @Override
+    public List<Script> pagingByCondition(Script script, Long page, Long size) {
+        return scriptRepository.pagingByCondition(script,page,size);
+    }
+
+    @Override
+    public Long countByCondition(Script script) {
+        return scriptRepository.countByCondition(script);
     }
 
     @Override

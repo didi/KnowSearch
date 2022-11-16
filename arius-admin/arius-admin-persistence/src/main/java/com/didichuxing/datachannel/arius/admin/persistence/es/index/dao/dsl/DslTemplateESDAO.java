@@ -216,30 +216,6 @@ public class DslTemplateESDAO extends BaseESDAO {
         return gatewayClient.performRequest(indexName, typeName, dsl, DslTemplatePO.class);
     }
 
-    private String buildQueryCriteriaDsl(Integer projectId, String dslTemplateMd5, String queryIndex, Long startTime,
-                                         Long endTime) {
-        return "[" + buildQueryCriteriaCell(projectId, dslTemplateMd5, queryIndex, startTime, endTime) + "]";
-    }
-
-    private String buildQueryCriteriaCell(Integer projectId, String dslTemplateMd5, String queryIndex, Long startTime,
-                                          Long endTime) {
-        List<String> cellList = Lists.newArrayList();
-
-        // 最近时间范围条件
-        cellList.add(DSLSearchUtils.getTermCellForRangeSearch(startTime, endTime, "timeStamp"));
-        // projectId 条件
-        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "projectId"));
-
-        if (StringUtils.isNotBlank(dslTemplateMd5)) {
-            // 优先使用 dslTemplateMd5 条件
-            cellList.add(DSLSearchUtils.getTermCellForExactSearch(dslTemplateMd5, "dslTemplateMd5"));
-        } else if (StringUtils.isNotBlank(queryIndex)) {
-            // queryIndex 条件
-            cellList.add(DSLSearchUtils.getTermCellForPrefixSearch(queryIndex, "indices"));
-        }
-        return ListUtils.strList2String(cellList);
-    }
-
     /**
      * 根据查询条件分页获取DSL模板数据
      *
@@ -500,6 +476,49 @@ public class DslTemplateESDAO extends BaseESDAO {
     }
 
     /**
+     * 不带元数据集群的查询模板分页查询
+     * @param projectId
+     * @param queryDTO
+     * @param templateNameList
+     * @return
+     */
+    public Tuple<Long, List<DslTemplatePO>> getDslTemplatePageWithoutMetadataCluster(Integer projectId, DslTemplateConditionDTO queryDTO,
+                                                                                     List<String> templateNameList) throws ESOperateException {
+        String mustDsl = buildQueryCriteriaDsl(projectId, queryDTO.getDslTemplateMd5(),
+                queryDTO.getQueryIndex(), queryDTO.getStartTime(), queryDTO.getEndTime());
+        String mustNotDsl = buildNonContainDslTemplate(templateNameList);
+        // 排序条件，默认根据使用时间排序 desc
+        String sortInfo = "timeStamp";
+        String sortOrder = "desc";
+        if (!StringUtils.isEmpty(queryDTO.getSortInfo())) {
+            // 根据用户自定义条件排序
+            sortOrder = BooleanUtils.isTrue(queryDTO.getOrderByDesc()) ? "desc" : "asc";
+            sortInfo = queryDTO.getSortInfo();
+        }
+
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_BY_CONDITION_WITHOUT_METADATA_CLUSTER,
+                (queryDTO.getPage() - 1) * queryDTO.getSize(), queryDTO.getSize(), mustDsl, mustNotDsl, sortInfo, sortOrder);
+
+        return ESOpTimeoutRetry.esRetryExecute("getDslTemplatePageWithoutMetadataCluster",3,
+                () -> gatewayClient.performRequestListAndGetTotalCount(null, indexName, typeName, dsl, DslTemplatePO.class),
+                Objects::isNull);
+    }
+
+    /**************************************** private method ****************************************************/
+
+    private String buildNonContainDslTemplate(List<String> templateNameList) {
+        List<String> cellList = Lists.newArrayList();
+        // 过滤indices=.的
+        cellList.add(DSLSearchUtils.getTermCellForPrefixSearch(".", "indices"));
+        // 过滤indices=arius
+        cellList.add(DSLSearchUtils.getTermCellForPrefixSearch("arius", "indices"));
+        // templateName
+        templateNameList.forEach(templateName->{
+            cellList.add(DSLSearchUtils.getTermCellForPrefixSearch(templateName, "indices"));
+        });
+        return "[" + ListUtils.strList2String(cellList) + "]";
+    }
+    /**
      * 根据查询语句获取查询模板数据
      *
      * @param dsl
@@ -515,5 +534,29 @@ public class DslTemplateESDAO extends BaseESDAO {
         });
 
         return list;
+    }
+
+    private String buildQueryCriteriaDsl(Integer projectId, String dslTemplateMd5, String queryIndex, Long startTime,
+                                         Long endTime) {
+        return "[" + buildQueryCriteriaCell(projectId, dslTemplateMd5, queryIndex, startTime, endTime) + "]";
+    }
+
+    private String buildQueryCriteriaCell(Integer projectId, String dslTemplateMd5, String queryIndex, Long startTime,
+                                          Long endTime) {
+        List<String> cellList = Lists.newArrayList();
+
+        // 最近时间范围条件
+        cellList.add(DSLSearchUtils.getTermCellForRangeSearch(startTime, endTime, "timeStamp"));
+        // projectId 条件
+        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "projectId"));
+
+        if (StringUtils.isNotBlank(dslTemplateMd5)) {
+            // 优先使用 dslTemplateMd5 条件
+            cellList.add(DSLSearchUtils.getTermCellForExactSearch(dslTemplateMd5, "dslTemplateMd5"));
+        } else if (StringUtils.isNotBlank(queryIndex)) {
+            // queryIndex 条件
+            cellList.add(DSLSearchUtils.getTermCellForPrefixSearch(queryIndex, "indices"));
+        }
+        return ListUtils.strList2String(cellList);
     }
 }

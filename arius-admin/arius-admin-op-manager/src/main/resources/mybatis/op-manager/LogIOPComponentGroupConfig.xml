@@ -55,4 +55,11 @@
         <include refid="Base_Column_List"/>
         from logi_op_component_group_config
     </select>
+    
+    <select id="getById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM logi_op_component_group_config
+        WHERE id = #{id}
+    </select>
 </mapper>

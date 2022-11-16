@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.script;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -10,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description = "脚本信息")
-public class ScriptVO extends BaseVO {
+@ApiModel(description = "查询脚本名称-提供给新增安装包下拉框")
+public class ScriptNameListVO {
     /**
      * 脚本id
      */
@@ -22,14 +21,4 @@ public class ScriptVO extends BaseVO {
      */
     @ApiModelProperty("脚本名")
     private String name;
-    /**
-     * 内容地址
-     */
-    @ApiModelProperty("内容地址")
-    private String contentUrl;
-    /**
-     * 描述
-     */
-    @ApiModelProperty("描述")
-    private String describe;
 }
