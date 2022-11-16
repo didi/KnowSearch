@@ -8,8 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.*;
 import java.sql.Timestamp;
+import java.util.Objects;
 
 /**
  * @author didi
@@ -70,7 +70,7 @@ public class Script {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "name缺失");
         }
 
-        if (uploadFile.isEmpty()) {
+        if (Objects.isNull(uploadFile)) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "脚本内容缺失");
         }
         return Result.success();
@@ -81,11 +81,9 @@ public class Script {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "id缺失");
         }
 
-        if (null == uploadFile && null == describe) {
+        if (Objects.isNull(uploadFile) && Objects.isNull(describe)) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "请指定要修改的值（脚本或者描述）");
         }
-
         return Result.success();
     }
-
 }

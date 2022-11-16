@@ -6,8 +6,6 @@ import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.domain.script.service.impl.ScriptDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +17,6 @@ import java.util.List;
  */
 @Component
 public class ScriptService {
-
     @Autowired
     private ScriptDomainService scriptDomainService;
 
@@ -61,7 +58,6 @@ public class ScriptService {
         if (checkResult.failed()) {
             return checkResult;
         }
-
         //补全参数信息
         Script originalScript = scriptDomainService.getScriptById(script.getId()).getData();
         if (null == originalScript) {
@@ -69,7 +65,10 @@ public class ScriptService {
         }
         script.setTemplateId(originalScript.getTemplateId());
         script.setName(originalScript.getName());
-
+        Boolean usingScript = usingScript(script.getId());
+        if (usingScript) {
+            return Result.fail(ResultCode.SCRIPT_OPERATE_ERROR.getCode(), "脚本已被绑定，不能编辑");
+        }
         //修改脚本
         return scriptDomainService.updateScript(script);
     }
@@ -85,14 +84,51 @@ public class ScriptService {
         if (null == id || null == (script = scriptDomainService.getScriptById(id).getData())) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "输入的id参数有问题，请核对");
         }
-
         //判断,若脚本已经绑定了包则不能删除
-        Package pk = new Package();
-        pk.setScriptId(id);
-        if (!packageDomainService.queryPackage(pk).getData().isEmpty()) {
+        Boolean usingScript = usingScript(script.getId());
+        if (usingScript) {
             return Result.fail(ResultCode.SCRIPT_OPERATE_ERROR.getCode(), "脚本已被绑定，不能删除");
         }
-
         return scriptDomainService.deleteScript(script);
+    }
+
+    /**
+     * 分页查询脚本列表
+     * @param script
+     * @return
+     */
+    public List<Script> pagingByCondition(Script script, Long page, Long size) {
+        List<Script> scriptList = scriptDomainService.pagingByCondition(script, (page - 1) * size, size);
+        return scriptList;
+    }
+
+    /**
+     * 查询脚本总数
+     * @param script
+     * @return
+     */
+    public Long countByCondition(Script script) {
+        return scriptDomainService.countByCondition(script);
+    }
+
+    /**
+     * 根据id查询脚本
+     * @param id
+     * @return
+     */
+    public Result<Script> getScriptById(Long id) {
+        return scriptDomainService.getScriptById(Math.toIntExact(id));
+    }
+
+    /**
+     * 是否正在使用脚本
+     * @param id
+     * @return
+     */
+    public Boolean usingScript(Integer id) {
+        Package usingPackage = new Package();
+        usingPackage.setScriptId(id);
+        Result<List<Package>> packageResult = packageDomainService.queryPackage(usingPackage);
+        return !packageResult.getData().isEmpty();
     }
 }

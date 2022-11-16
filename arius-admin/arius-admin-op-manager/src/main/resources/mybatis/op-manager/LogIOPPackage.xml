@@ -9,6 +9,7 @@
         <result column="version" jdbcType="VARCHAR" property="version"/>
         <result column="describe" jdbcType="VARCHAR" property="describe"/>
         <result column="type" jdbcType="INTEGER" property="type"/>
+        <result column="package_type" jdbcType="INTEGER" property="packageType"/>
         <result column="script_id" jdbcType="INTEGER" property="scriptId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
@@ -16,7 +17,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, `name`, url, version, `describe`, `type`, script_id,create_time, update_time, creator
+        id, `name`, url, version, `describe`, `type`, script_id,create_time, update_time, creator, package_type
     </sql>
 
     <insert id="insert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO"
@@ -25,8 +26,8 @@
         <selectKey resultType="integer" order="AFTER" keyProperty="id">
             SELECT LAST_INSERT_ID()
         </selectKey>
-        insert into logi_op_package (`name`, url, version, `describe`, `type`, script_id,create_time, update_time, creator)
-        values (#{name}, #{url}, #{version}, #{describe}, #{type}, #{scriptId}, #{createTime}, #{updateTime}, #{creator})
+        insert into logi_op_package (`name`, url, version, `describe`, `type`, script_id,create_time, update_time, creator, package_type)
+        values (#{name}, #{url}, #{version}, #{describe}, #{type}, #{scriptId}, #{createTime}, #{updateTime}, #{creator}, #{packageType})
     </insert>
 
     <update id="update" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO">
@@ -39,6 +40,7 @@
             <if test="scriptId != null">,script_id = #{scriptId}</if>
             <if test="updateTime != null">,update_time = #{updateTime}</if>
             <if test="creator != null">,creator = #{creator}</if>
+            <if test="packageType != null">,package_type = #{packageType}</if>
         </trim>
         where id = #{id}
     </update>
@@ -90,4 +92,35 @@
         where id = #{id}
     </delete>
 
+    <select id="listPackageVersionByPackageType"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO"
+            resultMap="BaseResultMap">
+        select
+            <include refid="Base_Column_List"/>
+        from logi_op_package
+        where package_type = #{packageType}
+    </select>
+
+    <select id="pagingByCondition"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_package
+        where 1 = 1
+        <if test="param.name != null">and `name` LIKE CONCAT('%', #{param.name}, '%')</if>
+        <if test="param.id != null">and id = #{param.id}</if>
+        order by  create_time desc
+        limit #{from}, #{size}
+    </select>
+
+    <select id="countByCondition"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO" resultType="long">
+        select
+        count(1)
+        from logi_op_package
+        where 1 = 1
+        <if test="name != null">and `name` LIKE CONCAT('%', #{name}, '%')</if>
+        <if test="id != null">and id = #{id}</if>
+    </select>
 </mapper>

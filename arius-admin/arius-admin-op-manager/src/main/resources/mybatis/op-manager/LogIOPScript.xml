@@ -70,4 +70,26 @@
         where id = #{id}
     </delete>
 
+    <select id="pagingByCondition"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_script
+        where 1 = 1
+        <if test="param.name != null">and `name` LIKE CONCAT('%', #{param.name}, '%')</if>
+        <if test="param.id != null">and id = #{param.id}</if>
+        order by  create_time desc
+        limit #{from}, #{size}
+    </select>
+
+    <select id="countByCondition"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO" resultType="long">
+        select
+        count(1)
+        from logi_op_script
+        where 1 = 1
+        <if test="name != null">and `name` LIKE CONCAT('%', #{name}, '%')</if>
+        <if test="id != null">and id = #{id}</if>
+    </select>
 </mapper>

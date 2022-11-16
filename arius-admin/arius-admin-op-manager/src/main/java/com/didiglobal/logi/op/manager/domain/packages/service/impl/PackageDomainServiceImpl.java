@@ -85,7 +85,6 @@ public class PackageDomainServiceImpl implements PackageDomainService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> updatePackage(Package pk) {
-
         //更新
         pk.update();
 
@@ -96,7 +95,6 @@ public class PackageDomainServiceImpl implements PackageDomainService {
             }
             pk.setUrl(storageRes.getData());
         }
-
         //更新数据库
         packageRepository.updatePackage(pk);
         int packageId = pk.getId();
@@ -106,9 +104,23 @@ public class PackageDomainServiceImpl implements PackageDomainService {
                 packageGroupConfig.setPackageId(packageId);
                 packageGroupConfigRepository.insertPackageGroupConfig(packageGroupConfig);
             });
-
         }
         return Result.success();
+    }
+
+    @Override
+    public List<Package> pagingByCondition(Package pagingPackage, Long page, Long size) {
+        return packageRepository.pagingByCondition(pagingPackage,page,size);
+    }
+
+    @Override
+    public List<String> listPackageVersionByPackageType(Integer packageType) {
+        return packageRepository.listPackageVersionByPackageType(packageType);
+    }
+
+    @Override
+    public Long countByCondition(Package pagingPackage) {
+        return packageRepository.countByCondition(pagingPackage);
     }
 
     @Override

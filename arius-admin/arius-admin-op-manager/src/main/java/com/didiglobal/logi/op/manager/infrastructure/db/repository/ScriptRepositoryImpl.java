@@ -45,6 +45,18 @@ public class ScriptRepositoryImpl implements ScriptRepository {
     }
 
     @Override
+    public List<Script> pagingByCondition(Script script, Long page, Long size) {
+        ScriptPO scriptPO = ScriptConverter.convertScriptDO2PO(script);
+        return ScriptConverter.convertScriptPO2DOList(scriptDao.pagingByCondition(scriptPO,page,size));
+    }
+
+    @Override
+    public Long countByCondition(Script script) {
+        ScriptPO scriptPO = ScriptConverter.convertScriptDO2PO(script);
+        return scriptDao.countByCondition(scriptPO);
+    }
+
+    @Override
     public int insertScript(Script script) {
         ScriptPO scriptPO = ScriptConverter.convertScriptDO2PO(script);
         scriptDao.insert(scriptPO);

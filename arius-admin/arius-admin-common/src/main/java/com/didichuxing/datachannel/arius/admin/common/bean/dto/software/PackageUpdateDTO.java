@@ -38,11 +38,16 @@ public class PackageUpdateDTO {
      * 是否引擎插件
      */
     @ApiModelProperty("是否引擎插件")
-    private String isEnginePlugin;
+    private Integer isEnginePlugin;
 
     /**
      * 关联的默认安装包分组配置
      */
     @ApiModelProperty("groupConfigList")
-    private List<PackageGroupConfigUpdateDTO> groupConfigList;
+    private String groupConfigList;
+    /**
+     * 软件包类型，1-es安装包、2-gateway安装包、3-es引擎插件、4-gateway引擎插件、5-es平台插件、6-gateway平台插件
+     */
+    @ApiModelProperty("packageType")
+    private Integer packageType;
 }
