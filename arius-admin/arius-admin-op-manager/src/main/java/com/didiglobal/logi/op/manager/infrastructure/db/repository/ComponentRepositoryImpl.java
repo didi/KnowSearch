@@ -73,7 +73,12 @@ public class ComponentRepositoryImpl implements ComponentRepository {
     public Component queryComponentByName(String name) {
         return ComponentConverter.convertComponentPO2DO(componentDao.queryComponentByName(name));
     }
-    
+
+    @Override
+    public List<Component> getComponentByPackageIds(List<Integer> packageIds) {
+        return ComponentConverter.convertComponentPO2DOList(componentDao.getByPackageIds(packageIds));
+    }
+
     @Override
     public Optional<String> queryComponentById(Integer componentId) {
         return Optional.ofNullable(componentDao.queryComponentById(componentId))

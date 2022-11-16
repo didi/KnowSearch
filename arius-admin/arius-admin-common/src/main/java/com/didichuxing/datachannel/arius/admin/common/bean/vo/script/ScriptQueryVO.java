@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description = "查询列表脚本信息")
+@ApiModel(description = "脚本信息")
 public class ScriptQueryVO extends BaseVO {
     /**
      * 脚本id
@@ -23,18 +23,13 @@ public class ScriptQueryVO extends BaseVO {
     @ApiModelProperty("脚本名")
     private String name;
     /**
-     * 模板id
+     * 内容地址
      */
-    @ApiModelProperty("模板id")
-    private String templateId;
+    @ApiModelProperty("内容地址")
+    private String contentUrl;
     /**
      * 描述
      */
     @ApiModelProperty("描述")
     private String describe;
-    /**
-     * 创建者
-     */
-    @ApiModelProperty("创建者")
-    private String creator;
 }

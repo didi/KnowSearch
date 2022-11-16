@@ -50,4 +50,20 @@ public interface ScriptRepository {
      * @return 删除条数
      */
     int deleteScript(int id);
+
+    /**
+     * 分页查询脚本列表
+     * @param script
+     * @param page
+     * @param size
+     * @return
+     */
+    List<Script> pagingByCondition(Script script, Long page, Long size);
+
+    /**
+     * 查询脚本总数
+     * @param script
+     * @return
+     */
+    Long countByCondition(Script script);
 }

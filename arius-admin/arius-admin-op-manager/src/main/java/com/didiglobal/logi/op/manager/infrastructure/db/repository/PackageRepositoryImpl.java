@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author didi
@@ -56,6 +57,24 @@ public class PackageRepositoryImpl implements PackageRepository {
         PackagePO po = PackageConverter.convertPackageDO2PO(pk);
         List<PackagePO> pos = packageDao.query(po);
         return PackageConverter.convertPackagePO2DOList(pos);
+    }
+
+    @Override
+    public List<Package> pagingByCondition(Package pagingPackage, Long page, Long size) {
+        PackagePO packagePO = PackageConverter.convertPackageDO2PO(pagingPackage);
+        return PackageConverter.convertPackagePO2DOList(packageDao.pagingByCondition(packagePO,page,size));
+    }
+
+    @Override
+    public List<String> listPackageVersionByPackageType(Integer packageType) {
+        List<PackagePO> packageList = packageDao.listPackageVersionByPackageType(packageType);
+        return packageList.stream().map(PackagePO::getVersion).collect(Collectors.toList());
+    }
+
+    @Override
+    public Long countByCondition(Package pagingPackage) {
+        PackagePO packagePO = PackageConverter.convertPackageDO2PO(pagingPackage);
+        return packageDao.countByCondition(packagePO);
     }
 
     @Override

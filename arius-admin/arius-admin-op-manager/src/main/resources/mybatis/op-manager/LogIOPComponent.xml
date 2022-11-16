@@ -117,4 +117,15 @@
         FROM logi_op_component
         WHERE name = #{id}
     </select>
+
+    <select id="getByPackageIds" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component
+        <where>
+            <foreach collection="list" item="packageId" open="package_id in (" separator="," close=")">
+                #{packageId}
+            </foreach>
+        </where>
+    </select>
 </mapper>
