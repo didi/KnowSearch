@@ -165,6 +165,13 @@ public interface ClusterLogicManager {
     Result<Long> estimatedDiskSize(Long clusterLogicId, Integer count);
 
     /**
+     * 获取当前逻辑集群对应region的机器规格
+     * @param clusterLogicId 逻辑集群id
+     * @return
+     */
+    Result<String> getClusterDataNodeSpec(Long clusterLogicId);
+
+    /**
      * 根据projectId获取项目下的逻辑集群
      * @param projectId 项目id
      * @return
