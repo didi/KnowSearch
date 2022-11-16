@@ -1,22 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.task;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.task.FastIndexConstant.*;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_INDEX_INCLUDE_NODE_NAME;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
@@ -79,6 +62,22 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.task.FastIndexConstant.*;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_INDEX_INCLUDE_NODE_NAME;
 
 @Service
 public class FastIndexManagerImpl {
@@ -295,6 +294,14 @@ public class FastIndexManagerImpl {
         }
 
         OpTask opTask = ret.getData();
+        if (!OpTaskTypeEnum.FAST_INDEX.getType().equals(opTask.getTaskType())) {
+            return Result.buildFail("任务类型异常，非数据迁移任务不支持取消任务！");
+        }
+        OpTaskStatusEnum taskStatusEnum = OpTaskStatusEnum.valueOfStatus(opTask.getStatus());
+        if (OpTaskStatusEnum.RUNNING != taskStatusEnum && OpTaskStatusEnum.WAITING != OpTaskStatusEnum.valueOfStatus(opTask.getStatus())) {
+            return Result.buildFail("只有等待和运行中的数据迁移任务可以取消，该任务状态异常，不支持取消操作！");
+        }
+
         FastIndexDTO fastIndexDTO = JSON.parseObject(opTask.getExpandData(), FastIndexDTO.class);
         //挑选任务并提交
         if (null == fastIndexDTO) {
@@ -319,6 +326,14 @@ public class FastIndexManagerImpl {
         Result<OpTask> ret = opTaskManager.getById(taskId);
         if (ret.failed()) {
             return FAIL_RESULT_GET_OP_TASK_ERROR;
+        }
+        OpTask opTask = ret.getData();
+        if (!OpTaskTypeEnum.FAST_INDEX.getType().equals(opTask.getTaskType())) {
+            return Result.buildFail("任务类型异常，非数据迁移任务不支持重试任务！");
+        }
+        OpTaskStatusEnum taskStatusEnum = OpTaskStatusEnum.valueOfStatus(opTask.getStatus());
+        if (OpTaskStatusEnum.FAILED != taskStatusEnum && OpTaskStatusEnum.CANCEL != taskStatusEnum) {
+            return Result.buildFail("只有取消和失败的数据迁移任务可以重试，该任务状态异常，暂时不可重试！");
         }
 
         Result<Void> cancelIndexTaskRet = restartIndexTask(taskId);
