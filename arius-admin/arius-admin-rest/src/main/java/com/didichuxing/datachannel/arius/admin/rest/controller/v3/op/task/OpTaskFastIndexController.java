@@ -24,11 +24,6 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping(V3 + "/op-task/fast-index")
 @Api(tags = "数据迁移任务接口(REST)")
 public class OpTaskFastIndexController {
-    //查询物理集群列表（可筛选插件）
-    //查询索引列表
-    //查询索引mapping和setting
-    //查询模版mapping和setting
-    //查询物理集群列表	GET /v3/cluster/phy/names
 
     @Autowired
     private FastIndexManagerImpl fastIndexManager;
@@ -81,7 +76,7 @@ public class OpTaskFastIndexController {
         return null;
     }
 
-    @PostMapping("/{taskId}/refresh")
+    @PutMapping("/{taskId}/refresh")
     @ResponseBody
     @ApiOperation(value = "刷新任务状态")
     public Result<Void> refreshTaskState(HttpServletRequest request,
@@ -89,7 +84,7 @@ public class OpTaskFastIndexController {
         return fastIndexManager.refreshTask(taskId);
     }
 
-    @PostMapping("/{taskId}/transfer")
+    @PutMapping("/{taskId}/transfer")
     @ResponseBody
     @ApiOperation(value = "转让模版")
     public Result<Void> transferTemplate(HttpServletRequest request,
@@ -97,7 +92,7 @@ public class OpTaskFastIndexController {
         return fastIndexManager.transferTemplate(taskId);
     }
 
-    @PostMapping("/{taskId}/rollback")
+    @PutMapping("/{taskId}/rollback")
     @ResponseBody
     @ApiOperation(value = "回切转让")
     public Result<Void> rollbackTemplate(HttpServletRequest request,
