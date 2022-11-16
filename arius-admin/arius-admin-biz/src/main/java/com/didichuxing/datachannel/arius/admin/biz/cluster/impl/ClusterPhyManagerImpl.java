@@ -12,7 +12,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterPhyPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
@@ -22,7 +21,12 @@ import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.MultiClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -95,6 +99,7 @@ import com.didichuxing.datachannel.arius.admin.remote.zeus.ZeusClusterRemoteServ
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.base.Strings;
@@ -213,6 +218,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private RoleTool                 roleTool;
     @Autowired
     private ZeusClusterRemoteService zeusClusterRemoteService;
+    @Autowired
+    private ComponentService         componentService;
     
     private static final FutureUtil<Void>         FUTURE_UTIL               = FutureUtil.init(
             "ClusterPhyManagerImpl", 20, 40, 100);
@@ -1232,6 +1239,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         return Result.buildSucc();
+    }
+    
+    @Override
+    public Result<Boolean> verifyNameUniqueness(String clusterName) {
+        	return Result.build(clusterPhyService.isClusterExists(clusterName) ||
+						Objects.nonNull(componentService.queryComponentByName(clusterName)));
     }
     
     /**************************************** private method ***************************************************/

@@ -28,16 +28,11 @@ import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum
 import com.didiglobal.logi.op.manager.infrastructure.common.event.DomainEvent;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.SpringEventPublisher;
 import com.google.common.base.Strings;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeMap;
+
+import java.util.*;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.Lists;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -381,7 +376,17 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
         }
         return Result.success();
     }
-    
+
+    @Override
+    public List<Integer> hasPackagesDependComponent(List<Integer> packageIds) {
+        List<Component> componentByPackageIds = componentRepository.getComponentByPackageIds(packageIds);
+        List<Integer> usingPackageIds = Lists.newArrayList();
+        if(!componentByPackageIds.isEmpty()){
+            usingPackageIds = componentByPackageIds.stream().map(Component::getPackageId).collect(Collectors.toList());
+        }
+        return usingPackageIds;
+    }
+
     @Override
     public Result<String> queryComponentById(Integer componentId) {
         final Optional<String> nameOpt = componentRepository.queryComponentById(componentId);

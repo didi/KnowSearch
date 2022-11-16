@@ -91,4 +91,11 @@ public interface ComponentDao {
      * @return 一个 ComponentPO 对象
      */
     ComponentPO queryComponentById(@Param("id")Integer id);
+
+    /**
+     * 通过软件包包ids查询软件是否在使用
+     * @param packageIds
+     * @return
+     */
+    List<ComponentPO> getByPackageIds(List<Integer> packageIds);
 }

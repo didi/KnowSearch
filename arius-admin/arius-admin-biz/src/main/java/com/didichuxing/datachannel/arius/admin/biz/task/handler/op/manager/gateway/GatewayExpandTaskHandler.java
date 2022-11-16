@@ -1,12 +1,11 @@
-package com.didichuxing.datachannel.arius.admin.biz.task.handler.gateway;
+package com.didichuxing.datachannel.arius.admin.biz.task.handler.op.manager.gateway;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.gateway.GatewayExpandContent;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
-import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
-import com.didiglobal.logi.op.manager.interfaces.assembler.ComponentAssembler;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,11 +15,11 @@ import org.springframework.stereotype.Component;
  * @date 2022/11/08
  * @since 0.3.2
  */
-@Component
+@Component("gatewayExpandTaskHandler")
 public class GatewayExpandTaskHandler extends AbstractGatewayTaskHandler {
 		
 		@Override
-		Result<Void> validatedAddTaskParam(OpTask param) {
+		protected Result<Void> validatedAddTaskParam(OpTask param) {
 				final GatewayExpandContent content     = convertString2Content(param.getExpandData());
 				final Integer              componentId = content.getComponentId();
 				// 校验 componentId 是否存在
@@ -33,35 +32,17 @@ public class GatewayExpandTaskHandler extends AbstractGatewayTaskHandler {
 				return Result.buildSucc();
 		}
 		
-		@Override
-		Result<Void> initParam(OpTask opTask) {
-				final GatewayExpandContent content = convertString2Content(opTask.getExpandData());
-				content.setType(OperationEnum.EXPAND.getType());
-				opTask.setExpandData(JSON.toJSONString(content));
-				return Result.buildSucc();
-		}
+		
 		
 		@Override
-		OpTaskTypeEnum operationType() {
+		protected OpTaskTypeEnum operationType() {
 				return OpTaskTypeEnum.GATEWAY_EXPAND;
 		}
 		
 		@Override
 		protected Result<Integer> submitTaskToOpManagerGetId(String expandData) {
-				final GatewayExpandContent content = convertString2Content(expandData);
-				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
-						componentService.scaleComponent(
-								ComponentAssembler.toScaleComponent(content));
-				if (result.failed()) {
-						return Result.buildFrom(result);
-				}
-				return Result.buildSucc(result.getData());
-		}
-		
-		protected String getName(String expandData) {
-				final GatewayExpandContent gatewayExpandContent = JSON.parseObject(expandData,
-						GatewayExpandContent.class);
-				return componentService.queryComponentById(gatewayExpandContent.getComponentId()).getData();
+				
+				return expand(expandData);
 		}
 		
 		@Override
@@ -70,12 +51,23 @@ public class GatewayExpandTaskHandler extends AbstractGatewayTaskHandler {
 						GatewayExpandContent.class);
 				final String name = componentService.queryComponentById(
 						gatewayExpandContent.getComponentId()).getData();
-				return String.format("%s-%s", name, operationType().getMessage());
+				return String.format("%s【%s】",  operationType().getMessage(),name);
 		}
 		
 		@Override
 		protected GatewayExpandContent convertString2Content(String expandData) {
 				return JSON.parseObject(expandData,
 						GatewayExpandContent.class);
+		}
+		
+		@Override
+		protected OperateRecord recordCurrentOperationTasks(String expandData) {
+				return new OperateRecord();
+		}
+		
+		protected String getName(String expandData) {
+				final GatewayExpandContent gatewayExpandContent = JSON.parseObject(expandData,
+						GatewayExpandContent.class);
+				return componentService.queryComponentById(gatewayExpandContent.getComponentId()).getData();
 		}
 }

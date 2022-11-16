@@ -16,7 +16,7 @@ public class ScriptQueryDTO extends PageDTO {
      * 脚本id
      */
     @ApiModelProperty("脚本id")
-    private Integer scriptId;
+    private Integer id;
     /**
      * 脚本名
      */

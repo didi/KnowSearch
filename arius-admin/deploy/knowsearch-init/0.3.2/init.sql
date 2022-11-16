@@ -2022,42 +2022,43 @@ CREATE TABLE logi_op_component_host
 CREATE TABLE logi_op_package
 (
     id          BIGINT AUTO_INCREMENT
-        PRIMARY KEY,
-    name        VARCHAR(255) NOT NULL,
-    url         VARCHAR(255) NULL,
-    version     VARCHAR(255) NOT NULL,
-    `describe`  VARCHAR(255) NULL,
-    type        TINYINT      NULL,
-    script_id   BIGINT       NOT NULL,
-    create_time TIMESTAMP    NULL,
-    update_time TIMESTAMP    NULL,
-    creator     VARCHAR(255) NULL
+        PRIMARY KEY COMMENT '软件id',
+    name        VARCHAR(255) NOT NULL COMMENT '软件名称',
+    url         VARCHAR(255) NULL COMMENT '文件地址',
+    version     VARCHAR(255) NOT NULL COMMENT '软件版本',
+    `describe`  VARCHAR(255) NULL COMMENT '描述',
+    type        TINYINT      NULL COMMENT '依赖类型,0是配置依赖，1是配置独立',
+    script_id   BIGINT       NOT NULL COMMENT '脚本id',
+    create_time TIMESTAMP    NULL COMMENT '创建时间',
+    update_time TIMESTAMP    NULL COMMENT '更新时间',
+    creator     VARCHAR(255) NULL COMMENT '创建者',
+    package_type TINYINT     NULL COMMENT '软件包类型,1-es安装包、2-gateway安装包、3-es引擎插件、4-gateway引擎插件、5-es平台插件、6-gateway平台插件'
 )CHARSET = utf8mb4;
 -- auto-generated definition
 CREATE TABLE logi_op_package_group_config
 (
     id             BIGINT AUTO_INCREMENT
-        PRIMARY KEY,
-    group_name     VARCHAR(5000) DEFAULT '' NOT NULL,
-    system_config  VARCHAR(5000)            NULL,
-    running_config VARCHAR(5000)            NULL,
-    file_config    VARCHAR(255)             NULL,
-    package_id     BIGINT                   NULL,
-    create_time    TIMESTAMP                NULL,
-    update_time    TIMESTAMP                NULL
+        PRIMARY KEY COMMENT '配置组id',
+    group_name     VARCHAR(5000) DEFAULT '' NOT NULL COMMENT '配置组名称',
+    system_config  VARCHAR(5000)            NULL COMMENT '系统配置',
+    running_config VARCHAR(5000)            NULL COMMENT '运行配置',
+    file_config    VARCHAR(255)             NULL COMMENT '文件配置',
+    package_id     BIGINT                   NULL COMMENT '软件包id',
+    create_time    TIMESTAMP                NULL COMMENT '创建时间',
+    update_time    TIMESTAMP                NULL COMMENT '更新时间'
 )
     CHARSET = utf8mb4;
 -- auto-generated definition
 CREATE TABLE logi_op_script
 (
     id          BIGINT AUTO_INCREMENT
-        PRIMARY KEY,
-    name        VARCHAR(255) NOT NULL,
-    template_id VARCHAR(255) NULL,
-    content_url VARCHAR(255) NULL,
-    `describe`  VARCHAR(255) NULL,
-    create_time TIMESTAMP    NULL,
-    update_time TIMESTAMP    NULL
+        PRIMARY KEY COMMENT '脚本id',
+    name        VARCHAR(255) NOT NULL COMMENT '脚本名称',
+    template_id VARCHAR(255) NULL COMMENT 'Zeus模板id',
+    content_url VARCHAR(255) NULL COMMENT '文件地址',
+    `describe`  VARCHAR(255) NULL COMMENT '描述',
+    create_time TIMESTAMP    NULL COMMENT '创建时间',
+    update_time TIMESTAMP    NULL COMMENT '更新时间'
 )CHARSET = utf8mb4;
 -- auto-generated definition
 CREATE TABLE logi_op_task

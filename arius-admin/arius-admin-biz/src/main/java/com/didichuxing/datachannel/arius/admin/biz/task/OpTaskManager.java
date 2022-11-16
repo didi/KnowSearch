@@ -40,10 +40,11 @@ public interface OpTaskManager {
 
     /**
      * 插入一条任务
+     *
      * @param task task
      * @return int
      */
-    void insert(OpTask task);
+    boolean insert(OpTask task);
 
     /**
      * 通过id更新任务

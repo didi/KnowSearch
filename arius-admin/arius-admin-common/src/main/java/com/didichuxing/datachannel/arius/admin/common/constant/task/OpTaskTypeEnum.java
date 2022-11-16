@@ -60,26 +60,25 @@ public enum OpTaskTypeEnum {
     GATEWAY_CONFIG_ROLLBACK(29, "GATEWAY集群配置回滚", "gateway-config-rollback"),
     GATEWAY_ROLLBACK(30, "GATEWAY集群回滚", "gateway-rollback"),
     //es cluster 操作列
-    ES_CLUSTER_NEW(1, "ES集群新建", "es_cluster-create"),
+    ES_CLUSTER_NEW(31, "ES集群新建", "es-cluster-create"),
     
-    ES_CLUSTER_EXPAND(2, "ES集群扩容", "es_cluster-expand"),
+    ES_CLUSTER_EXPAND(32, "ES集群扩容", "es-cluster-expand"),
     
-    ES_CLUSTER_SHRINK(3, "ES集群缩容", "es_cluster-shrink"),
+    ES_CLUSTER_SHRINK(33, "ES集群缩容", "es-cluster-shrink"),
     
-    ES_CLUSTER_RESTART(4, "ES集群重启", "es_cluster-restart"),
+    ES_CLUSTER_RESTART(34, "ES集群重启", "es-cluster-restart"),
     
-    ES_CLUSTER_UPGRADE(5, "ES集群升级", "es_cluster-upgrade"),
+    ES_CLUSTER_UPGRADE(35, "ES集群升级", "es-cluster-upgrade"),
     
     
-    ES_CLUSTER_CONFIG_EDIT(12, "ES集群配置编辑", "es_cluster-config-edit"),
+    ES_CLUSTER_CONFIG_EDIT(36, "ES集群配置编辑", "es-cluster-config-edit"),
     
-    ES_CLUSTER_PLUG_INSTALL(14, "ES集群插件安装", "es_cluster-plug-install"),
-    ES_CLUSTER_PLUG_UNINSTALL(15, "ES集群插件卸载", "es_cluster-plug-uninstall"),
-    ES_CLUSTER_PLUG_UPGRADE(16, "ES集群插件升级", "es_cluster-plug-upgrade"),
-    ES_CLUSTER_PLUG_RESTART(17, "ES集群插件重启", "es_cluster-plug-restart"),
-    ES_CLUSTER_PLUG_ROLLBACK(18, "ES集群插件回滚", "es_cluster-plug-rollback"),
-    ES_CLUSTER_ROLLBACK(19, "ES集群回滚", "es_cluster-rollback"),
-    ES_CLUSTER_CONFIG_ROLLBACK(20, "ES集群配置回滚", "es_cluster-config-rollback"),
+    ES_CLUSTER_PLUG_INSTALL(37, "ES集群插件安装", "es-cluster-plug-install"),
+    ES_CLUSTER_PLUG_UNINSTALL(38, "ES集群插件卸载", "es-cluster-plug-uninstall"),
+    ES_CLUSTER_PLUG_UPGRADE(39, "ES集群插件升级", "es-cluster-plug-upgrade"),
+    ES_CLUSTER_PLUG_RESTART(40, "ES集群插件重启", "es-cluster-plug-restart"),
+    ES_CLUSTER_ROLLBACK(41, "ES集群回滚", "es-cluster-rollback"),
+    ES_CLUSTER_CONFIG_ROLLBACK(42, "ES集群配置回滚", "es-cluster-config-rollback"),
                             UNKNOWN(-1, "unknown");
 
     OpTaskTypeEnum(Integer type, String message) {
@@ -132,9 +131,9 @@ public enum OpTaskTypeEnum {
         return Lists.newArrayList(GATEWAY_NEW, GATEWAY_CONFIG_EDIT, GATEWAY_EXPAND, GATEWAY_RESTART,
             GATEWAY_ROLLBACK, GATEWAY_SHRINK, GATEWAY_UPGRADE, ES_CLUSTER_CONFIG_EDIT,
             ES_CLUSTER_CONFIG_ROLLBACK, ES_CLUSTER_EXPAND, ES_CLUSTER_NEW, ES_CLUSTER_PLUG_INSTALL,
-            ES_CLUSTER_PLUG_RESTART, ES_CLUSTER_PLUG_ROLLBACK, ES_CLUSTER_PLUG_UNINSTALL,
+            ES_CLUSTER_PLUG_RESTART,  ES_CLUSTER_PLUG_UNINSTALL,
             ES_CLUSTER_PLUG_UPGRADE, ES_CLUSTER_RESTART, ES_CLUSTER_ROLLBACK, ES_CLUSTER_SHRINK,
-            ES_CLUSTER_UPGRADE);
+            ES_CLUSTER_UPGRADE,GATEWAY_CONFIG_ROLLBACK);
     }
 
     public static OpTaskTypeEnum valueOfPath(String apiPath) {
