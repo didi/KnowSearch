@@ -135,7 +135,7 @@ public class IndexCatESDAO extends BaseESDAO {
     public Tuple<Long, List<IndexCatCellUpdatePO>> getCatIndexInfo(String cluster, String index, String health, String status,
                                                              Integer projectId, Long from, Long size, String sortTerm,
                                                              Boolean orderByDesc, Boolean showMetadata) {
-        Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple;
+        Tuple<Long, List<IndexCatCellUpdatePO>> totalHitAndIndexCatCellListTuple;
         String queryTermDsl = showMetadata ? buildQueryTermDsl(cluster, index, health, status, projectId) :
                 buildQueryTermDslWithMustNot(cluster, index, health, status, projectId);
         String sortType = buildSortType(orderByDesc);
