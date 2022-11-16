@@ -197,4 +197,8 @@
 
     </dependencies>
 
+    <build>
+        <finalName>arius-admin-op-manager</finalName>
+    </build>
+
 </project>

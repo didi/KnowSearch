@@ -24,6 +24,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClust
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeService;
 import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import org.apache.commons.collections4.CollectionUtils;
@@ -169,9 +170,9 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 	}
 	
 	@Override
-	public Result<String> getBeforeVersionByGatewayClusterId(Integer gatewayClusterId) {
+	public Result<List<Object>> getBeforeVersionByGatewayClusterId(Integer gatewayClusterId) {
 		//TODO 后续实现
-		return Result.buildSucc("3.1");
+		return Result.buildSucc(Collections.emptyList());
 	}
 		
 		@Override

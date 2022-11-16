@@ -111,5 +111,12 @@ public interface PhyClusterDAO {
      * @return  long count
      */
     long getTotalHitByPackageId(@Param("packageId") Long packageId);
-
+    
+    /**
+     * 它通过集群物理 ID 返回组件 ID。
+     *
+     * @param clusterPhyId 集群的物理标识。
+     * @return 具有给定 clusterPhyId 的组件的 componentId。
+     */
+    Integer getComponentIdById(@Param("clusterPhyId")Integer clusterPhyId);
 }

@@ -9,12 +9,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigD
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.ConfigConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESConfigVO;
-import com.didiglobal.logi.op.manager.interfaces.vo.GeneralGroupConfigHostVO;
+import com.didiglobal.logi.op.manager.interfaces.vo.ComponentGroupConfigVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +39,7 @@ public class ESClusterConfigController {
 
     @Autowired
     private ESClusterConfigManager esClusterConfigManager;
-
+    
     @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "获取ES集群配置列表")
@@ -86,17 +85,17 @@ public class ESClusterConfigController {
     @GetMapping("/{clusterPhyId}/{configId}")
     @ResponseBody
     @ApiOperation(value = "根据 configId 获取物理集群配置信息",tags = "")
-    public Result<GeneralGroupConfigHostVO> getConfigByClusterPhyId(HttpServletRequest request,
+    public Result<ComponentGroupConfigVO> getConfigByClusterPhyId(HttpServletRequest request,
                                                                     @PathVariable("clusterPhyId") Integer clusterPhyId,
                                                                     @PathVariable("configId") Integer configId) {
-        return Result.buildSucc(new GeneralGroupConfigHostVO());
+       return esClusterConfigManager.getConfigByClusterPhyId(clusterPhyId,configId);
     }
     
-    @PostMapping("/config/page")
+    @PostMapping("/{phyClusterId}/config/page")
     @ResponseBody
     @ApiOperation(value = "按条件分页获取 cluster 配置列表", tags = "")
     public PaginationResult<ClusterPhyConfigVO> pageGetGatewayConfig(HttpServletRequest request,
-                                                                     @RequestBody ConfigConditionDTO condition) {
-        return new PaginationResult<>(Collections.singletonList(new ClusterPhyConfigVO()), 10, 1, 10);
+                                                                     @RequestBody ConfigConditionDTO condition,@PathVariable("phyClusterId") Integer phyClusterId) {
+        return esClusterConfigManager.pageGetConfig(condition, HttpRequestUtil.getProjectId(request), phyClusterId);
     }
 }

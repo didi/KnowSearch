@@ -87,7 +87,7 @@ public class GatewayV3Controller {
     @GetMapping("/{gatewayClusterId}/before-version")
     @ResponseBody
     @ApiOperation(value = "获取上个版本号",tags = "")
-    public Result<String> getBeforeVersionByGatewayClusterId(HttpServletRequest request,
+    public Result<List<Object>> getBeforeVersionByGatewayClusterId(HttpServletRequest request,
                                                @PathVariable("gatewayClusterId") Integer gatewayClusterId) {
         return gatewayClusterManager.getBeforeVersionByGatewayClusterId(gatewayClusterId);
     }
