@@ -1,11 +1,20 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigIndicesRequestContent;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.BLOCKS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DEFAULTS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.READ;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.WRITE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -36,26 +45,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -529,6 +518,10 @@ public class ESIndexServiceImpl implements ESIndexService {
         return esIndexDAO.getIndicesSetting(cluster, indexNames, tryTimes);
     }
 
+    public Map<String, IndexConfig> syncGetIndexConfig(String cluster, List<String> indexNames, int tryTimes) {
+        return esIndexDAO.getIndicesConfig(cluster, indexNames, tryTimes);
+    }
+
     /**
      * 获取索引主shard个数
      * @param clusterName
@@ -722,7 +715,7 @@ public class ESIndexServiceImpl implements ESIndexService {
         if (CollectionUtils.isNotEmpty(indexCatCellList)) {
             List<String> indexNameList = indexCatCellList.stream().map(IndexCatCell::getIndex)
                 .collect(Collectors.toList());
-            Map<String, IndexConfig> name2IndexConfigMap = this.syncGetIndexSetting(cluster, indexNameList, 3);
+            Map<String, IndexConfig> name2IndexConfigMap = this.syncGetIndexConfig(cluster, indexNameList, 3);
 
             Map<String, List<String>> aliasMap = this.syncGetIndexAliasesByIndices(cluster,
                 indexNameList.toArray(new String[0]));
@@ -730,8 +723,10 @@ public class ESIndexServiceImpl implements ESIndexService {
                 indexCatCell.setAliases(aliasMap.getOrDefault(indexCatCell.getIndex(), Lists.newArrayList()));
 
                 IndexConfig indexConfig = name2IndexConfigMap.get(indexCatCell.getIndex());
+                List<String> indexTypes = getIndexTypes(indexConfig);
                 Tuple<Boolean, Boolean> writeAndReadBlockFromMerge = getWriteAndReadBlock(indexConfig);
 
+                indexCatCell.setIndexTypeList(indexTypes);
                 indexCatCell
                     .setReadFlag(writeAndReadBlockFromMerge.getV1() != null && writeAndReadBlockFromMerge.getV1());
                 indexCatCell
@@ -743,6 +738,11 @@ public class ESIndexServiceImpl implements ESIndexService {
                 cluster);
         }
         return indexCatCellList;
+    }
+
+    private List<String> getIndexTypes(IndexConfig indexConfig) {
+        return Optional.ofNullable(indexConfig).map(IndexConfig::getMappings).map(MappingConfig::getMapping)
+            .map(Map::keySet).map(Lists::newArrayList).orElse(Lists.newArrayList());
     }
 
     /**

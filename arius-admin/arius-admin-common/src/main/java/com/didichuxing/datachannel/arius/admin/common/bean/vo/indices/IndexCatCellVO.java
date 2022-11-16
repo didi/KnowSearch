@@ -84,4 +84,7 @@ public class IndexCatCellVO extends BaseVO {
 
     @ApiModelProperty("恢复优先级")
     private Integer priorityLevel;
+
+    @ApiModelProperty("索引type")
+    private List<String> indexTypeList;
 }

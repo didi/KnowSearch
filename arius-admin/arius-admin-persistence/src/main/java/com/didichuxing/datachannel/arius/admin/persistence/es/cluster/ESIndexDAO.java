@@ -1,11 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_BLOCKS_READ;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_BLOCKS_WRITE;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SETTING_PRE;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_INDEX_INCLUDE_NODE_NAME;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Repository;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -59,23 +69,6 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConf
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Repository;
 
 /**
  * @author d06679
@@ -908,6 +901,38 @@ public class ESIndexDAO extends BaseESDAO {
         }
 
       
+
+        return response.getIndexsMapping().getIndexConfigMap();
+    }
+
+    public Map<String, IndexConfig> getIndicesConfig(String clusterName, List<String> indexNames, int tryTimes) {
+        ESClient esClient = esOpClient.getESClient(clusterName);
+        if (null == esClient) {
+            return Maps.newHashMap();
+        }
+
+        ESIndicesGetAllSettingRequest request = new ESIndicesGetAllSettingRequest();
+        request.setDefaultSettingFlag(true);
+        request.mapping(true);
+        request.alias(false);
+        request.setIndices(ListUtils.strList2StringArray(indexNames));
+
+        ESIndicesGetIndexResponse response = null;
+        try {
+            do {
+                response = esClient.admin().indices().getIndex(request).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            } while (tryTimes-- > 0 && null == response);
+        } catch (Exception e) {
+            LOGGER.warn(
+                "class=ESTemplateDAO||method=getIndexConfigs||get index fail||clusterName={}||indexName={}||msg={}",
+                clusterName, e.getMessage(), e);
+        }
+
+        if (response == null) {
+            return Maps.newHashMap();
+        }
+
+
 
         return response.getIndexsMapping().getIndexConfigMap();
     }
