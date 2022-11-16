@@ -1,11 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.operaterecord;
 
-import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 
 /**
  * 操作类型枚举
@@ -219,7 +220,11 @@ public enum OperateTypeEnum {
     ROLE_MANAGER_CREATE(ModuleEnum.ROLE_MANAGER, "创建角色", 53),
     ROLE_MANAGER_UNBIND_USER(ModuleEnum.ROLE_MANAGER, "角色解绑用户", 54),
     ROLE_MANAGER_BIND_USER(ModuleEnum.ROLE_MANAGER, "角色绑定用户", 55),
-    PHYSICAL_CLUSTER_NODE_CHANGE(ModuleEnum.PHYSICAL_CLUSTER, "节点变更", 62);
+    PHYSICAL_CLUSTER_NODE_CHANGE(ModuleEnum.PHYSICAL_CLUSTER, "节点变更", 62),
+
+    PHYSICAL_CLUSTER_FAST_INDEX(ModuleEnum.PHYSICAL_CLUSTER, "数据迁移", 63),
+
+    TEMPLATE_MANAGEMENT_TRANSFER(ModuleEnum.TEMPLATE_MANAGEMENT, "模版转让", 64);
 
     /**
      * 模块

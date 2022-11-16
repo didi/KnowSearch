@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.task.FastIndexTaskInfoDAO">
+    <resultMap id="BaseResultMap"
+               type="com.didichuxing.datachannel.arius.admin.common.bean.entity.task.fastindex.FastIndexTaskInfo">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="task_id" jdbcType="INTEGER" property="taskId"/>
+        <result column="task_type" jdbcType="INTEGER" property="taskType"/>
+        <result column="template_id" jdbcType="INTEGER" property="templateId"/>
+        <result column="template_name" jdbcType="VARCHAR" property="templateName"/>
+        <result column="index_name" jdbcType="VARCHAR" property="indexName"/>
+        <result column="index_types" jdbcType="VARCHAR" property="indexTypes"/>
+        <result column="target_index_name" jdbcType="VARCHAR" property="targetIndexName"/>
+        <result column="mappings" jdbcType="VARCHAR" property="mappings"/>
+        <result column="settings" jdbcType="VARCHAR" property="settings"/>
+        <result column="fast_dump_task_id" jdbcType="VARCHAR" property="fastDumpTaskId"/>
+        <result column="task_status" jdbcType="INTEGER" property="taskStatus"/>
+        <result column="read_file_rate_limit" jdbcType="DECIMAL" property="readFileRateLimit"/>
+        <result column="total_document_num" jdbcType="DECIMAL" property="totalDocumentNum"/>
+        <result column="shard_num" jdbcType="DECIMAL" property="shardNum"/>
+        <result column="succ_document_num" jdbcType="DECIMAL" property="succDocumentNum"/>
+        <result column="succ_shard_num" jdbcType="DECIMAL" property="succShardNum"/>
+        <result column="failed_document_num" jdbcType="DECIMAL" property="failedDocumentNum"/>
+        <result column="task_submit_result" jdbcType="VARCHAR" property="taskSubmitResult"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="task_start_time" jdbcType="TIMESTAMP" property="taskStartTime"/>
+        <result column="task_end_time" jdbcType="TIMESTAMP" property="taskEndTime"/>
+        <result column="scheduled_task_start_time" jdbcType="TIMESTAMP" property="scheduledTaskStartTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , task_id, task_type, template_id, template_name, index_name, index_types, target_index_name,
+    mappings, settings, fast_dump_task_id, task_status, read_file_rate_limit, total_document_num, 
+    shard_num, succ_document_num, succ_shard_num, failed_document_num, task_submit_result, 
+    create_time, update_time, task_start_time, task_end_time, scheduled_task_start_time
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from fast_index_task_info
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="listByTaskId"
+            resultType="com.didichuxing.datachannel.arius.admin.common.bean.entity.task.fastindex.FastIndexTaskInfo">
+        select
+        <include refid="Base_Column_List"/>
+        from fast_index_task_info
+        where task_id = #{taskId}
+    </select>
+    <select id="listByTaskIdAndStatus"
+            resultType="com.didichuxing.datachannel.arius.admin.common.bean.entity.task.fastindex.FastIndexTaskInfo">
+        select
+        <include refid="Base_Column_List"/>
+        from fast_index_task_info
+        where task_id = #{taskId}
+        <if test="taskStatusList != null and taskStatusList.size >0">
+            <foreach collection="taskStatusList" index="index" item="taskStatus" separator=","
+                     open="and task_status in (" close=")">
+                #{taskStatus}
+            </foreach>
+        </if>
+    </select>
+    <select id="listTemplateIdByTaskId" resultType="java.lang.Integer">
+        select DISTINCT template_id
+        from fast_index_task_info
+        where task_id = #{taskId}
+    </select>
+
+    <insert id="insert" keyColumn="id" keyProperty="id"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.entity.task.fastindex.FastIndexTaskInfo"
+            useGeneratedKeys="true">
+        insert into fast_index_task_info (task_id, task_type, template_id,
+                                          template_name, index_name, index_types,
+                                          target_index_name, mappings, settings,
+                                          fast_dump_task_id, task_status, read_file_rate_limit,
+                                          total_document_num, shard_num, succ_document_num,
+                                          succ_shard_num, failed_document_num, task_submit_result,
+                                          create_time, update_time, task_start_time,
+                                          task_end_time, scheduled_task_start_time)
+        values (#{taskId,jdbcType=INTEGER}, #{taskType,jdbcType=INTEGER}, #{templateId,jdbcType=INTEGER},
+                #{templateName,jdbcType=VARCHAR}, #{indexName,jdbcType=VARCHAR}, #{indexTypes,jdbcType=VARCHAR},
+                #{targetIndexName,jdbcType=VARCHAR}, #{mappings,jdbcType=VARCHAR}, #{settings,jdbcType=VARCHAR},
+                #{fastDumpTaskId,jdbcType=VARCHAR}, #{taskStatus,jdbcType=INTEGER},
+                #{readFileRateLimit,jdbcType=DECIMAL},
+                #{totalDocumentNum,jdbcType=DECIMAL}, #{shardNum,jdbcType=DECIMAL}, #{succDocumentNum,jdbcType=DECIMAL},
+                #{succShardNum,jdbcType=DECIMAL}, #{failedDocumentNum,jdbcType=DECIMAL},
+                #{taskSubmitResult,jdbcType=VARCHAR},
+                #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{taskStartTime,jdbcType=TIMESTAMP},
+                #{taskEndTime,jdbcType=TIMESTAMP}, #{scheduledTaskStartTime,jdbcType=TIMESTAMP})
+    </insert>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.entity.task.fastindex.FastIndexTaskInfo"
+            useGeneratedKeys="true">
+        insert into fast_index_task_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="taskId != null">
+                task_id,
+            </if>
+            <if test="taskType != null">
+                task_type,
+            </if>
+            <if test="templateId != null">
+                template_id,
+            </if>
+            <if test="templateName != null">
+                template_name,
+            </if>
+            <if test="indexName != null">
+                index_name,
+            </if>
+            <if test="indexTypes != null">
+                index_types,
+            </if>
+            <if test="targetIndexName != null">
+                target_index_name,
+            </if>
+            <if test="mappings != null">
+                mappings,
+            </if>
+            <if test="settings != null">
+                settings,
+            </if>
+            <if test="fastDumpTaskId != null">
+                fast_dump_task_id,
+            </if>
+            <if test="taskStatus != null">
+                task_status,
+            </if>
+            <if test="readFileRateLimit != null">
+                read_file_rate_limit,
+            </if>
+            <if test="totalDocumentNum != null">
+                total_document_num,
+            </if>
+            <if test="shardNum != null">
+                shard_num,
+            </if>
+            <if test="succDocumentNum != null">
+                succ_document_num,
+            </if>
+            <if test="succShardNum != null">
+                succ_shard_num,
+            </if>
+            <if test="failedDocumentNum != null">
+                failed_document_num,
+            </if>
+            <if test="taskSubmitResult != null">
+                task_submit_result,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+            <if test="taskStartTime != null">
+                task_start_time,
+            </if>
+            <if test="taskEndTime != null">
+                task_end_time,
+            </if>
+            <if test="scheduledTaskStartTime != null">
+                scheduled_task_start_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="taskId != null">
+                #{taskId,jdbcType=INTEGER},
+            </if>
+            <if test="taskType != null">
+                #{taskType,jdbcType=INTEGER},
+            </if>
+            <if test="templateId != null">
+                #{templateId,jdbcType=INTEGER},
+            </if>
+            <if test="templateName != null">
+                #{templateName,jdbcType=VARCHAR},
+            </if>
+            <if test="indexName != null">
+                #{indexName,jdbcType=VARCHAR},
+            </if>
+            <if test="indexTypes != null">
+                #{indexTypes,jdbcType=VARCHAR},
+            </if>
+            <if test="targetIndexName != null">
+                #{targetIndexName,jdbcType=VARCHAR},
+            </if>
+            <if test="mappings != null">
+                #{mappings,jdbcType=VARCHAR},
+            </if>
+            <if test="settings != null">
+                #{settings,jdbcType=VARCHAR},
+            </if>
+            <if test="fastDumpTaskId != null">
+                #{fastDumpTaskId,jdbcType=VARCHAR},
+            </if>
+            <if test="taskStatus != null">
+                #{taskStatus,jdbcType=INTEGER},
+            </if>
+            <if test="readFileRateLimit != null">
+                #{readFileRateLimit,jdbcType=DECIMAL},
+            </if>
+            <if test="totalDocumentNum != null">
+                #{totalDocumentNum,jdbcType=DECIMAL},
+            </if>
+            <if test="shardNum != null">
+                #{shardNum,jdbcType=DECIMAL},
+            </if>
+            <if test="succDocumentNum != null">
+                #{succDocumentNum,jdbcType=DECIMAL},
+            </if>
+            <if test="succShardNum != null">
+                #{succShardNum,jdbcType=DECIMAL},
+            </if>
+            <if test="failedDocumentNum != null">
+                #{failedDocumentNum,jdbcType=DECIMAL},
+            </if>
+            <if test="taskSubmitResult != null">
+                #{taskSubmitResult,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="taskStartTime != null">
+                #{taskStartTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="taskEndTime != null">
+                #{taskEndTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="scheduledTaskStartTime != null">
+                #{scheduledTaskStartTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.entity.task.fastindex.FastIndexTaskInfo">
+        update fast_index_task_info
+        <set>
+            <if test="taskId != null">
+                task_id = #{taskId,jdbcType=INTEGER},
+            </if>
+            <if test="taskType != null">
+                task_type = #{taskType,jdbcType=INTEGER},
+            </if>
+            <if test="templateId != null">
+                template_id = #{templateId,jdbcType=INTEGER},
+            </if>
+            <if test="templateName != null">
+                template_name = #{templateName,jdbcType=VARCHAR},
+            </if>
+            <if test="indexName != null">
+                index_name = #{indexName,jdbcType=VARCHAR},
+            </if>
+            <if test="indexTypes != null">
+                index_types = #{indexTypes,jdbcType=VARCHAR},
+            </if>
+            <if test="targetIndexName != null">
+                target_index_name = #{targetIndexName,jdbcType=VARCHAR},
+            </if>
+            <if test="mappings != null">
+                mappings = #{mappings,jdbcType=VARCHAR},
+            </if>
+            <if test="settings != null">
+                settings = #{settings,jdbcType=VARCHAR},
+            </if>
+            <if test="fastDumpTaskId != null">
+                fast_dump_task_id = #{fastDumpTaskId,jdbcType=VARCHAR},
+            </if>
+            <if test="taskStatus != null">
+                task_status = #{taskStatus,jdbcType=INTEGER},
+            </if>
+            <if test="readFileRateLimit != null">
+                read_file_rate_limit = #{readFileRateLimit,jdbcType=DECIMAL},
+            </if>
+            <if test="totalDocumentNum != null">
+                total_document_num = #{totalDocumentNum,jdbcType=DECIMAL},
+            </if>
+            <if test="shardNum != null">
+                shard_num = #{shardNum,jdbcType=DECIMAL},
+            </if>
+            <if test="succDocumentNum != null">
+                succ_document_num = #{succDocumentNum,jdbcType=DECIMAL},
+            </if>
+            <if test="succShardNum != null">
+                succ_shard_num = #{succShardNum,jdbcType=DECIMAL},
+            </if>
+            <if test="failedDocumentNum != null">
+                failed_document_num = #{failedDocumentNum,jdbcType=DECIMAL},
+            </if>
+            <if test="taskSubmitResult != null">
+                task_submit_result = #{taskSubmitResult,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="taskStartTime != null">
+                task_start_time = #{taskStartTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="taskEndTime != null">
+                task_end_time = #{taskEndTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="scheduledTaskStartTime != null">
+                scheduled_task_start_time = #{scheduledTaskStartTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.entity.task.fastindex.FastIndexTaskInfo">
+        update fast_index_task_info
+        set fast_dump_task_id         = #{fastDumpTaskId,jdbcType=VARCHAR},
+            task_status               = #{taskStatus,jdbcType=INTEGER},
+            total_document_num        = #{totalDocumentNum,jdbcType=DECIMAL},
+            shard_num                 = #{shardNum,jdbcType=DECIMAL},
+            succ_document_num         = #{succDocumentNum,jdbcType=DECIMAL},
+            succ_shard_num            = #{succShardNum,jdbcType=DECIMAL},
+            failed_document_num       = #{failedDocumentNum,jdbcType=DECIMAL},
+            task_submit_result        = #{taskSubmitResult,jdbcType=VARCHAR},
+            scheduled_task_start_time = #{scheduledTaskStartTime,jdbcType=TIMESTAMP}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <insert id="insertBatch" keyColumn="id" keyProperty="id"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.entity.task.fastindex.FastIndexTaskInfo"
+            useGeneratedKeys="true">
+        insert into fast_index_task_info (task_id, task_type, template_id, template_name, index_name, index_types,
+        target_index_name, mappings, settings, task_status, read_file_rate_limit,create_time,
+        update_time,scheduled_task_start_time, total_document_num )
+        values
+        <foreach collection="list" index="index" item="item" separator=",">
+            (#{item.taskId,jdbcType=INTEGER}, #{item.taskType,jdbcType=INTEGER}, #{item.templateId,jdbcType=INTEGER},
+            #{item.templateName,jdbcType=VARCHAR}, #{item.indexName,jdbcType=VARCHAR},
+            #{item.indexTypes,jdbcType=VARCHAR}, #{item.targetIndexName,jdbcType=VARCHAR},
+            #{item.mappings,jdbcType=VARCHAR}, #{item.settings,jdbcType=VARCHAR}, #{item.taskStatus,jdbcType=INTEGER},
+            #{item.readFileRateLimit,jdbcType=DECIMAL},#{item.createTime,jdbcType=TIMESTAMP},
+            #{item.updateTime,jdbcType=TIMESTAMP},
+            #{item.scheduledTaskStartTime,jdbcType=TIMESTAMP},#{item.totalDocumentNum,jdbcType=DECIMAL} )
+        </foreach>
+    </insert>
+
+    <update id="refreshTask"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.entity.task.fastindex.FastIndexTaskInfo">
+        update fast_index_task_info
+        <set>
+            <if test="fastDumpTaskId != null">
+                fast_dump_task_id = #{fastDumpTaskId,jdbcType=VARCHAR},
+            </if>
+            <if test="taskStatus != null">
+                task_status = #{taskStatus,jdbcType=INTEGER},
+            </if>
+            <if test="readFileRateLimit != null">
+                read_file_rate_limit = #{readFileRateLimit,jdbcType=DECIMAL},
+            </if>
+            <if test="totalDocumentNum != null">
+                total_document_num = #{totalDocumentNum,jdbcType=DECIMAL},
+            </if>
+            <if test="shardNum != null">
+                shard_num = #{shardNum,jdbcType=DECIMAL},
+            </if>
+            <if test="succDocumentNum != null">
+                succ_document_num = #{succDocumentNum,jdbcType=DECIMAL},
+            </if>
+            <if test="succShardNum != null">
+                succ_shard_num = #{succShardNum,jdbcType=DECIMAL},
+            </if>
+            <if test="failedDocumentNum != null">
+                failed_document_num = #{failedDocumentNum,jdbcType=DECIMAL},
+            </if>
+            <if test="taskSubmitResult != null">
+                task_submit_result = #{taskSubmitResult,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            task_start_time = #{taskStartTime,jdbcType=TIMESTAMP},
+            task_end_time = #{taskEndTime,jdbcType=TIMESTAMP},
+            <if test="scheduledTaskStartTime != null">
+                scheduled_task_start_time = #{scheduledTaskStartTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastResponse != null">
+                last_response = #{lastResponse},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateStatusBatch">
+        update fast_index_task_info
+        set
+        task_status = #{taskStatus}
+        where id in
+        <foreach collection="list" index="index" item="item" separator=",">#{item}</foreach>
+    </update>
+</mapper>

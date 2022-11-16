@@ -16,5 +16,5 @@ import lombok.Data;
 @Data
 public class FastIndexDetailVO extends OpTask {
     @ApiModelProperty("迁移任务状态")
-    private FastIndexStatus fastIndexStatus;
+    private FastIndexStats fastIndexStats;
 }

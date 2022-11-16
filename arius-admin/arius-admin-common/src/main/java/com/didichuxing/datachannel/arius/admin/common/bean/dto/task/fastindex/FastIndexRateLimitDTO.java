@@ -16,6 +16,6 @@ public class FastIndexRateLimitDTO {
 
     @ApiModelProperty("任务id")
     private Integer taskId;
-    @ApiModelProperty("任务读取速率（条/S）")
+    @ApiModelProperty("任务读取限流速率（条/S）")
     private Long    taskReadRate;
 }

@@ -49,6 +49,9 @@ public enum OpTaskHandleEnum {
     GATEWAY_ROLLBACK(OpTaskTypeEnum.GATEWAY_NEW.getType(),
         OpTaskConstant.GATEWAY_ROLLBACK),
 
+                              FAST_INDEX(OpTaskTypeEnum.FAST_INDEX.getType(),
+                                         OpTaskConstant.FAST_INDEX_TASK),
+
                               UNKNOWN(OpTaskTypeEnum.UNKNOWN.getType(), OpTaskConstant.UNKNOWN);
 
     OpTaskHandleEnum(Integer type, String message) {
@@ -84,11 +87,8 @@ public enum OpTaskHandleEnum {
 }
 
 class OpTaskConstant {
-  
-  
-  
-  
-  private OpTaskConstant() {
+
+    private OpTaskConstant() {
     }
 
     public static final String ECM_WORK_TASK               = "ecmOpTask";
@@ -105,6 +105,9 @@ class OpTaskConstant {
     public static final String CLUSTER_CONFIG_RESTART_TASK = "clusterConfigRestartTask";
 
     public static final String DCDR_WORK_TASK              = "dcdrOpTask";
+
+    public static final String FAST_INDEX_TASK             = "fastIndexOpTask";
+
     public static final String GATEWAY_CREATE             = "gatewayCreate";
     public static final String GATEWAY_EXPAND = "gatewayExpand";
     public static final String GATEWAY_SHRINK = "gatewayShrink";
