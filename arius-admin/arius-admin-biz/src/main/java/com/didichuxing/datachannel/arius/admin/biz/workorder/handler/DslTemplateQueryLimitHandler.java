@@ -25,8 +25,8 @@ import java.util.List;
  * @author wuxuan
  * @date 2022/11/15
  */
-@Service("dslTemplateQueryLimitChangeHandler")
-public class DslTemplateQueryLimitChangeHandler extends BaseWorkOrderHandler {
+@Service("dslTemplateQueryLimitHandler")
+public class DslTemplateQueryLimitHandler extends BaseWorkOrderHandler {
 
     @Autowired
     private DslTemplateManager dslTemplateManager;
