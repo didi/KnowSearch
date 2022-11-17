@@ -1,7 +1,7 @@
 package com.didi.arius.gateway.core.service.dsl.transform;
 
 import com.alibaba.fastjson.JSONObject;
-import com.didiglobal.logi.dsl.parse.dsl.ast.aggr.DateHistoGram;
+import com.didiglobal.knowframework.dsl.parse.dsl.ast.aggr.DateHistoGram;
 import org.elasticsearch.common.unit.TimeValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

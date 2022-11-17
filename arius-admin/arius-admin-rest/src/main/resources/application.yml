@@ -135,16 +135,16 @@ spring:
     max-thread-num: 100
     log-exipre: 3 # 日志保存天数，以天为单位
     app_name: arius_test03
-    claim-strategy: com.didiglobal.logi.job.core.consensual.RandomConsensual
+    claim-strategy: com.didiglobal.knowframework.job.core.consensual.RandomConsensual
     node-name: node1
-    job-log-fetcher-extend-bean-name: com.didiglobal.logi.job.extend.impl.DefaultJobLogFetcherExtendImpl
+    job-log-fetcher-extend-bean-name: com.didiglobal.knowframework.job.extend.impl.DefaultJobLogFetcherExtendImpl
     elasticsearch-address: 116.85.23.222
     elasticsearch-port: 18303
     elasticsearch-user: elastic
     elasticsearch-password: Didiyun@888
     elasticsearch-index-name: test
     elasticsearch-type-name: type
-  logi-security:
+  kf-security:
     app-name: know_search
     driver-class-name: ${spring.datasource.druid.driver-class-name}
     jdbc-url: ${spring.datasource.druid.url}

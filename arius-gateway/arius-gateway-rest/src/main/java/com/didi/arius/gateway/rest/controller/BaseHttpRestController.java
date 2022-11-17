@@ -24,7 +24,7 @@ import com.didi.arius.gateway.elasticsearch.client.gateway.search.ESSearchRespon
 import com.didi.arius.gateway.elasticsearch.client.model.ESActionRequest;
 import com.didi.arius.gateway.rest.http.IRestHandler;
 import com.didi.arius.gateway.rest.http.RestController;
-import com.didiglobal.logi.log.LogGather;
+import com.didiglobal.knowframework.log.LogGather;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.*;
 import org.elasticsearch.rest.support.RestUtils;

@@ -1,8 +1,8 @@
 package com.didi.arius.gateway.common.utils;
 
-import com.didiglobal.logi.metrics.MetricsSource;
-import com.didiglobal.logi.metrics.MetricsSystem;
-import com.didiglobal.logi.metrics.lib.DefaultMetricsSystem;
+import com.didiglobal.knowframework.metrics.MetricsSource;
+import com.didiglobal.knowframework.metrics.MetricsSystem;
+import com.didiglobal.knowframework.metrics.lib.DefaultMetricsSystem;
 
 public class MetricUtil {
 
