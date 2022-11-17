@@ -6,8 +6,8 @@ import static org.mockito.Mockito.when;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.impl.ClusterPhyMetricsManagerImpl;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.UserConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MultiMetricsClusterPhyNodeDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.UserConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ESClusterTaskDetail;
@@ -33,8 +33,6 @@ import com.didiglobal.logi.security.service.ProjectService;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import com.didiglobal.logi.security.util.HttpRequestUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -105,7 +103,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRoleHostService.listByRegionId(...).
         final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
-            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes",null)));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         // Configure IndexTemplateService.listByRegionId(...).
@@ -316,7 +314,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRoleHostService.listByRegionId(...).
         final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
-            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes",null)));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         when(indexTemplateService.listByRegionId(0)).thenReturn(Result.buildSucc());
@@ -361,7 +359,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRoleHostService.listByRegionId(...).
         final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
-            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes",null)));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         // Configure IndexTemplateService.listByRegionId(...).
@@ -408,7 +406,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRoleHostService.listByRegionId(...).
         final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
-            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes",null)));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         // Configure IndexTemplateService.listByRegionId(...).
@@ -455,7 +453,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRoleHostService.listByRegionId(...).
         final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
-            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes",null)));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         // Configure IndexTemplateService.listByRegionId(...).
@@ -494,7 +492,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRoleHostService.listByRegionId(...).
         final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
-            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes",null)));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         // Configure IndexTemplateService.listByRegionId(...).
@@ -719,7 +717,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRoleHostService.listByRegionId(...).
         final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
-            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes",null)));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         when(indexTemplateService.listByRegionId(0)).thenReturn(Result.buildSucc());
@@ -767,7 +765,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRoleHostService.listByRegionId(...).
         final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
-            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes",null)));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         // Configure IndexTemplateService.listByRegionId(...).
@@ -817,7 +815,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRoleHostService.listByRegionId(...).
         final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
-            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes",null)));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         // Configure IndexTemplateService.listByRegionId(...).
@@ -867,7 +865,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterRoleHostService.listByRegionId(...).
         final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
-            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes",null)));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         // Configure IndexTemplateService.listByRegionId(...).

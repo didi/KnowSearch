@@ -132,7 +132,27 @@ public class ClusterPhyDTO extends PageDTO {
 
     @ApiModelProperty("gateway地址")
     private String                     gatewayUrl;
+    /**
+     * 是否接入 ecm
+     */
+    @ApiModelProperty("是否接入 ecm")
+    private Boolean ecmAccess;
 
+    /**
+     * ecm 关联组建 id
+     */
+    @ApiModelProperty("ecm 关联组建 id")
+    private Integer componentId;
+
+    /**
+     * 代理地址
+     */
     @ApiModelProperty("代理地址")
-    private String                     proxyAddress;
+    private String proxyAddress;
+
+    /**
+     * gateway ids, 逗号分割
+     */
+    @ApiModelProperty("gateway ids, 逗号分割")
+    private String gatewayIds;
 }

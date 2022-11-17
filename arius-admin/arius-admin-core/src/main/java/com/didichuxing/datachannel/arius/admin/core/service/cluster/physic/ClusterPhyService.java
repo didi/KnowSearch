@@ -151,9 +151,13 @@ public interface ClusterPhyService {
      * @return true or false
      */
     boolean isClusterExistsByPackageId(Long packageId);
-
-
-
-
-
+		
+		
+		/**
+		 * 它返回具有给定集群物理 ID 的组件的组件 ID。
+		 *
+		 * @param clusterPhyId 集群的物理标识。
+		 * @return clusterPhyId 的组件 id
+		 */
+		Integer getComponentIdById(Integer clusterPhyId);
 }

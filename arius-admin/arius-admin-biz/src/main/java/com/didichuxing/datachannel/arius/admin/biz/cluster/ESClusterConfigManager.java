@@ -1,8 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.ConfigConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESConfigVO;
+import com.didiglobal.logi.op.manager.interfaces.vo.ComponentGroupConfigVO;
 import java.util.List;
 import java.util.Set;
 
@@ -48,4 +52,23 @@ public interface ESClusterConfigManager {
      * @return {@code Result<List<ESConfigVO>>}
      */
     Result<List<ESConfigVO>> gainEsClusterConfigs(Long clusterId);
+		
+		/**
+		 * 获取集群的配置列表
+		 *
+		 * @param condition 查询条件，包括配置名称、配置类型、配置状态。
+		 * @param projectId 项目编号
+		 * @param phyClusterId 物理集群 ID
+		 * @return ClusterPhyConfigVO 对象列表。
+		 */
+		PaginationResult<ClusterPhyConfigVO> pageGetConfig(ConfigConditionDTO condition, Integer projectId, Integer phyClusterId);
+    
+    /**
+     * 获取指定集群的配置
+     *
+     * @param clusterPhyId 集群的物理 ID。
+     * @param configId 要查询的配置的配置ID。
+     * @return GeneralGroupConfigHostVO
+     */
+    Result<ComponentGroupConfigVO> getConfigByClusterPhyId(Integer clusterPhyId, Integer configId);
 }

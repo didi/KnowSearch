@@ -368,8 +368,12 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     public boolean isClusterExistsByPackageId(Long packageId) {
         return clusterDAO.getTotalHitByPackageId(packageId) > 0;
     }
-
-
+    
+    @Override
+    public Integer getComponentIdById(Integer clusterPhyId) {
+        return clusterDAO.getComponentIdById(clusterPhyId);
+    }
+    
     /**************************************** private method ***************************************************/
     private List<String> buildTcpAddress(String cluster) {
         try {

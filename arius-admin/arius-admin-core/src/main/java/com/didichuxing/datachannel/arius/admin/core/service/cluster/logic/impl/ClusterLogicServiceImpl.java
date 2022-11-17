@@ -183,6 +183,11 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
                 .stream().anyMatch(indexTemplatePO -> indexTemplatePO.getProjectId().equals(deleteProjectId));
     }
     
+    @Override
+    public List<Long> getAllIdsByProjectId(Integer projectId) {
+        return logicClusterDAO.getAllIdsByProjectId(projectId);
+    }
+    
     /**
      * > 加入集群
      *

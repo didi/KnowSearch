@@ -178,4 +178,11 @@ public interface ProjectExtendManager {
      * @return 一个 Result 对象，里面有一个 Void 对象。
      */
     Result<Void> checkResourcesByProjectId(Integer projectId);
+    
+    /**
+     * 检查项目是否具有网关集群的功能
+     * @param projectId 项目id
+     * @return Result<Boolean>
+     */
+    Result<Boolean> projectExistenceGatewayCluster(Integer projectId);
 }

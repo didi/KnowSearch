@@ -18,7 +18,8 @@ public enum PageSearchHandleTypeEnum {
         GATEWAY_CLUSTER_CONFIG("gatewayClusterConfigPageSearchHandle"),
         TASK("taskPageSearch"),
         SCRIPT("scriptPageSearch"),
-        PACKAGE("packagePageSearch");
+        PACKAGE("packagePageSearch"),
+    ES_CLUSTER_CONFIG("esClusterConfigPageSearchHandle");
        private String pageSearchType;
 
         public String getPageSearchType(){
