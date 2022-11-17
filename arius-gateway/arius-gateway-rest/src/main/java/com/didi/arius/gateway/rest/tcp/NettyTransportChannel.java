@@ -2,6 +2,8 @@ package com.didi.arius.gateway.rest.tcp;
 
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.metadata.ActionContext;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.elasticsearch.Version;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.bytes.ReleasablePagedBytesReference;
@@ -17,8 +19,6 @@ import org.elasticsearch.transport.support.TransportStatus;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -29,7 +29,7 @@ import java.io.IOException;
 * 
 */
 public class NettyTransportChannel implements TransportChannel {
-	protected static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
+	protected static final ILog statLogger = LogFactory.getLog(QueryConsts.STAT_LOGGER);
 
     private final NettyTransport transport;
     private final TransportServiceAdapter transportServiceAdapter;

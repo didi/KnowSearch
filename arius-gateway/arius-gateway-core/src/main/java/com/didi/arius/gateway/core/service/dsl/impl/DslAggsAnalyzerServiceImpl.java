@@ -13,14 +13,14 @@ import com.didi.arius.gateway.core.service.arius.IndexTemplateService;
 import com.didi.arius.gateway.core.service.dsl.DslAggsAnalyzerService;
 import com.didi.arius.gateway.core.service.dsl.aggregations.AggsType;
 import com.didi.arius.gateway.core.service.dsl.aggregations.AggsTypes;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.xcontent.XContentHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,8 +36,8 @@ import java.util.Map;
  */
 @Service
 public class DslAggsAnalyzerServiceImpl implements DslAggsAnalyzerService {
-    protected static final Logger logger = LoggerFactory.getLogger(DslAggsAnalyzerServiceImpl.class);
-    private static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
+    protected static final ILog logger = LogFactory.getLog(DslAggsAnalyzerServiceImpl.class);
+    private static final ILog statLogger = LogFactory.getLog(QueryConsts.STAT_LOGGER);
 
     @Autowired
     private MetricsService metricsService;

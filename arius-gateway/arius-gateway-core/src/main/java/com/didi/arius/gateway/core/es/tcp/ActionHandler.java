@@ -8,6 +8,8 @@ import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.es.http.ESBase;
 import com.didi.arius.gateway.core.service.*;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.log.LogGather;
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.ActionListener;
@@ -17,8 +19,6 @@ import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.transport.TransportChannel;
 import org.elasticsearch.transport.TransportRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,9 +34,9 @@ import java.util.concurrent.TimeUnit;
 */
 @Component("actionHandler")
 public abstract class ActionHandler extends ESBase {
-	protected static final Logger logger = LoggerFactory.getLogger(ActionHandler.class);
-	protected static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
-	protected static final Logger traceLogger = LoggerFactory.getLogger(QueryConsts.TRACE_LOGGER);
+	protected static final ILog logger = LogFactory.getLog(ActionHandler.class);
+	protected static final ILog statLogger = LogFactory.getLog(QueryConsts.STAT_LOGGER);
+	protected static final ILog traceLogger = LogFactory.getLog(QueryConsts.TRACE_LOGGER);
 	
 	@Autowired
 	protected ActionController controller;

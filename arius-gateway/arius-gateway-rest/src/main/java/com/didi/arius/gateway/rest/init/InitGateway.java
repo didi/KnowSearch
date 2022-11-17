@@ -3,8 +3,8 @@ package com.didi.arius.gateway.rest.init;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.rest.http.NettyHttpServerTransport;
 import com.didi.arius.gateway.rest.tcp.NettyTransport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +12,7 @@ import javax.annotation.PostConstruct;
 
 @Component("initGateway")
 public class InitGateway {
-	protected static final Logger bootLogger = LoggerFactory.getLogger(QueryConsts.BOOT_LOGGER);
+	protected static final ILog bootLogger = LogFactory.getLog(QueryConsts.BOOT_LOGGER);
 
 	@Autowired
 	private NettyTransport nettyTransport;

@@ -1,8 +1,8 @@
 package com.didi.arius.gateway.common.flowcontrol;
 
 import com.didi.arius.gateway.common.enums.FlowStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 import java.util.Random;
 
@@ -12,7 +12,7 @@ import java.util.Random;
 * 
 */
 public class FlowLimit {
-	private Logger log = LoggerFactory.getLogger(FlowLimit.class);
+	private ILog log = LogFactory.getLog(FlowLimit.class);
 
 	/**
 	 * //阀值，如果flowRandom产生的随机数超过该阀值，则判断为over flow，否则即判断down

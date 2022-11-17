@@ -20,6 +20,8 @@ import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.common.metadata.TemplateClusterInfo;
 import com.didi.arius.gateway.common.utils.AppUtil;
 import com.didi.arius.gateway.core.es.http.HttpRestHandler;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.log.LogGather;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -31,11 +33,9 @@ import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestRequest;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class RestBaseWriteAction extends HttpRestHandler {
-    protected static final Logger logger = LoggerFactory.getLogger(RestBaseWriteAction.class);
+    protected static final ILog logger = LogFactory.getLog(RestBaseWriteAction.class);
 
     protected static final int OPER_INDEX                   = 100001;
     protected static final int OPER_UPDATE                  = 100002;

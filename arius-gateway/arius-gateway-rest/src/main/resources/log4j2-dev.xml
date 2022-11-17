@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration package="org.apache.logging.log4j.core,com.didiglobal.logi.log.log4j2.appender" >
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+
+        </Console>
+        <ElasticsearchAppender name="esAppender" address="116.85.23.222" port="18303" user="elastic" password="Didiyun@888" indexName="test" typeName="type" threshold="all" bufferSize="1000" numberOfShards="1" numberOfReplicas="0" logExpire="7" extendsMappingClass="" requestTimeoutMillis="3000">
+
+        </ElasticsearchAppender>
+    </Appenders>
+    <Loggers>
+        <root level="INFO">
+            <appender-ref ref="Console" />
+            <appender-ref ref="esAppender" />
+        </root>
+    </Loggers>
+</Configuration>

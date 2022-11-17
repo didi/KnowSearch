@@ -2,6 +2,8 @@ package com.didi.arius.gateway.elasticsearch.client;
 
 
 import com.didi.arius.gateway.elasticsearch.client.model.*;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
@@ -11,9 +13,6 @@ import org.elasticsearch.client.ResponseException;
 import org.elasticsearch.client.ResponseListener;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.common.transport.TransportAddress;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
@@ -23,7 +22,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ESClient extends ESAbstractClient {
-    protected static final Logger logger = LoggerFactory.getLogger(ESClient.class);
+    protected static final ILog logger = LogFactory.getLog(ESClient.class);
 
     private List<TransportAddress> tas = new ArrayList<>();
     private List<HttpHost> nodes = new ArrayList<>();

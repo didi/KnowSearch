@@ -7,9 +7,9 @@ import com.didi.arius.gateway.core.component.ThreadPool;
 import com.didi.arius.gateway.core.service.arius.GateWayHeartBeatService;
 import com.didi.arius.gateway.remote.AriusAdminRemoteService;
 import com.didi.arius.gateway.remote.response.ActiveCountResponse;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import lombok.NoArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ import javax.annotation.PostConstruct;
 @NoArgsConstructor
 public class GateWayHeartBeatServiceImpl implements GateWayHeartBeatService {
 
-    protected static final Logger bootLogger = LoggerFactory.getLogger( QueryConsts.BOOT_LOGGER);
+    protected static final ILog bootLogger = LogFactory.getLog( QueryConsts.BOOT_LOGGER);
 
     @Autowired
     private AriusAdminRemoteService ariusAdminRemoteService;

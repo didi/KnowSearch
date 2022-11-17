@@ -5,8 +5,8 @@ import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
 import com.didi.arius.gateway.core.service.ESRestClientService;
 import com.didi.arius.gateway.core.service.arius.IndexTemplateService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import java.util.List;
  */
 public abstract class AbstractDslLogProcess implements LogProcess<List<JSONObject>> {
 
-    protected static final Logger bootLogger = LoggerFactory.getLogger(QueryConsts.BOOT_LOGGER);
+    protected static final ILog bootLogger = LogFactory.getLog(QueryConsts.BOOT_LOGGER);
 
     public static final String TYPE = "_doc";
 

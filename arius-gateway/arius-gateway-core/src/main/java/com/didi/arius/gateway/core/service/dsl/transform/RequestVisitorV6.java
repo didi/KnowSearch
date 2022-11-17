@@ -2,13 +2,13 @@ package com.didi.arius.gateway.core.service.dsl.transform;
 
 import com.alibaba.fastjson.JSONObject;
 import com.didiglobal.knowframework.dsl.parse.dsl.ast.aggr.DateHistoGram;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.elasticsearch.common.unit.TimeValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RequestVisitorV6 extends BaseRequestVisitor {
 
-    protected static final Logger logger = LoggerFactory.getLogger(RequestVisitorV6.class);
+    protected static final ILog logger = LogFactory.getLog(RequestVisitorV6.class);
 
     protected static final String FIXED_INTERVAL = "fixed_interval";
     protected static final String INTERVAL = "interval";

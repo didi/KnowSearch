@@ -18,15 +18,14 @@ import com.didiglobal.knowframework.dsl.parse.dsl.ast.query.*;
 import com.didiglobal.knowframework.dsl.parse.dsl.ast.root.Sort;
 import com.didiglobal.knowframework.dsl.parse.dsl.ast.root.Timeout;
 import com.didiglobal.knowframework.dsl.parse.dsl.visitor.basic.OutputVisitor;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Map;
 
 public class BaseRequestVisitor extends OutputVisitor {
 
-    protected static final Logger logger = LoggerFactory.getLogger(BaseRequestVisitor.class);
+    protected static final ILog logger = LogFactory.getLog(BaseRequestVisitor.class);
 
     protected static final String TYPE = "_type";
 

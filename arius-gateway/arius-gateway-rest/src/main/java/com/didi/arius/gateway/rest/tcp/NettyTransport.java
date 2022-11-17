@@ -1,6 +1,8 @@
 package com.didi.arius.gateway.rest.tcp;
 
 import com.didi.arius.gateway.common.consts.QueryConsts;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.elasticsearch.common.network.NetworkUtils;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
@@ -12,8 +14,6 @@ import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.netty.util.ThreadRenamingRunnable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 */
 @Component("nettyTransport")
 public class NettyTransport {
-	private static final Logger logger = LoggerFactory.getLogger(QueryConsts.BOOT_LOGGER);
+	private static final ILog logger = LogFactory.getLog(QueryConsts.BOOT_LOGGER);
 	
 	@Value("${gateway.nettyTransport.port}")
 	private short port;

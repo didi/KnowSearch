@@ -6,8 +6,6 @@ import com.didi.arius.gateway.elasticsearch.client.model.ESActionResponse;
 import com.didi.arius.gateway.elasticsearch.client.response.query.query.aggs.ESAggrMap;
 import com.didi.arius.gateway.elasticsearch.client.response.query.query.hits.ESHit;
 import com.didi.arius.gateway.elasticsearch.client.response.query.query.hits.ESHits;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 

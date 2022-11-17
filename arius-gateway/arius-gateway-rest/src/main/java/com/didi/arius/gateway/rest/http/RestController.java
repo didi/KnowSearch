@@ -2,12 +2,12 @@ package com.didi.arius.gateway.rest.http;
 
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.utils.PathTrie;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestRequest.Method;
 import org.elasticsearch.rest.support.RestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 @Component("restController")
 public class RestController {
 
-    protected static final Logger bootLogger = LoggerFactory.getLogger(QueryConsts.BOOT_LOGGER);
+    protected static final ILog bootLogger = LogFactory.getLog(QueryConsts.BOOT_LOGGER);
 
     public static final PathTrie.Decoder REST_DECODER = value -> RestUtils.decodeComponent(value);
 

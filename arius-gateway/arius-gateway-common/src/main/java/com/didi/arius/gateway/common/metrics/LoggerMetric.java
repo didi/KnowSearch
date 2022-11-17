@@ -2,15 +2,15 @@ package com.didi.arius.gateway.common.metrics;
 
 import com.alibaba.fastjson.JSONObject;
 
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.metrics.Metric;
 import com.didiglobal.knowframework.metrics.MetricsRecord;
 import com.didiglobal.knowframework.metrics.MetricsTag;
 import com.didiglobal.knowframework.metrics.sink.mq.AbstractMetricSink;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LoggerMetric extends AbstractMetricSink {
-	protected static final Logger logger = LoggerFactory.getLogger("metrics");
+	protected static final ILog logger = LogFactory.getLog("metrics");
 
 	@Override
 	public void putMetrics(MetricsRecord record) {

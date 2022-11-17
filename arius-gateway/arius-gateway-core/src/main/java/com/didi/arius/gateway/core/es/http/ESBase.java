@@ -35,6 +35,8 @@ import com.didi.arius.gateway.elasticsearch.client.gateway.document.ESMultiGetRe
 import com.didi.arius.gateway.elasticsearch.client.gateway.search.ESSearchRequest;
 import com.didi.arius.gateway.elasticsearch.client.gateway.search.ESSearchResponse;
 import com.didi.arius.gateway.elasticsearch.client.gateway.search.response.src.Hit;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -62,8 +64,6 @@ import org.nlpcn.es4sql.query.AggregationQueryAction;
 import org.nlpcn.es4sql.query.DefaultQueryAction;
 import org.nlpcn.es4sql.query.QueryAction;
 import org.nlpcn.es4sql.query.SqlElasticRequestBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.didi.arius.gateway.common.consts.RestConsts.FIELDS;
@@ -75,7 +75,7 @@ import static com.didi.arius.gateway.common.consts.RestConsts.INDEX;
 * 
 */
 public abstract class ESBase {
-	protected static final Logger logger = LoggerFactory.getLogger(ESBase.class);
+	protected static final ILog logger = LogFactory.getLog(ESBase.class);
 	
 	@Autowired
 	protected DslAggsAnalyzerService dslAggsAnalyzerService;
