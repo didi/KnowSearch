@@ -344,22 +344,14 @@ public class ESUserManagerImpl implements ESUserManager {
                     .map(ClusterPhy::getCluster)
                     .distinct()
                     .collect(Collectors.toList());
-            if (clusterPhyList.isEmpty()) {
-                return Result.buildFail("超级项目下无独立类型集群，无法新增原生模式的ES_User");
-            } else {
-                return Result.buildSucc(clusterPhyList);
-            }
+            return Result.buildSucc(clusterPhyList);
         } else {
             //普通项目返回对应的独立的逻辑集群
             List<String> clusterLogicList = clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId).stream()
                     .filter(clusterLogic -> ClusterResourceTypeEnum.PRIVATE.getCode() == clusterLogic.getType())
                     .map(ClusterLogic::getName)
                     .distinct().collect(Collectors.toList());
-            if (clusterLogicList.isEmpty()) {
-                return Result.buildFail("该项目下无独立类型集群，无法新增原生模式的ES_User");
-            } else {
-                return Result.buildSucc(clusterLogicList);
-            }
+            return Result.buildSucc(clusterLogicList);
         }
     }
 
@@ -376,21 +368,13 @@ public class ESUserManagerImpl implements ESUserManager {
                     .map(ClusterPhy::getCluster)
                     .distinct()
                     .collect(Collectors.toList());
-            if (clusterPhyList.isEmpty()) {
-                return Result.buildFail("超级项目下无可用集群，无法新增集群模式的ES_User");
-            } else {
-                return Result.buildSucc(clusterPhyList);
-            }
+            return Result.buildSucc(clusterPhyList);
         } else {
             //普通项目返回对应的逻辑集群
             List<String> clusterLogicList = clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId).stream()
                     .map(ClusterLogic::getName)
                     .distinct().collect(Collectors.toList());
-            if (clusterLogicList.isEmpty()) {
-                return Result.buildFail("该项目下无可用集群，无法新增原生模式的ES_User");
-            } else {
-                return Result.buildSucc(clusterLogicList);
-            }
+            return Result.buildSucc(clusterLogicList);
         }
     }
 

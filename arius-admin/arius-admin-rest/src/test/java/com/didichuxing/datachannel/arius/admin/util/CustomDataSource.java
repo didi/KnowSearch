@@ -647,12 +647,12 @@ public class CustomDataSource {
 
     public static ClusterRoleHost getClusterRoleHost() {
         return new ClusterRoleHost(0L, 0L, "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec",
-            0, "attributes");
+            0, "attributes",null);
     }
 
     public static ClusterRoleHost getClusterRoleHostByRealIp() {
         return new ClusterRoleHost(0L, 0L, "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec",
-            0, "attributes");
+            0, "attributes",null);
     }
 
     public static ClusterRegion getClusterRegion() {
@@ -676,7 +676,7 @@ public class CustomDataSource {
             "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName", "nsTree", 0, "machineSpec",
             "password", "creator", Collections.singletonList(getClusterRoleInfo()),
             Collections.singletonList(getClusterRoleHost()), 0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0,
-            "gatewayUrl");
+            "gatewayUrl",null,null,null,null);
     }
 
     public static IndexTemplateWithPhyTemplates getIndexTemplateWithPhyTemplates() {

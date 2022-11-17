@@ -76,11 +76,11 @@ public interface ComponentRepository {
 
     /**
      * 删除组件
-     * @param id
+     * @param componentId
      * @return
      */
     int deleteComponent(int componentId);
-    
+
     /**
      * 给定一个名称，返回具有该名称的组件。
      *
@@ -88,7 +88,7 @@ public interface ComponentRepository {
      * @return 一个组件对象
      */
     Component queryComponentByName(String name);
-    
+
     /**
      * 给定组件 ID，返回组件的查询。
      *
@@ -96,4 +96,11 @@ public interface ComponentRepository {
      * @return Optional<String>
      */
     Optional<String> queryComponentById(Integer componentId);
+
+    /**
+     *
+     * @param packageIds
+     * @return
+     */
+    List<Component> getComponentByPackageIds(List<Integer> packageIds);
 }

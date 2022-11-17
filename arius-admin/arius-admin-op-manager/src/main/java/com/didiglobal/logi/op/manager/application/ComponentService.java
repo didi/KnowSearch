@@ -239,4 +239,9 @@ public class ComponentService {
     public Result<String> queryComponentById(Integer componentId) {
         return componentDomainService.queryComponentById(componentId);
     }
+    
+    public Result<List<ComponentGroupConfig>> getComponentConfig(
+        Integer componentId) {
+        return componentDomainService.getComponentConfig(componentId);
+    }
 }

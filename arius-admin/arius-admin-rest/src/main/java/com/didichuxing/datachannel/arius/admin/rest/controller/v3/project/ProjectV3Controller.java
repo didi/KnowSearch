@@ -222,8 +222,7 @@ public class ProjectV3Controller {
     @ResponseBody
     @ApiOperation(value = "获取当前操作项目下的集群是否绑定gateway", tags = "")
     public Result<Boolean> projectExistenceGatewayCluster(HttpServletRequest request) {
-        
-        return Result.buildSucc(Boolean.TRUE);
+        return projectExtendManager.projectExistenceGatewayCluster(HttpRequestUtil.getProjectId(request));
     }
 
 }

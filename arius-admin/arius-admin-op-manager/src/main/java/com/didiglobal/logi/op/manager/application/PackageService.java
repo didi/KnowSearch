@@ -65,10 +65,17 @@ public class PackageService {
         if (checkResult.failed()) {
             return checkResult;
         }
-        Result<Boolean> res = componentDomainService.hasPackageDependComponent(pk.getId());
+        Result<Boolean> res = usingPackage(pk.getId());
         if (res.getData() && null != pk.getUploadFile()) {
             return Result.fail(PACKAGE_IS_DEPEND_UPDATE_ERROR);
         }
+        //补全参数信息
+        Package originalPackage = packageDomainService.getPackageById(pk.getId()).getData();
+        if (null == originalPackage) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "输入的id参数有问题，未找到软件包");
+        }
+        pk.setName(originalPackage.getName());
+        pk.setVersion(originalPackage.getVersion());
         //修改安装包
         return packageDomainService.updatePackage(pk);
     }
@@ -90,11 +97,68 @@ public class PackageService {
         }
 
         //判断,若包已经绑定了组件则不能删除
-        Result<Boolean> res = componentDomainService.hasPackageDependComponent(id);
+        Result<Boolean> res = usingPackage(id);
         if (res.failed() || res.getData()) {
             return Result.fail(PACKAGE_IS_DEPEND_ERROR);
         }
 
         return packageDomainService.deletePackage(pk);
+    }
+
+    /**
+     * 分页查询软件包列表
+     * @param pagingPackage
+     * @param page
+     * @param size
+     * @return
+     */
+    public List<Package> pagingByCondition(Package pagingPackage, Long page, Long size) {
+        List<Package> packageList = packageDomainService.pagingByCondition(pagingPackage, (page - 1) * size, size);
+        return packageList;
+    }
+
+    /**
+     * 查询软件包总数
+     * @param pagingPackage
+     * @return
+     */
+    public Long countByCondition(Package pagingPackage) {
+        return packageDomainService.countByCondition(pagingPackage);
+    }
+
+    /**
+     * 根据id查询软件包
+     * @param id
+     * @return
+     */
+    public Result<Package> getPackageById(Long id) {
+        return packageDomainService.getPackageById(Math.toIntExact(id));
+    }
+
+    /**
+     * 是否正在使用安装包
+     * @param id
+     * @return
+     */
+    public Result<Boolean> usingPackage(Integer id) {
+        return componentDomainService.hasPackageDependComponent(id);
+    }
+
+    /**
+     * 通过软件包类型获取软件包版本list
+     * @param packageType
+     * @return
+     */
+    public List<String> listPackageVersionByPackageType(Integer packageType) {
+        return packageDomainService.listPackageVersionByPackageType(packageType);
+    }
+
+    /**
+     * 分页查询时判断软件包是否正在使用
+     * @param packageIds
+     * @return
+     */
+    public List<Integer> hasPackagesDependComponent(List<Integer> packageIds) {
+        return componentDomainService.hasPackagesDependComponent(packageIds);
     }
 }

@@ -184,7 +184,7 @@ public interface ComponentDomainService {
      * @return 任务id
      */
     Result<Integer> submitUninstallComponent(GeneralUninstallComponent uninstallComponent);
-    
+
     /**
      * 给定组件 ID，返回组件的查询。
      *
@@ -192,4 +192,11 @@ public interface ComponentDomainService {
      * @return  Result<String>
      */
     Result<String> queryComponentById(Integer componentId);
+
+    /**
+     * 软件包是否依赖
+     * @param packageIds
+     * @return
+     */
+    List<Integer> hasPackagesDependComponent(List<Integer> packageIds);
 }

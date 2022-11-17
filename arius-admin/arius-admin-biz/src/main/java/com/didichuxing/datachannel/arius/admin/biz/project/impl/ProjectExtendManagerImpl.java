@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTem
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectConfigPO;
@@ -35,6 +36,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
@@ -107,7 +110,11 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Autowired
     private RoleTool          roleTool;
     @Autowired
-    private               ESIndexCatService esIndexCatService;
+    private ESIndexCatService    esIndexCatService;
+    @Autowired
+    private ClusterRegionService clusterRegionService;
+    @Autowired
+    private ClusterPhyService    clusterPhyService;
     private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ProjectExtendManagerImpl", 10, 10, 100);
     
     /**
@@ -141,6 +148,22 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         }
         
         return Result.buildSucc();
+    }
+    
+    @Override
+    public Result<Boolean> projectExistenceGatewayCluster(Integer projectId) {
+        // 获取逻辑集群下所有的 id
+        List<Long> logicIds = clusterLogicService.getAllIdsByProjectId(projectId);
+        // 获取逻辑集群下的 regino 转换未集群名称
+        final List<String> clusterPhyNames = clusterRegionService.getClusterRegionsByLogicIds(
+                logicIds).stream().map(ClusterRegion::getPhyClusterName).distinct()
+            .collect(Collectors.toList());
+        final boolean projectExistenceGatewayCluster = clusterPhyService.listClustersByNames(
+                clusterPhyNames)
+            .stream()
+            //如果都是-1则没有绑定gateway
+            .anyMatch(i -> StringUtils.equals(i.getGatewayIds(), "-1"));
+        return Result.build(projectExistenceGatewayCluster);
     }
     
     @Override

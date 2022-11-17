@@ -84,12 +84,13 @@ public class OpTaskManagerImpl implements OpTaskManager {
     }
 
     @Override
-    public void insert(OpTask task) {
+    public boolean insert(OpTask task) {
         try {
-            opTaskService.insert(task);
+           return opTaskService.insert(task);
         } catch (Exception e) {
             LOGGER.error("class=DCDRWorkTaskHandler||method=addTask||taskType={}||businessKey={}||errMsg={}",
                 task.getTaskType(), task.getBusinessKey(), e.getStackTrace(), e);
+            return false;
         }
     }
 

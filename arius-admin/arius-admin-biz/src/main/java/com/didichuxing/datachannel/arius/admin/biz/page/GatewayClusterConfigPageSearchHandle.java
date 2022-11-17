@@ -11,8 +11,8 @@ import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClust
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
-import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,7 +44,7 @@ public class GatewayClusterConfigPageSearchHandle extends
 	@Autowired
 	private GatewayNodeService gatewayNodeService;
 	@Autowired
-	private ComponentDomainService componentDomainService;
+	private ComponentService   componentService;
 	
 	@Override
 	protected Result<Boolean> checkCondition(ConfigConditionDTO condition, Integer projectId) {
@@ -70,7 +70,7 @@ public class GatewayClusterConfigPageSearchHandle extends
 			return PaginationResult.buildSucc(Collections.emptyList(), 0L, condition.getPage(),
 					condition.getSize());
 		}
-		final List<ComponentGroupConfig> data = componentDomainService.getComponentConfig(
+		final List<ComponentGroupConfig> data = componentService.getComponentConfig(
 				componentId).getData();
 		if (CollectionUtils.isEmpty(data)) {
 			return PaginationResult.buildSucc(Collections.emptyList(), 0L, condition.getPage(),
