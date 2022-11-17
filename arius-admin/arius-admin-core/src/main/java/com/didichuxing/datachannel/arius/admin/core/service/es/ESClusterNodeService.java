@@ -142,7 +142,7 @@ public interface ESClusterNodeService {
      * @param cluster
      * @return
      */
-    List<ClusterNodeStats> syncGetNodeStats(String cluster);}
+    List<ClusterNodeStats> syncGetNodeStats(String cluster);
 
 		/**
 		 * 从名为 clusterName 的集群中获取所有插件。
@@ -150,5 +150,5 @@ public interface ESClusterNodeService {
 		 * @param clusterName 从中获取插件的集群的名称。
 		 * @return 对象的集合。
 		 */
-		Collection<ESResponsePluginInfo> syncGetPlugins(String clusterName) throws ESOperateException;
+	Collection<ESResponsePluginInfo> syncGetPlugins(String clusterName) throws ESOperateException;
 }

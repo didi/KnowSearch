@@ -200,11 +200,6 @@ public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy> {
      */
     private String gatewayIds;
 
-    /**
-     * SLB地址
-     */
-    private String                proxyAddress;
-
     @Override
     public int compareTo(ClusterPhy o) {
         if (null == o) {

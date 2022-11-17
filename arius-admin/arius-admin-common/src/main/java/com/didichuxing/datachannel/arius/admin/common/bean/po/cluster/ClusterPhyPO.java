@@ -180,11 +180,6 @@ public class ClusterPhyPO extends BasePO {
      */
     private String gatewayIds;
 
-    /**
-     * 代理地址
-     */
-    private String  proxyAddress;
-
     @Override
     public boolean equals(Object obj) {
         if (obj == null || obj.getClass() != this.getClass()) {

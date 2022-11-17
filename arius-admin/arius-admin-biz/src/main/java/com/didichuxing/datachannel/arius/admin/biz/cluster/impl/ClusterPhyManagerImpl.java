@@ -1467,6 +1467,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         clusterDTO.setCreator(operator);
         clusterDTO.setRunMode(RunModeEnum.READ_WRITE_SHARE.getRunMode());
         clusterDTO.setHealth(DEFAULT_CLUSTER_HEALTH);
+        clusterDTO.setEcmAccess(Boolean.FALSE);
+        clusterDTO.setComponentId(-1);
         return clusterDTO;
     }
 
