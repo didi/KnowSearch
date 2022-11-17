@@ -45,7 +45,6 @@ public class DslTemplateQueryLimitChangeHandler extends BaseWorkOrderHandler {
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
         DslTemplateQueryLimitContent content = JSON.parseObject(extensions, DslTemplateQueryLimitContent.class);
-
         return ConvertUtil.obj2Obj(content, DslTemplateQueryLimitDetail.class);
     }
 
@@ -96,7 +95,7 @@ public class DslTemplateQueryLimitChangeHandler extends BaseWorkOrderHandler {
         if (workOrderTypeEnum == null) {
             return "";
         }
-        return content.getName() + workOrderTypeEnum.getMessage();
+        return "项目id:"+content.getProjectId() + workOrderTypeEnum.getMessage();
     }
 
 

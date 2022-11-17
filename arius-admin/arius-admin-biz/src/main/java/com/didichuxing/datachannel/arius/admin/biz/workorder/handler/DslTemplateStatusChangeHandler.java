@@ -97,7 +97,8 @@ public class DslTemplateStatusChangeHandler extends BaseWorkOrderHandler {
         if (workOrderTypeEnum == null) {
             return "";
         }
-        return content.getName() + workOrderTypeEnum.getMessage();
+
+        return content.getDslTemplateMd5() + workOrderTypeEnum.getMessage();
     }
 
 
