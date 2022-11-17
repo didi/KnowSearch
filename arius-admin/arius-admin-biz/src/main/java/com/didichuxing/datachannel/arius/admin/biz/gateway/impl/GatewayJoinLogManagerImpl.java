@@ -18,8 +18,8 @@ import com.didichuxing.datachannel.arius.admin.metadata.service.GatewayJoinLogSe
 import java.util.ArrayList;
 import java.util.List;
 
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;

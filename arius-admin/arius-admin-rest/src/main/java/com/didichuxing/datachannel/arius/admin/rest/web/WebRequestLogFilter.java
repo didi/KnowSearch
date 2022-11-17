@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.rest.web;
 
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.log.common.Constants;
-import com.didiglobal.logi.log.common.TraceContext;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.log.common.Constants;
+import com.didiglobal.knowframework.log.common.TraceContext;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;

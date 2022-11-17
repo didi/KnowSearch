@@ -6,8 +6,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.OpTaskVO;
 import com.didichuxing.datachannel.arius.admin.core.service.task.OpTaskService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

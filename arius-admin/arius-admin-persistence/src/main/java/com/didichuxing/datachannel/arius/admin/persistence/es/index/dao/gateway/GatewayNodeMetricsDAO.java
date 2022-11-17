@@ -24,10 +24,10 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.didichuxing.datachannel.arius.admin.persistence.es.metric.BaseTopNMetricsDAO;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
+import com.didiglobal.knowframework.elasticsearch.client.response.query.query.ESQueryResponse;
+import com.didiglobal.knowframework.elasticsearch.client.response.query.query.aggs.ESAggr;
+import com.didiglobal.knowframework.elasticsearch.client.response.query.query.aggs.ESAggrMap;
+import com.didiglobal.knowframework.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Lists;
 
 import lombok.NoArgsConstructor;

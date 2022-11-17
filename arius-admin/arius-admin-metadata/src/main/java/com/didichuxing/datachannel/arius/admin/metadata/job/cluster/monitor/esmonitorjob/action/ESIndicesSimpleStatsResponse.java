@@ -22,8 +22,8 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esm
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
-import com.didiglobal.logi.elasticsearch.client.gateway.search.response.Shards;
-import com.didiglobal.logi.elasticsearch.client.model.ESActionResponse;
+import com.didiglobal.knowframework.elasticsearch.client.gateway.search.response.Shards;
+import com.didiglobal.knowframework.elasticsearch.client.model.ESActionResponse;
 
 import java.util.HashMap;
 import java.util.Map;

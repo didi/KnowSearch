@@ -10,23 +10,23 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Tri
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didiglobal.logi.security.common.PagingData;
-import com.didiglobal.logi.security.common.PagingData.Pagination;
-import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.dto.role.RoleAssignDTO;
-import com.didiglobal.logi.security.common.dto.role.RoleQueryDTO;
-import com.didiglobal.logi.security.common.dto.role.RoleSaveDTO;
-import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
-import com.didiglobal.logi.security.common.vo.role.RoleBriefVO;
-import com.didiglobal.logi.security.common.vo.role.RoleDeleteCheckVO;
-import com.didiglobal.logi.security.common.vo.role.RoleVO;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.exception.LogiSecurityException;
-import com.didiglobal.logi.security.service.ProjectService;
-import com.didiglobal.logi.security.service.RoleService;
-import com.didiglobal.logi.security.service.UserProjectService;
-import com.didiglobal.logi.security.service.UserService;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.knowframework.security.common.PagingData;
+import com.didiglobal.knowframework.security.common.PagingData.Pagination;
+import com.didiglobal.knowframework.security.common.PagingResult;
+import com.didiglobal.knowframework.security.common.dto.role.RoleAssignDTO;
+import com.didiglobal.knowframework.security.common.dto.role.RoleQueryDTO;
+import com.didiglobal.knowframework.security.common.dto.role.RoleSaveDTO;
+import com.didiglobal.knowframework.security.common.vo.role.AssignInfoVO;
+import com.didiglobal.knowframework.security.common.vo.role.RoleBriefVO;
+import com.didiglobal.knowframework.security.common.vo.role.RoleDeleteCheckVO;
+import com.didiglobal.knowframework.security.common.vo.role.RoleVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.security.exception.KfSecurityException;
+import com.didiglobal.knowframework.security.service.ProjectService;
+import com.didiglobal.knowframework.security.service.RoleService;
+import com.didiglobal.knowframework.security.service.UserProjectService;
+import com.didiglobal.knowframework.security.service.UserService;
+import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
@@ -80,7 +80,7 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
                     String.format("删除角色:[%s]", roleBriefByRoleId.getRoleName()),
                     OperateTypeEnum.ROLE_MANAGER_DELETE);
             return Result.buildSucc();
-        } catch (LogiSecurityException e) {
+        } catch (KfSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
@@ -124,7 +124,7 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
             saveOperateRecord(HttpRequestUtil.getOperator(request), String.format("新增角色:[%s]", saveDTO.getRoleName()),
                     OperateTypeEnum.ROLE_MANAGER_CREATE);
             return Result.buildSucc();
-        } catch (LogiSecurityException e) {
+        } catch (KfSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
@@ -145,7 +145,7 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
                     String.format("角色:[%s] 解绑的用户:[%s]", roleBriefByRoleId.getRoleName(),
                             userBriefVO.getUserName()), OperateTypeEnum.ROLE_MANAGER_UNBIND_USER);
             return Result.buildSucc();
-        } catch (LogiSecurityException e) {
+        } catch (KfSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
@@ -155,7 +155,7 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
         try {
             roleService.updateRole(saveDTO, request);
             return Result.buildSucc();
-        } catch (LogiSecurityException e) {
+        } catch (KfSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
@@ -188,7 +188,7 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
                     OperateTypeEnum.ROLE_MANAGER_BIND_USER);
             return Result.buildSucc();
 
-        } catch (LogiSecurityException e) {
+        } catch (KfSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }

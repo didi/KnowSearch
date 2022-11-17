@@ -7,8 +7,8 @@ import org.springframework.beans.BeansException;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 /**
  * 从SpringContent中获取指定接口的类的实例

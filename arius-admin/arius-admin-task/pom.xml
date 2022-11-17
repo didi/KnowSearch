@@ -30,13 +30,13 @@
 
         <!-- logi -->
         <dependency>
-            <groupId>io.github.zqrferrari</groupId>
-            <artifactId>logi-job-spring-boot-starter</artifactId>
+            <groupId>io.github.knowstack</groupId>
+            <artifactId>kf-job-spring-boot-starter</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>io.github.zqrferrari</groupId>
-            <artifactId>logi-log</artifactId>
+            <groupId>io.github.knowstack</groupId>
+            <artifactId>kf-log</artifactId>
         </dependency>
 
         <dependency>

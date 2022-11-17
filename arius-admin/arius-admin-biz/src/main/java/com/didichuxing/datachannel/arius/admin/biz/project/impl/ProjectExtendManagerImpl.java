@@ -40,23 +40,23 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService
 import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
-import com.didiglobal.logi.security.common.PagingData;
-import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.dto.project.ProjectQueryDTO;
-import com.didiglobal.logi.security.common.dto.project.ProjectSaveDTO;
-import com.didiglobal.logi.security.common.enums.project.ProjectUserCode;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.logi.security.common.vo.project.ProjectDeleteCheckVO;
-import com.didiglobal.logi.security.common.vo.project.ProjectVO;
-import com.didiglobal.logi.security.common.vo.role.RoleBriefVO;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.common.vo.user.UserVO;
-import com.didiglobal.logi.security.exception.LogiSecurityException;
-import com.didiglobal.logi.security.service.ProjectService;
-import com.didiglobal.logi.security.service.RoleService;
-import com.didiglobal.logi.security.service.UserProjectService;
-import com.didiglobal.logi.security.service.UserService;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.knowframework.security.common.PagingData;
+import com.didiglobal.knowframework.security.common.PagingResult;
+import com.didiglobal.knowframework.security.common.dto.project.ProjectQueryDTO;
+import com.didiglobal.knowframework.security.common.dto.project.ProjectSaveDTO;
+import com.didiglobal.knowframework.security.common.enums.project.ProjectUserCode;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectDeleteCheckVO;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectVO;
+import com.didiglobal.knowframework.security.common.vo.role.RoleBriefVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserVO;
+import com.didiglobal.knowframework.security.exception.KfSecurityException;
+import com.didiglobal.knowframework.security.service.ProjectService;
+import com.didiglobal.knowframework.security.service.RoleService;
+import com.didiglobal.knowframework.security.service.UserProjectService;
+import com.didiglobal.knowframework.security.service.UserService;
+import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.Collection;
@@ -201,7 +201,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 projectExtendVO.setId(projectExtendVO.getConfig().getProjectId());
             }
             return Result.<ProjectExtendVO> buildSucc(projectExtendVO);
-        } catch (LogiSecurityException e) {
+        } catch (KfSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
@@ -232,7 +232,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
             projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
             return Result.buildSucc(projectExtendVO);
-        } catch (LogiSecurityException e) {
+        } catch (KfSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
@@ -406,7 +406,6 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      *
      * @param saveDTO  项目信息
      * @param operator 请求信息
-     * @throws LogiSecurityException 项目相关的错误信息
      */
     @Override
     public Result<Void> updateProject(ProjectExtendSaveDTO saveDTO, String operator) {
@@ -425,7 +424,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             //操作前的项目信息
             projectService.updateProject(project, operator);
             return Result.buildSucc();
-        } catch (LogiSecurityException e) {
+        } catch (KfSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
@@ -480,7 +479,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         try {
             projectService.changeProjectStatus(projectId, operator);
             return Result.buildSucc();
-        } catch (LogiSecurityException e) {
+        } catch (KfSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
@@ -503,7 +502,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 return operationProjectUserResult;
             }
             return Result.buildSucc();
-        } catch (LogiSecurityException e) {
+        } catch (KfSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
 
@@ -533,7 +532,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 return operationProjectOwnerResult;
             }
             return Result.buildSucc();
-        } catch (LogiSecurityException e) {
+        } catch (KfSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
@@ -559,7 +558,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             }
 
             return Result.buildSucc();
-        } catch (LogiSecurityException e) {
+        } catch (KfSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
@@ -589,7 +588,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             }
 
             return Result.buildSucc();
-        } catch (LogiSecurityException e) {
+        } catch (KfSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
@@ -629,7 +628,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      */
     @Override
     public Result<List<UserBriefVO>> unassignedByProjectId(Integer projectId, Boolean containsAdminRole) {
-        final com.didiglobal.logi.security.common.Result<List<UserBriefVO>> listResult = projectService
+        final com.didiglobal.knowframework.security.common.Result<List<UserBriefVO>> listResult = projectService
             .unassignedByProjectId(projectId);
         if (listResult.successed()) {
             //如果为false则不包含管理员角色的用户
@@ -672,7 +671,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      */
     @Override
     public Result<List<ProjectBriefExtendVO>> getProjectBriefByUserId(Integer userId) {
-        final com.didiglobal.logi.security.common.Result<List<ProjectBriefVO>> listResult = projectService
+        final com.didiglobal.knowframework.security.common.Result<List<ProjectBriefVO>> listResult = projectService
             .getProjectBriefByUserId(userId);
         if (listResult.successed()) {
             final List<ProjectBriefExtendVO> dtoList = ConvertUtil.list2List(listResult.getData(),

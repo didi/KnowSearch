@@ -4,8 +4,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeStats;
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.*;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.lucene.util.NamedThreadFactory;

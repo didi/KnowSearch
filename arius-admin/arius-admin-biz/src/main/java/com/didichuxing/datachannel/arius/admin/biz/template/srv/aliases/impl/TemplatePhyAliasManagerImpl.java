@@ -8,9 +8,9 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AdminESOpRetryCon
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.IndexTemplateServiceImpl;
-import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.elasticsearch.client.response.setting.template.TemplateConfig;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;

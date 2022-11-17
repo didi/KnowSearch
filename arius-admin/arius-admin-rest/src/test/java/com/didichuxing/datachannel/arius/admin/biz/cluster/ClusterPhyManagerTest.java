@@ -52,8 +52,8 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
-import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.knowframework.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;

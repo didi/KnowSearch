@@ -31,8 +31,8 @@ import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.Ar
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIndexInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateAccessESDAO;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
-import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.knowframework.elasticsearch.client.response.cluster.ESClusterHealthResponse;
+import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.HashMap;

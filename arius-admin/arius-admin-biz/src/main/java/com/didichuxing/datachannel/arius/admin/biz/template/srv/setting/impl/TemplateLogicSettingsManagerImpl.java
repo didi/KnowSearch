@@ -35,7 +35,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
+import com.didiglobal.knowframework.elasticsearch.client.utils.JsonUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

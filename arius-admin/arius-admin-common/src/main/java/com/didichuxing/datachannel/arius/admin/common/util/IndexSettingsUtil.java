@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSetti
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.ESSettingConstant;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
+import com.didiglobal.knowframework.elasticsearch.client.utils.JsonUtils;
 import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.StringUtils;
 

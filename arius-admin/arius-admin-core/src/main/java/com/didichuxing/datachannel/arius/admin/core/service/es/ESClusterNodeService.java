@@ -7,8 +7,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordina
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.PendingTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
+import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
+import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 
 import java.util.List;
 import java.util.Map;

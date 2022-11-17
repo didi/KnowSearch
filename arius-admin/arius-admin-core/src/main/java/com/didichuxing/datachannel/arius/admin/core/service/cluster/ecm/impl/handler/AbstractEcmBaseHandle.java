@@ -7,13 +7,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.E
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 import java.util.List;
 
 public abstract class AbstractEcmBaseHandle {
-    protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractEcmBaseHandle.class);
+    protected final static ILog LOGGER = LogFactory.getLog(AbstractEcmBaseHandle.class);
 
     protected ESClusterTypeEnum   esClusterTypeEnum;
 

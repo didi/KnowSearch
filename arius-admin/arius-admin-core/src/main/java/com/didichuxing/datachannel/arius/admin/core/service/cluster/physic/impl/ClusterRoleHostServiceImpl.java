@@ -39,11 +39,11 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterRoleHostDAO;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
-import com.didiglobal.logi.elasticsearch.client.response.model.http.HttpInfo;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
+import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
+import com.didiglobal.knowframework.elasticsearch.client.response.model.http.HttpInfo;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;

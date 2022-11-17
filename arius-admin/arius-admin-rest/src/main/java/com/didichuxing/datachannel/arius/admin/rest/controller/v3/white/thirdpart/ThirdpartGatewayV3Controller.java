@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslT
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.GatewayESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalVO;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

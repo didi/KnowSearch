@@ -16,9 +16,9 @@ import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoard
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.OneLevelTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHit;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHits;
+import com.didiglobal.knowframework.elasticsearch.client.response.query.query.ESQueryResponse;
+import com.didiglobal.knowframework.elasticsearch.client.response.query.query.hits.ESHit;
+import com.didiglobal.knowframework.elasticsearch.client.response.query.query.hits.ESHits;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;

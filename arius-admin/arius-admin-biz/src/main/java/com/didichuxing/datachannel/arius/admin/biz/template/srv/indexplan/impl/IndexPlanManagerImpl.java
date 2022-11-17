@@ -27,7 +27,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
+import com.didiglobal.knowframework.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;

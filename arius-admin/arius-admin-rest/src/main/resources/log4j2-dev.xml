@@ -1,36 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- status="OFF"，可以去掉，它的含义为是否记录log4j2本身的event信息，默认是OFF -->
-<configuration status="debug" monitorInterval="30">
-    <!-- 定义下面的引用名 -->
-    <Properties>
+<Configuration package="org.apache.logging.log4j.core,com.didiglobal.logi.log.log4j2.appender" >
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
 
-        <Property name="PID">????</Property>
-        <Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
-        <Property name="LOG_LEVEL_PATTERN">%5p</Property>
-        <Property name="LOG_DATEFORMAT_PATTERN">yyyy-MM-dd HH:mm:ss.SSS</Property>
-        <Property name="CONSOLE_LOG_PATTERN">%clr{%d{${LOG_DATEFORMAT_PATTERN}}}{faint} %clr{${LOG_LEVEL_PATTERN}} %clr{${sys:PID}}{magenta} %clr{---}{faint} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{cyan} %clr{:}{faint} %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
-        <Property name="log_pattern">%d{${LOG_DATEFORMAT_PATTERN}} ${LOG_LEVEL_PATTERN} ${sys:PID} --- [%t] %-40.40c{1.} : %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
-        <!-- name的值是变量的名称，value的值时变量定义的值。通过定义的值会被插入到logger上下文中。定义后，可以使"${}"来使用变量。 -->
-        <property name="log.path">./logs/</property>
-    </Properties>
-
-    <!--先定义所有的appender -->
-    <appenders>
-
-        <Console name="console" target="SYSTEM_OUT">
-            <!--输出日志的格式-->
-            <PatternLayout pattern="[%-5level][%d{YYYY-MM-dd HH:mm:ss.SSS+0800}][%F:%line] %msg%n"/>
-            <!--控制台只输出level及其以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
-            <Filters>
-                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
-            </Filters>
         </Console>
-    </appenders>
+        <ElasticsearchAppender name="esAppender" address="116.85.23.222" port="18303" user="elastic" password="Didiyun@888" indexName="test" typeName="type" threshold="all" bufferSize="1000" numberOfShards="1" numberOfReplicas="0" logExpire="7" extendsMappingClass="">
 
-    <!-- dev 环境只需要打印到控制台就行 -->
-    <loggers>
-        <AsyncRoot level="INFO" includeLocation="true">
-            <AppenderRef ref="console" />
-        </AsyncRoot>
-    </loggers>
-</configuration>
+        </ElasticsearchAppender>
+    </Appenders>
+    <Loggers>
+        <root level="INFO">
+            <appender-ref ref="Console" />
+            <appender-ref ref="esAppender" />
+        </root>
+    </Loggers>
+</Configuration>

@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.rest.swagger;
 
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;

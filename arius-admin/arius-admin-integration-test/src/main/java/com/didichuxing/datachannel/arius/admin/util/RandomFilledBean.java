@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -16,7 +16,7 @@ public class RandomFilledBean {
     private RandomFilledBean() {
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RandomFilledBean.class);
+    private static final ILog LOGGER = LogFactory.getLog(RandomFilledBean.class);
 
     public static <T> T construct(Class<T> cls) throws NoSuchMethodException, IllegalAccessException,
                                                 InvocationTargetException, InstantiationException {

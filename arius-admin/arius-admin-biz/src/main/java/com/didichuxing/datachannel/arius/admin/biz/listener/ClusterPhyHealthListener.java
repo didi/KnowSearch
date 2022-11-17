@@ -8,8 +8,8 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterPhyHealthEvent;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 @Component
 public class ClusterPhyHealthListener implements ApplicationListener<ClusterPhyHealthEvent> {

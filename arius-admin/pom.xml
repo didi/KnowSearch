@@ -61,9 +61,9 @@
                 <version>${java-diff-utils.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.github.zqrferrari</groupId>
-                <artifactId>logi-security-spring-boot-starter</artifactId>
-                <version>${logi-security-spring-boot-starter.version}</version>
+                <version>1.0.0</version>
+                <groupId>io.github.knowstack</groupId>
+                <artifactId>kf-security-spring-boot-starter</artifactId>
             </dependency>
             <!-- self -->
             <dependency>
@@ -669,9 +669,9 @@
             </dependency>
 
             <dependency>
-                <groupId>io.github.zqrferrari</groupId>
-                <artifactId>logi-log</artifactId>
-                <version>1.0.6</version>
+                <version>2.0.0</version>
+                <groupId>io.github.knowstack</groupId>
+                <artifactId>kf-log</artifactId>
                 <exclusions>
                     <exclusion>
                         <artifactId>log4j-slf4j-impl</artifactId>
@@ -685,9 +685,9 @@
             </dependency>
 
             <dependency>
-                <groupId>io.github.zqrferrari</groupId>
-                <artifactId>logi-elasticsearch-client</artifactId>
-                <version>${logi-elasticsearch-client.version}</version>
+                <groupId>io.github.knowstack</groupId>
+                <artifactId>kf-elasticsearch-client</artifactId>
+                <version>1.0.0</version>
             </dependency>
 
             <dependency>
@@ -713,9 +713,9 @@
             </dependency>
 
             <dependency>
-                <groupId>io.github.zqrferrari</groupId>
-                <artifactId>logi-job-spring-boot-starter</artifactId>
-                <version>1.0.29</version>
+                <groupId>io.github.knowstack</groupId>
+                <artifactId>kf-job-spring-boot-starter</artifactId>
+                <version>2.0.0</version>
             </dependency>
 
             <dependency>

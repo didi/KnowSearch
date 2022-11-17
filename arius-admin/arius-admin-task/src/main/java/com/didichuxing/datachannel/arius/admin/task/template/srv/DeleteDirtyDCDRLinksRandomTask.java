@@ -13,14 +13,15 @@ import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTyp
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didiglobal.logi.job.annotation.Task;
-import com.didiglobal.logi.job.common.TaskResult;
-import com.didiglobal.logi.job.core.job.Job;
-import com.didiglobal.logi.job.core.job.JobContext;
+import com.didiglobal.knowframework.job.annotation.Task;
+import com.didiglobal.knowframework.job.common.TaskResult;
+import com.didiglobal.knowframework.job.core.job.Job;
+import com.didiglobal.knowframework.job.core.job.JobContext;
 import java.util.List;
+
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -31,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Task(name = "DeleteDirtyDCDRLinksRandomTask", description = "删除成功任务中的dcdr脏链路", cron = "0 0 2 */1 * ?", autoRegister = true)
 public class DeleteDirtyDCDRLinksRandomTask implements Job {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DeleteDirtyDCDRLinksRandomTask.class);
+    private static final ILog LOGGER = LogFactory.getLog(DeleteDirtyDCDRLinksRandomTask.class);
 
     @Autowired
     private OpTaskManager       opTaskManager;

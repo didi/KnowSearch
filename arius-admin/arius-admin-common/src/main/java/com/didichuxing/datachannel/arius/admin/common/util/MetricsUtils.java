@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.common.util;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.MetricsContentVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
+import com.didiglobal.knowframework.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Calendar;

@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.action;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.didiglobal.logi.elasticsearch.client.response.model.indices.CommonStat;
+import com.didiglobal.knowframework.elasticsearch.client.response.model.indices.CommonStat;
 
 import java.util.List;
 import java.util.Map;

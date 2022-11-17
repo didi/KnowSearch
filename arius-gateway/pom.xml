@@ -156,9 +156,9 @@
                 <version>${es.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.github.zqrferrari</groupId>
-                <artifactId>logi-elasticsearch-sql</artifactId>
-                <version>1.0.4</version>
+                <groupId>io.github.knowstack</groupId>
+                <artifactId>kf-elasticsearch-sql</artifactId>
+                <version>1.0.0</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.elasticsearch</groupId>
@@ -180,9 +180,9 @@
 
             <!-- 依赖DSL 解析模块 -->
             <dependency>
-                <groupId>io.github.zqrferrari</groupId>
-                <artifactId>logi-dsl-prase</artifactId>
-                <version>1.0.12</version>
+                <version>1.0.0</version>
+                <groupId>io.github.knowstack</groupId>
+                <artifactId>kf-dsl-prase</artifactId>
                 <exclusions>
                     <exclusion>
                         <artifactId>elasticsearch</artifactId>
@@ -205,9 +205,9 @@
             </dependency>
 
             <dependency>
-                <groupId>io.github.zqrferrari</groupId>
-                <artifactId>logi-metrices</artifactId>
-                <version>1.0.5</version>
+                <version>1.0.0</version>
+                <groupId>io.github.knowstack</groupId>
+                <artifactId>kf-metrices</artifactId>
                 <exclusions>
                     <exclusion>
                         <artifactId>log4j</artifactId>

@@ -3,8 +3,8 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esm
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeToIndexTempBean;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 public class ESNodeToIndexComputer {
     private static final ILog  LOGGER = LogFactory.getLog(ESNodeToIndexComputer.class);

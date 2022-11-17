@@ -33,12 +33,14 @@ import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.workorder.WorkOrderService;
-import com.didiglobal.logi.security.common.entity.dept.Dept;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.service.DeptService;
-import com.didiglobal.logi.security.service.ProjectService;
-import com.didiglobal.logi.security.service.UserService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.security.common.entity.dept.Dept;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.security.service.DeptService;
+import com.didiglobal.knowframework.security.service.ProjectService;
+import com.didiglobal.knowframework.security.service.UserService;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,8 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,7 +58,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class WorkOrderManagerImpl implements WorkOrderManager {
 
-    private static final Logger LOGGER               = LoggerFactory.getLogger(WorkOrderManagerImpl.class);
+    private static final ILog LOGGER               = LogFactory.getLog(WorkOrderManagerImpl.class);
 
     private static final int    PROJECT_ID_TO_CREATE = -99;
 

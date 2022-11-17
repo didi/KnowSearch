@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.task.component;
 
-import com.didiglobal.logi.job.common.TaskResult;
+import com.didiglobal.knowframework.job.common.TaskResult;
 
 public class TaskResultBuilder {
     private StringBuffer failMsg = new StringBuffer();

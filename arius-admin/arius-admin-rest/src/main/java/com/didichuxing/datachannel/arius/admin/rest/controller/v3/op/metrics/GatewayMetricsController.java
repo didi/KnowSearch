@@ -19,7 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.gateway.GatewayOverviewMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.GatewayMetricsTypeEnum;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;

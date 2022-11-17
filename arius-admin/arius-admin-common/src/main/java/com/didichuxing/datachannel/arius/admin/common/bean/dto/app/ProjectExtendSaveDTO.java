@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.app;
 
-import com.didiglobal.logi.security.common.dto.project.ProjectSaveDTO;
+import com.didiglobal.knowframework.security.common.dto.project.ProjectSaveDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

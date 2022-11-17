@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 
-import static com.didiglobal.logi.security.util.HttpRequestUtil.COOKIE_OR_SESSION_MAX_AGE_UNIT_SEC;
+import static com.didiglobal.knowframework.security.util.HttpRequestUtil.COOKIE_OR_SESSION_MAX_AGE_UNIT_SEC;
 
 import com.didichuxing.datachannel.arius.admin.biz.project.LoginManager;
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
@@ -9,16 +9,16 @@ import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
-import com.didiglobal.logi.security.common.Result;
-import com.didiglobal.logi.security.common.dto.account.AccountLoginDTO;
-import com.didiglobal.logi.security.common.enums.ResultCode;
-import com.didiglobal.logi.security.common.vo.project.ProjectVO;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.exception.LogiSecurityException;
-import com.didiglobal.logi.security.service.LoginService;
-import com.didiglobal.logi.security.service.ProjectService;
-import com.didiglobal.logi.security.util.AESUtils;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.knowframework.security.common.Result;
+import com.didiglobal.knowframework.security.common.dto.account.AccountLoginDTO;
+import com.didiglobal.knowframework.security.common.enums.ResultCode;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.security.exception.KfSecurityException;
+import com.didiglobal.knowframework.security.service.LoginService;
+import com.didiglobal.knowframework.security.service.ProjectService;
+import com.didiglobal.knowframework.security.util.AESUtils;
+import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -54,7 +54,6 @@ public class LoginManagerImpl implements LoginManager {
      * @param request  请求信息
      * @param response
      * @return token
-     * @throws LogiSecurityException 登录错误
      */
     @Override
     public Result<UserBriefVO> verifyLogin(AccountLoginDTO loginDTO, HttpServletRequest request,
@@ -65,7 +64,7 @@ public class LoginManagerImpl implements LoginManager {
             //response设置平台独有cookie
             addCookieByKnowSearch(userBriefVO.getUserName(), response);
             return Result.success(userBriefVO);
-        } catch (LogiSecurityException e) {
+        } catch (KfSecurityException e) {
             return Result.fail(e);
         }
     }
@@ -124,7 +123,7 @@ public class LoginManagerImpl implements LoginManager {
                     }
 
                     if (!projectService.checkProjectExist(userNameAndUserIdAndProjectIdTuple3.v3)) {
-                        throw new LogiSecurityException(ResultCode.PROJECT_NOT_EXISTS);
+                        throw new KfSecurityException(ResultCode.PROJECT_NOT_EXISTS);
                     }
                     //判断用户在非管理员角色下，操作用户是否是当前项目成员或者拥有者
                     if (!roleTool.isAdmin(userNameAndUserIdAndProjectIdTuple3.v2)) {
@@ -134,7 +133,7 @@ public class LoginManagerImpl implements LoginManager {
                             projectVO)
                               || ProjectUtils.isUserNameBelongProjectResponsible(userNameAndUserIdAndProjectIdTuple3.v1,
                                   projectVO))) {
-                            throw new LogiSecurityException(ResultCode.NO_PERMISSION);
+                            throw new KfSecurityException(ResultCode.NO_PERMISSION);
                         }
 
                     }

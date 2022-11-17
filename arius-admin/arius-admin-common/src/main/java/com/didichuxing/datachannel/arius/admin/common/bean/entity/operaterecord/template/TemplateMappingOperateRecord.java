@@ -6,7 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappi
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.DiffUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.DiffUtil.DiffJson;
-import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.knowframework.elasticsearch.client.response.setting.common.MappingConfig;
 import java.util.List;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;

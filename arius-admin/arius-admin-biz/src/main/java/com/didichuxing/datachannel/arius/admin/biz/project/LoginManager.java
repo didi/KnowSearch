@@ -1,10 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.project;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
-import com.didiglobal.logi.security.common.Result;
-import com.didiglobal.logi.security.common.dto.account.AccountLoginDTO;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.exception.LogiSecurityException;
+import com.didiglobal.knowframework.security.common.Result;
+import com.didiglobal.knowframework.security.common.dto.account.AccountLoginDTO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -24,7 +23,6 @@ public interface LoginManager {
      * @param loginDTO 登陆信息
      * @param request  请求信息
      * @return token
-     * @throws LogiSecurityException 登录错误
      */
     Result<UserBriefVO> verifyLogin(AccountLoginDTO loginDTO, HttpServletRequest request, HttpServletResponse response);
 

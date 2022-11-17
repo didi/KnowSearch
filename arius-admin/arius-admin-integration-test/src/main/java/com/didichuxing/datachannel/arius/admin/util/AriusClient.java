@@ -1,18 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.util;
 
 import com.alibaba.fastjson.JSON;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class AriusClient {
-    private static final Logger    LOGGER                      = LoggerFactory.getLogger(AriusClient.class);
+    private static final ILog LOGGER                      = LogFactory.getLog(AriusClient.class);
     private static final MediaType JSON_TYPE                   = MediaType.get("application/json; charset=utf-8");
     private static String          prefix;
     private static String          user                        = "admin";

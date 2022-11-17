@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting;
 
 import com.alibaba.fastjson.JSON;
-import com.didiglobal.logi.elasticsearch.client.model.ESActionRequest;
-import com.didiglobal.logi.elasticsearch.client.model.ESActionResponse;
-import com.didiglobal.logi.elasticsearch.client.model.RestRequest;
-import com.didiglobal.logi.elasticsearch.client.model.RestResponse;
+import com.didiglobal.knowframework.elasticsearch.client.model.ESActionRequest;
+import com.didiglobal.knowframework.elasticsearch.client.model.ESActionResponse;
+import com.didiglobal.knowframework.elasticsearch.client.model.RestRequest;
+import com.didiglobal.knowframework.elasticsearch.client.model.RestResponse;
 import org.elasticsearch.action.ActionRequestValidationException;
 
 public class ESClusterGetSettingsAllRequest extends ESActionRequest<ESClusterGetSettingsAllRequest> {

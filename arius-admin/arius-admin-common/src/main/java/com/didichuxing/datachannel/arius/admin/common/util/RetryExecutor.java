@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 

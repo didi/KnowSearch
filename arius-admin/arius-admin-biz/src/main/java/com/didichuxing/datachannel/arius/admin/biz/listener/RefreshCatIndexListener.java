@@ -5,8 +5,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatC
 import com.didichuxing.datachannel.arius.admin.common.event.index.RefreshCatIndexInfoEvent;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
