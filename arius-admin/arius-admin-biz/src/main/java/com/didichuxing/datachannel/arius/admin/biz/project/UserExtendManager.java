@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserQueryExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserExtendVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserWithPwVO;
 import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.user.UserBriefQueryDTO;
 import com.didiglobal.logi.security.common.dto.user.UserDTO;
@@ -61,7 +62,7 @@ public interface UserExtendManager {
      * @return 用户详情
      * @throws LogiSecurityException 用户不存在
      */
-    Result<UserVO> getUserDetailByUserId(Integer userId, Integer projectId);
+    Result<UserWithPwVO> getUserDetailByUserId(Integer userId, Integer projectId) throws Exception;
 
     /**
      * 根据用户id删除用户

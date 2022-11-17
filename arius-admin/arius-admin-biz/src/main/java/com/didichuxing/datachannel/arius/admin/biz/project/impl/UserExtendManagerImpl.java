@@ -6,9 +6,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserQueryExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserExtendVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserWithPwVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -18,24 +20,26 @@ import com.didiglobal.logi.security.common.PagingData.Pagination;
 import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.user.UserBriefQueryDTO;
 import com.didiglobal.logi.security.common.dto.user.UserDTO;
+import com.didiglobal.logi.security.common.entity.UserProject;
 import com.didiglobal.logi.security.common.entity.user.User;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
 import com.didiglobal.logi.security.common.vo.role.RoleBriefVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.common.vo.user.UserVO;
+import com.didiglobal.logi.security.dao.ProjectDao;
+import com.didiglobal.logi.security.dao.UserDao;
+import com.didiglobal.logi.security.dao.UserProjectDao;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
 import com.didiglobal.logi.security.service.PermissionService;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.RolePermissionService;
 import com.didiglobal.logi.security.service.UserService;
+import com.didiglobal.logi.security.util.CopyBeanUtil;
 import com.didiglobal.logi.security.util.PWEncryptUtil;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
@@ -58,7 +62,13 @@ public class UserExtendManagerImpl implements UserExtendManager {
     private RolePermissionService rolePermissionService;
     @Autowired
     private PermissionService     permissionService;
-    
+    @Autowired
+    private UserProjectDao        userProjectDao;
+    @Autowired
+    private UserDao               userDao;
+
+    private final static int NORMAL = 0;
+
     private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("UserExtendManagerImpl", 10, 10, 100);
     /**
      * 用户注册信息校验
@@ -170,7 +180,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
      * @throws LogiSecurityException 用户不存在
      */
     @Override
-    public Result<UserVO> getUserDetailByUserId(Integer userId, Integer projectId) {
+    public Result<UserWithPwVO> getUserDetailByUserId(Integer userId, Integer projectId) throws Exception {
         final UserVO userVO = userService.getUserDetailByUserId(userId);
         final List<RoleBriefVO> roleList = Optional.ofNullable(userVO.getRoleList()).orElse(Lists.newArrayList());
         final List<Integer> roleIds = roleList.stream().map(RoleBriefVO::getId).collect(Collectors.toList());
@@ -203,8 +213,10 @@ public class UserExtendManagerImpl implements UserExtendManager {
         }
     
         userVO.setProjectList(projectBriefList);
-    
-        return Result.buildSucc(userVO);
+        UserWithPwVO userWithPwVO = ConvertUtil.obj2Obj(userVO, UserWithPwVO.class);
+        userWithPwVO.setPassword(PWEncryptUtil.decode(userDao.selectByUserId(userId).getPw()));
+
+        return Result.buildSucc(userWithPwVO);
     }
 
     /**
@@ -219,6 +231,23 @@ public class UserExtendManagerImpl implements UserExtendManager {
         if (deleteByUserId.failed()) {
             return Result.build(deleteByUserId.getCode(), deleteByUserId.getMessage());
         }
+
+        // 获取该用户对应的所有应用id，删除相关应用下的该用户数据
+        final List<Integer> projectIdList = userProjectDao.selectProjectIdListByUserIdList(
+                Collections.singletonList(userId));
+        if(AriusObjUtils.isEmptyList(projectIdList)){
+            return Result.buildSucc();
+        }
+        List<UserProject> userProjectList = new ArrayList<>(projectIdList.size());
+        projectIdList.forEach(projectId -> {
+            UserProject userProject = new UserProject();
+            userProject.setProjectId(projectId);
+            userProject.setUserId(userId);
+            userProject.setUserType(NORMAL);
+            userProjectList.add(userProject);
+        });
+        userProjectDao.deleteUserProject(userProjectList);
+
         return Result.buildSucc();
     }
 
