@@ -78,7 +78,7 @@ public interface GatewayClusterManager {
      * @param gatewayClusterId 网关集群 ID。
      * @return 更新前的网关集群版本。
      */
-    Result<String> getBeforeVersionByGatewayClusterId(Integer gatewayClusterId);
+    Result<List<Object>> getBeforeVersionByGatewayClusterId(Integer gatewayClusterId);
 		
 	
 		/**

@@ -12,8 +12,8 @@ import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClusterService;
+import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
-import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.interfaces.vo.ComponentGroupConfigVO;
 import java.util.Collections;
@@ -36,9 +36,9 @@ public class GatewayClusterConfigManagerImpl implements GatewayClusterConfigMana
 	@Autowired
 	private GatewayClusterService gatewayClusterService;
 	@Autowired
-	private ComponentDomainService componentDomainService;
+	private ComponentService      componentService;
 	@Autowired
-	private HandleFactory handleFactory;
+	private HandleFactory         handleFactory;
 	@Override
 	public PaginationResult<GatewayConfigVO> pageGetConfig(ConfigConditionDTO condition,
 			Integer projectId, Integer gatewayClusterId) {
@@ -63,7 +63,7 @@ public class GatewayClusterConfigManagerImpl implements GatewayClusterConfigMana
 			Integer configId) {
 		final Integer componentIdById = gatewayClusterService.getComponentIdById(gatewayClusterId);
 		final Optional<ComponentGroupConfig> componentGroupConfigOptional = Optional.ofNullable(
-						componentDomainService.getComponentConfig(
+						componentService.getComponentConfig(
 								componentIdById).getData()).orElse(Collections.emptyList())
 				.stream().filter(i -> Objects.equals(i.getId(), configId)).findFirst();
 		

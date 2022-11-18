@@ -19,7 +19,7 @@ public enum PageSearchHandleTypeEnum {
         TASK("taskPageSearch"),
         SCRIPT("scriptPageSearch"),
         PACKAGE("packagePageSearch"),
-
+        ES_CLUSTER_CONFIG("esClusterConfigPageSearchHandle"),
         FAST_INDEX_TASK_LOG("fastIndexTaskLogPageSearch");
        private String pageSearchType;
 

@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESResponsePluginInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
@@ -67,6 +68,13 @@ public interface ESClusterService {
      * @return map
      */
     Map<String, List<String>> syncGetNode2PluginsMap(String cluster) throws ESOperateException;
+    /**
+     * 获取集群上安装的插件列表
+     *
+     * @param cluster 集群名称，即elasticsearch.yml文件中的集群名称。
+     * @return ESResponsePluginInfo 对象列表。
+     */
+    List<ESResponsePluginInfo> syncGetPlugins(String cluster)throws ESOperateException;
 
     /**
      * 获取某个集群内索引别名到索引名称的映射
