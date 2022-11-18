@@ -449,6 +449,32 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         return Result.buildSucc(ConvertUtil.list2List(ret.getData(), ESClusterRoleHostVO.class));
     }
 
+    /**
+     * 获取当前平台所有集群节点的机器规格
+     * @return
+     */
+    @Override
+    public Result<List<String>> listAllMachineSpecs() {
+        List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.listAllNodeByRole(DATA_NODE.getCode());
+        if(AriusObjUtils.isEmptyList(clusterRoleHostList)){
+            return Result.buildFail("当前集群还没有任何节点");
+        }
+        List<String> machineSpecs = clusterRoleHostList.stream()
+                .filter(clusterRoleHost -> StringUtils.isNotBlank(clusterRoleHost.getMachineSpec()))
+                .map(ClusterRoleHost::getMachineSpec)
+                .distinct().collect(Collectors.toList());
+        machineSpecs.sort((s1, s2) -> {
+                int i1 = Integer.valueOf(s1.substring(0, s1.indexOf('c')));
+                int i2 = Integer.valueOf(s2.substring(0, s2.indexOf('c')));
+                if(i1 == i2){
+                    return 0;
+                }
+                return i1 > i2 ? 1 : -1;
+            }
+        );
+        return Result.buildSucc(machineSpecs);
+    }
+
     /**************************************** private method ***************************************************/
     private List<ESClusterRoleHostVO> buildClusterRoleHostStats(String cluster,
                                                                 List<ClusterRoleHost> clusterRoleHostList) {
