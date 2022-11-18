@@ -59,7 +59,7 @@ public interface ESIndexMoveTaskService {
     Tuple<String, Result<Void>> stopTask(FastIndexDTO fastIndexDTO, String fastDumpTaskId);
 
     /**
-     * 检查卫生
+     * 检查fastDump内核是否连通
      *
      * @param fastIndexDTO 快速指数dto
      * @return {@link Result}<{@link Void}>

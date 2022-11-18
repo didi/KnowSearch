@@ -1,17 +1,35 @@
-package com.didichuxing.datachannel.arius.admin.biz.task;
+package com.didichuxing.datachannel.arius.admin.biz.task.impl;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.FAST_INDEX_TASK_LOG;
+import static com.didichuxing.datachannel.arius.admin.common.constant.task.FastIndexConstant.*;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_INDEX_INCLUDE_NODE_NAME;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
+import com.didichuxing.datachannel.arius.admin.biz.page.FastIndexTaskLogPageSearchHandle;
+import com.didichuxing.datachannel.arius.admin.biz.task.FastIndexManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.BaseResult;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexLogsConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -25,8 +43,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.fastindex
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastDumpTaskLogVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastIndexDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastIndexStats;
+import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.FastIndexConstant;
@@ -41,17 +61,17 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConf
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.task.OpTaskService;
 import com.didichuxing.datachannel.arius.admin.core.service.task.fastindex.ESIndexMoveTaskService;
-import com.didichuxing.datachannel.arius.admin.core.service.task.fastindex.FastIndexTaskServiceImpl;
+import com.didichuxing.datachannel.arius.admin.core.service.task.fastindex.FastIndexTaskService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
@@ -59,28 +79,11 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingC
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.task.FastIndexConstant.*;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_INDEX_INCLUDE_NODE_NAME;
 
 @Service
-public class FastIndexManagerImpl {
+public class FastIndexManagerImpl implements FastIndexManager {
     protected static final ILog                                      LOGGER                                = LogFactory
         .getLog(BaseTemplateSrvImpl.class);
 
@@ -101,20 +104,11 @@ public class FastIndexManagerImpl {
     protected TemplateLogicManager                                   templateLogicManager;
 
     @Autowired
-    protected TemplateSrvManager                                     templateSrvManager;
-
-    @Autowired
-    protected ClusterPhyManager                                      clusterPhyManager;
+    protected ClusterPhyService                                      clusterPhyService;
     @Autowired
     private ClusterRegionService                                     clusterRegionService;
     @Autowired
     protected OperateRecordService                                   operateRecordService;
-    @Autowired
-    protected ProjectService                                         projectService;
-    @Autowired
-    protected AriusConfigInfoService                                 ariusConfigInfoService;
-    @Autowired
-    protected ESClusterNodeService                                   esClusterNodeService;
 
     @Autowired
     private ClusterRoleHostService                                   clusterRoleHostService;
@@ -127,17 +121,13 @@ public class FastIndexManagerImpl {
     @Autowired
     private ESTemplateService                                        esTemplateService;
     @Autowired
-    private FastIndexTaskServiceImpl                                 fastIndexTaskService;
-
+    private FastIndexTaskService                                     fastIndexTaskService;
     @Autowired
-    protected ClusterRegionManager                                   clusterRegionManager;
-    @Autowired
-    protected OpTaskManager                                          opTaskManager;
+    private OpTaskService                                            opTaskService;
     @Autowired
     private ESIndexMoveTaskService                                   esIndexMoveTaskService;
-
     @Autowired
-    private ClusterLogicService                                      clusterLogicService;
+    private HandleFactory                                            handleFactory;
 
     private static final FutureUtil<Result<List<FastIndexTaskInfo>>> FAST_INDEX_TASK_TEMPLATE_FUTURE_UTIL  = FutureUtil
         .init("FastIndexTaskTemplate", 10, 10, 100);
@@ -157,21 +147,21 @@ public class FastIndexManagerImpl {
      * 5.保存主任务
      * 6.拆分为子任务存储
      *
-     * @param fastIndexDTO
-     * @param operator
-     * @param projectId
-     * @return
+     * @param fastIndexDTO 数据迁移任务
+     * @param operator 操作人
+     * @param projectId 当前项目
+     * @return  Result<WorkTaskVO>
      */
+    @Override
     @Transactional
-    public Result<WorkTaskVO> submitTask(FastIndexDTO fastIndexDTO, String operator,
-                                         Integer projectId) throws NotFindSubclassException {
+    public Result<WorkTaskVO> submitTask(FastIndexDTO fastIndexDTO, String operator, Integer projectId) {
 
         Result<Void> checkRet = checkTask(fastIndexDTO);
         if (checkRet.failed()) {
             return Result.buildFrom(checkRet);
         }
-        ClusterPhy sourceCluster = clusterPhyManager.getClusterByName(fastIndexDTO.getSourceCluster()).getData();
-        ClusterPhy targetCluster = clusterPhyManager.getClusterByName(fastIndexDTO.getTargetCluster()).getData();
+        ClusterPhy sourceCluster = clusterPhyService.getClusterByName(fastIndexDTO.getSourceCluster());
+        ClusterPhy targetCluster = clusterPhyService.getClusterByName(fastIndexDTO.getTargetCluster());
 
         //检查原索引是否存在，创建目标模版，获取索引任务列表
         List<FastIndexTaskDTO> taskList = fastIndexDTO.getTaskList();
@@ -198,17 +188,8 @@ public class FastIndexManagerImpl {
             return Result.buildFrom(createIndexRet);
         }
         //2.1 设置基础数据
-        OpTaskDTO opTaskDTO = new OpTaskDTO();
         String businessKey = String.format("%s=>>%S", sourceCluster.getCluster(), targetCluster.getCluster());
-        opTaskDTO.setBusinessKey(businessKey);
-        opTaskDTO.setTitle(businessKey + OpTaskTypeEnum.FAST_INDEX.getMessage());
-        opTaskDTO.setTaskType(OpTaskTypeEnum.FAST_INDEX.getType());
-        opTaskDTO.setCreator(operator);
-        opTaskDTO.setDeleteFlag(false);
-        opTaskDTO.setStatus(OpTaskStatusEnum.WAITING.getStatus());
-        //2.4 保存任务
-        opTaskDTO.setExpandData(ConvertUtil.obj2Json(fastIndexDTO));
-        Result<OpTask> workTaskResult = opTaskManager.addTask(opTaskDTO, projectId);
+        Result<OpTask> workTaskResult = addOpTask(fastIndexDTO, operator, businessKey);
         if (workTaskResult.failed()) {
             return Result.buildFrom(workTaskResult);
         }
@@ -243,13 +224,13 @@ public class FastIndexManagerImpl {
         return Result.buildSucc(ConvertUtil.obj2Obj(workTaskResult.getData(), WorkTaskVO.class));
     }
 
-    public Result<Void> refreshTask(Integer taskId) throws NotFindSubclassException {
-        Result<OpTask> ret = opTaskManager.getById(taskId);
-        if (ret.failed()) {
+    @Override
+    public Result<Void> refreshTask(Integer taskId) {
+        OpTask opTask = opTaskService.getById(taskId);
+        if (null == opTask) {
             return FAIL_RESULT_GET_OP_TASK_ERROR;
         }
 
-        OpTask opTask = ret.getData();
         OpTaskStatusEnum taskStatusEnum = OpTaskStatusEnum.valueOfStatus(opTask.getStatus());
         if (taskStatusEnum != OpTaskStatusEnum.RUNNING && taskStatusEnum != OpTaskStatusEnum.WAITING) {
             return Result.buildSucc();
@@ -260,18 +241,14 @@ public class FastIndexManagerImpl {
             //打印日志
             return FAIL_RESULT_GET_FAST_INDEX_TASK_ERROR;
         }
-        Result<ClusterPhy> sourceClusterRet = clusterPhyManager.getClusterByName(fastIndexDTO.getSourceCluster());
-        if (sourceClusterRet.failed()) {
-            //打印日志
+        ClusterPhy sourceCluster = clusterPhyService.getClusterByName(fastIndexDTO.getSourceCluster());
+        if (null == sourceCluster) {
             return Result.buildFail("获取源物理集群信息失败");
         }
-        ClusterPhy sourceCluster = sourceClusterRet.getData();
-        Result<ClusterPhy> targetClusterRet = clusterPhyManager.getClusterByName(fastIndexDTO.getTargetCluster());
-        if (targetClusterRet.failed()) {
-            //打印日志
+        ClusterPhy targetCluster = clusterPhyService.getClusterByName(fastIndexDTO.getTargetCluster());
+        if (null == targetCluster) {
             return Result.buildFail("获取目标物理集群信息失败");
         }
-        ClusterPhy targetCluster = targetClusterRet.getData();
 
         Result<Void> submitIndexTaskRet = submitIndexTask(opTask.getId(), fastIndexDTO, sourceCluster, targetCluster);
         if (submitIndexTaskRet.failed()) {
@@ -284,21 +261,22 @@ public class FastIndexManagerImpl {
         return refreshTaskStatus(opTask);
     }
 
-    public Result<Void> cancelTask(Integer taskId, Integer projectId) throws NotFindSubclassException {
+    @Override
+    public Result<Void> cancelTask(Integer taskId, Integer projectId) {
         if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             return Result.buildFail("越权操作，请更换项目或者更换账号");
         }
-        Result<OpTask> ret = opTaskManager.getById(taskId);
-        if (ret.failed()) {
+        OpTask opTask = opTaskService.getById(taskId);
+        if (null == opTask) {
             return FAIL_RESULT_GET_OP_TASK_ERROR;
         }
 
-        OpTask opTask = ret.getData();
         if (!OpTaskTypeEnum.FAST_INDEX.getType().equals(opTask.getTaskType())) {
             return Result.buildFail("任务类型异常，非数据迁移任务不支持取消任务！");
         }
         OpTaskStatusEnum taskStatusEnum = OpTaskStatusEnum.valueOfStatus(opTask.getStatus());
-        if (OpTaskStatusEnum.RUNNING != taskStatusEnum && OpTaskStatusEnum.WAITING != OpTaskStatusEnum.valueOfStatus(opTask.getStatus())) {
+        if (OpTaskStatusEnum.RUNNING != taskStatusEnum
+            && OpTaskStatusEnum.WAITING != OpTaskStatusEnum.valueOfStatus(opTask.getStatus())) {
             return Result.buildFail("只有等待和运行中的数据迁移任务可以取消，该任务状态异常，不支持取消操作！");
         }
 
@@ -319,15 +297,15 @@ public class FastIndexManagerImpl {
         return refreshTaskStatus(opTask);
     }
 
-    public Result<Void> restartTask(Integer taskId, Integer projectId) throws NotFindSubclassException {
+    @Override
+    public Result<Void> restartTask(Integer taskId, Integer projectId) {
         if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             return Result.buildFail("越权操作，请更换项目或者更换账号");
         }
-        Result<OpTask> ret = opTaskManager.getById(taskId);
-        if (ret.failed()) {
+        OpTask opTask = opTaskService.getById(taskId);
+        if (null == opTask) {
             return FAIL_RESULT_GET_OP_TASK_ERROR;
         }
-        OpTask opTask = ret.getData();
         if (!OpTaskTypeEnum.FAST_INDEX.getType().equals(opTask.getTaskType())) {
             return Result.buildFail("任务类型异常，非数据迁移任务不支持重试任务！");
         }
@@ -341,15 +319,15 @@ public class FastIndexManagerImpl {
             return Result.buildFrom(cancelIndexTaskRet);
         }
 
-        return refreshTaskStatus(ret.getData());
+        return refreshTaskStatus(opTask);
     }
 
+    @Override
     public Result<Void> modifyTaskRateLimit(Integer taskId, FastIndexRateLimitDTO fastIndexRateLimitDTO) {
-        Result<OpTask> ret = opTaskManager.getById(taskId);
-        if (ret.failed()) {
+        OpTask opTask = opTaskService.getById(taskId);
+        if (null == opTask) {
             return FAIL_RESULT_GET_OP_TASK_ERROR;
         }
-        OpTask opTask = ret.getData();
         FastIndexDTO fastIndexDTO = JSON.parseObject(opTask.getExpandData(), FastIndexDTO.class);
         //挑选任务并提交
         if (null == fastIndexDTO) {
@@ -363,12 +341,13 @@ public class FastIndexManagerImpl {
         return Result.buildSucc();
     }
 
+    @Override
     public Result<FastIndexDetailVO> getTaskDetail(Integer taskId) {
-        Result<OpTask> ret = opTaskManager.getById(taskId);
-        if (ret.failed()) {
+        OpTask opTask = opTaskService.getById(taskId);
+        if (null == opTask) {
             return Result.buildFrom(FAIL_RESULT_GET_OP_TASK_ERROR);
         }
-        OpTask opTask = ret.getData();
+
         FastIndexDTO fastIndexDTO = JSON.parseObject(opTask.getExpandData(), FastIndexDTO.class);
         OpTaskStatusEnum taskStatusEnum = OpTaskStatusEnum.valueOfStatus(opTask.getStatus());
         if (taskStatusEnum == OpTaskStatusEnum.RUNNING || taskStatusEnum == OpTaskStatusEnum.WAITING) {
@@ -377,7 +356,7 @@ public class FastIndexManagerImpl {
             } catch (Exception e) {
                 // 刷新任务状态失败
                 // pass
-                LOGGER.error("refreshTask fialed! ", e);
+                LOGGER.error("refreshTask failed! ", e);
             }
         }
 
@@ -387,7 +366,6 @@ public class FastIndexManagerImpl {
 
         if (DATA_TYPE_INDEX.equals(fastIndexDTO.getDataType())) {
             totalStats = calculationTaskStats(taskIndexStatsList);
-            ret = opTaskManager.getById(taskId);
         } else {
             if (DATA_TYPE_TEMPLATE.equals(fastIndexDTO.getDataType())) {
                 Map<Integer, List<FastIndexTaskInfo>> templateId2IndexTaskList = taskIndexList.stream()
@@ -399,9 +377,9 @@ public class FastIndexManagerImpl {
                 });
                 totalStats = calculationTaskStats(list);
             }
-            ret = opTaskManager.getById(taskId);
         }
-        FastIndexDetailVO detailVO = ConvertUtil.obj2Obj(ret.getData(), FastIndexDetailVO.class);
+        opTask = opTaskService.getById(taskId);
+        FastIndexDetailVO detailVO = ConvertUtil.obj2Obj(opTask, FastIndexDetailVO.class);
         if (null != totalStats) {
             totalStats.setTaskType(fastIndexDTO.getDataType());
             detailVO.setFastIndexStats(totalStats);
@@ -409,12 +387,12 @@ public class FastIndexManagerImpl {
         return Result.buildSucc(detailVO);
     }
 
-    public Result<Void> transferTemplate(Integer taskId) throws NotFindSubclassException {
-        Result<OpTask> ret = opTaskManager.getById(taskId);
-        if (ret.failed()) {
+    @Override
+    public Result<Void> transferTemplate(Integer taskId) {
+        OpTask opTask = opTaskService.getById(taskId);
+        if (null == opTask) {
             return FAIL_RESULT_GET_OP_TASK_ERROR;
         }
-        OpTask opTask = ret.getData();
         if (!OpTaskTypeEnum.FAST_INDEX.getType().equals(opTask.getTaskType())) {
             return Result.buildFail("任务类型异常，非数据迁移任务不支持转让模板所属！");
         }
@@ -432,7 +410,7 @@ public class FastIndexManagerImpl {
         if (!TRANSFER_STATUS_WAITING.equals(fastIndexDTO.getTransferStatus())) {
             return Result.buildFail("当前迁移任务不可转让模板所属！");
         }
-        
+
         if (Boolean.TRUE.equals(fastIndexDTO.getTransfer())) {
             Integer targetProjectId = fastIndexDTO.getTargetProjectId();
             Long targetLogicClusterId = fastIndexDTO.getTargetLogicClusterId();
@@ -460,15 +438,15 @@ public class FastIndexManagerImpl {
         processDTO.setTaskId(opTask.getId());
         processDTO.setStatus(opTask.getStatus());
         processDTO.setExpandData(JSON.toJSONString(fastIndexDTO));
-        return opTaskManager.processTask(processDTO);
+        return processTask(processDTO);
     }
 
-    public Result<Void> rollbackTemplate(Integer taskId) throws NotFindSubclassException {
-        Result<OpTask> ret = opTaskManager.getById(taskId);
-        if (ret.failed()) {
+    @Override
+    public Result<Void> rollbackTemplate(Integer taskId) {
+        OpTask opTask = opTaskService.getById(taskId);
+        if (null == opTask) {
             return FAIL_RESULT_GET_OP_TASK_ERROR;
         }
-        OpTask opTask = ret.getData();
         if (!OpTaskTypeEnum.FAST_INDEX.getType().equals(opTask.getTaskType())) {
             return Result.buildFail("任务类型异常，暂时不可回切！");
         }
@@ -510,7 +488,61 @@ public class FastIndexManagerImpl {
         processDTO.setTaskId(opTask.getId());
         processDTO.setStatus(opTask.getStatus());
         processDTO.setExpandData(JSON.toJSONString(fastIndexDTO));
-        return opTaskManager.processTask(processDTO);
+        return processTask(processDTO);
+    }
+
+    @Override
+    public PaginationResult<FastDumpTaskLogVO> pageGetTasks(Integer projectId,
+                                                            FastIndexLogsConditionDTO queryDTO) throws NotFindSubclassException {
+        OpTask opTask = opTaskService.getById(queryDTO.getTaskId());
+        if (null == opTask) {
+            return PaginationResult.buildFail("获取数据迁移主任务失败");
+        }
+        if (!OpTaskTypeEnum.FAST_INDEX.getType().equals(opTask.getTaskType())) {
+            return PaginationResult.buildFail("任务类型异常！");
+        }
+        BaseHandle baseHandle = handleFactory.getByHandlerNamePer(FAST_INDEX_TASK_LOG.getPageSearchType());
+        if (baseHandle instanceof FastIndexTaskLogPageSearchHandle) {
+            FastIndexTaskLogPageSearchHandle handle = (FastIndexTaskLogPageSearchHandle) baseHandle;
+            return handle.doPage(queryDTO, projectId);
+        }
+        LOGGER.warn(
+            "class=FastIndexTaskManager||method=pageGetTasks||msg=failed to get the FastIndexTaskLogPageSearchHandle");
+
+        return PaginationResult.buildFail("分页获取任务中心信息失败");
+    }
+
+    private Result<OpTask> addOpTask(FastIndexDTO fastIndexDTO, String operator, String businessKey) {
+        OpTask opTask = new OpTask();
+        opTask.setBusinessKey(businessKey);
+        opTask.setTitle(businessKey + OpTaskTypeEnum.FAST_INDEX.getMessage());
+        opTask.setTaskType(OpTaskTypeEnum.FAST_INDEX.getType());
+        opTask.setCreator(operator);
+        opTask.setDeleteFlag(false);
+        opTask.setStatus(OpTaskStatusEnum.WAITING.getStatus());
+        //2.4 保存任务
+        opTask.setExpandData(ConvertUtil.obj2Json(fastIndexDTO));
+        opTask.setCreateTime(new Date());
+        opTask.setUpdateTime(new Date());
+
+        opTaskService.insert(opTask);
+        boolean succ = 0 < opTask.getId();
+        if (!succ) {
+            LOGGER.error(
+                "class=FastIndexManagerImpl||method=addOpTask||taskType={}||businessKey={}||errMsg=failed to insert",
+                opTask.getTaskType(), opTask.getBusinessKey());
+            return Result.buildFail();
+        }
+        return Result.buildSucc(opTask);
+    }
+
+    private Result<Void> processTask(OpTaskProcessDTO processDTO) {
+        OpTask opTask = new OpTask();
+        opTask.setId(processDTO.getTaskId());
+        opTask.setStatus(processDTO.getStatus());
+        opTask.setExpandData(processDTO.getExpandData());
+        opTaskService.update(opTask);
+        return Result.buildSucc();
     }
 
     private FastIndexStats calculationTaskStats(List<FastIndexStats> taskIndexList) {
@@ -554,7 +586,8 @@ public class FastIndexManagerImpl {
         fastIndexStats.setSuccDocumentNum(succDocumentNum.get());
         fastIndexStats.setFailedDocumentNum(failedDocumentNum.get());
         if (costTime.get() != null && costTime.get().compareTo(BigDecimal.ZERO) > 0) {
-            fastIndexStats.setIndexMoveRate(succDocumentNum.get().divide(costTime.get(), RoundingMode.DOWN));//总文档数除以时间
+            //总文档数除以时间
+            fastIndexStats.setIndexMoveRate(succDocumentNum.get().divide(costTime.get(), RoundingMode.DOWN));
         }
         fastIndexStats.setShardNum(shardNum.get());
         fastIndexStats.setSuccShardNum(succShardNum.get());
@@ -771,12 +804,12 @@ public class FastIndexManagerImpl {
     }
 
     private Result<Void> checkTask(FastIndexDTO fastIndexDTO) {
-        Result<ClusterPhy> sourceClusterRet = clusterPhyManager.getClusterByName(fastIndexDTO.getSourceCluster());
-        if (sourceClusterRet.failed() || null == sourceClusterRet.getData()) {
+        ClusterPhy sourceCluster = clusterPhyService.getClusterByName(fastIndexDTO.getSourceCluster());
+        if (null == sourceCluster) {
             return Result.buildFail("获取源物理集群信息失败");
         }
-        Result<ClusterPhy> targetClusterRet = clusterPhyManager.getClusterByName(fastIndexDTO.getTargetCluster());
-        if (targetClusterRet.failed() || null == targetClusterRet.getData()) {
+        ClusterPhy targetCluster = clusterPhyService.getClusterByName(fastIndexDTO.getTargetCluster());
+        if (null == targetCluster) {
             return Result.buildFail("获取目标物理集群信息失败");
         }
         if (DATA_TYPE_TEMPLATE.equals(fastIndexDTO.getDataType())) {
@@ -951,7 +984,7 @@ public class FastIndexManagerImpl {
         return Result.buildSucc();
     }
 
-    private Result<Void> refreshTaskStatus(OpTask opTask) throws NotFindSubclassException {
+    private Result<Void> refreshTaskStatus(OpTask opTask) {
         List<FastIndexTaskInfo> taskInfoList = fastIndexTaskService.listByTaskId(opTask.getId());
         Map<Integer, List<FastIndexTaskInfo>> status2TaskList = taskInfoList.stream()
             .collect(Collectors.groupingBy(FastIndexTaskInfo::getTaskStatus));
@@ -988,8 +1021,8 @@ public class FastIndexManagerImpl {
         processDTO.setTaskId(opTask.getId());
         processDTO.setStatus(taskStatusEnum.getStatus());
         processDTO.setExpandData(opTask.getExpandData());
-        Result<Void> result = opTaskManager.processTask(processDTO);
-        
+        Result<Void> result = processTask(processDTO);
+
         if (result.success() && OpTaskStatusEnum.SUCCESS == taskStatusEnum
             && Boolean.TRUE.equals(fastIndexDTO.getTransfer())
             && TRANSFER_STATUS_WAITING.equals(fastIndexDTO.getTransferStatus())) {

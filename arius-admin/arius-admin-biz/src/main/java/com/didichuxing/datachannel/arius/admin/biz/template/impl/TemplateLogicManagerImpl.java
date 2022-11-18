@@ -1341,10 +1341,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 transferRet = false;
             }
-            content = String.format("模板%s(%s)转让(%s)：项目%s,逻辑集群%s,物理集群%s，region%s 转让到项目%s,逻辑集群%s,物理集群%s，region%s(%s)",
-                oldIndexTemplate.getName(), templateId, transferRet ? "成功" : "失败", oldIndexTemplate.getProjectId(),
-                oldIndexTemplate.getResourceId(), masterTemplate.getCluster(), masterTemplate.getRegionId(),
-                targetProjectId, targetLogicClusterId, phyClusterName, clusterRegion.getName(), clusterRegion.getId());
+            content = String.format(
+                    "模板%s(%s)转让(%s)：项目【%s】逻辑集群【%s】物理集群【%s】region【%s】 转让到项目【%s】逻辑集群【%s】物理集群【%s】region【%s(%s)】",
+                    oldIndexTemplate.getName(), templateId, transferRet ? "成功" : "失败", oldIndexTemplate.getProjectId(),
+                    oldIndexTemplate.getResourceId(), masterTemplate.getCluster(), masterTemplate.getRegionId(),
+                    targetProjectId, targetLogicClusterId, phyClusterName, clusterRegion.getName(), clusterRegion.getId());
         }
 
         //这里记录模版转让的操作记录与结果

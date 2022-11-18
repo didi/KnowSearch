@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -12,9 +14,11 @@ import lombok.Data;
  */
 @Data
 @ApiModel("数据迁移任务日志查询类")
-public class FastIndexLogsConditionDTO {
+public class FastIndexLogsConditionDTO extends PageDTO {
     @ApiModelProperty("当前任务ID")
     private Integer taskId;
+    @ApiModelProperty("当前任务ID")
+    private String fastDumpTaskId;
     @ApiModelProperty("执行节点")
     private String  executionNode;
     @ApiModelProperty("索引名称")
@@ -27,4 +31,12 @@ public class FastIndexLogsConditionDTO {
     private Long    startTime;
     @ApiModelProperty("结束时间")
     private Long    endTime;
+
+
+    @ApiModelProperty("排序字段 时间logMills")
+    private String  sortTerm;
+
+    @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
+    private Boolean orderByDesc = true;
+
 }

@@ -15,7 +15,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.FastIndexT
  * @date 2022/10/31
  */
 @Service
-public class FastIndexTaskServiceImpl {
+public class FastIndexTaskServiceImpl implements FastIndexTaskService {
 
     @Autowired
     private FastIndexTaskInfoDAO fastIndexTaskInfoDAO;
@@ -26,6 +26,7 @@ public class FastIndexTaskServiceImpl {
      * @param recordList 记录
      * @return int
      */
+    @Override
     public boolean saveTasks(List<FastIndexTaskInfo> recordList) {
         return fastIndexTaskInfoDAO.insertBatch(recordList) > 0;
     }
@@ -36,30 +37,23 @@ public class FastIndexTaskServiceImpl {
      *
      * @param taskInfo 记录
      */
+    @Override
     public void refreshTask(FastIndexTaskInfo taskInfo) {
         fastIndexTaskInfoDAO.refreshTask(taskInfo);
     }
 
-    /**
-     * 批更新状态
-     * @param taskStatus 任务状态
-     * @param ids        id
-     * @return int
-     */
-    public boolean updateStatusBatch(Integer taskStatus, List<Integer> ids) {
-
-        return true;
-    }
-
+    @Override
     public List<FastIndexTaskInfo> listByTaskId(Integer taskId) {
         return fastIndexTaskInfoDAO.listByTaskId(taskId);
     }
 
+    @Override
     public List<Integer> listTemplateIdByTaskId(Integer taskId) {
         return fastIndexTaskInfoDAO.listTemplateIdByTaskId(taskId);
     }
 
+    @Override
     public List<FastIndexTaskInfo> listByTaskIdAndStatus(Integer taskId, List<Integer> taskStatusList) {
-        return fastIndexTaskInfoDAO.listByTaskIdAndStatus(taskId,taskStatusList);
+        return fastIndexTaskInfoDAO.listByTaskIdAndStatus(taskId, taskStatusList);
     }
 }

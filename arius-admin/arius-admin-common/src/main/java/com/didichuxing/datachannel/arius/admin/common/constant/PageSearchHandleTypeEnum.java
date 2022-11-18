@@ -18,7 +18,9 @@ public enum PageSearchHandleTypeEnum {
         GATEWAY_CLUSTER_CONFIG("gatewayClusterConfigPageSearchHandle"),
         TASK("taskPageSearch"),
         SCRIPT("scriptPageSearch"),
-        PACKAGE("packagePageSearch");
+        PACKAGE("packagePageSearch"),
+
+        FAST_INDEX_TASK_LOG("fastIndexTaskLogPageSearch");
        private String pageSearchType;
 
         public String getPageSearchType(){

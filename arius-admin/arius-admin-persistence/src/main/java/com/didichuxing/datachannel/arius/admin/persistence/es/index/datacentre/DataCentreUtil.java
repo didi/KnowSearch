@@ -1,13 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.datacentre;
 
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import lombok.NoArgsConstructor;
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+
+import lombok.NoArgsConstructor;
 
 @Component
 @NoArgsConstructor
@@ -67,6 +69,9 @@ public class DataCentreUtil {
 
     @Value("${es.cluster.task.info.index.name:arius_stats_cluster_task_info}")
     private String ariusStatsClusterTaskInfo;
+
+    @Value("${es.fast.dump.metrics.index.name:fastdump_metrics}")
+    private String fastDumpMetrics;
 
     @PostConstruct
     public void init() {
@@ -151,7 +156,9 @@ public class DataCentreUtil {
 
     public String getAriusStatsDashBoardInfo(){ return ariusStatsDashboardInfo;}
 
-
+    public String getFastDumpMetrics() {
+        return getIndexName(fastDumpMetrics);
+    }
 
     /*************************************** private method ***************************************/
     private String getIndexName(String originIndexName) {

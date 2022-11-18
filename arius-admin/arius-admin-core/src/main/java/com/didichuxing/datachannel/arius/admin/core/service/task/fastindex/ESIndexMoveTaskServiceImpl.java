@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
@@ -19,7 +18,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.fastindex
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.fastindex.ESIndexMoveTaskStats;
 import com.didichuxing.datachannel.arius.admin.common.util.BaseHttpUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.persistence.component.ESUpdateClient;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Maps;
@@ -36,8 +34,6 @@ public class ESIndexMoveTaskServiceImpl implements ESIndexMoveTaskService {
     private static final String FAST_DUMP_EXIST_CODE = "1000";
     private static final String CODE                 = "code";
     private static final int    FAST_DUMP_SUCC_CODE  = 200;
-    @Autowired
-    ESUpdateClient              esUpdateClient;
 
     @Override
     public Tuple<String, Result<String>> submitTask(FastIndexDTO fastIndexDTO, ESIndexMoveTaskContext context) {
@@ -58,7 +54,6 @@ public class ESIndexMoveTaskServiceImpl implements ESIndexMoveTaskService {
         String response = get(fastIndexDTO.getTaskSubmitAddress(), fastIndexDTO.getSourceClusterPassword(),
             "/index-move/all/stats");
         if (StringUtils.isNotBlank(response)) {
-            LOGGER.info("============getAllTaskStats:{}",response);
             Result result = JSON.parseObject(response, Result.class);
             if (FAST_DUMP_SUCC_CODE == result.getCode()) {
                 if (null != result.getData()) {
@@ -103,7 +98,6 @@ public class ESIndexMoveTaskServiceImpl implements ESIndexMoveTaskService {
 
     private <T> Result<T> response2Result(String response, Class<T> targetClass) {
         if (StringUtils.isNotBlank(response)) {
-            LOGGER.info("============response2Result:{}",response);
             Result result = JSON.parseObject(response, Result.class);
             if (FAST_DUMP_SUCC_CODE == result.getCode()) {
                 if (null != result.getData() && null != targetClass) {

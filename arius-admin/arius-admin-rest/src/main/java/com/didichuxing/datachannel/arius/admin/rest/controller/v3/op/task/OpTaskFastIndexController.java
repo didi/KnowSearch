@@ -7,12 +7,14 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.didichuxing.datachannel.arius.admin.biz.task.FastIndexManagerImpl;
+import com.didichuxing.datachannel.arius.admin.biz.task.FastIndexManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexLogsConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastDumpTaskLogVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastIndexDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
@@ -26,13 +28,12 @@ import io.swagger.annotations.ApiOperation;
 public class OpTaskFastIndexController {
 
     @Autowired
-    private FastIndexManagerImpl fastIndexManager;
+    private FastIndexManager fastIndexManager;
 
     @PostMapping("")
     @ResponseBody
-    @ApiOperation(value = "数据迁移提交迁移任务接口", notes = "")
-    public Result<WorkTaskVO> submitTask(HttpServletRequest request,
-                                         @RequestBody FastIndexDTO fastIndexDTO) throws NotFindSubclassException {
+    @ApiOperation(value = "数据迁移提交迁移任务接口")
+    public Result<WorkTaskVO> submitTask(HttpServletRequest request, @RequestBody FastIndexDTO fastIndexDTO) {
         return fastIndexManager.submitTask(fastIndexDTO, HttpRequestUtil.getOperator(request),
             HttpRequestUtil.getProjectId(request));
     }
@@ -40,23 +41,21 @@ public class OpTaskFastIndexController {
     @DeleteMapping("/{taskId}")
     @ResponseBody
     @ApiOperation(value = "根据任务id取消任务")
-    public Result<Void> cancelTask(HttpServletRequest request,
-                                   @PathVariable("taskId") Integer taskId) throws NotFindSubclassException {
+    public Result<Void> cancelTask(HttpServletRequest request, @PathVariable("taskId") Integer taskId) {
         return fastIndexManager.cancelTask(taskId, HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("/{taskId}")
     @ResponseBody
     @ApiOperation(value = "根据任务id重试任务")
-    public Result<Void> restartTask(HttpServletRequest request,
-                                    @PathVariable("taskId") Integer taskId) throws NotFindSubclassException {
+    public Result<Void> restartTask(HttpServletRequest request, @PathVariable("taskId") Integer taskId) {
         return fastIndexManager.restartTask(taskId, HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("/{taskId}/rate-limit")
     @ResponseBody
     @ApiOperation(value = "根据任务id修改限流值")
-    public Result<Void> modifyTaskRateLimit(HttpServletRequest request, @PathVariable("taskId") Integer taskId,
+    public Result<Void> modifyTaskRateLimit(@PathVariable("taskId") Integer taskId,
                                             @RequestBody FastIndexRateLimitDTO fastIndexRateLimitDTO) {
         return fastIndexManager.modifyTaskRateLimit(taskId, fastIndexRateLimitDTO);
     }
@@ -68,35 +67,32 @@ public class OpTaskFastIndexController {
         return fastIndexManager.getTaskDetail(taskId);
     }
 
-    @PostMapping("/{taskId}/logs")
+    @PostMapping("/logs")
     @ResponseBody
     @ApiOperation(value = "查询任务日志")
-    public Result<String> getTaskLogs(@PathVariable("taskId") Integer taskId,
-                                      @RequestBody FastIndexLogsConditionDTO logsConditionDTO) {
-        return null;
+    public PaginationResult<FastDumpTaskLogVO> getTaskLogs(HttpServletRequest request,
+                                                           @RequestBody FastIndexLogsConditionDTO logsConditionDTO) throws NotFindSubclassException {
+        return fastIndexManager.pageGetTasks(HttpRequestUtil.getProjectId(request), logsConditionDTO);
     }
 
     @PutMapping("/{taskId}/refresh")
     @ResponseBody
     @ApiOperation(value = "刷新任务状态")
-    public Result<Void> refreshTaskState(HttpServletRequest request,
-                                         @PathVariable("taskId") Integer taskId) throws NotFindSubclassException {
+    public Result<Void> refreshTaskState(@PathVariable("taskId") Integer taskId) {
         return fastIndexManager.refreshTask(taskId);
     }
 
     @PutMapping("/{taskId}/transfer")
     @ResponseBody
     @ApiOperation(value = "转让模版")
-    public Result<Void> transferTemplate(HttpServletRequest request,
-                                         @PathVariable("taskId") Integer taskId) throws NotFindSubclassException {
+    public Result<Void> transferTemplate(@PathVariable("taskId") Integer taskId) {
         return fastIndexManager.transferTemplate(taskId);
     }
 
     @PutMapping("/{taskId}/rollback")
     @ResponseBody
     @ApiOperation(value = "回切转让")
-    public Result<Void> rollbackTemplate(HttpServletRequest request,
-                                         @PathVariable("taskId") Integer taskId) throws NotFindSubclassException {
+    public Result<Void> rollbackTemplate(@PathVariable("taskId") Integer taskId) {
         return fastIndexManager.rollbackTemplate(taskId);
     }
 }
