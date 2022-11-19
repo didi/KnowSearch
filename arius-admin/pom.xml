@@ -26,7 +26,7 @@
         <sha1/>
         <changelist/>
         <arius.admin.client.version>1.0.6-SNAPSHOT</arius.admin.client.version>
-        <spring.boot.version>2.0.5.RELEASE</spring.boot.version>
+        <spring.boot.version>2.2.13.RELEASE</spring.boot.version>
         <spring.version>5.0.18.RELEASE</spring.version>
         <spring-restdocs.version>2.0.2.RELEASE</spring-restdocs.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -230,18 +230,6 @@
                 <groupId>org.mybatis</groupId>
                 <artifactId>mybatis</artifactId>
                 <version>3.5.6</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-webmvc</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-web</artifactId>
-                <version>${spring.version}</version>
             </dependency>
 
             <dependency>
@@ -672,16 +660,6 @@
                 <version>2.0.0</version>
                 <groupId>io.github.knowstack</groupId>
                 <artifactId>kf-log</artifactId>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>log4j-slf4j-impl</artifactId>
-                        <groupId>org.apache.logging.log4j</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.aspectj</groupId>
-                        <artifactId>aspectjrt</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <dependency>

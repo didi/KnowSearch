@@ -61,7 +61,7 @@ public class OperateRecordManagerImpl implements OperateRecordManager {
      * 0 0 1 * * ? 每天凌晨 1 点执行该方法 定时删除操作日志，根据配置中指定的保存天数对操作日志进行保留
      */
     @Scheduled(cron = "0 0 1 * * ?")
-    private void scheduledDeletionOldOperateRecord() {
+    public void scheduledDeletionOldOperateRecord() {
         Date saveTime = getSaveTime();
         LOGGER.info(
                 "class=OperateRecordServiceImpl||method=scheduledDeletionOldOperateRecord||msg= 操作日志定时删除任务开始执行");

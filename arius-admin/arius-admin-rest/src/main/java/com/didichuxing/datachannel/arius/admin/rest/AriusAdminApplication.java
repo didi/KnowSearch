@@ -31,7 +31,7 @@ import java.io.IOException;
 @EnableScheduling
 @EnableCaching
 @ServletComponentScan
-@SpringBootApplication(scanBasePackages = { "com.didichuxing.datachannel.arius.admin" })
+@SpringBootApplication(scanBasePackages = { "com.didichuxing.datachannel.arius.admin", "com.didiglobal.knowframework.job", "com.didiglobal.knowframework" })
 public class AriusAdminApplication {
 
     private static final ILog LOGGER           = LogFactory.getLog(AriusAdminApplication.class);
