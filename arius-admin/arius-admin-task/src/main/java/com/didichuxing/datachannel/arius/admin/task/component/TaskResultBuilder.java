@@ -13,7 +13,7 @@ public class TaskResultBuilder {
         if (failMsg.length() > 0) {
             return new TaskResult(TaskResult.FAIL_CODE, failMsg.toString());
         } else {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
     }
 

@@ -31,7 +31,7 @@ public class SyncEcmTaskStatus implements Job {
         List<EcmTask> ecmTasks = ecmTaskManager.listRunningEcmTask();
         if (AriusObjUtils.isEmptyList(ecmTasks)) {
             LOGGER.info("class=SyncEcmTaskStatus||method=syncTaskStatus||msg=worktask empty and finished");
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
 
         // todo:对于集群新建，扩缩容这些可能修改物理集群读写地址的任务，可能会出现重试中阻塞的问题，从而影响到下一个任务的执行，考虑是否采用线程池
@@ -47,6 +47,6 @@ public class SyncEcmTaskStatus implements Job {
         }
         LOGGER.info("class=SyncEcmTaskStatus||method=syncTaskStatus||msg=finish");
 
-        return TaskResult.SUCCESS;
+        return TaskResult.buildSuccess();
     }
 }

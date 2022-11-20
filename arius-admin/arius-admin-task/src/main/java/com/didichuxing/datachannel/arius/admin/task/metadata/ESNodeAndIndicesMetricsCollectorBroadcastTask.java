@@ -22,6 +22,6 @@ public class ESNodeAndIndicesMetricsCollectorBroadcastTask implements Job {
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=ESNodeAndIndicesMetricsCollectorBroadcastTask||method=execute||msg=start");
         monitorJobHandler.handleBrocastJobTask("", jobContext.getCurrentWorkerCode(), jobContext.getAllWorkerCodes());
-        return TaskResult.SUCCESS;
+        return TaskResult.buildSuccess();
     }
 }

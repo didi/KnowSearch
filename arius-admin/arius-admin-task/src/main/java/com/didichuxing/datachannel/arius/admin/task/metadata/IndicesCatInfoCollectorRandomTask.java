@@ -20,6 +20,6 @@ public class IndicesCatInfoCollectorRandomTask implements Job {
     public TaskResult execute(JobContext jobContext) throws Exception{
         LOGGER.info("class=IndicesCatInfoCollectorRandomTask||method=execute||msg=start");
         indexCatInfoCollector.handleJobTask("");
-        return TaskResult.SUCCESS;
+        return TaskResult.buildSuccess();
     }
 }

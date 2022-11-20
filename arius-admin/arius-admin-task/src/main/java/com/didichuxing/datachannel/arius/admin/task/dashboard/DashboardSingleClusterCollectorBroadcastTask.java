@@ -62,7 +62,7 @@ public class DashboardSingleClusterCollectorBroadcastTask implements Job {
         // 获取单台admin实例能采集的集群数
         List<ClusterPhy> monitorCluster = ariusMetaJobClusterDistributeService.getSingleMachineMonitorCluster(hostName);
         if (CollectionUtils.isEmpty(monitorCluster)) {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
 
         long currentTimeMillis = System.currentTimeMillis();

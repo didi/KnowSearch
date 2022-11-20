@@ -39,9 +39,9 @@ public class ShardNumAdjustRandomTask extends BaseConcurrentTemplateTask impleme
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=ShardNumAdjustRandomTask||method=execute||msg=ShardNumAdjustRandomTask start");
         if (execute()) {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
-        return TaskResult.FAIL;
+        return TaskResult.buildFail();
     }
 
     

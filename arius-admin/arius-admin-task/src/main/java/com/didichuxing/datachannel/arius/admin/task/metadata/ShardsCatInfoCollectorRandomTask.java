@@ -21,6 +21,6 @@ public class ShardsCatInfoCollectorRandomTask implements Job {
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=ShardsCatInfoCollectorRandomTask||method=execute||msg=start");
         shardCatInfoCollector.handleJobTask("");
-        return TaskResult.SUCCESS;
+        return TaskResult.buildSuccess();
     }
 }

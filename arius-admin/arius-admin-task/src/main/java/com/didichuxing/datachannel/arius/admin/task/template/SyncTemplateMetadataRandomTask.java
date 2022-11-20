@@ -23,9 +23,9 @@ public class SyncTemplateMetadataRandomTask extends BaseConcurrentClusterTask im
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=SyncTemplateMetadataRandomTask||method=execute||msg=SyncTemplateMetadataRandomTask start.");
         if (execute()) {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
-        return TaskResult.FAIL;
+        return TaskResult.buildFail();
     }
 
     /**

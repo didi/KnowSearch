@@ -48,7 +48,7 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
         List<OpTask> successDcdrSwitchTaskList = opTaskManager
             .getSuccessTaskByType(OpTaskTypeEnum.TEMPLATE_DCDR.getType());
         if (CollectionUtils.isEmpty(successDcdrSwitchTaskList)) {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
 
         for (OpTask successDcdrSwitchTask : successDcdrSwitchTaskList) {
@@ -94,6 +94,6 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
             opTaskManager.updateTask(successDcdrSwitchTask);
         }
 
-        return TaskResult.SUCCESS;
+        return TaskResult.buildSuccess();
     }
 }

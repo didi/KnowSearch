@@ -20,6 +20,6 @@ public class ESLogicClusterMetricsCollectorBroadcastTask implements Job {
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=ESLogicClusterMetricsCollectorBroadcastTask||method=execute||msg=start");
         logicClusterMonitorJobHandler.handleJobTask("");
-        return TaskResult.SUCCESS;
+        return TaskResult.buildSuccess();
     }
 }

@@ -26,9 +26,9 @@ public class DeleteExpireIndexRandomTask extends BaseConcurrentTemplateTask impl
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=DeleteExpireIndexRandomTask||method=execute||msg=DeleteExpireIndexRandomTask start");
         if (execute()) {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
-        return TaskResult.FAIL;
+        return TaskResult.buildFail();
     }
 
     

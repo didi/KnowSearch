@@ -28,6 +28,6 @@ public class DslTemplateUpdateNearestQueryLimitRandomTask implements Job {
         LOGGER.info("class=DslTemplateUpdateNearestQueryLimitRandomTask||method=execute||msg=start");
         // 更新最近的DSL模版限流值任务
         dslTemplateUpdateNearestQueryLimitJob.handleJobTask("");
-        return TaskResult.SUCCESS;
+        return TaskResult.buildSuccess();
     }
 }

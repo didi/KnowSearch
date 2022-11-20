@@ -24,9 +24,9 @@ public class CopyIndexMapping2TemplateRandomTask extends BaseConcurrentClusterTa
         LOGGER.info(
             "class=CopyIndexMapping2TemplateRandomTask||method=execute||msg=CopyIndexMapping2TemplateRandomTask start.");
         if (execute()) {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
-        return TaskResult.FAIL;
+        return TaskResult.buildFail();
     }
 
     /**

@@ -22,6 +22,6 @@ public class DslTemplateDelExpiredRandomTask implements Job {
 
         dslTemplateDelExpiredJob.handleJobTask("");
 
-        return TaskResult.SUCCESS;
+        return TaskResult.buildSuccess();
     }
 }

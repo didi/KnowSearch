@@ -42,7 +42,7 @@ public class DashboardAllClusterCollectorRandomTask implements Job {
         List<String> clusterNameList = clusterPhyService.listClusterNames();
         if (CollectionUtils.isEmpty(clusterNameList)) {
             LOGGER.warn("class=DashboardAllClusterCollectorRandomTask||method=execute||msg=clusterNameList is empty");
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
 
         for (Map.Entry<String, BaseDashboardCollector> entry : BASE_DASHBOARD_COLLECTOR_MAP.entrySet()) {

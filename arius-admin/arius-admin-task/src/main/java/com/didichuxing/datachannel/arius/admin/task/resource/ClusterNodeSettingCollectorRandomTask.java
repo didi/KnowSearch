@@ -25,9 +25,9 @@ public class ClusterNodeSettingCollectorRandomTask extends BaseConcurrentCluster
         LOGGER.info(
             "class=ClusterNodeSettingCollectorRandomTask||method=execute||msg=ClusterNodeSettingCollectorRandomTask start.");
         if (execute()) {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
-        return TaskResult.FAIL;
+        return TaskResult.buildFail();
     }
 
     /**

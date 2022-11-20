@@ -18,9 +18,9 @@ public class DcdrInfoCollectorRandomTask extends BaseConcurrentTemplateTask impl
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=DcdrInfoCollectorRandomTask||method=execute||msg=DcdrInfoCollectorRandomTask start.");
         if (execute()) {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
-        return TaskResult.FAIL;
+        return TaskResult.buildFail();
     }
 
     @Override

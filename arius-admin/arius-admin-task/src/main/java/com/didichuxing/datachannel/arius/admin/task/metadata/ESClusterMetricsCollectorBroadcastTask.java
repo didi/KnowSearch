@@ -21,6 +21,6 @@ public class ESClusterMetricsCollectorBroadcastTask implements Job {
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=ESClusterMetricsCollectorBroadcastTask||method=execute||msg=start");
         clusterMonitorJobHandler.handleJobTask("");
-        return TaskResult.SUCCESS;
+        return TaskResult.buildSuccess();
     }
 }

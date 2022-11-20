@@ -60,9 +60,9 @@ public class JudgeTemplateBlockWriteTask extends BaseConcurrentTemplateTask impl
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=JudgeTemplateBlockWriteTask||method=execute||msg=JudgeTemplateBlockWriteTask start.");
         if (execute()) {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
-        return TaskResult.FAIL;
+        return TaskResult.buildFail();
     }
 
     @Override

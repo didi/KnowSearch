@@ -21,9 +21,9 @@ public class ClusterResourceInfoCollectorRandomTask extends BaseConcurrentCluste
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=ClusterResourceInfoCollectorRandomTask||method=execute||msg=start");
         if (execute()) {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
-        return TaskResult.FAIL;
+        return TaskResult.buildFail();
     }
 
     @Override

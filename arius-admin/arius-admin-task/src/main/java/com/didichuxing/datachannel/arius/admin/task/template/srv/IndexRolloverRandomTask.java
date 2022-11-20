@@ -40,9 +40,9 @@ public class IndexRolloverRandomTask extends BaseConcurrentTemplateTask implemen
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=IndexRolloverRandomTask||method=execute||msg=IndexRolloverRandomTask start");
         if (execute()) {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
-        return TaskResult.FAIL;
+        return TaskResult.buildFail();
     }
 
    

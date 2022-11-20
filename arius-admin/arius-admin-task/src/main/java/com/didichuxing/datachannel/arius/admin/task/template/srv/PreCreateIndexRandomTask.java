@@ -29,9 +29,9 @@ public class PreCreateIndexRandomTask extends BaseConcurrentTemplateTask impleme
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=PreCreateIndexRandomTask||method=execute||msg=PreCreateIndexRandomTask start");
         if (execute()) {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
-        return TaskResult.FAIL;
+        return TaskResult.buildFail();
     }
 
     

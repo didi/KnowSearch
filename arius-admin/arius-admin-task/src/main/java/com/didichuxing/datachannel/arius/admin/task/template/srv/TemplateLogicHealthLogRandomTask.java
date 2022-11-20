@@ -24,9 +24,9 @@ public class TemplateLogicHealthLogRandomTask extends BaseConcurrentTemplateTask
 	public TaskResult execute(JobContext jobContext) throws Exception {
 		LOGGER.info("class={}||method=execute||msg=HealthRandomTask start",getClass().getSimpleName());
 		if (execute()) {
-			return TaskResult.SUCCESS;
+			return TaskResult.buildSuccess();
 		}
-		return TaskResult.FAIL;
+		return TaskResult.buildFail();
 	}
 	
 
