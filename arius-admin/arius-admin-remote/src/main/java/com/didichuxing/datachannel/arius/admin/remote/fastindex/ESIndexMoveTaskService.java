@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.core.service.task.fastindex;
+package com.didichuxing.datachannel.arius.admin.remote.fastindex;
 
 import java.util.List;
 

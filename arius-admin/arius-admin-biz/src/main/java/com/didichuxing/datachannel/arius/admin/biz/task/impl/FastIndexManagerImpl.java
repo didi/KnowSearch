@@ -70,10 +70,10 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.task.OpTaskService;
-import com.didichuxing.datachannel.arius.admin.core.service.task.fastindex.ESIndexMoveTaskService;
 import com.didichuxing.datachannel.arius.admin.core.service.task.fastindex.FastIndexTaskService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.remote.fastindex.ESIndexMoveTaskService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
@@ -130,13 +130,13 @@ public class FastIndexManagerImpl implements FastIndexManager {
     private HandleFactory                                            handleFactory;
 
     private static final FutureUtil<Result<List<FastIndexTaskInfo>>> FAST_INDEX_TASK_TEMPLATE_FUTURE_UTIL  = FutureUtil
-        .init("FastIndexTaskTemplate", 10, 10, 100);
+        .init("FastIndexTaskTemplate", 10, 20, 10000);
 
     private static final FutureUtil<Result<FastIndexTaskInfo>>       FAST_INDEX_TASK_INDEX_FUTURE_UTIL     = FutureUtil
-        .init("FastIndexTaskIndex", 10, 10, 100);
+        .init("FastIndexTaskIndex", 10, 20, 10000);
 
     private static final FutureUtil<Result>                          FAST_INDEX_MANAGER_FUTURE_UTIL        = FutureUtil
-        .init("FastIndexManager", 10, 10, 100);
+        .init("FastIndexManager", 10, 20, 10000);
 
     /**
      * 提交数据迁移任务
