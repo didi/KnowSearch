@@ -135,4 +135,11 @@ public class ESPhyClusterNodeController {
     public Result<List<ClusterNodeInfoVO>> listClusterLogicNodeInfos(@PathVariable String clusterPhyName) {
         return clusterNodeManager.listClusterPhyNodeInfosByName(clusterPhyName);
     }
+
+    @GetMapping("/machineSpecs")
+    @ResponseBody
+    @ApiOperation(value = "获取当前平台所有的机器规格")
+    public Result<List<String>> listAllMachineSpecs() {
+        return clusterNodeManager.listAllMachineSpecs();
+    }
 }
