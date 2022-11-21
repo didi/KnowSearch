@@ -73,11 +73,12 @@ public class PluginManagerImpl implements PluginManager {
 		
 		@Override
 		public Result<List<PluginVO>> listESPluginByClusterId(Integer clusterPhyId) {
-				
+				final ClusterPhy cluster = clusterPhyService.getClusterById(clusterPhyId);
+				if (Objects.isNull(cluster)) {
+						return Result.buildSucc(Collections.emptyList());
+				}
 				List<PluginInfoPO> pluginList = pluginInfoService.listByClusterId(clusterPhyId,
 						PluginClusterTypeEnum.ES);
-				
-				final ClusterPhy cluster = clusterPhyService.getClusterById(clusterPhyId);
 				// 获取内核的插件列表
 				final Result<List<PluginVO>> listResult = listESKernelPluginCache(cluster.getCluster());
 				final List<PluginVO>         list       = ConvertUtil.list2List(pluginList, PluginVO.class);
