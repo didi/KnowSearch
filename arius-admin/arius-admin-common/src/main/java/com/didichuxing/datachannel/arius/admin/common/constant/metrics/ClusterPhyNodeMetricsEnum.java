@@ -368,6 +368,12 @@ public enum ClusterPhyNodeMetricsEnum {
     /**
      * 单位：MB
      */
+    BREAKERS_IN_FLIGHT_HTTP_REQUESTS_LIMIT_SIZE_IN_BYTES("breakers-in_flight_http_requests-limit_size_in_bytes",
+            "inflight requests http circuit breaker 内存占用"),
+
+    /**
+     * 单位：MB
+     */
     BREAKERS_ACCOUNTING_LIMIT_SIZE_IN_BYTES("breakers-accounting-limit_size_in_bytes",
             "Accounting requests circuit breaker 内存占用"),
 
