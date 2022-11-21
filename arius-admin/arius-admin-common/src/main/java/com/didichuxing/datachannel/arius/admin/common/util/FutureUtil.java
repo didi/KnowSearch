@@ -1,15 +1,20 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.*;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.lucene.util.NamedThreadFactory;
+import org.springframework.util.ReflectionUtils;
 
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.lucene.util.NamedThreadFactory;
 
 @NoArgsConstructor
 public class FutureUtil<T> {
@@ -110,6 +115,35 @@ public class FutureUtil<T> {
         return this;
     }
 
+    public void waitExecuteQueue() {
+        try {
+            Field field = LinkedBlockingDeque.class.getDeclaredField("capacity");
+            ReflectionUtils.makeAccessible(field);
+            Object capacitySize = ReflectionUtils.getField(field, executor.getQueue());
+            Integer currentSize = executor.getQueue().size();
+            if (Objects.equals(capacitySize, currentSize)) {
+                waitExecute();
+            }
+        } catch (Exception e) {
+            LOGGER.error("class=FutureUtil||method=waitExecuteQueue||msg=waitExecuteQueue failed", e);
+        }
+    }
+
+    public List<T> waitResultQueue() {
+        try {
+            Field field = LinkedBlockingDeque.class.getDeclaredField("capacity");
+            ReflectionUtils.makeAccessible(field);
+            Object capacitySize = ReflectionUtils.getField(field, executor.getQueue());
+            Integer currentSize = executor.getQueue().size();
+            if (Objects.equals(capacitySize, currentSize)) {
+                return waitResult();
+            }
+        } catch (Exception e) {
+            LOGGER.error("class=FutureUtil||method=waitResultQueue||msg=waitResultQueue failed", e);
+        }
+        return Lists.newArrayList();
+    }
+    
     public void waitExecute(long timeOutSeconds) {
         Long currentThreadId = Thread.currentThread().getId();
 

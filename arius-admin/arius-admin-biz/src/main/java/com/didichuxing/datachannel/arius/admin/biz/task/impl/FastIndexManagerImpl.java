@@ -130,13 +130,13 @@ public class FastIndexManagerImpl implements FastIndexManager {
     private HandleFactory                                            handleFactory;
 
     private static final FutureUtil<Result<List<FastIndexTaskInfo>>> FAST_INDEX_TASK_TEMPLATE_FUTURE_UTIL  = FutureUtil
-        .init("FastIndexTaskTemplate", 10, 20, 10000);
+        .init("FastIndexTaskTemplate", 10, 20, 1000);
 
     private static final FutureUtil<Result<FastIndexTaskInfo>>       FAST_INDEX_TASK_INDEX_FUTURE_UTIL     = FutureUtil
-        .init("FastIndexTaskIndex", 10, 20, 10000);
+        .init("FastIndexTaskIndex", 10, 20, 1000);
 
     private static final FutureUtil<Result>                          FAST_INDEX_MANAGER_FUTURE_UTIL        = FutureUtil
-        .init("FastIndexManager", 10, 20, 10000);
+        .init("FastIndexManager", 10, 20, 1000);
 
     /**
      * 提交数据迁移任务
@@ -421,9 +421,11 @@ public class FastIndexManagerImpl implements FastIndexManager {
                 return transferTemplateCheckRet;
             }
             List<Integer> templateIdList = fastIndexTaskService.listTemplateIdByTaskId(taskId);
-            templateIdList.forEach(templateId -> FAST_INDEX_MANAGER_FUTURE_UTIL.callableTask(() -> templateLogicManager
-                .transferTemplate(templateId, targetProjectId, targetLogicClusterId, phyClusterName)));
-            List<Result> resultList = FAST_INDEX_MANAGER_FUTURE_UTIL.waitResult();
+            List<Result> resultList = Lists.newCopyOnWriteArrayList();
+            templateIdList.forEach(templateId -> resultList.addAll(
+                FAST_INDEX_MANAGER_FUTURE_UTIL.callableTask(() -> templateLogicManager.transferTemplate(templateId,
+                    targetProjectId, targetLogicClusterId, phyClusterName)).waitResultQueue()));
+            resultList.addAll(FAST_INDEX_MANAGER_FUTURE_UTIL.waitResult());
             List<Object> succTemplateList = resultList.stream().filter(BaseResult::success).map(Result::getData)
                 .collect(Collectors.toList());
             List<Object> failedTemplateList = resultList.stream().filter(BaseResult::failed).map(Result::getData)
@@ -470,9 +472,11 @@ public class FastIndexManagerImpl implements FastIndexManager {
                 return transferTemplateCheckRet;
             }
             List<Integer> templateIdList = fastIndexTaskService.listTemplateIdByTaskId(taskId);
-            templateIdList.forEach(templateId -> FAST_INDEX_MANAGER_FUTURE_UTIL.callableTask(() -> templateLogicManager
-                .transferTemplate(templateId, targetProjectId, targetLogicClusterId, phyClusterName)));
-            List<Result> resultList = FAST_INDEX_MANAGER_FUTURE_UTIL.waitResult();
+            List<Result> resultList = Lists.newCopyOnWriteArrayList();
+            templateIdList.forEach(templateId -> resultList.addAll(
+                FAST_INDEX_MANAGER_FUTURE_UTIL.callableTask(() -> templateLogicManager.transferTemplate(templateId,
+                    targetProjectId, targetLogicClusterId, phyClusterName)).waitResultQueue()));
+            resultList.addAll(FAST_INDEX_MANAGER_FUTURE_UTIL.waitResult());
             List<Object> succTemplateList = resultList.stream().filter(BaseResult::success).map(Result::getData)
                 .collect(Collectors.toList());
             List<Object> failedTemplateList = resultList.stream().filter(BaseResult::failed).map(Result::getData)
@@ -655,7 +659,8 @@ public class FastIndexManagerImpl implements FastIndexManager {
 
     private Result<Void> createTargetIndex(ClusterPhy targetCluster, List<FastIndexTaskInfo> taskIndexList) {
         //在目标集群中创建索引
-        taskIndexList.forEach(taskIndex -> FAST_INDEX_MANAGER_FUTURE_UTIL.callableTask(() -> {
+        List<Result> resultList = Lists.newCopyOnWriteArrayList();
+        taskIndexList.forEach(taskIndex -> resultList.addAll(FAST_INDEX_MANAGER_FUTURE_UTIL.callableTask(() -> {
 
             IndexConfig config = new IndexConfig();
             if (StringUtils.isNotBlank(taskIndex.getMappings())) {
@@ -675,9 +680,9 @@ public class FastIndexManagerImpl implements FastIndexManager {
             }
 
             return Result.buildFail("目标集群中创建索引【" + taskIndex.getTargetIndexName() + "】失败");
-        }));
-        List<Result> failedList = FAST_INDEX_MANAGER_FUTURE_UTIL.waitResult().stream().filter(BaseResult::failed)
-            .collect(Collectors.toList());
+        }).waitResultQueue()));
+        resultList.addAll(FAST_INDEX_MANAGER_FUTURE_UTIL.waitResult());
+        List<Result> failedList = resultList.stream().filter(BaseResult::failed).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(failedList)) {
             return Result.buildFail(failedList.stream().map(BaseResult::getMessage).collect(Collectors.joining("\n")));
         }
@@ -686,9 +691,11 @@ public class FastIndexManagerImpl implements FastIndexManager {
 
     private Result<List<FastIndexTaskInfo>> getTaskIndexListByIndex(FastIndexDTO fastIndexDTO,
                                                                     List<FastIndexTaskDTO> taskList) {
+
+        List<Result<FastIndexTaskInfo>> resultList = Lists.newCopyOnWriteArrayList();
         //如果是索引则直接检查原索引是否存在
-        taskList.forEach(
-            task -> task.getSourceIndexList().forEach(indexDTO -> FAST_INDEX_TASK_INDEX_FUTURE_UTIL.callableTask(() -> {
+        taskList.forEach(task -> task.getSourceIndexList()
+            .forEach(indexDTO -> resultList.addAll(FAST_INDEX_TASK_INDEX_FUTURE_UTIL.callableTask(() -> {
                 List<CatIndexResult> catIndexResultList = esIndexService
                     .syncCatIndexByExpression(fastIndexDTO.getSourceCluster(), indexDTO.getResourceNames());
                 if (null == catIndexResultList) {
@@ -709,8 +716,8 @@ public class FastIndexManagerImpl implements FastIndexManager {
                 taskInfo.setSettings(task.getSettings());
                 taskInfo.setTotalDocumentNum(new BigDecimal(catIndexResult.getDocsCount()));
                 return Result.buildSucc(taskInfo);
-            })));
-        List<Result<FastIndexTaskInfo>> resultList = FAST_INDEX_TASK_INDEX_FUTURE_UTIL.waitResult();
+            }).waitResultQueue())));
+        resultList.addAll(FAST_INDEX_TASK_INDEX_FUTURE_UTIL.waitResult());
         List<Result<FastIndexTaskInfo>> failedList = resultList.stream().filter(BaseResult::failed)
             .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(failedList)) {
@@ -741,7 +748,8 @@ public class FastIndexManagerImpl implements FastIndexManager {
             return Result.buildFail("所选模板【" + StringUtils.join(failedTemplateNames, ",") + "】异常");
         }
 
-        taskList.forEach(task -> FAST_INDEX_TASK_TEMPLATE_FUTURE_UTIL.callableTask(() -> {
+        List<Result<List<FastIndexTaskInfo>>> resultList = Lists.newCopyOnWriteArrayList();
+        taskList.forEach(task -> resultList.addAll(FAST_INDEX_TASK_TEMPLATE_FUTURE_UTIL.callableTask(() -> {
             try {
                 IndexTemplate logic = templateId2Logic.get(task.getSourceTemplateId());
                 //创建模版
@@ -771,8 +779,8 @@ public class FastIndexManagerImpl implements FastIndexManager {
                 //pass
                 return Result.buildFail("创建模版失败");
             }
-        }));
-        List<Result<List<FastIndexTaskInfo>>> resultList = FAST_INDEX_TASK_TEMPLATE_FUTURE_UTIL.waitResult();
+        }).waitResultQueue()));
+        resultList.addAll(FAST_INDEX_TASK_TEMPLATE_FUTURE_UTIL.waitResult());
         List<Result<List<FastIndexTaskInfo>>> failedList = resultList.stream().filter(BaseResult::failed)
             .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(failedList)) {
