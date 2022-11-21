@@ -95,8 +95,8 @@ public class OpTaskManagerImpl implements OpTaskManager {
     }
 
     @Override
-    public void updateTask(OpTask task) {
-        opTaskService.update(task);
+    public Boolean updateTask(OpTask task) {
+        return opTaskService.update(task);
     }
 
     @Override
@@ -127,7 +127,13 @@ public class OpTaskManagerImpl implements OpTaskManager {
       
         return Result.buildSucc(tasks);
     }
-
+    
+    @Override
+    public Result<List<OpTask>> getPendingTaskByTypes(List<Integer> taskTypes) {
+        return Result.buildSucc(
+            ConvertUtil.list2List(opTaskService.getPendingTaskByTypes(taskTypes), OpTask.class));
+    }
+    
     @Override
     public Result<Void> processTask(OpTaskProcessDTO processDTO) throws NotFindSubclassException {
         if (AriusObjUtils.isNull(processDTO.getTaskId())) {

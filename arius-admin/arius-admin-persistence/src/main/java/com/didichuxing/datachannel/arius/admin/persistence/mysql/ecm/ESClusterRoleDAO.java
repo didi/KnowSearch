@@ -91,4 +91,12 @@ public interface ESClusterRoleDAO {
     int deleteRoleClusterByCluterIdAndRole(@Param("clusterId") Long clusterId, @Param("role") String role);
     
     int countByClusterId(@Param("clusterId")Integer clusterId);
+    
+    /**
+     * > 通过id删除一条记录
+     *
+     * @param id 要删除的记录的id
+     * @return 受删除语句影响的行数。
+     */
+    int deleteById(@Param("id")Long id);
 }

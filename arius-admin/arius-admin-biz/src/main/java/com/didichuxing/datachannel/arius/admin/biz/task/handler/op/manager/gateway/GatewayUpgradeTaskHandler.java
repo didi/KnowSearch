@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,7 +24,7 @@ public class GatewayUpgradeTaskHandler extends AbstractGatewayTaskHandler {
 				final GatewayUpgradeContent content = JSON.parseObject(param.getExpandData(),
 						GatewayUpgradeContent.class);
 				// 校验 componentId 是否存在
-				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> result = componentService.queryComponentById(
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> result = componentService.queryComponentNameById(
 						content.getComponentId());
 				if (result.failed()) {
 						return Result.buildFrom(result);
@@ -50,7 +51,7 @@ public class GatewayUpgradeTaskHandler extends AbstractGatewayTaskHandler {
 		@Override
 		protected String getTitle(String expandData) {
 				final GatewayUpgradeContent content = convertString2Content(expandData);
-				final String name = componentService.queryComponentById(content.getComponentId())
+				final String name = componentService.queryComponentNameById(content.getComponentId())
 				                                    .getData();
 				return String.format("%s【%s】", operationType().getMessage(), name);
 		}
@@ -64,4 +65,24 @@ public class GatewayUpgradeTaskHandler extends AbstractGatewayTaskHandler {
 		protected OperateRecord recordCurrentOperationTasks(String expandData) {
 				return new OperateRecord();
 		}
+		
+		@Override
+		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
+				//版本号升级
+				final String expandData = opTask.getExpandData();
+				final GatewayUpgradeContent gatewayUpgradeContent = convertString2Content(expandData);
+				// 获取安装包中的版本号
+				final Integer packageId = gatewayUpgradeContent.getPackageId();
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Package> packageRes =
+						packageService.getPackageById(
+								Long.valueOf(packageId));
+				if (packageRes.failed()) {
+						return Result.buildFrom(packageRes);
+				}
+				final Integer componentId = gatewayUpgradeContent.getComponentId();
+				
+				return gatewayClusterManager.updateVersionWithECM(componentId, packageRes.getData().getVersion());
+		}
+		
+
 }

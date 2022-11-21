@@ -66,4 +66,22 @@ public interface PluginDAO {
 		 * @return 列表<PluginInfoPO>
 		 */
 		List<PluginInfoPO> listByClusterIdAndClusterType(@Param("clusterId")Integer clusterId, @Param("clusterType")Integer clusterType);
+		
+		/**
+		 * 它从表中删除一条记录。
+		 *
+		 * @param clusterId 集群ID
+		 * @param clusterType ES GATEWAY
+		 * @param componentId 要删除的组件的组件 ID。
+		 */
+		boolean deleteByClusterIdAndClusterTypeAndComponentId(@Param("clusterId")Integer clusterId, @Param("clusterType") Integer clusterType, @Param("componentId") Integer componentId);
+		
+		/**
+		 *
+		 *
+		 * @param clusterId 集群编号
+		 * @param clusterType 集群类型，1：k8s，2：mesos
+		 * @param componentId 插件的组件 ID。
+		 */
+		PluginInfoPO selectByClusterIdAndComponentIdAndClusterType(@Param("clusterId")Integer clusterId, @Param("clusterType") Integer clusterType, @Param("componentId") Integer componentId);
 }

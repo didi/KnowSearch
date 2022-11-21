@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NoArgsConstructor;
@@ -120,15 +121,15 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
     /**
      * 新建集群
-     * @param param    集群信息
-     * @param operator 操作人
+     *
+     * @param param 集群信息
      * @return 成功 true 失败 false
      * <p>
      * 参数不合理
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Boolean> createCluster(ClusterPhyDTO param, String operator) {
+    public Result<Boolean> createCluster(ClusterPhyDTO param) {
         Result<Boolean> checkResult = checkClusterParam(param, OperationEnum.ADD);
         if (checkResult.failed()) {
             LOGGER.warn("class=ESClusterPhyServiceImpl||method=addCluster||msg={}", checkResult.getMessage());
@@ -371,6 +372,26 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     @Override
     public Integer getComponentIdById(Integer clusterPhyId) {
         return clusterDAO.getComponentIdById(clusterPhyId);
+    }
+    
+    @Override
+    public boolean hasClusterRelationComponentId(Integer componentId) {
+        return Objects.nonNull(clusterDAO.getOneByComponentId(componentId));
+    }
+    
+    @Override
+    public boolean updateVersion(Integer componentId, String version) {
+        return clusterDAO.updateOneVersionByComponentId(componentId,version);
+    }
+    
+    @Override
+    public ClusterPhyPO getOneByComponentId(Integer componentId) {
+        return clusterDAO.getOneByComponentId(componentId);
+    }
+    
+    @Override
+    public List<ClusterPhyPO> listClusterByGatewayId(Integer gatewayId) {
+        return clusterDAO.listClusterByGatewayId(gatewayId);
     }
     
     /**************************************** private method ***************************************************/

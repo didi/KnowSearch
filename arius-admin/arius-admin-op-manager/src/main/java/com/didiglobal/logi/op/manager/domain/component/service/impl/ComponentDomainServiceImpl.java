@@ -27,12 +27,19 @@ import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralUpgradeC
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.DomainEvent;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.SpringEventPublisher;
+import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.google.common.base.Strings;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -197,7 +204,19 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     
     @Override
     public Result<Component> queryComponentByName(String name) {
-        return Result.buildSuccess(componentRepository.queryComponentByName(name));
+        Component component = componentRepository.queryComponentByName(name);
+        List<ComponentHost> hosts = componentHostRepository.listComponentHost();
+        Map<Integer, List<ComponentHost>> componentId2ListMap = ConvertUtil.list2MapOfList(hosts,
+                                                                                           ComponentHost::getComponentId,
+                                                                                           i -> i);
+        List<ComponentGroupConfig> configs = componentGroupConfigRepository.listGroupConfig();
+        Map<Integer, List<ComponentGroupConfig>> componentId2ConfigListMap = ConvertUtil.list2MapOfList(configs,
+                                                                                                        ComponentGroupConfig::getComponentId,
+                                                                                                        i -> i);
+        component.setHostList(componentId2ListMap.get(component.getId()));
+        component.setGroupConfigList(componentId2ConfigListMap.get(component.getId()));
+    
+        return Result.buildSuccess(component);
     }
     
     /**
@@ -388,9 +407,33 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     }
 
     @Override
-    public Result<String> queryComponentById(Integer componentId) {
-        final Optional<String> nameOpt = componentRepository.queryComponentById(componentId);
+    public Result<String> queryComponentNameById(Integer componentId) {
+        final Optional<String> nameOpt = componentRepository.queryComponentNameById(componentId);
         return nameOpt.map(Result::buildSuccess)
             .orElseGet(() -> Result.fail(ResultCode.COMPONENT_NOT_EXIST_ERROR));
+    }
+    
+    @Override
+    public Result<List<ComponentHost>> queryComponentHostById(Integer componentId) {
+        return Result.buildSuccess(componentHostRepository.listHostByComponentId(componentId));
+    }
+    
+    @Override
+    public Result<Component> queryComponentById(Integer componentId) {
+        final Optional<Component> componentOpt = componentRepository.queryComponentById(componentId);
+        componentOpt.ifPresent(component -> {
+            List<ComponentHost> hosts = componentHostRepository.listComponentHost();
+            Map<Integer, List<ComponentHost>> componentId2ListMap = ConvertUtil.list2MapOfList(hosts,
+                                                                                               ComponentHost::getComponentId,
+                                                                                               i -> i);
+            List<ComponentGroupConfig> configs = componentGroupConfigRepository.listGroupConfig();
+            Map<Integer, List<ComponentGroupConfig>> componentId2ConfigListMap = ConvertUtil.list2MapOfList(configs,
+                                                                                                            ComponentGroupConfig::getComponentId,
+                                                                                                            i -> i);
+            component.setHostList(componentId2ListMap.get(component.getId()));
+            component.setGroupConfigList(componentId2ConfigListMap.get(component.getId()));
+        });
+        return componentOpt.map(Result::buildSuccess).orElseGet(
+                () -> Result.fail(ResultCode.COMPONENT_NOT_EXIST_ERROR));
     }
 }

@@ -26,7 +26,7 @@ public class ESClusterConfigEditTaskHandler extends AbstractESTaskHandler {
 						return Result.buildFail("组建 id 不能为空");
 				}
 				// 校验 componentId 是否存在
-				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> result = componentService.queryComponentById(
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> result = componentService.queryComponentNameById(
 						content.getComponentId());
 				if (result.failed()) {
 						return Result.buildFrom(result);
@@ -48,7 +48,7 @@ public class ESClusterConfigEditTaskHandler extends AbstractESTaskHandler {
 		@Override
 		protected String getTitle(String expandData) {
 				final Integer componentId = convertString2Content(expandData).getComponentId();
-				final String name = componentService.queryComponentById(componentId).getData();
+				final String name = componentService.queryComponentNameById(componentId).getData();
 				return String.format("%s【%s】", operationType().getMessage(), name);
 		}
 		
@@ -61,4 +61,11 @@ public class ESClusterConfigEditTaskHandler extends AbstractESTaskHandler {
 		protected OperateRecord recordCurrentOperationTasks(String expandData) {
 				return new OperateRecord();
 		}
+		
+		@Override
+		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
+				//TODO 后续考虑下如果端口号变更的情况，那么需要怎么做，这里需要补充更新到节点信息中
+				return Result.buildSucc();
+		}
+		
 }

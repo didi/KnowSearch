@@ -127,4 +127,16 @@
         FROM gateway_cluster_info
         WHERE cluster_name = #{name}
     </select>
+	
+    <select id="getOneByComponentId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM gateway_cluster_info
+        WHERE component_id = #{componentId}
+    </select>
+    
+    <update id="updateVersion">
+        UPDATE gateway_cluster_info
+        SET version = #{version} where component_id=#{componentId}
+    </update>
 </mapper>

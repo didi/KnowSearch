@@ -1,5 +1,7 @@
 package com.didiglobal.logi.op.manager.domain.task.service.impl;
 
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.REX;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
@@ -15,20 +17,21 @@ import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralExecuteC
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
-import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskLogEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.DeploymentService;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.apache.logging.log4j.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-
-import java.util.*;
-
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.REX;
 
 /**
  * @author didi
@@ -263,7 +266,12 @@ public class TaskDomainServiceImpl implements TaskDomainService {
         }
         return Result.success(task);
     }
-
+    
+    @Override
+    public Result<List<Task>> getTaskListByIds(List<Integer> taskIds) {
+        return Result.buildSuccess(taskRepository.getTaskListByIds(taskIds));
+    }
+    
     @Override
     public Result<List<TaskDetail>> listTaskDetailByTaskId(int taskId) {
         List<TaskDetail> taskDetailList = taskDetailRepository.listTaskDetailByTaskId(taskId);
@@ -324,4 +332,3 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     }
 
 }
-

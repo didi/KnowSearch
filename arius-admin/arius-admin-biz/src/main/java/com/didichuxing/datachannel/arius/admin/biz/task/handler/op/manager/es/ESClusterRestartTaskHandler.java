@@ -23,7 +23,7 @@ public class ESClusterRestartTaskHandler extends AbstractESTaskHandler {
 		protected Result<Void> validatedAddTaskParam(OpTask param) {
 				final GatewayRestartContent content = convertString2Content(param.getExpandData());
 				// 校验 componentId 是否存在
-				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> result = componentService.queryComponentById(
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> result = componentService.queryComponentNameById(
 						content.getComponentId());
 				if (result.failed()) {
 						return Result.buildFrom(result);
@@ -65,6 +65,12 @@ public class ESClusterRestartTaskHandler extends AbstractESTaskHandler {
 		
 		protected String getName(String expandData) {
 				final GatewayRestartContent restartContent = convertString2Content(expandData);
-				return componentService.queryComponentById(restartContent.getComponentId()).getData();
+				return componentService.queryComponentNameById(restartContent.getComponentId()).getData();
+		}
+		
+		@Override
+		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
+				//TODO 后续考虑下如果端口号变更的情况，那么需要怎么做，这里需要补充更新到节点信息中
+				return Result.buildSucc();
 		}
 }

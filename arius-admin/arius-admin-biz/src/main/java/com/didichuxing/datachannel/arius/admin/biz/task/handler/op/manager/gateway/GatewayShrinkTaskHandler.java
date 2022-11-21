@@ -4,10 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.gateway.GatewayShrinkContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 /**
@@ -27,7 +31,7 @@ public class GatewayShrinkTaskHandler extends AbstractGatewayTaskHandler {
 						return Result.buildFail("组建 ID 不能为空");
 				}
 				// 校验 componentId 是否存在
-				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> result = componentService.queryComponentById(
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> result = componentService.queryComponentNameById(
 						content.getComponentId());
 				if (result.failed()) {
 						return Result.buildFrom(result);
@@ -56,7 +60,7 @@ public class GatewayShrinkTaskHandler extends AbstractGatewayTaskHandler {
 		protected String getTitle(String expandData) {
 				final GatewayShrinkContent shrinkContent = JSON.parseObject(expandData,
 						GatewayShrinkContent.class);
-				final String name = componentService.queryComponentById(
+				final String name = componentService.queryComponentNameById(
 						shrinkContent.getComponentId()).getData();
 				return String.format("%s【%s】",  operationType().getMessage(),name);
 		}
@@ -70,4 +74,30 @@ public class GatewayShrinkTaskHandler extends AbstractGatewayTaskHandler {
 		protected OperateRecord recordCurrentOperationTasks(String expandData) {
 				return new OperateRecord();
 		}
+		
+		@Override
+		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
+			final String                 expandData           = opTask.getExpandData();
+				final GatewayShrinkContent gatewayShrinkContent = convertString2Content(expandData);
+				//1. 获取组建 id，并从 gatewayCluster 获取名称
+				Result<String> nameRes = gatewayClusterManager.getNameByComponentId(
+						gatewayShrinkContent.getComponentId());
+				if (nameRes.failed()) {
+						return Result.buildFrom(nameRes);
+				}
+				final String clusterName = nameRes.getData();
+				// 将扩容的节点获取到
+				final List<TupleTwo<String, Integer>> ipAndPortTuples = convertFGeneralGroupConfigDTO2IpAndPortTuple(
+						gatewayShrinkContent.getGroupConfigList());
+				final List<GatewayNodeHostDTO> nodes = ipAndPortTuples.stream()
+						.map(i -> GatewayNodeHostDTO.builder().port(i.v2())
+								.clusterName(clusterName)
+								.hostname(i.v1())
+								.build())
+						.distinct()
+						.collect(Collectors.toList());
+				// 缩容节点写入
+				return gatewayClusterManager.shrinkNodesWithECM(nodes, clusterName );
+		}
+
 }

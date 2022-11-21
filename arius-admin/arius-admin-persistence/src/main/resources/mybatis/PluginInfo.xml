@@ -91,4 +91,16 @@
 		WHERE cluster_type = #{clusterType}
 			AND cluster_id = #{clusterId}
 	</select>
+	
+	<delete id="deleteByClusterIdAndClusterTypeAndComponentId">
+		DELETE FROM plugin_info WHERE component_id=#{componentId} AND cluster_type=#{clusterType} AND cluster_id=#{clusterId}
+	</delete>
+	
+	<select id="selectByClusterIdAndComponentIdAndClusterType" resultMap="BaseResultMap">
+		SELECT    <include refid="Base_Column_List"/>
+		FROM plugin_info
+		WHERE component_id = #{componentId}
+			AND cluster_type = #{clusterType}
+			AND cluster_id = #{clusterId}
+	</select>
 </mapper>

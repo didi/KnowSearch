@@ -70,4 +70,12 @@ public interface  GatewayNodeService {
 	 * @return 列表<GatewayClusterNodePO>
 	 */
 	List<GatewayClusterNodePO> listByHosts(List<String> hosts);
+	
+	/**
+	 * 删除一批网关节点
+	 *
+	 * @param ids 要删除的ID。
+	 * @return 一个布尔值。
+	 */
+	Boolean deleteBatch(List<Integer> ids);
 }

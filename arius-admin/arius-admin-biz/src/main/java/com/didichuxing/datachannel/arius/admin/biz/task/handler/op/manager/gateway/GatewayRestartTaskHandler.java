@@ -22,7 +22,7 @@ public class GatewayRestartTaskHandler extends AbstractGatewayTaskHandler {
 		protected Result<Void> validatedAddTaskParam(OpTask param) {
 				final GatewayRestartContent content = convertString2Content(param.getExpandData());
 				// 校验 componentId 是否存在
-				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> result = componentService.queryComponentById(
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> result = componentService.queryComponentNameById(
 						content.getComponentId());
 				if (result.failed()) {
 						return Result.buildFrom(result);
@@ -40,21 +40,25 @@ public class GatewayRestartTaskHandler extends AbstractGatewayTaskHandler {
 		
 		@Override
 		protected Result<Integer> submitTaskToOpManagerGetId(String expandData) {
-				
-				return restart(expandData);
+			
+			return restart(expandData);
 		}
 		
 		@Override
 		protected String getTitle(String expandData) {
-				final GatewayRestartContent restartContent = convertString2Content(expandData);
-				final String name = componentService.queryComponentById(restartContent.getComponentId())
-						.getData();
-				return String.format("%s【%s】",  operationType().getMessage(),name);
+			final GatewayRestartContent restartContent = convertString2Content(expandData);
+			final String name = componentService.queryComponentNameById(restartContent.getComponentId()).getData();
+			return String.format("%s【%s】", operationType().getMessage(), name);
 		}
 		
 		@Override
 		protected GatewayRestartContent convertString2Content(String expandData) {
 				return JSON.parseObject(expandData, GatewayRestartContent.class);
+		}
+		
+		@Override
+		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
+				return Result.buildSucc();
 		}
 		
 		@Override
@@ -64,6 +68,7 @@ public class GatewayRestartTaskHandler extends AbstractGatewayTaskHandler {
 		
 		protected String getName(String expandData) {
 				final GatewayRestartContent restartContent = convertString2Content(expandData);
-				return componentService.queryComponentById(restartContent.getComponentId()).getData();
+				return componentService.queryComponentNameById(restartContent.getComponentId()).getData();
 		}
+	
 }

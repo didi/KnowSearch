@@ -208,4 +208,14 @@ public class TaskService {
         final Result<Task> taskRes = taskDomainService.getTaskById(taskId);
         return Result.build(Objects.nonNull(taskRes.getData()));
     }
+    
+    /**
+     * 按 ID 获取任务列表。
+     *
+     * @param taskIds 要查询的任务ID列表。
+     * @return 任务清单
+     */
+    public Result<List<Task>> getTaskListByIds(List<Integer> taskIds) {
+        return taskDomainService.getTaskListByIds(taskIds);
+    }
 }

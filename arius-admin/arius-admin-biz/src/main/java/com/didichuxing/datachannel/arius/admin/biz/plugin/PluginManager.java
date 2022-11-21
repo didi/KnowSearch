@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.plugin;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.plugin.PluginCreateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginClusterTypeEnum;
 import java.util.List;
 
 /**
@@ -37,4 +39,44 @@ public interface PluginManager {
 		 * @return 列表<PluginVO>
 		 */
 		Result<List<PluginVO>> listESKernelPluginCache(String clusterPhy);
+		
+		/**
+		 * 使用 ECM 创建插件
+		 *
+		 * @param pluginCreateDTO 包含插件信息的插件 DTO 对象。
+		 * @return 一个 PluginCreateResult 对象。
+		 */
+		Result<Void> createWithECM(PluginCreateDTO pluginCreateDTO);
+		
+		/**
+		 * 卸载指定集群ID、集群类型、组件ID的插件
+		 *
+		 * @param clusterId 集群 ID。
+		 * @param type 要卸载的集群类型。
+		 * @param componentId 要卸载的组件的 ID。
+		 * @return 卸载的结果。
+		 */
+		Result<Void> uninstallWithECM(Integer clusterId, PluginClusterTypeEnum type, Integer componentId);
+		
+	
+		/**
+		 * 更新插件组件的版本
+		 *
+		 * @param clusterId 集群编号
+		 * @param componentId 要更新的组件的 ID。
+		 * @param type 集群类型，即要更新的集群类型。
+		 * @param version 要更新的插件版本
+		 * @return 返回类型是 Result<Void>，它是操作结果的包装类。
+		 */
+		Result<Void> updateVersionWithECM(Integer clusterId, Integer componentId, PluginClusterTypeEnum type, String version);
+		
+	
+	
+		/**
+		 * 检查集群是否完成卸载插件
+		 *
+		 * @param clusterId 集群编号
+		 * @param type 要卸载的集群类型。
+		 */
+		Result<Void> checkClusterCompleteUninstallPlugins(Integer clusterId, PluginClusterTypeEnum type);
 }

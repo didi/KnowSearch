@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.plugin;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESResponsePluginInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.plugin.PluginCreateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.plugin.PluginInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
@@ -20,10 +21,12 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -90,6 +93,43 @@ public class PluginManagerImpl implements PluginManager {
 				} catch (Exception ignore) {
 						return Result.buildSucc(Collections.emptyList());
 				}
+		}
+		
+		@Override
+		public Result<Void> createWithECM(PluginCreateDTO pluginCreateDTO) {
+				// 无需记录：工单记录即可
+				PluginInfoPO pluginInfoPO = ConvertUtil.obj2Obj(pluginCreateDTO, PluginInfoPO.class);
+				return Result.build(pluginInfoService.create(pluginInfoPO));
+		}
+		
+		@Override
+		public Result<Void> uninstallWithECM(Integer clusterId, PluginClusterTypeEnum type, Integer componentId) {
+				//无需记录：工单记录即可
+				return Result.build(pluginInfoService.delete(clusterId,type.getClusterType(),componentId));
+		}
+		
+		@Override
+		public Result<Void> updateVersionWithECM(Integer clusterId, Integer componentId, PluginClusterTypeEnum type,
+		                                         String version) {
+				// 无需记录：工单记录即可
+				// 获取对应的 ID
+				PluginInfoPO pluginInfoPO = pluginInfoService.selectByClusterIdAndComponentIdAndClusterType(clusterId,
+				                                                                                            componentId,
+				                                                                                            type.getClusterType());
+				if (Objects.isNull(pluginInfoPO)) {
+						return Result.buildFail("未找到指定的插件信息");
+				}
+				pluginInfoPO.setVersion(version);
+				return Result.build(pluginInfoService.update(pluginInfoPO));
+		}
+		
+		@Override
+		public Result<Void> checkClusterCompleteUninstallPlugins(Integer clusterId, PluginClusterTypeEnum type) {
+				List<PluginInfoPO> pluginInfoPOS = pluginInfoService.listByClusterId(clusterId, type);
+				if (CollectionUtils.isEmpty(pluginInfoPOS)) {
+						return Result.buildSucc();
+				}
+				return Result.buildFail("集群中存在插件未完全卸载，请先卸载集群中存在的插件，才可进行下线集群任务");
 		}
 		
 		private void refreshClusterPhyPluginInfo() {
