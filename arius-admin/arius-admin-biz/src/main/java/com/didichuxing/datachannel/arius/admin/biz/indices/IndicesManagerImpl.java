@@ -583,8 +583,10 @@ public class IndicesManagerImpl implements IndicesManager {
             return Result.buildFail("获取单个索引详情信息失败");
         }
         //设置索引阻塞信息
-        List<IndexCatCell> finalIndexCatCellList = esIndexService.buildIndexAliasesAndBlockInfo(phyCluster,
+        List<IndexCatCell> indexCatCellList = esIndexService.buildIndexAliasesAndBlockInfo(phyCluster,
                 Collections.singletonList(indexCatCell));
+        // 设置索引setting相关信息
+        List<IndexCatCell> finalIndexCatCellList = esIndexService.buildIndexSettingsInfo(phyCluster, indexCatCellList);
         List<IndexCatCellVO> indexCatCellVOList = ConvertUtil.list2List(finalIndexCatCellList, IndexCatCellVO.class);
     
         return Result.buildSucc(indexCatCellVOList.get(0));
