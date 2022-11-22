@@ -175,3 +175,6 @@ CREATE TABLE logi_op_task_detail
     create_time     TIMESTAMP        NULL COMMENT '创建时间',
     update_time     TIMESTAMP        NULL COMMENT '更新时间'
 );
+
+#arius_config_info修改业务类型对应的配置值
+UPDATE arius_config_info SET `value`  = '[{"code":0,"desc":"系统日志","label":"system"},{"code":1,"desc":"日志数据","label":"log"},{"code":2,"desc":"用户上报数据","label":"olap"},{"code":3,"desc":"RDS数据","label":"binlog"},{"code":4,"desc":"离线导入数据","label":"offline"}]'  WHERE id = 1671;
