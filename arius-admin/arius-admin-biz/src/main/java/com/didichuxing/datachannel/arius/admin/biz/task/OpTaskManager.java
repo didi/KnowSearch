@@ -51,7 +51,7 @@ public interface OpTaskManager {
      * @param task task
      * @return int
      */
-    void updateTask(OpTask task);
+    Boolean updateTask(OpTask task);
 
     /**
      * 通过id获取任务
@@ -67,6 +67,14 @@ public interface OpTaskManager {
      * @return List<TaskPO>
      */
     Result<List<OpTask>> list();
+    
+    /**
+     * 按任务类型获取待处理任务
+     *
+     * @param taskTypes 任务类型列表。
+     * @return OpTask 对象列表。
+     */
+    Result<List<OpTask>> getPendingTaskByTypes(List<Integer> taskTypes);
 
     /**
      * 处理任务任务

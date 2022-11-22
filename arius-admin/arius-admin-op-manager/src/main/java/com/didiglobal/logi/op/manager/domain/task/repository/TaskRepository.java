@@ -1,7 +1,6 @@
 package com.didiglobal.logi.op.manager.domain.task.repository;
 
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
-
 import java.util.List;
 
 /**
@@ -56,4 +55,12 @@ public interface TaskRepository {
      * @return 未终止状态的任务列表
      */
     List<Task> getUnFinalStatusTaskList();
+    
+    /**
+     * 按 ID 获取任务列表。
+     *
+     * @param taskIds 要检索的任务 ID 列表。
+     * @return 任务清单
+     */
+    List<Task> getTaskListByIds(List<Integer> taskIds);
 }

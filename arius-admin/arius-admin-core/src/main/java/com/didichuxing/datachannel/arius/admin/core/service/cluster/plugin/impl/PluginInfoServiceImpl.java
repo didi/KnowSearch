@@ -31,4 +31,25 @@ public class PluginInfoServiceImpl implements PluginInfoService {
 				return pluginDAO.listByClusterIdAndClusterType(clusterId,
 						clusterTypeEnum.getClusterType());
 		}
+		
+		@Override
+		public boolean create(PluginInfoPO pluginInfoPO) {
+				return pluginDAO.insert(pluginInfoPO)==1;
+		}
+		
+		@Override
+		public boolean delete(Integer clusterId, Integer clusterType, Integer componentId) {
+				return pluginDAO.deleteByClusterIdAndClusterTypeAndComponentId(clusterId,clusterType,componentId);
+		}
+		
+		@Override
+		public boolean update(PluginInfoPO pluginInfoPO) {
+				return pluginDAO.updateByPrimaryKeySelective(pluginInfoPO)==1;
+		}
+		
+		@Override
+		public PluginInfoPO selectByClusterIdAndComponentIdAndClusterType(Integer clusterId, Integer componentId,
+		                                                                  Integer clusterType) {
+				return pluginDAO.selectByClusterIdAndComponentIdAndClusterType(clusterId,componentId,clusterType);
+		}
 }

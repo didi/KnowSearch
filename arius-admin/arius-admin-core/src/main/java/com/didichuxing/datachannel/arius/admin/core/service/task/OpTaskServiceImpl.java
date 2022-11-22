@@ -87,6 +87,11 @@ public class OpTaskServiceImpl implements OpTaskService {
         return ConvertUtil.list2List(opTaskDao.getPendingTaskByType(taskType), OpTask.class);
     }
     
+    @Override
+    public List<OpTaskPO> getPendingTaskByTypes(List<Integer> taskTypes) {
+        return opTaskDao.getPendingTaskByTypes(taskTypes);
+    }
+    
     /**
      * 获取最新任务
      *

@@ -47,7 +47,7 @@ public class ESClusterRollbackTaskHandler extends AbstractESTaskHandler {
 		protected String getTitle(String expandData) {
 				final ClusterRollbackContent content     = convertString2Content(expandData);
 				final Integer                componentId = content.getComponentId();
-				final String name = componentService.queryComponentById(componentId)
+				final String name = componentService.queryComponentNameById(componentId)
 				                                    .getData();
 				return String.format("%s【%s】", operationType().getMessage(), name);
 		}
@@ -61,4 +61,11 @@ public class ESClusterRollbackTaskHandler extends AbstractESTaskHandler {
 		protected OperateRecord recordCurrentOperationTasks(String expandData) {
 				return new OperateRecord();
 		}
+		
+		@Override
+		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
+				//TODO 后续考虑下如果端口号变更的情况，那么需要怎么做，这里需要补充更新到节点信息中
+				return Result.buildSucc();
+		}
+	
 }

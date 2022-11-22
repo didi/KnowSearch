@@ -3,7 +3,6 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
-
 import java.util.List;
 import java.util.Map;
 
@@ -83,5 +82,13 @@ public interface ClusterRoleService {
      * @return
      */
     Result<Void> deleteRoleClusterByClusterId(Integer clusterId, Integer projectId);
+    
+    /**
+     * 删除具有给定 ID 的所有实体。
+     *
+     * @param ids 要删除的数据的id。
+     * @return 一个布尔值。
+     */
+    boolean deleteByIds(List<Long> ids);
 
 }

@@ -115,7 +115,7 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM logi_op_component
-        WHERE name = #{id}
+        WHERE id = #{id}
     </select>
 
     <select id="getByPackageIds" resultMap="BaseResultMap">

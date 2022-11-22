@@ -2,24 +2,32 @@ package com.didiglobal.logi.op.manager.application;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHost;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralConfigChangeComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralExecuteComponentFunction;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralRestartComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralRollbackComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralScaleComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralUninstallComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralUpgradeComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
+import java.util.List;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
-
-import java.util.List;
 
 /**
  * @author didi
@@ -236,10 +244,42 @@ public class ComponentService {
         return componentDomainService.queryComponentByName(name);
     }
     
-    public Result<String> queryComponentById(Integer componentId) {
+    /**
+     * > 通过id查询组件
+     *
+     * @param componentId 组件 ID。
+     * @return 结果 <String> 对象。
+     */
+    public Result<String> queryComponentNameById(Integer componentId) {
+        return componentDomainService.queryComponentNameById(componentId);
+    }
+    
+    /**
+     * > 通过 id 查询组件
+     *
+     * @param componentId 组件 ID。
+     * @return 结果 <String> 对象。
+     */
+    public Result<Component> queryComponentById(Integer componentId) {
         return componentDomainService.queryComponentById(componentId);
     }
     
+    /**
+     * 通过组件ID查询组件的主机信息
+     *
+     * @param componentId 组件 ID
+     * @return ComponentHost 对象的列表。
+     */
+    public Result<List<ComponentHost>> queryComponentHostById(Integer componentId) {
+        return componentDomainService.queryComponentHostById(componentId);
+    }
+    
+    /**
+     * 获取组件的配置。
+     *
+     * @param componentId 您要为其获取配置的组件的组件 ID。
+     * @return ComponentGroupConfig 对象的列表。
+     */
     public Result<List<ComponentGroupConfig>> getComponentConfig(
         Integer componentId) {
         return componentDomainService.getComponentConfig(componentId);

@@ -22,4 +22,8 @@ public class PluginUpgradeContent extends GeneralUpgradeComponentDTO {
 		 * 依赖组件 id
 		 */
 		private Integer dependComponentId;
+		/**
+		 * 原因
+		 */
+		private String reason;
 }

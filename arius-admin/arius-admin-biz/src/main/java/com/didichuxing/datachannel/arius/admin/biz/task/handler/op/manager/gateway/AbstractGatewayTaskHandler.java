@@ -5,9 +5,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONValidator;
 import com.alibaba.fastjson.JSONValidator.Type;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayClusterManager;
+import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.task.handler.op.manager.AbstractOpManagerTaskHandler;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
+import java.util.Collections;
+import java.util.List;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,7 +31,9 @@ public abstract class AbstractGatewayTaskHandler extends AbstractOpManagerTaskHa
 		
 		
 		@Autowired
-		protected GatewayClusterManager gatewayClusterManager;
+		protected GatewayClusterManager     gatewayClusterManager;
+		@Autowired
+		protected GatewayClusterNodeManager gatewayClusterNodeManager;
 		
 		
 		/**
@@ -53,4 +60,10 @@ public abstract class AbstractGatewayTaskHandler extends AbstractOpManagerTaskHa
 								i.matches("http:\\\\n\\s*port:\\s*\\d*"));
 		}
 		
+		@Override
+		protected List<TupleTwo<String, Integer>> convertFGeneralGroupConfigDTO2IpAndPortTuple(
+				List<GeneralGroupConfigDTO> dtos) {
+				//TODO 实现抓换
+				return Collections.emptyList();
+		}
 }

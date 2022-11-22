@@ -21,4 +21,39 @@ public interface PluginInfoService {
 		 * @return 列表<PluginInfoPO>
 		 */
 		List<PluginInfoPO> listByClusterId(Integer clusterId, PluginClusterTypeEnum clusterTypeEnum);
+		
+		/**
+		 * 创建一个插件
+		 *
+		 * @param pluginInfoPO PluginInfoPO 对象
+		 * @return 一个布尔值。
+		 */
+		boolean create(PluginInfoPO pluginInfoPO);
+		
+		/**
+		 * 从集群中删除组件
+		 *
+		 * @param clusterId 集群的 ID。
+		 * @param clusterType ES GATEWAY
+		 * @param componentId 要删除的组件的 ID。
+		 * @return 一个布尔值。
+		 */
+		boolean delete(Integer clusterId, Integer clusterType, Integer componentId);
+		
+		/**
+		 * 更新插件信息
+		 *
+		 * @param pluginInfoPO PluginInfoPO 对象
+		 * @return 一个布尔值。
+		 */
+		boolean update(PluginInfoPO pluginInfoPO);
+		
+		/**
+		 *
+		 *
+		 * @param clusterId 要查询的集群的集群ID。
+		 * @param componentId 插件的组件 ID。
+		 * @param clusterType 1-k8s，2 个月
+		 */
+		PluginInfoPO selectByClusterIdAndComponentIdAndClusterType(Integer clusterId, Integer componentId, Integer clusterType);
 }
