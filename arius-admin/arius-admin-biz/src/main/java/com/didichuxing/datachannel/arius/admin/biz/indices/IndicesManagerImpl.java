@@ -556,7 +556,14 @@ public class IndicesManagerImpl implements IndicesManager {
             return Result.buildFrom(ret);
         }
 
-        List<IndexShardInfo> indexShardInfoList = esIndexCatService.syncGetIndexShardInfo(phyCluster, indexName);
+        List<IndexShardInfo> indexShardInfoList = null;
+        try {
+            indexShardInfoList = esIndexCatService.syncGetIndexShardInfo(phyCluster, indexName);
+        } catch (ESOperateException e) {
+            LOGGER.error("class=IndicesManagerImpl||method=getIndexShardsInfo||clusterName={}||errMsg=fail to get indexShardInfo",
+                    cluster);
+            return Result.buildFail("获取索引shard(主)在节点中的分布详情异常");
+        }
         List<IndexShardInfoVO> indexNodeShardVOList = indexShardInfoList.stream().filter(this::filterPrimaryShard)
             .map(this::coverUnit).collect(Collectors.toList());
         return Result.buildSucc(indexNodeShardVOList);
@@ -576,8 +583,10 @@ public class IndicesManagerImpl implements IndicesManager {
             return Result.buildFail("获取单个索引详情信息失败");
         }
         //设置索引阻塞信息
-        List<IndexCatCell> finalIndexCatCellList = esIndexService.buildIndexAliasesAndBlockInfo(phyCluster,
+        List<IndexCatCell> indexCatCellList = esIndexService.buildIndexAliasesAndBlockInfo(phyCluster,
                 Collections.singletonList(indexCatCell));
+        // 设置索引setting相关信息
+        List<IndexCatCell> finalIndexCatCellList = esIndexService.buildIndexSettingsInfo(phyCluster, indexCatCellList);
         List<IndexCatCellVO> indexCatCellVOList = ConvertUtil.list2List(finalIndexCatCellList, IndexCatCellVO.class);
     
         return Result.buildSucc(indexCatCellVOList.get(0));
@@ -823,22 +832,12 @@ public class IndicesManagerImpl implements IndicesManager {
             return Result.buildFail(checkResult.getMessage());
         }
 
-        IndicesIncrementalSettingDTO incrementalSetting =  params.stream().findFirst().orElse(null);
-        String changeKey = incrementalSetting.getKey();
-        String changeValue = incrementalSetting.getValue();
-
-        // 把param转换成以物理集群名为key的map集合(以集群为维度进行索引settings批量更新操作)
-        Map<String/*集群名称*/, List<String>/*该集群中要修改settings的index名称列表*/> cluster2indicesMap = params.stream().collect(
-                Collectors.groupingBy(IndicesIncrementalSettingDTO::getCluster,
-                Collectors.mapping(IndicesIncrementalSettingDTO::getIndex, Collectors.toList())));
-
-        for(Map.Entry<String, List<String>> entry : cluster2indicesMap.entrySet()){
-            String cluster = entry.getKey();
-            boolean response = esIndexService.syncPutIndexSetting(cluster, cluster2indicesMap.get(cluster),
-                    changeKey, changeValue, "", RETRY_COUNT);
+        for (IndicesIncrementalSettingDTO indicesIncrementalSettingDTO : params) {
+            boolean response = esIndexService.syncPutIndexSettings(indicesIncrementalSettingDTO.getCluster(), Collections.singletonList(indicesIncrementalSettingDTO.getIndex()),
+                    indicesIncrementalSettingDTO.getIncrementalSettings(), RETRY_COUNT);
             if (!response) {
                 LOGGER.error("class=IndicesManagerImpl||method=updateIndexSettingsByMerge,cluster={}, errMsg={}",
-                        cluster, "update indices settings failed");
+                        indicesIncrementalSettingDTO.getCluster(), "update indices settings failed");
             }
         }
 
@@ -859,6 +858,9 @@ public class IndicesManagerImpl implements IndicesManager {
             return Result.buildParamIllegal("参数不能为空");
         }
         for (IndicesIncrementalSettingDTO param : params) {
+            if(param.getIncrementalSettings() == null || param.getIncrementalSettings().isEmpty()){
+                return Result.buildParamIllegal("参数不能为空");
+            }
             Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(param.getCluster(), projectId);
             if (getClusterRet.failed()) {
                 return Result.buildFrom(getClusterRet);

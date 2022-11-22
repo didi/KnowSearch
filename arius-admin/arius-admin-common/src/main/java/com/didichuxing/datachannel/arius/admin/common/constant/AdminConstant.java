@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.constant;
 
+import com.didichuxing.datachannel.arius.admin.common.constant.template.DataType;
 import com.didiglobal.logi.log.util.HostUtil;
 import java.util.Arrays;
 import java.util.List;
@@ -110,4 +111,8 @@ public class AdminConstant {
     public static final Integer MAX_BIND_PORT_VALUE               = 65535;
     public static final Integer MIN_BIND_PORT_VALUE               = 1;
 
+    /**
+     * 未知的数据类型
+     */
+    public static final DataType UNKNOW_DATA_TYPE = new DataType(-1, "未知数据", "unknow");
 }

@@ -163,9 +163,8 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
 
         //计算本机需要采集的具体es集群
         if (needReAcquireCluster(jobTotalNu, clusterPhyList, allTaskPOList)) {
-            allTaskPOList = ariusMetaJobClusterDistributeDAO.getAllTask();
-//            List<AriusMetaJobClusterDistributePO> lockedTasks = acquireOwnCluster(jobTotalNu, allTaskPOList);
-            List<AriusMetaJobClusterDistributePO> lockedTasks = allTaskPOList;
+            List<AriusMetaJobClusterDistributePO> lockedTasks = acquireOwnCluster(jobTotalNu, allTaskPOList);
+
             localTask.clear();
             localTask = getLocalTaskInfo(lockedTasks, clusterPhyList);
             clusterTotal = jobTotalNu;

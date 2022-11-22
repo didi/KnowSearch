@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import java.util.List;
 import java.util.Set;
@@ -35,11 +36,11 @@ public interface ClusterPhyService {
 
     /**
      * 新建物理集群
+     *
      * @param param 集群信息
-     * @param operator 操作人
      * @return 成功 true 失败 false
      */
-    Result<Boolean> createCluster(ClusterPhyDTO param, String operator);
+    Result<Boolean> createCluster(ClusterPhyDTO param);
 
     /**
      * 编辑物理集群信息
@@ -151,9 +152,46 @@ public interface ClusterPhyService {
      * @return true or false
      */
     boolean isClusterExistsByPackageId(Long packageId);
-
-
-
-
-
+		
+		
+		/**
+		 * 它返回具有给定集群物理 ID 的组件的组件 ID。
+		 *
+		 * @param clusterPhyId 集群的物理标识。
+		 * @return clusterPhyId 的组件 id
+		 */
+		Integer getComponentIdById(Integer clusterPhyId);
+    
+    /**
+     * 如果集群具有具有给定组件 ID 的关系组件，则返回 true
+     *
+     * @param componentId 要检查的组件的组件 ID。
+     * @return 一个布尔值。
+     */
+    boolean hasClusterRelationComponentId(Integer componentId);
+    
+    /**
+     * 使用给定的 ID 更新组件的版本。
+     *
+     * @param componentId 您要更新的组件的 ID。
+     * @param version 要更新的组件的版本。
+     * @return 一个布尔值。
+     */
+    boolean updateVersion(Integer componentId, String version);
+    
+    /**
+     * 它返回具有 componentId 的 ClusterPhyPO 对象。
+     *
+     * @param componentId 集群的组件 ID。
+     * @return ClusterPhyPO 对象列表
+     */
+    ClusterPhyPO getOneByComponentId(Integer componentId);
+    
+    /**
+     * 它返回网关所属的集群。
+     *
+     * @param gatewayId 集群的网关 ID。
+     * @return ClusterPhyPO
+     */
+    	List<ClusterPhyPO> listClusterByGatewayId(Integer gatewayId);
 }

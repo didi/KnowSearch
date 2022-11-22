@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.plugin.PluginDAO">
+	<resultMap id="BaseResultMap"
+		type="com.didichuxing.datachannel.arius.admin.common.bean.po.plugin.PluginInfoPO">
+		<!--@mbg.generated--><!--@Table plugin_info-->
+		<id column="id" jdbcType="BIGINT" property="id"/>
+		<result column="name" jdbcType="VARCHAR" property="name"/>
+		<result column="cluster_id" jdbcType="VARCHAR" property="clusterId"/>
+		<result column="version" jdbcType="VARCHAR" property="version"/>
+		<result column="memo" jdbcType="VARCHAR" property="memo"/>
+		<result column="component_id" jdbcType="INTEGER" property="componentId"/>
+		<result column="plugin_type" jdbcType="INTEGER" property="pluginType"/>
+		<result column="cluster_type" jdbcType="INTEGER" property="clusterType"/>
+		<result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+		<result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+	</resultMap>
+	<sql id="Base_Column_List">
+		<!--@mbg.generated-->id,
+		                     name,
+		                     cluster_id,
+		                     version,
+		                     memo,
+		                     component_id,
+		                     plugin_type,
+		                     cluster_type,
+		                     create_time,
+		                     update_time
+	</sql>
+	<select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+		<!--@mbg.generated-->SELECT
+		<include refid="Base_Column_List"/>
+		FROM plugin_info
+		WHERE id = #{id}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		<!--@mbg.generated-->DELETE
+		                     FROM plugin_info
+		                     WHERE id = #{id}
+	</delete>
+	<insert id="insert" keyColumn="id" keyProperty="id"
+		parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.plugin.PluginInfoPO"
+		useGeneratedKeys="true">
+		<!--@mbg.generated-->INSERT INTO plugin_info (name, cluster_id, version, memo, component_id, plugin_type, cluster_type) VALUES (#{name}, #{clusterId}, #{version}, #{memo}, #{componentId}, #{pluginType}, #{clusterType})
+	</insert>
+	<update id="updateByPrimaryKeySelective"
+		parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.plugin.PluginInfoPO">
+		<!--@mbg.generated-->UPDATE plugin_info
+		<set>
+			<if test="name != null">
+				name = #{name},
+			</if>
+			<if test="clusterId != null">
+				cluster_id = #{clusterId},
+			</if>
+			<if test="version != null">
+				version = #{version},
+			</if>
+			<if test="memo != null">
+				memo = #{memo},
+			</if>
+			<if test="componentId != null">
+				component_id = #{componentId},
+			</if>
+			<if test="pluginType != null">
+				plugin_type = #{pluginType},
+			</if>
+			<if test="clusterType != null">
+				cluster_type = #{clusterType},
+			</if>
+		
+		</set>
+		WHERE id = #{id}
+	</update>
+	<insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map"
+		useGeneratedKeys="true">
+		<!--@mbg.generated-->INSERT INTO plugin_info
+		                     (name, cluster_id, version, memo, component_id, plugin_type,
+		                      cluster_type,
+		                      create_time)
+	VALUES
+		<foreach collection="list" item="item" separator=",">
+			(#{item.name}, #{item.clusterId}, #{item.version}, #{item.memo}, #{item.componentId}, #{item.pluginType}, #{item.clusterType}, #{item.createTime})
+		</foreach>
+	</insert>
+	
+	<select id="listByClusterIdAndClusterType" resultMap="BaseResultMap">
+		<!--@mbg.generated-->SELECT
+		<include refid="Base_Column_List"/>
+		FROM plugin_info
+		WHERE cluster_type = #{clusterType}
+			AND cluster_id = #{clusterId}
+	</select>
+	
+	<delete id="deleteByClusterIdAndClusterTypeAndComponentId">
+		DELETE FROM plugin_info WHERE component_id=#{componentId} AND cluster_type=#{clusterType} AND cluster_id=#{clusterId}
+	</delete>
+	
+	<select id="selectByClusterIdAndComponentIdAndClusterType" resultMap="BaseResultMap">
+		SELECT    <include refid="Base_Column_List"/>
+		FROM plugin_info
+		WHERE component_id = #{componentId}
+			AND cluster_type = #{clusterType}
+			AND cluster_id = #{clusterId}
+	</select>
+</mapper>

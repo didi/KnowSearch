@@ -1,6 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.core.service.task;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.task.OpTaskPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.OpTaskVO;
+
 import java.util.List;
 
 /**
@@ -48,6 +53,13 @@ public interface OpTaskService {
      * @return {@link List}<{@link OpTask}>
      */
     List<OpTask> getPendingTaskByType(Integer taskType);
+    /**
+     * 批量获取pending任务通过类型
+     *
+     * @param taskTypes 任务类型
+     * @return {@link List}<{@link OpTaskPO}>
+     */
+    List<OpTaskPO> getPendingTaskByTypes(List<Integer> taskTypes);
     
     /**
      * 获取最新任务
@@ -65,4 +77,11 @@ public interface OpTaskService {
      * @return boolean
      */
     boolean insert(OpTask task);
+
+    /**
+     * 任务中心分页查询
+     * @param queryDTO
+     * @return
+     */
+    Tuple<Long, List<OpTaskVO>> pagingGetTasksByCondition(OpTaskQueryDTO queryDTO);
 }

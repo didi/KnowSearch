@@ -58,126 +58,119 @@ public enum ClusterPhyNodeMetricsEnum {
 
     /*************************************2.节点-索引基本信息******************************************/
     /**
-     * 单位：个/s
+     * 单位：个/S
      */
 
     INDICES_INDEXING_RATE("indices-indexing-index_total_rate", "索引写入TPS"),
     /**
-     * 单位：次/MIN
+     * 单位：次/S
      */
-    INDICES_QUERY_CACHE_EVICTIONS("indices-query_cache-evictions", "索引写入TPS"),
+    INDICES_QUERY_CACHE_EVICTIONS("indices-query_cache-evictions", "query Cache evictions"),
     /**
-     * 单位：次/MIN
+     * 单位：次/S
      */
-    INDICES_REQUEST_CACHE_EVICTIONS("indices-request_cache-evictions", "索引写入TPS"),
+    INDICES_REQUEST_CACHE_EVICTIONS("indices-request_cache-evictions", "request Cache eviction"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
 
-    INDICES_INDEXING_LATENCY("indices-indexing-index_time_per_doc", "索引写入耗时"),
+    INDICES_INDEXING_LATENCY("indices-indexing-index_time_in_millis", "索引写入耗时"),
     /**
-     * 单位：个/s
+     * 单位：MS
+     */
+    INDICES_INDEXING_INDEX_TIME_PER_DOC("indices-indexing-index_time_per_doc", "单个文档写入耗时"),
+    /**
+     * 单位：个/S
      */
 
     INDICES_QUERY_RATE("indices-search-query_total_rate", "Query QPS"),
     /**
-     * 单位：个/s
+     * 单位：个/S
      */
-
     INDICES_FETCH_RATE("indices-search-fetch_total_rate", "Fetch QPS"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
-
     INDICES_QUERY_LATENCY("indices-search-query_time_per_query", "索引Query耗时"),
 
+    /**
+     * 单位：MS
+     */
+    INDICES_QUERY_TIME_IN_MILLIS("indices-search-query_time_in_millis", "索引Query耗时"),
     /**
      * 单位：个
      */
     INDICES_QUERY_TOTAL("indices-search-query_total", "索引Query总数"),
-
     /**
-     * 单位：ms
+     * 单位：MS
      */
-
     INDICES_FETCH_LATENCY("indices-search-fetch_time_per_fetch", "索引Fetch耗时"),
     /**
      * 单位：个
      */
-
     INDICES_CUREENT_SCROLL_NUM("indices-search-scroll_current", "Scroll当下请求量"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
-
     INDICES_SCROLL_LATENCY("indices-search-scroll_avg_time", "Scroll请求耗时"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
-
     INDICES_MERGE_LATENCY("indices-merges_avg_time", "Merge操作耗时"),
     /**
-     * 单位：次/分钟
+     * 单位：次/MIN
      */
-
     INDICES_MERGES_NUM_PER_MIN("indices-merges-total", "每分钟merges操作次数"),
     /**
-     * 单位：次/分钟
+     * 单位：次/MIN
      */
 
     INDICES_FLUSH_NUM_PER_MIN("indices-flush-total", "每分钟indices操作次数"),
     /**
-     * 单位：次/分钟
+     * 单位：次/MIN
      */
-
     INDICES_REFRESH_NUM_PER_MIN("indices-refresh-total", "每分钟refresh操作次数"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
-
     INDICES_REFRESH_LATENCY("indices-refresh_avg_time", "Refresh操作耗时"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
-
     INDICES_FLUSH_LATENCY("indices-flush_avg_time", "Flush操作耗时"),
     /**
      * 单位：MB
      */
-
     INDICES_UNCOMMITTED_TRANSLOG_SIZE("indices-translog-uncommitted_size_in_bytes",
             "未提交Translog大小"),
     /**
      * 单位：MB
      */
-
     INDICES_QUERY_CACHE_MEM_SIZE("indices-query_cache-memory_size_in_bytes",
             "QueryCache内存占用大小"),
     /**
      * 单位：MB
      */
-
     INDICES_REQUEST_CACHE_MEM_SIZE("indices-request_cache-memory_size_in_bytes",
             "RequestCache内存占用大小"),
     /**
-     * 单位：次/分钟
+     * 单位：次/MIN
      */
-
     INDICES_QUERY_CACHE_HIT_NUM("indices-query_cache-hit_count", "QueryCache内存命中次数"),
     /**
-     * 单位：次/分钟
+     * 单位：次/MIN
      */
 
     INDICES_REQUEST_CACHE_HIT_NUM("indices-request_cache-hit_count",
             "RequestCache内存命中次数"),
     /**
-     * 单位：次/分钟
+     * 单位：次/MIN
      */
 
     INDICES_QUERY_CACHE_MISS_NUM("indices-query_cache-miss_count",
             "QueryCache内存未命中次数"),
     /**
-     * 单位：次/分钟
+     * 单位：次/MIN
      */
 
     INDICES_REQUEST_CACHE_MISS_NUM("indices-request_cache-miss_count",
@@ -269,7 +262,7 @@ public enum ClusterPhyNodeMetricsEnum {
      * 单位：MB
      */
     INDICES_NORMS_MEMORY_IN_BYTES("indices-segments-norms_memory_in_bytes",
-            "索引norms内存大小"),
+            "索引norMS内存大小"),
 
     /**
      * 单位：MB
@@ -285,7 +278,7 @@ public enum ClusterPhyNodeMetricsEnum {
     /**
      * 单位：MB
      */
-    INDICES_BREAKERS_FIELDDATA_LIMIT_SIZE_IN_BYTES("indices-segments-breakers-fielddata-limit_size_in_bytes",
+    INDICES_BREAKERS_FIELDDATA_LIMIT_SIZE_IN_BYTES("breakers-fielddata-estimated_size_in_bytes",
             "索引Fielddata内存大小"),
 
     /**
@@ -310,19 +303,19 @@ public enum ClusterPhyNodeMetricsEnum {
 
     /*************************************4.JVM指标******************************************/
     /**
-     * 单位：次/s
+     * 单位：次/S
      */
-    YOUNG_GC_NUM("jvm-gc-young-collection_count_rate", "young-gc次数/s"),
+    YOUNG_GC_NUM("jvm-gc-young-collection_count_rate", "young-gc次数/S"),
     /**
-     * 单位：次/s
+     * 单位：次/S
      */
-    OLD_GC_NUM("jvm-gc-old-collection_count_rate", "old-gc次数/s"),
+    OLD_GC_NUM("jvm-gc-old-collection_count_rate", "old-gc次数/S"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
     YOUNG_GC_LATENCY("jvm-gc-young-collection_avg_time", "young-gc耗时"),
     /**
-     * 单位：ms
+     * 单位：MS
      */
     OLD_GC_LATENCY("jvm-gc-old-collection_avg_time", "old-gc耗时"),
     /**
@@ -371,6 +364,12 @@ public enum ClusterPhyNodeMetricsEnum {
      */
     BREAKERS_IN_FLIGHT_REQUESTS_LIMIT_SIZE_IN_BYTES("breakers-in_flight_requests-limit_size_in_bytes",
             "inflight requests circuit breaker 内存占用"),
+
+    /**
+     * 单位：MB
+     */
+    BREAKERS_IN_FLIGHT_HTTP_REQUESTS_LIMIT_SIZE_IN_BYTES("breakers-in_flight_http_requests-limit_size_in_bytes",
+            "inflight requests http circuit breaker 内存占用"),
 
     /**
      * 单位：MB

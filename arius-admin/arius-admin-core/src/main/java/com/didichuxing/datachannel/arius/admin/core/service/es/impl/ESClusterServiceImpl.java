@@ -8,6 +8,7 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESResponsePluginInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentOnIp;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
@@ -140,7 +141,12 @@ public class ESClusterServiceImpl implements ESClusterService {
     public Map<String, List<String>> syncGetNode2PluginsMap(String cluster) throws ESOperateException {
         return esClusterDAO.getNode2PluginsMap(cluster, 3);
     }
-
+    
+    @Override
+    public List<ESResponsePluginInfo> syncGetPlugins(String cluster) throws ESOperateException {
+        return esClusterDAO.getPlugins(cluster);
+    }
+    
     /**
      * 获取某个集群内索引别名到索引名称的映射
      *
@@ -236,7 +242,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public ESClusterHealthResponse syncGetClusterHealth(String clusterName) {
+    public ESClusterHealthResponse syncGetClusterHealth(String clusterName) throws ESOperateException {
         return esClusterDAO.getClusterHealth(clusterName, 3);
     }
 
@@ -246,7 +252,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public ClusterHealthEnum syncGetClusterHealthEnum(String clusterName) {
+    public ClusterHealthEnum syncGetClusterHealthEnum(String clusterName) throws ESOperateException {
         ESClusterHealthResponse clusterHealthResponse = esClusterDAO.getClusterHealth(clusterName, 3);
 
         ClusterHealthEnum clusterHealthEnum = ClusterHealthEnum.UNKNOWN;
@@ -258,7 +264,13 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     @Override
     public ESClusterStatsResponse syncGetClusterStats(String clusterName) {
-        return esClusterDAO.getClusterStats(clusterName);
+        try {
+            return esClusterDAO.getClusterStats(clusterName);
+        } catch (ESOperateException e) {
+            LOGGER.error("class=ESClusterServiceImpl||method=syncGetClusterStats||clusterName={}||errMsg=fail to get cluster stats",
+                    clusterName);
+            return null;
+        }
     }
 
     @Override
@@ -267,7 +279,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public Map<String, Integer> synGetSegmentsOfIpByCluster(String clusterName) {
+    public Map<String, Integer> synGetSegmentsOfIpByCluster(String clusterName) throws ESOperateException {
         Map<String, Integer> segmentsOnIpMap = Maps.newHashMap();
         for (ECSegmentOnIp ecSegmentsOnIp : esClusterDAO.getSegmentsOfIpByCluster(clusterName)) {
             if (segmentsOnIpMap.containsKey(ecSegmentsOnIp.getIp())) {
@@ -292,17 +304,17 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public String synGetESVersionByCluster(String cluster) {
+    public String synGetESVersionByCluster(String cluster) throws ESOperateException {
         return esClusterDAO.getESVersionByCluster(cluster, 3);
     }
 
     @Override
-    public Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster) {
+    public Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster) throws ESOperateException {
         return esClusterDAO.getAllSettingsByCluster(cluster, 3);
     }
 
     @Override
-    public Map<String, ClusterNodeSettings> syncGetPartOfSettingsByCluster(String cluster) {
+    public Map<String, ClusterNodeSettings> syncGetPartOfSettingsByCluster(String cluster) throws ESOperateException {
         return esClusterDAO.getPartOfSettingsByCluster(cluster, 3);
     }
 

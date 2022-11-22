@@ -17,7 +17,7 @@ public enum ClusterDynamicConfigsTypeEnum {
                                            BREAKER(1, "breaker"),
 
                                            /**
-                                            * 物理集群下的routing配置项
+                                            * 物理集群下的allocation配置项
                                             */
                                            ALLOCATION(2, "allocation"),
 

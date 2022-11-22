@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es;
 
-import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralRestartComponentDTO;
+import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.GeneralRestartComponentContent;
 
 /**
  * 集群启动内容
@@ -9,5 +9,5 @@ import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralRestartCompo
  * @date 2022/10/20
  * @since 0.3.2
  */
-public class ClusterRestartContent extends GeneralRestartComponentDTO {
+public class ClusterRestartContent extends GeneralRestartComponentContent {
 }

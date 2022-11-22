@@ -342,27 +342,27 @@ public class ClusterOverviewMetricsHandle {
         metrics.setInvalidNodes(invalidNodeIps);
     }
 
-    private void getBigShardsMetrics(ESClusterOverviewMetricsVO metrics) {
+    private void getBigShardsMetrics(ESClusterOverviewMetricsVO metrics) throws ESOperateException {
         List<ShardMetrics> shardMetrics = esShardService.syncGetBigShards(metrics.getClusterName());
         metrics.setBigShards(ConvertUtil.list2List(shardMetrics, BigShardMetricsVO.class));
     }
 
-    private void getBigIndicesMetrics(ESClusterOverviewMetricsVO metrics) {
+    private void getBigIndicesMetrics(ESClusterOverviewMetricsVO metrics) throws ESOperateException {
         List<BigIndexMetrics> bigIndexMetrics = esClusterNodeService.syncGetBigIndices(metrics.getClusterName());
         metrics.setBigIndices(ConvertUtil.list2List(bigIndexMetrics, BigIndexMetricsVO.class));
     }
 
-    private void getMovingShardsMetrics(ESClusterOverviewMetricsVO metrics) {
+    private void getMovingShardsMetrics(ESClusterOverviewMetricsVO metrics) throws ESOperateException {
         List<MovingShardMetrics> movingShardsMetrics = esShardService.syncGetMovingShards(metrics.getClusterName());
         metrics.setMovingShards(ConvertUtil.list2List(movingShardsMetrics, MovingShardMetricsVO.class));
     }
 
-    private void getUnassignedShardsMetrics(ESClusterOverviewMetricsVO metrics) {
+    private void getUnassignedShardsMetrics(ESClusterOverviewMetricsVO metrics) throws ESOperateException {
         List<UnAssignShardMetrics> unAssignShardMetrics = esShardService.syncGetUnAssignShards(metrics.getClusterName());
         metrics.setUnAssignShards(ConvertUtil.list2List(unAssignShardMetrics, UnAssignShardMetricsVO.class));
     }
 
-    private void getPendingTasksMetrics(ESClusterOverviewMetricsVO metrics) {
+    private void getPendingTasksMetrics(ESClusterOverviewMetricsVO metrics) throws ESOperateException {
         List<PendingTask> pendingTaskFromES = esClusterNodeService.syncGetPendingTask(metrics.getClusterName());
         metrics.setPendingTasks(ConvertUtil.list2List(pendingTaskFromES, PendingTaskVO.class));
     }

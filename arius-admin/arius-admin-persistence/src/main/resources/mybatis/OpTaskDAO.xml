@@ -116,6 +116,38 @@
         <include refid="where"/>
     </select>
 
+    <select id="pagingByCondition" resultMap="WorkTaskMap">
+        select
+        <include refid="columns" />
+        FROM
+        arius_op_task
+        where delete_flag = '0'
+        <if test="param.title != null">     and `title` LIKE CONCAT('%', #{param.title}, '%')</if>
+        <if test="param.startTime != null">
+            and create_time &gt;= #{param.startTime}
+        </if>
+        <if test="param.endTime != null">
+            and create_time &lt;= #{param.endTime}
+        </if>
+        order by  ${sortTerm}  ${sortType}
+        limit #{from}, #{size}
+    </select>
+
+    <select id="countByCondition"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskQueryDTO" resultType="long">
+        select
+        count(1)
+        from arius_op_task
+        where delete_flag = '0'
+        <if test="title != null">     and `title` LIKE CONCAT('%', #{title}, '%')</if>
+        <if test="startTime != null">
+            and create_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            and create_time &lt;= #{endTime}
+        </if>
+    </select>
+
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         <![CDATA[
             INSERT INTO arius_op_task (
@@ -172,5 +204,15 @@
                 id = #{id}
             </where>
     </update>
-
+  
+  <select id="getPendingTaskByTypes" resultMap="WorkTaskMap">
+    SELECT
+    <include refid="columns"/>
+    FROM arius_op_task
+    WHERE task_type IN
+    <foreach collection="taskTypes" separator="," item="taskType" close=")" open="(">
+      #{taskType}
+    </foreach>
+    AND status in ('waiting', 'pause', 'running')
+  </select>
 </mapper>

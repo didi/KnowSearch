@@ -126,4 +126,7 @@ public class IndexTemplateDTO extends PageDTO {
 
     @ApiModelProperty("恢复优先级")
     private Integer priorityLevel;
+
+    @ApiModelProperty("元数据逻辑集群ids")
+    private List<Integer> metadataLogicClusterIds;
 }

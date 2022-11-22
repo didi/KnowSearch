@@ -5,14 +5,16 @@
         <result column="id" jdbcType="BIGINT" property="id"/>
         <result column="cluster_name" jdbcType="VARCHAR" property="clusterName"/>
         <result column="host_name" jdbcType="VARCHAR" property="hostName"/>
+        <result column="node_name" jdbcType="VARCHAR" property="nodeName"/>
         <result column="port" jdbcType="INTEGER" property="port"/>
+        <result column="machine_spec" jdbcType="VARCHAR" property="machineSpec"/>
         <result column="heartbeat_time" jdbcType="TIMESTAMP" property="heartbeatTime"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, cluster_name, host_name, port, heartbeat_time, create_time, update_time
+        id, cluster_name, host_name, port, heartbeat_time, create_time, update_time,node_name,machine_spec
     </sql>
 
     <insert id="recordGatewayNode"
@@ -36,5 +38,87 @@
         from gateway_cluster_node_info
         where cluster_name = #{clusterName} AND heartbeat_time > #{time}
     </select>
-
+    
+    <insert
+      id="insert"
+      parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into gateway_cluster_node_info
+            (cluster_name, host_name, port,machine_spec)
+        values (#{clusterName}, #{hostName}, #{port}，#{machineSpec})
+    </insert>
+    
+    <select id="selectByBatchClusterName" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM gateway_cluster_node_info WHERE   cluster_name IN
+        <foreach collection="clusterNames" separator="," item="clusterName" close=")" open="(">
+            #{clusterName}
+        </foreach>
+    </select>
+    
+    <select id="selectByClusterName" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM gateway_cluster_node_info WHERE   cluster_name=#{clusterName}
+    </select>
+    
+    <delete id="deleteByClusterName">
+        DELETE
+        FROM gateway_cluster_node_info
+        WHERE cluster_name = #{clusterName}
+    </delete>
+    
+    <select id="listByCondition" resultMap="BaseResultMap">
+         SELECT
+        <include refid="Base_Column_List"/>
+        FROM gateway_cluster_node_info
+        <where>
+            <if test="nodeName != null and nodeName != ''">
+                AND node_name LIKE CONCAT('%'
+                , #{nodeName}
+                , '%')
+            </if>
+            <if test="clusterName != null and clusterName != ''">
+                AND cluster_name = #{clusterName}
+            </if>
+        </where>
+         <if test="sortTerm != null">
+            order by ${sortTerm} ${sortType}
+        </if>
+        limit #{from}, #{size}
+    </select>
+    
+    <select id="countByCondition" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM gateway_cluster_node_info
+        <where>
+            <if test="clusterName != null and clusterName != ''">
+                AND cluster_name = #{clusterName}
+            </if>
+            <if test="nodeName != null and nodeName != ''">
+                AND node_name LIKE CONCAT('%'
+                    , #{nodeName}
+                    , '%')
+            </if>
+        </where>
+    </select>
+    
+    <select id="listByHosts" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM gateway_cluster_node_info WHERE
+            host_name IN
+        <foreach collection="hosts" separator="," item="host" close=")" open="(">
+            #{host}
+        </foreach>
+    </select>
+    
+    <delete id="deleteBatch">
+        DELETE  FROM gateway_cluster_node_info
+        WHERE id IN
+         <foreach collection="ids" separator="," item="id" close=")" open="(">
+            #{id}
+        </foreach>
+    </delete>
 </mapper>

@@ -1,7 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import java.util.List;
+
+import com.didichuxing.datachannel.arius.admin.common.constant.template.DataType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,7 +25,7 @@ public class TemplateCreateOrderDetail extends AbstractOrderDetail {
 
     /**
      * 用户数据类型
-     * @see DataTypeEnum
+     * @see DataType
      */
     private Integer      dataType;
 
