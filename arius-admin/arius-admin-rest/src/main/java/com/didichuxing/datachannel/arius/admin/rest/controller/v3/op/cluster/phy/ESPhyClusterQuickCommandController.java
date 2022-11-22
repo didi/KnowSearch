@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandIndicesQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandShardsQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -46,7 +47,7 @@ public class ESPhyClusterQuickCommandController {
     @PostMapping("/indices-distribution")
     @ResponseBody
     @ApiOperation(value = "indices分布")
-    public PaginationResult<IndicesDistributionVO> indicesDistribution(HttpServletRequest request,
+    public List<IndicesDistributionVO> indicesDistribution(HttpServletRequest request,
                                                                        @RequestBody ClusterPhyQuickCommandIndicesQueryDTO condition) throws NotFindSubclassException {
         return clusterPhyQuickCommandManager.indicesDistributionPage(condition, HttpRequestUtil.getProjectId(request));
     }
@@ -54,8 +55,8 @@ public class ESPhyClusterQuickCommandController {
     @PostMapping("/shard-distribution")
     @ResponseBody
     @ApiOperation(value = "shard分布")
-    public PaginationResult<ShardDistributionVO> shardDistribution(HttpServletRequest request,
-                                                               @RequestBody ClusterPhyQuickCommandShardsQueryDTO condition) throws NotFindSubclassException {
+    public List<ShardDistributionVO> shardDistribution(HttpServletRequest request,
+                                                               @RequestBody ClusterPhyQuickCommandShardsQueryDTO condition) throws ESOperateException{
         return clusterPhyQuickCommandManager.shardDistributionPage(condition, HttpRequestUtil.getProjectId(request));
     }
 
