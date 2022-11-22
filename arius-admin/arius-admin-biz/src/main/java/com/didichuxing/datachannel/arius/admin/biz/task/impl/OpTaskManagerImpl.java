@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.OpTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskHandleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -24,7 +25,9 @@ import com.didichuxing.datachannel.arius.admin.core.service.task.OpTaskService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.op.manager.application.TaskService;
+import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.entity.value.TaskDetail;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
 import com.didiglobal.logi.op.manager.interfaces.assembler.TaskDetailAssembler;
 import com.didiglobal.logi.op.manager.interfaces.vo.TaskDetailVO;
 import com.didiglobal.logi.security.service.UserService;
@@ -201,11 +204,34 @@ public class OpTaskManagerImpl implements OpTaskManager {
     public Result<Void> retryTask(Integer id) {
         final OpTask opTask = opTaskService.getById(id);
         Result<Void> result = checkCorrectnessAndStatusTask(opTask);
-        if (result.failed()){
+        if (result.failed()) {
             return result;
         }
         final Integer taskId = Integer.valueOf(opTask.getBusinessKey());
-        return Result.buildFromWithData(taskService.retryTask(taskId));
+        com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> voidResult = taskService.retryTask(taskId);
+        if (voidResult.isSuccess()) {
+            // 更新工单中的状态
+            com.didiglobal.logi.op.manager.infrastructure.common.Result<Task> taskRes = taskService.getTaskById(taskId);
+            Integer status = taskRes.getData().getStatus();
+            OpTaskProcessDTO processDTO = ConvertUtil.obj2Obj(opTask, OpTaskProcessDTO.class);
+            processDTO.setTaskId(opTask.getId());
+            //3. 填充状态
+            processDTO.setStatus(
+                    OpTaskStatusEnum.valueOfStatusByOpManagerEnum(TaskStatusEnum.find(status)).getStatus());
+            try {
+                Result<Void> processTaskRes = processTask(processDTO);
+                if (processTaskRes.failed()) {
+                    return processTaskRes;
+                }
+            } catch (Exception ignore) {
+            }
+            // 重试后继续执行
+            Result<Void> executeRes = execute(id);
+            if (executeRes.failed()) {
+                return executeRes;
+            }
+        }
+        return Result.buildFromWithData(voidResult);
     }
     
     @Override
