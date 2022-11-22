@@ -175,3 +175,6 @@ CREATE TABLE logi_op_task_detail
     create_time     TIMESTAMP        NULL COMMENT '创建时间',
     update_time     TIMESTAMP        NULL COMMENT '更新时间'
 );
+
+-- 新增平台配置初始化数据
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1686, 'arius.common.group', 'cluster.region.unsupported_divide_type', 'xpack.installed,zen1,ml.machine_memory,ml.max_open_jobs,ml.enabled', 1, -1, 1, '设置平台不支持的region划分方式', '2022-11-19 10:45:34', '2022-11-19 10:45:34', '2022-11-19 10:45:34');
