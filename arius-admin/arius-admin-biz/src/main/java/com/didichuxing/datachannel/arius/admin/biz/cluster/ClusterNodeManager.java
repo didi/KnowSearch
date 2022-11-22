@@ -123,4 +123,10 @@ public interface ClusterNodeManager {
      * @return
      */
     Result<List<ClusterNodeInfoVO>> listClusterPhyNodeInfosByName(String clusterPhyName);
+
+    /**
+     * 获取当前平台所有集群节点的机器规格
+     * @return
+     */
+    Result<List<String>> listAllMachineSpecs();
 }

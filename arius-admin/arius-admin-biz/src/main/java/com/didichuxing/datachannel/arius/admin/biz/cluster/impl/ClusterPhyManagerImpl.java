@@ -678,7 +678,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         Object beforeValue = beforeChangeConfigs.getData().values().stream()
             .filter(
-                clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.containsKey(changeKey))
+                clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.get(changeKey) != null)
             .map(clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.get(changeKey))
             .findFirst().orElse("");
         Object changeValue = param.getValue();
