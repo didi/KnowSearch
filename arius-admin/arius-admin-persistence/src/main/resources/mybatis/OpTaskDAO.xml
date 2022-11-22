@@ -204,5 +204,15 @@
                 id = #{id}
             </where>
     </update>
-
+  
+  <select id="getPendingTaskByTypes" resultMap="WorkTaskMap">
+    SELECT
+    <include refid="columns"/>
+    FROM arius_op_task
+    WHERE task_type IN
+    <foreach collection="taskTypes" separator="," item="taskType" close=")" open="(">
+      #{taskType}
+    </foreach>
+    AND status in ('waiting', 'pause', 'running')
+  </select>
 </mapper>

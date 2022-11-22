@@ -100,4 +100,21 @@ public interface GatewayClusterService {
 		 * @return GatewayClusterPO 对象
 		 */
 		GatewayClusterPO getOneByName(String name);
+		
+		/**
+		 * 通过 componentId 获取一个 GatewayClusterPO
+		 *
+		 * @param componentId 网关集群的组件 ID。
+		 * @return GatewayClusterPO 对象
+		 */
+		GatewayClusterPO getOneByComponentId(Integer componentId);
+		
+		/**
+		 * 使用给定的 ID 更新组件的版本。
+		 *
+		 * @param componentId 您要更新的组件的 ID。
+		 * @param version 要更新的组件的版本。
+		 * @return 一个布尔值。
+		 */
+		Boolean updateVersion(Integer componentId, String version);
 }

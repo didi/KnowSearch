@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.task.op.manager.gateway;
 
-import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneraInstallComponentDTO;
+import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.GeneraInstallComponentContent;
 
 /**
  * 集群插件安装内容
@@ -10,5 +10,5 @@ import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneraInstallCompon
  * @date 2022/10/20
  * @since 0.3.2
  */
-public class GatewayPluginInstallContent extends GeneraInstallComponentDTO {
+public class GatewayPluginInstallContent extends GeneraInstallComponentContent {
 }

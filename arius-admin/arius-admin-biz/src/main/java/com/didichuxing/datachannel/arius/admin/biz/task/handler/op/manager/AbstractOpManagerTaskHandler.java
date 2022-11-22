@@ -1,7 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.task.handler.op.manager;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.biz.plugin.PluginManager;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskHandler;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.OfflineContent;
 import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.PluginUninstallContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -9,19 +13,23 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.op.manager.application.ComponentService;
+import com.didiglobal.logi.op.manager.application.PackageService;
 import com.didiglobal.logi.op.manager.application.TaskService;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.interfaces.assembler.ComponentAssembler;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneraInstallComponentDTO;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralConfigChangeComponentDTO;
+import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralRestartComponentDTO;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralRollbackComponentDTO;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralScaleComponentDTO;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralUpgradeComponentDTO;
 import java.util.Date;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -33,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		
+		protected final static String REASON = "reason";
 		@Autowired
 		protected OpTaskManager        opTaskManager;
 		@Autowired
@@ -41,6 +50,10 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		protected TaskService          taskService;
 		@Autowired
 		private   OperateRecordService operateRecordService;
+		@Autowired
+		protected PackageService       packageService;
+		@Autowired
+		protected PluginManager        pluginManager;
 		
 		
 		@Override
@@ -71,7 +84,7 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 				final boolean insert = opTaskManager.insert(opTask);
 				if (insert) {
 						final OperateRecord operateRecord = recordCurrentOperationTasks(opTask.getExpandData());
-						operateRecordService.save(operateRecord);
+						//operateRecordService.save(operateRecord);
 				}
 				
 				return Result.buildSucc(opTask);
@@ -84,22 +97,26 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		
 		@Override
 		public Result<Void> process(OpTask opTask, Integer step, String status, String expandData) {
-				final Result<Void> result = validatedProcess(opTask.getExpandData());
-				if (result.failed()) {
-						return Result.buildFrom(result);
-				}
-				final String businessKey = opTask.getBusinessKey();
-				// 进行任务执行
-				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> executeRes =
-						taskService.execute(
-								Integer.parseInt(businessKey));
-				if (executeRes.failed()) {
-						return Result.buildFrom(executeRes);
-				}
-				opTask.setStatus(status);
-				opTask.setUpdateTime(new Date());
-				opTaskManager.updateTask(opTask);
-				return Result.buildSucc();
+			final Result<Void> result = validatedProcess(opTask.getExpandData());
+			if (result.failed()) {
+				return Result.buildFrom(result);
+			}
+			opTask.setStatus(status);
+			opTask.setUpdateTime(new Date());
+			// 如果任务的后续处理是失败的，则任务始终无法成功
+			if (OpTaskStatusEnum.valueOfStatus(status).equals(OpTaskStatusEnum.SUCCESS)) {
+				// 任务完成的后置处理
+					final Result<Void> afterSuccessTaskExecutionRes = afterSuccessTaskExecution(opTask);
+					String expandDataNew = settingTaskStatus(expandData, afterSuccessTaskExecutionRes);
+					if (afterSuccessTaskExecutionRes.failed()) {
+							// 如果后置操作失败，那么暂停任务即可
+							opTask.setStatus(OpTaskStatusEnum.PAUSE.getStatus());
+					}
+				opTask.setExpandData(expandDataNew);
+			}
+			final Boolean aBoolean = opTaskManager.updateTask(opTask);
+			
+			return Result.build(aBoolean);
 		}
 		
 		
@@ -110,6 +127,13 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 * @return Result<Void>
 		 */
 		protected abstract Result<Void> validatedAddTaskParam(OpTask param);
+		/**
+		 * > 此函数将文件配置转换为 IP 地址和端口的元组列表
+		 *
+		 * @param dtos 配置文件的文件路径
+		 * @return 字符串和整数元组的列表。
+		 */
+		protected abstract List<TupleTwo<String,Integer>> convertFGeneralGroupConfigDTO2IpAndPortTuple(List<GeneralGroupConfigDTO> dtos);
 		
 		/**
 		 * 此函数接受一个字符串作为参数，并返回一个 Result<Void>。
@@ -122,6 +146,23 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 						return Result.buildParamIllegal("提交内容为空");
 				}
 				return Result.buildSucc();
+		}
+		/**
+		 * > 设置任务状态
+		 *
+		 * @param expandData 执行任务时传入的数据。
+		 * @param afterSuccessTaskExecutionRes 任务执行成功后的任务执行结果。
+		 * @return 任务失败的原因。
+		 */
+		protected String settingTaskStatus(String expandData,
+				Result<Void> afterSuccessTaskExecutionRes) {
+				final JSONObject jsonObject = JSON.parseObject(expandData);
+				if (afterSuccessTaskExecutionRes.failed()) {
+						jsonObject.put(REASON, afterSuccessTaskExecutionRes.getData());
+				} else {
+						jsonObject.remove(REASON);
+				}
+				return JSON.toJSONString(jsonObject);
 		}
 		
 		
@@ -168,6 +209,13 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 * @return 返回类型与参数的类型相同。
 		 */
 		protected abstract <T> T convertString2Content(String expandData);
+		/**
+		 * > 该函数在任务执行成功后调用
+		 *  例如：创建：扩容：缩容，下线，删除等任务
+		 * @param opTask 已执行的任务对象。
+		 * @return Result<Void>
+		 */
+		protected abstract Result<Void>  afterSuccessTaskExecution(OpTask opTask);
 		
 		
 		/**
@@ -333,9 +381,9 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 * @return 结果对象。
 		 */
 		protected Result<Integer> offLine(String expandData) {
-				final Integer componentId = convertString2Content(expandData);
+				final OfflineContent content = convertString2Content(expandData);
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
-						componentService.offLineComponent(componentId);
+						componentService.offLineComponent(content.getComponentId());
 				if (result.failed()) {
 						return Result.buildFrom(result);
 				}

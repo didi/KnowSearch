@@ -1,10 +1,9 @@
 package com.didiglobal.logi.op.manager.infrastructure.db;
 
+import java.sql.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.sql.Timestamp;
 
 /**
  * @author didi
@@ -46,5 +45,9 @@ public class ComponentHostPO {
      * 更新时间
      */
     private Timestamp updateTime;
+    /**
+     * 机器规格
+     */
+    private String machineSpec;
 
 }

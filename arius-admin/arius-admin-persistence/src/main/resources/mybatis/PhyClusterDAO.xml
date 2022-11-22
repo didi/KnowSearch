@@ -289,4 +289,24 @@
         FROM es_cluster_phy_info
         WHERE id = #{clusterPhyId}
     </select>
+    
+    <select id="getOneByComponentId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM es_cluster_phy_info
+        WHERE component_id = #{componentId}
+    </select>
+    
+    <update id="updateOneVersionByComponentId">
+        UPDATE es_cluster_phy_info
+        SET es_version = #{version}
+        where component_id = #{componentId}
+    </update>
+    
+    <select id="listClusterByGatewayId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM es_cluster_phy_info
+        WHERE FIND_IN_SET(#{gatewayId}, gateway_ids)
+    </select>
 </mapper>

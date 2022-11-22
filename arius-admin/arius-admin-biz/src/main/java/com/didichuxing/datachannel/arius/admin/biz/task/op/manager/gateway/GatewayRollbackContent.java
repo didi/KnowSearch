@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.task.op.manager.gateway;
 
-import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralRollbackComponentDTO;
+import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.GeneralRollbackComponentContent;
 
 /**
  * 集群回滚
@@ -9,5 +9,6 @@ import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralRollbackComp
  * @date 2022/10/25
  * @since 0.3.2
  */
-public class GatewayRollbackContent extends GeneralRollbackComponentDTO {
+public class GatewayRollbackContent extends GeneralRollbackComponentContent {
+
 }

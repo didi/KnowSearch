@@ -90,4 +90,9 @@ public class GatewayNodeServiceImpl implements GatewayNodeService {
 		gatewayClusterNode.setId(gatewayClusterNode.getId());
 		return i;
 	}
+		
+		@Override
+		public Boolean deleteBatch(List<Integer> ids) {
+				return gatewayClusterNodeDAO.deleteBatch(ids)==ids.size();
+		}
 }

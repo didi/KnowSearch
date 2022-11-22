@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.task.op.manager.gateway;
 
-import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterConfigContent;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
 import java.util.List;
 import lombok.EqualsAndHashCode;
@@ -18,7 +17,7 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
-public class GatewayConfigRollbackContent extends ClusterConfigContent {
+public class GatewayConfigRollbackContent extends GatewayConfigContent {
 		
 		public GatewayConfigRollbackContent(Integer componentId) {
 				super(componentId);
@@ -29,5 +28,5 @@ public class GatewayConfigRollbackContent extends ClusterConfigContent {
 		 * 旧的分组配置列表
 		 */
 		private List<GeneralGroupConfigDTO> oldGroupConfigList;
-		
+
 }

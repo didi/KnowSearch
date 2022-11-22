@@ -49,8 +49,8 @@ public enum OpTaskHandleEnum {
         OpTaskConstant.GATEWAY_CONFIG_EDIT),
     GATEWAY_CONFIG_ROLLBACK(OpTaskTypeEnum.GATEWAY_CONFIG_ROLLBACK.getType(),
         OpTaskConstant.GATEWAY_CONFIG_ROLLBACK),
-    GATEWAY_ROLLBACK(OpTaskTypeEnum.GATEWAY_ROLLBACK.getType(),
-        OpTaskConstant.GATEWAY_ROLLBACK),
+    GATEWAY_ROLLBACK(OpTaskTypeEnum.GATEWAY_ROLLBACK.getType(), OpTaskConstant.GATEWAY_ROLLBACK),
+    GATEWAY_OFFLINE(OpTaskTypeEnum.GATEWAY_OFFLINE.getType(), OpTaskConstant.GATEWAY_OFFLINE),
     //ES相关操作 0.3.2
     ES_CLUSTER_NEW(OpTaskTypeEnum.ES_CLUSTER_NEW.getType(), OpTaskConstant.ES_CLUSTER_CREATE),
     
@@ -71,6 +71,7 @@ public enum OpTaskHandleEnum {
     ES_CLUSTER_PLUG_RESTART(OpTaskTypeEnum.ES_CLUSTER_PLUG_RESTART.getType(), OpTaskConstant.ES_CLUSTER_PLUG_RESTART),
     ES_CLUSTER_ROLLBACK(OpTaskTypeEnum.ES_CLUSTER_ROLLBACK.getType(), OpTaskConstant.ES_CLUSTER_ROLLBACK),
     ES_CLUSTER_CONFIG_ROLLBACK(OpTaskTypeEnum.ES_CLUSTER_CONFIG_ROLLBACK.getType(), OpTaskConstant.ES_CLUSTER_CONFIG_ROLLBACK),
+    ES_CLUSTER_OFFLINE(OpTaskTypeEnum.ES_CLUSTER_OFFLINE.getType(), OpTaskConstant.ES_CLUSTER_OFFLINE),
 
                               UNKNOWN(OpTaskTypeEnum.UNKNOWN.getType(), OpTaskConstant.UNKNOWN);
 
@@ -148,6 +149,8 @@ class OpTaskConstant {
     public static final String ES_CLUSTER_PLUG_RESTART    = "esClusterPluginRestartTask";
     public static final String ES_CLUSTER_ROLLBACK        = "esClusterRollbackTask";
     public static final String ES_CLUSTER_CONFIG_ROLLBACK = "esClusterConfigRollbackTask";
+    public static final String GATEWAY_OFFLINE            = "gatewayOfflineTask";
+    public static final String ES_CLUSTER_OFFLINE         = "esClusterOfflineTask";
 
     public static final String UNKNOWN                     = "unknown";
 }
