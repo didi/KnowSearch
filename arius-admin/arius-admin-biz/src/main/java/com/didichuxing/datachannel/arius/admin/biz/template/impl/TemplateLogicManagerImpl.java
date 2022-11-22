@@ -1582,8 +1582,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             openSrvList.add(TemplateServiceEnum.TEMPLATE_DCDR.getCode());
         }
         // 如果创建模版的settings的translog持久化方式为async，则要开启对应服务状态
-        final Map<String, String> setting = JsonUtils.flat(JSONObject.parseObject(param.getSetting()));
-        String translogDurabilityType = setting.getOrDefault(ESSettingConstant.INDEX_TRANSLOG_DURABILITY, "request");
+        Map<String, Object> setting = ConvertUtil.directFlatObject(JSONObject.parseObject(param.getSetting()));
+        String translogDurabilityType = setting.getOrDefault(ESSettingConstant.INDEX_TRANSLOG_DURABILITY, "request").toString();
         if (ESSettingConstant.ASYNC.equals(translogDurabilityType)){
             openSrvList.add(TemplateServiceEnum.TEMPLATE_TRANSLOG_ASYNC.getCode());
         }
@@ -1593,7 +1593,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         // 恢复优先级设置
-        String priorityLevel = setting.getOrDefault(ESSettingConstant.INDEX_PRIORITY, "0");
+        String priorityLevel = setting.getOrDefault(ESSettingConstant.INDEX_PRIORITY, "0").toString();
         indexTemplateDTO.setPriorityLevel(Integer.valueOf(priorityLevel));
 
         return indexTemplateDTO;
