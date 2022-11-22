@@ -31,7 +31,12 @@ public class TaskRepositoryImpl implements TaskRepository {
     public Task getTaskById(int id) {
         return TaskConverter.convertTaskPO2DO(taskDao.getById(id));
     }
-
+    
+    @Override
+    public List<Task> getTaskListByIds(List<Integer> taskIds) {
+        return TaskConverter.convertTaskPO2DOList(taskDao.getTaskListByIds(taskIds));
+    }
+    
     @Override
     public int updateTaskStatus(int id, int status) {
         return taskDao.updateStatus(id, status);

@@ -4,9 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterShrinkContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 
@@ -27,13 +31,23 @@ public class ESClusterShrinkTaskHandler extends AbstractESTaskHandler {
 						return Result.buildFail("组建 ID 不能为空");
 				}
 				// 校验 componentId 是否存在
-				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> result = componentService.queryComponentById(
-						content.getComponentId());
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> result = componentService.queryComponentNameById(
+								content.getComponentId());
 				if (result.failed()) {
 						return Result.buildFrom(result);
 				}
-				
-				return Result.buildSucc();
+				// 校验缩容的节点是否被 region 绑定
+				Result<String> nameRes = clusterPhyManager.getNameByComponentId(content.getComponentId());
+				if (nameRes.failed()) {
+						return Result.buildFrom(nameRes);
+				}
+				final String clusterName = nameRes.getData();
+				final List<TupleTwo<String, Integer>> ipAndPortTuples = convertFGeneralGroupConfigDTO2IpAndPortTuple(
+								content.getGroupConfigList());
+				final List<ESClusterRoleHostDTO> nodes = ipAndPortTuples.stream().map(i -> ESClusterRoleHostDTO.builder().port(
+								String.valueOf(i.v2())).cluster(clusterName).hostname(i.v1()).ip(i.v1()).build()).distinct().collect(
+								Collectors.toList());
+				return clusterPhyManager.checkShrinkNodesContainsBindRegion(nodes, clusterName);
 		}
 		
 		
@@ -50,7 +64,7 @@ public class ESClusterShrinkTaskHandler extends AbstractESTaskHandler {
 		@Override
 		protected String getTitle(String expandData) {
 				final ClusterShrinkContent shrinkContent = convertString2Content(expandData);
-				final String name = componentService.queryComponentById(shrinkContent.getComponentId())
+				final String name = componentService.queryComponentNameById(shrinkContent.getComponentId())
 				                                    .getData();
 				return String.format("%s:【%s】", operationType().getMessage(), name);
 		}
@@ -64,4 +78,26 @@ public class ESClusterShrinkTaskHandler extends AbstractESTaskHandler {
 		protected OperateRecord recordCurrentOperationTasks(String expandData) {
 				return new OperateRecord();
 		}
+		
+		@Override
+		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
+				final String expandData = opTask.getExpandData();
+				final ClusterShrinkContent content = convertString2Content(expandData);
+				//1. 获取组建 id，并从 gatewayCluster 获取名称
+				Result<String> nameRes = clusterPhyManager.getNameByComponentId(content.getComponentId());
+				if (nameRes.failed()) {
+						return Result.buildFrom(nameRes);
+				}
+				final String clusterName = nameRes.getData();
+				// 将扩容的节点获取到
+				final List<TupleTwo<String, Integer>> ipAndPortTuples = convertFGeneralGroupConfigDTO2IpAndPortTuple(
+								content.getGroupConfigList());
+				final List<ESClusterRoleHostDTO> nodes = ipAndPortTuples.stream().map(i -> ESClusterRoleHostDTO.builder().port(
+								String.valueOf(i.v2())).cluster(clusterName).hostname(i.v1()).ip(i.v1()).build())
+								.distinct().collect(
+								Collectors.toList());
+				// 缩容节点写入
+				return clusterPhyManager.shrinkNodesWithEcm(nodes, clusterName);
+		}
+	
 }

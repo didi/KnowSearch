@@ -450,8 +450,8 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteByIds(List<Integer> ids) {
-        
         return clusterRoleHostDAO.deleteByIds(ids)==ids.size();
     }
 
@@ -736,8 +736,10 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
      */
     private void setRoleClusterId(ESClusterRoleHostPO roleClusterHostPO, String cluster) {
         ESClusterNodeRoleEnum role = ESClusterNodeRoleEnum.valueOf(roleClusterHostPO.getRole());
-        ClusterRoleInfo clusterRoleInfo = clusterRoleService.createRoleClusterIfNotExist(cluster, role.getDesc());
-        roleClusterHostPO.setRoleClusterId(clusterRoleInfo.getId());
+        if (!role.equals(UNKNOWN)) {
+            ClusterRoleInfo clusterRoleInfo = clusterRoleService.createRoleClusterIfNotExist(cluster, role.getDesc());
+            roleClusterHostPO.setRoleClusterId(clusterRoleInfo.getId());
+        }
     }
 
     private Map<String/*roleClusterId@esNodeName*/ , ESClusterRoleHostPO> getNodeInfoFromDbMap(String cluster) {

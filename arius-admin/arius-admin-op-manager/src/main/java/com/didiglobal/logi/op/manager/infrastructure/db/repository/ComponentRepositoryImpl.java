@@ -5,11 +5,10 @@ import com.didiglobal.logi.op.manager.domain.component.repository.ComponentRepos
 import com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO;
 import com.didiglobal.logi.op.manager.infrastructure.db.converter.ComponentConverter;
 import com.didiglobal.logi.op.manager.infrastructure.db.mapper.ComponentDao;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 /**
  * @author didi
@@ -80,8 +79,14 @@ public class ComponentRepositoryImpl implements ComponentRepository {
     }
 
     @Override
-    public Optional<String> queryComponentById(Integer componentId) {
+    public Optional<String> queryComponentNameById(Integer componentId) {
         return Optional.ofNullable(componentDao.queryComponentById(componentId))
             .map(ComponentPO::getName);
+    }
+    
+    @Override
+    public Optional<Component> queryComponentById(Integer componentId) {
+        return Optional.ofNullable(componentDao.queryComponentById(componentId)).map(
+                ComponentConverter::convertComponentPO2DO);
     }
 }

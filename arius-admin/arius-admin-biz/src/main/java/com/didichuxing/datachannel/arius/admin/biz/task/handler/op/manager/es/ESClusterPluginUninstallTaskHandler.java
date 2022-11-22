@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterPlu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import java.util.Objects;
 import org.springframework.stereotype.Component;
@@ -28,13 +29,13 @@ public class ESClusterPluginUninstallTaskHandler extends AbstractESTaskHandler {
 						return Result.buildFail("组建 ID 和组建依赖 ID 不能为空");
 				}
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> dependComponentRes =
-						componentService.queryComponentById(
+						componentService.queryComponentNameById(
 								content.getDependComponentId());
 				if (dependComponentRes.failed()) {
 						return Result.buildFrom(dependComponentRes);
 				}
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> componentRes =
-						componentService.queryComponentById(
+						componentService.queryComponentNameById(
 								content.getComponentId());
 				if (dependComponentRes.failed()) {
 						return Result.buildFrom(componentRes);
@@ -59,10 +60,10 @@ public class ESClusterPluginUninstallTaskHandler extends AbstractESTaskHandler {
 				final ClusterPluginUninstallContent content           = convertString2Content(expandData);
 				final Integer                       dependComponentId = content.getDependComponentId();
 				// 获取依赖安装的主机名称
-				final String dependComponentName = componentService.queryComponentById(dependComponentId)
+				final String dependComponentName = componentService.queryComponentNameById(dependComponentId)
 				                                                   .getData();
 				// 获取组建名称
-				final String name = componentService.queryComponentById(content.getComponentId()).getData();
+				final String name = componentService.queryComponentNameById(content.getComponentId()).getData();
 				
 				return String.format("%s- 集群名称【%s】- 插件名称【%s】", operationType().getMessage(),
 						dependComponentName
@@ -78,4 +79,19 @@ public class ESClusterPluginUninstallTaskHandler extends AbstractESTaskHandler {
 		protected OperateRecord recordCurrentOperationTasks(String expandData) {
 				return new OperateRecord();
 		}
+		
+		@Override
+		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
+				String expandData = opTask.getExpandData();
+				ClusterPluginUninstallContent content = convertString2Content(expandData);
+				//1.根据依赖组件ID获取集群ID
+				Result<Integer> clusterIdRes = clusterPhyManager.getIdByComponentId(content.getDependComponentId());
+				if (clusterIdRes.failed()){
+						return Result.buildFrom(clusterIdRes);
+				}
+				Integer clusterId = clusterIdRes.getData();
+				return pluginManager.uninstallWithECM(clusterId, PluginClusterTypeEnum.ES,content.getComponentId());
+		}
+		
+	
 }

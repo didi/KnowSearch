@@ -58,4 +58,14 @@
         from logi_op_task
         where status != 4 and status != 5 and status != 6
     </select>
+    
+    <select id="getTaskListByIds" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM logi_op_task
+        WHERE id IN
+        <foreach collection="taskIds" separator="," item="id" close=")" open="(">
+            #{id}
+        </foreach>
+    </select>
 </mapper>

@@ -4,11 +4,25 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterCreateContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterCreateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterTag;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterCreateSourceEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didiglobal.logi.op.manager.domain.component.entity.Component;
+import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
+import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 
 
 /**
@@ -18,7 +32,7 @@ import org.springframework.stereotype.Component;
  * @date 2022/11/15
  * @since 0.3.2
  */
-@Component("esClusterCreateTaskHandler")
+@org.springframework.stereotype.Component("esClusterCreateTaskHandler")
 public class ESClusterCreateTaskHandler extends AbstractESTaskHandler {
 		
 		@Override
@@ -73,4 +87,50 @@ public class ESClusterCreateTaskHandler extends AbstractESTaskHandler {
 				return new OperateRecord();
 		}
 		
+		@Override
+		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
+				String expandData = opTask.getExpandData();
+				ClusterCreateContent content = convertString2Content(expandData);
+				// 获取对应组建
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Component> componentResult = componentService.queryComponentByName(
+								content.getName());
+				if (componentResult.failed()) {
+						return Result.buildFrom(componentResult);
+				}
+				// 获取安装包中的版本号
+				final Integer packageId = content.getPackageId();
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Package> packageRes = packageService.getPackageById(
+								Long.valueOf(packageId));
+				if (packageRes.failed()) {
+						return Result.buildFrom(packageRes);
+				}
+				ClusterCreateDTO createDTO = initClusterCreateDTO(content, componentResult.getData(), packageRes.getData());
+				return clusterPhyManager.createWithECM(createDTO, opTask.getCreator());
+		}
+		
+		private ClusterCreateDTO initClusterCreateDTO(ClusterCreateContent content, Component component, Package pac) {
+				final List<TupleTwo<String, Integer>> ip2PortTuples = convertFGeneralGroupConfigDTO2IpAndPortTuple(
+								content.getGroupConfigList());
+				Map<String, Integer> ip2PortMap = ConvertUtil.list2Map(ip2PortTuples, TupleTwo::v1, TupleTwo::v2);
+				List<ESClusterRoleHostDTO> nodes = component.getHostList().stream().map(
+								i -> ESClusterRoleHostDTO.builder().hostname(i.getHost()).ip(i.getHost()).cluster(content.getName())
+												.port(String.valueOf(ip2PortMap.get(i.getHost()))).machineSpec(i.getMachineSpec())
+												.status(HostStatusEnum.find(i.getStatus()).equals(HostStatusEnum.ON_LINE)
+																        ? ESClusterNodeStatusEnum.ONLINE.getCode()
+																        : ESClusterNodeStatusEnum.OFFLINE.getCode())
+												//默认都设置为master
+												.role(ESClusterNodeRoleEnum.MASTER_NODE.getCode())
+												.build()).collect(
+								Collectors.toList());
+				ClusterTag clusterTag = new ClusterTag();
+				clusterTag.setCreateSource(ESClusterCreateSourceEnum.ES_NEW.ordinal());
+				return ClusterCreateDTO.builder().type(ESClusterTypeEnum.ES_HOST.getCode()).cluster(content.getName())
+								.esVersion(pac.getVersion()).roleClusterHosts(nodes).password(
+												String.format("%s:%s", content.getUsername(), content.getPassword())).tags(JSON.toJSONString(clusterTag)).dataCenter(
+												content.getDataCenter()).componentId(component.getId()).clusterType(content.getClusterType())
+								.ecmAccess(Boolean.TRUE)
+								.build();
+		}
+		
+	
 }

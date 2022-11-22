@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * ES集群对应角色集群 服务实现类
@@ -46,6 +47,7 @@ public class ClusterRoleServiceImpl implements ClusterRoleService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ClusterRoleInfo createRoleClusterIfNotExist(String clusterName, String role) {
 
         ClusterPhy clusterPhy = clusterPhyService.getClusterByName(clusterName);
@@ -134,5 +136,10 @@ public class ClusterRoleServiceImpl implements ClusterRoleService {
             return Result.build(roleClusterDAO.delete(clusterId) >0);
         }
         return Result.buildSucc();
+    }
+    
+    @Override
+    public boolean deleteByIds(List<Long> ids) {
+        return ids.stream().mapToInt(roleClusterDAO::deleteById).count()==ids.size();
     }
 }

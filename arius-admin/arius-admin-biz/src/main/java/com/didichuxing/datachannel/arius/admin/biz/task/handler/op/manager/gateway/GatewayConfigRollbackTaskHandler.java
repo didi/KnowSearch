@@ -42,9 +42,15 @@ public class GatewayConfigRollbackTaskHandler extends AbstractGatewayTaskHandler
 		@Override
 		protected String getTitle(String expandData) {
 				final Integer componentId = convertString2Content(expandData).getComponentId();
-				final String name = componentService.queryComponentById(componentId)
+				final String name = componentService.queryComponentNameById(componentId)
 				                                    .getData();
 				return String.format("%s【%s】", operationType().getMessage(), name);
+		}
+		
+		@Override
+		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
+				//TODO 后续考虑下如果端口号变更的情况，那么需要怎么做，这里需要补充更新到节点信息中
+				return Result.buildSucc();
 		}
 		
 		@Override
@@ -56,4 +62,5 @@ public class GatewayConfigRollbackTaskHandler extends AbstractGatewayTaskHandler
 		protected OperateRecord recordCurrentOperationTasks(String expandData) {
 				return new OperateRecord();
 		}
+	
 }

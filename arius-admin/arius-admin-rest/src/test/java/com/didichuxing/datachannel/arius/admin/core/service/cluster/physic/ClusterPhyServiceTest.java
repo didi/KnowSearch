@@ -2,16 +2,6 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.util.*;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
@@ -30,6 +20,18 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.impl.
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
 /**
  * @author wpk
@@ -109,36 +111,36 @@ public class ClusterPhyServiceTest {
         ClusterPhyDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
         esClusterDTO.setCluster(existCluster);
         Assertions.assertEquals(Result.buildParamIllegal("集群信息为空").getMessage(),
-            ClusterPhyService.createCluster(null, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(null).getMessage());
         esClusterDTO.setEsVersion(null);
         Assertions.assertEquals(Result.buildParamIllegal("es版本为空").getMessage(),
-            ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(esClusterDTO).getMessage());
         esClusterDTO.setIdc(null);
         Assertions.assertEquals(Result.buildParamIllegal("机房信息为空").getMessage(),
-            ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(esClusterDTO).getMessage());
         esClusterDTO.setDataCenter(null);
         Assertions.assertEquals(Result.buildParamIllegal("数据中心为空").getMessage(),
-            ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(esClusterDTO).getMessage());
         esClusterDTO.setType(null);
         Assertions.assertEquals(Result.buildParamIllegal("集群类型为空").getMessage(),
-            ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(esClusterDTO).getMessage());
         esClusterDTO.setHttpAddress(null);
         Assertions.assertEquals(Result.buildParamIllegal("集群HTTP地址为空").getMessage(),
-            ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(esClusterDTO).getMessage());
         esClusterDTO.setCluster(null);
         Assertions.assertEquals(Result.buildParamIllegal("集群名称为空").getMessage(),
-            ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(esClusterDTO).getMessage());
         esClusterDTO = CustomDataSource.esClusterDTOFactory();
         esClusterDTO.setCluster(existCluster);
         esClusterDTO.setEsVersion("test.test.test");
         Assertions.assertEquals(Result.buildParamIllegal("es版本号非法").getMessage(),
-            ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(esClusterDTO).getMessage());
         esClusterDTO.setDataCenter("wpkTest");
         Assertions.assertEquals(Result.buildParamIllegal("数据中心非法").getMessage(),
-            ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(esClusterDTO).getMessage());
         esClusterDTO = CustomDataSource.esClusterDTOFactory();
         esClusterDTO.setCluster(existCluster);
-        Assertions.assertTrue(ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).success());
+        Assertions.assertTrue(ClusterPhyService.createCluster(esClusterDTO).success());
     }
 
     @Test

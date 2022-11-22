@@ -61,4 +61,12 @@ public interface TaskDao {
      * @return 列表
      */
     List<TaskPO> getUnFinalStatusTaskList();
+    
+    /**
+     * 按 ID 获取任务列表。
+     *
+     * @param taskIds 任务 ID 列表
+     * @return TaskPO 对象列表。
+     */
+    List<TaskPO> getTaskListByIds(@Param("taskIds") List<Integer> taskIds);
 }

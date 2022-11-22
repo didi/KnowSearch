@@ -96,4 +96,21 @@ public interface GatewayClusterDAO {
      * @return 一个 GatewayClusterPO 对象。
      */
     GatewayClusterPO getOneByName(@Param("name")String name);
+    
+    /**
+     * 通过 componentId 获取一个 GatewayClusterPO
+     *
+     * @param componentId 网关集群的组件ID。
+     * @return GatewayClusterPO 对象
+     */
+    GatewayClusterPO getOneByComponentId(@Param("componentId")Integer componentId);
+    
+    /**
+     * 它更新组件的版本。
+     *
+     * @param componentId 要更新的组件的 ID
+     * @param version 要更新的组件的版本
+     * @return 布尔值
+     */
+    Boolean updateVersion(@Param("componentId") Integer componentId,@Param("version") String version);
 }

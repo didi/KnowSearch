@@ -95,7 +95,7 @@ public interface ComponentRepository {
      * @param componentId 您要查询的组件的 id。
      * @return Optional<String>
      */
-    Optional<String> queryComponentById(Integer componentId);
+    Optional<String> queryComponentNameById(Integer componentId);
 
     /**
      *
@@ -103,4 +103,15 @@ public interface ComponentRepository {
      * @return
      */
     List<Component> getComponentByPackageIds(List<Integer> packageIds);
+    
+    /**
+     * “给定一个组件 ID，如果存在则返回该组件，否则返回 null。”
+     *
+     * //科特林
+     * fun queryComponentById(componentId: Int): 组件？
+     *
+     * @param componentId 您要查询的组件的 ID。
+     * @return 可选的<组件>
+     */
+    Optional<Component> queryComponentById(Integer componentId);
 }

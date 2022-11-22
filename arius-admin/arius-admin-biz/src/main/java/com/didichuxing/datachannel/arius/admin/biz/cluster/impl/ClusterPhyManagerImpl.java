@@ -21,6 +21,8 @@ import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterCreateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
@@ -38,6 +40,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVOWithProjects;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
@@ -60,6 +63,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterCreateSourceEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterImportRuleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicLevelEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterPhyEvent;
@@ -883,7 +887,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     public Result<Boolean> addCluster(ClusterPhyDTO param, String operator, Integer projectId) {
-        Result<Boolean> result = clusterPhyService.createCluster(param, operator);
+        Result<Boolean> result = clusterPhyService.createCluster(param);
 
         if (result.success()) {
             SpringTool.publish(new ClusterPhyEvent(param.getCluster(), operator));
@@ -1247,6 +1251,182 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 						Objects.nonNull(componentService.queryComponentByName(clusterName)));
     }
     
+    @Override
+    public Result<Void> updateVersionWithECM(Integer componentId, String version) {
+        if (!clusterPhyService.hasClusterRelationComponentId(componentId)){
+            return Result.buildFail("版本更新失败,无法匹配到具有组件ID【%s】的集群信息");
+        }
+        // 无需写入到操作记录，工单操作中生成操作记录即可
+        return Result.build(clusterPhyService.updateVersion(componentId,version));
+    }
+    
+    @Override
+    public Result<String> getNameByComponentId(Integer componentId) {
+        ClusterPhyPO clusterPhy = clusterPhyService.getOneByComponentId(componentId);
+        if (Objects.isNull(clusterPhy)) {
+            return Result.buildFail("无法匹配到具有组件 ID【%s】的集群信息");
+        }
+        return Result.buildSucc(clusterPhy.getCluster());
+    }
+    
+    @Override
+    public Result<Void> checkShrinkNodesContainsBindRegion(List<ESClusterRoleHostDTO> nodes, String clusterName) {
+        //1.1 获取所有节点信息
+        List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.listNodesByClusters(
+                Collections.singletonList(clusterName));
+        if (CollectionUtils.isEmpty(clusterRoleHosts)) {
+            return Result.buildFail("节点信息不存在，无法进行缩容");
+        }
+        Map<Long, ClusterRoleHost> id2CrMap = ConvertUtil.list2Map(clusterRoleHosts, ClusterRoleHost::getId);
+        Map<String, List<Long>> str2IdsMaps = ConvertUtil.list2MapOfList(clusterRoleHosts, i -> String.format(
+                "cluster:[%s];hostname:[%s];ip:[%s];port:[%s]", i.getCluster(), i.getHostname(), i.getIp(),
+                i.getPort()), ClusterRoleHost::getId);
+        // 获取需要删除 ids
+        List<Long> removeIds = nodes.stream()
+                // 拼接出 key
+                .map(i -> String.format("cluster:[%s];hostname:[%s];ip:[%s];port:[%s]", i.getCluster(), i.getHostname(),
+                                        i.getIp(), i.getPort())).filter(str2IdsMaps::containsKey).map(str2IdsMaps::get)
+                .flatMap(Collection::stream).distinct().collect(Collectors.toList());
+        // 对需要删除的 ids 进行校验
+        boolean checkShrinkBindRegion = removeIds.stream().map(id2CrMap::get).map(ClusterRoleHost::getRegionId)
+                .anyMatch(regionId -> Objects.equals(-1, regionId));
+        if (checkShrinkBindRegion) {
+            return Result.buildFail("缩容的节点已经被 Region 绑定了，无法缩容");
+        }
+        return Result.buildSucc();
+    }
+    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Void> createWithECM(ClusterCreateDTO createDTO, String operator) {
+        List<ESClusterRoleHostDTO> roleClusterHosts = createDTO.getRoleClusterHosts();
+        // 这里其实是需要一个内置 trim 用来保证传输进行的 roleClusterHosts 是正确的
+        roleClusterHosts.forEach(roleClusterHostsTrimHostnameAndPort);
+    
+        // 设置 region 为 -1
+        for (ESClusterRoleHostDTO roleClusterHost : roleClusterHosts) {
+            if (roleClusterHost.getRegionId() == null) {
+                roleClusterHost.setRegionId(-1);
+            }
+        }
+        List<ESClusterRoleHost> esClusterRoleHosts = ConvertUtil.list2List(roleClusterHosts, ESClusterRoleHost.class,
+                                                                           i->i.setRole(ESClusterNodeRoleEnum.MASTER_NODE.getDesc()));
+        // 保存全量节点信息到 DB
+        try {
+            // 保存集群信息
+            ClusterPhyDTO clusterDTO = buildPhyClusters(createDTO, operator);
+            Result<Boolean> addClusterRet = clusterPhyService.createCluster(clusterDTO);
+             //创建节点信息
+            boolean clusterNodeSettings = clusterRoleHostService.createClusterNodeSettings(esClusterRoleHosts,
+                                                                                           createDTO.getCluster());
+        
+            if (addClusterRet.failed()) {
+                // 这里必须显示事务回滚
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                return Result.buildFrom(addClusterRet);
+            }
+        } catch (Exception e) {
+            LOGGER.error("class=ClusterPhyManagerImpl||method=createWithECM||clusterPhy={}||errMsg={}",
+                         createDTO.getCluster(), e);
+            // 这里必须显示事务回滚
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.buildFail("操作失败, 请联系管理员");
+        }
+    
+        return Result.buildSucc();
+    }
+    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Void> shrinkNodesWithEcm(List<ESClusterRoleHostDTO> nodes, String clusterName) {
+        //1获取所有节点信息
+        List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.listNodesByClusters(
+                Collections.singletonList(clusterName));
+        if (CollectionUtils.isEmpty(clusterRoleHosts)) {
+            return Result.buildFail("节点信息不存在，无法进行缩容");
+        }
+        //转换为Map形式
+        Map<String, List<Long>> str2IdsMaps = ConvertUtil.list2MapOfList(clusterRoleHosts, i -> String.format(
+                "cluster:[%s];hostname:[%s];ip:[%s];port:[%s]", i.getCluster(), i.getHostname(), i.getIp(),
+                i.getPort()), ClusterRoleHost::getId);
+        // 获取需要删除 ids
+        List<Integer> removeIds = nodes.stream()
+                // 拼接出 key
+                .map(i -> String.format("cluster:[%s];hostname:[%s];ip:[%s];port:[%s]", i.getCluster(), i.getHostname(),
+                                        i.getIp(), i.getPort())).filter(str2IdsMaps::containsKey).map(str2IdsMaps::get)
+                .flatMap(Collection::stream).distinct().map(Long::intValue).collect(Collectors.toList());
+        Map<Long, Long> id2roleClusterIdMaps = ConvertUtil.list2Map(clusterRoleHosts, ClusterRoleHost::getId,
+                                                           ClusterRoleHost::getRoleClusterId);
+        List<Long> roleClusterIdLists = removeIds.stream().map(Integer::longValue).map(id2roleClusterIdMaps::get)
+                .distinct().collect(Collectors.toList());
+        return Result.build(clusterRoleHostService.deleteByIds(removeIds));
+    }
+    
+    @Override
+    public Result<Void> expandNodesWithECM(List<ESClusterRoleHostDTO> nodes, String clusterName) {
+        // 这里其实是需要一个内置 trim 用来保证传输进行的 roleClusterHosts 是正确的
+        nodes.forEach(roleClusterHostsTrimHostnameAndPort);
+    
+        // 设置 region 为 -1
+        for (ESClusterRoleHostDTO roleClusterHost : nodes) {
+            if (roleClusterHost.getRegionId() == null) {
+                roleClusterHost.setRegionId(-1);
+            }
+        }
+        try {
+            boolean clusterNodeSettings = clusterRoleHostService.createClusterNodeSettings(ConvertUtil.list2List(nodes,ESClusterRoleHost.class), clusterName);
+        } catch (AdminTaskException exception) {
+            return Result.buildFail(exception.getMessage());
+        }
+        return Result.buildSucc();
+    }
+    
+    @Override
+    public Result<Integer> getIdByComponentId(Integer dependComponentId) {
+        ClusterPhyPO clusterPhyPO = clusterPhyService.getOneByComponentId(dependComponentId);
+        if (Objects.isNull(clusterPhyPO)){
+            return Result.buildFail(String.format("组件ID【%s】未匹配到对应的集群信息",dependComponentId));
+        }
+        return Result.buildSucc(clusterPhyPO.getId());
+    }
+    
+    @Override
+    public Result<Void> checkCompleteUnbindResources(ClusterPhy clusterPhy) {
+        // 1. set region
+        List<ClusterRegion> regions = clusterRegionService.listPhyClusterRegions(clusterPhy.getCluster());
+        if (CollectionUtils.isEmpty(regions)) {
+            return Result.buildSucc();
+        }
+        //必须先全部把逻辑集群下线才是对的
+        if (regions.stream().allMatch(i-> StringUtils.equals("-1", i.getLogicClusterIds()))){
+            return Result.buildFail("当前下线的集群存在绑定的逻辑集群，无法下线");
+        }
+        return Result.buildSucc();
+    }
+    
+    @Override
+    public Result<Void> offlineWithECM(Integer id, String creator, Integer projectId) {
+        // 再次确认当前信息未被中途绑定
+        ClusterPhy cluster = clusterPhyService.getClusterById(id);
+        if (Objects.isNull(cluster)) {
+            return Result.buildSucc();
+        }
+        Result<Void> result = checkCompleteUnbindResources(cluster);
+        if (result.failed()) {
+            return result;
+        }
+        try {
+            doDeleteClusterJoin(cluster, creator, projectId);
+        } catch (AdminOperateException e) {
+            LOGGER.error("class=ClusterPhyManagerImpl||method=offlineWithECM||errMsg={}||e={}||clusterId={}",
+                         e.getMessage(), e, id);
+            // 这里显示回滚处理特殊异常场景
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.buildFail(e.getMessage());
+        }
+        return Result.buildSucc();
+    }
+    
     /**************************************** private method ***************************************************/
 
     private Result<Boolean> checkClusterExistAndConfigType(MultiClusterSettingDTO param) {
@@ -1433,7 +1613,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private Result<ClusterPhyVO> saveClusterPhy(ClusterJoinDTO param, String operator) {
         //保存集群信息
         ClusterPhyDTO clusterDTO = buildPhyClusters(param, operator);
-        Result<Boolean> addClusterRet = clusterPhyService.createCluster(clusterDTO, operator);
+        Result<Boolean> addClusterRet = clusterPhyService.createCluster(clusterDTO);
         if (addClusterRet.failed()) {
             return Result.buildFrom(addClusterRet);
         }
@@ -1469,6 +1649,32 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         clusterDTO.setHealth(DEFAULT_CLUSTER_HEALTH);
         clusterDTO.setEcmAccess(Boolean.FALSE);
         clusterDTO.setComponentId(-1);
+        return clusterDTO;
+    }
+    
+    private ClusterPhyDTO buildPhyClusters(ClusterCreateDTO param, String operator) {
+        ClusterPhyDTO clusterDTO = ConvertUtil.obj2Obj(param, ClusterPhyDTO.class);
+        
+        String clientAddress = clusterRoleHostService.buildESClientHttpAddressesStr(param.getRoleClusterHosts());
+        
+        clusterDTO.setDesc(param.getPhyClusterDesc());
+        if (StringUtils.isBlank(clusterDTO.getDataCenter())) {
+            clusterDTO.setDataCenter(DataCenterEnum.CN.getCode());
+        }
+        if (null == clusterDTO.getType()) {
+            clusterDTO.setType(ESClusterTypeEnum.ES_HOST.getCode());
+        }
+        clusterDTO.setHttpAddress(clientAddress);
+        clusterDTO.setHttpWriteAddress(clientAddress);
+        clusterDTO.setIdc(DEFAULT_CLUSTER_IDC);
+        clusterDTO.setLevel(ResourceLogicLevelEnum.NORMAL.getCode());
+        clusterDTO.setImageName("");
+        clusterDTO.setPackageId(-1L);
+        clusterDTO.setNsTree("");
+        clusterDTO.setPlugIds("");
+        clusterDTO.setCreator(operator);
+        clusterDTO.setRunMode(RunModeEnum.READ_WRITE_SHARE.getRunMode());
+        clusterDTO.setHealth(DEFAULT_CLUSTER_HEALTH);
         return clusterDTO;
     }
 

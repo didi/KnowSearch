@@ -600,7 +600,7 @@ class ClusterPhyManagerTest {
             .thenReturn("7.6.0.1401");
         param.setDataCenter("");
         when(mockClusterRoleHostService.collectClusterNodeSettings(CLUSTER)).thenReturn(true);
-        when(mockClusterPhyService.createCluster(Mockito.any(), Mockito.anyString())).thenReturn(Result.buildSucc());
+        when(mockClusterPhyService.createCluster(Mockito.any())).thenReturn(Result.buildSucc());
         assertTrue(clusterPhyManager.joinCluster(param, "admin", projectId).success());
         verify(mockEsOpClient).connect(CLUSTER);
         verify(mockClusterRoleHostService).collectClusterNodeSettings(CLUSTER);
@@ -706,7 +706,7 @@ class ClusterPhyManagerTest {
 
     @Test
     void testAddCluster() {
-        when(mockClusterPhyService.createCluster(clusterPhyDTO, "operator")).thenReturn(Result.buildBoolen(true));
+        when(mockClusterPhyService.createCluster(clusterPhyDTO)).thenReturn(Result.buildBoolen(true));
         assertEquals(Result.buildBoolen(true), clusterPhyManager.addCluster(clusterPhyDTO, "operator", 0));
     }
 

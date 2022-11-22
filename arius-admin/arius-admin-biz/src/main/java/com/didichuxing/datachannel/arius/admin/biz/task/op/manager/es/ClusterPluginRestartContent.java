@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es;
 
-import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralRestartComponentDTO;
+import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.GeneralRestartComponentContent;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +17,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClusterPluginRestartContent extends GeneralRestartComponentDTO {
+public class ClusterPluginRestartContent extends GeneralRestartComponentContent {
 		
 		
 		/**
