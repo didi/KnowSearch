@@ -22,7 +22,7 @@ public class ShardDistributionVO {
     @ApiModelProperty("节点名称")
     private String node;
     @ApiModelProperty("文档")
-    private int docs;
+    private String docs;
     @ApiModelProperty("ip")
     private String ip;
     @ApiModelProperty("索引")
