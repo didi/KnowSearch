@@ -159,6 +159,8 @@ CREATE TABLE `es_cluster_phy_info`  (
   `platform_type` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'IaaS平台类型',
   `resource_type` tinyint(4) NOT NULL DEFAULT -1 COMMENT '集群资源类型，1-共享资源，2-独立资源，3-独享资源',
   `gateway_url` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '集群gateway地址',
+  `kibana_address`          varchar(200)        NOT NULL DEFAULT '' COMMENT ' kibana 外链 地址 ',
+  `cerebro_address`         varchar(200)        NOT NULL DEFAULT '' COMMENT ' cerebro 外链 地址 ',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_cluster`(`cluster`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 4852 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '物理集群表' ROW_FORMAT = Dynamic;

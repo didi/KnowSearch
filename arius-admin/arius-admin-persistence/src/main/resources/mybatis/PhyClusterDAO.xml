@@ -33,12 +33,14 @@
         <result column="platform_type"                       jdbcType="VARCHAR" property="platformType"/>
         <result column="resource_type"                jdbcType="TINYINT" property="resourceType"/>
         <result column="gateway_url"                jdbcType="VARCHAR" property="gatewayUrl"/>
+        <result column="kibana_address"                jdbcType="VARCHAR" property="kibanaAddress"/>
+        <result column="cerebro_address"                jdbcType="VARCHAR" property="cerebroAddress"/>
     </resultMap>
 
     <sql id="Base_Column_List">
        id, cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,image_name, idc,
         es_version, `level`, `password`, cfg_id, package_id, plug_ids, creator,ns_tree,  create_time, update_time,
-           run_mode, write_action, health, active_shard_num, disk_total, disk_usage, disk_usage_percent, tags,platform_type,resource_type,gateway_url
+           run_mode, write_action, health, active_shard_num, disk_total, disk_usage, disk_usage_percent, tags,platform_type,resource_type,gateway_url, kibana_address, cerebro_address
     </sql>
 
     <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO"
@@ -47,12 +49,12 @@
         (cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,
          image_name, idc, es_version, `level`, package_id, plug_ids, creator, ns_tree, run_mode,
          write_action, health, `password`, active_shard_num, disk_total, disk_usage, disk_usage_percent, `tags`,
-         platform_type, resource_type, gateway_url)
+         platform_type, resource_type, gateway_url, kibana_address, cerebro_address)
         values (#{cluster}, #{readAddress}, #{writeAddress}, #{httpAddress}, #{httpWriteAddress}, #{desc}, #{type},
                 #{dataCenter}, #{imageName}, #{idc}, #{esVersion}, #{level}, #{packageId}, #{plugIds}, #{creator},
                 #{nsTree}, #{runMode}, #{writeAction}, #{health}, #{password}, #{activeShardNum},
                 #{diskTotal}, #{diskUsage}, #{diskUsagePercent}, #{tags}, #{platformType}, #{resourceType},
-                #{gatewayUrl})
+                #{gatewayUrl},#{kibanaAddress},#{cerebroAddress})
     </insert>
 
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO">
@@ -85,6 +87,8 @@
             <if test="diskUsagePercent != null">, disk_usage_percent = #{diskUsagePercent}</if>
             <if test="tags != null">, `tags` = #{tags}</if>
             <if test="gatewayUrl != null">, gateway_url = #{gatewayUrl}</if>
+            <if test="kibana_address != null">, kibana_address = #{kibanaAddress}</if>
+            <if test="cerebro_address != null">, cerebro_address = #{cerebroAddress}</if>
         </trim>
         where id = #{id} and is_active = 1;
     </update>
