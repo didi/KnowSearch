@@ -61,3 +61,6 @@ CREATE TABLE plugin_info
 #es_cluster_role_host_info新增字段
 ALTER TABLE es_cluster_role_host_info
     ADD component_host_id BIGINT DEFAULT -1 NULL COMMENT '关联组建id';
+
+#arius_config_info修改业务类型对应的配置值
+UPDATE arius_config_info SET `value`  = '[{"code":0,"desc":"系统日志","label":"system"},{"code":1,"desc":"日志数据","label":"log"},{"code":2,"desc":"用户上报数据","label":"olap"},{"code":3,"desc":"RDS数据","label":"binlog"},{"code":4,"desc":"离线导入数据","label":"offline"}]'  WHERE id = 1671;
