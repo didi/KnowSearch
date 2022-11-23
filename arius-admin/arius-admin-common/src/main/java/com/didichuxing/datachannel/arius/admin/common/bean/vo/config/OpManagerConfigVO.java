@@ -40,4 +40,6 @@ public class OpManagerConfigVO extends BaseVO {
     private String  fileConfig;
     @ApiModelProperty("版本")
     private String  version;
+    @ApiModelProperty("是否支持编辑和回滚")
+    private Boolean supportEditAndRollback;
 }

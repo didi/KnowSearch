@@ -56,4 +56,8 @@ public class GeneralGroupConfigDTO {
      * 机器规格
      */
     private String machineSpec;
+    /**
+     * 配置依赖组件
+     */
+    private Integer dependConfigComponentId;
 }

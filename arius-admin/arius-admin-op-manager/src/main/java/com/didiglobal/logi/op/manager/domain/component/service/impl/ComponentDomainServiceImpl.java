@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
@@ -205,6 +206,9 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     @Override
     public Result<Component> queryComponentByName(String name) {
         Component component = componentRepository.queryComponentByName(name);
+        if (Objects.isNull(component)){
+            return Result.fail(ResultCode.COMPONENT_NOT_EXIST_ERROR);
+        }
         List<ComponentHost> hosts = componentHostRepository.listComponentHost();
         Map<Integer, List<ComponentHost>> componentId2ListMap = ConvertUtil.list2MapOfList(hosts,
                                                                                            ComponentHost::getComponentId,

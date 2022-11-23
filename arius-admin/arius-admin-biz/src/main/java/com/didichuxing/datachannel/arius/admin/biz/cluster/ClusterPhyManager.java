@@ -465,4 +465,12 @@ public interface ClusterPhyManager {
      * @return 带有 Void 对象的 Result 对象。
      */
     Result<Void> offlineWithECM(Integer id, String creator, Integer projectId);
+    
+    /**
+     * 通过集群id获取之前的版本
+     *
+     * @param clusterPhyId 集群的物理 ID。
+     * @return 列表<Object>
+     */
+    Result<List<Object>> getBeforeVersionByClusterId(Integer clusterPhyId);
 }
