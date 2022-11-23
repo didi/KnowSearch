@@ -8,7 +8,7 @@ import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainServi
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.storage.StorageService;
-import org.jetbrains.annotations.NotNull;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -116,6 +116,12 @@ public class PackageDomainServiceImpl implements PackageDomainService {
     @Override
     public List<String> listPackageVersionByPackageType(Integer packageType) {
         return packageRepository.listPackageVersionByPackageType(packageType);
+    }
+
+    @Override
+    public List<Package> listPackageWithLowerVersionByPackageTypeAndVersion(Integer packageType, String version) {
+        Integer versionCast2Int = Integer.valueOf(StringUtils.replace(version, ".", "").trim());
+        return packageRepository.listPackageWithLowerVersionByPackageTypeAndVersion(packageType,versionCast2Int);
     }
 
     @Override

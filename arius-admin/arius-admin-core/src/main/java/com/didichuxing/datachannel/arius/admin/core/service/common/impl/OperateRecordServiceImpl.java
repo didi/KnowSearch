@@ -178,7 +178,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         }
         OperateRecordInfoPO selectOneOperateRecordInfoPO = operateRecordDAO.selectOneOperateRecord(operateRecordDTO);
         if (null == selectOneOperateRecordInfoPO) {
-            return insertOperateRecordInfoWithoutCheck(operateRecordDTO);
+            return insertOperateRecordInfoWithCheck(operateRecordDTO);
         }
         OperateRecordInfoPO convertOperateRecordInfoPO = ConvertUtil.obj2Obj(operateRecordDTO, OperateRecordInfoPO.class);
         convertOperateRecordInfoPO.setUpdateTime(new Date());
@@ -189,28 +189,13 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     }
 
     /**
-     * 组装查询参数
-     * @param operateRecordDTO
-     * @return
-     */
-    private QueryWrapper<OperateRecordInfoPO> buildOperateRecordInfoPOQueryWrapper(OperateRecordDTO operateRecordDTO) {
-        QueryWrapper<OperateRecordInfoPO> operateRecordInfoPOQueryWrapper = new QueryWrapper<>();
-        operateRecordInfoPOQueryWrapper.eq(PROJECT_NAME, operateRecordDTO.getProjectName());
-        operateRecordInfoPOQueryWrapper.eq(MODULE_ID, operateRecordDTO.getModuleId());
-        operateRecordInfoPOQueryWrapper.eq(OPERATE_ID, operateRecordDTO.getOperateId());
-        operateRecordInfoPOQueryWrapper.eq(TRIGGER_WAY_ID, operateRecordDTO.getTriggerWayId());
-        operateRecordInfoPOQueryWrapper.eq(USER_OPERATION, operateRecordDTO.getUserOperation());
-        return operateRecordInfoPOQueryWrapper;
-    }
-
-    /**
      * 新增操作记录
      * @param operateRecordDTO
      */
-    private Result<Integer> insertOperateRecordInfoWithoutCheck(OperateRecordDTO operateRecordDTO) {
+    private Result<Integer> insertOperateRecordInfoWithCheck(OperateRecordDTO operateRecordDTO) {
         OperateRecordInfoPO operateRecordInfoPO = ConvertUtil.obj2Obj(operateRecordDTO, OperateRecordInfoPO.class);
         operateRecordInfoPO.setOperateTime(new Date());
-        boolean succ = (1 == operateRecordDAO.insert(operateRecordInfoPO));
+        boolean succ = (1 == operateRecordDAO.insertWithCheck(operateRecordInfoPO));
         return Result.build(succ, operateRecordInfoPO.getId());
     }
 
