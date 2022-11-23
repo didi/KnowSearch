@@ -107,4 +107,10 @@
     <select id="countByClusterId" resultType="int">
         select count(1) from es_cluster_role_info  where delete_flag = 0 and elastic_cluster_id = #{clusterId}
     </select>
+    
+    <delete id="deleteById">
+        update es_cluster_role_info
+        set delete_flag = 1
+        where id = #{id}
+    </delete>
 </mapper>

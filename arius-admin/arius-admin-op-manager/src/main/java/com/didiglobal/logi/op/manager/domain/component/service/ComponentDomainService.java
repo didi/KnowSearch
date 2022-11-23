@@ -2,9 +2,16 @@ package com.didiglobal.logi.op.manager.domain.component.service;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHost;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
-
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralConfigChangeComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralExecuteComponentFunction;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralRestartComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralRollbackComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralScaleComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralUninstallComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralUpgradeComponent;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -191,7 +198,7 @@ public interface ComponentDomainService {
      * @param componentId 您要查询的组件的 id。
      * @return  Result<String>
      */
-    Result<String> queryComponentById(Integer componentId);
+    Result<String> queryComponentNameById(Integer componentId);
 
     /**
      * 软件包是否依赖
@@ -199,4 +206,20 @@ public interface ComponentDomainService {
      * @return
      */
     List<Integer> hasPackagesDependComponent(List<Integer> packageIds);
+    
+    /**
+     * 通过组件id查询组件宿主
+     *
+     * @param componentId 组件的 ID。
+     * @return ComponentHost 对象的列表。
+     */
+    Result<List<ComponentHost>> queryComponentHostById(Integer componentId);
+    
+    /**
+     * 通过 ID 查询组件。
+     *
+     * @param componentId 要查询的组件的 ID。
+     * @return 一个组件对象。
+     */
+    Result<Component> queryComponentById(Integer componentId);
 }

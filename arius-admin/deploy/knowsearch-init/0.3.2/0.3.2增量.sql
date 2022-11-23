@@ -61,6 +61,124 @@ CREATE TABLE plugin_info
 #es_cluster_role_host_info新增字段
 ALTER TABLE es_cluster_role_host_info
     ADD component_host_id BIGINT DEFAULT -1 NULL COMMENT '关联组建id';
+-- auto-generated definition
+CREATE TABLE logi_op_component
+(
+    id                         INT(11) UNSIGNED AUTO_INCREMENT COMMENT '组件自增id'
+        PRIMARY KEY,
+    status                     INT          NOT NULL COMMENT '状态(0 green,1 yellow,2 red,3 unKnow)',
+    contain_component_ids      VARCHAR(200) NULL COMMENT '包含组件id列表',
+    name                       VARCHAR(100) NULL COMMENT '组件名',
+    package_id                 INT          NULL COMMENT '关联安装包id',
+    depend_config_component_id INT          NULL COMMENT '配置依赖组件',
+    username                   VARCHAR(50)  NULL COMMENT '用户名',
+    password                   VARCHAR(50)  NULL COMMENT '密码',
+    is_open_tsl                TINYINT      NULL COMMENT '是否开启tsl',
+    create_time                TIMESTAMP    NULL COMMENT '创建时间',
+    update_time                TIMESTAMP    NULL COMMENT '更新时间',
+    is_deleted                 INT          NULL COMMENT '0未删除1删除'
+)
+    ;
+-- auto-generated definition
+CREATE TABLE logi_op_component_group_config
+(
+    id                       INT(11) UNSIGNED AUTO_INCREMENT COMMENT '自增id'
+        PRIMARY KEY,
+    component_id             INT           NULL COMMENT '关联组件id',
+    group_name               VARCHAR(50)   NULL COMMENT '分组名',
+    system_config            VARCHAR(5000) NULL COMMENT '系统配置',
+    running_config           VARCHAR(5000) NULL COMMENT '运行时配置',
+    file_config              VARCHAR(5000) NULL COMMENT '文件配置',
+    install_directory_config VARCHAR(200)  NULL COMMENT '安装目录',
+    process_num_config       VARCHAR(200)  NULL COMMENT '进程数',
+    hosts                    VARCHAR(200)  NULL COMMENT '分组下的ip',
+    version                  VARCHAR(50)   NULL COMMENT '版本',
+    create_time              TIMESTAMP     NULL COMMENT '创建时间',
+    update_time              TIMESTAMP     NULL COMMENT '更新时间'
+);
+-- auto-generated definition
+CREATE TABLE logi_op_component_host
+(
+    host         VARCHAR(11) DEFAULT '' NOT NULL COMMENT '主机',
+    component_id INT                    NOT NULL COMMENT '关联组件id',
+    status       INT                    NULL COMMENT '状态（在线或离线）',
+    group_name   VARCHAR(11)            NULL COMMENT '分组名',
+    process_num  INT                    NULL COMMENT '进程数',
+    is_deleted   INT                    NULL COMMENT '是否卸载',
+    create_time  TIMESTAMP              NULL COMMENT '创建时间',
+    update_time  TIMESTAMP              NULL COMMENT '更新时间'
+);
+
+-- auto-generated definition
+CREATE TABLE logi_op_package
+(
+    id           BIGINT AUTO_INCREMENT COMMENT '软件id'
+        PRIMARY KEY,
+    name         VARCHAR(255) NOT NULL COMMENT '软件名称',
+    url          VARCHAR(255) NULL COMMENT '文件地址',
+    version      VARCHAR(255) NOT NULL COMMENT '软件版本',
+    `describe`   VARCHAR(255) NULL COMMENT '描述',
+    type         TINYINT      NULL COMMENT '依赖类型,0是配置依赖，1是配置独立',
+    script_id    BIGINT       NOT NULL COMMENT '脚本id',
+    create_time  TIMESTAMP    NULL COMMENT '创建时间',
+    update_time  TIMESTAMP    NULL COMMENT '更新时间',
+    creator      VARCHAR(255) NULL COMMENT '创建者',
+    package_type TINYINT      NULL COMMENT '软件包类型,1-es安装包、2-gateway安装包、3-es引擎插件、4-gateway引擎插件、5-es平台插件、6-gateway平台插件'
+);
+-- auto-generated definition
+CREATE TABLE logi_op_package_group_config
+(
+    id             BIGINT AUTO_INCREMENT COMMENT '配置组id'
+        PRIMARY KEY,
+    group_name     VARCHAR(5000) DEFAULT '' NOT NULL COMMENT '配置组名称',
+    system_config  VARCHAR(5000)            NULL COMMENT '系统配置',
+    running_config VARCHAR(5000)            NULL COMMENT '运行配置',
+    file_config    VARCHAR(255)             NULL COMMENT '文件配置',
+    package_id     BIGINT                   NULL COMMENT '软件包id',
+    create_time    TIMESTAMP                NULL COMMENT '创建时间',
+    update_time    TIMESTAMP                NULL COMMENT '更新时间'
+);
+-- auto-generated definition
+CREATE TABLE logi_op_script
+(
+    id          BIGINT AUTO_INCREMENT COMMENT '脚本id'
+        PRIMARY KEY,
+    name        VARCHAR(255) NOT NULL COMMENT '脚本名称',
+    template_id VARCHAR(255) NULL COMMENT 'Zeus模板id',
+    content_url VARCHAR(255) NULL COMMENT '文件地址',
+    `describe`  VARCHAR(255) NULL COMMENT '描述',
+    create_time TIMESTAMP    NULL COMMENT '创建时间',
+    update_time TIMESTAMP    NULL COMMENT '更新时间'
+);
+-- auto-generated definition
+CREATE TABLE logi_op_task
+(
+    id          INT(11) UNSIGNED AUTO_INCREMENT COMMENT '任务id自增'
+        PRIMARY KEY,
+    status      INT           NULL COMMENT '任务状态',
+    `describe`  VARCHAR(200)  NULL COMMENT '描述',
+    type        INT           NULL COMMENT '任务类型',
+    is_finish   INT           NULL COMMENT '是否结束',
+    content     VARCHAR(5000) NULL COMMENT '任务内容',
+    create_time TIMESTAMP     NULL COMMENT '创建时间',
+    update_time TIMESTAMP     NULL COMMENT '更新时间'
+);
+-- auto-generated definition
+CREATE TABLE logi_op_task_detail
+(
+    id              INT(11) UNSIGNED NOT NULL COMMENT '关联任务id',
+    execute_task_id INT              NULL COMMENT 'zeus的执行任务id',
+    status          INT              NULL COMMENT '状态',
+    host            VARCHAR(50)      NULL COMMENT '主机',
+    group_name      VARCHAR(100)     NULL COMMENT '关联分组名',
+    process_num     INT              NULL COMMENT '进程数',
+    create_time     TIMESTAMP        NULL COMMENT '创建时间',
+    update_time     TIMESTAMP        NULL COMMENT '更新时间'
+);
+
+#arius_config_info修改业务类型对应的配置值
+UPDATE arius_config_info SET `value`  = '[{"code":0,"desc":"系统日志","label":"system"},{"code":1,"desc":"日志数据","label":"log"},{"code":2,"desc":"用户上报数据","label":"olap"},{"code":3,"desc":"RDS数据","label":"binlog"},{"code":4,"desc":"离线导入数据","label":"offline"}]'  WHERE id = 1671;
+
 
 -- auto-generated definition
 create table fast_index_task_info

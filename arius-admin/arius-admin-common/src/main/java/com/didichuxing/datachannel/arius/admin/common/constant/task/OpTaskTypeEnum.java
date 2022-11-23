@@ -58,27 +58,29 @@ public enum OpTaskTypeEnum {
     GATEWAY_PLUG_UNINSTALL(27, "GATEWAY集群插件卸载", "gateway-plug-uninstall"),
     GATEWAY_CONFIG_EDIT(28, "GATEWAY集群配置新增", "gateway-config-edit"),
     GATEWAY_CONFIG_ROLLBACK(29, "GATEWAY集群配置回滚", "gateway-config-rollback"),
-    GATEWAY_ROLLBACK(30, "GATEWAY集群回滚", "gateway-rollback"),
+    GATEWAY_ROLLBACK(30, "GATEWAY 集群回滚", "gateway-rollback"),
+    GATEWAY_OFFLINE(31, "GATEWAY 集群回滚", "gateway-rollback"),
     //es cluster 操作列
-    ES_CLUSTER_NEW(31, "ES集群新建", "es-cluster-create"),
+    ES_CLUSTER_NEW(32, "ES集群新建", "es-cluster-create"),
     
-    ES_CLUSTER_EXPAND(32, "ES集群扩容", "es-cluster-expand"),
+    ES_CLUSTER_EXPAND(33, "ES集群扩容", "es-cluster-expand"),
     
-    ES_CLUSTER_SHRINK(33, "ES集群缩容", "es-cluster-shrink"),
+    ES_CLUSTER_SHRINK(34, "ES集群缩容", "es-cluster-shrink"),
     
-    ES_CLUSTER_RESTART(34, "ES集群重启", "es-cluster-restart"),
+    ES_CLUSTER_RESTART(35, "ES集群重启", "es-cluster-restart"),
     
-    ES_CLUSTER_UPGRADE(35, "ES集群升级", "es-cluster-upgrade"),
+    ES_CLUSTER_UPGRADE(36, "ES集群升级", "es-cluster-upgrade"),
     
     
-    ES_CLUSTER_CONFIG_EDIT(36, "ES集群配置编辑", "es-cluster-config-edit"),
+    ES_CLUSTER_CONFIG_EDIT(37, "ES集群配置编辑", "es-cluster-config-edit"),
     
-    ES_CLUSTER_PLUG_INSTALL(37, "ES集群插件安装", "es-cluster-plug-install"),
-    ES_CLUSTER_PLUG_UNINSTALL(38, "ES集群插件卸载", "es-cluster-plug-uninstall"),
-    ES_CLUSTER_PLUG_UPGRADE(39, "ES集群插件升级", "es-cluster-plug-upgrade"),
-    ES_CLUSTER_PLUG_RESTART(40, "ES集群插件重启", "es-cluster-plug-restart"),
-    ES_CLUSTER_ROLLBACK(41, "ES集群回滚", "es-cluster-rollback"),
-    ES_CLUSTER_CONFIG_ROLLBACK(42, "ES集群配置回滚", "es-cluster-config-rollback"),
+    ES_CLUSTER_PLUG_INSTALL(38, "ES集群插件安装", "es-cluster-plug-install"),
+    ES_CLUSTER_PLUG_UNINSTALL(39, "ES集群插件卸载", "es-cluster-plug-uninstall"),
+    ES_CLUSTER_PLUG_UPGRADE(40, "ES集群插件升级", "es-cluster-plug-upgrade"),
+    ES_CLUSTER_PLUG_RESTART(41, "ES集群插件重启", "es-cluster-plug-restart"),
+    ES_CLUSTER_ROLLBACK(42, "ES集群回滚", "es-cluster-rollback"),
+    ES_CLUSTER_CONFIG_ROLLBACK(43, "ES 集群配置回滚", "es-cluster-config-rollback"),
+    ES_CLUSTER_OFFLINE(44, "ES 集群下线操作", "es-cluster-offline"),
                             UNKNOWN(-1, "unknown");
 
     OpTaskTypeEnum(Integer type, String message) {
@@ -133,7 +135,7 @@ public enum OpTaskTypeEnum {
             ES_CLUSTER_CONFIG_ROLLBACK, ES_CLUSTER_EXPAND, ES_CLUSTER_NEW, ES_CLUSTER_PLUG_INSTALL,
             ES_CLUSTER_PLUG_RESTART,  ES_CLUSTER_PLUG_UNINSTALL,
             ES_CLUSTER_PLUG_UPGRADE, ES_CLUSTER_RESTART, ES_CLUSTER_ROLLBACK, ES_CLUSTER_SHRINK,
-            ES_CLUSTER_UPGRADE,GATEWAY_CONFIG_ROLLBACK);
+            ES_CLUSTER_UPGRADE,GATEWAY_CONFIG_ROLLBACK,GATEWAY_OFFLINE,ES_CLUSTER_OFFLINE);
     }
 
     public static OpTaskTypeEnum valueOfPath(String apiPath) {

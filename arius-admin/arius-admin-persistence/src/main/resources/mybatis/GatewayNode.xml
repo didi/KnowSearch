@@ -7,13 +7,14 @@
         <result column="host_name" jdbcType="VARCHAR" property="hostName"/>
         <result column="node_name" jdbcType="VARCHAR" property="nodeName"/>
         <result column="port" jdbcType="INTEGER" property="port"/>
+        <result column="machine_spec" jdbcType="VARCHAR" property="machineSpec"/>
         <result column="heartbeat_time" jdbcType="TIMESTAMP" property="heartbeatTime"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, cluster_name, host_name, port, heartbeat_time, create_time, update_time,node_name
+        id, cluster_name, host_name, port, heartbeat_time, create_time, update_time,node_name,machine_spec
     </sql>
 
     <insert id="recordGatewayNode"
@@ -44,8 +45,8 @@
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into gateway_cluster_node_info
-            (cluster_name, host_name, port)
-        values (#{clusterName}, #{hostName}, #{port})
+            (cluster_name, host_name, port,machine_spec)
+        values (#{clusterName}, #{hostName}, #{port}，#{machineSpec})
     </insert>
     
     <select id="selectByBatchClusterName" resultMap="BaseResultMap">
@@ -112,4 +113,12 @@
             #{host}
         </foreach>
     </select>
+    
+    <delete id="deleteBatch">
+        DELETE  FROM gateway_cluster_node_info
+        WHERE id IN
+         <foreach collection="ids" separator="," item="id" close=")" open="(">
+            #{id}
+        </foreach>
+    </delete>
 </mapper>

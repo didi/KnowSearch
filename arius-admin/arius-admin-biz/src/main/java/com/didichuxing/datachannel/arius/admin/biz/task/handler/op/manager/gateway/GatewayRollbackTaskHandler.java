@@ -30,7 +30,7 @@ public class GatewayRollbackTaskHandler extends AbstractGatewayTaskHandler {
 						return Result.buildFail("组建 id 不能为空");
 				}
 				// 校验 componentId 是否存在
-				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> result = componentService.queryComponentById(
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> result = componentService.queryComponentNameById(
 						content.getComponentId());
 				if (result.failed()) {
 						return Result.buildFrom(result);
@@ -47,6 +47,12 @@ public class GatewayRollbackTaskHandler extends AbstractGatewayTaskHandler {
 		}
 		
 		@Override
+		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
+				//TODO 注意这里如果回滚的是IP/PORT/扩缩容 那么需要进行对应的变更
+				return Result.buildSucc();
+		}
+		
+		@Override
 		protected Result<Integer> submitTaskToOpManagerGetId(String expandData) {
 			
 				return rollback(expandData);
@@ -55,7 +61,7 @@ public class GatewayRollbackTaskHandler extends AbstractGatewayTaskHandler {
 		@Override
 		protected String getTitle(String expandData) {
 				final GatewayRollbackContent content = convertString2Content(expandData);
-				final String name = componentService.queryComponentById(content.getComponentId())
+				final String name = componentService.queryComponentNameById(content.getComponentId())
 						.getData();
 				return String.format("%s【%s】",  operationType().getMessage(),name);
 		}
@@ -69,4 +75,5 @@ public class GatewayRollbackTaskHandler extends AbstractGatewayTaskHandler {
 		protected OperateRecord recordCurrentOperationTasks(String expandData) {
 				return new OperateRecord();
 		}
+
 }

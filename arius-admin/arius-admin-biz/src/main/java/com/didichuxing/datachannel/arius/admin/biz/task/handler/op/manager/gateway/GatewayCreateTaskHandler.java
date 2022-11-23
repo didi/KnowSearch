@@ -4,11 +4,19 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.gateway.GatewayCreateContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayClusterCreateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.GatewayHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didiglobal.logi.op.manager.domain.component.entity.Component;
+import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 
 /**
  * 网关创建任务处理程序
@@ -17,7 +25,7 @@ import org.springframework.stereotype.Component;
  * @date 2022/11/08
  * @since 0.3.2
  */
-@Component("gatewayCreateTaskHandler")
+@org.springframework.stereotype.Component("gatewayCreateTaskHandler")
 public class GatewayCreateTaskHandler extends AbstractGatewayTaskHandler {
 		
 		
@@ -75,4 +83,56 @@ public class GatewayCreateTaskHandler extends AbstractGatewayTaskHandler {
 		protected OperateRecord recordCurrentOperationTasks(String expandData) {
 				return new OperateRecord();
 		}
+		
+		@Override
+		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
+			final String expandData = opTask.getExpandData();
+			final GatewayCreateContent gatewayCreateContent = convertString2Content(expandData);
+			// 获取对应组建
+			final com.didiglobal.logi.op.manager.infrastructure.common.Result<Component> componentResult = componentService.queryComponentByName(
+					gatewayCreateContent.getName());
+			if (componentResult.failed()) {
+				return Result.buildFrom(componentResult);
+			}
+			// 获取安装包中的版本号
+			final Integer packageId = gatewayCreateContent.getPackageId();
+			final com.didiglobal.logi.op.manager.infrastructure.common.Result<Package> packageRes = packageService.getPackageById(
+					Long.valueOf(packageId));
+			if (packageRes.failed()) {
+				return Result.buildFrom(packageRes);
+			}
+			GatewayClusterCreateDTO gatewayClusterDTO = initGatewayClusterDTO(gatewayCreateContent,
+					componentResult.getData(), packageRes.getData());
+			return gatewayClusterManager.createWithECM(gatewayClusterDTO, AuthConstant.SUPER_PROJECT_ID, opTask.getCreator());
+		}
+		
+		/**
+		 * > 函数用于将网关配置文件中的网关集群配置信息转换为数据库中的网关集群配置信息
+		 *
+		 * @param gatewayCreateContent 用户传入的参数
+		 * @param component            当前正在创建的组件对象。
+		 * @param pack                  安装包
+		 */
+		private GatewayClusterCreateDTO initGatewayClusterDTO(GatewayCreateContent gatewayCreateContent,
+				Component component, Package pack) {
+				final List<TupleTwo<String, Integer>> ip2PortTuples = convertFGeneralGroupConfigDTO2IpAndPortTuple(gatewayCreateContent.getGroupConfigList());
+			
+				final List<GatewayNodeHostDTO> nodes = ip2PortTuples.stream()
+						.map(i -> GatewayNodeHostDTO.builder().port(i.v2())
+								.clusterName(gatewayCreateContent.getName())
+								.hostname(i.v1())
+								.build()).collect(Collectors.toList());
+				return GatewayClusterCreateDTO.builder()
+						.clusterName(gatewayCreateContent.getName())
+						.health(GatewayHealthEnum.GREEN.getCode())
+						.ecmAccess(Boolean.TRUE)
+						.memo(gatewayCreateContent.getMemo())
+						.componentId(component.getId())
+						.version(pack.getVersion())
+						.proxyAddress(gatewayCreateContent.getProxyAddress())
+						.dataCenter(gatewayCreateContent.getProxyAddress())
+						.nodes(nodes)
+						.build();
+		}
+	
 }

@@ -12,16 +12,16 @@ import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralRollbackComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralUpgradeComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.ComponentHandlerFactory;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.google.common.base.Strings;
+import java.util.List;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
 
 /**
  * @author didi
@@ -132,8 +132,7 @@ public class TaskService {
             return Result.fail(configResult.getCode(), configResult.getMessage());
         }
 
-        if (task.getType() == OperationEnum.INSTALL.getType() ||
-                task.getType() == OperationEnum.UPGRADE.getType()) {
+        if (task.getType() == OperationEnum.INSTALL.getType()) {
             GeneralInstallComponent installComponent = ConvertUtil.str2ObjByJson(task.getContent(), GeneralInstallComponent.class);
             //如果是安装和升级，设置url
             Integer packageId = installComponent.getPackageId();
@@ -141,6 +140,14 @@ public class TaskService {
             configResult.getData().setUsername(installComponent.getUsername());
             configResult.getData().setPassword(installComponent.getPassword());
             configResult.getData().setIsOpenTSL(installComponent.getIsOpenTSL());
+        } else if(task.getType() == OperationEnum.UPGRADE.getType()){
+            GeneralUpgradeComponent upgradeComponent = ConvertUtil.str2ObjByJson(task.getContent(), GeneralUpgradeComponent.class);
+            Component component = componentDomainService.getComponentById(upgradeComponent.getComponentId()).getData();
+            Integer packageId = upgradeComponent.getPackageId();
+            configResult.getData().setUrl(packageDomainService.getPackageById(packageId).getData().getUrl());
+            configResult.getData().setUsername(component.getUsername());
+            configResult.getData().setPassword(component.getPassword());
+            configResult.getData().setIsOpenTSL(component.getIsOpenTSL());
         } else {
             Integer componentId = JSON.parseObject(task.getContent()).getInteger("componentId");
             Component component = componentDomainService.getComponentById(componentId).getData();
@@ -207,5 +214,25 @@ public class TaskService {
     public Result<Boolean> hasTask(Integer taskId) {
         final Result<Task> taskRes = taskDomainService.getTaskById(taskId);
         return Result.build(Objects.nonNull(taskRes.getData()));
+    }
+    
+    /**
+     * 按 ID 获取任务列表。
+     *
+     * @param taskIds 要查询的任务ID列表。
+     * @return 任务清单
+     */
+    public Result<List<Task>> getTaskListByIds(List<Integer> taskIds) {
+        return taskDomainService.getTaskListByIds(taskIds);
+    }
+    
+    /**
+     * 通过其 ID 获取任务。
+     *
+     * @param taskId 要检索的任务的 ID。
+     * @return 结果<任务>
+     */
+    public Result<Task> getTaskById(Integer taskId) {
+        return taskDomainService.getTaskById(taskId);
     }
 }

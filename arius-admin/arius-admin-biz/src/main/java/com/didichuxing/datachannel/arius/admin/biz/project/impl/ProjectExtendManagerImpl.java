@@ -152,6 +152,9 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     
     @Override
     public Result<Boolean> projectExistenceGatewayCluster(Integer projectId) {
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)){
+            return Result.buildSucc(Boolean.TRUE);
+        }
         // 获取逻辑集群下所有的 id
         List<Long> logicIds = clusterLogicService.getAllIdsByProjectId(projectId);
         // 获取逻辑集群下的 regino 转换未集群名称
@@ -163,7 +166,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             .stream()
             //如果都是-1则没有绑定gateway
             .anyMatch(i -> StringUtils.equals(i.getGatewayIds(), "-1"));
-        return Result.build(projectExistenceGatewayCluster);
+        return Result.buildSucc(projectExistenceGatewayCluster);
     }
     
     @Override

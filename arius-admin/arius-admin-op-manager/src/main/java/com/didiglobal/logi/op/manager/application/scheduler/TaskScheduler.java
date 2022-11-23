@@ -56,6 +56,7 @@ public class TaskScheduler {
     @Transactional(rollbackFor = Exception.class)
     public void handle(Task task) {
         try {
+            if(task.getStatus() == TaskStatusEnum.WAITING.getStatus()) {return;}
             Set<Integer> executeIdSet = new LinkedHashSet<>();
             //获取执行id列表
             for (TaskDetail taskDetail : task.getDetailList()) {

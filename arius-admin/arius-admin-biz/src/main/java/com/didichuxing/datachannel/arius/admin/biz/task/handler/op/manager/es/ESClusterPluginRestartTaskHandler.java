@@ -28,13 +28,13 @@ public class ESClusterPluginRestartTaskHandler extends AbstractESTaskHandler {
 				}
 				
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> dependComponentRes =
-						componentService.queryComponentById(
+						componentService.queryComponentNameById(
 								content.getDependComponentId());
 				if (dependComponentRes.failed()) {
 						return Result.buildFrom(dependComponentRes);
 				}
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> componentRes =
-						componentService.queryComponentById(
+						componentService.queryComponentNameById(
 								content.getComponentId());
 				if (dependComponentRes.failed()) {
 						return Result.buildFrom(componentRes);
@@ -59,10 +59,10 @@ public class ESClusterPluginRestartTaskHandler extends AbstractESTaskHandler {
 				final ClusterPluginRestartContent content           = convertString2Content(expandData);
 				final Integer                     dependComponentId = content.getDependComponentId();
 				// 获取依赖安装的主机名称
-				final String dependComponentName = componentService.queryComponentById(dependComponentId)
+				final String dependComponentName = componentService.queryComponentNameById(dependComponentId)
 				                                                   .getData();
 				// 获取组建名称
-				final String name = componentService.queryComponentById(content.getComponentId()).getData();
+				final String name = componentService.queryComponentNameById(content.getComponentId()).getData();
 				
 				return String.format("%s- 集群名称【%s】- 插件名称【%s】", operationType().getMessage(),
 						dependComponentName
@@ -75,7 +75,14 @@ public class ESClusterPluginRestartTaskHandler extends AbstractESTaskHandler {
 		}
 		
 		@Override
+		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
+				//TODO 重启可能根本不需要后置处理，带测试后如果需要再进行补齐
+				return Result.buildSucc();
+		}
+		
+		@Override
 		protected OperateRecord recordCurrentOperationTasks(String expandData) {
 				return new OperateRecord();
 		}
+		
 }
