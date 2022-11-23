@@ -556,6 +556,12 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         if (null == param.getGatewayUrl()) {
             param.setGatewayUrl("");
         }
+        if (null == param.getKibanaAddress()) {
+            param.setKibanaAddress("");
+        }
+        if (null == param.getCerebroAddress()) {
+            param.setCerebroAddress("");
+        }
     }
 
     /**
