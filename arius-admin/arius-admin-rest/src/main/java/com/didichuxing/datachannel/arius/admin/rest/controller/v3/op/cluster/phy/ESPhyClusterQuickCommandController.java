@@ -47,17 +47,17 @@ public class ESPhyClusterQuickCommandController {
     @PostMapping("/indices-distribution")
     @ResponseBody
     @ApiOperation(value = "indices分布")
-    public List<IndicesDistributionVO> indicesDistribution(HttpServletRequest request,
+    public Result<List<IndicesDistributionVO>> indicesDistribution(HttpServletRequest request,
                                                                        @RequestBody ClusterPhyQuickCommandIndicesQueryDTO condition) throws NotFindSubclassException {
-        return clusterPhyQuickCommandManager.indicesDistributionPage(condition, HttpRequestUtil.getProjectId(request));
+        return Result.buildSucc(clusterPhyQuickCommandManager.indicesDistributionPage(condition, HttpRequestUtil.getProjectId(request)));
     }
 
     @PostMapping("/shard-distribution")
     @ResponseBody
     @ApiOperation(value = "shard分布")
-    public List<ShardDistributionVO> shardDistribution(HttpServletRequest request,
+    public Result<List<ShardDistributionVO>> shardDistribution(HttpServletRequest request,
                                                                @RequestBody ClusterPhyQuickCommandShardsQueryDTO condition) throws ESOperateException{
-        return clusterPhyQuickCommandManager.shardDistributionPage(condition, HttpRequestUtil.getProjectId(request));
+        return Result.buildSucc(clusterPhyQuickCommandManager.shardDistributionPage(condition, HttpRequestUtil.getProjectId(request)));
     }
 
     @PutMapping("/{cluster}/pending-task-analysis")

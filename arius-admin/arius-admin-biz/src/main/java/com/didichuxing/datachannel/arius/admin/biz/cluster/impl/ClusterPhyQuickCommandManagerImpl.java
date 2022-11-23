@@ -24,11 +24,11 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.*;
 import com.didiglobal.knowframework.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -167,15 +167,43 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
     @Override
     public List<IndicesDistributionVO> indicesDistributionPage(
             ClusterPhyQuickCommandIndicesQueryDTO condition, Integer projectId) {
+        List<IndicesDistributionVO> indicesDistributionVOS = new ArrayList<>();
         List<CatIndexResult> catIndexResultList = esIndexService.syncIndicesDistribution(condition.getCluster());
-        return ConvertUtil.list2List(catIndexResultList, IndicesDistributionVO.class);
+        catIndexResultList.forEach(catIndexResult -> {
+            IndicesDistributionVO indicesDistributionVO = ConvertUtil.obj2Obj(catIndexResult, IndicesDistributionVO.class);
+            indicesDistributionVO.setPriStoreSize(SizeUtil.getUnitSize(catIndexResult.getPriStoreSize()));
+            indicesDistributionVO.setStoreSize(SizeUtil.getUnitSize(catIndexResult.getStoreSize()));
+            if (StringUtils.isNotBlank(condition.getKeyword())) {
+                String index = Objects.isNull(indicesDistributionVO.getIndex())?"":indicesDistributionVO.getIndex();
+                if (index.contains(condition.getKeyword())) {
+                    indicesDistributionVOS.add(indicesDistributionVO);
+                }
+            } else {
+                indicesDistributionVOS.add(indicesDistributionVO);
+            }
+        });
+        return indicesDistributionVOS;
     }
     
     @Override
     public List<ShardDistributionVO> shardDistributionPage(ClusterPhyQuickCommandShardsQueryDTO condition,Integer projectId)
             throws ESOperateException {
         List<ShardCatCellPO> shardCatCellPOS =  esShardCatService.syncShardDistribution(condition.getCluster(),System.currentTimeMillis());
-        return ConvertUtil.list2List(shardCatCellPOS,ShardDistributionVO.class);
+        List<ShardDistributionVO> shardDistributionVOS = new ArrayList<>();
+        shardCatCellPOS.forEach(shardCatCellPO -> {
+            ShardDistributionVO shardDistributionVO = ConvertUtil.obj2Obj(shardCatCellPO, ShardDistributionVO.class);
+            shardDistributionVO.setStore(SizeUtil.getUnitSize(shardCatCellPO.getStore()));
+            if (StringUtils.isNotBlank(condition.getKeyword())) {
+                String node = Objects.isNull(shardDistributionVO.getNode())?"":shardDistributionVO.getNode();
+                String index = Objects.isNull(shardDistributionVO.getIndex())?"":shardDistributionVO.getIndex();
+                if (node.contains(condition.getKeyword()) || index.contains(condition.getKeyword())) {
+                    shardDistributionVOS.add(shardDistributionVO);
+                }
+            }else {
+                shardDistributionVOS.add(shardDistributionVO);
+            }
+        });
+        return shardDistributionVOS;
     }
     
     private Result<Void> checkClusterExistence(String cluster) {

@@ -362,4 +362,115 @@ public interface ClusterPhyManager {
      * @return 列表<ClusterPhy>
      */
     List<ClusterPhy> pagingGetClusterPhyByCondition(ClusterPhyConditionDTO condition);
+
+
+    /**
+     * 批量更新物理集群的动态配置项
+     * @param param        要更新的配置项
+     * @param operator
+     * @param projectId
+     * @return
+     */
+    Result<Boolean> batchUpdateClusterDynamicConfig(MultiClusterSettingDTO param, String operator, Integer projectId) throws ESOperateException;
+		
+		/**
+		 * 验证给定的集群名称是唯一的。
+		 *
+		 *
+		 * @param clusterName 要创建的集群的名称。
+		 * @return 一个 CompletableFuture<Boolean>
+		 */
+		Result<Boolean> verifyNameUniqueness(String clusterName);
+		
+		/**
+		 * “更新一个组件的版本。”
+		 *
+		 * 注释的第一行是对该功能的简短描述。第二行是参数列表，第三行是返回值的说明
+		 *
+		 * @param componentId 要更新的组件的组件 ID。
+		 * @param version 要更新的组件的版本。
+		 * @return 结果 <Void> 对象。
+		 */
+		Result<Void> updateVersionWithECM(Integer componentId, String version);
+    
+    /**
+     * “给定一个组件 ID，返回组件的名称。”
+     *
+     * 该函数在 Result 类中定义，该类表示操作的结果。操作的结果可以是成功也可以是失败。在成功的情况下，结果包含操作的值。在失败的情况下，结果包含发生的错误
+     *
+     * @param componentId 您要获取其名称的组件的组件 ID。
+     * @return 包含字符串的结果对象。
+     */
+    Result<String> getNameByComponentId(Integer componentId);
+    
+    /**
+     * 通过删除指定节点来收缩集群
+     *
+     * @param nodes 要删除的节点列表。
+     * @param clusterName 要操作的集群名称
+     * @return 操作的结果。
+     */
+    Result<Void> shrinkNodesWithEcm(List<ESClusterRoleHostDTO> nodes, String clusterName);
+    
+ 
+    /**
+     * 检查待缩容的节点是否包含绑定region
+     *
+     * @param nodes 要删除的节点列表
+     * @param clusterName 要操作的集群名称
+     */
+    Result<Void> checkShrinkNodesContainsBindRegion(List<ESClusterRoleHostDTO> nodes, String clusterName);
+    
+    /**
+     * ecm使用给定参数创建集群
+     *
+     * @param createDTO ClusterCreateDTO 对象
+     * @param operator
+     * @return 创建操作的结果。
+     */
+    Result<Void> createWithECM(ClusterCreateDTO createDTO, String operator);
+    
+    /**
+     * 通过将指定节点添加到集群来扩展集群
+     *
+     * @param nodes 要扩展的节点列表。
+     * @param clusterName 要扩展的集群的名称。
+     * @return 操作的结果。
+     */
+    Result<Void> expandNodesWithECM(List<ESClusterRoleHostDTO> nodes, String clusterName);
+    
+    /**
+     * 获取依赖于给定组件的组件的 ID。
+     *
+     * @param dependComponentId 您要获取其 ID 的组件的组件 ID。
+     * @return 依赖于具有给定 id 的组件的组件的 id。
+     */
+    Result<Integer> getIdByComponentId(Integer dependComponentId);
+    
+  
+    /**
+     * 它检查解除绑定资源操作是否完成。
+     *
+     * @param clusterPhy 要检查的集群。
+     */
+    Result<Void> checkCompleteUnbindResources(ClusterPhy clusterPhy);
+    
+    /**
+     * OfflineWithEcm() 用于使用 ECM 使项目离线
+     *
+     * @param id 待下线的项目id。
+     * @param creator 正在执行操作的用户。
+     * @param projectId 超级项目的id。
+     * @return 带有 Void 对象的 Result 对象。
+     */
+    Result<Void> offlineWithECM(Integer id, String creator, Integer projectId);
+
+    /**
+     * 物理集群绑定 gateway
+     * @param clusterPhyId  集群id
+     * @param gatewayClusterId gatewayId
+     * @param operator 操作人
+     * @param projectId 项目id
+     */
+    Result<Void> bindGatewayCluster(Integer clusterPhyId, Integer gatewayClusterId, String operator, Integer projectId);
 }

@@ -32,5 +32,5 @@ public class ShardDistributionVO {
     @ApiModelProperty("state")
     private String state;
     @ApiModelProperty("store大小")
-    private String store;
+    private Long store;
 }

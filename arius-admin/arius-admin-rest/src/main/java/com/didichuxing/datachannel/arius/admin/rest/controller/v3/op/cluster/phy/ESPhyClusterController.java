@@ -206,4 +206,15 @@ public class ESPhyClusterController {
         return clusterPhyManager.addCluster(param, HttpRequestUtil.getOperator(request),
             HttpRequestUtil.getProjectId(request));
     }
+ 
+    @PostMapping("{clusterPhyId}/{gatewayClusterId}")
+    @ResponseBody
+    @ApiOperation(value = "物理集群绑定 gateway",tags = "")
+    public Result<Void> bindGatewayCluster(@PathVariable("clusterPhyId") Integer clusterPhyId,
+                                                         @PathVariable("gatewayClusterId") Integer gatewayClusterId,
+                                                         HttpServletRequest request) {
+        return clusterPhyManager.bindGatewayCluster(clusterPhyId,gatewayClusterId, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
+    }
+    
 }
