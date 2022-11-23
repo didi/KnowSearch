@@ -112,15 +112,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -1426,7 +1419,15 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         return Result.buildSucc();
     }
-    
+
+    @Override
+    public Result<Void> bindGatewayCluster(Integer clusterPhyId, Integer gatewayClusterId, String operator, Integer projectId) {
+        ClusterPhy cluster = clusterPhyService.getClusterById(clusterPhyId);
+        cluster.setGatewayIds(cluster.getGatewayIds()+","+gatewayClusterId);
+        clusterPhyService.editCluster(ConvertUtil.obj2Obj(cluster,ClusterPhyDTO.class),operator);
+        return Result.buildSucc();
+    }
+
     /**************************************** private method ***************************************************/
 
     private Result<Boolean> checkClusterExistAndConfigType(MultiClusterSettingDTO param) {

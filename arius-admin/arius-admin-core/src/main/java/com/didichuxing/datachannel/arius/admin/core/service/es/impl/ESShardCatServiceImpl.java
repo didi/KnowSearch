@@ -88,7 +88,7 @@ public class ESShardCatServiceImpl implements ESShardCatService {
             shardDistributionVO.setPrirep(cell.getPrirep());
             shardDistributionVO.setShard(String.valueOf(cell.getShard()));
             shardDistributionVO.setState(cell.getState());
-            shardDistributionVO.setStore(cell.getStore());
+            shardDistributionVO.setStore(SizeUtil.getUnitSize(cell.getStore()));
             shardDistributionVOList.add(shardDistributionVO);
         });
         return shardDistributionVOList;

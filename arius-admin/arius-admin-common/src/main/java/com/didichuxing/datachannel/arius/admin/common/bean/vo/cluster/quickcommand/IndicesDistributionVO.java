@@ -32,9 +32,9 @@ public class IndicesDistributionVO {
     @ApiModelProperty("文档删数量")
     private String docsDeleted;
     @ApiModelProperty("存储主副本和副本的大小")
-    private String storeSize;
+    private Long storeSize;
     @ApiModelProperty("主分片大小")
-    private String priStoreSize;
+    private Long priStoreSize;
     @ApiModelProperty("uuid")
     private String uuid;
 }

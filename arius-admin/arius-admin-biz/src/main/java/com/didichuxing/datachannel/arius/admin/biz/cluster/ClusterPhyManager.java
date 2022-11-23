@@ -465,4 +465,13 @@ public interface ClusterPhyManager {
      * @return 带有 Void 对象的 Result 对象。
      */
     Result<Void> offlineWithECM(Integer id, String creator, Integer projectId);
+
+    /**
+     * 物理集群绑定 gateway
+     * @param clusterPhyId  集群id
+     * @param gatewayClusterId gatewayId
+     * @param operator 操作人
+     * @param projectId 项目id
+     */
+    Result<Void> bindGatewayCluster(Integer clusterPhyId, Integer gatewayClusterId, String operator, Integer projectId);
 }
