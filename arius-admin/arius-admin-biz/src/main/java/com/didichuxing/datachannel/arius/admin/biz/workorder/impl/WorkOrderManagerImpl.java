@@ -93,9 +93,9 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.DSL_TEMPLATE_QUERY_LIMIT.getName(),
                 WorkOrderTypeEnum.DSL_TEMPLATE_QUERY_LIMIT.getMessage()));
         orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.TEMPLATE_LOGIC_BLOCK_READ.getName(),
-                WorkOrderTypeEnum.DSL_TEMPLATE_QUERY_LIMIT.getMessage()));
+                WorkOrderTypeEnum.TEMPLATE_LOGIC_BLOCK_READ.getMessage()));
         orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.TEMPLATE_LOGIC_BLOCK_WRITE.getName(),
-                WorkOrderTypeEnum.DSL_TEMPLATE_QUERY_LIMIT.getMessage()));
+                WorkOrderTypeEnum.TEMPLATE_LOGIC_BLOCK_WRITE.getMessage()));
         return Result.buildSucc(orderTypeVOList);
     }
     
