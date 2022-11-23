@@ -5,6 +5,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -22,11 +24,12 @@ public interface ESIndexCatService {
      * @param size        当前页数量
      * @param sortTerm    排序字段
      * @param orderByDesc 降序标识
+     * @param showMetadata 是否展示元数据信息
      * @return Tuple<Long, List < IndexCatCell>>   key1 -> 命中总数, key2 索引列表
      */
     Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String cluster, String index, String health, String status,
                                                         Integer projectId, Long from, Long size, String sortTerm,
-                                                        Boolean orderByDesc);
+                                                        Boolean orderByDesc, Boolean showMetadata);
 
     /**
      * 更新索引删除标识
@@ -53,7 +56,7 @@ public interface ESIndexCatService {
      * @param indexName 索引名称
      * @return
      */
-    List<IndexShardInfo> syncGetIndexShardInfo(String cluster, String indexName);
+    List<IndexShardInfo> syncGetIndexShardInfo(String cluster, String indexName) throws ESOperateException;
 
 
     /**

@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.pl
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
+import com.didichuxing.datachannel.arius.admin.biz.plugin.PluginManager;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,9 +32,11 @@ public class PhyClusterPluginController {
 
     @Autowired
     private ClusterPhyManager    clusterPhyManager;
-
+    
     @Autowired
     private ClusterPluginManager clusterPluginManager;
+    @Autowired
+    private PluginManager        pluginManager;
 
     @GetMapping("/{cluster}")
     @ResponseBody
@@ -68,11 +71,11 @@ public class PhyClusterPluginController {
         return clusterPluginManager.editPluginDesc(pluginDTO, HttpRequestUtil.getOperator(request),
             HttpRequestUtil.getProjectId(request));
     }
-    @GetMapping("/{clusterPhyId}")
+    @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "获取物理集群的插件列表",tags = "")
     public Result<List<PluginVO>> listByClusterPhyId(HttpServletRequest request,
-                                               @PathVariable("clusterPhyId") Integer clusterPhyId) {
-        return Result.buildSucc();
+                                               @RequestParam("clusterPhyId") Integer clusterPhyId) {
+        return pluginManager.listESPluginByClusterId(clusterPhyId);
     }
 }

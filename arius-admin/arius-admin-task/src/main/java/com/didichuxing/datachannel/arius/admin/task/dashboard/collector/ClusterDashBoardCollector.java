@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
@@ -41,7 +42,7 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
                                                                                                                  * 1000;
 
     @Override
-    public void collectSingleCluster(String cluster, long startTime) {
+    public void collectSingleCluster(String cluster, long startTime) throws ESOperateException {
         DashBoardStats dashBoardStats = buildInitDashBoardStats(startTime);
 
         ClusterMetrics clusterMetrics = cluster2LastTimeClusterMetricsMap.getOrDefault(cluster, new ClusterMetrics());

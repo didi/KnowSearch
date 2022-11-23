@@ -180,6 +180,25 @@ public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy> {
      * 网关地址
      */
     private String                gatewayUrl;
+    /**
+     * 是否接入 gateway
+     */
+    private Boolean ecmAccess;
+    
+    /**
+     * ecm 关联组建 id
+     */
+    private Integer componentId;
+    
+    /**
+     * 代理地址
+     */
+    private String proxyAddress;
+    
+    /**
+     * gateway ids, 逗号分割
+     */
+    private String gatewayIds;
 
     @Override
     public int compareTo(ClusterPhy o) {

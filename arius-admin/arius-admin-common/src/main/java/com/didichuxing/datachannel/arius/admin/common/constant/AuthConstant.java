@@ -32,4 +32,8 @@ public final class AuthConstant {
      * 默认元数据项目id
      */
     public static final Integer DEFAULT_METADATA_PROJECT_ID          = 2;
+    /**
+     * 非超级项目无权限
+     */
+    public static final String PROJECT_WITHOUT_PERMISSION = "非超级项目无权限";
 }

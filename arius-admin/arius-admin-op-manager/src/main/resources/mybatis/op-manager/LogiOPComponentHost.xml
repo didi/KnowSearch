@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didiglobal.logi.op.manager.infrastructure.db.mapper.ComponentHostDao">
+    <resultMap id="BaseResultMap"
+               type="com.didiglobal.logi.op.manager.infrastructure.db.ComponentHostPO">
+        <result column="host" jdbcType="VARCHAR" property="host"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="component_id" jdbcType="INTEGER" property="componentId"/>
+        <result column="group_name" jdbcType="INTEGER" property="groupName"/>
+        <result column="process_num" jdbcType="INTEGER" property="processNum"/>
+        <result column="is_deleted" jdbcType="INTEGER" property="isDeleted"/>
+        <result column="machine_spec" jdbcType="VARCHAR" property="machineSpec"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        host, status, component_id, group_name, process_num, is_deleted, create_time, update_time,machine_spec
+    </sql>
+
+    <insert id="insert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentHostPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into logi_op_component_host (host, status, component_id, group_name, process_num, is_deleted,
+        create_time, update_time,machine_spec)
+        values (#{host}, #{status}, #{componentId}, #{groupName}, #{processNum}, #{isDeleted}, #{createTime},
+        #{updateTime},#{machineSpec})
+    </insert>
+
+    <update id="updateDeleteStatus">
+        update logi_op_component_host set is_deleted = #{isDeleted}
+        where component_id = #{componentId} and group_name = #{groupName} and host = #{host}
+    </update>
+
+    <select id="listAll"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentHostPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component_host
+        where is_deleted = 0
+    </select>
+
+    <update id="updateStatus">
+        update logi_op_component_host set status = #{status}
+        where component_id = #{componentId} and group_name = #{groupName} and host = #{host}
+    </update>
+
+    <select id="findByComponentId"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentHostPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component_host
+        where component_id = #{componentId} and is_deleted = 0
+    </select>
+
+</mapper>

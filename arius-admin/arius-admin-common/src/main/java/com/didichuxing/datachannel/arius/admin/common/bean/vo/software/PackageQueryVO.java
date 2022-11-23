@@ -7,10 +7,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description = "查询列表安装包VO")
+@ApiModel(description = "查询安装包VO")
 public class PackageQueryVO extends BaseVO {
     /**
      * 安装包id
@@ -23,18 +25,33 @@ public class PackageQueryVO extends BaseVO {
     @ApiModelProperty("安装包名字")
     private String name;
     /**
+     * 地址
+     */
+    @ApiModelProperty("地址")
+    private String url;
+    /**
      * 版本
      */
     @ApiModelProperty("版本")
     private String version;
     /**
-     * 创建者
+     * 描述
      */
-    @ApiModelProperty("创建者")
-    private String creator;
+    @ApiModelProperty("描述")
+    private String describe;
     /**
-     * 是否正在使用
+     * 是否引擎插件
      */
-    @ApiModelProperty("是否正在使用")
-    private String isUsing;
+    @ApiModelProperty("是否引擎插件")
+    private Integer isEnginePlugin;
+    /**
+     * 脚本id
+     */
+    @ApiModelProperty("脚本id")
+    private Integer scriptId;
+    /**
+     * 关联的默认安装包分组配置
+     */
+    @ApiModelProperty("关联的默认安装包分组配置")
+    private List<PackageGroupConfigQueryVO> groupConfigList;
 }

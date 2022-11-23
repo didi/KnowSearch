@@ -1,6 +1,7 @@
 package com.didiglobal.logi.op.manager.infrastructure.db.mapper;
 
 import com.didiglobal.logi.op.manager.infrastructure.db.PackagePO;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -66,4 +67,27 @@ public interface PackageDao {
      * @return 删除条数
      */
     int delete(int id);
+
+    /**
+     * 根据软件包类型获取软件包版本
+     * @param packageType
+     * @return
+     */
+    List<PackagePO> listPackageVersionByPackageType(Integer packageType);
+
+    /**
+     * 分页查询软件包列表
+     * @param packagePO
+     * @param from
+     * @param size
+     * @return
+     */
+    List<PackagePO> pagingByCondition(@Param("param") PackagePO packagePO, @Param("from") Long from, @Param("size") Long size);
+
+    /**
+     * 软件包总数
+     * @param packagePO
+     * @return
+     */
+    Long countByCondition(PackagePO packagePO);
 }

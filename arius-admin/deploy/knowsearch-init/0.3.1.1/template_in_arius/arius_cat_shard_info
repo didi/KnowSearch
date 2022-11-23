@@ -1,0 +1,14 @@
+{
+  "dataCenter": "cn",
+  "name": "arius_cat_shard_info",
+  "resourceId": #resourceId,
+  "level": 1,
+  "cyclicalRoll": 1,
+  "expireTime": 3,
+  "dateField": "timestamp",
+  "dateFieldFormat": "epoch_millis",
+  "diskSize": 30,
+  "dataType": 0,
+  "desc": "shard 分配数据",
+  "mapping": "{\"properties\":{\"prirep\":{\"type\":\"keyword\"},\"node\":{\"type\":\"keyword\"},\"docs\":{\"type\":\"long\"},\"clusterPhy\":{\"type\":\"keyword\"},\"ip\":{\"type\":\"keyword\"},\"index\":{\"type\":\"keyword\"},\"shard\":{\"type\":\"long\"},\"state\":{\"type\":\"keyword\"},\"store\":{\"type\":\"long\"},\"timestamp\":{\"format\":\"epoch_millis\",\"type\":\"date\"}}}",
+  "setting": "{\"index\":{\"translog.durability\":\"async\",\"translog.sync_interval\":\"15s\",\"refresh_interval\":\"1s\"}}"}

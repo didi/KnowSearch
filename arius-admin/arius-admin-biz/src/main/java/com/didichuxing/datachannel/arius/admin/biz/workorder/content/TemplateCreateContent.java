@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.DataType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -26,7 +26,7 @@ public class TemplateCreateContent extends BaseContent {
 
     /**
      * 用户数据类型
-     * @see DataTypeEnum
+     * @see DataType
      */
     private Integer dataType;
 

@@ -2,19 +2,21 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.ga
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
+import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayClusterManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterBriefVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterVO;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,17 +39,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(V3 + "/gateway")
 @Api(tags = "GATEWAY 管理接口 (REST)")
 public class GatewayV3Controller {
-    
+    @Autowired
+    private GatewayClusterManager gatewayClusterManager;
     @GetMapping("/brief-info")
     @ApiOperation(value = "gateway 管理简要信息", tags = "")
     public Result<List<GatewayClusterBriefVO>> listBriefInfo(HttpServletRequest request) {
-        return Result.buildSucc(Collections.singletonList(new GatewayClusterBriefVO()));
+        return gatewayClusterManager.listBriefInfo();
     }
     
     @PostMapping("/join")
     @ApiOperation(value = "gateway 集群接入", tags = "")
     public Result<GatewayClusterVO> joinCluster(HttpServletRequest request, @RequestBody GatewayClusterJoinDTO param) {
-        return Result.buildSucc(new GatewayClusterVO());
+        return gatewayClusterManager.join(param, HttpRequestUtil.getProjectId(request));
     }
     
     @PostMapping("/page")
@@ -55,41 +58,38 @@ public class GatewayV3Controller {
     @ApiOperation(value = "按条件分页获取 gateway 集群集群列表",tags = "")
     public PaginationResult<GatewayClusterVO> pageGetGatewayCluster(HttpServletRequest request,
                                                                     @RequestBody GatewayConditionDTO condition) {
-        return new PaginationResult<>(Collections.singletonList(new GatewayClusterVO()), 10, 1, 10);
+        return gatewayClusterManager.pageGetCluster(condition,HttpRequestUtil.getProjectId(request));
     }
-    
-    
-    
-    
     
     @GetMapping("/{gatewayClusterId}")
     @ResponseBody
     @ApiOperation(value = "根据 gatewayClusterId 获取 gateway 集群信息",tags = "")
     public Result<GatewayClusterVO> getGateway(HttpServletRequest request,
                                                @PathVariable("gatewayClusterId") Integer gatewayClusterId) {
-        return Result.buildSucc(new GatewayClusterVO());
+        return gatewayClusterManager.getOneById(gatewayClusterId);
     }
-    
-    
-  
     
     @DeleteMapping("/{gatewayClusterId}")
     @ResponseBody
     @ApiOperation(value = "gateway 集群下线",tags = "")
     public Result<Void> deleteById(HttpServletRequest request,
                                                        @PathVariable("gatewayClusterId") Integer gatewayClusterId) {
-        return Result.buildSucc();
+        return gatewayClusterManager.deleteById(gatewayClusterId,HttpRequestUtil.getProjectId(request));
     }
     
     @PutMapping("/{gatewayClusterId}")
     @ResponseBody
     @ApiOperation(value = "gateway 编辑",tags = "")
-    public Result<Void> edit(HttpServletRequest request, @PathVariable("gatewayClusterId") Integer gatewayClusterId, @RequestBody GatewayDTO data) {
-        return Result.buildSucc();
+    public Result<Void> edit(HttpServletRequest request, @PathVariable("gatewayClusterId") Integer gatewayClusterId, @RequestBody GatewayClusterDTO data) {
+        return gatewayClusterManager.editOne(data,HttpRequestUtil.getProjectId(request),
+            HttpRequestUtil.getOperator(request));
     }
-    
-   
-    
-    
+    @GetMapping("/{gatewayClusterId}/before-version")
+    @ResponseBody
+    @ApiOperation(value = "获取上个版本号",tags = "")
+    public Result<List<Object>> getBeforeVersionByGatewayClusterId(HttpServletRequest request,
+                                               @PathVariable("gatewayClusterId") Integer gatewayClusterId) {
+        return gatewayClusterManager.getBeforeVersionByGatewayClusterId(gatewayClusterId);
+    }
     
 }

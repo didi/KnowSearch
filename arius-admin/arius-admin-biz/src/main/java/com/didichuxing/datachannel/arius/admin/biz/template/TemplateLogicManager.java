@@ -24,6 +24,8 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,7 +60,7 @@ public interface TemplateLogicManager {
      */
     @Transactional(rollbackFor = Exception.class)
     Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator,
-                        Integer projectId) throws AdminOperateException;
+                        Integer projectId);
 
     /**
      * 获取所有逻辑模板聚合
@@ -109,6 +111,11 @@ public interface TemplateLogicManager {
      * 根据项目获取有管理\读写\读权限的逻辑模版
      */
     List<String> getTemplateLogicNames(Integer projectId);
+
+    /**
+     * 获取模板的业务类型
+     */
+    Map<Integer, String> getDataTypeCode2DescMap();
 
     Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId);
 
@@ -257,11 +264,10 @@ public interface TemplateLogicManager {
 
     /**
      * 更新模版settings和非分区模版索引的settings(可以用来实现部分模版服务，如异步translog、恢复优先级)
-     * @param  settingsDTO 模版增量settings
-     * @param templateIdList  模版id列表
+     * @param param 模版增量settings
      * @param operator
      * @param projectId
      * @return
      */
-    Result<Void> updateTemplateAndIndexSettings(TemplateIncrementalSettingsDTO settingsDTO, List<Integer> templateIdList, String operator, Integer projectId) throws AdminOperateException;
+    Result<Void> updateTemplateAndIndexSettings(TemplateIncrementalSettingsDTO param, String operator, Integer projectId) throws AdminOperateException;
 }

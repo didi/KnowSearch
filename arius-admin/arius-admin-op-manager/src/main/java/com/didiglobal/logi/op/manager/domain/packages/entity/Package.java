@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author didi
@@ -71,6 +72,10 @@ public class Package {
      * 关联的默认安装包分组配置
      */
     private List<PackageGroupConfig> groupConfigList;
+    /**
+     * 软件包类型，1-es安装包、2-gateway安装包、3-es引擎插件、4-gateway引擎插件、5-es平台插件、6-gateway平台插件
+     */
+    private Integer packageType;
 
 
     public Package create() {
@@ -107,7 +112,7 @@ public class Package {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "未绑定脚本");
         }
 
-        if (uploadFile.isEmpty()) {
+        if (Objects.isNull(uploadFile)) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "安装包内容缺失");
         }
         return Result.success();
@@ -117,6 +122,10 @@ public class Package {
     public Result<Void> checkUpdateParam() {
         if (null == id) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "id缺失");
+        }
+
+        if (null == scriptId) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "未绑定脚本");
         }
         return Result.success();
     }

@@ -47,11 +47,16 @@ public class ESClusterLogicStatsService {
         List<String> logicCLusterNodesList = logicClusterNodesNameMap.get(logicClusterId.intValue());
         List<ClusterLogicStats> phyCLusterNodeStatsList = phyClusterNodeStatsMap.get(clusterPhy.getCluster());
         if (CollectionUtils.isNotEmpty(phyCLusterNodeStatsList) && CollectionUtils.isNotEmpty(logicCLusterNodesList)) {
-            List<ClusterLogicStats> logicNodeStats = phyCLusterNodeStatsList.stream().filter(clusterLogicStats -> logicCLusterNodesList.contains(clusterLogicStats.getNodeName())).collect(Collectors.toList());
-            Long docNu = logicNodeStats.stream().filter(Objects::nonNull).map(ClusterLogicStats::getDocCount).filter(Objects::nonNull).mapToLong(Long::longValue).sum();
-            Double diskFree = logicNodeStats.stream().filter(Objects::nonNull).map(ClusterLogicStats::getUsageFsBytes).filter(Objects::nonNull).mapToDouble(Long::doubleValue).sum();
-            Double diskUsage = logicNodeStats.stream().filter(Objects::nonNull).map(ClusterLogicStats::getFreeInBytes).filter(Objects::nonNull).mapToDouble(Long::doubleValue).sum();
-            Double diskTotal = logicNodeStats.stream().filter(Objects::nonNull).map(ClusterLogicStats::getTotalFsBytes).filter(Objects::nonNull).mapToDouble(Long::doubleValue).sum();
+            List<ClusterLogicStats> logicNodeStats = phyCLusterNodeStatsList.stream()
+                    .filter(clusterLogicStats -> logicCLusterNodesList.contains(clusterLogicStats.getNodeName())).collect(Collectors.toList());
+            Long docNu = logicNodeStats.stream().filter(Objects::nonNull).map(ClusterLogicStats::getDocCount)
+                    .filter(Objects::nonNull).mapToLong(Long::longValue).sum();
+            Double diskFree = logicNodeStats.stream().filter(Objects::nonNull).map(ClusterLogicStats::getFreeInBytes)
+                    .filter(Objects::nonNull).mapToDouble(Long::doubleValue).sum();
+            Double diskUsage = logicNodeStats.stream().filter(Objects::nonNull).map(ClusterLogicStats::getUsageFsBytes)
+                    .filter(Objects::nonNull).mapToDouble(Long::doubleValue).sum();
+            Double diskTotal = logicNodeStats.stream().filter(Objects::nonNull).map(ClusterLogicStats::getTotalFsBytes)
+                    .filter(Objects::nonNull).mapToDouble(Long::doubleValue).sum();
             //设置节点数
             statsPO.setNumberDataNodes((long) logicNodeStats.size());
             //总文档数量

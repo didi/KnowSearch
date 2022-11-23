@@ -10,6 +10,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum.OWN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum.isTemplateAuthExitByCode;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateSettingEnum.INDEX_PRIORITY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateSettingEnum.INDEX_TRANSLOG_DURABILITY;
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl.NOT_CHECK;
 
 import com.alibaba.fastjson.JSON;
@@ -58,10 +60,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.*;
 import com.didichuxing.datachannel.arius.admin.common.event.index.IndexDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateCreatePipelineEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -83,6 +82,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.DataTypeService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
@@ -94,15 +94,8 @@ import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -128,7 +121,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     @Autowired
     private TemplateStatsService            templateStatsService;
 
-  
+    @Autowired
+    private DataTypeService                 dataTypeService;
 
     @Autowired
     private ColdManager                     templateColdManager;
@@ -173,13 +167,16 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private ClusterLogicService             clusterLogicService;
 
     private final static Integer            RETRY_TIMES           = 3;
+
     @Autowired
     private IndicesManager                  indicesManager;
+
     @Autowired
     private PipelineManager                 templatePipelineManager;
     
     @Autowired
     protected ESClusterNodeService esClusterNodeService;
+
     @Autowired
     private ESClusterService esClusterService;
 
@@ -212,8 +209,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer projectId)
-            throws AdminOperateException {
+    public Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer projectId) {
         IndexTemplateDTO indexTemplateDTO = buildTemplateDTO(param, projectId);
         Result<Void> validLogicTemplateResult = indexTemplateService.validateTemplate(indexTemplateDTO, ADD, projectId);
         if (validLogicTemplateResult.failed()) {
@@ -225,16 +221,15 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (validPhyTemplateResult.failed()) {
             return validPhyTemplateResult;
         }
+
         final Map<String, String> setting = JsonUtils.flat(JSONObject.parseObject(param.getSetting()));
         if (setting.containsKey(ESSettingConstant.INDEX_NUMBER_OF_SHARDS) || setting.containsKey(
                 ESSettingConstant.INDEX_ROUTING_ALLOCATION_INCLUDE_NAME) || setting.containsKey(
                 ESSettingConstant.INDEX_ROUTING_ALLOCATION_INCLUDE_RACK)) {
             return Result.buildFail(
                     "\"index.number_of_shards \"和 \"index.routing.allocation.include._name \"和 \"index.routing.allocation.include.rack \"三个字段系统会自动计算，不支持用户自定义设置。");
-        
         }
-        
-    
+
         try {
             Result<Void> save2DBResult = indexTemplateService.addTemplateWithoutCheck(indexTemplateDTO);
             if (save2DBResult.failed()) {
@@ -262,15 +257,14 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             LOGGER.error("class=TemplateLogicManagerImpl||method=create", e);
             // 这里必须显示事务回滚
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return Result.buildFail(e.getMessage());
+            return Result.buildFail("模板创建出现admin操作异常，请重试");
         } catch (Exception e) {
             LOGGER.error("class=TemplateLogicManagerImpl||method=create", e);
             // 这里必须显示事务回滚
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Result.buildFail("模版创建失败，请重新尝试");
         }
-    
-        
+
     }
 
     /**
@@ -283,12 +277,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     public List<IndexTemplateLogicAggregate> getAllTemplatesAggregate(Integer projectId) {
         List<IndexTemplateLogicAggregate> indexTemplateLogicAggregates = new ArrayList<>();
         List<IndexTemplateWithCluster> logicTemplates = indexTemplateService.listAllLogicTemplateWithClusters();
-        
-
         return indexTemplateLogicAggregates;
     }
-
-
 
     /**
      * 拼接集群名称
@@ -300,7 +290,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (CollectionUtils.isNotEmpty(logicClusters)) {
             return String.join(",", logicClusters.stream().map(ClusterLogic::getName).collect(Collectors.toList()));
         }
-
         return StringUtils.EMPTY;
     }
 
@@ -314,10 +303,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         List<ConsoleTemplateVO> consoleTemplates = Lists.newArrayList();
         if (CollectionUtils.isNotEmpty(aggregates)) {
             Map<Integer, String> projectId2ProjectNameMap = Maps.newHashMap();
-
             for (IndexTemplateLogicAggregate aggregate : aggregates) {
                 ConsoleTemplateVO consoleTemplateVO = fetchConsoleTemplate(aggregate);
-
                 //获取项目名称
                 Integer projectId = consoleTemplateVO.getProjectId();
                 if (projectId2ProjectNameMap.containsKey(projectId)) {
@@ -330,11 +317,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                         projectId2ProjectNameMap.put(projectId, projectName);
                     }
                 }
-
                 consoleTemplates.add(consoleTemplateVO);
             }
         }
-
         Collections.sort(consoleTemplates);
         return consoleTemplates;
     }
@@ -440,9 +425,19 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Override
     public List<String> getTemplateLogicNames(Integer projectId) {
-        List<IndexTemplate> templateLogics = indexTemplateService.listProjectLogicTemplatesByProjectId(projectId);
+        List<IndexTemplate> templateLogics;
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            templateLogics = indexTemplateService.listAllLogicTemplates();
+        } else {
+            templateLogics = indexTemplateService.listProjectLogicTemplatesByProjectId(projectId);
+        }
 
         return templateLogics.stream().map(IndexTemplate::getName).collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<Integer, String> getDataTypeCode2DescMap() {
+        return dataTypeService.code2DescMap();
     }
 
     @Override
@@ -456,8 +451,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             }
             final Result<Void> voidResult = indexTemplateService.editTemplateInfoTODB(param);
             if (voidResult.success()) {
-                String dataTypeBefore= DataTypeEnum.valueOf(oldIndexTemplate.getDataType()).getDesc();
-                String dataTypeAfter= DataTypeEnum.valueOf(param.getDataType()).getDesc();
+                String dataTypeBefore= dataTypeService.descOfCode(oldIndexTemplate.getDataType());
+                String dataTypeAfter= dataTypeService.descOfCode(param.getDataType());
                 String descBefore=oldIndexTemplate.getDesc();
                 String descAfter=param.getDesc();
     
@@ -521,9 +516,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
         return result;
     }
-    
-    
-    
 
     @Override
     public PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(TemplateConditionDTO condition,
@@ -582,8 +574,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             if (null == clusterPhy) {
                 return Result.buildFail(String.format("模板归属集群[%s]不存在", clusterPhyName));
             }
-
-            
         }
 
         return Result.buildSucc(true);
@@ -625,8 +615,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         return Result.buildSucc();
     }
 
-   
-
     @Override
     public Result<Boolean> checkTemplateEditService(Integer templateId, Integer templateSrvId) {
         // 根据逻辑模板id获取对应的逻辑物理模板信息
@@ -663,7 +651,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return Result.buildNotExist("索引不存在");
         }
 
-       
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             return Result.buildSucc();
         }
@@ -698,8 +685,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             LOGGER.error("class={}||method=updateDCDRInfo||templateName={}",getClass().getSimpleName(), logicId, e);
             return false;
         }
-       
-       
+
         // 2. 获取位点差dcdr
         if (dcdrFlag) {
             try {
@@ -712,7 +698,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                     getClass().getSimpleName(),logicId,  e);
                  return false;
             }
-    
         }
 
         try {
@@ -1123,18 +1108,12 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 indexTemplateService.update(templatePO);
                 return true;
             }
-    
-           
-    
-            
+
             return true;
         } catch (Exception e) {
             LOGGER.error("class=TemplateLogicManagerImpl||method=updateTemplateHealthByLogicId||logicId={}", logicId, e);
             return false;
         }
-        
-        
-        
     }
     
     /**
@@ -1175,7 +1154,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return Result.buildFail("限流调整失败！");
         }
     }
-    
    
     /**
      * 用索引模板的写操作。
@@ -1245,16 +1223,15 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     /**
      * 更新模版settings和非分区模版索引的settings(可以用来实现部分模版服务，如异步translog、恢复优先级)
-     * @param settings 模版增量settings
-     * @param templateIdList  模版id列表
+     * @param param 模版增量settings
      * @param operator
      * @param projectId
      * @return
      */
     @Override
-    public Result<Void> updateTemplateAndIndexSettings(TemplateIncrementalSettingsDTO settings, List<Integer> templateIdList, String operator, Integer projectId) throws AdminOperateException {
+    public Result<Void> updateTemplateAndIndexSettings(TemplateIncrementalSettingsDTO param, String operator, Integer projectId) throws AdminOperateException {
 
-        Result<Void> checkResult = checkParam(projectId, operator, settings);
+        Result<Void> checkResult = checkParam(projectId, operator, param);
         if(checkResult.failed()){
             return Result.buildFail(checkResult.getMessage());
         }
@@ -1264,12 +1241,12 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         StringBuilder updateFailTemplates = new StringBuilder();
         // 构造模版的增量settings
         Map<String, String> incrementalSettings = Maps.newHashMap();
-        incrementalSettings.put(settings.getKey(), settings.getValue());
+        incrementalSettings.putAll(param.getIncrementalSettings());
 
         // indicesIncrementalSettingList 存储需要更新settings的索引
         List<IndicesIncrementalSettingDTO> indicesIncrementalSettingList = Lists.newArrayList();
 
-        for (Integer logicId : templateIdList) {
+        for (Integer logicId : param.getTemplateIdList()) {
             // 增量方式修改每个模版的settings
             Result<Void> result = templateLogicSettingsManager.updateSettingsByMerge(logicId, incrementalSettings, operator, projectId);
             if(result.failed()){
@@ -1279,7 +1256,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                         logicId, "update settings failed");
             } else {
                 // 更新状态到DB中，以便page查询数据时获取到服务的状态：对于translog功能，更新srvCode字段；对于恢复优先级功能，要更新字段priority_level
-                Result<Void> updateDBResult = updateStatusToDB(logicId, settings);
+                Result<Void> updateDBResult = updateStatusToDB(logicId, param);
                 if(updateDBResult.failed()){
                     LOGGER.error("class=TemplateLogicManagerImpl||method=updateTemplateAndIndexSettings,templateId={}, errMsg={}",
                             logicId, "update db failed");
@@ -1300,8 +1277,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                     IndicesIncrementalSettingDTO indicesIncrementalSettingDTO = new IndicesIncrementalSettingDTO();
                     indicesIncrementalSettingDTO.setCluster(physicalMaster.getCluster());
                     indicesIncrementalSettingDTO.setIndex(catIndexResult.getIndex());
-                    indicesIncrementalSettingDTO.setKey(settings.getKey());
-                    indicesIncrementalSettingDTO.setValue(settings.getValue());
+                    indicesIncrementalSettingDTO.setIncrementalSettings(param.getIncrementalSettings());
 
                     indicesIncrementalSettingList.add(indicesIncrementalSettingDTO);
                 }
@@ -1325,7 +1301,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     /**************************************** private method ***************************************************/
 
-    private Result<Void> checkParam(Integer projectId, String operator, TemplateIncrementalSettingsDTO settings){
+    private Result<Void> checkParam(Integer projectId, String operator, TemplateIncrementalSettingsDTO param){
         final Result<Void> projectCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (projectCheck.failed()) {
             return Result.buildFail(projectCheck.getMessage());
@@ -1333,27 +1309,56 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (AriusObjUtils.isNull(operator)) {
             return Result.buildParamIllegal("操作人为空");
         }
-
-        if(ESSettingConstant.INDEX_TRANSLOG_DURABILITY.equals(settings.getKey())){
-            if(!(ESSettingConstant.ASYNC.equals(settings.getValue()) || ESSettingConstant.REQUEST.equals(settings.getValue()))) {
-                return Result.buildParamIllegal("setting [index.translog.durability] must be 'request' or 'async'");
-            }
-        }else if (ESSettingConstant.INDEX_PRIORITY.equals(settings.getKey())){
-            if(!StringUtils.isNumeric(settings.getValue())){
-                return Result.buildParamIllegal("setting [index.priority] must be numeric");
-            }
-            Integer priorityLevel = Integer.valueOf(settings.getValue());
-            if(priorityLevel < 0){
-                return Result.buildParamIllegal("setting [index.priority] must be >= 0");
-            }
-            if(!(ESSettingConstant.HIGH_PRIORITY.equals(priorityLevel) || ESSettingConstant.MIDDLE_PRIORITY
-                    .equals(priorityLevel) || ESSettingConstant.LOW_PRIORITY.equals(priorityLevel))){
-                return Result.buildParamIllegal("setting [index.priority] must be 10,5,0");
-            }
-        }else {
-            return Result.buildParamIllegal("模版settings的key取值有误");
+        if(param.getIncrementalSettings() == null || param.getIncrementalSettings().isEmpty()){
+            return Result.buildParamIllegal("参数为空");
         }
 
+        for(Map.Entry<String, String> entry : param.getIncrementalSettings().entrySet()){
+            String key = entry.getKey();
+            String value = param.getIncrementalSettings().get(key);
+
+            if (TemplateSettingEnum.stream().noneMatch(settingEnum -> settingEnum.getSetting().equals(key))) {
+                return Result.buildParamIllegal("模版settings的key取值有误");
+            }
+
+            Result<Void> result;
+            switch (TemplateSettingEnum.getBySetting(key)){
+                case INDEX_PRIORITY:
+                    result = checkPriorityValid(value, INDEX_PRIORITY);
+                    break;
+                case INDEX_TRANSLOG_DURABILITY:
+                    result = checkTranslogValid(value, INDEX_TRANSLOG_DURABILITY);
+                    break;
+                default:
+                    result = Result.buildFail("模版settings的key取值有误");
+            }
+            if (result.failed()){
+                return Result.buildFrom(result);
+            }
+        }
+
+        return Result.buildSucc();
+    }
+
+    private Result<Void> checkPriorityValid(String value, TemplateSettingEnum templateSettingEnum) {
+        if (!StringUtils.isNumeric(value)){
+            return Result.buildParamIllegal("setting [index.priority] must be numeric");
+        }
+        Integer priorityLevel = Integer.valueOf(value);
+        if (priorityLevel < 0){
+            return Result.buildParamIllegal("setting [index.priority] must be >= 0");
+        }
+
+        if(templateSettingEnum.getValueList().stream().noneMatch(needValue -> needValue.equals(value))) {
+            return Result.buildParamIllegal("setting [index.priority] must be " + templateSettingEnum.getValues());
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> checkTranslogValid(String value, TemplateSettingEnum templateSettingEnum) {
+        if (templateSettingEnum.getValueList().stream().noneMatch(needValue -> needValue.equals(value))) {
+            return Result.buildParamIllegal("setting [index.translog.durability] must be " + templateSettingEnum.getValues());
+        }
         return Result.buildSucc();
     }
 
@@ -1361,38 +1366,48 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      * 更新状态到数据库中
      * 对于异步translog功能，更新srvCode字段；对于恢复优先级功能，要更新字段priority_level
      * @param logicId
-     * @param settings
+     * @param param
      * @return
      */
-    private Result<Void> updateStatusToDB(Integer logicId, TemplateIncrementalSettingsDTO settings){
+    private Result<Void> updateStatusToDB(Integer logicId, TemplateIncrementalSettingsDTO param){
         IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(logicId);
-        if(ESSettingConstant.INDEX_TRANSLOG_DURABILITY.equals(settings.getKey())){
-            String srvCodeStr = indexTemplate.getOpenSrv();
-            List<String> srvCodeList = ListUtils.string2StrList(srvCodeStr);
-            String updateSrvCode = TemplateServiceEnum.TEMPLATE_TRANSLOG_ASYNC.getCode().toString();
-            if(ESSettingConstant.ASYNC.equals(settings.getValue())){
-                if (srvCodeList.isEmpty()) {
-                    indexTemplate.setOpenSrv(updateSrvCode);
-                } else {
-                    if (!srvCodeList.contains(updateSrvCode)) {
-                        indexTemplate.setOpenSrv(srvCodeStr + "," + updateSrvCode);
-                    }
+        for (Map.Entry<String, String> entry : param.getIncrementalSettings().entrySet()) {
+            String key = entry.getKey();
+            String value = param.getIncrementalSettings().get(key);
+
+            if(ESSettingConstant.INDEX_TRANSLOG_DURABILITY.equals(key)){
+                String updateSrvCode = TemplateServiceEnum.TEMPLATE_TRANSLOG_ASYNC.getCode().toString();
+                if(ESSettingConstant.ASYNC.equals(value)){
+                    buildTemplateOpenSrv(indexTemplate, updateSrvCode, Boolean.TRUE);
+                }else {
+                    buildTemplateOpenSrv(indexTemplate, updateSrvCode, Boolean.FALSE);
                 }
-            }else {
-                if (srvCodeList.contains(updateSrvCode)) {
-                    srvCodeList.remove(updateSrvCode);
-                    indexTemplate.setOpenSrv(ListUtils.strList2String(srvCodeList));
-                }
+            }else if (ESSettingConstant.INDEX_PRIORITY.equals(key)){
+                indexTemplate.setPriorityLevel(Integer.valueOf(value));
             }
-        }else if (ESSettingConstant.INDEX_PRIORITY.equals(settings.getKey())){
-            indexTemplate.setPriorityLevel(Integer.valueOf(settings.getValue()));
         }
         IndexTemplatePO indexTemplatePO = ConvertUtil.obj2Obj(indexTemplate, IndexTemplatePO.class);
         boolean update = indexTemplateService.update(indexTemplatePO);
         if(!update){
             return Result.buildFail(logicId + "模版更新db失败");
         }
+
         return Result.buildSucc();
+    }
+
+    private void buildTemplateOpenSrv(IndexTemplate indexTemplate, String updateSrvCode, Boolean status) {
+        String srvCodeStr = indexTemplate.getOpenSrv();
+        List<String> srvCodeList = ListUtils.string2StrList(srvCodeStr);
+        if(Boolean.TRUE.equals(status)) {
+            if (srvCodeList.isEmpty()) {
+                indexTemplate.setOpenSrv(updateSrvCode);
+            }else if (!srvCodeList.contains(updateSrvCode)) {
+                indexTemplate.setOpenSrv(srvCodeStr + "," + updateSrvCode);
+            }
+        }else if (srvCodeList.contains(updateSrvCode)) {
+            srvCodeList.remove(updateSrvCode);
+            indexTemplate.setOpenSrv(ListUtils.strList2String(srvCodeList));
+        }
     }
 
     /**
@@ -1482,8 +1497,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
         return indexTemplateLogicAggregate;
     }
-
-
 
     /**
      * 校验物理集群的合法性

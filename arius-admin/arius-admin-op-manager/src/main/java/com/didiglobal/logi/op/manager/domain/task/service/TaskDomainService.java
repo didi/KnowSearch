@@ -158,5 +158,12 @@ public interface TaskDomainService {
      * @return String
      */
     Result<String> getTaskLog(int taskId, String hostname, int taskLogEnumType);
-
+    
+    /**
+     * 按 ID 获取任务列表。
+     *
+     * @param taskIds 要检索的任务 ID 列表。
+     * @return 任务清单
+     */
+    Result<List<Task>> getTaskListByIds(List<Integer> taskIds);
 }

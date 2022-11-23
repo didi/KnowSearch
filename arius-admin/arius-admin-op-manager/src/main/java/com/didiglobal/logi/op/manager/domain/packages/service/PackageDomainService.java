@@ -51,4 +51,26 @@ public interface PackageDomainService {
      */
     Result<Void> deletePackage(Package pk);
 
+    /**
+     * 分页查询软件包列表
+     * @param pagingPackage
+     * @param page
+     * @param size
+     * @return
+     */
+    List<Package> pagingByCondition(Package pagingPackage, Long page, Long size);
+
+    /**
+     * 软件包总数
+     * @param pagingPackage
+     * @return
+     */
+    Long countByCondition(Package pagingPackage);
+
+    /**
+     * 根据软件包类型获取软件包版本
+     * @param packageType
+     * @return
+     */
+    List<String> listPackageVersionByPackageType(Integer packageType);
 }

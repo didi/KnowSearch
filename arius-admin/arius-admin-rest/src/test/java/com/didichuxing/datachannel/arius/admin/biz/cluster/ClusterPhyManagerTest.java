@@ -176,7 +176,7 @@ class ClusterPhyManagerTest {
             "httpAddress", 0, "tags", "code", "idc", 0, "esVersion", "imageName", "nsTree", "plugIds", 0L, esConfigDTO,
             Collections.singletonList(pluginDTO), Collections.singletonList(esClusterRoleDTO),
             Collections.singletonList(esClusterRoleHostDTO), 0, "machineSpec", "operator",  "password",
-            0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0, "gatewayUrl");
+            0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0, "gatewayUrl",null,null,null,null);
 
 //        clusterPhyVO = new ClusterPhyVO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
 //            "httpWriteAddress", 0, "tags", "dataCenter", 0, "machineSpec", 0, "esVersion", "imageName", null,
@@ -185,24 +185,24 @@ class ClusterPhyManagerTest {
 //            0.0, 0L, 0L, "password", "idc", 0, "writeAction", 0, 0L, "platformType", 0, "gatewayUrl",null,null ,null);
 
         clusterRoleHost = new ClusterRoleHost(0L, 0L, "hostname", "ip", CLUSTER, "port", 0, 0, "rack", "nodeSet",
-            "machineSpec", 0, "attributes");
+            "machineSpec", 0, "attributes",null);
         clusterRoleInfo = new ClusterRoleInfo(0L, 0L, "roleClusterName", "role", 0, 0, "machineSpec", "esVersion", 0,
             "plugIds", false, Collections.singletonList(clusterRoleHost));
         clusterPhy = new ClusterPhy(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName",
             "nsTree", 0, "machineSpec", "password", "creator",
             Collections.singletonList(clusterRoleInfo), Collections.singletonList(clusterRoleHost), 0, "writeAction", 0,
-            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl");
+            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl",null,null,null,null);
         privateClusterPhy = new ClusterPhy(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName",
             "nsTree", 0, "machineSpec", "password", "creator",
             Collections.singletonList(clusterRoleInfo), Collections.singletonList(clusterRoleHost), 0, "writeAction", 0,
-            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl");
+            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl",null,null,null,null);
         exclusiveClusterPhy = new ClusterPhy(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName",
             "nsTree", 0, "machineSpec", "password", "creator",
             Collections.singletonList(clusterRoleInfo), Collections.singletonList(clusterRoleHost), 0, "writeAction", 0,
-            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl");
+            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl",null,null,null,null);
         clusterPhyList = Collections.singletonList(clusterPhy);
         esClusterStatsResponse = new ESClusterStatsResponse("status", 0L, 0L, 0L,new ByteSizeValue(0L, ByteSizeUnit.BYTES), 0L, 0L, 0L, 0L, 0L, 0L,0L, 0L,
             new ByteSizeValue(0L, ByteSizeUnit.BYTES), new ByteSizeValue(0L, ByteSizeUnit.BYTES),
@@ -220,7 +220,7 @@ class ClusterPhyManagerTest {
         region = new ClusterRegion(0L, "name", "logicClusterIds", CLUSTER, "config","");
 
         roleHostList = Collections.singletonList(new ClusterRoleHost(0L, 0L, "hostname", "ip", CLUSTER, "port", 0, 0,
-            "rack", "nodeSet", "machineSpec", -1, "attributes"));
+            "rack", "nodeSet", "machineSpec", -1, "attributes",null));
         regions = Collections.singletonList(region);
     }
 
@@ -493,7 +493,7 @@ class ClusterPhyManagerTest {
     }
 
     @Test
-    void testJoinCluster() throws InvocationTargetException, IllegalAccessException, AdminTaskException {
+    void testJoinCluster() throws InvocationTargetException, IllegalAccessException, AdminTaskException, ESOperateException {
         Integer projectId = 1;
         ClusterJoinDTO param = new ClusterJoinDTO(0, 0, "clusterPhyName", "esVersion", Lists.newArrayList(),
             "desc", "passwd", 4, "{\"createSource\":1}", "cn", "acs", 1,"127.0.0.1");
@@ -600,7 +600,7 @@ class ClusterPhyManagerTest {
             .thenReturn("7.6.0.1401");
         param.setDataCenter("");
         when(mockClusterRoleHostService.collectClusterNodeSettings(CLUSTER)).thenReturn(true);
-        when(mockClusterPhyService.createCluster(Mockito.any(), Mockito.anyString())).thenReturn(Result.buildSucc());
+        when(mockClusterPhyService.createCluster(Mockito.any())).thenReturn(Result.buildSucc());
         assertTrue(clusterPhyManager.joinCluster(param, "admin", projectId).success());
         verify(mockEsOpClient).connect(CLUSTER);
         verify(mockClusterRoleHostService).collectClusterNodeSettings(CLUSTER);
@@ -706,7 +706,7 @@ class ClusterPhyManagerTest {
 
     @Test
     void testAddCluster() {
-        when(mockClusterPhyService.createCluster(clusterPhyDTO, "operator")).thenReturn(Result.buildBoolen(true));
+        when(mockClusterPhyService.createCluster(clusterPhyDTO)).thenReturn(Result.buildBoolen(true));
         assertEquals(Result.buildBoolen(true), clusterPhyManager.addCluster(clusterPhyDTO, "operator", 0));
     }
 
@@ -740,7 +740,7 @@ class ClusterPhyManagerTest {
     }
 
     @Test
-    void testUpdateClusterHealth() {
+    void testUpdateClusterHealth() throws ESOperateException {
         when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(null);
         assertFalse(clusterPhyManager.updateClusterHealth(CLUSTER, "operator"));
 
@@ -773,7 +773,7 @@ class ClusterPhyManagerTest {
     }
 
     @Test
-    void testCheckClusterHealth() {
+    void testCheckClusterHealth() throws ESOperateException {
         when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(null);
         assertFalse(clusterPhyManager.checkClusterHealth(CLUSTER, "operator").success());
         ClusterPhy clusterPhy = new ClusterPhy();
@@ -804,12 +804,12 @@ class ClusterPhyManagerTest {
         // Setup
         final List<ClusterRoleInfo> expectedResult = Arrays.asList(new ClusterRoleInfo(0L, 0L, "roleClusterName",
             "role", 0, 0, "machineSpec", "esVersion", 0, "plugIds", false, Arrays.asList(new ClusterRoleHost(0L, 0L,
-                "hostname", "ip", CLUSTER, "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes"))));
+                "hostname", "ip", CLUSTER, "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes",null))));
 
         // Configure ClusterRoleService.getAllRoleClusterByClusterId(...).
         final List<ClusterRoleInfo> clusterRoleInfos = Arrays.asList(new ClusterRoleInfo(0L, 0L, "roleClusterName",
             "role", 0, 0, "machineSpec", "esVersion", 0, "plugIds", false, Arrays.asList(new ClusterRoleHost(0L, 0L,
-                "hostname", "ip", CLUSTER, "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes"))));
+                "hostname", "ip", CLUSTER, "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes",null))));
         when(mockClusterRoleService.getAllRoleClusterByClusterId(0)).thenReturn(clusterRoleInfos);
 
         // Run the test

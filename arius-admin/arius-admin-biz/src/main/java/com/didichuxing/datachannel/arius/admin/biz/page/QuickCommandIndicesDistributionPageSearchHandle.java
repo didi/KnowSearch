@@ -63,7 +63,7 @@ public class QuickCommandIndicesDistributionPageSearchHandle extends AbstractPag
             Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(
                     queryCluster, condition.getKeyword(), condition.getHealth(),condition.getStatus(), queryProjectId,
                     (condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(),
-                    condition.getOrderByDesc());
+                    condition.getOrderByDesc(), true);
             if (null == totalHitAndIndexCatCellListTuple) {
                 LOGGER.warn("class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||"
                                 + "errMsg=get empty index cat info from es",

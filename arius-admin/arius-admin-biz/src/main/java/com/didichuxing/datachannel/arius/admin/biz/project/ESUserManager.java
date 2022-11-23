@@ -47,6 +47,16 @@ public interface ESUserManager {
     Result<Void> editESUser(ESUserDTO esUserDTO, String operator);
 
     /**
+     * 设置es User为应用默认es User
+     *
+     * @param esUserName ES用户
+     * @param projectId {@link ProjectPO#getId()}
+     * @param operator 操作人 {@link   com.didichuxing.datachannel.arius.admin.core.component.RoleTool#isAdmin}
+     * @return {@code Result<Void>}
+     */
+    Result<Void> setDefaultDisplay(int esUserName, int projectId, String operator);
+
+    /**
      * 删除项目下的指定es user
      *
      * @param esUser ES用户
@@ -89,5 +99,21 @@ public interface ESUserManager {
      * @return {@code Result<List<ConsoleESUserWithVerifyCodeVO>>}
      */
     Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(Integer projectId, String operator);
+
+    /**
+     * 获取原生模式下项目的访问集群列表
+     *
+     * @param projectId
+     * @return {@code Result<List<String>> }
+     */
+    Result<List<String>> listClusterByAppInPrimitiveType(Integer projectId);
+
+    /**
+     * 获取集群模式下项目的访问集群列表
+     *
+     * @param projectId
+     * @return {@code Result<List<String>> }
+     */
+    Result<List<String>> listClusterByAppInClusterType(Integer projectId);
 
 }

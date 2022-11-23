@@ -27,7 +27,7 @@ public class GatewayClusterVO {
     @ApiModelProperty("集群健康:-1:unknown;1.green;2.yellow;3.red")
     private Integer health;
     @ApiModelProperty("是否为 ecm 接入")
-    private Boolean whetherECMAccess;
+    private Boolean ecmAccess;
     @ApiModelProperty("代理地址")
     private String  proxyAddress;
     @ApiModelProperty("版本")

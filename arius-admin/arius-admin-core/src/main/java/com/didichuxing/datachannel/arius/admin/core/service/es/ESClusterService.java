@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESResponsePluginInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
@@ -67,6 +68,13 @@ public interface ESClusterService {
      * @return map
      */
     Map<String, List<String>> syncGetNode2PluginsMap(String cluster) throws ESOperateException;
+    /**
+     * 获取集群上安装的插件列表
+     *
+     * @param cluster 集群名称，即elasticsearch.yml文件中的集群名称。
+     * @return ESResponsePluginInfo 对象列表。
+     */
+    List<ESResponsePluginInfo> syncGetPlugins(String cluster)throws ESOperateException;
 
     /**
      * 获取某个集群内索引别名到索引名称的映射
@@ -101,7 +109,7 @@ public interface ESClusterService {
      * @param clusterName
      * @return
      */
-    ESClusterHealthResponse syncGetClusterHealth(String clusterName);
+    ESClusterHealthResponse syncGetClusterHealth(String clusterName) throws ESOperateException;
 
     /**
      * 获取集群task信息
@@ -117,7 +125,7 @@ public interface ESClusterService {
      * @param clusterName
      * @return
      */
-    ClusterHealthEnum syncGetClusterHealthEnum(String clusterName);
+    ClusterHealthEnum syncGetClusterHealthEnum(String clusterName) throws ESOperateException;
 
     /**
      * 获取集群状态信息
@@ -136,7 +144,7 @@ public interface ESClusterService {
      * @param clusterName 物理集群名称
      * @return Map<String, Integer> String表示的是实例所在的ip值，Integer表示该ip上的总的segment数目
      */
-    Map<String, Integer> synGetSegmentsOfIpByCluster(String clusterName);
+    Map<String, Integer> synGetSegmentsOfIpByCluster(String clusterName) throws ESOperateException;
 
     /**
      * 集群的持久化操作
@@ -156,19 +164,19 @@ public interface ESClusterService {
     /**
      * 获取全量集群节点Setting配置; key ——> 节点uuid ,value ——> ClusterNodeInfo
      */
-    Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster);
+    Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster) throws ESOperateException;
 
     /**
      * 获取部分集群节点Setting配置; key ——> 节点uuid ,value ——> ClusterNodeSettings
      */
-    Map<String, ClusterNodeSettings> syncGetPartOfSettingsByCluster(String cluster);
+    Map<String, ClusterNodeSettings> syncGetPartOfSettingsByCluster(String cluster) throws ESOperateException;
 
     /**
      * 获取运行集群的es版本号
      * @param cluster 物理集群名称
      * @return 物理集群es版本号
      */
-    String synGetESVersionByCluster(String cluster);
+    String synGetESVersionByCluster(String cluster) throws ESOperateException;
 
     /**
      * 检测是否为同一个集群
