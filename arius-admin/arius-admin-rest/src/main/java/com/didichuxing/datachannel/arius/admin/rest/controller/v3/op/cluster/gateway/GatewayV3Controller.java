@@ -10,6 +10,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayCl
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterBriefVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginHealthEnum;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -91,5 +93,13 @@ public class GatewayV3Controller {
                                                @PathVariable("gatewayClusterId") Integer gatewayClusterId) {
         return gatewayClusterManager.getBeforeVersionByGatewayClusterId(gatewayClusterId);
     }
+    
+    @GetMapping("health")
+    @ResponseBody
+    @ApiOperation(value = "获取健康类型", tags = "")
+    public Result<List<TupleTwo<Integer, PluginHealthEnum>>> getPluginHealth(HttpServletRequest request) {
+        return Result.buildSucc(PluginHealthEnum.getAll());
+    }
+  
     
 }

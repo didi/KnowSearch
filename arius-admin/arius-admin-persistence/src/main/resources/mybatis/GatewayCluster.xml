@@ -28,12 +28,7 @@
         (#{clusterName},#{componentId},#{ecmAccess},#{health},#{proxyAddress},#{memo},#{dataCenter})
     </insert>
 
-    <select id="getByClusterName" parameterType="string" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from gateway_cluster_info
-        where cluster_name = #{clusterName}
-    </select>
+   
 
     <select id="listAll" resultMap="BaseResultMap">
         select

@@ -19,4 +19,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GeneraInstallComponentContent extends GeneraInstallComponentDTO {
 		private String reason;
+		private Integer pluginType;
 }

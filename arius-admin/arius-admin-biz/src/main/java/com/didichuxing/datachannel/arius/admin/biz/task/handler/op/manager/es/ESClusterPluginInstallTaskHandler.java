@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.plugin.PluginCreateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginClusterTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginInfoTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
@@ -28,6 +29,9 @@ public class ESClusterPluginInstallTaskHandler extends AbstractESTaskHandler {
 		protected Result<Void> validatedAddTaskParam(OpTask param) {
 				final ClusterPluginInstallContent content = convertString2Content(
 						param.getExpandData());
+				if (Objects.isNull(content.getPluginType())) {
+						return Result.buildFail("插件类型不可为空");
+				}
 				if (Objects.isNull(content.getDependComponentId())) {
 						return Result.buildFail("组建依赖 ID 不可为空");
 				}
@@ -48,6 +52,7 @@ public class ESClusterPluginInstallTaskHandler extends AbstractESTaskHandler {
 		protected OpTaskTypeEnum operationType() {
 				return OpTaskTypeEnum.ES_CLUSTER_PLUG_INSTALL;
 		}
+		
 		
 		@Override
 		protected Result<Integer> submitTaskToOpManagerGetId(String expandData) {
@@ -116,7 +121,7 @@ public class ESClusterPluginInstallTaskHandler extends AbstractESTaskHandler {
 								.componentId(componentResult.getData().getId())
 								
 								//TODO 插件类型未知 需要等
-								//.pluginType(PluginInfoTypeEnum.ENGINE.getPluginType())
+								.pluginType(PluginInfoTypeEnum.find(content.getPluginType()).getPluginType())
 								.clusterType(PluginClusterTypeEnum.ES.getClusterType()).build();
 				return pluginManager.createWithECM(pluginCreateDTO);
 		}
