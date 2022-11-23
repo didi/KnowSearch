@@ -53,7 +53,19 @@ public class TemplateWithSrvVO extends BaseVO {
     private Boolean partition;
     @ApiModelProperty("模版健康:-1：未知")
     private Integer health;
-    
+
+    /**
+     * 是否禁读
+     */
+    @ApiModelProperty("是否禁读")
+    private Boolean blockRead;
+
+    /**
+     * 是否禁写
+     */
+    @ApiModelProperty("是否禁写")
+    private Boolean blockWrite;
+
     /**
      * 指示主集群的联通状态
      */
