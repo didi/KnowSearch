@@ -61,7 +61,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ESUserManagerImpl implements ESUserManager {
     private static final ILog    LOGGER = LogFactory.getLog(ESUserManagerImpl.class);
-    private static final String ES_USER_ERROR_MSG="应用下未匹配到逻辑集群，es user 不可以被设置为 %s 和 %s";
+    private static final String ES_USER_ERROR_MSG="应用下未匹配到逻辑集群，ES_User 不可以被设置为 %s 和 %s";
     @Autowired
     private ProjectService       projectService;
     @Autowired
