@@ -198,4 +198,18 @@
 		where cast(operate_time as datetime) &lt; #{saveTime}
 	</update>
 
+	<insert id="insertWithCheck"
+			parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO"
+			useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into operate_record_info (project_name, module_id, operate_id, trigger_way_id,
+		user_operation, operate_time,
+		content, biz_id)
+		select #{projectName}, #{moduleId}, #{operateId}, #{triggerWayId}, #{userOperation},
+		#{operateTime}, #{content}, #{bizId}
+		from dual where not exists (
+		    select 1 from operate_record_info where project_name=#{projectName} and module_id=#{moduleId} and operate_id=#{operateId}
+		    and trigger_way_id=#{triggerWayId} and user_operation=#{userOperation}
+		)
+	</insert>
+
 </mapper>

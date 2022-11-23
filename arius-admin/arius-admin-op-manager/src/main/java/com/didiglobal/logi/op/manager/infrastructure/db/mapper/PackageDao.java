@@ -90,4 +90,12 @@ public interface PackageDao {
      * @return
      */
     Long countByCondition(PackagePO packagePO);
+
+    /**
+     * 通过包类型和当前版本查询比当前版本低的版本
+     * @param packageType
+     * @param version
+     * @return
+     */
+    List<PackagePO> listPackageWithLowerVersionByPackageTypeAndVersion(@Param("packageType") Integer packageType,@Param("version") Integer version);
 }

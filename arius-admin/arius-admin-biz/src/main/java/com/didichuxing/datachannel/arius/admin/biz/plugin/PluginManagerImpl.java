@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.plugin.PluginCrea
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.plugin.PluginInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageVersionVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginInfoTypeEnum;
@@ -15,8 +16,12 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.plugin.PluginInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
+import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClusterService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.op.manager.application.ComponentService;
+import com.didiglobal.logi.op.manager.application.PackageService;
+import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.util.Collections;
@@ -50,6 +55,12 @@ public class PluginManagerImpl implements PluginManager {
 		private              ESClusterNodeService          esClusterNodeService;
 		@Autowired
 		private              AriusScheduleThreadPool       ariusScheduleThreadPool;
+		@Autowired
+		private GatewayClusterService gatewayClusterService;
+		@Autowired
+		private ComponentService componentService;
+		@Autowired
+		private PackageService packageService;
 		/**
 		 * 插件列表的缓存:ES 集群维度
 		 */
@@ -132,7 +143,24 @@ public class PluginManagerImpl implements PluginManager {
 				}
 				return Result.buildFail("集群中存在插件未完全卸载，请先卸载集群中存在的插件，才可进行下线集群任务");
 		}
-		
+		@Override
+		public Result<List<PackageVersionVO>> getBeforeVersionByGatewayClusterId(Integer gatewayClusterId) {
+			Integer componentId = gatewayClusterService.getComponentIdById(gatewayClusterId);
+			com.didiglobal.logi.op.manager.infrastructure.common.Result<com.didiglobal.logi.op.manager.domain.component.entity.Component> componentResult = componentService.queryComponentById(componentId);
+			if (componentResult.failed()) {
+				return Result.buildFrom(componentResult);
+			}
+			com.didiglobal.logi.op.manager.infrastructure.common.Result<Package> packageByIdResult = packageService.getPackageById((long) componentResult.getData().getPackageId());
+			if(packageByIdResult.failed()){
+				return Result.buildFrom(packageByIdResult);
+			}
+			Integer packageType = packageByIdResult.getData().getPackageType();
+			String version = packageByIdResult.getData().getVersion();
+			List<Package> packageList = packageService.listPackageWithLowerVersionByPackageTypeAndVersion(packageType,version);
+			return Result.buildSucc(ConvertUtil.list2List(packageList,PackageVersionVO.class));
+		}
+
+	/******************************************private***********************************************/
 		private void refreshClusterPhyPluginInfo() {
 				for (String clusterName : clusterPhyService.listClusterNames()) {
 						try {

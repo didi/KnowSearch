@@ -161,4 +161,14 @@ public class PackageService {
     public List<Integer> hasPackagesDependComponent(List<Integer> packageIds) {
         return componentDomainService.hasPackagesDependComponent(packageIds);
     }
+
+    /**
+     * 通过包类型和当前版本查询比当前版本低的版本
+     * @param packageType
+     * @param version
+     * @return
+     */
+    public List<Package> listPackageWithLowerVersionByPackageTypeAndVersion(Integer packageType, String version) {
+        return packageDomainService.listPackageWithLowerVersionByPackageTypeAndVersion(packageType,version);
+    }
 }

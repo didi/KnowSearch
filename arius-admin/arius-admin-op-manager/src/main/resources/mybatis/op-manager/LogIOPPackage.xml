@@ -123,4 +123,11 @@
         <if test="name != null">and `name` LIKE CONCAT('%', #{name}, '%')</if>
         <if test="id != null">and id = #{id}</if>
     </select>
+
+    <select id="listPackageWithLowerVersionByPackageTypeAndVersion" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_package
+        where package_type = #{packageType} and convert(TRIM(REPLACE(version,'.','')),UNSIGNED) &lt; #{version}
+    </select>
 </mapper>
