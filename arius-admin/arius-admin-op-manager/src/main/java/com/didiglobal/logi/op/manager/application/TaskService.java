@@ -140,6 +140,7 @@ public class TaskService {
             configResult.getData().setUsername(installComponent.getUsername());
             configResult.getData().setPassword(installComponent.getPassword());
             configResult.getData().setIsOpenTSL(installComponent.getIsOpenTSL());
+            configResult.getData().setDependConfigComponentId(installComponent.getDependConfigComponentId());
         } else if(task.getType() == OperationEnum.UPGRADE.getType()){
             GeneralUpgradeComponent upgradeComponent = ConvertUtil.str2ObjByJson(task.getContent(), GeneralUpgradeComponent.class);
             Component component = componentDomainService.getComponentById(upgradeComponent.getComponentId()).getData();
@@ -148,6 +149,7 @@ public class TaskService {
             configResult.getData().setUsername(component.getUsername());
             configResult.getData().setPassword(component.getPassword());
             configResult.getData().setIsOpenTSL(component.getIsOpenTSL());
+            configResult.getData().setDependConfigComponentId(component.getDependConfigComponentId());
         } else {
             Integer componentId = JSON.parseObject(task.getContent()).getInteger("componentId");
             Component component = componentDomainService.getComponentById(componentId).getData();
@@ -160,6 +162,7 @@ public class TaskService {
             configResult.getData().setUsername(component.getUsername());
             configResult.getData().setPassword(component.getPassword());
             configResult.getData().setIsOpenTSL(component.getIsOpenTSL());
+            configResult.getData().setDependConfigComponentId(component.getDependConfigComponentId());
         }
         return Result.success(configResult.getData());
     }

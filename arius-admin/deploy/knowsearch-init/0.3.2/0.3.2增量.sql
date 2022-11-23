@@ -178,3 +178,7 @@ CREATE TABLE logi_op_task_detail
 
 #arius_config_info修改业务类型对应的配置值
 UPDATE arius_config_info SET `value`  = '[{"code":0,"desc":"系统日志","label":"system"},{"code":1,"desc":"日志数据","label":"log"},{"code":2,"desc":"用户上报数据","label":"olap"},{"code":3,"desc":"RDS数据","label":"binlog"},{"code":4,"desc":"离线导入数据","label":"offline"}]'  WHERE id = 1671;
+
+
+-- 新增平台配置初始化数据
+INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1686, 'arius.common.group', 'cluster.region.unsupported_divide_type', 'xpack.installed,zen1,ml.machine_memory,ml.max_open_jobs,ml.enabled', 1, -1, 1, '设置平台不支持的region划分方式', '2022-11-19 10:45:34', '2022-11-19 10:45:34', '2022-11-19 10:45:34');
