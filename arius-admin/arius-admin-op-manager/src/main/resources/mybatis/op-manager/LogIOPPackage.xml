@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didiglobal.logi.op.manager.infrastructure.db.mapper.PackageDao">
+    <resultMap id="BaseResultMap"
+               type="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="url" jdbcType="VARCHAR" property="url"/>
+        <result column="version" jdbcType="VARCHAR" property="version"/>
+        <result column="describe" jdbcType="VARCHAR" property="describe"/>
+        <result column="type" jdbcType="INTEGER" property="type"/>
+        <result column="package_type" jdbcType="INTEGER" property="packageType"/>
+        <result column="script_id" jdbcType="INTEGER" property="scriptId"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="creator" jdbcType="VARCHAR" property="creator"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, `name`, url, version, `describe`, `type`, script_id,create_time, update_time, creator, package_type
+    </sql>
+
+    <insert id="insert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        <selectKey resultType="integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into logi_op_package (`name`, url, version, `describe`, `type`, script_id,create_time, update_time, creator, package_type)
+        values (#{name}, #{url}, #{version}, #{describe}, #{type}, #{scriptId}, #{createTime}, #{updateTime}, #{creator}, #{packageType})
+    </insert>
+
+    <update id="update" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO">
+        update logi_op_package
+        <trim prefix="set" prefixOverrides=",">
+            <if test="url!= null">,url = #{url}</if>
+            <if test="version != null">,version = #{version}</if>
+            <if test="describe != null">,`describe` = #{describe}</if>
+            <if test="type != null">,`type` = #{type}</if>
+            <if test="scriptId != null">,script_id = #{scriptId}</if>
+            <if test="updateTime != null">,update_time = #{updateTime}</if>
+            <if test="creator != null">,creator = #{creator}</if>
+            <if test="packageType != null">,package_type = #{packageType}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="findById"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_package
+        where id = #{id}
+    </select>
+
+    <select id="findByName"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_package
+        where `name` = #{name}
+        order by id desc
+    </select>
+
+    <select id="findByVersion"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_package
+        where version = #{version}
+        order by id desc
+    </select>
+
+    <select id="query"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_package
+        where 1 = 1
+        <if test="name != null">and `name` LIKE CONCAT('%', #{name}, '%')</if>
+        <if test="id != null">and id = #{id}</if>
+        <if test="scriptId != null">and script_id = #{scriptId}</if>
+        order by id desc
+    </select>
+
+    <delete id="delete" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO">
+        delete from logi_op_package
+        where id = #{id}
+    </delete>
+
+    <select id="listPackageVersionByPackageType"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO"
+            resultMap="BaseResultMap">
+        select
+            <include refid="Base_Column_List"/>
+        from logi_op_package
+        where package_type = #{packageType}
+    </select>
+
+    <select id="pagingByCondition"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_package
+        where 1 = 1
+        <if test="param.name != null">and `name` LIKE CONCAT('%', #{param.name}, '%')</if>
+        <if test="param.id != null">and id = #{param.id}</if>
+        order by  create_time desc
+        limit #{from}, #{size}
+    </select>
+
+    <select id="countByCondition"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO" resultType="long">
+        select
+        count(1)
+        from logi_op_package
+        where 1 = 1
+        <if test="name != null">and `name` LIKE CONCAT('%', #{name}, '%')</if>
+        <if test="id != null">and id = #{id}</if>
+    </select>
+</mapper>

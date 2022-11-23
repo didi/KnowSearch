@@ -7,8 +7,11 @@ import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterNodeDAO;
+import java.util.Collections;
 import java.util.List;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,11 +38,17 @@ public class GatewayNodeServiceImpl implements GatewayNodeService {
 	
 	@Override
 	public List<GatewayClusterNodePO> selectByBatchClusterName(List<String> clusterName) {
+			if (CollectionUtils.isEmpty(clusterName)) {
+					return Collections.emptyList();
+			}
 		return gatewayClusterNodeDAO.selectByBatchClusterName(clusterName);
 	}
 	
 	@Override
 	public List<GatewayClusterNodePO> listByClusterName(String clusterName) {
+			if (StringUtils.isBlank(clusterName)) {
+					return Collections.emptyList();
+			}
 		return gatewayClusterNodeDAO.selectByClusterName(clusterName);
 	}
 	
@@ -63,6 +72,11 @@ public class GatewayNodeServiceImpl implements GatewayNodeService {
 		return gatewayClusterNodeDAO.countByCondition(condition);
 	}
 	
+	@Override
+	public List<GatewayClusterNodePO> listByHosts(List<String> hosts) {
+		return gatewayClusterNodeDAO.listByHosts(hosts);
+	}
+	
 	/**
 	 * > 在数据库中插入一条记录
 	 *
@@ -76,4 +90,9 @@ public class GatewayNodeServiceImpl implements GatewayNodeService {
 		gatewayClusterNode.setId(gatewayClusterNode.getId());
 		return i;
 	}
+		
+		@Override
+		public Boolean deleteBatch(List<Integer> ids) {
+				return gatewayClusterNodeDAO.deleteBatch(ids)==ids.size();
+		}
 }

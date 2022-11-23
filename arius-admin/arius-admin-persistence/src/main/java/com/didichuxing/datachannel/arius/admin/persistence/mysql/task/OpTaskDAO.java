@@ -109,4 +109,12 @@ public interface OpTaskDAO {
      * @return
      */
     Long countByCondition(OpTaskQueryDTO queryDTO);
+    
+    /**
+     * 按任务类型获取待处理任务
+     *
+     * @param taskTypes 要查询的任务类型。
+     * @return OpTaskPO 对象列表。
+     */
+    List<OpTaskPO> getPendingTaskByTypes(@Param("taskTypes") List<Integer> taskTypes);
 }

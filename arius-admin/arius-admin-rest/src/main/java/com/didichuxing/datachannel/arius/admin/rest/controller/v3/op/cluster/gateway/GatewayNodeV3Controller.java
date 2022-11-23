@@ -38,7 +38,7 @@ public class GatewayNodeV3Controller {
     @ApiOperation(value = "按条件分页获取 gateway 节点集群列表",tags = "")
     public PaginationResult<GatewayClusterNodeVO> pageGetGatewayNodes(HttpServletRequest request,
         @PathVariable("gatewayClusterId")Integer gatewayClusterId, @RequestBody GatewayNodeConditionDTO condition) {
-        return gatewayClusterNodeManager.pageGetNode(condition, gatewayClusterId,
-            HttpRequestUtil.getProjectId(request));
+        return gatewayClusterNodeManager.pageGetNode(condition,
+            HttpRequestUtil.getProjectId(request),gatewayClusterId);
     }
 }

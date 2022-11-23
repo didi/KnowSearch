@@ -83,4 +83,21 @@ public interface GatewayClusterNodeDAO {
      * @return Long
      */
     Long countByCondition(GatewayNodeConditionDTO condition);
+    
+    /**
+     * 它返回具有指定主机的 GatewayClusterNodePO 对象列表。
+     *
+     * @param hosts 网关集群节点的主机名
+     * @return GatewayClusterNodePO 列表
+     */
+    List<GatewayClusterNodePO> listByHosts(@Param("hosts")List<String> hosts);
+    
+  
+    /**
+     * > 按id删除一批记录
+     *
+     * @param ids 要删除的 ID 列表。
+     * @return 受删除影响的行数。
+     */
+    int deleteBatch(@Param("ids")List<Integer> ids);
 }

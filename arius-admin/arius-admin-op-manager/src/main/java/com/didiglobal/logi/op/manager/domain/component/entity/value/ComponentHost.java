@@ -2,12 +2,10 @@ package com.didiglobal.logi.op.manager.domain.component.entity.value;
 
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.DeleteEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
+import java.sql.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.sql.Timestamp;
-import java.util.List;
 
 /**
  * @author didi
@@ -49,7 +47,10 @@ public class ComponentHost {
      * 更新时间
      */
     private Timestamp updateTime;
-
+    /**
+     * 机器规格
+     */
+    private String    machineSpec;
     public ComponentHost create() {
         return this.create(HostStatusEnum.ON_LINE.getStatus());
     }

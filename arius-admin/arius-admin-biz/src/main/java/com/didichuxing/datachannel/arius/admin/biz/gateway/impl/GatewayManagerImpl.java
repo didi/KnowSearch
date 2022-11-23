@@ -1,19 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.gateway.impl;
 
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplateLogicAliasManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Alias;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
@@ -44,7 +32,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectConfigService;
@@ -62,6 +49,21 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author didi
@@ -95,14 +97,10 @@ public class GatewayManagerImpl implements GatewayManager {
 
     @Autowired
     private ClusterPhyService clusterPhyService;
-    @Autowired
-    private AriusConfigInfoService          ariusConfigInfoService;
 
     @Autowired
     private DslStatisticsService            dslStatisticsService;
 
-    @Autowired
-    private TemplateSrvManager              templateSrvManager;
 
     @Autowired
     private TemplateLogicAliasService       templateLogicAliasService;
@@ -138,46 +136,7 @@ public class GatewayManagerImpl implements GatewayManager {
         return Result.buildSucc(list);
     }
 
-    private List<ESUser> listESUsers() {
-        final List<Integer> projectIds = projectService.getProjectBriefList().stream().map(ProjectBriefVO::getId)
-            .collect(Collectors.toList());
-        return esUserService.listESUsers(projectIds);
-    }
 
-    private Map<Integer, String> listProject() {
-        return projectService.getProjectBriefList().stream()
-            .collect(Collectors.toMap(ProjectBriefVO::getId, ProjectBriefVO::getProjectName));
-    }
-
-    private Map<Integer, String> listProjectWithCache() {
-        try {
-            return (Map<Integer, String>) projectESUserListCache.get("listProject", this::listProject);
-        } catch (ExecutionException e) {
-            return listProject();
-        }
-    }
-
-    private List<ESUser> listESUserWithCache() {
-        try {
-            return (List<ESUser>) projectESUserListCache.get("listESUsers", this::listESUsers);
-        } catch (ExecutionException e) {
-            return listESUsers();
-        }
-    }
-
-    private Map<Integer/*projectId*/, ProjectConfig> listProjectConfig() {
-
-        return projectConfigService.projectId2ProjectConfigMap();
-    }
-
-    private Map<Integer/*projectId*/, ProjectConfig> listProjectConfigWithCache() {
-        try {
-            return (Map<Integer/*projectId*/, ProjectConfig>) projectESUserListCache.get("listProjectConfig",
-                this::listProjectConfig);
-        } catch (ExecutionException e) {
-            return listProjectConfig();
-        }
-    }
 
     @Override
     public Result<List<GatewayESUserVO>> listESUserByProject() {
@@ -189,8 +148,7 @@ public class GatewayManagerImpl implements GatewayManager {
         Map<Integer/*projectId*/, ProjectConfig> projectId2ProjectConfigMap = listProjectConfigWithCache();
 
         // 查询出所有的权限
-        Map<Integer/*projectId*/, Collection<ProjectTemplateAuth>> projectId2ProjectTemplateAuthsMap = projectLogicTemplateAuthService
-            .getAllProjectTemplateAuthsWithCache();
+        Map<Integer/*projectId*/, Collection<ProjectTemplateAuth>> projectId2ProjectTemplateAuthsMap = projectLogicTemplateAuthService.getAllProjectTemplateAuthsWithCache();
         Map<Integer/*es user*/, Collection<ProjectTemplateAuth>> esUser2ProjectTemplateAuthsMap = Maps.newHashMap();
         Map<Integer/*es user*/, String/*projectName*/> esUser2ProjectNameMap = Maps.newHashMap();
         Map<Integer/*es user*/, ProjectConfig> esUser2ESUserConfigMap = Maps.newHashMap();
@@ -507,6 +465,47 @@ public class GatewayManagerImpl implements GatewayManager {
             slavesInfos.add(buildPhysicalDeployVO(physical));
         }
         return slavesInfos;
+    }
+    
+        private List<ESUser> listESUsers() {
+        final List<Integer> projectIds = projectService.getProjectBriefList().stream().map(ProjectBriefVO::getId)
+            .collect(Collectors.toList());
+        return esUserService.listESUsers(projectIds);
+    }
+
+    private Map<Integer, String> listProject() {
+        return projectService.getProjectBriefList().stream()
+            .collect(Collectors.toMap(ProjectBriefVO::getId, ProjectBriefVO::getProjectName));
+    }
+
+    private Map<Integer, String> listProjectWithCache() {
+        try {
+            return (Map<Integer, String>) projectESUserListCache.get("listProject", this::listProject);
+        } catch (ExecutionException e) {
+            return listProject();
+        }
+    }
+
+    private List<ESUser> listESUserWithCache() {
+        try {
+            return (List<ESUser>) projectESUserListCache.get("listESUsers", this::listESUsers);
+        } catch (ExecutionException e) {
+            return listESUsers();
+        }
+    }
+
+    private Map<Integer/*projectId*/, ProjectConfig> listProjectConfig() {
+
+        return projectConfigService.projectId2ProjectConfigMap();
+    }
+
+    private Map<Integer/*projectId*/, ProjectConfig> listProjectConfigWithCache() {
+        try {
+            return (Map<Integer/*projectId*/, ProjectConfig>) projectESUserListCache.get("listProjectConfig",
+                this::listProjectConfig);
+        } catch (ExecutionException e) {
+            return listProjectConfig();
+        }
     }
 
 }

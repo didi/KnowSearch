@@ -6,10 +6,13 @@ import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayClusterManager
 import com.didichuxing.datachannel.arius.admin.biz.page.GatewayClusterPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayClusterCreateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterBriefVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterNodeVO;
@@ -18,13 +21,21 @@ import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeService;
+import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,16 +51,20 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Component
 public class GatewayClusterManagerImpl implements GatewayClusterManager {
-	
-	@Autowired
-	private GatewayClusterService gatewayClusterService;
-	@Autowired
-	private GatewayNodeService gatewayNodeService;
-	@Autowired
-	private HandleFactory handleFactory;
-	
-	@Autowired
-	private OperateRecordService operateRecordService;
+		
+		@Autowired
+		private GatewayClusterService gatewayClusterService;
+		@Autowired
+		private GatewayNodeService    gatewayNodeService;
+		@Autowired
+		private HandleFactory         handleFactory;
+		
+		@Autowired
+		private ComponentService     componentService;
+		@Autowired
+		private OperateRecordService operateRecordService;
+		@Autowired
+		private ClusterPhyService    clusterPhyService;
 	
 	@Override
 	public Result<List<GatewayClusterBriefVO>> listBriefInfo() {
@@ -69,7 +84,7 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		//2. 转换 gatewayCluster 对象
 		final GatewayClusterDTO gatewayDTO = ConvertUtil.obj2Obj(param, GatewayClusterDTO.class);
 		//3. 初始化一些信息
-		initGatewayCluster(gatewayDTO);
+		initJoinGatewayCluster(gatewayDTO);
 		final boolean addGatewayCluster = gatewayClusterService.insertOne(gatewayDTO);
 		//4. 写入节点信息
 		final boolean addGatewayNode = gatewayNodeService.insertBatch(param.getGatewayNodeHosts());
@@ -86,9 +101,104 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		
 		return Result.buildFail("gateway 集群加入失败, 请联系管理员");
 	}
-	
-	
-	@Override
+		
+		@Override
+		public Result<Void> createWithECM(GatewayClusterCreateDTO gatewayCluster, Integer projectId,
+		                                  String operate) {
+				Result<Void> result = checkGatewayCreateParam(gatewayCluster);
+				if (result.failed()) {
+						return Result.buildFrom(result);
+				}
+				//2. 转换 gatewayCluster 对象
+				final GatewayClusterDTO gatewayDTO = ConvertUtil.obj2Obj(gatewayCluster,
+						GatewayClusterDTO.class);
+				final boolean addGatewayCluster = gatewayClusterService.insertOne(gatewayDTO);
+				//3. 写入节点信息
+				final boolean addGatewayNode = gatewayNodeService.insertBatch(gatewayCluster.getNodes());
+				//无需写入到操作记录，工单操作中生成操作记录即可
+				return Result.build(addGatewayCluster && addGatewayNode);
+		}
+		
+		@Override
+		public Result<String> getNameByComponentId(Integer componentId) {
+				GatewayClusterPO gatewayClusterPO = gatewayClusterService.getOneByComponentId(componentId);
+				return Optional.ofNullable(gatewayClusterPO).map(GatewayClusterPO::getClusterName)
+						.map(Result::buildSucc).orElse(
+								Result.buildFail(String.format("组建 ID【%s】绑定未匹配到对应的集群", componentId)));
+		}
+		
+		@Override
+		public Result<Void> expandNodesWithECM(List<GatewayNodeHostDTO> nodes) {
+			// 无需写入到操作记录，工单操作中生成操作记录即可
+			return Result.build(gatewayNodeService.insertBatch(nodes));
+		}
+		
+		@Override
+		public Result<Void> shrinkNodesWithECM(List<GatewayNodeHostDTO> nodes, String name) {
+				final List<GatewayClusterNodePO> nodePOS = gatewayNodeService.listByClusterName(
+						name);
+				//转换未map
+				final Map<String, Integer> string2IdMaps = nodePOS.stream()
+						.map(i -> Tuples.of(i.getId(), String.format("hostname:[%s];clusterName:[%s];port:[%s]",
+								i.getClusterName(), i.getClusterName(), i.getPort())))
+						.collect(Collectors.toMap(TupleTwo::v2, TupleTwo::v1));
+				//转换未相同的信息
+				final List<Integer> ids = nodes.stream()
+						.map(i -> String.format("hostname:[%s];clusterName:[%s];port:[%s]",
+								i.getClusterName(), i.getClusterName(), i.getPort()))
+						.filter(string2IdMaps::containsKey).map(string2IdMaps::get)
+						.collect(Collectors.toList());
+				// 无需写入到操作记录，工单操作中生成操作记录即可
+				return Result.build(gatewayNodeService.deleteBatch(ids));
+		}
+		
+		@Override
+		public Result<Void> updateVersionWithECM(Integer componentId, String version) {
+				if (Objects.isNull(gatewayClusterService.getOneByComponentId(componentId))) {
+						return Result.buildFail("版本更新失败, 无法匹配到具有组件 ID【%s】的集群信息");
+				}
+				// 无需写入到操作记录，工单操作中生成操作记录即可
+				return Result.build(gatewayClusterService.updateVersion(componentId, version));
+		}
+		
+		@Override
+		public Result<GatewayClusterVO> getClusterByName(String name) {
+				GatewayClusterPO clusterPO = gatewayClusterService.getOneByName(name);
+				if (Objects.isNull(clusterPO)){
+						return Result.buildFail("未找到gateway节点信息");
+				}
+				
+				return Result.buildSucc(ConvertUtil.obj2Obj(clusterPO,GatewayClusterVO.class));
+		}
+		
+		@Override
+		public Result<Void> checkCompleteUnbindResources(GatewayClusterVO data) {
+				GatewayClusterPO clusterPO = gatewayClusterService.getOneByName(data.getClusterName());
+				if (Objects.isNull(clusterPO)){
+						return Result.buildFail("未找到gateway节点信息");
+				}
+				Integer gatewayId = clusterPO.getId();
+				List<ClusterPhyPO> clusterPhyList = clusterPhyService.listClusterByGatewayId(gatewayId);
+				if (CollectionUtils.isNotEmpty(clusterPhyList)){
+						return Result.buildFail(String.format("当前gateway集群绑定了【%s】个ES集群，请先解绑对应的ES集群",clusterPhyList.size()));
+				}
+				return Result.buildSucc();
+		}
+		
+		@Override
+		public Result<Void> offlineWithECM(Integer id) {
+				GatewayClusterPO clusterPO = gatewayClusterService.getOneById(id);
+				if (Objects.isNull(clusterPO)){
+						return Result.buildSucc();
+				}
+				Result<Void> result = checkCompleteUnbindResources(ConvertUtil.obj2Obj(clusterPO, GatewayClusterVO.class));
+				if (result.failed()){
+						return result;
+				}
+				return Result.build(gatewayClusterService.deleteOneById(id));
+		}
+		
+		@Override
 	public PaginationResult<GatewayClusterVO> pageGetCluster(GatewayConditionDTO condition,
 			Integer projectId) {
 		BaseHandle baseHandle = null;
@@ -166,12 +276,18 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 	}
 	
 	@Override
-	public Result<String> getBeforeVersionByGatewayClusterId(Integer gatewayClusterId) {
+	public Result<List<Object>> getBeforeVersionByGatewayClusterId(Integer gatewayClusterId) {
 		//TODO 后续实现
-		return Result.buildSucc("3.1");
+		return Result.buildSucc(Collections.emptyList());
 	}
-	
-	/**
+		
+		@Override
+		public Result<Boolean> verifyNameUniqueness(String name) {
+				return Result.build(gatewayClusterService.checkNameCluster(name) ||
+						Objects.nonNull(componentService.queryComponentByName(name)));
+		}
+		
+		/**
 	 * > 检查网关集群加入的参数
 	 *
 	 * @param param     GatewayClusterJoinDTO
@@ -188,26 +304,56 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		if (StringUtils.isEmpty(param.getClusterName())) {
 			return Result.buildFail("集群名称不可为空");
 		}
-		if (!gatewayClusterService.checkNameCluster(param.getClusterName())) {
+		final Result<Boolean> result = verifyNameUniqueness(param.getClusterName());
+			//这里不能存在op侧相同的名称或者admin侧相同的名称
+		if (Boolean.TRUE.equals(result.getData())) {
 			return Result.buildFail("集群名称已存在，不可创建同名集群");
 		}
 		if (CollectionUtils.isEmpty(param.getGatewayNodeHosts())) {
 			return Result.buildFail("节点信息不可为空");
 		}
 		if (param.getGatewayNodeHosts().stream().anyMatch(
-				node -> StringUtils.isEmpty(node.getHostname()) || StringUtils.isEmpty(node.getPort()))) {
+				node -> StringUtils.isEmpty(node.getHostname()) || Objects.isNull(node.getPort()))) {
 			return Result.buildFail("传入的节点信息地址和端口号不可为空");
 		}
 		
 		return Result.buildSucc();
 	}
+		
+		/**
+		 * > 检查网关集群创建的参数
+		 *
+		 * @param data 用户传入的数据。
+		 * @return 结果<无效>
+		 */
+		private Result<Void> checkGatewayCreateParam(GatewayClusterCreateDTO data) {
+				if (Objects.isNull(data)) {
+						return Result.buildFail("传入实体不可为空");
+				}
+				if (StringUtils.isEmpty(data.getClusterName())) {
+						return Result.buildFail("集群名称不可为空");
+				}
+				final Result<Boolean> result = verifyNameUniqueness(data.getClusterName());
+				// 这里不能存在 op 侧相同的名称或者 admin 侧相同的名称
+				if (Boolean.TRUE.equals(result.getData())) {
+						return Result.buildFail("集群名称已存在，不可创建同名集群");
+				}
+				if (CollectionUtils.isEmpty(data.getNodes())) {
+						return Result.buildFail("节点信息不可为空");
+				}
+				if (data.getNodes().stream().anyMatch(
+						node -> StringUtils.isEmpty(node.getHostname()) || Objects.isNull(node.getPort()))) {
+						return Result.buildFail("传入的节点信息地址和端口号不可为空");
+				}
+				return Result.buildSucc();
+		}
 	
 	/**
 	 * > 该函数初始化网关集群
 	 *
 	 * @param gatewayClusterDTO 传递给 initGatewayCluster 方法的 gatewayDTO 对象。
 	 */
-	private void initGatewayCluster(GatewayClusterDTO gatewayClusterDTO) {
+	private void initJoinGatewayCluster(GatewayClusterDTO gatewayClusterDTO) {
 		gatewayClusterDTO.setEcmAccess(Boolean.FALSE);
 		gatewayClusterDTO.setHealth(ClusterHealthEnum.UNKNOWN.getCode());
 		gatewayClusterDTO.setComponentId(-1);

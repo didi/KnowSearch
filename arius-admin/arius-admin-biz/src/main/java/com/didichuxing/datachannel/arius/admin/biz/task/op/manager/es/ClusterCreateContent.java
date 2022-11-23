@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es;
 
-import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneraInstallComponentDTO;
+import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.GeneraInstallComponentContent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClusterCreateContent extends GeneraInstallComponentDTO {
+public class ClusterCreateContent extends GeneraInstallComponentContent {
     private String memo;
     private String dataCenter;
     private String proxyAddress;

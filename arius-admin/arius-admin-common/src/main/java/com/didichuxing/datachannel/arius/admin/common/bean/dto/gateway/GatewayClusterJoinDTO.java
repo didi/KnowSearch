@@ -37,4 +37,7 @@ public class GatewayClusterJoinDTO extends BaseDTO {
     
     @ApiModelProperty("数据中心")
     private String dataCenter;
+   
+    @ApiModelProperty("机器规格")
+    private String machineSpec;
 }

@@ -51,4 +51,9 @@ public class GeneralGroupConfigDTO {
      * 配置版本
      */
     private String version;
+    
+    /**
+     * 机器规格
+     */
+    private String machineSpec;
 }

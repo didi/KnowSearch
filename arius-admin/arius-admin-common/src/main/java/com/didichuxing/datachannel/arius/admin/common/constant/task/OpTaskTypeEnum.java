@@ -1,6 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.task;
 
+import com.google.common.collect.Lists;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * 任务枚举类型
@@ -9,6 +11,9 @@ import java.util.Arrays;
  * @date 2022-05-20
  */
 public enum OpTaskTypeEnum {
+    /**
+     * TODO 关于ES的相关操作无需改动，这里需要保留至下个迭代之后才可以进行下线，所以这里的枚举类是不能改动的
+     */
                             /**新增*/
                             CLUSTER_NEW(1, "集群新建", "cluster-create"),
 
@@ -35,13 +40,7 @@ public enum OpTaskTypeEnum {
                             //TODO 移除：全部改走 配置编辑
                             CLUSTER_CONFIG_DELETE(13, "集群配置删除", "cluster-config-delete"),
 
-                             CLUSTER_PLUG_INSTALL(14, "集群插件安装", "cluster-plug-install"),
-    CLUSTER_PLUG_UNINSTALL(15, "集群插件卸载", "cluster-plug-uninstall"),
-    CLUSTER_PLUG_UPGRADE(16, "集群插件升级", "cluster-plug-upgrade"),
-    CLUSTER_PLUG_RESTART(17, "集群插件重启", "cluster-plug-restart"),
-    CLUSTER_PLUG_ROLLBACK(18, "集群插件回滚", "cluster-plug-rollback"),
-    CLUSTER_ROLLBACK(19, "集群回滚", "cluster-rollback"),
-    CLUSTER_CONFIG_ROLLBACK(20, "集群配置回滚", "cluster-config-rollback"),
+    //gateway
     GATEWAY_NEW(21, "GATEWAY集群新建", "gateway-create"),
     GATEWAY_EXPAND(22, "GATEWAY集群扩容", "gateway-expand"),
     
@@ -56,7 +55,29 @@ public enum OpTaskTypeEnum {
     GATEWAY_PLUG_UNINSTALL(27, "GATEWAY集群插件卸载", "gateway-plug-uninstall"),
     GATEWAY_CONFIG_EDIT(28, "GATEWAY集群配置新增", "gateway-config-edit"),
     GATEWAY_CONFIG_ROLLBACK(29, "GATEWAY集群配置回滚", "gateway-config-rollback"),
-    GATEWAY_ROLLBACK(30, "GATEWAY集群回滚", "gateway-rollback"),
+    GATEWAY_ROLLBACK(30, "GATEWAY 集群回滚", "gateway-rollback"),
+    GATEWAY_OFFLINE(31, "GATEWAY 集群回滚", "gateway-rollback"),
+    //es cluster 操作列
+    ES_CLUSTER_NEW(32, "ES集群新建", "es-cluster-create"),
+    
+    ES_CLUSTER_EXPAND(33, "ES集群扩容", "es-cluster-expand"),
+    
+    ES_CLUSTER_SHRINK(34, "ES集群缩容", "es-cluster-shrink"),
+    
+    ES_CLUSTER_RESTART(35, "ES集群重启", "es-cluster-restart"),
+    
+    ES_CLUSTER_UPGRADE(36, "ES集群升级", "es-cluster-upgrade"),
+    
+    
+    ES_CLUSTER_CONFIG_EDIT(37, "ES集群配置编辑", "es-cluster-config-edit"),
+    
+    ES_CLUSTER_PLUG_INSTALL(38, "ES集群插件安装", "es-cluster-plug-install"),
+    ES_CLUSTER_PLUG_UNINSTALL(39, "ES集群插件卸载", "es-cluster-plug-uninstall"),
+    ES_CLUSTER_PLUG_UPGRADE(40, "ES集群插件升级", "es-cluster-plug-upgrade"),
+    ES_CLUSTER_PLUG_RESTART(41, "ES集群插件重启", "es-cluster-plug-restart"),
+    ES_CLUSTER_ROLLBACK(42, "ES集群回滚", "es-cluster-rollback"),
+    ES_CLUSTER_CONFIG_ROLLBACK(43, "ES 集群配置回滚", "es-cluster-config-rollback"),
+    ES_CLUSTER_OFFLINE(44, "ES 集群下线操作", "es-cluster-offline"),
                             UNKNOWN(-1, "unknown");
 
     OpTaskTypeEnum(Integer type, String message) {
@@ -98,6 +119,20 @@ public enum OpTaskTypeEnum {
         }
 
         return OpTaskTypeEnum.UNKNOWN;
+    }
+    
+    /**
+     * > 它返回由 OpManager 管理的所有任务类型的列表
+     *
+     * @return OpTaskTypeEnum 列表
+     */
+    public static List<OpTaskTypeEnum> opManagerTask() {
+        return Lists.newArrayList(GATEWAY_NEW, GATEWAY_CONFIG_EDIT, GATEWAY_EXPAND, GATEWAY_RESTART,
+            GATEWAY_ROLLBACK, GATEWAY_SHRINK, GATEWAY_UPGRADE, ES_CLUSTER_CONFIG_EDIT,
+            ES_CLUSTER_CONFIG_ROLLBACK, ES_CLUSTER_EXPAND, ES_CLUSTER_NEW, ES_CLUSTER_PLUG_INSTALL,
+            ES_CLUSTER_PLUG_RESTART,  ES_CLUSTER_PLUG_UNINSTALL,
+            ES_CLUSTER_PLUG_UPGRADE, ES_CLUSTER_RESTART, ES_CLUSTER_ROLLBACK, ES_CLUSTER_SHRINK,
+            ES_CLUSTER_UPGRADE,GATEWAY_CONFIG_ROLLBACK,GATEWAY_OFFLINE,ES_CLUSTER_OFFLINE);
     }
 
     public static OpTaskTypeEnum valueOfPath(String apiPath) {

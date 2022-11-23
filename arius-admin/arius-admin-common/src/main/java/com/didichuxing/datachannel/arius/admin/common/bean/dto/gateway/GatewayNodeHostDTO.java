@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ import lombok.NoArgsConstructor;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel("gateway节点DTO")
@@ -33,7 +35,9 @@ public class GatewayNodeHostDTO extends BaseDTO {
     private String clusterName;
     
     @ApiModelProperty("端口")
-    private String port;
+    private Integer port;
+    @ApiModelProperty("机器规格")
+    private String machineSpec;
     
     
 }

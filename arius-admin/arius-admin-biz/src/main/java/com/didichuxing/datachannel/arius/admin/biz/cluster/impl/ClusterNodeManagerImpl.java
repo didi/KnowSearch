@@ -449,7 +449,50 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         return Result.buildSucc(ConvertUtil.list2List(ret.getData(), ESClusterRoleHostVO.class));
     }
 
+    /**
+     * 获取当前平台所有集群节点的机器规格
+     * @return
+     */
+    @Override
+    public Result<List<String>> listAllMachineSpecs() {
+        List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.listAllNodeByRole(DATA_NODE.getCode());
+        if(AriusObjUtils.isEmptyList(clusterRoleHostList)){
+            return Result.buildFail("当前集群还没有任何节点");
+        }
+        List<String> machineSpecs = clusterRoleHostList.stream()
+                .filter(clusterRoleHost -> StringUtils.isNotBlank(clusterRoleHost.getMachineSpec()))
+                .map(ClusterRoleHost::getMachineSpec)
+                .distinct().collect(Collectors.toList());
+        machineSpecs.sort(this::machineSpecSort);
+        return Result.buildSucc(machineSpecs);
+    }
+
     /**************************************** private method ***************************************************/
+    /**
+     * 对节点规格（如4c-125g-500g）进行排序展示，方便用户查看选择
+     * @param s1
+     * @param s2
+     * @return
+     */
+    private int machineSpecSort(String s1, String s2) {
+        int c1 = Integer.valueOf(s1.substring(0, s1.indexOf('c')));
+        int c2 = Integer.valueOf(s2.substring(0, s2.indexOf('c')));
+        if(c1 == c2){
+            int g1 = Integer.valueOf(s1.substring(s1.indexOf('c')+2, s1.indexOf('g')));
+            int g2 = Integer.valueOf(s2.substring(s2.indexOf('c')+2, s2.indexOf('g')));
+            if(g1 == g2){
+                int gg1 = Integer.valueOf(s1.substring(s1.indexOf('g')+2, s1.length()-1));
+                int gg2 = Integer.valueOf(s2.substring(s2.indexOf('g')+2, s2.length()-1));
+                if(gg1 == gg2){
+                    return 0;
+                }
+                return gg1 > gg2 ? 1 : -1;
+            }
+            return g1 > g2 ? 1 : -1;
+        }
+        return c1 > c2 ? 1 : -1;
+    }
+
     private List<ESClusterRoleHostVO> buildClusterRoleHostStats(String cluster,
                                                                 List<ClusterRoleHost> clusterRoleHostList) {
         List<ESClusterRoleHostVO> roleHostList = ConvertUtil.list2List(clusterRoleHostList, ESClusterRoleHostVO.class);
