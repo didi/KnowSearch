@@ -226,7 +226,7 @@ public class ESPhyClusterController {
         return clusterPhyManager.getBeforeVersionByClusterId(clusterPhyId);
     }
     
-    @GetMapping("health-type")
+    @GetMapping("health")
     @ResponseBody
     @ApiOperation(value = "获取集群健康枚举类",tags = "")
     public Result<List<TupleTwo<Integer,ClusterHealthEnum>>> getHealthEnum(HttpServletRequest request) {
@@ -234,7 +234,7 @@ public class ESPhyClusterController {
     }
     
     
-    @GetMapping("cluster-resource-type")
+    @GetMapping("cluster-resource")
     @ResponseBody
     @ApiOperation(value = "获取集群资源类型",tags = "")
     public Result<List<TupleTwo<Integer, ClusterResourceTypeEnum>>> getClusterResourceType(HttpServletRequest request) {
