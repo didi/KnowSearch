@@ -39,6 +39,10 @@ public enum WorkOrderTypeEnum {
 
                                TEMPLATE_TRANSFER("templateTransfer", "模版转移"),
 
+                               TEMPLATE_LOGIC_BLOCK_WRITE("templateLogicBlockWrite", "索引模板写状态变更"),
+
+                               TEMPLATE_LOGIC_BLOCK_READ("templateLogicBlockRead", "索引模板读状态变更"),
+
                                DSL_TEMPLATE_STATUS_CHANGE("dslTemplateStatusChange", "查询模板状态变更"),
 
                                DSL_TEMPLATE_QUERY_LIMIT("dslTemplateQueryLimit", "查询模板限流值变更"),
