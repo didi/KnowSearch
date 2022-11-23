@@ -275,12 +275,6 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		return Result.build(edit);
 	}
 	
-	@Override
-	public Result<List<Object>> getBeforeVersionByGatewayClusterId(Integer gatewayClusterId) {
-		//TODO 后续实现
-		return Result.buildSucc(Collections.emptyList());
-	}
-		
 		@Override
 		public Result<Boolean> verifyNameUniqueness(String name) {
 				return Result.build(gatewayClusterService.checkNameCluster(name) ||

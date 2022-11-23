@@ -80,4 +80,11 @@ public interface OperateRecordDAO {
      * @return
      */
     int updateById(OperateRecordInfoPO convertOperateRecordInfoPO);
+
+    /**
+     * 插入数据前校验是否存在这条数据
+     * @param operateRecordInfoPO
+     * @return
+     */
+    int insertWithCheck(OperateRecordInfoPO operateRecordInfoPO);
 }
