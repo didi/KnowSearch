@@ -2,6 +2,7 @@ package com.didiglobal.logi.op.manager.interfaces.dto.general;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author didi
@@ -9,6 +10,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class GeneralConfigChangeComponentDTO extends GeneralBaseOperationComponentDTO{
     private Integer componentId;
 }

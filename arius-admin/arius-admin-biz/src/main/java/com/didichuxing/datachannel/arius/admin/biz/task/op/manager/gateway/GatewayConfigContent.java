@@ -11,9 +11,7 @@ import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.ConfigChangeC
  */
 
 public class GatewayConfigContent extends ConfigChangeComponentContent {
-    public GatewayConfigContent(Integer componentId) {
-        super(componentId);
-    }
+
     
     
 }
