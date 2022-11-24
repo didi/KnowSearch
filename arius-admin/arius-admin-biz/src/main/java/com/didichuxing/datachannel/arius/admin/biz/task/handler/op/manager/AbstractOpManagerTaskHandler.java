@@ -4,21 +4,23 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.plugin.PluginManager;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskHandler;
-import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.OfflineContent;
 import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.PluginUninstallContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.task.OpTaskPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.task.OpTaskService;
 import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.op.manager.application.PackageService;
 import com.didiglobal.logi.op.manager.application.TaskService;
+import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.interfaces.assembler.ComponentAssembler;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneraInstallComponentDTO;
@@ -41,9 +43,9 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		
-		protected final static String REASON = "reason";
+		protected final static String           REASON = "reason";
 		@Autowired
-		protected OpTaskManager        opTaskManager;
+		protected OpTaskService        opTaskService;
 		@Autowired
 		protected ComponentService     componentService;
 		@Autowired
@@ -69,9 +71,14 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 						return Result.buildFrom(initParamRes);
 				}
 				// 提交一个任务
-				final Result<Integer> submitTaskToOpManagerGetIdRes =
-						submitTaskToOpManagerGetId(opTask.getExpandData());
+				final Result<Integer> submitTaskToOpManagerGetIdRes = submitTaskToOpManagerGetId(opTask.getExpandData());
 				if (submitTaskToOpManagerGetIdRes.failed()) {
+						if (ResultCode.TASK_REPEAT_ERROR.getCode().equals(submitTaskToOpManagerGetIdRes.getCode())) {
+								String title = getTitle(opTask.getExpandData());
+								OpTaskPO taskPO = opTaskService.getTaskByTitleAndType(title, operationType().getType());
+								return Result.build(ResultCode.TASK_REPEAT_ERROR.getCode(),
+								                    String.format("有重名未完成任务 [%s]", taskPO.getId()));
+						}
 						return Result.buildFrom(submitTaskToOpManagerGetIdRes);
 				}
 				
@@ -81,7 +88,7 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 				opTask.setUpdateTime(new Date());
 				opTask.setStatus(OpTaskStatusEnum.WAITING.getStatus());
 				opTask.setDeleteFlag(false);
-				final boolean insert = opTaskManager.insert(opTask);
+				final boolean insert = opTaskService.insert(opTask);
 				if (insert) {
 						final OperateRecord operateRecord = recordCurrentOperationTasks(opTask.getExpandData());
 						//operateRecordService.save(operateRecord);
@@ -114,7 +121,7 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 					}
 				opTask.setExpandData(expandDataNew);
 			}
-			final Boolean aBoolean = opTaskManager.updateTask(opTask);
+			final Boolean aBoolean = opTaskService.update(opTask);
 			
 			return Result.build(aBoolean);
 		}

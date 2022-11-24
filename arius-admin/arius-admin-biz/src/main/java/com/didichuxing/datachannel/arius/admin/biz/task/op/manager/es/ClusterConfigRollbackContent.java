@@ -18,9 +18,7 @@ import lombok.Setter;
 @Setter
 public class ClusterConfigRollbackContent extends ClusterConfigContent {
 		
-		public ClusterConfigRollbackContent(Integer componentId) {
-				super(componentId);
-		}
+
 		
 		
 		/**
