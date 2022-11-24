@@ -60,6 +60,12 @@ public class InstallComponentHandler extends BaseComponentHandler implements Com
                     getData().get(0);
             if (pk.getType() == PackageTypeEnum.CONFIG_DEPENDENT.getType()) {
                 installComponent.setDependConfigComponentId(installComponent.getDependComponentId());
+                Component dependComponent = componentDomainService.getComponentById(installComponent.getDependComponentId()).getData();
+                if(dependComponent.getUsername() != null){
+                    installComponent.setUsername(dependComponent.getUsername());
+                    installComponent.setPassword(dependComponent.getPassword());
+                    installComponent.setIsOpenTSL(dependComponent.getIsOpenTSL());
+                }
             }
             installComponent.setTemplateId(scriptDomainService.getScriptById(pk.getScriptId()).getData().getTemplateId());
             String content = JSONObject.toJSON(installComponent).toString();
