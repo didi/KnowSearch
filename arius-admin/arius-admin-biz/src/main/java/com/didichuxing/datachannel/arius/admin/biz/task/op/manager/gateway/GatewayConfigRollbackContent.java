@@ -19,9 +19,7 @@ import lombok.Setter;
 @Setter
 public class GatewayConfigRollbackContent extends GatewayConfigContent {
 		
-		public GatewayConfigRollbackContent(Integer componentId) {
-				super(componentId);
-		}
+	
 		
 		
 		/**

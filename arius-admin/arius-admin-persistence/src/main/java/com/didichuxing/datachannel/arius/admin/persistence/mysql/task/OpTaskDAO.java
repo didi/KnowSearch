@@ -117,4 +117,13 @@ public interface OpTaskDAO {
      * @return OpTaskPO 对象列表。
      */
     List<OpTaskPO> getPendingTaskByTypes(@Param("taskTypes") List<Integer> taskTypes);
+    
+    /**
+     * > 按标题和类型获取任务
+     *
+     * @param title 任务名称
+     * @param type 任务类型，即任务表中任务的类型。
+     * @return 一个 TaskPO 对象
+     */
+    OpTaskPO getTaskByTitleAndType(@Param("title")String title, @Param("taskType")Integer type);
 }
