@@ -71,6 +71,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
@@ -1672,11 +1673,20 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (Boolean.TRUE.equals(existDCDRAndPipelineModule.v1)) {
             openSrvList.add(TemplateServiceEnum.TEMPLATE_DCDR.getCode());
         }
+        // 如果创建模版的settings的translog持久化方式为async，则要开启对应服务状态
+        Map<String, Object> setting = ConvertUtil.directFlatObject(JSONObject.parseObject(param.getSetting()));
+        String translogDurabilityType = setting.getOrDefault(ESSettingConstant.INDEX_TRANSLOG_DURABILITY, "request").toString();
+        if (ESSettingConstant.ASYNC.equals(translogDurabilityType)){
+            openSrvList.add(TemplateServiceEnum.TEMPLATE_TRANSLOG_ASYNC.getCode());
+        }
         if (CollectionUtils.isNotEmpty(openSrvList)) {
             //如果集群支持pipeline
             indexTemplateDTO.setOpenSrv(ConvertUtil.list2String(openSrvList, ","));
         }
-      
+
+        // 恢复优先级设置
+        String priorityLevel = setting.getOrDefault(ESSettingConstant.INDEX_PRIORITY, "0").toString();
+        indexTemplateDTO.setPriorityLevel(Integer.valueOf(priorityLevel));
 
         return indexTemplateDTO;
     }

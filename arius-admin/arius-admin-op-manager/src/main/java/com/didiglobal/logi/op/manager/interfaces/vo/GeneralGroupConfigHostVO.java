@@ -56,5 +56,9 @@ public class GeneralGroupConfigHostVO {
      * 是否开启tsl认证（0未开启，1开启）
      */
     private Integer isOpenTSL;
+    /**
+     * 配置依赖组件
+     */
+    private Integer dependConfigComponentId;
 
 }

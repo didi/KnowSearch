@@ -5,6 +5,7 @@ import com.didiglobal.logi.op.manager.domain.packages.repository.PackageReposito
 import com.didiglobal.logi.op.manager.infrastructure.db.PackagePO;
 import com.didiglobal.logi.op.manager.infrastructure.db.converter.PackageConverter;
 import com.didiglobal.logi.op.manager.infrastructure.db.mapper.PackageDao;
+import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -63,6 +64,12 @@ public class PackageRepositoryImpl implements PackageRepository {
     public List<Package> pagingByCondition(Package pagingPackage, Long page, Long size) {
         PackagePO packagePO = PackageConverter.convertPackageDO2PO(pagingPackage);
         return PackageConverter.convertPackagePO2DOList(packageDao.pagingByCondition(packagePO,page,size));
+    }
+
+    @Override
+    public List<Package> listPackageWithLowerVersionByPackageTypeAndVersion(Integer packageType, Integer version) {
+        List<PackagePO> packageList = packageDao.listPackageWithLowerVersionByPackageTypeAndVersion(packageType,version);
+        return ConvertUtil.list2List(packageList,Package.class);
     }
 
     @Override
