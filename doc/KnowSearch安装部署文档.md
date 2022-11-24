@@ -1,4 +1,4 @@
-#前言
+# 前言
 
 + 本文以Centos7系统为例，系统基础配置要求：4核8G
 
@@ -240,10 +240,10 @@
 	
 	#修改配置文件(data目录是前端文件跟目录，arius-admin是集群时，IP地址填写arius-admin的VIP地址)
 	sed -i 's#fe_home#data#g' /etc/nginx/nginx.conf
-	sed -i 's#admin_master_ip#IP地址#' /etc/nginx/nginx.conf
-	sed -i 's#web_port#8015#' /etc/nginx/nginx.conf
-	sed -i 's#kib_ip#127.0.0.1#' /etc/nginx/nginx.conf
-	sed -i 's#kib_port#8088#' /etc/nginx/nginx.conf
+	sed -i 's#admin_master_ip#IP地址#g' /etc/nginx/nginx.conf
+	sed -i 's#web_port#8015#g' /etc/nginx/nginx.conf
+	sed -i 's#kib_ip#127.0.0.1#g' /etc/nginx/nginx.conf
+	sed -i 's#kib_port#8088#g' /etc/nginx/nginx.conf
 
 	#重启Nginx服务
 	systemctl restart nginx
