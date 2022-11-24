@@ -1,6 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.cluster;
 
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 插件健康枚举
@@ -84,5 +89,10 @@ public enum PluginHealthEnum {
 				}
 				
 				return false;
+		}
+		
+		public static List<TupleTwo<Integer, PluginHealthEnum>> getAll() {
+				return Arrays.stream(PluginHealthEnum.values()).map(i -> Tuples.of(i.getCode(), i)).collect(
+								Collectors.toList());
 		}
 }

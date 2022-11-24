@@ -5,6 +5,9 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import com.didichuxing.datachannel.arius.admin.biz.plugin.PluginManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginHealthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginInfoTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
@@ -37,5 +40,18 @@ public class GatewayPluginV3Controller {
     public Result<List<PluginVO>> listByGatewayClusterId(HttpServletRequest request,
                                                          @PathVariable("gatewayId") Integer gatewayId) {
         return pluginManager.listGatewayPluginByGatewayClusterId(gatewayId);
+    }
+    
+    @GetMapping("plugin-health")
+    @ResponseBody
+    @ApiOperation(value = "获取插件健康", tags = "")
+    public Result<List<TupleTwo<Integer, PluginHealthEnum>>> getPluginHealth(HttpServletRequest request) {
+        return Result.buildSucc(PluginHealthEnum.getAll());
+    }
+     @GetMapping("plugin-type")
+    @ResponseBody
+    @ApiOperation(value = "获取插件类型", tags = "")
+    public Result<List<TupleTwo<Integer, PluginInfoTypeEnum>>> getPluginInfoType(HttpServletRequest request) {
+        return Result.buildSucc(PluginInfoTypeEnum.getAll());
     }
 }

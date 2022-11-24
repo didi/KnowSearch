@@ -2,24 +2,32 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.pl
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
-import com.didichuxing.datachannel.arius.admin.biz.plugin.PluginManager;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPluginManager;
+import com.didichuxing.datachannel.arius.admin.biz.plugin.PluginManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginHealthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginInfoTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author linyunan
@@ -77,5 +85,19 @@ public class PhyClusterPluginController {
     public Result<List<PluginVO>> listByClusterPhyId(HttpServletRequest request,
                                                @RequestParam("clusterPhyId") Integer clusterPhyId) {
         return pluginManager.listESPluginByClusterId(clusterPhyId);
+    }
+    
+    @GetMapping("plugin-health")
+    @ResponseBody
+    @ApiOperation(value = "获取插件健康", tags = "")
+    public Result<List<TupleTwo<Integer, PluginHealthEnum>>> getPluginHealth(HttpServletRequest request) {
+        return Result.buildSucc(PluginHealthEnum.getAll());
+    }
+    
+    @GetMapping("plugin-type")
+    @ResponseBody
+    @ApiOperation(value = "获取插件类型", tags = "")
+    public Result<List<TupleTwo<Integer, PluginInfoTypeEnum>>> getPluginInfoType(HttpServletRequest request) {
+        return Result.buildSucc(PluginInfoTypeEnum.getAll());
     }
 }
