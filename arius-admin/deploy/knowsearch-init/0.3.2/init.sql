@@ -704,7 +704,7 @@ CREATE TABLE `index_template_info`
     `id_field`          varchar(512)                          DEFAULT '' COMMENT 'id 字段 ',
     `routing_field`     varchar(512)                          DEFAULT '' COMMENT 'routing 字段 ',
     `expression`        varchar(100)                 NOT NULL DEFAULT '' COMMENT ' 索引表达式 ',
-    `desc`              varchar(500)                 NOT NULL DEFAULT '' COMMENT ' 索引描述 ',
+    `desc`              varchar(1000)                NOT NULL DEFAULT '' COMMENT ' 索引描述 ',
     `quota`             decimal(10, 3)               NOT NULL DEFAULT '-1.000' COMMENT '规格',
     `project_id`        int(10)                      NOT NULL DEFAULT '-1' COMMENT 'project_id',
     `ingest_pipeline`   varchar(512)                 NOT NULL DEFAULT '' COMMENT 'ingest_pipeline',
