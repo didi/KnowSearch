@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class GeneralConfigChangeComponent extends GeneralBaseOperationComponent {
     private Integer componentId;
 

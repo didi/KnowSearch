@@ -5,7 +5,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskQueryD
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.OpTaskPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.OpTaskVO;
-
 import java.util.List;
 
 /**
@@ -84,4 +83,12 @@ public interface OpTaskService {
      * @return
      */
     Tuple<Long, List<OpTaskVO>> pagingGetTasksByCondition(OpTaskQueryDTO queryDTO);
+		
+		/**
+		 * It returns the task with the given title and type.
+		 *
+		 * @param title task title
+		 * @param type 1-add, 2-update, 3-delete
+		 */
+		OpTaskPO getTaskByTitleAndType(String title, Integer type);
 }

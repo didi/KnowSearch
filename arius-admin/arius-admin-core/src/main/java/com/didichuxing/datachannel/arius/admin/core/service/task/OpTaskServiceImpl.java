@@ -10,11 +10,10 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.OpTaskDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import com.google.common.collect.Lists;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -133,5 +132,10 @@ public class OpTaskServiceImpl implements OpTaskService {
                     e.getMessage(), e);
         }
         return new Tuple<>(count, ConvertUtil.list2List(opTaskPOList,OpTaskVO.class));
+    }
+    
+    @Override
+    public OpTaskPO getTaskByTitleAndType(String title, Integer type) {
+        return opTaskDao.getTaskByTitleAndType(title,type);
     }
 }
