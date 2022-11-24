@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
+import com.baomidou.mybatisplus.core.conditions.interfaces.Func;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyQuickCommandManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.QuickCommandIndicesDistributionPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.page.QuickCommandShardsDistributionPageSearchHandle;
@@ -8,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandIndicesQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandShardsQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.ShardCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
@@ -15,16 +17,19 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.*;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 快捷指令实现.
@@ -160,30 +165,45 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
     }
     
     @Override
-    public PaginationResult<IndicesDistributionVO> indicesDistributionPage(
-            ClusterPhyQuickCommandIndicesQueryDTO condition, Integer projectId) throws NotFindSubclassException {
-        BaseHandle baseHandle = handleFactory.getByHandlerNamePer(
-                PageSearchHandleTypeEnum.QUICK_COMMAND_INDEX.getPageSearchType());
-        if (baseHandle instanceof QuickCommandIndicesDistributionPageSearchHandle) {
-            QuickCommandIndicesDistributionPageSearchHandle handle = (QuickCommandIndicesDistributionPageSearchHandle) baseHandle;
-            return handle.doPage(condition, projectId);
-        }
-        
-        return PaginationResult.buildFail("获取索引分页信息失败");
+    public List<IndicesDistributionVO> indicesDistributionPage(
+            ClusterPhyQuickCommandIndicesQueryDTO condition, Integer projectId) {
+        List<IndicesDistributionVO> indicesDistributionVOS = new ArrayList<>();
+        List<CatIndexResult> catIndexResultList = esIndexService.syncIndicesDistribution(condition.getCluster());
+        catIndexResultList.forEach(catIndexResult -> {
+            IndicesDistributionVO indicesDistributionVO = ConvertUtil.obj2Obj(catIndexResult, IndicesDistributionVO.class);
+            indicesDistributionVO.setPriStoreSize(SizeUtil.getUnitSize(catIndexResult.getPriStoreSize()));
+            indicesDistributionVO.setStoreSize(SizeUtil.getUnitSize(catIndexResult.getStoreSize()));
+            if (StringUtils.isNotBlank(condition.getKeyword())) {
+                String index = Objects.isNull(indicesDistributionVO.getIndex())?"":indicesDistributionVO.getIndex();
+                if (index.contains(condition.getKeyword())) {
+                    indicesDistributionVOS.add(indicesDistributionVO);
+                }
+            } else {
+                indicesDistributionVOS.add(indicesDistributionVO);
+            }
+        });
+        return indicesDistributionVOS;
     }
     
     @Override
-    public PaginationResult<ShardDistributionVO> shardDistributionPage(ClusterPhyQuickCommandShardsQueryDTO condition,
-                                                                       Integer projectId)
-            throws NotFindSubclassException {
-        BaseHandle baseHandle = handleFactory.getByHandlerNamePer(
-                PageSearchHandleTypeEnum.QUICK_COMMAND_SHARD.getPageSearchType());
-        if (baseHandle instanceof QuickCommandShardsDistributionPageSearchHandle) {
-            QuickCommandShardsDistributionPageSearchHandle handle = (QuickCommandShardsDistributionPageSearchHandle) baseHandle;
-            return handle.doPage(condition, projectId);
-        }
-        
-        return PaginationResult.buildFail("获取索引分页信息失败");
+    public List<ShardDistributionVO> shardDistributionPage(ClusterPhyQuickCommandShardsQueryDTO condition,Integer projectId)
+            throws ESOperateException {
+        List<ShardCatCellPO> shardCatCellPOS =  esShardCatService.syncShardDistribution(condition.getCluster(),System.currentTimeMillis());
+        List<ShardDistributionVO> shardDistributionVOS = new ArrayList<>();
+        shardCatCellPOS.forEach(shardCatCellPO -> {
+            ShardDistributionVO shardDistributionVO = ConvertUtil.obj2Obj(shardCatCellPO, ShardDistributionVO.class);
+            shardDistributionVO.setStore(SizeUtil.getUnitSize(shardCatCellPO.getStore()));
+            if (StringUtils.isNotBlank(condition.getKeyword())) {
+                String node = Objects.isNull(shardDistributionVO.getNode())?"":shardDistributionVO.getNode();
+                String index = Objects.isNull(shardDistributionVO.getIndex())?"":shardDistributionVO.getIndex();
+                if (node.contains(condition.getKeyword()) || index.contains(condition.getKeyword())) {
+                    shardDistributionVOS.add(shardDistributionVO);
+                }
+            }else {
+                shardDistributionVOS.add(shardDistributionVO);
+            }
+        });
+        return shardDistributionVOS;
     }
     
     private Result<Void> checkClusterExistence(String cluster) {
