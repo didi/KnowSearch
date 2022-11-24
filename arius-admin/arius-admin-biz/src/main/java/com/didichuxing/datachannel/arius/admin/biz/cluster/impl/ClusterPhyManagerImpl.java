@@ -1317,12 +1317,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             // 保存集群信息
             ClusterPhyDTO clusterDTO = buildPhyClusters(createDTO, operator);
             Result<Boolean> addClusterRet = clusterPhyService.createCluster(clusterDTO);
-             //创建节点信息
-            boolean clusterNodeSettings = clusterRoleHostService.createClusterNodeSettings(esClusterRoleHosts,
-                                                                                           createDTO.getCluster());
-            if (!clusterNodeSettings) {
-                throw new AdminOperateException("节点信息创建失败");
-            }
             if (addClusterRet.failed()) {
                 // 这里必须显示事务回滚
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
