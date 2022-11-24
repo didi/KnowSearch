@@ -371,17 +371,22 @@ public class FastIndexManagerImpl implements FastIndexManager {
 
         if (DATA_TYPE_INDEX.equals(fastIndexDTO.getDataType())) {
             totalStats = calculationTaskStats(taskIndexStatsList);
-        } else {
-            if (DATA_TYPE_TEMPLATE.equals(fastIndexDTO.getDataType())) {
-                Map<Integer, List<FastIndexTaskInfo>> templateId2IndexTaskList = taskIndexList.stream()
-                    .collect(Collectors.groupingBy(FastIndexTaskInfo::getTemplateId));
-                List<FastIndexStats> list = Lists.newArrayList();
-                templateId2IndexTaskList.forEach((key, val) -> {
-                    FastIndexStats templateStats = calculationTaskStats(taskIndexStatsList);
-                    list.add(templateStats);
-                });
-                totalStats = calculationTaskStats(list);
-            }
+        } else if (DATA_TYPE_TEMPLATE.equals(fastIndexDTO.getDataType())) {
+            Map<Integer, List<FastIndexTaskInfo>> templateId2IndexTaskList = taskIndexList.stream()
+                .collect(Collectors.groupingBy(FastIndexTaskInfo::getTemplateId));
+            Map<Integer, IndexTemplate> templateMap = indexTemplateService
+                .getLogicTemplatesMapByIds(Lists.newArrayList(templateId2IndexTaskList.keySet()));
+            List<FastIndexStats> list = Lists.newArrayList();
+            templateId2IndexTaskList.forEach((key, val) -> {
+                FastIndexStats templateStats = calculationTaskStats(taskIndexStatsList);
+                IndexTemplate indexTemplate = templateMap.getOrDefault(key, null);
+                if (null != indexTemplate) {
+                    templateStats.setTemplateName(indexTemplate.getName());
+                }
+                templateStats.setTemplateId(key);
+                list.add(templateStats);
+            });
+            totalStats = calculationTaskStats(list);
         }
         opTask = opTaskService.getById(taskId);
         FastIndexDetailVO detailVO = ConvertUtil.obj2Obj(opTask, FastIndexDetailVO.class);
