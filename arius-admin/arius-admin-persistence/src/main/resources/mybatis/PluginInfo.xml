@@ -6,7 +6,7 @@
 		<!--@mbg.generated--><!--@Table plugin_info-->
 		<id column="id" jdbcType="BIGINT" property="id"/>
 		<result column="name" jdbcType="VARCHAR" property="name"/>
-		<result column="cluster_id" jdbcType="VARCHAR" property="clusterId"/>
+		<result column="cluster_id" jdbcType="INTEGER" property="clusterId"/>
 		<result column="version" jdbcType="VARCHAR" property="version"/>
 		<result column="memo" jdbcType="VARCHAR" property="memo"/>
 		<result column="component_id" jdbcType="INTEGER" property="componentId"/>
@@ -39,9 +39,11 @@
 		                     WHERE id = #{id}
 	</delete>
 	<insert id="insert" keyColumn="id" keyProperty="id"
-		parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.plugin.PluginInfoPO"
-		useGeneratedKeys="true">
-		<!--@mbg.generated-->INSERT INTO plugin_info (name, cluster_id, version, memo, component_id, plugin_type, cluster_type) VALUES (#{name}, #{clusterId}, #{version}, #{memo}, #{componentId}, #{pluginType}, #{clusterType})
+		parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.plugin.PluginInfoPO" useGeneratedKeys="true">
+		<!--@mbg.generated-->INSERT INTO plugin_info (name, cluster_id, version, memo, component_id, plugin_type,
+		                                              cluster_type)
+		                     VALUES (#{name}, #{clusterId}, #{version}, #{memo}, #{componentId}, #{pluginType},
+		                             #{clusterType})
 	</insert>
 	<update id="updateByPrimaryKeySelective"
 		parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.plugin.PluginInfoPO">

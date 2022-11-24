@@ -31,7 +31,7 @@ public class PluginInfoPO extends BasePO {
     /**
     *  集群 id
     */
-    private String clusterId;
+    private Integer clusterId;
 
     /**
     *  插件版本
