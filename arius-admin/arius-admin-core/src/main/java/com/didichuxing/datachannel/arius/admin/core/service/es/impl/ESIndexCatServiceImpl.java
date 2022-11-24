@@ -8,10 +8,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatC
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellUpdatePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellUpdatePO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index.IndexCatESDAO;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
@@ -46,7 +49,7 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     public Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String cluster, String index, String health,
                                                                String status, Integer projectId, Long from, Long size,
                                                                String sortTerm, Boolean orderByDesc, Boolean showMetadata) {
-        Tuple<Long, List<IndexCatCellPO>> hitTotal2catIndexInfoTuplePO = indexCatESDAO.getCatIndexInfo(cluster, index,
+        Tuple<Long, List<IndexCatCellUpdatePO>> hitTotal2catIndexInfoTuplePO = indexCatESDAO.getCatIndexInfo(cluster, index,
             health, status, projectId, from, size, sortTerm, orderByDesc, showMetadata);
         if (null == hitTotal2catIndexInfoTuplePO) {
             return null;
@@ -54,7 +57,14 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
 
         Tuple<Long, List<IndexCatCell>> hitTotal2catIndexInfoTuple = new Tuple<>();
         hitTotal2catIndexInfoTuple.setV1(hitTotal2catIndexInfoTuplePO.getV1());
-        hitTotal2catIndexInfoTuple.setV2(ConvertUtil.list2List(hitTotal2catIndexInfoTuplePO.getV2(), IndexCatCell.class));
+        List<IndexCatCell> indexCatCells = new ArrayList<>();
+        hitTotal2catIndexInfoTuplePO.getV2().forEach(indexCatCellUpdatePO -> {
+            IndexCatCell indexCatCell = ConvertUtil.obj2Obj(indexCatCellUpdatePO,IndexCatCell.class);
+            indexCatCell.setPriStoreSize(SizeUtil.getUnitSize(indexCatCellUpdatePO.getPriStoreSize()));
+            indexCatCell.setStoreSize(SizeUtil.getUnitSize(indexCatCellUpdatePO.getStoreSize()));
+            indexCatCells.add(indexCatCell);
+        });
+        hitTotal2catIndexInfoTuple.setV2(indexCatCells);
         return hitTotal2catIndexInfoTuple;
     }
 
@@ -134,7 +144,7 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     public Boolean syncUpsertCatIndex(List<IndexCatCellDTO> params, int retryCount) {
         BatchProcessor.BatchProcessResult<IndexCatCellDTO, Boolean> result = new BatchProcessor<IndexCatCellDTO, Boolean>().batchList(
                         params).batchSize(5000).processor(
-                        items -> indexCatESDAO.batchUpsert(ConvertUtil.list2List(params, IndexCatCellPO.class), retryCount))
+                        items -> indexCatESDAO.batchUpsert(ConvertUtil.list2List(params, IndexCatCellUpdatePO.class), retryCount))
                 .succChecker(succ -> succ).process();
         
         if (!result.isSucc()) {

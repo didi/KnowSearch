@@ -1,101 +1,61 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.handle;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.BIG_SHARD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.PHY_CLUSTER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.CPU_LOAD_15M;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.CPU_LOAD_1M;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.CPU_LOAD_5M;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.CPU_USAGE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.DISK_USAGE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.INDEXING_LATENCY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.SEARCH_LATENCY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.TASK_COST;
-
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.DiskInfoMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.ReadQPSMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.RecvTransMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.SendTransMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.ShardInfoMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.TaskCountMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.WriteTPSMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.BigIndexMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ClusterMemInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.MovingShardMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.PendingTask;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ShardMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.UnAssignShardMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentileMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.BigIndexMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.BigShardMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.CpuLoadFor15MinMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.CpuLoadFor1MinMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.CpuLoadFor5MinMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.CpuUsageMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.DiskInfoMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.DiskUsageMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterOverviewMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterPhyBasicMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.IndexingLatencyMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.MovingShardMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.NodeInfoForDiskUsageGte75PercentVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.PendingTaskVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ReadQPSMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.RecvTransMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.SearchLatencyMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.SendTransMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ShardInfoMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.TaskCostMetricVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.TaskCountMetricVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.UnAssignShardMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.WriteTPSMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.*;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
+import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import com.didiglobal.logi.elasticsearch.client.response.model.fs.FSNode;
+import com.didiglobal.logi.elasticsearch.client.response.model.fs.FSTotal;
+import com.didiglobal.logi.elasticsearch.client.response.model.indices.CommonStat;
+import com.didiglobal.logi.elasticsearch.client.response.model.indices.Docs;
+import com.didiglobal.logi.elasticsearch.client.response.model.indices.Segments;
+import com.didiglobal.logi.elasticsearch.client.response.model.jvm.JvmMem;
+import com.didiglobal.logi.elasticsearch.client.response.model.jvm.JvmNode;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import io.swagger.models.auth.In;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.BIG_SHARD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.LOGIC_CLUSTER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.PHY_CLUSTER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.*;
 
 /**
  * Created by linyunan on 2021-08-02
  */
 @Component
-public class ClusterOverviewMetricsHandle {
+public class ClusterLogicOverviewMetricsHandle {
 
     private static final ILog             LOGGER                        = LogFactory
-        .getLog(ClusterOverviewMetricsHandle.class);
+        .getLog(ClusterLogicOverviewMetricsHandle.class);
 
     @Autowired
     private ESClusterPhyStatsService      esClusterPhyStatsService;
@@ -122,6 +82,8 @@ public class ClusterOverviewMetricsHandle {
 
     @Autowired
     private IndexTemplatePhyService       indexTemplatePhyService;
+    @Autowired
+    private ESIndexService                esIndexService;
 
     private static final FutureUtil<Void> getMultipleMetricFutureUtil   = FutureUtil.init("getMultipleMetricFutureUtil",
         10, 10, 100);
@@ -135,16 +97,17 @@ public class ClusterOverviewMetricsHandle {
      * @see    ClusterPhyClusterMetricsEnum
      * @return ESClusterOverviewMetricsVO
      */
-    public ESClusterOverviewMetricsVO buildClusterPhyOverviewMetrics(MetricsClusterPhyDTO metricsClusterPhyDTO) {
+    public ESClusterOverviewMetricsVO buildClusterLogicOverviewMetrics(MetricsClusterPhyDTO metricsClusterPhyDTO) {
 
         //1. building base objects
         ESClusterOverviewMetricsVO esClusterOverviewMetricsVO = initESClusterPhyOverviewMetricsVO(metricsClusterPhyDTO);
 
         //2. 从ES中获取指标, 同时获取多个
         for (String metricsType : metricsClusterPhyDTO.getMetricsTypes()) {
-            getMultipleMetricFutureUtil.runnableTask(() -> aggClusterPhyOverviewMetrics(esClusterOverviewMetricsVO,
+            getMultipleMetricFutureUtil.runnableTask(() -> aggClusterLogicOverviewMetrics(esClusterOverviewMetricsVO,
                 metricsType, metricsClusterPhyDTO.getAggType(), metricsClusterPhyDTO.getStartTime(),
-                metricsClusterPhyDTO.getEndTime()));
+                metricsClusterPhyDTO.getEndTime(),metricsClusterPhyDTO.getItemNamesUnderClusterLogic(),
+                    metricsClusterPhyDTO.getClusterLogicName(),metricsClusterPhyDTO.getProjectId()));
         }
         getMultipleMetricFutureUtil.waitExecute();
         //3.非超级项目进行大索引过滤
@@ -233,13 +196,13 @@ public class ClusterOverviewMetricsHandle {
         return esClusterOverviewMetricsVO;
     }
 
-    private void aggClusterPhyOverviewMetrics(ESClusterOverviewMetricsVO metrics, String metricsType, String aggType,
-                                              Long startTime, Long endTime) {
+    private void aggClusterLogicOverviewMetrics(ESClusterOverviewMetricsVO metrics, String metricsType, String aggType,
+                                                Long startTime, Long endTime, List<String> itemNamesUnderClusterLogic, String clusterLogic, Integer projectId) {
         try {
             switch (ClusterPhyClusterMetricsEnum.valueOfType(metricsType)) {
                 /*************************基本状态指标(状态类型)***************************/
                 case BASIC:
-                    getBasicMetrics(metrics);
+                    getBasicMetrics(metrics,itemNamesUnderClusterLogic,clusterLogic,projectId);
                     return;
                 case ELAPSEDTIME:
                     getElapsedTimeMetrics(metrics);
@@ -267,68 +230,68 @@ public class ClusterOverviewMetricsHandle {
 
                 /********************************分位图类型*******************************/
                 case CPU_USAGE:
-                    aggPercentilesMetrics(metrics,PHY_CLUSTER, CPU_USAGE.getType(), aggType, startTime, endTime,
+                    aggPercentilesMetrics(metrics,LOGIC_CLUSTER, CPU_USAGE.getType(), aggType, startTime, endTime,
                         b -> metrics.setCpuUsage(ConvertUtil.list2List(b, CpuUsageMetricsVO.class)));
                     return;
                 case CPU_LOAD_1M:
-                    aggPercentilesMetrics(metrics,PHY_CLUSTER, CPU_LOAD_1M.getType(), aggType, startTime, endTime,
+                    aggPercentilesMetrics(metrics,LOGIC_CLUSTER, CPU_LOAD_1M.getType(), aggType, startTime, endTime,
                         b -> metrics.setCpuLoad1M(ConvertUtil.list2List(b, CpuLoadFor1MinMetricsVO.class)));
                     return;
                 case CPU_LOAD_5M:
-                    aggPercentilesMetrics(metrics,PHY_CLUSTER, CPU_LOAD_5M.getType(), aggType, startTime, endTime,
+                    aggPercentilesMetrics(metrics,LOGIC_CLUSTER, CPU_LOAD_5M.getType(), aggType, startTime, endTime,
                         b -> metrics.setCpuLoad5M(ConvertUtil.list2List(b, CpuLoadFor5MinMetricsVO.class)));
                     return;
                 case CPU_LOAD_15M:
-                    aggPercentilesMetrics(metrics,PHY_CLUSTER, CPU_LOAD_15M.getType(), aggType, startTime, endTime,
+                    aggPercentilesMetrics(metrics,LOGIC_CLUSTER, CPU_LOAD_15M.getType(), aggType, startTime, endTime,
                         b -> metrics.setCpuLoad15M(ConvertUtil.list2List(b, CpuLoadFor15MinMetricsVO.class)));
                     return;
                 case DISK_USAGE:
-                    aggPercentilesMetrics(metrics,PHY_CLUSTER, DISK_USAGE.getType(), aggType, startTime, endTime,
+                    aggPercentilesMetrics(metrics,LOGIC_CLUSTER, DISK_USAGE.getType(), aggType, startTime, endTime,
                         b -> metrics.setDiskUsage(ConvertUtil.list2List(b, DiskUsageMetricsVO.class)));
                     return;
                 case SEARCH_LATENCY:
-                    aggPercentilesMetrics(metrics,PHY_CLUSTER, SEARCH_LATENCY.getType(), aggType, startTime, endTime,
+                    aggPercentilesMetrics(metrics,LOGIC_CLUSTER, SEARCH_LATENCY.getType(), aggType, startTime, endTime,
                         b -> metrics.setSearchLatency(ConvertUtil.list2List(b, SearchLatencyMetricsVO.class)));
                     return;
                 case INDEXING_LATENCY:
-                    aggPercentilesMetrics(metrics,PHY_CLUSTER, INDEXING_LATENCY.getType(), aggType, startTime, endTime,
+                    aggPercentilesMetrics(metrics,LOGIC_CLUSTER, INDEXING_LATENCY.getType(), aggType, startTime, endTime,
                         b -> metrics.setIndexingLatency(ConvertUtil.list2List(b, IndexingLatencyMetricsVO.class)));
                     return;
 
                 case TASK_COST:
-                    aggPercentilesMetrics(metrics,PHY_CLUSTER, TASK_COST.getType(), aggType, startTime, endTime,
+                    aggPercentilesMetrics(metrics,LOGIC_CLUSTER, TASK_COST.getType(), aggType, startTime, endTime,
                         b -> metrics.setTaskCost(ConvertUtil.list2List(b, TaskCostMetricVO.class)));
                     return;
 
                 /********************************普通指标(折线图)*******************************/
                 case DISK_INFO:
-                    aggDiskInfoMetrics(metrics,PHY_CLUSTER, aggType, startTime, endTime);
+                    aggDiskInfoMetrics(metrics,LOGIC_CLUSTER, aggType, startTime, endTime);
                     return;
                 case SHARD_NUM:
-                    aggShardNuMetrics(metrics,PHY_CLUSTER, aggType, startTime, endTime);
+                    aggShardNuMetrics(metrics,LOGIC_CLUSTER, aggType, startTime, endTime);
                     return;
                 case READ_QPS:
-                    aggReadTpsMetrics(metrics,PHY_CLUSTER, aggType, startTime, endTime);
+                    aggReadTpsMetrics(metrics,LOGIC_CLUSTER, aggType, startTime, endTime);
                     return;
                 case WRITE_TPS:
-                    aggWriteTpsMetrics(metrics,PHY_CLUSTER, aggType, startTime, endTime);
+                    aggWriteTpsMetrics(metrics,LOGIC_CLUSTER, aggType, startTime, endTime);
                     return;
                 case RECV_TRANS_SIZE:
-                    aggRecvTransMetrics(metrics,PHY_CLUSTER, aggType, startTime, endTime);
+                    aggRecvTransMetrics(metrics,LOGIC_CLUSTER, aggType, startTime, endTime);
                     return;
                 case SEND_TRANS_SIZE:
-                    aggSendTransMetrics(metrics,PHY_CLUSTER, aggType, startTime, endTime);
+                    aggSendTransMetrics(metrics,LOGIC_CLUSTER, aggType, startTime, endTime);
                     return;
                 case NODES_FOR_DISK_USAGE_GTE_75PERCENT:
                     aggNodesForDiskUsageGte75PercentMetrics(metrics);
                     return;
                 case TASK_NUM:
-                    aggTaskCount(metrics,PHY_CLUSTER, aggType, startTime, endTime);
+                    aggTaskCount(metrics,LOGIC_CLUSTER, aggType, startTime, endTime);
                     return;
                 default:
             }
         } catch (Exception e) {
-            LOGGER.error("class=ClusterPhyOverviewMetricsHandle||method=aggClusterPhyOverviewMetrics||errMsg={}",
+            LOGGER.error("class=ClusterLogicOverviewMetricsHandle||method=aggClusterLogicOverviewMetrics||errMsg={}",
                 e.getMessage());
         }
     }
@@ -374,16 +337,15 @@ public class ClusterOverviewMetricsHandle {
     private void getElapsedTimeMetrics(ESClusterOverviewMetricsVO metrics) {
         ESClusterPhyBasicMetricsVO basic = metrics.getBasic();
         getClusterBasicInfoFutureUtil
-            .runnableTask(() -> buildBasicMetricsFromClusterStats(basic, metrics.getClusterName()))
             .runnableTask(() -> buildBasicMetricsFromEsClusterTemplate(basic, metrics.getClusterName()))
             .runnableTask(() -> buildBasicMetricsFromEsClusterNodeInfo(basic, metrics.getClusterName()))
             .runnableTask(() -> buildBasicMetricsFromEsClusterMemInfo(basic, metrics.getClusterName())).waitExecute();
     }
 
-    private void getBasicMetrics(ESClusterOverviewMetricsVO metrics) {
+    private void getBasicMetrics(ESClusterOverviewMetricsVO metrics,List<String> itemNamesUnderClusterLogic,String clusterLogic, Integer projectId) {
         ESClusterPhyBasicMetricsVO basic = metrics.getBasic();
         getClusterBasicInfoFutureUtil
-            .runnableTask(() -> buildBasicMetricsFromClusterStats(basic, metrics.getClusterName()))
+            .runnableTask(() -> buildBasicMetricsFromClusterStats(basic, metrics.getClusterName(),itemNamesUnderClusterLogic,clusterLogic,projectId))
             .runnableTask(() -> buildBasicMetricsFromEsClusterTemplate(basic, metrics.getClusterName()))
             .runnableTask(() -> buildBasicMetricsFromEsClusterNodeInfo(basic, metrics.getClusterName()))
             .runnableTask(() -> buildBasicMetricsFromEsClusterMemInfo(basic, metrics.getClusterName())).waitExecute();
@@ -398,7 +360,7 @@ public class ClusterOverviewMetricsHandle {
         ClusterMemInfo clusterMemInfo = esClusterNodeService.synGetClusterMem(clusterName);
         if (AriusObjUtils.isNull(clusterMemInfo)) {
             LOGGER.warn(
-                "class=ClusterPhyOverviewMetricsHandle||method=buildBasicMetricsFromEsClusterMemInfo||mem info is empty");
+                "class=ClusterLogicOverviewMetricsHandle||method=buildBasicMetricsFromEsClusterMemInfo||mem info is empty");
             return;
         }
 
@@ -415,48 +377,59 @@ public class ClusterOverviewMetricsHandle {
      * @param basicVO
      * @param clusterName
      */
-    private void buildBasicMetricsFromClusterStats(ESClusterPhyBasicMetricsVO basicVO, String clusterName) {
+    private void buildBasicMetricsFromClusterStats(ESClusterPhyBasicMetricsVO basicVO, String clusterName,
+                                                   List<String> itemNamesUnderClusterLogic,String clusterLogic, Integer projectId) {
+        List<ClusterNodeStats> nodeStats = esClusterNodeService.syncGetNodeStats(clusterName);
+        Map<String, Long> node2ShardNum = esClusterNodeService.syncGetNode2ShardNumMap(clusterName);
+        List<String> indies = esIndexCatService.syncGetIndexListByProjectId(projectId,clusterLogic);
+        List<CatIndexResult> catIndexResults = esIndexService.syncCatIndex(clusterName, 3);
         ESClusterStatsResponse clusterStats = esClusterService.syncGetClusterStats(clusterName);
-        if (null == clusterStats) {
-            return;
-        }
+
+        //shard数
+        long shardNum = itemNamesUnderClusterLogic.stream().mapToLong(node2ShardNum::get).filter(Objects::nonNull).sum();
+        long indicesStoreSize = catIndexResults.stream().filter(index->indies.contains(index.getIndex())).mapToLong(index->SizeUtil.getUnitSize(index.getStoreSize())).sum();
+        long docCount =  catIndexResults.stream().filter(index->indies.contains(index.getIndex())).mapToLong(index->Long.parseLong(index.getDocsCount())).sum();
+        //磁盘信息
+        long totalInBytes = nodeStats.stream().filter(nodeStat->itemNamesUnderClusterLogic.contains(nodeStat.getName())).mapToLong(this::getTotalInBytes).sum();
+        long availableInBytes = nodeStats.stream().filter(nodeStat->itemNamesUnderClusterLogic.contains(nodeStat.getName())).mapToLong(this::getAvailableInBytes).sum();
+        long freeInBytes = nodeStats.stream().filter(nodeStat->itemNamesUnderClusterLogic.contains(nodeStat.getName())).mapToLong(this::getFreeInBytes).sum();
+        //设置堆内存使用率信息
+        long heapUsedInBytes = nodeStats.stream().filter(nodeStat->itemNamesUnderClusterLogic.contains(nodeStat.getName())).mapToLong(this::getHeapUsedInBytes).sum();
+        long nonHeapUsedInBytes =  nodeStats.stream().filter(nodeStat->itemNamesUnderClusterLogic.contains(nodeStat.getName())).mapToLong(this::getNonHeapUsedInBytes).sum();
 
         //设置状态
         basicVO.setStatus(clusterStats.getStatus());
-
         //设置基础信息
-        basicVO.setNumberNodes(clusterStats.getTotalNodes());
-        basicVO.setTotalIndicesNu(clusterStats.getIndexCount());
-        basicVO.setShardNu(clusterStats.getTotalShard());
-        basicVO.setTotalDocNu(clusterStats.getDocsCount());
-        basicVO.setIndicesStoreSize(clusterStats.getIndicesStoreSize().getBytes());
+        basicVO.setNumberNodes((long) itemNamesUnderClusterLogic.size());
+        basicVO.setTotalIndicesNu((long) indies.size());
+        basicVO.setShardNu((long) shardNum);
+        basicVO.setTotalDocNu(docCount);
+        basicVO.setIndicesStoreSize(indicesStoreSize);
         basicVO.setUnassignedShardNum(clusterStats.getUnassignedShardNum());
 
         //设置集群磁盘信息
-        long storeSize = clusterStats.getTotalFs().getBytes() - clusterStats.getFreeFs().getBytes();
-        basicVO.setStoreSize(storeSize);
-        basicVO.setTotalStoreSize(clusterStats.getTotalFs().getBytes());
-        basicVO.setFreeStoreSize(clusterStats.getFreeFs().getBytes());
+        basicVO.setStoreSize(availableInBytes);
+        basicVO.setTotalStoreSize(totalInBytes);
+        basicVO.setFreeStoreSize(freeInBytes);
         //保留小数点后3位
-        BigDecimal storeSizeDec = new BigDecimal(storeSize);
-        BigDecimal totalSizeDec = new BigDecimal(clusterStats.getTotalFs().getBytes());
+        BigDecimal storeSizeDec = new BigDecimal(availableInBytes);
+        BigDecimal totalSizeDec = new BigDecimal(totalInBytes);
         basicVO.setStoreUsage(storeSizeDec.divide(totalSizeDec, 5, 1).doubleValue() * 100);
         basicVO.setStoreFreeUsage((100 - basicVO.getStoreUsage()));
 
         //设置堆内存使用率信息
-        long heapFreeSize = clusterStats.getTotalHeapMem().getBytes() - clusterStats.getUsedHeapMem().getBytes();
-        basicVO.setHeapMemFree(heapFreeSize);
-        basicVO.setHeapMemTotal(clusterStats.getTotalHeapMem().getBytes());
-        basicVO.setHeapMemUsed(clusterStats.getUsedHeapMem().getBytes());
+        long heapTotalSize = nonHeapUsedInBytes + heapUsedInBytes;
+        basicVO.setHeapMemFree(nonHeapUsedInBytes);
+        basicVO.setHeapMemTotal(heapTotalSize);
+        basicVO.setHeapMemUsed(heapUsedInBytes);
         //保留小数点后3位
-        BigDecimal storeHeapMemSizeDec = new BigDecimal(clusterStats.getUsedHeapMem().getBytes());
-        BigDecimal totalHeapMemSizeDec = new BigDecimal(clusterStats.getTotalHeapMem().getBytes());
+        BigDecimal storeHeapMemSizeDec = new BigDecimal(heapUsedInBytes);
+        BigDecimal totalHeapMemSizeDec = new BigDecimal(heapTotalSize);
         basicVO.setHeapUsage(storeHeapMemSizeDec.divide(totalHeapMemSizeDec, 5, 1).doubleValue() * 100);
         basicVO.setHeapFreeUsage((100 - basicVO.getHeapUsage()));
-
         //设置集群节点信息
         basicVO.setNumberMasterNodes(clusterStats.getNumberMasterNodes());
-        basicVO.setNumberDataNodes(clusterStats.getNumberDataNodes());
+        basicVO.setNumberDataNodes((long) itemNamesUnderClusterLogic.size());
         basicVO.setNumberClientNodes(clusterStats.getNumberClientNodes());
         basicVO.setNumberIngestNodes(clusterStats.getNumberIngestNodes());
         basicVO.setNumberCoordinatingOnlyNodes(clusterStats.getNumberCoordinatingOnly());
@@ -546,7 +519,7 @@ public class ClusterOverviewMetricsHandle {
 
     private void aggWriteTpsMetrics(ESClusterOverviewMetricsVO metrics,long clusterType, String aggType, Long startTime, Long endTime) {
         List<WriteTPSMetrics> writeTPSMetrics = esClusterPhyStatsService
-            .getAggClusterPhyMetrics(metrics.getClusterName(), clusterType,aggType, startTime, endTime, WriteTPSMetrics.class);
+            .getAggClusterPhyMetrics(metrics.getClusterName(),clusterType, aggType, startTime, endTime, WriteTPSMetrics.class);
 
         List<WriteTPSMetricsVO> writeTPSMetricsVOS = ConvertUtil.list2List(writeTPSMetrics, WriteTPSMetricsVO.class);
         Collections.sort(writeTPSMetricsVOS);
@@ -607,5 +580,58 @@ public class ClusterOverviewMetricsHandle {
                 .collect(Collectors.toList());
 
         return nodeInfoForDiskUsageGte75PercentVOS;
+    }
+
+
+    /**
+     * > 从集群节点统计中获取以字节为单位使用的非堆内存
+     *
+     * @param clusterNodeStats 包含 JVM 统计信息的 ClusterNodeStats 对象。
+     * @return 以字节为单位使用的非堆内存。
+     */
+    private long getNonHeapUsedInBytes(ClusterNodeStats clusterNodeStats) {
+        return Optional.of(clusterNodeStats).map(ClusterNodeStats::getJvm).map(JvmNode::getMem).map(JvmMem::getNonHeapUsedInBytes).orElse(0L);
+    }
+
+    /**
+     * > 从集群节点统计中获取堆使用的字节数
+     *
+     * @param clusterNodeStats 包含 JVM 统计信息的 ClusterNodeStats 对象。
+     * @return 以字节为单位使用的堆。
+     */
+    private long getHeapUsedInBytes(ClusterNodeStats clusterNodeStats) {
+        return Optional.of(clusterNodeStats).map(ClusterNodeStats::getJvm).map(JvmNode::getMem).map(JvmMem::getHeapUsedInBytes).orElse(0L);
+    }
+
+    /**
+     * > 从集群节点统计中获取可用空间（以字节为单位）
+     *
+     * @param clusterNodeStats 包含节点信息的 ClusterNodeStats 对象。
+     * @return 集群节点的可用空间（以字节为单位）。
+     */
+    private long getFreeInBytes(ClusterNodeStats clusterNodeStats) {
+        return Optional.of(clusterNodeStats).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getFreeInBytes).orElse(0L);
+    }
+
+    /**
+     * > 从集群节点统计中获取可用空间（以字节为单位）
+     *
+     * @param clusterNodeStats 包含节点信息的 ClusterNodeStats 对象。
+     * @return 可用空间（以字节为单位）。
+     */
+    private long getAvailableInBytes(ClusterNodeStats clusterNodeStats) {
+        return Optional.of(clusterNodeStats).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getAvailableInBytes).orElse(0L);
+    }
+
+    /**
+     * “获取集群节点统计信息的总字节数，如果集群节点统计信息为空，则为 0。”
+     *
+     * 该函数比这要复杂一些，但这就是它的要点
+     *
+     * @param clusterNodeStats 包含节点信息的 ClusterNodeStats 对象。
+     * @return 文件系统中的总字节数。
+     */
+    private long getTotalInBytes(ClusterNodeStats clusterNodeStats) {
+        return Optional.of(clusterNodeStats).map(ClusterNodeStats::getFs).map(FSNode::getTotal).map(FSTotal::getTotalInBytes).orElse(0L);
     }
 }
