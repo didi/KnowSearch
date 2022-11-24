@@ -72,7 +72,7 @@ public class OpTaskFastIndexController {
     @ApiOperation(value = "查询任务日志")
     public PaginationResult<FastDumpTaskLogVO> getTaskLogs(HttpServletRequest request,
                                                            @RequestBody FastIndexLogsConditionDTO logsConditionDTO) throws NotFindSubclassException {
-        return fastIndexManager.pageGetTasks(HttpRequestUtil.getProjectId(request), logsConditionDTO);
+        return fastIndexManager.pageGetTaskLogs(HttpRequestUtil.getProjectId(request), logsConditionDTO);
     }
 
     @PutMapping("/{taskId}/refresh")

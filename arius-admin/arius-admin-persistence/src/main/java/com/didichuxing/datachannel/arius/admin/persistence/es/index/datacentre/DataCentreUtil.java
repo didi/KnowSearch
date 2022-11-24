@@ -70,7 +70,7 @@ public class DataCentreUtil {
     @Value("${es.cluster.task.info.index.name:arius_stats_cluster_task_info}")
     private String ariusStatsClusterTaskInfo;
 
-    @Value("${es.fast.dump.metrics.index.name:fastdump_metrics}")
+    @Value("${es.fast.dump.metrics.index.name:fastdump_move_metrics_info}")
     private String fastDumpMetrics;
 
     @PostConstruct

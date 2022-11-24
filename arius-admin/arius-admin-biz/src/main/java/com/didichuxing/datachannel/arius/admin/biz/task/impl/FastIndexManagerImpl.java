@@ -57,10 +57,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
@@ -93,6 +90,7 @@ public class FastIndexManagerImpl implements FastIndexManager {
     private static final Result<Void>                                FAIL_RESULT_GET_FAST_INDEX_TASK_ERROR = Result
         .buildFail("获取数据迁移任务原始信息失败");
     private static final String                                      GET_INDEX_FAILED_MSG                  = "获取原集群中的索引【%s】失败！";
+    private static final long                                        TASK_WAITING_TIME                     = 5 * 1000L;
 
     @Autowired
     protected IndexTemplateService                                   indexTemplateService;
@@ -241,6 +239,12 @@ public class FastIndexManagerImpl implements FastIndexManager {
             //打印日志
             return FAIL_RESULT_GET_FAST_INDEX_TASK_ERROR;
         }
+        Date scheduledTaskStartTime = fastIndexDTO.getTaskStartTime();
+        if (null != scheduledTaskStartTime && DateTimeUtil.isAfterDateTime(scheduledTaskStartTime, 0)) {
+            //如果任务调度时间在当前时间之后，则暂时不提交任务
+            return Result.buildSucc();
+        }
+
         ClusterPhy sourceCluster = clusterPhyService.getClusterByName(fastIndexDTO.getSourceCluster());
         if (null == sourceCluster) {
             return Result.buildFail("获取源物理集群信息失败");
@@ -496,15 +500,8 @@ public class FastIndexManagerImpl implements FastIndexManager {
     }
 
     @Override
-    public PaginationResult<FastDumpTaskLogVO> pageGetTasks(Integer projectId,
-                                                            FastIndexLogsConditionDTO queryDTO) throws NotFindSubclassException {
-        OpTask opTask = opTaskService.getById(queryDTO.getTaskId());
-        if (null == opTask) {
-            return PaginationResult.buildFail("获取数据迁移主任务失败");
-        }
-        if (!OpTaskTypeEnum.FAST_INDEX.getType().equals(opTask.getTaskType())) {
-            return PaginationResult.buildFail("任务类型异常！");
-        }
+    public PaginationResult<FastDumpTaskLogVO> pageGetTaskLogs(Integer projectId,
+                                                               FastIndexLogsConditionDTO queryDTO) throws NotFindSubclassException {
         BaseHandle baseHandle = handleFactory.getByHandlerNamePer(FAST_INDEX_TASK_LOG.getPageSearchType());
         if (baseHandle instanceof FastIndexTaskLogPageSearchHandle) {
             FastIndexTaskLogPageSearchHandle handle = (FastIndexTaskLogPageSearchHandle) baseHandle;
@@ -652,6 +649,9 @@ public class FastIndexManagerImpl implements FastIndexManager {
             }
             if (null != finalReadFileRateLimit) {
                 taskInfo.setReadFileRateLimit(finalReadFileRateLimit);
+            }
+            if (null != fastIndexDTO.getTaskStartTime()) {
+                taskInfo.setScheduledTaskStartTime(fastIndexDTO.getTaskStartTime());
             }
         });
         return fastIndexTaskService.saveTasks(taskIndexList);
@@ -1072,9 +1072,13 @@ public class FastIndexManagerImpl implements FastIndexManager {
                 indexTask.setLastResponse(JSON.toJSONString(taskStats));
             }
             if (null == taskStats) {
-                indexTask.setTaskStatus(FastIndexTaskStatusEnum.FAILED.getValue());
-                indexTask.setTaskEndTime(new Date());
-                fastIndexTaskService.refreshTask(indexTask);
+                //如果提交任务的时间与当前时间相差超过 TASK_WAITING_TIME，则认为任务失败，否则暂时不更新任务状态
+                Date taskStartTime = indexTask.getTaskStartTime();
+                if (null == taskStartTime || System.currentTimeMillis() - taskStartTime.getTime() > TASK_WAITING_TIME) {
+                    indexTask.setTaskStatus(FastIndexTaskStatusEnum.FAILED.getValue());
+                    indexTask.setTaskEndTime(new Date());
+                    fastIndexTaskService.refreshTask(indexTask);
+                }
                 return;
             }
             FastIndexTaskStatusEnum fastIndexTaskStatusEnum = FastIndexTaskStatusEnum.enumOfCode(taskStats.getStatus());
@@ -1140,6 +1144,10 @@ public class FastIndexManagerImpl implements FastIndexManager {
                 taskInfo.setTaskStatus(FastIndexTaskStatusEnum.WAITING.getValue());
                 taskInfo.setFastDumpTaskId(resultTuple.getV2().getData());
                 taskInfo.setTaskStartTime(new Date());
+            } else {
+                taskInfo.setTaskStatus(FastIndexTaskStatusEnum.FAILED.getValue());
+                taskInfo.setTaskStartTime(new Date());
+                taskInfo.setTaskEndTime(new Date());
             }
             fastIndexTaskService.refreshTask(taskInfo);
         });

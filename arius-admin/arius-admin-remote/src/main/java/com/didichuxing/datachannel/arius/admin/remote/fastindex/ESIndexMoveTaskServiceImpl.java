@@ -101,12 +101,7 @@ public class ESIndexMoveTaskServiceImpl implements ESIndexMoveTaskService {
             Result result = JSON.parseObject(response, Result.class);
             if (FAST_DUMP_SUCC_CODE == result.getCode()) {
                 if (null != result.getData() && null != targetClass) {
-                    T data = null;
-                    if (result.getData().getClass() == targetClass) {
-                        data = (T) result.getData();
-                    } else {
-                        data = ConvertUtil.obj2Obj(result.getData(), targetClass);
-                    }
+                    T data = ConvertUtil.str2ObjByJson(JSON.toJSONString(result.getData()), targetClass);
                     return Result.buildSucc(data);
                 }
                 return Result.buildSucc();

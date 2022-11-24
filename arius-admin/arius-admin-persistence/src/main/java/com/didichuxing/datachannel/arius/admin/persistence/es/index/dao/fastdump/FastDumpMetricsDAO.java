@@ -14,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.Fa
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastDumpTaskLogVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
@@ -47,6 +48,8 @@ public class FastDumpMetricsDAO extends BaseESDAO {
         // 排序条件，默认根据使用时间排序 desc
         String sortTerm = "timeStamp";
         String sortOrder = "desc";
+        String realName = IndexNameUtils.genDailyIndexName(indexName, logsConditionDTO.getStartTime(), logsConditionDTO.getEndTime());
+
         if (!StringUtils.isEmpty(logsConditionDTO.getSortTerm())) {
             // 根据用户自定义条件排序
             sortOrder = BooleanUtils.isTrue(logsConditionDTO.getOrderByDesc()) ? "desc" : "asc";
@@ -56,36 +59,31 @@ public class FastDumpMetricsDAO extends BaseESDAO {
             buildQueryTermDsl(logsConditionDTO), sortTerm, sortOrder, logsConditionDTO.getFrom(),
             logsConditionDTO.getSize());
         return ESOpTimeoutRetry.esRetryExecute("getTaskLogs", 3, () -> gatewayClient
-            .performRequestListAndGetTotalCount(null, indexName, typeName, dsl, FastDumpTaskLogVO.class),
+            .performRequestListAndGetTotalCount(null, realName, typeName, dsl, FastDumpTaskLogVO.class),
             Objects::isNull);
     }
     
 
     private String buildQueryTermDsl(FastIndexLogsConditionDTO logsConditionDTO) {
-        return "[" + buildTermCell(logsConditionDTO.getFastDumpTaskId(), logsConditionDTO.getExecutionNode(),
-            logsConditionDTO.getIndexName(), logsConditionDTO.getTemplateName(), logsConditionDTO.getLogLevel(),
+        return "[" + buildTermCell(logsConditionDTO.getFastDumpTaskIdList(),logsConditionDTO.getExecutionNode(),
+            logsConditionDTO.getIndexName(), logsConditionDTO.getLogLevel(),
             logsConditionDTO.getStartTime(), logsConditionDTO.getEndTime()) + "]";
     }
 
-    private String buildTermCell(String fastDumpTaskId, String executionNode, String indexName, String templateName,
+    private String buildTermCell(List<String> fastDumpTaskIdList, String executionNode, String indexName,
                                  String logLevel, Long startTime, Long endTime) {
         List<String> termCellList = Lists.newArrayList();
-        //get index status term
-        termCellList.add(DSLSearchUtils.getTermCellForExactSearch(fastDumpTaskId, "fastDumpTaskId"));
+        //get fastDumpTaskId term
+        termCellList.add(DSLSearchUtils.getTermCellsForExactSearch(fastDumpTaskIdList, "taskId"));
 
-        termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(executionNode, "executionNode"));
-        termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(indexName, "indexName"));
-        //get index dsl term
-        termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(templateName, "templateName"));
+        termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(executionNode, "ip"));
+        termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(indexName, "sourceIndex"));
 
-        //get index status term
-        termCellList.add(DSLSearchUtils.getTermCellForExactSearch(logLevel, "logLevel"));
+        //get level term
+        termCellList.add(DSLSearchUtils.getTermCellForExactSearch(logLevel, "level"));
 
-        termCellList.add(DSLSearchUtils.getTermCellForRangeSearch(startTime, endTime, "taskTime"));
+        termCellList.add(DSLSearchUtils.getTermCellForRangeSearch(startTime, endTime, "timestamp"));
 
-        //指定applicationName
-        termCellList.add(DSLSearchUtils.getTermCellForExactSearch("fast-dump", "applicationName"));
-        termCellList.add(DSLSearchUtils.getTermCellForExactSearch("LOG", "logType"));
         return ListUtils.strList2String(termCellList);
     }
 }

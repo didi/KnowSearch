@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 
 import io.swagger.annotations.ApiModel;
@@ -32,11 +34,14 @@ public class FastIndexLogsConditionDTO extends PageDTO {
     @ApiModelProperty("结束时间")
     private Long    endTime;
 
-
-    @ApiModelProperty("排序字段 时间logMills")
+    @ApiModelProperty("排序字段 时间timeStamp")
     private String  sortTerm;
 
     @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
     private Boolean orderByDesc = true;
 
+    /**
+     * 内部查询使用
+     */
+    private List<String> fastDumpTaskIdList;
 }

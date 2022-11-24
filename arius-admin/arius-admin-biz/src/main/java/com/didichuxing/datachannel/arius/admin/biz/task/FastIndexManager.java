@@ -44,6 +44,6 @@ public interface FastIndexManager {
 
     Result<Void> rollbackTemplate(Integer taskId);
 
-    PaginationResult<FastDumpTaskLogVO> pageGetTasks(Integer projectId,
-                                                     FastIndexLogsConditionDTO queryDTO) throws NotFindSubclassException;
+    PaginationResult<FastDumpTaskLogVO> pageGetTaskLogs(Integer projectId,
+                                                        FastIndexLogsConditionDTO queryDTO) throws NotFindSubclassException;
 }
