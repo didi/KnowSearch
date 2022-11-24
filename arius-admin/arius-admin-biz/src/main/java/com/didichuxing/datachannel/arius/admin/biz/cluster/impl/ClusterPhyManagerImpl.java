@@ -871,6 +871,14 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         if (deleteClusterResult.failed()) {
             return Result.buildFrom(deleteClusterResult);
         }
+        if (Objects.nonNull(clusterPhy.getComponentId())&&clusterPhy.getComponentId()>0){
+            com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> offLineComponentRes =
+                    componentService.offLineComponent(
+                    clusterPhy.getComponentId());
+            if (offLineComponentRes.failed()){
+                return Result.buildFrom(offLineComponentRes);
+            }
+        }
 
         SpringTool.publish(new ClusterPhyEvent(clusterPhy.getCluster(), operator));
          operateRecordService.saveOperateRecordWithManualTrigger(String.format("删除集群：%s", clusterPhy.getCluster()), operator,
@@ -1241,7 +1249,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Override
     public Result<Boolean> verifyNameUniqueness(String clusterName) {
         	return Result.build(clusterPhyService.isClusterExists(clusterName) ||
-						Objects.nonNull(componentService.queryComponentByName(clusterName)));
+					componentService.queryComponentByName(clusterName).isSuccess());
     }
     
     @Override
@@ -1312,7 +1320,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
              //创建节点信息
             boolean clusterNodeSettings = clusterRoleHostService.createClusterNodeSettings(esClusterRoleHosts,
                                                                                            createDTO.getCluster());
-        
+            if (!clusterNodeSettings) {
+                throw new AdminOperateException("节点信息创建失败");
+            }
             if (addClusterRet.failed()) {
                 // 这里必须显示事务回滚
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -1371,6 +1381,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         } catch (AdminTaskException exception) {
             return Result.buildFail(exception.getMessage());
         }
+        //缩容后发布事件，通过模板进行缩容
+
         return Result.buildSucc();
     }
     
@@ -1426,6 +1438,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         cluster.setGatewayIds(cluster.getGatewayIds()+","+gatewayClusterId);
         clusterPhyService.editCluster(ConvertUtil.obj2Obj(cluster,ClusterPhyDTO.class),operator);
         return Result.buildSucc();
+    }
+
+
+    @Override
+    public Result<List<Object>> getBeforeVersionByClusterId(Integer clusterPhyId) {
+        return Result.buildSucc(Collections.emptyList());
     }
 
     /**************************************** private method ***************************************************/
@@ -1960,7 +1978,13 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
               operateRecordService.saveOperateRecordWithManualTrigger(String.format("cluster:[%s]删除物理集群角色;[%d]", clusterPhy.getCluster(), clusterPhy.getId()), operator,
                     projectId, clusterPhy.getId(), OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE);
         }
-
+        if (Objects.nonNull(clusterPhy.getComponentId()) && clusterPhy.getComponentId() > 0) {
+            com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> offLineComponentRes = componentService.offLineComponent(
+                    clusterPhy.getComponentId());
+            if (offLineComponentRes.failed()) {
+                throw new AdminOperateException(String.format("解绑物理集群 (%s) 组件失败", clusterPhy.getCluster()));
+            }
+        }
         Result<Void> deleteRoleClusterHostResult = clusterRoleHostService.deleteByCluster(clusterPhy.getCluster(),
             projectId);
         if (deleteRoleClusterHostResult.failed()) {

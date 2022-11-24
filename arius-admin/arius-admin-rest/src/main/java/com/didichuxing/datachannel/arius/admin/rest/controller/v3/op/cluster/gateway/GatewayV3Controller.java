@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.ga
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayClusterManager;
+import com.didichuxing.datachannel.arius.admin.biz.plugin.PluginManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayClusterDTO;
@@ -10,6 +11,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayCl
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterBriefVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageVersionVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginHealthEnum;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -41,6 +45,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class GatewayV3Controller {
     @Autowired
     private GatewayClusterManager gatewayClusterManager;
+    @Autowired
+    private PluginManager         pluginManager;
     @GetMapping("/brief-info")
     @ApiOperation(value = "gateway 管理简要信息", tags = "")
     public Result<List<GatewayClusterBriefVO>> listBriefInfo(HttpServletRequest request) {
@@ -86,10 +92,18 @@ public class GatewayV3Controller {
     }
     @GetMapping("/{gatewayClusterId}/before-version")
     @ResponseBody
-    @ApiOperation(value = "获取上个版本号",tags = "")
-    public Result<List<Object>> getBeforeVersionByGatewayClusterId(HttpServletRequest request,
-                                               @PathVariable("gatewayClusterId") Integer gatewayClusterId) {
-        return gatewayClusterManager.getBeforeVersionByGatewayClusterId(gatewayClusterId);
+    @ApiOperation(value = "获取更低的版本号",tags = "")
+    public Result<List<PackageVersionVO>> getBeforeVersionByGatewayClusterId(HttpServletRequest request,
+                                                                             @PathVariable("gatewayClusterId") Integer gatewayClusterId) {
+        return pluginManager.getBeforeVersionByGatewayClusterId(gatewayClusterId);
     }
+    
+    @GetMapping("health")
+    @ResponseBody
+    @ApiOperation(value = "获取健康类型", tags = "")
+    public Result<List<TupleTwo<Integer, PluginHealthEnum>>> getPluginHealth(HttpServletRequest request) {
+        return Result.buildSucc(PluginHealthEnum.getAll());
+    }
+  
     
 }

@@ -41,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 /**
  * 网关集群
@@ -235,26 +236,38 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public Result<Void> deleteById(Integer gatewayClusterId, Integer projectId) {
-		Result<Void> result = checkDeleteById(gatewayClusterId, projectId);
-		if (result.failed()) {
-			return result;
-		}
-		final GatewayClusterPO gatewayCluster = gatewayClusterService.getOneById(gatewayClusterId);
-		if (Objects.isNull(gatewayCluster)) {
-			return Result.buildSucc();
-		}
-		// 先下线 node
-		boolean deleteByClusterName =
-				gatewayNodeService.deleteByClusterName(gatewayCluster.getClusterName());
-		final boolean deleteOneById = gatewayClusterService.deleteOneById(gatewayClusterId);
-		if (deleteByClusterName && deleteOneById) {
+			Result<Void> result = checkDeleteById(gatewayClusterId, projectId);
+			if (result.failed()) {
+					return result;
+			}
+			final GatewayClusterPO gatewayCluster = gatewayClusterService.getOneById(gatewayClusterId);
+			if (Objects.isNull(gatewayCluster)) {
+					return Result.buildSucc();
+			}
+			
+			if (Objects.nonNull(gatewayCluster.getComponentId()) || gatewayCluster.getComponentId() > 0) {
+					// 下线 op
+					com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> componentRes = componentService.offLineComponent(
+									gatewayCluster.getComponentId());
+					if (componentRes.failed()) {
+							// 这里显示回滚处理特殊异常场景
+							TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+							return Result.buildFrom(componentRes);
+					}
+			}
+			// 先下线 node
+			boolean deleteByClusterName = gatewayNodeService.deleteByClusterName(gatewayCluster.getClusterName());
+			final boolean deleteOneById = gatewayClusterService.deleteOneById(gatewayClusterId);
+			if (!deleteByClusterName || !deleteOneById) {
+					// 这里显示回滚处理特殊异常场景
+					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+					return Result.buildFail("下线失败，请联系管理员");
+			}
 			//TODO 后续补齐操作记录
 			String content = String.format("gateway 集群 %s 下线成功", gatewayCluster.getClusterName());
 			//operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,
 			//		data.getId(), OperateTypeEnum.TEMPLATE_SERVICE);
-			return Result.buildSuccWithMsg("下线gateway集群成功");
-		}
-		return Result.buildFail("下线失败，请联系管理员");
+			return Result.buildSuccWithMsg("下线 gateway 集群成功");
 	}
 	
 	@Override
@@ -275,12 +288,6 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		return Result.build(edit);
 	}
 	
-	@Override
-	public Result<List<Object>> getBeforeVersionByGatewayClusterId(Integer gatewayClusterId) {
-		//TODO 后续实现
-		return Result.buildSucc(Collections.emptyList());
-	}
-		
 		@Override
 		public Result<Boolean> verifyNameUniqueness(String name) {
 				return Result.build(gatewayClusterService.checkNameCluster(name) ||

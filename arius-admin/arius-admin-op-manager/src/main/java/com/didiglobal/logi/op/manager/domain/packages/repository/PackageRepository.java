@@ -88,4 +88,12 @@ public interface PackageRepository {
      * @return
      */
     List<String> listPackageVersionByPackageType(Integer packageType);
+
+    /**
+     * 通过包类型和当前版本查询比当前版本低的版本
+     * @param packageType
+     * @param versionCast2Int
+     * @return
+     */
+    List<Package> listPackageWithLowerVersionByPackageTypeAndVersion(Integer packageType, Integer versionCast2Int);
 }

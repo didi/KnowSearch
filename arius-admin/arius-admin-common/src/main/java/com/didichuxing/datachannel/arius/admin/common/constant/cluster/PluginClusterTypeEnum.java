@@ -1,5 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.cluster;
 
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -22,5 +27,10 @@ public enum PluginClusterTypeEnum {
 		 */
 		ES(2);
 		private final Integer clusterType;
+		
+		public static List<TupleTwo<Integer, PluginClusterTypeEnum>> getAll() {
+				return Arrays.stream(PluginClusterTypeEnum.values()).map(i -> Tuples.of(i.getClusterType(), i)).collect(
+								Collectors.toList());
+		}
 		
 }

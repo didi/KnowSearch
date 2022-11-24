@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.plugin.PluginCreateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageVersionVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginClusterTypeEnum;
 import java.util.List;
 
@@ -79,4 +80,11 @@ public interface PluginManager {
 		 * @param type 要卸载的集群类型。
 		 */
 		Result<Void> checkClusterCompleteUninstallPlugins(Integer clusterId, PluginClusterTypeEnum type);
+		/**
+		 * 通过网关集群id获取之前的版本号
+		 *
+		 * @param gatewayClusterId 网关集群 ID。
+		 * @return 更新前的网关集群版本。
+		 */
+		Result<List<PackageVersionVO>> getBeforeVersionByGatewayClusterId(Integer gatewayClusterId);
 }

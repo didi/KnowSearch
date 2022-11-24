@@ -26,4 +26,8 @@ public class PluginUpgradeContent extends GeneralUpgradeComponentDTO {
 		 * 原因
 		 */
 		private String reason;
+		/**
+		 * 插件类型
+		 */
+		private Integer pluginType;
 }

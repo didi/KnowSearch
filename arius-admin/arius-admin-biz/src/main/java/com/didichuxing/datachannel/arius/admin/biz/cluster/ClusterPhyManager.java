@@ -474,4 +474,12 @@ public interface ClusterPhyManager {
      * @param projectId 项目id
      */
     Result<Void> bindGatewayCluster(Integer clusterPhyId, Integer gatewayClusterId, String operator, Integer projectId);
+
+    /**
+     * 通过集群id获取之前的版本
+     *
+     * @param clusterPhyId 集群的物理 ID。
+     * @return 列表<Object>
+     */
+    Result<List<Object>> getBeforeVersionByClusterId(Integer clusterPhyId);
 }
