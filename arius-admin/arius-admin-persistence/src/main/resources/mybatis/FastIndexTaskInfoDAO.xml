@@ -27,13 +27,14 @@
         <result column="task_start_time" jdbcType="TIMESTAMP" property="taskStartTime"/>
         <result column="task_end_time" jdbcType="TIMESTAMP" property="taskEndTime"/>
         <result column="scheduled_task_start_time" jdbcType="TIMESTAMP" property="scheduledTaskStartTime"/>
+        <result column="task_cost_time" jdbcType="DECIMAL" property="taskCostTime"/>
     </resultMap>
     <sql id="Base_Column_List">
         id
         , task_id, task_type, template_id, template_name, index_name, index_types, target_index_name,
     mappings, settings, fast_dump_task_id, task_status, read_file_rate_limit, total_document_num, 
     shard_num, succ_document_num, succ_shard_num, failed_document_num, task_submit_result, 
-    create_time, update_time, task_start_time, task_end_time, scheduled_task_start_time
+    create_time, update_time, task_start_time, task_end_time, scheduled_task_start_time,task_cost_time
     </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
         select
@@ -388,6 +389,9 @@
             </if>
             <if test="lastResponse != null">
                 last_response = #{lastResponse},
+            </if>
+            <if test="taskCostTime != null">
+                task_cost_time = #{taskCostTime},
             </if>
         </set>
         where id = #{id,jdbcType=INTEGER}

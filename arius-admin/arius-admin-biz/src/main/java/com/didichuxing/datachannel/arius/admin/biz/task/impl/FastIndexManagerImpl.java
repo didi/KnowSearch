@@ -217,6 +217,7 @@ public class FastIndexManagerImpl implements FastIndexManager {
         } else {
             //这里如果子任务写入失败，则显式进行事务回滚
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.buildFail("子任务保存失败！");
         }
 
         return Result.buildSucc(ConvertUtil.obj2Obj(workTaskResult.getData(), WorkTaskVO.class));
@@ -572,11 +573,17 @@ public class FastIndexManagerImpl implements FastIndexManager {
             updateStatusValue(hasSucc, Sets.newHashSet(FastIndexTaskStatusEnum.SUCCESS), taskStatusEnum);
 
             addBigDecimal(totalDocumentNum, indexTask.getTotalDocumentNum());
-            addBigDecimal(succDocumentNum, indexTask.getTotalDocumentNum());
-            addBigDecimal(failedDocumentNum, indexTask.getTotalDocumentNum());
-            addBigDecimal(shardNum, indexTask.getTotalDocumentNum());
-            addBigDecimal(succShardNum, indexTask.getTotalDocumentNum());
-            addBigDecimal(costTime, indexTask.getTotalDocumentNum());
+            addBigDecimal(succDocumentNum, indexTask.getSuccDocumentNum());
+            addBigDecimal(failedDocumentNum, indexTask.getFailedDocumentNum());
+            addBigDecimal(shardNum, indexTask.getShardNum());
+            addBigDecimal(succShardNum, indexTask.getSuccShardNum());
+            addBigDecimal(costTime, indexTask.getTaskCostTime());
+            if (indexTask.getSuccDocumentNum() != null && indexTask.getTaskCostTime() != null
+                && indexTask.getTaskCostTime().compareTo(BigDecimal.ZERO) > 0) {
+                //总文档数除以时间
+                indexTask.setIndexMoveRate(indexTask.getSuccDocumentNum().multiply((BigDecimal.valueOf(1000L)))
+                    .divide(indexTask.getTaskCostTime(), RoundingMode.DOWN));
+            }
             childrenList.add(ConvertUtil.obj2Obj(indexTask, FastIndexStats.class));
         });
         FastIndexTaskStatusEnum taskStatusEnum = getFastIndexTaskStatusEnum(hasNotSubmited.get(), isRunning.get(),
@@ -586,10 +593,13 @@ public class FastIndexManagerImpl implements FastIndexManager {
         fastIndexStats.setTotalDocumentNum(totalDocumentNum.get());
         fastIndexStats.setSuccDocumentNum(succDocumentNum.get());
         fastIndexStats.setFailedDocumentNum(failedDocumentNum.get());
-        if (costTime.get() != null && costTime.get().compareTo(BigDecimal.ZERO) > 0) {
+        fastIndexStats.setIndexMoveRate(BigDecimal.ZERO);
+        if (succDocumentNum.get() != null && costTime.get() != null && costTime.get().compareTo(BigDecimal.ZERO) > 0) {
             //总文档数除以时间
-            fastIndexStats.setIndexMoveRate(succDocumentNum.get().divide(costTime.get(), RoundingMode.DOWN));
+            fastIndexStats.setIndexMoveRate(
+                succDocumentNum.get().multiply(BigDecimal.valueOf(1000L)).divide(costTime.get(), RoundingMode.DOWN));
         }
+        fastIndexStats.setTaskCostTime(costTime.get());
         fastIndexStats.setShardNum(shardNum.get());
         fastIndexStats.setSuccShardNum(succShardNum.get());
         fastIndexStats.setChildrenList(childrenList);
