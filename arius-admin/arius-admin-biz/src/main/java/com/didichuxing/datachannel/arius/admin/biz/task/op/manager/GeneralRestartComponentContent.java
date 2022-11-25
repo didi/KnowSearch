@@ -19,4 +19,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GeneralRestartComponentContent extends GeneralRestartComponentDTO {
 		private String reason;
+		private Integer pluginType;
 }

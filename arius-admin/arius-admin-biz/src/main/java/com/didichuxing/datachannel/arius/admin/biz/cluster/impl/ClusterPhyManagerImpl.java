@@ -112,15 +112,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -1324,12 +1317,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             // 保存集群信息
             ClusterPhyDTO clusterDTO = buildPhyClusters(createDTO, operator);
             Result<Boolean> addClusterRet = clusterPhyService.createCluster(clusterDTO);
-             //创建节点信息
-            boolean clusterNodeSettings = clusterRoleHostService.createClusterNodeSettings(esClusterRoleHosts,
-                                                                                           createDTO.getCluster());
-            if (!clusterNodeSettings) {
-                throw new AdminOperateException("节点信息创建失败");
-            }
             if (addClusterRet.failed()) {
                 // 这里必须显示事务回滚
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -1389,7 +1376,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildFail(exception.getMessage());
         }
         //缩容后发布事件，通过模板进行缩容
-        
+
         return Result.buildSucc();
     }
     
@@ -1438,12 +1425,21 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         return Result.buildSucc();
     }
-    
+
+    @Override
+    public Result<Void> bindGatewayCluster(Integer clusterPhyId, Integer gatewayClusterId, String operator, Integer projectId) {
+        ClusterPhy cluster = clusterPhyService.getClusterById(clusterPhyId);
+        cluster.setGatewayIds(cluster.getGatewayIds()+","+gatewayClusterId);
+        clusterPhyService.editCluster(ConvertUtil.obj2Obj(cluster,ClusterPhyDTO.class),operator);
+        return Result.buildSucc();
+    }
+
+
     @Override
     public Result<List<Object>> getBeforeVersionByClusterId(Integer clusterPhyId) {
         return Result.buildSucc(Collections.emptyList());
     }
-    
+
     /**************************************** private method ***************************************************/
 
     private Result<Boolean> checkClusterExistAndConfigType(MultiClusterSettingDTO param) {
@@ -1639,8 +1635,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     private ClusterPhyDTO buildPhyClusters(ClusterJoinDTO param, String operator) {
         ClusterPhyDTO clusterDTO = ConvertUtil.obj2Obj(param, ClusterPhyDTO.class);
-
-        String clientAddress = clusterRoleHostService.buildESClientHttpAddressesStr(param.getRoleClusterHosts());
+        String clientAddress = "";
+        if (StringUtils.isNotBlank(param.getProxyAddress())){
+            clientAddress = param.getProxyAddress();
+        }else {
+            clientAddress = clusterRoleHostService.buildESClientHttpAddressesStr(param.getRoleClusterHosts());
+        }
 
         clusterDTO.setDesc(param.getPhyClusterDesc());
         if (StringUtils.isBlank(clusterDTO.getDataCenter())) {
@@ -1660,6 +1660,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         clusterDTO.setCreator(operator);
         clusterDTO.setRunMode(RunModeEnum.READ_WRITE_SHARE.getRunMode());
         clusterDTO.setHealth(DEFAULT_CLUSTER_HEALTH);
+        clusterDTO.setEcmAccess(Boolean.FALSE);
+        clusterDTO.setComponentId(-1);
         return clusterDTO;
     }
     

@@ -55,10 +55,10 @@
         "type": "long"
       },
       "priStoreSize": {
-        "type": "keyword"
+        "type": "long"
       },
       "storeSize": {
-        "type": "keyword"
+        "type": "long"
       },
       "key": {
         "ignore_above": 1024,

@@ -464,12 +464,19 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     public Long getSearchRejectedNum(String cluster, String node) {
         return ariusStatsNodeInfoESDAO.getSearchRejectedNum(cluster, node);
     }
-    
+
+    @Override
+    public List<ClusterNodeStats> syncGetNodeStats(String cluster) {
+        return esClusterNodeDAO.getNodeState(cluster);
+    }
+
+
+
     @Override
     public Collection<ESResponsePluginInfo> syncGetPlugins(String clusterName) throws ESOperateException {
         return esClusterNodeDAO.syncGetPlugins(clusterName);
     }
-    
+
     /*********************************************private******************************************/
 
     @Override

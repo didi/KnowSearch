@@ -132,15 +132,23 @@ public interface ESClusterNodeService {
      * SearchRejected数
      *
      * @param cluster 集群 WriteRejectedNum
+     * @param node
      * @return {@code Long}
      */
     public Long getSearchRejectedNum(String cluster,String node);
-		
+
+    /**
+     * 获取nodeStats信息
+     * @param cluster
+     * @return
+     */
+    List<ClusterNodeStats> syncGetNodeStats(String cluster);
+
 		/**
 		 * 从名为 clusterName 的集群中获取所有插件。
 		 *
 		 * @param clusterName 从中获取插件的集群的名称。
 		 * @return 对象的集合。
 		 */
-		Collection<ESResponsePluginInfo> syncGetPlugins(String clusterName) throws ESOperateException;
+	Collection<ESResponsePluginInfo> syncGetPlugins(String clusterName) throws ESOperateException;
 }

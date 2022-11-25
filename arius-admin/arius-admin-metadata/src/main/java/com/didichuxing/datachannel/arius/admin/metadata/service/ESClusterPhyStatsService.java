@@ -53,7 +53,7 @@ public class ESClusterPhyStatsService {
      * @param endTime                结束时间
      * @return                       分位图实体
      */
-    public List<BasePercentileMetrics> getAggPercentilesMetrics(String clusterName, String clusterMetricsType,
+    public List<BasePercentileMetrics> getAggPercentilesMetrics(String clusterName,long clusterType, String clusterMetricsType,
                                                                 String aggType, Long startTime, Long endTime) {
         AtomicReference<Map<Long, Double>> avgAtomic = new AtomicReference<>();
         AtomicReference<Map<Long, Double>> st99Atomic = new AtomicReference<>();
@@ -62,19 +62,19 @@ public class ESClusterPhyStatsService {
         AtomicReference<Map<Long, Double>> st55Atomic = new AtomicReference<>();
 
         futureUtil
-            .runnableTask(() -> avgAtomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,
+            .runnableTask(() -> avgAtomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,clusterType,
                 clusterMetricsType, aggType, PercentilesEnum.AVG.getType(), startTime, endTime)))
 
-            .runnableTask(() -> st99Atomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,
+            .runnableTask(() -> st99Atomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,clusterType,
                 clusterMetricsType, aggType, PercentilesEnum.ST99.getType(), startTime, endTime)))
 
-            .runnableTask(() -> st95Atomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,
+            .runnableTask(() -> st95Atomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,clusterType,
                 clusterMetricsType, aggType, PercentilesEnum.ST95.getType(), startTime, endTime)))
 
-            .runnableTask(() -> st75Atomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,
+            .runnableTask(() -> st75Atomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,clusterType,
                 clusterMetricsType, aggType, PercentilesEnum.ST75.getType(), startTime, endTime)))
 
-            .runnableTask(() -> st55Atomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,
+            .runnableTask(() -> st55Atomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,clusterType,
                 clusterMetricsType, aggType, PercentilesEnum.ST55.getType(), startTime, endTime)))
             .waitExecute();
 
@@ -115,9 +115,9 @@ public class ESClusterPhyStatsService {
      * @param clazz       根据类中属性名称去ES索引中匹配指标，匹配到则返回，否则为空
      * @return            clazz
      */
-    public <T> List<T> getAggClusterPhyMetrics(String clusterName, String aggType, Long startTime, Long endTime,
+    public <T> List<T> getAggClusterPhyMetrics(String clusterName,long clusterType, String aggType, Long startTime, Long endTime,
                                                Class<T> clazz) {
-        return ariusStatsClusterInfoEsDao.getAggClusterPhyMetrics(clusterName, aggType, startTime, endTime, clazz);
+        return ariusStatsClusterInfoEsDao.getAggClusterPhyMetrics(clusterName,clusterType, aggType, startTime, endTime, clazz);
     }
 
     /**

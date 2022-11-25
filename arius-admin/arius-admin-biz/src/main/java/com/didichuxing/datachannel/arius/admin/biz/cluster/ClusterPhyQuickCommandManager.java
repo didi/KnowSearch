@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcomma
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmentDescriptionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardDistributionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.TaskMissionAnalysisVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import java.util.List;
 
@@ -94,7 +95,7 @@ public interface ClusterPhyQuickCommandManager {
      * @param projectId 项目
      * @return IndicesDistributionVO
      */
-    PaginationResult<IndicesDistributionVO> indicesDistributionPage(ClusterPhyQuickCommandIndicesQueryDTO condition,
+    List<IndicesDistributionVO> indicesDistributionPage(ClusterPhyQuickCommandIndicesQueryDTO condition,
                                                                     Integer projectId) throws NotFindSubclassException;
     
     /**
@@ -104,6 +105,6 @@ public interface ClusterPhyQuickCommandManager {
      * @param projectId 项目
      * @return ShardDistributionVO
      */
-    PaginationResult<ShardDistributionVO> shardDistributionPage(ClusterPhyQuickCommandShardsQueryDTO condition,
-                                                                Integer projectId) throws NotFindSubclassException;
+    List<ShardDistributionVO> shardDistributionPage(ClusterPhyQuickCommandShardsQueryDTO condition,
+                                                                Integer projectId) throws ESOperateException;
 }
