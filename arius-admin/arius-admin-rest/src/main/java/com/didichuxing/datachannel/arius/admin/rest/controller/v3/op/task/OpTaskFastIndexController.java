@@ -4,6 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastIndexBriefVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -94,5 +95,12 @@ public class OpTaskFastIndexController {
     @ApiOperation(value = "回切转让")
     public Result<Void> rollbackTemplate(@PathVariable("taskId") Integer taskId) {
         return fastIndexManager.rollbackTemplate(taskId);
+    }
+
+    @GetMapping("/{taskId}/brief")
+    @ResponseBody
+    @ApiOperation(value = "获取模板和索引的下拉框值")
+    public Result<FastIndexBriefVO> getTemplateAndIndexBrief(@PathVariable("taskId") Integer taskId) {
+        return fastIndexManager.getTemplateAndIndexBrief(taskId);
     }
 }

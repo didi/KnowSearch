@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.Fa
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastDumpTaskLogVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastIndexBriefVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastIndexDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
@@ -46,4 +47,11 @@ public interface FastIndexManager {
 
     PaginationResult<FastDumpTaskLogVO> pageGetTaskLogs(Integer projectId,
                                                         FastIndexLogsConditionDTO queryDTO) throws NotFindSubclassException;
+
+    /**
+     * 获取模板和索引的下拉框值
+     * @param taskId
+     * @return
+     */
+    Result<FastIndexBriefVO> getTemplateAndIndexBrief(Integer taskId);
 }

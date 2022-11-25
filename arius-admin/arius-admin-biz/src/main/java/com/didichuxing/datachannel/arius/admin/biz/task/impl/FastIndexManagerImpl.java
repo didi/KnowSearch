@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastIndexBriefVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -503,6 +504,24 @@ public class FastIndexManagerImpl implements FastIndexManager {
         processDTO.setStatus(opTask.getStatus());
         processDTO.setExpandData(JSON.toJSONString(fastIndexDTO));
         return processTask(processDTO);
+    }
+
+    @Override
+    public Result<FastIndexBriefVO> getTemplateAndIndexBrief(Integer taskId) {
+        OpTask opTask = opTaskService.getById(taskId);
+        if (null == opTask) {
+            return Result.buildFrom(FAIL_RESULT_GET_OP_TASK_ERROR);
+        }
+        List<FastIndexTaskInfo> taskIndexList = fastIndexTaskService.listByTaskId(taskId);
+        String templateName = taskIndexList.stream().map(FastIndexTaskInfo::getTemplateName).distinct().findFirst().orElse(null);
+        FastIndexBriefVO fastIndexBriefVO = new FastIndexBriefVO();
+        List<String> indexNameList = Lists.newArrayList();
+        taskIndexList.stream().forEach(fastIndexTaskInfo -> indexNameList.add(fastIndexTaskInfo.getIndexName()));
+        fastIndexBriefVO.setIndexName(indexNameList);
+        if(Objects.nonNull(templateName)){
+            fastIndexBriefVO.setTemplateName(templateName);
+        }
+        return Result.buildSucc(fastIndexBriefVO);
     }
 
     @Override
