@@ -497,7 +497,7 @@ class ClusterPhyManagerTest {
     void testJoinCluster() throws InvocationTargetException, IllegalAccessException, AdminTaskException {
         Integer projectId = 1;
         ClusterJoinDTO param = new ClusterJoinDTO(0, 0, "clusterPhyName", "esVersion", Lists.newArrayList(),
-            "desc", "passwd", 4, "{\"createSource\":1}", "cn", "acs", 1,null,null,null,null,null);
+                "desc", "passwd", 4, "{\"createSource\":1}", "cn", "acs", 1,null,null,null,null,null);
         ESClusterRoleHostDTO roleHostDTO = new ESClusterRoleHostDTO(0L, 0L, "hostname", "", CLUSTER, "port", false, 0,
             0, "nodeSet", 0, "attributes", "16c-32g-1t");
         assertEquals(Result.buildParamIllegal("参数为空").getMessage(),

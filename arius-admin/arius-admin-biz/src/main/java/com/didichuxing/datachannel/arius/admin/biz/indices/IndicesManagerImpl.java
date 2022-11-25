@@ -568,6 +568,8 @@ public class IndicesManagerImpl implements IndicesManager {
         String phyCluster = getClusterRet.getData();
     
         IndexCatCell indexCatCell = esIndexCatService.syncGetCatIndexInfoById(phyCluster, indexName);
+        indexCatCell.setPriStoreSize(SizeUtil.getUnitSize(Long.parseLong(indexCatCell.getPriStoreSize())));
+        indexCatCell.setStoreSize(SizeUtil.getUnitSize(Long.parseLong(indexCatCell.getStoreSize())));
     
         if (Objects.isNull(indexCatCell)) {
             return Result.buildFail("获取单个索引详情信息失败");
