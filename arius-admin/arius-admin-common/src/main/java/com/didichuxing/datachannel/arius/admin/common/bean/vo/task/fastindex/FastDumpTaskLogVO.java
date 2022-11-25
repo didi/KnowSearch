@@ -6,19 +6,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class FastDumpTaskLogVO {
-    private String logType;
-    private String traceId;
-    private String hostName;
-    private String fileName;
-    private String logThread;
+
+    private String failedLuceneDataPath;
     private String ip;
-    private String methodName;
-    private String className;
+    private String level;
     private String message;
-    private String spanId;
-    private String logName;
-    private String logLevel;
-    private Long logMills;
-    private Integer lineNumber;
-    private String applicationName;
+    private String sourceClusterName;
+    private String sourceIndex;
+    private String targetClusterName;
+    private String targetIndex;
+    private String taskId;
+    private Long timestamp;
 }

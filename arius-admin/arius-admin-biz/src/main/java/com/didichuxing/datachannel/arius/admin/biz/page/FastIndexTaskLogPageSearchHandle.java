@@ -81,14 +81,28 @@ public class FastIndexTaskLogPageSearchHandle extends
             condition.setSortTerm(DEFAULT_SORT_TERM);
         }
 
-        List<String> fastDumpTaskIdList = Lists.newArrayList();
+        List<FastIndexTaskInfo> taskInfoList = fastIndexTaskService.listByTaskId(condition.getTaskId());
+        List<FastIndexTaskInfo> ret = taskInfoList;
+        List<String> fastDumpTaskIdList = Lists.newArrayList("");
         if (StringUtils.isNotBlank(condition.getFastDumpTaskId())) {
-            fastDumpTaskIdList.add(condition.getFastDumpTaskId());
-        } else {
-            List<FastIndexTaskInfo> taskInfoList = fastIndexTaskService.listByTaskId(condition.getTaskId());
-            fastDumpTaskIdList = taskInfoList.stream().map(FastIndexTaskInfo::getFastDumpTaskId)
-                .filter(StringUtils::isNotBlank).distinct().collect(Collectors.toList());
+            ret = taskInfoList.stream()
+                .filter(obj -> StringUtils.equals(condition.getFastDumpTaskId(), obj.getFastDumpTaskId()))
+                .collect(Collectors.toList());
         }
+
+        if (StringUtils.isNotBlank(condition.getTemplateName())) {
+            ret = taskInfoList.stream()
+                .filter(obj -> StringUtils.equals(condition.getTemplateName(), obj.getTemplateName()))
+                .collect(Collectors.toList());
+        }
+        if (StringUtils.isNotBlank(condition.getIndexName())) {
+            ret = taskInfoList.stream().filter(obj -> StringUtils.equals(condition.getIndexName(), obj.getIndexName()))
+                .collect(Collectors.toList());
+        }
+
+        fastDumpTaskIdList.addAll(ret.stream().map(FastIndexTaskInfo::getFastDumpTaskId).filter(StringUtils::isNotBlank)
+            .distinct().collect(Collectors.toList()));
+
         condition.setFastDumpTaskIdList(fastDumpTaskIdList);
     }
 

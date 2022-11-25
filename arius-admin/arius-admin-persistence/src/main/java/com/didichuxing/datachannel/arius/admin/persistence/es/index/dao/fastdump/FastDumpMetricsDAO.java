@@ -14,7 +14,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.Fa
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastDumpTaskLogVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
@@ -48,8 +47,12 @@ public class FastDumpMetricsDAO extends BaseESDAO {
         // 排序条件，默认根据使用时间排序 desc
         String sortTerm = "timeStamp";
         String sortOrder = "desc";
-        String realName = IndexNameUtils.genDailyIndexName(indexName, logsConditionDTO.getStartTime(), logsConditionDTO.getEndTime());
-
+        String realName;
+        if (StringUtils.isNotBlank(indexName) && !StringUtils.endsWith(indexName, "*")) {
+            realName = indexName + "*";
+        }else {
+            realName = indexName;
+        }
         if (!StringUtils.isEmpty(logsConditionDTO.getSortTerm())) {
             // 根据用户自定义条件排序
             sortOrder = BooleanUtils.isTrue(logsConditionDTO.getOrderByDesc()) ? "desc" : "asc";
