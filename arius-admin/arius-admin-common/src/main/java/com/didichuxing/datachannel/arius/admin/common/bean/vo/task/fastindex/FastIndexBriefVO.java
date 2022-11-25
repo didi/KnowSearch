@@ -13,5 +13,5 @@ public class FastIndexBriefVO {
     private String               templateName;
 
     @ApiModelProperty("原索引名称")
-    private List<String> indexName;
+    private String indexName;
 }

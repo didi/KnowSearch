@@ -23,6 +23,9 @@ import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping(V3 + "/op-task/fast-index")
 @Api(tags = "数据迁移任务接口(REST)")
@@ -100,7 +103,7 @@ public class OpTaskFastIndexController {
     @GetMapping("/{taskId}/brief")
     @ResponseBody
     @ApiOperation(value = "获取模板和索引的下拉框值")
-    public Result<FastIndexBriefVO> getTemplateAndIndexBrief(@PathVariable("taskId") Integer taskId) {
+    public Result<Map<String, List<FastIndexBriefVO>>> getTemplateAndIndexBrief(@PathVariable("taskId") Integer taskId) {
         return fastIndexManager.getTemplateAndIndexBrief(taskId);
     }
 }

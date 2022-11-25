@@ -11,6 +11,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.Fas
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastIndexDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * 任务 Service
  *
@@ -53,5 +56,5 @@ public interface FastIndexManager {
      * @param taskId
      * @return
      */
-    Result<FastIndexBriefVO> getTemplateAndIndexBrief(Integer taskId);
+    Result<Map<String, List<FastIndexBriefVO>>> getTemplateAndIndexBrief(Integer taskId);
 }

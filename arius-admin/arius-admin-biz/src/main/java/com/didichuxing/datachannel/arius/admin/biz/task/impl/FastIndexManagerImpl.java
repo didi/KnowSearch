@@ -507,20 +507,14 @@ public class FastIndexManagerImpl implements FastIndexManager {
     }
 
     @Override
-    public Result<FastIndexBriefVO> getTemplateAndIndexBrief(Integer taskId) {
+    public Result< Map<String, List<FastIndexBriefVO>>> getTemplateAndIndexBrief(Integer taskId) {
         OpTask opTask = opTaskService.getById(taskId);
         if (null == opTask) {
             return Result.buildFrom(FAIL_RESULT_GET_OP_TASK_ERROR);
         }
         List<FastIndexTaskInfo> taskIndexList = fastIndexTaskService.listByTaskId(taskId);
-        String templateName = taskIndexList.stream().map(FastIndexTaskInfo::getTemplateName).distinct().findFirst().orElse(null);
-        FastIndexBriefVO fastIndexBriefVO = new FastIndexBriefVO();
-        List<String> indexNameList = Lists.newArrayList();
-        taskIndexList.stream().forEach(fastIndexTaskInfo -> indexNameList.add(fastIndexTaskInfo.getIndexName()));
-        fastIndexBriefVO.setIndexName(indexNameList);
-        if(Objects.nonNull(templateName)){
-            fastIndexBriefVO.setTemplateName(templateName);
-        }
+        List<FastIndexBriefVO> fastIndexBriefVOS = ConvertUtil.list2List(taskIndexList, FastIndexBriefVO.class);
+        Map<String, List<FastIndexBriefVO>> fastIndexBriefVO = fastIndexBriefVOS.stream().collect(Collectors.groupingBy(FastIndexBriefVO::getTemplateName));
         return Result.buildSucc(fastIndexBriefVO);
     }
 
