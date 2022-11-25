@@ -149,7 +149,13 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
 
     @Override
     public Result<List<ComponentGroupConfig>> getComponentConfig(int componentId) {
-        List<ComponentGroupConfig> configList = componentGroupConfigRepository.getConfigByComponentId(componentId);
+        Component component = componentRepository.getComponentById(componentId);
+        List<ComponentGroupConfig> configList;
+        if(null != component.getDependConfigComponentId()) {
+            configList = componentGroupConfigRepository.getConfigByComponentId(component.getDependConfigComponentId());
+        } else {
+            configList = componentGroupConfigRepository.getConfigByComponentId(componentId);
+        }
         return Result.success(getLatestGroupConfig(configList));
     }
 
