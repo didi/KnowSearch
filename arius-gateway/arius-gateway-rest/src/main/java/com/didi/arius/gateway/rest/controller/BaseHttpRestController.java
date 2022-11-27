@@ -1,5 +1,6 @@
 package com.didi.arius.gateway.rest.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.consts.RestConsts;
 import com.didi.arius.gateway.common.exception.QueryDslLengthException;
@@ -27,6 +28,18 @@ import com.didi.arius.gateway.rest.http.RestController;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.log.LogGather;
+import com.didiglobal.knowframework.observability.Observability;
+import com.didiglobal.knowframework.observability.common.constant.Constant;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
+import io.opentelemetry.context.propagation.TextMapGetter;
+import io.opentelemetry.context.propagation.TextMapPropagator;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.*;
 import org.elasticsearch.rest.support.RestUtils;
@@ -44,6 +57,15 @@ public abstract class BaseHttpRestController implements IRestHandler {
     protected static final ILog traceLogger = LogFactory.getLog(QueryConsts.TRACE_LOGGER);
     protected static final ILog auditLogger = LogFactory.getLog(QueryConsts.AUDIT_LOGGER);
     protected static final String AUTHORIZATION = "Authorization";
+
+    private static final TextMapPropagator TEXT_MAP_PROPAGATOR = Observability.getTextMapPropagator();
+    private static final Tracer tracer = Observability.getTracer(BaseHttpRestController.class.getName());
+
+    private static Set<Integer> validHttpStatusCodeSet = new HashSet<>();
+
+    static {
+        validHttpStatusCodeSet.add(HttpStatus.SC_OK);
+    }
 
     @Autowired
     protected DynamicConfigService dynamicConfigService;
@@ -81,29 +103,92 @@ public abstract class BaseHttpRestController implements IRestHandler {
 
     @Override
     public void dispatchRequest(RestRequest request, RestChannel channel) {
+        Span span = buildSpan(request);
         QueryContext queryContext = parseContext(request, channel);
-
-        try {
-
+        try (Scope scope = span.makeCurrent()) {
+            // Process the request
             checkToken(queryContext);
-
             preRequest(queryContext);
-
             handleRequest(queryContext);
-
             postRequest(queryContext);
+            //handle response status code
+            RestResponse response = queryContext.getResponse();
+            //set span status
+            int httpStatus = response.status().getStatus();
+            setSpanStatus(span, httpStatus);
         } catch (Exception ex) {
-
+            span.setStatus(StatusCode.ERROR, ex.getMessage());
             preException(queryContext, ex);
-
             try {
                 channel.sendResponse(new BytesRestResponse(channel, ex));
             } catch (IOException ioe) {
                 BytesRestResponse response = new BytesRestResponse(RestStatus.INTERNAL_SERVER_ERROR);
                 channel.sendResponse(response);
             }
+        } finally {
+            // Close the span
+            span.end();
         }
     }
+
+    /**
+     * 根据 http status 设置 span 状态
+     * @param span Span 对象
+     * @param httpStatus http status code
+     */
+    private void setSpanStatus(Span span, int httpStatus) {
+        if(!validHttpStatusCodeSet.contains(httpStatus)) {
+            span.setStatus(
+                    StatusCode.ERROR,
+                    String.format(
+                            "http状态码%d不在合法http状态码集%s内",
+                            httpStatus,
+                            JSON.toJSONString(validHttpStatusCodeSet)
+                    )
+            );
+        } else {
+            span.setStatus(StatusCode.OK);
+        }
+    }
+
+    /**
+     * 根据 request 对象，构建 span 对象，并注入 http 请求头相关信息
+     * @param request RestRequest 对象
+     * @return Span 对象
+     */
+    private Span buildSpan(RestRequest request) {
+        Context context = TEXT_MAP_PROPAGATOR.extract(Context.current(), request, getter);
+        Span span = tracer.spanBuilder(
+                String.format("%s.%s", this.getClass().getName(), "dispatchRequest")
+        ).setParent(context).setSpanKind(SpanKind.SERVER).startSpan();
+        span.setAttribute(Constant.ATTRIBUTE_KEY_COMPONENT, Constant.ATTRIBUTE_VALUE_COMPONENT_HTTP);
+        span.setAttribute(Constant.ATTRIBUTE_KEY_HTTP_METHOD, request.method().name());
+        span.setAttribute(Constant.ATTRIBUTE_KEY_HTTP_SCHEMA, Constant.ATTRIBUTE_VALUE_COMPONENT_HTTP);
+        span.setAttribute(Constant.ATTRIBUTE_KEY_HTTP_HOST, request.getLocalAddress().toString());
+        span.setAttribute(Constant.ATTRIBUTE_KEY_HTTP_TARGET, request.uri());
+        return span;
+    }
+
+    /*
+     * extract the context from http headers
+     */
+    private static final TextMapGetter<RestRequest> getter =
+            new TextMapGetter<RestRequest>() {
+                @Override
+                public Iterable<String> keys(RestRequest carrier) {
+                    List<String> iterable = new ArrayList<>();
+                    Set<String> headers = carrier.getHeaders();
+                    if(CollectionUtils.isNotEmpty(headers)) {
+                        iterable.addAll(headers);
+                    }
+                    return iterable;
+                }
+                @Override
+                public String get(RestRequest carrier, String key) {
+                    String headerValue = carrier.getHeader(key);
+                    return headerValue == null ? StringUtils.EMPTY : headerValue;
+                }
+            };
 
     /************************************************************** abstract method **************************************************************/
     /**

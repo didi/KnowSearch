@@ -23,23 +23,26 @@ public class NettyHttpController {
     public void dispatchRequest(HttpRequest request, HttpChannel channel) {
         try {
             LogFactory.setUniqueFlag();
-
-            IRestHandler restHandler;
-            if (request.rawPath().startsWith("/_xpack")) {
-                restHandler = restCommonController;
-            } else {
-                restHandler = restController.tryAllHandlers(request);
-            }
-
-            if (restHandler == null) {
-                restHandler = restCommonController;
-            }
-
-            if(restHandler != null){
-                restHandler.dispatchRequest(request, channel);
-            }
+            handleRequest(request, channel);
         } finally {
             LogFactory.removeFlag();
+        }
+    }
+
+    private void handleRequest(HttpRequest request, HttpChannel channel) {
+        IRestHandler restHandler;
+        if (request.rawPath().startsWith("/_xpack")) {
+            restHandler = restCommonController;
+        } else {
+            restHandler = restController.tryAllHandlers(request);
+        }
+
+        if (restHandler == null) {
+            restHandler = restCommonController;
+        }
+
+        if(restHandler != null){
+            restHandler.dispatchRequest(request, channel);
         }
     }
 }
