@@ -111,11 +111,7 @@ public abstract class BaseHttpRestController implements IRestHandler {
             preRequest(queryContext);
             handleRequest(queryContext);
             postRequest(queryContext);
-            //handle response status code
-            RestResponse response = queryContext.getResponse();
-            //set span status
-            int httpStatus = response.status().getStatus();
-            setSpanStatus(span, httpStatus);
+            span.setStatus(StatusCode.OK);
         } catch (Exception ex) {
             span.setStatus(StatusCode.ERROR, ex.getMessage());
             preException(queryContext, ex);
@@ -128,26 +124,6 @@ public abstract class BaseHttpRestController implements IRestHandler {
         } finally {
             // Close the span
             span.end();
-        }
-    }
-
-    /**
-     * 根据 http status 设置 span 状态
-     * @param span Span 对象
-     * @param httpStatus http status code
-     */
-    private void setSpanStatus(Span span, int httpStatus) {
-        if(!validHttpStatusCodeSet.contains(httpStatus)) {
-            span.setStatus(
-                    StatusCode.ERROR,
-                    String.format(
-                            "http状态码%d不在合法http状态码集%s内",
-                            httpStatus,
-                            JSON.toJSONString(validHttpStatusCodeSet)
-                    )
-            );
-        } else {
-            span.setStatus(StatusCode.OK);
         }
     }
 
