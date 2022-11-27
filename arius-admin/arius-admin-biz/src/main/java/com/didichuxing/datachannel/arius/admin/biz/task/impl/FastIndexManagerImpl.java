@@ -507,15 +507,27 @@ public class FastIndexManagerImpl implements FastIndexManager {
     }
 
     @Override
-    public Result< Map<String, List<FastIndexBriefVO>>> getTemplateAndIndexBrief(Integer taskId) {
+    public Result<List<FastIndexBriefVO>> getFastIndexBrief(Integer taskId) {
         OpTask opTask = opTaskService.getById(taskId);
         if (null == opTask) {
             return Result.buildFrom(FAIL_RESULT_GET_OP_TASK_ERROR);
         }
+        FastIndexDTO fastIndexDTO = JSON.parseObject(opTask.getExpandData(), FastIndexDTO.class);
+        //查询出索引和模板
         List<FastIndexTaskInfo> taskIndexList = fastIndexTaskService.listByTaskId(taskId);
-        List<FastIndexBriefVO> fastIndexBriefVOS = ConvertUtil.list2List(taskIndexList, FastIndexBriefVO.class);
-        Map<String, List<FastIndexBriefVO>> fastIndexBriefVO = fastIndexBriefVOS.stream().collect(Collectors.groupingBy(FastIndexBriefVO::getTemplateName));
-        return Result.buildSucc(fastIndexBriefVO);
+        //拼接结果
+        List<FastIndexBriefVO> fastIndexBriefVOList = Lists.newArrayList();
+        if (DATA_TYPE_INDEX.equals(fastIndexDTO.getDataType())) {
+            List<String> indexList = taskIndexList.stream().map(FastIndexTaskInfo::getIndexName).collect(Collectors.toList());
+            fastIndexBriefVOList.add(new FastIndexBriefVO(indexList));
+        } else if (DATA_TYPE_TEMPLATE.equals(fastIndexDTO.getDataType())) {
+            Map<String, List<String>> templateMap = ConvertUtil.list2MapOfList(taskIndexList, FastIndexTaskInfo::getTemplateName, FastIndexTaskInfo::getIndexName);
+            templateMap.forEach((template, indexList) -> {
+                FastIndexBriefVO fastIndexBriefVO = new FastIndexBriefVO(template, indexList);
+                fastIndexBriefVOList.add(fastIndexBriefVO);
+            });
+        }
+        return Result.buildSucc(fastIndexBriefVOList);
     }
 
     @Override

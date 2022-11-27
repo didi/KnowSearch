@@ -56,5 +56,5 @@ public interface FastIndexManager {
      * @param taskId
      * @return
      */
-    Result<Map<String, List<FastIndexBriefVO>>> getTemplateAndIndexBrief(Integer taskId);
+    Result<List<FastIndexBriefVO>> getFastIndexBrief(Integer taskId);
 }

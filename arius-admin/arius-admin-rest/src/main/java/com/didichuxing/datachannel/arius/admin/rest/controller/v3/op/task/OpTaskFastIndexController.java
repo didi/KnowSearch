@@ -103,7 +103,7 @@ public class OpTaskFastIndexController {
     @GetMapping("/{taskId}/brief")
     @ResponseBody
     @ApiOperation(value = "获取模板和索引的下拉框值")
-    public Result<Map<String, List<FastIndexBriefVO>>> getTemplateAndIndexBrief(@PathVariable("taskId") Integer taskId) {
-        return fastIndexManager.getTemplateAndIndexBrief(taskId);
+    public Result<List<FastIndexBriefVO>> getTemplateAndIndexBrief(@PathVariable("taskId") Integer taskId) {
+        return fastIndexManager.getFastIndexBrief(taskId);
     }
 }
