@@ -113,9 +113,14 @@ public abstract class BaseHttpRestController implements IRestHandler {
             postRequest(queryContext);
             //handle response status code
             RestResponse response = queryContext.getResponse();
-            //set span status
-            int httpStatus = response.status().getStatus();
-            setSpanStatus(span, httpStatus);
+            if(null == response || null == response.status()) {
+                //注：业务方表示 response 可能为 null 或 response.status 为空，此时，如未抛异常，表示成功
+                span.setStatus(StatusCode.OK);
+            } else {
+                //set span status
+                int httpStatus = response.status().getStatus();
+                setSpanStatus(span, httpStatus);
+            }
         } catch (Exception ex) {
             span.setStatus(StatusCode.ERROR, ex.getMessage());
             preException(queryContext, ex);
