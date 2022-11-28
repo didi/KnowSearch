@@ -91,6 +91,7 @@ public class FastIndexManagerImpl implements FastIndexManager {
     private static final Result<Void>                                FAIL_RESULT_GET_FAST_INDEX_TASK_ERROR = Result
         .buildFail("获取数据迁移任务原始信息失败");
     private static final String                                      GET_INDEX_FAILED_MSG                  = "获取原集群中的索引【%s】失败！";
+    private static final String                                      GET_READ_FILE_RATE_LIMIT_MSG          = "设置的任务读取速率不能小于【%d】";
     private static final long                                        TASK_WAITING_TIME                     = 5 * 1000L;
 
     @Autowired
@@ -763,7 +764,35 @@ public class FastIndexManagerImpl implements FastIndexManager {
         if (CollectionUtils.isNotEmpty(failedList)) {
             return Result.buildFail(failedList.stream().map(BaseResult::getMessage).collect(Collectors.joining("\n")));
         }
+        //校验任务读取速率
+        Result<List<FastIndexTaskInfo>> checkReadFileRateLimitResult = checkReadFileRateLimit(fastIndexDTO, resultList.size());
+        if (checkReadFileRateLimitResult.failed()) {
+            return checkReadFileRateLimitResult;
+        }
         return Result.buildSucc(resultList.stream().map(Result::getData).collect(Collectors.toList()));
+    }
+
+    /**
+     * 校验任务读取速率
+     * @param fastIndexDTO
+     * @param size
+     * @return
+     */
+    private Result<List<FastIndexTaskInfo>> checkReadFileRateLimit(FastIndexDTO fastIndexDTO, int size) {
+        Long taskReadRate = fastIndexDTO.getTaskReadRate();
+        if (null != taskReadRate && taskReadRate > 0) {
+            if (size == 0 && taskReadRate < 1000L) {
+                return Result.buildFail(String.format(GET_READ_FILE_RATE_LIMIT_MSG, 1000));
+            }
+            if(size == 0){
+                return Result.buildSucc();
+            }
+            BigDecimal readFileRateLimit = BigDecimal.valueOf(taskReadRate).divide(BigDecimal.valueOf(size), RoundingMode.UP);
+            if (readFileRateLimit.compareTo(new BigDecimal(1000)) < 0) {
+                return Result.buildFail(String.format(GET_READ_FILE_RATE_LIMIT_MSG, 1000 * size));
+            }
+        }
+        return Result.buildSucc();
     }
 
     private Result<List<FastIndexTaskInfo>> createTemplateAndGetTaskIndexListByTemplate(FastIndexDTO fastIndexDTO,
@@ -787,9 +816,41 @@ public class FastIndexManagerImpl implements FastIndexManager {
         if (CollectionUtils.isNotEmpty(failedTemplateNames)) {
             return Result.buildFail("所选模板【" + StringUtils.join(failedTemplateNames, ",") + "】异常");
         }
-
+        //根据模版在原集群中获取索引列表
         List<Result<List<FastIndexTaskInfo>>> resultList = Lists.newCopyOnWriteArrayList();
         taskList.forEach(task -> resultList.addAll(FAST_INDEX_TASK_TEMPLATE_FUTURE_UTIL.callableTask(() -> {
+            IndexTemplate logic = templateId2Logic.get(task.getSourceTemplateId());
+            List<CatIndexResult> results = esIndexService.syncCatIndexByExpression(fastIndexDTO.getSourceCluster(),
+                    logic.getExpression());
+            if (null == results) {
+                return Result.buildFail("根据模版【" + logic.getName() + "】获取原集群中的索引失败！");
+            }
+
+            return Result.buildSucc(results.stream().filter(Objects::nonNull).map(catIndex -> {
+                FastIndexTaskInfo taskInfo = new FastIndexTaskInfo();
+                taskInfo.setTaskType(DATA_TYPE_TEMPLATE);//template
+                taskInfo.setTemplateId(logic.getId());
+                taskInfo.setTemplateName(logic.getName());
+                taskInfo.setIndexName(catIndex.getIndex());
+                taskInfo.setTargetIndexName(catIndex.getIndex());
+                taskInfo.setTaskStatus(FastIndexTaskStatusEnum.NOT_SUBMITTED.getValue());//未提交
+                taskInfo.setTotalDocumentNum(new BigDecimal(catIndex.getDocsCount()));
+                return taskInfo;
+            }).collect(Collectors.toList()));
+        }).waitResultQueue()));
+        resultList.addAll(FAST_INDEX_TASK_TEMPLATE_FUTURE_UTIL.waitResult());
+        Result<List<FastIndexTaskInfo>> failedListResult = getListResult(resultList);
+        if (failedListResult.failed()) {
+            return failedListResult;
+        }
+        //校验任务读取速率
+        Result<List<FastIndexTaskInfo>> checkReadFileRateLimitResult = checkReadFileRateLimit(fastIndexDTO, resultList.size());
+        if (checkReadFileRateLimitResult.failed()) {
+            return checkReadFileRateLimitResult;
+        }
+        //创建模板
+        List<Result<List<FastIndexTaskInfo>>> createTemplateResultList = Lists.newCopyOnWriteArrayList();
+        taskList.forEach(task -> createTemplateResultList.addAll(FAST_INDEX_TASK_TEMPLATE_FUTURE_UTIL.callableTask(() -> {
             try {
                 IndexTemplate logic = templateId2Logic.get(task.getSourceTemplateId());
                 //创建模版
@@ -797,37 +858,32 @@ public class FastIndexManagerImpl implements FastIndexManager {
                 if (createRet.failed()) {
                     return Result.buildFrom(createRet);
                 }
-                //根据模版在原集群中获取索引列表
-                List<CatIndexResult> results = esIndexService.syncCatIndexByExpression(fastIndexDTO.getSourceCluster(),
-                    logic.getExpression());
-                if (null == results) {
-                    return Result.buildFail("根据模版【" + logic.getName() + "】获取原集群中的索引失败！");
-                }
-
-                return Result.buildSucc(results.stream().filter(Objects::nonNull).map(catIndex -> {
-                    FastIndexTaskInfo taskInfo = new FastIndexTaskInfo();
-                    taskInfo.setTaskType(DATA_TYPE_TEMPLATE);//template
-                    taskInfo.setTemplateId(logic.getId());
-                    taskInfo.setTemplateName(logic.getName());
-                    taskInfo.setIndexName(catIndex.getIndex());
-                    taskInfo.setTargetIndexName(catIndex.getIndex());
-                    taskInfo.setTaskStatus(FastIndexTaskStatusEnum.NOT_SUBMITTED.getValue());//未提交
-                    taskInfo.setTotalDocumentNum(new BigDecimal(catIndex.getDocsCount()));
-                    return taskInfo;
-                }).collect(Collectors.toList()));
+                return Result.buildSucc();
             } catch (AdminOperateException e) {
-                //pass
-                return Result.buildFail("创建模版失败");
+                return Result.buildFail("创建模版【" + task.getSourceTemplateId() + "】失败");
             }
         }).waitResultQueue()));
-        resultList.addAll(FAST_INDEX_TASK_TEMPLATE_FUTURE_UTIL.waitResult());
-        List<Result<List<FastIndexTaskInfo>>> failedList = resultList.stream().filter(BaseResult::failed)
-            .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(failedList)) {
-            return Result.buildFail(failedList.stream().map(BaseResult::getMessage).collect(Collectors.joining("\n")));
+        createTemplateResultList.addAll(FAST_INDEX_TASK_TEMPLATE_FUTURE_UTIL.waitResultQueue());
+        Result<List<FastIndexTaskInfo>> createTemplateFailedResult = getListResult(createTemplateResultList);
+        if (createTemplateFailedResult.failed()) {
+            return createTemplateFailedResult;
         }
         return Result.buildSucc(
-            resultList.stream().map(Result::getData).flatMap(Collection::stream).collect(Collectors.toList()));
+                resultList.stream().map(Result::getData).flatMap(Collection::stream).collect(Collectors.toList()));
+    }
+
+    /**
+     * 判断异步线程执行结果是否失败
+     * @param ResultList
+     * @return
+     */
+    private Result<List<FastIndexTaskInfo>> getListResult(List<Result<List<FastIndexTaskInfo>>> ResultList) {
+        List<Result<List<FastIndexTaskInfo>>> FailedList = ResultList.stream().filter(BaseResult::failed)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(FailedList)) {
+            return Result.buildFail(FailedList.stream().map(BaseResult::getMessage).collect(Collectors.joining("\n")));
+        }
+        return Result.buildSucc();
     }
 
     private Result<Void> createTargetTemplate(FastIndexDTO fastIndexDTO, ClusterRegion targetClusterRegion,
