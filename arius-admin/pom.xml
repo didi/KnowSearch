@@ -722,7 +722,7 @@
             <dependency>
                 <groupId>io.github.zqrferrari</groupId>
                 <artifactId>logi-job-spring-boot-starter</artifactId>
-                <version>1.0.29</version>
+                <version>1.0.30</version>
             </dependency>
 
             <dependency>
