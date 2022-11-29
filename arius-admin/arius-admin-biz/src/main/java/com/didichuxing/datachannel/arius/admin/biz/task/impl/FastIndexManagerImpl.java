@@ -7,6 +7,7 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -816,6 +817,7 @@ public class FastIndexManagerImpl implements FastIndexManager {
         if (CollectionUtils.isNotEmpty(failedTemplateNames)) {
             return Result.buildFail("所选模板【" + StringUtils.join(failedTemplateNames, ",") + "】异常");
         }
+        AtomicInteger indexCount = new AtomicInteger(0);
         //根据模版在原集群中获取索引列表
         List<Result<List<FastIndexTaskInfo>>> resultList = Lists.newCopyOnWriteArrayList();
         taskList.forEach(task -> resultList.addAll(FAST_INDEX_TASK_TEMPLATE_FUTURE_UTIL.callableTask(() -> {
@@ -825,8 +827,7 @@ public class FastIndexManagerImpl implements FastIndexManager {
             if (null == results) {
                 return Result.buildFail("根据模版【" + logic.getName() + "】获取原集群中的索引失败！");
             }
-
-            return Result.buildSucc(results.stream().filter(Objects::nonNull).map(catIndex -> {
+            List<FastIndexTaskInfo> indexTaskInfoList = results.stream().filter(Objects::nonNull).map(catIndex -> {
                 FastIndexTaskInfo taskInfo = new FastIndexTaskInfo();
                 taskInfo.setTaskType(DATA_TYPE_TEMPLATE);//template
                 taskInfo.setTemplateId(logic.getId());
@@ -836,7 +837,9 @@ public class FastIndexManagerImpl implements FastIndexManager {
                 taskInfo.setTaskStatus(FastIndexTaskStatusEnum.NOT_SUBMITTED.getValue());//未提交
                 taskInfo.setTotalDocumentNum(new BigDecimal(catIndex.getDocsCount()));
                 return taskInfo;
-            }).collect(Collectors.toList()));
+            }).collect(Collectors.toList());
+            indexCount.accumulateAndGet(indexTaskInfoList.size(), Integer::sum);
+            return Result.buildSucc(indexTaskInfoList);
         }).waitResultQueue()));
         resultList.addAll(FAST_INDEX_TASK_TEMPLATE_FUTURE_UTIL.waitResult());
         Result<List<FastIndexTaskInfo>> failedListResult = getListResult(resultList);
@@ -844,7 +847,7 @@ public class FastIndexManagerImpl implements FastIndexManager {
             return failedListResult;
         }
         //校验任务读取速率
-        Result<List<FastIndexTaskInfo>> checkReadFileRateLimitResult = checkReadFileRateLimit(fastIndexDTO, resultList.size());
+        Result<List<FastIndexTaskInfo>> checkReadFileRateLimitResult = checkReadFileRateLimit(fastIndexDTO, indexCount.get());
         if (checkReadFileRateLimitResult.failed()) {
             return checkReadFileRateLimitResult;
         }
