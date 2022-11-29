@@ -117,4 +117,11 @@ public class ESPhyClusterNodeController {
         return clusterNodeManager.delete(ids, HttpRequestUtil.getProjectId(request),
                         HttpRequestUtil.getOperator(request));
     }
+
+    @GetMapping("/machineSpecs")
+    @ResponseBody
+    @ApiOperation(value = "获取当前平台所有的机器规格")
+    public Result<List<String>> listAllMachineSpecs() {
+        return clusterNodeManager.listAllMachineSpecs();
+    }
 }

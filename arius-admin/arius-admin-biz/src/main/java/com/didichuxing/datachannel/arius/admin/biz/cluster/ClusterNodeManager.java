@@ -95,4 +95,10 @@ public interface ClusterNodeManager {
      * @return
      */
     Result<Boolean> checkMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator, Integer projectId);
+
+    /**
+     * 获取当前平台所有集群节点的机器规格
+     * @return
+     */
+    Result<List<String>> listAllMachineSpecs();
 }
