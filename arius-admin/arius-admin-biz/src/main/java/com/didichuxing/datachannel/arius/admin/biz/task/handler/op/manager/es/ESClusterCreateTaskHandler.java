@@ -22,6 +22,7 @@ import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigD
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 
@@ -52,7 +53,18 @@ public class ESClusterCreateTaskHandler extends AbstractESTaskHandler {
 				if (Boolean.TRUE.equals(result.getData())) {
 						return Result.buildFail("ES集群名称已存在，不可创建同名集群");
 				}
-				
+				final List<GeneralGroupConfigDTO> groupConfigList = content.getGroupConfigList();
+				if (CollectionUtils.isEmpty(groupConfigList)) {
+						return Result.buildFail("配置为空");
+				}
+				final long count = groupConfigList.stream().map(GeneralGroupConfigDTO::getGroupName)
+						.count();
+				if (count > 1) {
+						return Result.buildFail("配置组的名称不能是重复的");
+				}
+				if (CollectionUtils.isEmpty(content.getDefaultGroupNames())) {
+						return Result.buildFail("默认的配置组名称未进行选择");
+				}
 				return Result.buildSucc();
 		}
 		
@@ -109,9 +121,18 @@ public class ESClusterCreateTaskHandler extends AbstractESTaskHandler {
 		}
 		
 		private ClusterCreateDTO initClusterCreateDTO(ClusterCreateContent content, Component component, Package pac) {
+				//1.转换为k v
+				final Map<String, GeneralGroupConfigDTO> groupName2GroupConfigDTOMap = ConvertUtil.list2Map(
+						content.getGroupConfigList(), GeneralGroupConfigDTO::getGroupName);
+				//2.获取指定的配置
+				final List<GeneralGroupConfigDTO> configDTOS = content.getDefaultGroupNames().stream()
+						.map(groupName2GroupConfigDTOMap::get).collect(
+								Collectors.toList());
+				//3.获取指定配置的ip和端口号
 				final List<TupleTwo<String, Integer>> ip2PortTuples = convertFGeneralGroupConfigDTO2IpAndPortTuple(
-								content.getGroupConfigList());
+								configDTOS);
 				Map<String, Integer> ip2PortMap = ConvertUtil.list2Map(ip2PortTuples, TupleTwo::v1, TupleTwo::v2);
+				//4.转换为master节点
 				List<ESClusterRoleHostDTO> nodes = component.getHostList().stream().map(
 								i -> ESClusterRoleHostDTO.builder().hostname(i.getHost()).ip(i.getHost()).cluster(content.getName())
 												.port(String.valueOf(ip2PortMap.get(i.getHost()))).machineSpec(i.getMachineSpec())
