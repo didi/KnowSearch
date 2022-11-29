@@ -13,6 +13,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TemplateLogicStatusDetail extends AbstractOrderDetail {
     /**
+     * 索引模板名称
+     */
+    private String name;
+    /**
      * 模板Id
      */
     private Integer templateId;

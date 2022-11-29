@@ -88,6 +88,11 @@ public class TemplateLogicBlockReadHandler extends BaseWorkOrderHandler {
         if (AriusObjUtils.isNull(content.getStatus())) {
             return Result.buildParamIllegal("禁用/启用读的状态为空");
         }
+
+        if (AriusObjUtils.isNull(content.getName())) {
+            return Result.buildParamIllegal("索引模板名称为空");
+        }
+
         return Result.buildSucc();
     }
 
@@ -101,7 +106,7 @@ public class TemplateLogicBlockReadHandler extends BaseWorkOrderHandler {
             return "";
         }
 
-        return "项目id为:" + content.getProjectId() + "的模板id为:" + content.getTemplateId() + workOrderTypeEnum.getMessage();
+        return content.getName()+ workOrderTypeEnum.getMessage();
     }
 
 

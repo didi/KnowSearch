@@ -95,7 +95,7 @@ public class DslTemplateQueryLimitHandler extends BaseWorkOrderHandler {
         if (workOrderTypeEnum == null) {
             return "";
         }
-        return "项目id:"+content.getProjectId() + workOrderTypeEnum.getMessage();
+        return workOrderTypeEnum.getMessage();
     }
 
 
