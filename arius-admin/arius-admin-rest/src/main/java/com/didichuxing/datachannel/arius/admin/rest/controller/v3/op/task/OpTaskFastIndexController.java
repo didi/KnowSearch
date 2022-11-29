@@ -4,7 +4,12 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastIndexBriefVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -105,5 +110,20 @@ public class OpTaskFastIndexController {
     @ApiOperation(value = "获取模板和索引的下拉框值")
     public Result<List<FastIndexBriefVO>> getTemplateAndIndexBrief(@PathVariable("taskId") Integer taskId) {
         return fastIndexManager.getFastIndexBrief(taskId);
+    }
+
+    @GetMapping("/{cluster}/{indexName}/setting")
+    @ResponseBody
+    @ApiOperation(value = "查询setting")
+    public Result<IndexSettingVO> getSetting(@PathVariable String cluster, @PathVariable String indexName,
+                                             HttpServletRequest request) {
+        return fastIndexManager.getSetting(cluster, indexName, HttpRequestUtil.getProjectId(request));
+    }
+    @GetMapping("/template/setting")
+    @ResponseBody
+    @ApiOperation(value = "获取模板Setting接口")
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
+    public Result<IndexTemplatePhySetting> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws AdminOperateException {
+        return fastIndexManager.getTemplateSettings(logicId);
     }
 }

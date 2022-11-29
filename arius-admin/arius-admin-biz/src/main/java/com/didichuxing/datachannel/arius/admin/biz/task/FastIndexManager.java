@@ -5,6 +5,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexLogsConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexRateLimitDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastDumpTaskLogVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastIndexBriefVO;
@@ -57,4 +59,20 @@ public interface FastIndexManager {
      * @return
      */
     Result<List<FastIndexBriefVO>> getFastIndexBrief(Integer taskId);
+
+    /**
+     * 索引模式-查看setting,去掉es原生默认加上的字段
+     * @param cluster
+     * @param indexName
+     * @param projectId
+     * @return
+     */
+    Result<IndexSettingVO> getSetting(String cluster, String indexName, Integer projectId);
+
+    /**
+     * 模板模式-查看setting，替换分配节点
+     * @param logicId
+     * @return
+     */
+    Result<IndexTemplatePhySetting> getTemplateSettings(Integer logicId);
 }

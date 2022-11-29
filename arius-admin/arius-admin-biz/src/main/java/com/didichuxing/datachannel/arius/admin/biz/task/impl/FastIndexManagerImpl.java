@@ -11,7 +11,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastIndexBriefVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
+import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
+import com.didiglobal.logi.security.service.ProjectService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -129,6 +139,12 @@ public class FastIndexManagerImpl implements FastIndexManager {
     private ESIndexMoveTaskService                                   esIndexMoveTaskService;
     @Autowired
     private HandleFactory                                            handleFactory;
+    @Autowired
+    private ClusterLogicService                                      clusterLogicService;
+    @Autowired
+    private ProjectService                                            projectService;
+    @Autowired
+    private TemplatePhySettingManager                                 templatePhySettingManager;
 
     private static final FutureUtil<Result<List<FastIndexTaskInfo>>> FAST_INDEX_TASK_TEMPLATE_FUTURE_UTIL  = FutureUtil
         .init("FastIndexTaskTemplate", 10, 20, 1000);
@@ -507,6 +523,72 @@ public class FastIndexManagerImpl implements FastIndexManager {
         processDTO.setStatus(opTask.getStatus());
         processDTO.setExpandData(JSON.toJSONString(fastIndexDTO));
         return processTask(processDTO);
+    }
+
+    @Override
+    public Result<IndexTemplatePhySetting> getTemplateSettings(Integer logicId) {
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(logicId);
+        if (templateLogicWithPhysical == null) {
+            return Result.buildNotExist("逻辑模板不存在, ID:" + logicId);
+        }
+        if (!templateLogicWithPhysical.hasPhysicals()) {
+            return Result.buildNotExist("物理模板不存在，ID:" + logicId);
+        }
+        IndexTemplatePhy indexTemplatePhy = templateLogicWithPhysical.getMasterPhyTemplate();
+        if (indexTemplatePhy != null) {
+            try {
+
+                IndexTemplatePhySetting indexTemplatePhySetting = templatePhySettingManager.fetchTemplateSettings(indexTemplatePhy.getCluster(),
+                        indexTemplatePhy.getName());
+                Map<String, String> indexTemplateMap = indexTemplatePhySetting.flatSettings();
+
+                return Result.buildSucc(indexTemplatePhySetting);
+            } catch (ESOperateException e) {
+                return Result.buildFail(e.getMessage());
+            }
+        }
+
+        return Result.buildFail("不存在Master角色物理模板，ID：" + logicId);
+    }
+
+    @Override
+    public Result<IndexSettingVO> getSetting(String cluster, String indexName, Integer projectId) {
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(cluster, projectId);
+        if (getClusterRet.failed()) {
+            return Result.buildFrom(getClusterRet);
+        }
+        String phyCluster = getClusterRet.getData();
+        Result<Void> ret = basicCheckParam(phyCluster, indexName, projectId);
+        if (ret.failed()) {
+            return Result.buildFrom(ret);
+        }
+
+        IndexSettingVO indexSettingVO = new IndexSettingVO();
+        MultiIndexsConfig multiIndexsConfig = esIndexService.syncGetIndexConfigs(phyCluster, indexName);
+        if (null == multiIndexsConfig) {
+            LOGGER.warn(
+                    "class=IndicesManagerImpl||method=getSetting||cluster={}||index={}||errMsg=get empty Index configs ",
+                    phyCluster, indexName);
+            return Result.buildSucc(indexSettingVO);
+        }
+
+        IndexConfig indexConfig = multiIndexsConfig.getIndexConfig(indexName);
+        if (null == indexConfig) {
+            LOGGER.warn(
+                    "class=IndicesManagerImpl||method=getSetting||cluster={}||index={}||errMsg=get empty Index configs ",
+                    phyCluster, indexName);
+            return Result.buildSucc(indexSettingVO);
+        }
+        //删除不需要的setting配置
+        Map<String, String> setting = indexConfig.getSettings();
+        setting.remove("index.creation_date");
+        setting.remove("index.uuid");
+        setting.remove("index.version.created");
+        setting.remove("index.provided_name");
+        setting.remove("index.routing.allocation.include._name");
+        indexSettingVO.setProperties(JsonUtils.reFlat(setting));
+        indexSettingVO.setIndexName(indexName);
+        return Result.buildSucc(indexSettingVO);
     }
 
     @Override
@@ -1311,6 +1393,49 @@ public class FastIndexManagerImpl implements FastIndexManager {
             return new Tuple<>(arr[0], arr[1]);
         }
         return new Tuple<>("", "");
+    }
+
+    /**
+     * 注意， 这里普通用户侧前端传输cluster值是：逻辑集群名称，运维侧是：物理集群名称
+     * @param cluster
+     * @param projectId
+     * @return
+     */
+    private Result<String> getClusterPhyByClusterNameAndProjectId(String cluster, Integer projectId) {
+        String phyClusterName;
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            phyClusterName = cluster;
+        } else {
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByNameAndProjectId(cluster,projectId );
+            if (null == clusterLogic) {
+                return Result.buildParamIllegal(String.format("逻辑集群[%s]不存在", cluster));
+            }
+            ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
+            if (null == clusterRegion) {
+                return Result.buildParamIllegal("逻辑集群未绑定Region");
+            }
+            phyClusterName = clusterRegion.getPhyClusterName();
+            if (!esClusterService.isConnectionStatus(phyClusterName)){
+                return Result.buildFail(String.format("%s 集群不正常",cluster));
+            }
+        }
+        return Result.buildSucc(phyClusterName);
+    }
+
+    private Result<Void> basicCheckParam(String cluster, String index, Integer projectId) {
+        if (!projectService.checkProjectExist(projectId)) {
+            return Result.buildParamIllegal(String.format("当前登录项目Id[%s]不存在, 无权限操作", projectId));
+        }
+
+        if (!clusterPhyService.isClusterExists(cluster)) {
+            return Result.buildParamIllegal(String.format("物理集群[%s]不存在", cluster));
+        }
+
+        if (!esIndexService.syncIsIndexExist(cluster, index)) {
+            return Result.buildParamIllegal(String.format("集群[%s]中的索引[%s]不存在", cluster, index));
+        }
+
+        return Result.buildSucc();
     }
 
 }
