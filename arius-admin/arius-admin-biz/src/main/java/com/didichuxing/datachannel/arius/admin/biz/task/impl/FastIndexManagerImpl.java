@@ -381,7 +381,8 @@ public class FastIndexManagerImpl implements FastIndexManager {
                 .getLogicTemplatesMapByIds(Lists.newArrayList(templateId2IndexTaskList.keySet()));
             List<FastIndexStats> list = Lists.newArrayList();
             templateId2IndexTaskList.forEach((key, val) -> {
-                FastIndexStats templateStats = calculationTaskStats(taskIndexStatsList);
+                List<FastIndexStats> taskTemplateIndexStatsList = ConvertUtil.list2List(val, FastIndexStats.class);
+                FastIndexStats templateStats = calculationTaskStats(taskTemplateIndexStatsList);
                 IndexTemplate indexTemplate = templateMap.getOrDefault(key, null);
                 if (null != indexTemplate) {
                     templateStats.setTemplateName(indexTemplate.getName());
