@@ -39,7 +39,9 @@
     <select id="selectOneByClusterName" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from gateway_cluster_info;
+        from gateway_cluster_info
+        where cluster_name = #{clusterName}
+        limit 1
     </select>
     
     <select id="listByCondition"
@@ -122,14 +124,25 @@
         FROM gateway_cluster_info
         WHERE cluster_name = #{name}
     </select>
-	
+
+    <select id="listByNames" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from gateway_cluster_info
+        <where>
+            <foreach collection="list" item="clusterName" open="cluster_name in (" separator="," close=")">
+                #{clusterName}
+            </foreach>
+        </where>
+    </select>
+
     <select id="getOneByComponentId" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>
         FROM gateway_cluster_info
         WHERE component_id = #{componentId}
     </select>
-    
+
     <update id="updateVersion">
         UPDATE gateway_cluster_info
         SET version = #{version} where component_id=#{componentId}

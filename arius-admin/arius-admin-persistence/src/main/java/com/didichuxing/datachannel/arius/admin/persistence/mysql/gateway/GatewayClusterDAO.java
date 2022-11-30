@@ -96,7 +96,14 @@ public interface GatewayClusterDAO {
      * @return 一个 GatewayClusterPO 对象。
      */
     GatewayClusterPO getOneByName(@Param("name")String name);
-    
+
+    /**
+     * 通过gateway集群名称获取gateway
+     * @param gatewayClusterName
+     * @return
+     */
+    List<GatewayClusterPO> listByNames(List<String> gatewayClusterName);
+
     /**
      * 通过 componentId 获取一个 GatewayClusterPO
      *

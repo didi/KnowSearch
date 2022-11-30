@@ -145,12 +145,12 @@ public class PackageService {
     }
 
     /**
-     * 通过软件包类型获取软件包版本list
+     * 根据软件包类型获取软件包
      * @param packageType
      * @return
      */
-    public List<String> listPackageVersionByPackageType(Integer packageType) {
-        return packageDomainService.listPackageVersionByPackageType(packageType);
+    public List<Package> listPackageByPackageType(Integer packageType){
+        return packageDomainService.listPackageByPackageType(packageType);
     }
 
     /**
@@ -160,15 +160,5 @@ public class PackageService {
      */
     public List<Integer> hasPackagesDependComponent(List<Integer> packageIds) {
         return componentDomainService.hasPackagesDependComponent(packageIds);
-    }
-
-    /**
-     * 通过包类型和当前版本查询比当前版本低的版本
-     * @param packageType
-     * @param version
-     * @return
-     */
-    public List<Package> listPackageWithLowerVersionByPackageTypeAndVersion(Integer packageType, String version) {
-        return packageDomainService.listPackageWithLowerVersionByPackageTypeAndVersion(packageType,version);
     }
 }

@@ -17,7 +17,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterNodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.GatewayESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalVO;
@@ -40,6 +39,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+
+import com.google.common.collect.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -181,7 +182,8 @@ public class GatewayManagerTest {
         when(mockTemplateLogicAliasService.listAliasMapWithCache()).thenReturn(new HashMap<>());
 
         // Run the test
-        final Result<List<GatewayESUserVO>> result = gatewayManagerImplUnderTest.listESUserByProject();
+        List<String> gatewayClusterName = Lists.newArrayList("Normal");
+        final Result<List<GatewayESUserVO>> result = gatewayManagerImplUnderTest.listESUserByProject(gatewayClusterName);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -205,7 +207,7 @@ public class GatewayManagerTest {
 
         // Run the test
         final Result<Map<String, GatewayTemplatePhysicalVO>> result = gatewayManagerImplUnderTest
-            .getTemplateMap("cluster");
+            .getTemplateMap("cluster", Lists.newArrayList());
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -231,7 +233,7 @@ public class GatewayManagerTest {
 
         // Run the test
         final Result<Map<String, GatewayTemplateDeployInfoVO>> result = gatewayManagerImplUnderTest
-            .listDeployInfo();
+            .listDeployInfo(Lists.newArrayList());
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);

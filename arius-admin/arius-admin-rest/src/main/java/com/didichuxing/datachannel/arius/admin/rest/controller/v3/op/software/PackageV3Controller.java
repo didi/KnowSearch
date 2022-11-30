@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageQ
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageUpdateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackagePageVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageQueryVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageVersionVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -68,10 +69,9 @@ public class PackageV3Controller {
                 HttpRequestUtil.getProjectId(request));
     }
 
-    @GetMapping("{packageTypeDesc}/version/list")
+    @GetMapping("{packageTypeDesc}/versions")
     @ApiOperation(value = "安装包版本list", notes = "")
-    public Result<List<String>> listPackageVersionByPackageType(HttpServletRequest request, @PathVariable String packageTypeDesc) {
-        return packageManager.listPackageVersionByPackageType(packageTypeDesc, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+    public Result<List<PackageVersionVO>> listPackageWithHigherVersionByPackageTypeAndVersion(HttpServletRequest request, @PathVariable String packageTypeDesc,String currentVersion) {
+        return packageManager.listPackageWithHigherVersionByPackageTypeAndVersion(packageTypeDesc, HttpRequestUtil.getProjectId(request),currentVersion);
     }
 }

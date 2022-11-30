@@ -92,15 +92,6 @@
         where id = #{id}
     </delete>
 
-    <select id="listPackageVersionByPackageType"
-            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO"
-            resultMap="BaseResultMap">
-        select
-            <include refid="Base_Column_List"/>
-        from logi_op_package
-        where package_type = #{packageType}
-    </select>
-
     <select id="pagingByCondition"
             parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO"
             resultMap="BaseResultMap">
@@ -124,10 +115,11 @@
         <if test="id != null">and id = #{id}</if>
     </select>
 
-    <select id="listPackageWithLowerVersionByPackageTypeAndVersion" resultMap="BaseResultMap">
+    <select id="listPackageByPackageType" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from logi_op_package
-        where package_type = #{packageType} and convert(TRIM(REPLACE(version,'.','')),UNSIGNED) &lt; #{version}
+        where package_type = #{packageType}
     </select>
+
 </mapper>

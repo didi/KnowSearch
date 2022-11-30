@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageQ
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageUpdateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackagePageVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageQueryVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageVersionVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -16,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.software.Software
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.PACKAGE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
@@ -129,14 +132,14 @@ public class PackageManagerImpl implements PackageManager {
     }
 
     @Override
-    public Result<List<String>> listPackageVersionByPackageType(String packageTypeDesc, String operator, Integer projectId) {
+    public Result<List<PackageVersionVO>> listPackageWithHigherVersionByPackageTypeAndVersion(String packageTypeDesc, Integer projectId, String currentVersion) {
         Result<Void> result = ProjectUtils.checkProjectCorrectly(retId -> retId, projectId, projectId);
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
-        List<String> listPackageVersionByPackageType = packageService.listPackageVersionByPackageType
-                (SoftwarePackageTypeEnum.getPackageTypeByDesc(packageTypeDesc));
-        return Result.buildSucc(listPackageVersionByPackageType);
+        List<Package> listPackageByPackageType = packageService.listPackageByPackageType(SoftwarePackageTypeEnum.getPackageTypeByDesc(packageTypeDesc));
+        List<Package> listPackage = listPackageByPackageType.stream().filter(aPackage -> ESVersionUtil.compareVersion(aPackage.getVersion(), currentVersion) > 0).collect(Collectors.toList());
+        return Result.buildSucc(ConvertUtil.list2List(listPackage,PackageVersionVO.class));
     }
 
     /*************************************************private**********************************************************/

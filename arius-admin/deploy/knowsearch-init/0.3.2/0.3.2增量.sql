@@ -150,7 +150,8 @@ CREATE TABLE logi_op_script
     content_url VARCHAR(255) NULL COMMENT '文件地址',
     `describe`  VARCHAR(255) NULL COMMENT '描述',
     create_time TIMESTAMP    NULL COMMENT '创建时间',
-    update_time TIMESTAMP    NULL COMMENT '更新时间'
+    update_time TIMESTAMP    NULL COMMENT '更新时间',
+    creator     VARCHAR(255) NULL COMMENT '创建者'
 );
 -- auto-generated definition
 CREATE TABLE logi_op_task
