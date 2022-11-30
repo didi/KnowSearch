@@ -1,6 +1,6 @@
 #项目、用户、权限点
 -- auto-generated definition
-create table logi_security_config
+create table kf_security_config
 (
     id          bigint unsigned auto_increment comment '主键自增'
         primary key,
@@ -19,10 +19,10 @@ create table logi_security_config
     comment 'logi 配置项' charset = utf8;
 
 create index idx_group_name
-    on logi_security_config (value_group, value_name);
+    on kf_security_config (value_group, value_name);
 
 -- auto-generated definition
-create table logi_security_dept
+create table kf_security_dept
 (
     id          int auto_increment
         primary key,
@@ -39,7 +39,7 @@ create table logi_security_dept
     comment '部门信息表' charset = utf8;
 
 -- auto-generated definition
-create table logi_security_message
+create table kf_security_message
 (
     id          int auto_increment
         primary key,
@@ -56,7 +56,7 @@ create table logi_security_message
     comment '消息中心' charset = utf8;
 
 -- auto-generated definition
-create table logi_security_oplog
+create table kf_security_oplog
 (
     id                int auto_increment
         primary key,
@@ -76,7 +76,7 @@ create table logi_security_oplog
     comment '操作日志' charset = utf8;
 
 -- auto-generated definition
-create table logi_security_oplog_extra
+create table kf_security_oplog_extra
 (
     id          int auto_increment
         primary key,
@@ -90,7 +90,7 @@ create table logi_security_oplog_extra
     comment '操作日志信息（操作页面、操作类型、对象分类）' charset = utf8;
 
 -- auto-generated definition
-create table logi_security_permission
+create table kf_security_permission
 (
     id              int auto_increment
         primary key,
@@ -107,7 +107,7 @@ create table logi_security_permission
     comment '权限表' charset = utf8;
 
 -- auto-generated definition
-create table logi_security_project
+create table kf_security_project
 (
     id           int auto_increment comment '项目 id'
         primary key,
@@ -124,7 +124,7 @@ create table logi_security_project
     comment '项目表' charset = utf8;
 
 -- auto-generated definition
-create table logi_security_resource_type
+create table kf_security_resource_type
 (
     id          int auto_increment
         primary key,
@@ -137,7 +137,7 @@ create table logi_security_resource_type
     comment '资源类型表' charset = utf8;
 
 -- auto-generated definition
-create table logi_security_role
+create table kf_security_role
 (
     id           int auto_increment
         primary key,
@@ -153,7 +153,7 @@ create table logi_security_role
     comment '角色信息' charset = utf8;
 
 -- auto-generated definition
-create table logi_security_role_permission
+create table kf_security_role_permission
 (
     id            int auto_increment
         primary key,
@@ -167,7 +167,7 @@ create table logi_security_role_permission
     comment '角色权限表（只保留叶子权限与角色关系）' charset = utf8;
 
 -- auto-generated definition
-create table logi_security_user
+create table kf_security_user
 (
     id          int auto_increment
         primary key,
@@ -186,7 +186,7 @@ create table logi_security_user
     comment '用户信息' charset = utf8;
 
 -- auto-generated definition
-create table logi_security_user_project
+create table kf_security_user_project
 (
     id          int auto_increment
         primary key,
@@ -201,7 +201,7 @@ create table logi_security_user_project
     comment '用户项目关系表（项目负责人）' charset = utf8;
 
 -- auto-generated definition
-create table logi_security_user_resource
+create table kf_security_user_resource
 (
     id               int auto_increment
         primary key,
@@ -218,7 +218,7 @@ create table logi_security_user_resource
     comment '用户和资源关系表' charset = utf8;
 
 -- auto-generated definition
-create table logi_security_user_role
+create table kf_security_user_role
 (
     id          int auto_increment
         primary key,
@@ -840,6 +840,7 @@ CREATE TABLE `logi_task`
     `owner`           varchar(200)  NOT NULL DEFAULT '' COMMENT ' 责任人 ',
     `task_worker_str` varchar(3000) NOT NULL DEFAULT '' COMMENT ' 机器执行信息 ',
     `app_name`        varchar(100)  NOT NULL DEFAULT '' COMMENT ' 被调度的应用名称 ',
+    `node_name_white_list_str` VARCHAR(3000) DEFAULT '' NOT NULL COMMENT '执行节点名对应白名单集',
     `create_time`     datetime               DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`     datetime               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
@@ -886,6 +887,7 @@ CREATE TABLE `logi_worker`
     `app_name`        varchar(100) NOT NULL DEFAULT '' COMMENT ' 被调度的应用名称 ',
     `create_time`     datetime              DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`     datetime              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `node_name`     VARCHAR(100) DEFAULT '' NOT NULL COMMENT 'node 名',
     PRIMARY KEY (`id`),
     UNIQUE KEY `worker_code` (`worker_code`)
 ) ENGINE = InnoDB
@@ -1015,7 +1017,7 @@ CREATE TABLE `user_metrics_config_info` (
 
 
 #权限点和角色的初始化数据
-insert into logi_security_role_permission (id, role_id, permission_id, create_time, update_time, is_delete, app_name)
+insert into kf_security_role_permission (id, role_id, permission_id, create_time, update_time, is_delete, app_name)
 values (1597, 1, 0, '2022-06-01 21:19:42.0', '2022-08-25 10:31:42.0', 0, 'know_search'),
        (1935, 1, 1593, '2022-06-14 17:41:03.0', '2022-08-27 17:36:58.0', 0, 'know_search'),
        (1937, 1, 1637, '2022-06-14 17:41:03.0', '2022-08-25 10:31:42.0', 0, 'know_search'),
@@ -1203,7 +1205,7 @@ values (1597, 1, 0, '2022-06-01 21:19:42.0', '2022-08-25 10:31:42.0', 0, 'know_s
        (5591, 1, 1759, '2022-08-11 10:39:01.0', '2022-08-25 10:31:42.0', 0, 'know_search'),
        (5593, 2, 1759, '2022-08-11 10:39:59.0', '2022-08-25 10:31:42.0', 0, 'know_search');
 #权限点初始化数据
-insert into logi_security_permission (id, permission_name, parent_id, leaf, level, description, create_time, update_time, is_delete, app_name)
+insert into kf_security_permission (id, permission_name, parent_id, leaf, level, description, create_time, update_time, is_delete, app_name)
 values  (1593, '物理集群', 0, 0, 1, '物理集群', '2022-05-24 18:08:22.0', '2022-08-24 20:07:31.0', 0, 'know_search'),
         (1595, '我的集群', 0, 0, 1, '我的集群', '2022-05-24 18:08:22.0', '2022-05-24 18:08:22.0', 0, 'know_search'),
         (1597, '集群版本', 0, 0, 1, '集群版本', '2022-05-24 18:08:22.0', '2022-05-24 18:08:22.0', 0, 'know_search'),
@@ -1348,21 +1350,21 @@ values  (1593, '物理集群', 0, 0, 1, '物理集群', '2022-05-24 18:08:22.0',
         (1875, '查看dashboard', 1871, 1, 2, '查看dashboard', '2022-05-24 18:08:24.0', '2022-08-27 17:35:50.0', 0,
          'know_search');
 #角色初始化数据
-insert into logi_security_role (id, role_code, role_name, description, last_reviser, create_time, update_time,
+insert into kf_security_role (id, role_code, role_name, description, last_reviser, create_time, update_time,
                                 is_delete, app_name)
 values (1, 'r14715628', '管理员', '管理员', 'admin', '2022-06-01 21:19:42.0', '2022-07-06 22:23:59.0', 0,
         'know_search'),
        (2, 'r14481382', '资源 owner', '普通用户拥有的最大权限', 'admin', '2022-06-14 18:08:56.0',
         '2022-07-06 20:36:31.0', 0, 'know_search');
 #初始化用户
-insert into logi_security_user (id, user_name, pw, salt, real_name, phone, email, dept_id, is_delete,
+insert into kf_security_user (id, user_name, pw, salt, real_name, phone, email, dept_id, is_delete,
                                 create_time, update_time, app_name)
 values (1, 'admin',
         'V1ZkU2RHRlhOSGhOYWs0M1VVWmFjVk5xVW1oaE0zUmlTVEJCZUZGRFRtUm1WVzh5VlcxNGMyRkZRamw3UUZacVNqUmhhM3RiSTBBeVFDTmRmVW8yVW14c2FFQjl7QFZqSjRha3tbI0AzQCNdfUo2UmxsaEB9Mv{#cdRgJ45Lqx}3IubEW87!==',
         '', 'admin', '18888888888', 'admin@12345.com', null, 0, '2022-05-26 05:46:12.0', '2022-08-26 09:06:19.0',
         'know_search');
 #初始化用户和角色的关系
-insert into logi_security_user_role (id, user_id, role_id, create_time, update_time, is_delete, app_name)
+insert into kf_security_user_role (id, user_id, role_id, create_time, update_time, is_delete, app_name)
 values (1, 1, 2, '2022-08-26 19:54:22.0', '2022-08-26 19:54:22.0', 0, 'know_search'),
        (2, 1, 1, '2022-08-30 21:05:17.0', '2022-08-30 21:05:17.0', 0, 'know_search');
 #项目和项目配置、es user 的关系
@@ -1370,7 +1372,7 @@ insert into project_arius_config (project_id, analyze_response_enable, is_source
                                   dsl_analyze_enable, slow_query_times, is_active, memo, create_time, update_time)
 values (1, 1, 0, 1, 1, 1000, 1, '超级应用', '2022-06-14 18:52:08.0', '2022-08-27 23:13:14.0'),
        (2, 1, 0, 1, 1, 1000, 1, '元数据模版应用 不可以被删除', '2022-08-25 11:18:45.0', '2022-08-25 11:18:45.0');
-insert into logi_security_project (id, project_code, project_name, description, dept_id, running, create_time,
+insert into kf_security_project (id, project_code, project_name, description, dept_id, running, create_time,
                                    update_time, is_delete, app_name)
 values (1, 'p14000143', 'SuperApp', '超级应用', 0, 1, '2022-05-26 05:49:08.0', '2022-08-24 11:09:49.0', 0,
         'know_search'),
@@ -1524,40 +1526,40 @@ values  (1, 'registry.xiaojukeji.com/didibuild/elasticsearch-image.hnb-pre-v.ari
         (321, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/1.2.3.1-4.tar.gz', '6.6.6.6', 'admin', 0, '4', '1', '2022-08-26 15:47:48.0', '2022-08-27 14:55:35.0', 0);
 /*
 0.3.1原始sql
-UPDATE logi_security_permission SET permission_name = 'Kibana', parent_id = 1609, leaf = 1, level = 2, description = 'Kibana', create_time = '2022-05-24 18:08:26.0', update_time = '2022-06-14 16:44:02.0', is_delete = 0, app_name = 'know_search' WHERE id = 1855;
-UPDATE logi_security_permission SET permission_name = 'SQL查询', parent_id = 1609, leaf = 1, level = 2, description = 'SQL查询', create_time = '2022-05-24 18:08:26.0', update_time = '2022-06-14 16:44:02.0', is_delete = 0, app_name = 'know_search' WHERE id = 1857;
-UPDATE logi_security_permission SET permission_name = 'DSL查询', parent_id = 1609, leaf = 1, level = 2, description = 'DSL查询', create_time = '2022-05-24 18:08:24.0', update_time = '2022-06-14 16:39:48.0', is_delete = 0, app_name = 'know_search' WHERE id = 1757;
-UPDATE logi_security_role_permission SET role_id = 1, permission_id = 1609, create_time = '2022-06-14 17:41:03.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2059;
-UPDATE logi_security_role_permission SET role_id = 1, permission_id = 1757, create_time = '2022-06-14 17:41:03.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2061;
-UPDATE logi_security_role_permission SET role_id = 1, permission_id = 1855, create_time = '2022-06-14 17:41:03.0', update_time = '2022-08-25 10:34:13.0', is_delete = 0, app_name = 'know_search' WHERE id = 2063;
-UPDATE logi_security_role_permission SET role_id = 1, permission_id = 1857, create_time = '2022-06-14 17:41:03.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2065;
-UPDATE logi_security_role_permission SET role_id = 2, permission_id = 1609, create_time = '2022-06-14 18:08:56.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2241;
-UPDATE logi_security_role_permission SET role_id = 2, permission_id = 1757, create_time = '2022-06-14 18:08:56.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2243;
-UPDATE logi_security_role_permission SET role_id = 2, permission_id = 1855, create_time = '2022-06-14 18:08:56.0', update_time = '2022-08-25 10:33:12.0', is_delete = 1, app_name = 'know_search' WHERE id = 2245;
-UPDATE logi_security_role_permission SET role_id = 2, permission_id = 1857, create_time = '2022-06-14 18:08:56.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2247;
+UPDATE kf_security_permission SET permission_name = 'Kibana', parent_id = 1609, leaf = 1, level = 2, description = 'Kibana', create_time = '2022-05-24 18:08:26.0', update_time = '2022-06-14 16:44:02.0', is_delete = 0, app_name = 'know_search' WHERE id = 1855;
+UPDATE kf_security_permission SET permission_name = 'SQL查询', parent_id = 1609, leaf = 1, level = 2, description = 'SQL查询', create_time = '2022-05-24 18:08:26.0', update_time = '2022-06-14 16:44:02.0', is_delete = 0, app_name = 'know_search' WHERE id = 1857;
+UPDATE kf_security_permission SET permission_name = 'DSL查询', parent_id = 1609, leaf = 1, level = 2, description = 'DSL查询', create_time = '2022-05-24 18:08:24.0', update_time = '2022-06-14 16:39:48.0', is_delete = 0, app_name = 'know_search' WHERE id = 1757;
+UPDATE kf_security_role_permission SET role_id = 1, permission_id = 1609, create_time = '2022-06-14 17:41:03.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2059;
+UPDATE kf_security_role_permission SET role_id = 1, permission_id = 1757, create_time = '2022-06-14 17:41:03.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2061;
+UPDATE kf_security_role_permission SET role_id = 1, permission_id = 1855, create_time = '2022-06-14 17:41:03.0', update_time = '2022-08-25 10:34:13.0', is_delete = 0, app_name = 'know_search' WHERE id = 2063;
+UPDATE kf_security_role_permission SET role_id = 1, permission_id = 1857, create_time = '2022-06-14 17:41:03.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2065;
+UPDATE kf_security_role_permission SET role_id = 2, permission_id = 1609, create_time = '2022-06-14 18:08:56.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2241;
+UPDATE kf_security_role_permission SET role_id = 2, permission_id = 1757, create_time = '2022-06-14 18:08:56.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2243;
+UPDATE kf_security_role_permission SET role_id = 2, permission_id = 1855, create_time = '2022-06-14 18:08:56.0', update_time = '2022-08-25 10:33:12.0', is_delete = 1, app_name = 'know_search' WHERE id = 2245;
+UPDATE kf_security_role_permission SET role_id = 2, permission_id = 1857, create_time = '2022-06-14 18:08:56.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2247;
 */
 # 0.3.1.1变更sql
 # 1.更新level和leaf
-UPDATE logi_security_permission SET permission_name = 'DSL查询', parent_id = 0, leaf = 0, level = 1, description = 'DSL查询', create_time = '2022-05-24 18:08:24.0', update_time = '2022-09-02 19:01:17.0', is_delete = 0, app_name = 'know_search' WHERE id = 1757;
-UPDATE logi_security_permission SET permission_name = 'Kibana', parent_id = 0, leaf = 0, level = 1, description = 'Kibana', create_time = '2022-05-24 18:08:26.0', update_time = '2022-09-02 19:01:17.0', is_delete = 0, app_name = 'know_search' WHERE id = 1855;
-UPDATE logi_security_permission SET permission_name = 'SQL查询', parent_id = 0, leaf = 0, level = 1, description = 'SQL查询', create_time = '2022-05-24 18:08:26.0', update_time = '2022-09-02 19:01:17.0', is_delete = 0, app_name = 'know_search' WHERE id = 1857;
-#1.1修改logi_security_role_permission
-UPDATE logi_security_role_permission SET role_id = 1, permission_id = 1609, create_time = '2022-06-14 17:41:03.0', update_time = '2022-09-02 19:04:07.0', is_delete = 1, app_name = 'know_search' WHERE id = 2059;
-UPDATE logi_security_role_permission SET role_id = 1, permission_id = 1757, create_time = '2022-06-14 17:41:03.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2061;
-UPDATE logi_security_role_permission SET role_id = 1, permission_id = 1855, create_time = '2022-06-14 17:41:03.0', update_time = '2022-08-25 10:34:13.0', is_delete = 0, app_name = 'know_search' WHERE id = 2063;
-UPDATE logi_security_role_permission SET role_id = 1, permission_id = 1857, create_time = '2022-06-14 17:41:03.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2065;
-UPDATE logi_security_role_permission SET role_id = 2, permission_id = 1609, create_time = '2022-06-14 18:08:56.0', update_time = '2022-09-02 19:04:07.0', is_delete = 1, app_name = 'know_search' WHERE id = 2241;
-UPDATE logi_security_role_permission SET role_id = 2, permission_id = 1757, create_time = '2022-06-14 18:08:56.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2243;
-UPDATE logi_security_role_permission SET role_id = 2, permission_id = 1855, create_time = '2022-06-14 18:08:56.0', update_time = '2022-08-25 10:33:12.0', is_delete = 1, app_name = 'know_search' WHERE id = 2245;
-UPDATE logi_security_role_permission SET role_id = 2, permission_id = 1857, create_time = '2022-06-14 18:08:56.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2247;
+UPDATE kf_security_permission SET permission_name = 'DSL查询', parent_id = 0, leaf = 0, level = 1, description = 'DSL查询', create_time = '2022-05-24 18:08:24.0', update_time = '2022-09-02 19:01:17.0', is_delete = 0, app_name = 'know_search' WHERE id = 1757;
+UPDATE kf_security_permission SET permission_name = 'Kibana', parent_id = 0, leaf = 0, level = 1, description = 'Kibana', create_time = '2022-05-24 18:08:26.0', update_time = '2022-09-02 19:01:17.0', is_delete = 0, app_name = 'know_search' WHERE id = 1855;
+UPDATE kf_security_permission SET permission_name = 'SQL查询', parent_id = 0, leaf = 0, level = 1, description = 'SQL查询', create_time = '2022-05-24 18:08:26.0', update_time = '2022-09-02 19:01:17.0', is_delete = 0, app_name = 'know_search' WHERE id = 1857;
+#1.1修改kf_security_role_permission
+UPDATE kf_security_role_permission SET role_id = 1, permission_id = 1609, create_time = '2022-06-14 17:41:03.0', update_time = '2022-09-02 19:04:07.0', is_delete = 1, app_name = 'know_search' WHERE id = 2059;
+UPDATE kf_security_role_permission SET role_id = 1, permission_id = 1757, create_time = '2022-06-14 17:41:03.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2061;
+UPDATE kf_security_role_permission SET role_id = 1, permission_id = 1855, create_time = '2022-06-14 17:41:03.0', update_time = '2022-08-25 10:34:13.0', is_delete = 0, app_name = 'know_search' WHERE id = 2063;
+UPDATE kf_security_role_permission SET role_id = 1, permission_id = 1857, create_time = '2022-06-14 17:41:03.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2065;
+UPDATE kf_security_role_permission SET role_id = 2, permission_id = 1609, create_time = '2022-06-14 18:08:56.0', update_time = '2022-09-02 19:04:07.0', is_delete = 1, app_name = 'know_search' WHERE id = 2241;
+UPDATE kf_security_role_permission SET role_id = 2, permission_id = 1757, create_time = '2022-06-14 18:08:56.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2243;
+UPDATE kf_security_role_permission SET role_id = 2, permission_id = 1855, create_time = '2022-06-14 18:08:56.0', update_time = '2022-08-25 10:33:12.0', is_delete = 1, app_name = 'know_search' WHERE id = 2245;
+UPDATE kf_security_role_permission SET role_id = 2, permission_id = 1857, create_time = '2022-06-14 18:08:56.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2247;
 #2.更新name
-UPDATE logi_security_permission SET permission_name = 'Kibana查询', parent_id = 0, leaf = 0, level = 1, description = 'Kibana查询', create_time = '2022-05-24 18:08:26.0', update_time = '2022-09-05 14:19:29.0', is_delete = 0, app_name = 'know_search' WHERE id = 1855;
+UPDATE kf_security_permission SET permission_name = 'Kibana查询', parent_id = 0, leaf = 0, level = 1, description = 'Kibana查询', create_time = '2022-05-24 18:08:26.0', update_time = '2022-09-05 14:19:29.0', is_delete = 0, app_name = 'know_search' WHERE id = 1855;
 #3.新增3个权限点
-INSERT INTO logi_security_permission (permission_name, parent_id, leaf, level, description, create_time, update_time, is_delete, app_name) VALUES ('DSL', 0, 0, 1, 'DSL', '2022-05-24 18:08:24.0', '2022-09-02 19:01:17.0', 0, 'know_search');
-INSERT INTO logi_security_permission (permission_name, parent_id, leaf, level, description, create_time, update_time, is_delete, app_name) VALUES ('Kibana', 0, 0, 1, 'Kibana', '2022-05-24 18:08:26.0', '2022-09-02 19:01:17.0', 0, 'know_search');
-INSERT INTO logi_security_permission (permission_name, parent_id, leaf, level, description, create_time, update_time, is_delete, app_name) VALUES ('SQL', 0, 0, 1, 'SQL', '2022-05-24 18:08:26.0', '2022-09-02 19:01:17.0', 0, 'know_search');
-#3.1 新增logi_security_role_permission
-insert into logi_security_role_permission(role_id, permission_id, is_delete, app_name)
+INSERT INTO kf_security_permission (permission_name, parent_id, leaf, level, description, create_time, update_time, is_delete, app_name) VALUES ('DSL', 0, 0, 1, 'DSL', '2022-05-24 18:08:24.0', '2022-09-02 19:01:17.0', 0, 'know_search');
+INSERT INTO kf_security_permission (permission_name, parent_id, leaf, level, description, create_time, update_time, is_delete, app_name) VALUES ('Kibana', 0, 0, 1, 'Kibana', '2022-05-24 18:08:26.0', '2022-09-02 19:01:17.0', 0, 'know_search');
+INSERT INTO kf_security_permission (permission_name, parent_id, leaf, level, description, create_time, update_time, is_delete, app_name) VALUES ('SQL', 0, 0, 1, 'SQL', '2022-05-24 18:08:26.0', '2022-09-02 19:01:17.0', 0, 'know_search');
+#3.1 新增kf_security_role_permission
+insert into kf_security_role_permission(role_id, permission_id, is_delete, app_name)
 values (1, 1877, 0, 'know_search'),
        (1, 1879, 0, 'know_search'),
        (1, 1881, 0, 'know_search'),
@@ -1566,9 +1568,9 @@ values (1, 1877, 0, 'know_search'),
        (2, 1881, 0, 'know_search');
 
 #4.再次更新level和leaf
-UPDATE logi_security_permission SET permission_name = 'DSL查询', parent_id = 1877, leaf = 1, level = 2, description = 'DSL查询' WHERE id = 1757;
-UPDATE logi_security_permission SET permission_name = 'Kibana查询', parent_id = 1879, leaf = 1, level = 2, description = 'Kibana查询' WHERE id = 1855;
-UPDATE logi_security_permission SET permission_name = 'SQL查询', parent_id = 1881, leaf = 1, level = 2, description = 'SQL查询' WHERE id = 1857;
+UPDATE kf_security_permission SET permission_name = 'DSL查询', parent_id = 1877, leaf = 1, level = 2, description = 'DSL查询' WHERE id = 1757;
+UPDATE kf_security_permission SET permission_name = 'Kibana查询', parent_id = 1879, leaf = 1, level = 2, description = 'Kibana查询' WHERE id = 1855;
+UPDATE kf_security_permission SET permission_name = 'SQL查询', parent_id = 1881, leaf = 1, level = 2, description = 'SQL查询' WHERE id = 1857;
 
 #5.用户和应用配置信息表
 alter table user_metrics_config_info rename to user_config_info;
@@ -1581,8 +1583,8 @@ truncate table user_config_info;
 INSERT INTO `user_config_info`(`user_name`, `project_id`, `config_type`, `config_info`)
 select DISTINCT t1.user_name,t2.project_id,2,
                 concat('[{\"firstUserConfigType\":\"searchQuery\",\"projectId\":',t2.project_id,',\"secondUserConfigType\":\"searchTemplate\",\"userConfigTypes\":[\"totalCostAvg\",\"totalShardsAvg\"],\"userName\":\"',t1.user_name,'\"}]') as config_info
-from logi_security_user t1 inner join
-     logi_security_user_project t2 on t1.id=t2.user_id and t2.is_delete='0'
+from kf_security_user t1 inner join
+     kf_security_user_project t2 on t1.id=t2.user_id and t2.is_delete='0'
 where  t1.is_delete='0';
 -- ----------------------------
 -- Table structure for metric_dictionary_info
@@ -1806,8 +1808,8 @@ INSERT INTO `metric_dictionary_info` VALUES (5283, '索引', '单个shard小于5
 
 
 #重新全量导入权限点表
-truncate table logi_security_permission;
-insert into logi_security_permission (id, permission_name, parent_id, leaf, level, description, create_time, update_time, is_delete, app_name)
+truncate table kf_security_permission;
+insert into kf_security_permission (id, permission_name, parent_id, leaf, level, description, create_time, update_time, is_delete, app_name)
 values  (1593, '物理集群', 0, 0, 1, '物理集群', '2022-05-24 18:08:22.0', '2022-08-24 20:07:31.0', 0, 'know_search'),
         (1595, '我的集群', 0, 0, 1, '我的集群', '2022-05-24 18:08:22.0', '2022-05-24 18:08:22.0', 0, 'know_search'),
         (1597, '集群版本', 0, 0, 1, '集群版本', '2022-05-24 18:08:22.0', '2022-05-24 18:08:22.0', 0, 'know_search'),
@@ -1954,5 +1956,5 @@ values  (1593, '物理集群', 0, 0, 1, '物理集群', '2022-05-24 18:08:22.0',
         (1879, 'Kibana', 0, 0, 1, 'Kibana', '2022-05-24 18:08:26.0', '2022-09-02 19:01:17.0', 0, 'know_search'),
         (1881, 'SQL', 0, 0, 1, 'SQL', '2022-05-24 18:08:26.0', '2022-09-02 19:01:17.0', 0, 'know_search');
 
-alter table logi_security_oplog
+alter table kf_security_oplog
     modify target varchar(225) not null comment '操作对象';
