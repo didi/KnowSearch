@@ -14,7 +14,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.Fas
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 任务 Service
@@ -72,7 +71,8 @@ public interface FastIndexManager {
     /**
      * 模板模式-查看setting，替换分配节点
      * @param logicId
+     * @param logicClusterId
      * @return
      */
-    Result<IndexTemplatePhySetting> getTemplateSettings(Integer logicId);
+    Result<IndexTemplatePhySetting> getTemplateSettings(Integer logicId, Long logicClusterId);
 }

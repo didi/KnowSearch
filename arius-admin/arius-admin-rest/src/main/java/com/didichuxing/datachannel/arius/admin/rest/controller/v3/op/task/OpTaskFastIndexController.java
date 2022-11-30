@@ -1,35 +1,30 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.task;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastIndexBriefVO;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import com.didichuxing.datachannel.arius.admin.biz.task.FastIndexManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexLogsConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexRateLimitDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastDumpTaskLogVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastIndexBriefVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastIndexDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
-
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Map;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 @RestController
 @RequestMapping(V3 + "/op-task/fast-index")
@@ -119,11 +114,11 @@ public class OpTaskFastIndexController {
                                              HttpServletRequest request) {
         return fastIndexManager.getSetting(cluster, indexName, HttpRequestUtil.getProjectId(request));
     }
-    @GetMapping("/template/setting")
+    @GetMapping("/template/{logicClusterId}/{logicId}/setting")
     @ResponseBody
     @ApiOperation(value = "获取模板Setting接口")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    public Result<IndexTemplatePhySetting> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws AdminOperateException {
-        return fastIndexManager.getTemplateSettings(logicId);
+    public Result<IndexTemplatePhySetting> getTemplateSettings(@PathVariable("logicId") Integer logicId, @PathVariable("logicClusterId") Long logicClusterId) {
+        return fastIndexManager.getTemplateSettings(logicId, logicClusterId);
     }
 }

@@ -103,6 +103,11 @@ public class FastIndexManagerImpl implements FastIndexManager {
         .buildFail("获取数据迁移任务原始信息失败");
     private static final String                                      GET_INDEX_FAILED_MSG                  = "获取原集群中的索引【%s】失败！";
     private static final String                                      GET_READ_FILE_RATE_LIMIT_MSG          = "设置的任务读取速率不能小于【%d】";
+    private static final String                                      INDEX_CREATION_DATE          = "index.creation_date";
+    private static final String                                      INDEX_UUID          = "index.uuid";
+    private static final String                                      INDEX_VERSION_CREATED          = "index.version.created";
+    private static final String                                      INDEX_PROVIDED_NAME          = "index.provided_name";
+    private static final String                                      INDEX_ROUTING_ALLOCATION_INCLUDE_NAME          = "index.routing.allocation.include._name";
     private static final long                                        TASK_WAITING_TIME                     = 5 * 1000L;
 
     @Autowired
@@ -526,7 +531,7 @@ public class FastIndexManagerImpl implements FastIndexManager {
     }
 
     @Override
-    public Result<IndexTemplatePhySetting> getTemplateSettings(Integer logicId) {
+    public Result<IndexTemplatePhySetting> getTemplateSettings(Integer logicId, Long logicClusterId) {
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(logicId);
         if (templateLogicWithPhysical == null) {
             return Result.buildNotExist("逻辑模板不存在, ID:" + logicId);
@@ -534,15 +539,23 @@ public class FastIndexManagerImpl implements FastIndexManager {
         if (!templateLogicWithPhysical.hasPhysicals()) {
             return Result.buildNotExist("物理模板不存在，ID:" + logicId);
         }
+        ClusterRegion region = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
+        if (region == null) {
+            return Result.buildFail("目标逻辑集群异常：region不存在！");
+        }
+        Result<List<ClusterRoleHost>> roleHostResult = clusterRoleHostService.listByRegionId(Math.toIntExact(region.getId()));
+        if (roleHostResult.failed()) {
+            return Result.buildFail(String.format("获取region[%d]节点列表异常", region.getId()));
+        }
         IndexTemplatePhy indexTemplatePhy = templateLogicWithPhysical.getMasterPhyTemplate();
         if (indexTemplatePhy != null) {
             try {
-
                 IndexTemplatePhySetting indexTemplatePhySetting = templatePhySettingManager.fetchTemplateSettings(indexTemplatePhy.getCluster(),
                         indexTemplatePhy.getName());
                 Map<String, String> indexTemplateMap = indexTemplatePhySetting.flatSettings();
-
-                return Result.buildSucc(indexTemplatePhySetting);
+                String nodesSets = roleHostResult.getData().stream().map(ClusterRoleHost::getNodeSet).collect(Collectors.joining(","));
+                indexTemplateMap.put(INDEX_ROUTING_ALLOCATION_INCLUDE_NAME,nodesSets);
+                return Result.buildSucc(new IndexTemplatePhySetting(indexTemplateMap));
             } catch (ESOperateException e) {
                 return Result.buildFail(e.getMessage());
             }
@@ -581,11 +594,11 @@ public class FastIndexManagerImpl implements FastIndexManager {
         }
         //删除不需要的setting配置
         Map<String, String> setting = indexConfig.getSettings();
-        setting.remove("index.creation_date");
-        setting.remove("index.uuid");
-        setting.remove("index.version.created");
-        setting.remove("index.provided_name");
-        setting.remove("index.routing.allocation.include._name");
+        setting.remove(INDEX_CREATION_DATE);
+        setting.remove(INDEX_UUID);
+        setting.remove(INDEX_VERSION_CREATED);
+        setting.remove(INDEX_PROVIDED_NAME);
+        setting.remove(INDEX_ROUTING_ALLOCATION_INCLUDE_NAME);
         indexSettingVO.setProperties(JsonUtils.reFlat(setting));
         indexSettingVO.setIndexName(indexName);
         return Result.buildSucc(indexSettingVO);
