@@ -15,7 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
-import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.knowframework.security.service.ProjectService;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;

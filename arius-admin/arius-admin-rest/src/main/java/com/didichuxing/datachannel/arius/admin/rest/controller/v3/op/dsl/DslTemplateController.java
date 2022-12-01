@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTempla
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayJoinVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.QueryDiagnosisTabNameEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

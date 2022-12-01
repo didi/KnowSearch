@@ -20,6 +20,8 @@
 package com.didi.arius.gateway.rest.http;
 
 import com.didi.arius.gateway.common.consts.QueryConsts;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.elasticsearch.common.Booleans;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.netty.NettyUtils;
@@ -52,8 +54,6 @@ import org.jboss.netty.handler.codec.http.HttpContentCompressor;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.timeout.ReadTimeoutException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -70,7 +70,7 @@ import static org.elasticsearch.http.netty.cors.CorsHandler.ANY_ORIGIN;
  */
 @Component("nettyHttpServerTransport")
 public class NettyHttpServerTransport {
-    private static final Logger logger = LoggerFactory.getLogger(QueryConsts.BOOT_LOGGER);
+    private static final ILog logger = LogFactory.getLog(QueryConsts.BOOT_LOGGER);
 
     @Value("${gateway.httpTransport.port}")
     private int httpPort;

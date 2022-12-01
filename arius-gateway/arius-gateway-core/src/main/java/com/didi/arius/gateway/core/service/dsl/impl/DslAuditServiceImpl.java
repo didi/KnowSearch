@@ -10,15 +10,16 @@ import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.service.arius.DslTemplateService;
 import com.didi.arius.gateway.core.service.dsl.DslAuditService;
-import com.didiglobal.logi.dsl.parse.DslExtractionUtilV2;
-import com.didiglobal.logi.dsl.parse.bean.ExtractResult;
+import com.didiglobal.knowframework.dsl.parse.DslExtractionUtilV2;
+import com.didiglobal.knowframework.dsl.parse.bean.ExtractResult;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import lombok.NoArgsConstructor;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.xcontent.XContentHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,7 @@ import org.springframework.stereotype.Service;
 @Service
 @NoArgsConstructor
 public class DslAuditServiceImpl implements DslAuditService {
-    protected static final Logger logger = LoggerFactory.getLogger(DslAuditServiceImpl.class);
+    protected static final ILog logger = LogFactory.getLog(DslAuditServiceImpl.class);
 
     @Autowired
     private DslTemplateService dslTemplateService;

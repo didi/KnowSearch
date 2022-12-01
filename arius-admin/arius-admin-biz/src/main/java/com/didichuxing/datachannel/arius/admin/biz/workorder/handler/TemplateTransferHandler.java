@@ -18,9 +18,9 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
-import com.didiglobal.logi.security.service.UserService;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.security.service.ProjectService;
+import com.didiglobal.knowframework.security.service.UserService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

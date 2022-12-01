@@ -2,9 +2,9 @@ package com.didichuxing.datachannel.arius.admin.core.service.es;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didiglobal.logi.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
-import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
+import com.didiglobal.knowframework.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.knowframework.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
+import com.didiglobal.knowframework.elasticsearch.client.response.setting.template.TemplateConfig;
 import java.util.List;
 import java.util.Map;
 

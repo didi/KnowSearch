@@ -1,14 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.util;
 
 import com.didichuxing.datachannel.arius.admin.common.util.YamlUtil;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedWriter;
@@ -28,7 +28,7 @@ public class StatLineOfMethodTest {
     /**
      * 将该类运行时抛出的异常记录到日志中
      */
-    private static final Logger LOGGER            = LoggerFactory.getLogger(StatLineOfMethodTest.class);
+    private static final ILog LOGGER            = LogFactory.getLog(StatLineOfMethodTest.class);
     /**
      * 统计项目中有多少超过规定代码行数的方法
      */

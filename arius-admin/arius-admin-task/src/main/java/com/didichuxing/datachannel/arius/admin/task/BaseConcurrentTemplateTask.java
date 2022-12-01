@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateDAO;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 /**
  * base任务 模板并发处理

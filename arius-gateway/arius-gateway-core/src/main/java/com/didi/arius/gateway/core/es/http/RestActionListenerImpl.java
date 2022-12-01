@@ -9,7 +9,9 @@ import com.didi.arius.gateway.common.utils.CommonUtil;
 import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.core.component.SpringTool;
 import com.didi.arius.gateway.elasticsearch.client.model.ESActionResponse;
-import com.didiglobal.logi.log.LogGather;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.log.LogGather;
 import org.apache.http.util.EntityUtils;
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.ActionListener;
@@ -22,13 +24,11 @@ import org.elasticsearch.rest.BytesRestResponse;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestResponse;
 import org.elasticsearch.rest.RestStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RestActionListenerImpl<T extends ESActionResponse> implements ActionListener<T> {
-	protected static final Logger logger = LoggerFactory.getLogger(RestActionListenerImpl.class);
-	private static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
-	protected static final Logger traceLogger = LoggerFactory.getLogger(QueryConsts.TRACE_LOGGER);
+	protected static final ILog logger = LogFactory.getLog(RestActionListenerImpl.class);
+	private static final ILog statLogger = LogFactory.getLog(QueryConsts.STAT_LOGGER);
+	protected static final ILog traceLogger = LogFactory.getLog(QueryConsts.TRACE_LOGGER);
 	protected static final String ERROR = "error";
 	
 	protected QueryContext queryContext;

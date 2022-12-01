@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESPackageDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.espackage.ESPackageVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;

@@ -6,8 +6,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.Indicato
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.degreeindicator.DegreeParam;
 import com.didichuxing.datachannel.arius.admin.metadata.utils.ReadExprValueUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 public abstract class AbstractDegreeIndicator implements IDegreeIndicator {
     protected static final ILog LOGGER = LogFactory.getLog(AbstractDegreeIndicator.class);

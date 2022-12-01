@@ -10,8 +10,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Sets;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;

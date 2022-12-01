@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.event.metrics;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStats;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
+import com.didiglobal.knowframework.elasticsearch.client.response.cluster.ESClusterHealthResponse;
 import java.util.List;
 import java.util.Map;
 

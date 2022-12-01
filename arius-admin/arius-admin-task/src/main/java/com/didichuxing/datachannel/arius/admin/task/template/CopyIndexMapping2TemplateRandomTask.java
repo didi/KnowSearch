@@ -3,12 +3,12 @@ package com.didichuxing.datachannel.arius.admin.task.template;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
 import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.job.annotation.Task;
-import com.didiglobal.logi.job.common.TaskResult;
-import com.didiglobal.logi.job.core.job.Job;
-import com.didiglobal.logi.job.core.job.JobContext;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.job.annotation.Task;
+import com.didiglobal.knowframework.job.common.TaskResult;
+import com.didiglobal.knowframework.job.core.job.Job;
+import com.didiglobal.knowframework.job.core.job.JobContext;
 
 /**
  * @author didi
@@ -24,9 +24,9 @@ public class CopyIndexMapping2TemplateRandomTask extends BaseConcurrentClusterTa
         LOGGER.info(
             "class=CopyIndexMapping2TemplateRandomTask||method=execute||msg=CopyIndexMapping2TemplateRandomTask start.");
         if (execute()) {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
-        return TaskResult.FAIL;
+        return TaskResult.buildFail();
     }
 
     /**

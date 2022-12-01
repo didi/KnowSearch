@@ -7,8 +7,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ProjectId
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateStatsInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;

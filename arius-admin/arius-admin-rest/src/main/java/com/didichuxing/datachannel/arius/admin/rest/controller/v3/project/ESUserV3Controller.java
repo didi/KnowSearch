@@ -14,7 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ESUserVO;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;

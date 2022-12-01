@@ -26,7 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DashBoardMetricsService;
-import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;

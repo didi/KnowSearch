@@ -18,8 +18,8 @@
             <artifactId>json-patch</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.zqrferrari</groupId>
-            <artifactId>logi-security-spring-boot-starter</artifactId>
+            <groupId>io.github.knowstack</groupId>
+            <artifactId>kf-security-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>com.didichuxing.datachannel</groupId>
@@ -52,8 +52,8 @@
         </dependency>
 
         <dependency>
-            <groupId>io.github.zqrferrari</groupId>
-            <artifactId>logi-elasticsearch-client</artifactId>
+            <groupId>io.github.knowstack</groupId>
+            <artifactId>kf-elasticsearch-client</artifactId>
         </dependency>
 
         <dependency>

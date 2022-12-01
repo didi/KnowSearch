@@ -8,7 +8,7 @@ import com.didi.arius.gateway.core.es.http.RestActionListenerImpl;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import com.didi.arius.gateway.elasticsearch.client.gateway.document.ESIndexRequest;
 import com.didi.arius.gateway.elasticsearch.client.gateway.document.ESIndexResponse;
-import com.didiglobal.logi.log.LogGather;
+import com.didiglobal.knowframework.log.LogGather;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.support.replication.ReplicationRequest;

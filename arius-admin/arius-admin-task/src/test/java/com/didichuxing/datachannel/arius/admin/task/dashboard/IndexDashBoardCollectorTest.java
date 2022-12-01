@@ -2,8 +2,8 @@ package com.didichuxing.datachannel.arius.admin.task.dashboard;
 
 import com.didichuxing.datachannel.arius.admin.task.config.AriusAdminTaskConfiguration;
 
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

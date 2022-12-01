@@ -26,7 +26,7 @@
         <sha1/>
         <changelist/>
         <arius.admin.client.version>1.0.6-SNAPSHOT</arius.admin.client.version>
-        <spring.boot.version>2.0.5.RELEASE</spring.boot.version>
+        <spring.boot.version>2.2.13.RELEASE</spring.boot.version>
         <spring.version>5.0.18.RELEASE</spring.version>
         <spring-restdocs.version>2.0.2.RELEASE</spring-restdocs.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -61,9 +61,9 @@
                 <version>${java-diff-utils.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.github.zqrferrari</groupId>
-                <artifactId>logi-security-spring-boot-starter</artifactId>
-                <version>${logi-security-spring-boot-starter.version}</version>
+                <version>1.0.0</version>
+                <groupId>io.github.knowstack</groupId>
+                <artifactId>kf-security-spring-boot-starter</artifactId>
             </dependency>
             <!-- self -->
             <dependency>
@@ -230,18 +230,6 @@
                 <groupId>org.mybatis</groupId>
                 <artifactId>mybatis</artifactId>
                 <version>3.5.6</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-webmvc</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-web</artifactId>
-                <version>${spring.version}</version>
             </dependency>
 
             <dependency>
@@ -669,25 +657,15 @@
             </dependency>
 
             <dependency>
-                <groupId>io.github.zqrferrari</groupId>
-                <artifactId>logi-log</artifactId>
-                <version>1.0.6</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>log4j-slf4j-impl</artifactId>
-                        <groupId>org.apache.logging.log4j</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.aspectj</groupId>
-                        <artifactId>aspectjrt</artifactId>
-                    </exclusion>
-                </exclusions>
+                <version>2.0.0</version>
+                <groupId>io.github.knowstack</groupId>
+                <artifactId>kf-log</artifactId>
             </dependency>
 
             <dependency>
-                <groupId>io.github.zqrferrari</groupId>
-                <artifactId>logi-elasticsearch-client</artifactId>
-                <version>${logi-elasticsearch-client.version}</version>
+                <groupId>io.github.knowstack</groupId>
+                <artifactId>kf-elasticsearch-client</artifactId>
+                <version>1.0.0</version>
             </dependency>
 
             <dependency>
@@ -713,9 +691,9 @@
             </dependency>
 
             <dependency>
-                <groupId>io.github.zqrferrari</groupId>
-                <artifactId>logi-job-spring-boot-starter</artifactId>
-                <version>1.0.29</version>
+                <groupId>io.github.knowstack</groupId>
+                <artifactId>kf-job-spring-boot-starter</artifactId>
+                <version>2.0.0</version>
             </dependency>
 
             <dependency>

@@ -6,8 +6,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 

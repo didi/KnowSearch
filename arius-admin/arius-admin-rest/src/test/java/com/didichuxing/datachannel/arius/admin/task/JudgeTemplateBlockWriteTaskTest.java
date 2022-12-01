@@ -10,7 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import com.didiglobal.knowframework.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Test;

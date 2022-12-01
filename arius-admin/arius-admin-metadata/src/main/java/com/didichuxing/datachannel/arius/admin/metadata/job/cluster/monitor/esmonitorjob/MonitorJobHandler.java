@@ -22,7 +22,7 @@ import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmo
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsRegister;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor.AriusMetaJobClusterDistributeDAO;
-import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.knowframework.elasticsearch.client.ESClient;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;

@@ -8,9 +8,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ResultWorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.*;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.exception.LogiSecurityException;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.security.exception.KfSecurityException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.ThrowsAdvice;
 import org.springframework.http.HttpStatus;
@@ -81,8 +81,8 @@ public class ExceptionHandleController implements ThrowsAdvice {
         return result;
     }
 
-    @ExceptionHandler(LogiSecurityException.class)
-    public Result<Object> handleLogiSecurityException(LogiSecurityException e) {
+    @ExceptionHandler(KfSecurityException.class)
+    public Result<Object> handleLogiSecurityException(KfSecurityException e) {
         LOGGER.warn(
             "class=ExceptionHandleController||method=handleLogiSecurityException||arius admin process error||errMsg={}",
             e.getMessage(), e);

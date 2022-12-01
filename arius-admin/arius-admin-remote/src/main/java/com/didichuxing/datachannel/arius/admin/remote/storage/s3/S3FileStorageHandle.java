@@ -4,12 +4,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.remote.storage.FileStorageHandle;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import io.minio.*;
 import io.minio.messages.Item;
 import lombok.NoArgsConstructor;
 import org.apache.commons.compress.utils.Lists;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,7 @@ import java.util.List;
 @NoArgsConstructor
 public class S3FileStorageHandle implements FileStorageHandle {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(S3FileStorageHandle.class);
+    private static final ILog LOGGER = LogFactory.getLog(S3FileStorageHandle.class);
 
     @Value("${s3.endpoint:}")
     private String              endpoint;

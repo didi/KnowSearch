@@ -12,7 +12,7 @@ import java.util.Map;
  *
  * @author shizeying
  * @date 2022/06/01
- * @see com.didiglobal.logi.security.common.vo.project.ProjectVO
+ * @see com.didiglobal.knowframework.security.common.vo.project.ProjectVO
  */
 public interface ProjectConfigService {
     /**

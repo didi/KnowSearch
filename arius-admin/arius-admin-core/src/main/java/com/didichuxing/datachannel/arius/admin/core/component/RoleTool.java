@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.core.component;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
-import com.didiglobal.logi.security.common.vo.role.RoleVO;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.common.vo.user.UserVO;
-import com.didiglobal.logi.security.service.RoleService;
-import com.didiglobal.logi.security.service.UserService;
+import com.didiglobal.knowframework.security.common.vo.role.RoleVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserVO;
+import com.didiglobal.knowframework.security.service.RoleService;
+import com.didiglobal.knowframework.security.service.UserService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  *
  * @author shizeying
  * @date 2022/06/01
- * @see com.didiglobal.logi.security.service.RoleService 实现admin册指定角色任务的判断
+ * @see com.didiglobal.knowframework.security.service.RoleService 实现admin册指定角色任务的判断
  */
 @Component
 public class RoleTool {

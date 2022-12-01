@@ -10,9 +10,9 @@ import com.didi.arius.gateway.common.metadata.QueryContext;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.component.ThreadPool;
 import com.didi.arius.gateway.core.service.RateLimitService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import lombok.NoArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
@@ -28,9 +28,9 @@ import java.util.concurrent.atomic.AtomicLong;
 @NoArgsConstructor
 public class RateLimitServiceImpl implements RateLimitService, ApplicationListener<PostResponseEvent> {
 
-    private static final Logger logger = LoggerFactory.getLogger(RateLimitServiceImpl.class);
-    private static final Logger bootLogger = LoggerFactory.getLogger(QueryConsts.BOOT_LOGGER);
-    private static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
+    private static final ILog logger = LogFactory.getLog(RateLimitServiceImpl.class);
+    private static final ILog bootLogger = LogFactory.getLog(QueryConsts.BOOT_LOGGER);
+    private static final ILog statLogger = LogFactory.getLog(QueryConsts.STAT_LOGGER);
 
     private AtomicLong totalByteIn = new AtomicLong();
 

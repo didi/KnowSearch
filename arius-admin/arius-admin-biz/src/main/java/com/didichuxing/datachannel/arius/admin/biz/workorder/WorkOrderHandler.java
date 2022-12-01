@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.deta
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import java.util.List;
 
 /**

@@ -10,17 +10,15 @@ import com.didichuxing.datachannel.arius.admin.common.util.BaseHttpUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.*;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.request.ZeusCreateTaskParam;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.NoArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,7 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @NoArgsConstructor
 public class ZeusClusterRemoteServiceImpl implements ZeusClusterRemoteService {
-    private static final Logger LOGGER   = LoggerFactory.getLogger(ZeusClusterRemoteServiceImpl.class);
+    private static final ILog LOGGER   = LogFactory.getLog(ZeusClusterRemoteServiceImpl.class);
 
     @Value("${zeus.server}")
     private String              zeusServer;

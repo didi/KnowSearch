@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.project;
 
-import com.didiglobal.logi.security.common.Result;
-import com.didiglobal.logi.security.common.vo.permission.PermissionTreeVO;
+import com.didiglobal.knowframework.security.common.Result;
+import com.didiglobal.knowframework.security.common.vo.permission.PermissionTreeVO;
 
 /**
  * 权限点扩展管理器

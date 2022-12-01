@@ -53,10 +53,10 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicAliasService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisticsService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;

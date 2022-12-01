@@ -11,7 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.mapping.Field;
 import com.didichuxing.datachannel.arius.admin.common.mapping.SpecialField;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

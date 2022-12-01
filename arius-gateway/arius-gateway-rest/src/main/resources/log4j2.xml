@@ -1,144 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="error" monitorInterval="60">
-	<!--变量配置-->
-	<Properties>
-		<property name="gateway.queryConfig.logPath" value="." />
-	</Properties>
+<Configuration package="org.apache.logging.log4j.core,com.didiglobal.logi.log.log4j2.appender" >
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
 
-	<Appenders>
+        </Console>
+        <ElasticsearchAppender name="esAppender" address="116.85.23.222" port="18303" user="elastic" password="Didiyun@888" indexName="index_observability" typeName="type" threshold="all" bufferSize="1000" numberOfShards="1" numberOfReplicas="0" logExpire="7" extendsMappingClass="" requestTimeoutMillis="3000">
 
-		<console name="console" target="SYSTEM_OUT">
-			<!--输出日志的格式-->
-			<PatternLayout pattern="[%-5level][%d{YYYY-MM-dd HH:mm:ss.SSS+0800}][%F:%line] %msg%n"/>
-			<!--控制台只输出level及其以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
-			<ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
-		</console>
-
-		<RollingFile name="file" fileName="${gateway.queryConfig.logPath}/log/gateway.log" filePattern="${gateway.queryConfig.logPath}/log/gateway.log.%d{yyyy-MM-dd}"
-			append="true">
-			<PatternLayout pattern="[%p][%d][%-4r][%t][%F:%L] %m%n" />
-			<Policies>
-				<TimeBasedTriggeringPolicy modulate="true"
-					interval="1" />
-			</Policies>
-			<DefaultRolloverStrategy max="7"/>
-		</RollingFile>
-		
-		<RollingFile name="bootLog" fileName="${gateway.queryConfig.logPath}/log/boot.log" filePattern="${gateway.queryConfig.logPath}/log/boot.log.%d{yyyy-MM-dd}"
-			append="true">
-			<PatternLayout pattern="[%p][%d][%-4r][%t] %m%n" />
-			<Policies>
-				<TimeBasedTriggeringPolicy modulate="true"
-					interval="1" />
-			</Policies>
-			<DefaultRolloverStrategy max="7"/>
-		</RollingFile>			
-		
-		<RollingFile name="queryStats" fileName="${gateway.queryConfig.logPath}/log/stats.log" filePattern="${gateway.queryConfig.logPath}/log/stats.log.%d{yyyy-MM-dd}"
-			append="true">
-			<PatternLayout pattern="[%p][%d][%-4r][%t] %m%n" />
-			<Policies>
-				<TimeBasedTriggeringPolicy modulate="true"
-					interval="1" />
-			</Policies>
-			<DefaultRolloverStrategy max="7"/>
-		</RollingFile>		
-
-		<RollingFile name="metrics" fileName="${gateway.queryConfig.logPath}/log/metrics.log" filePattern="${gateway.queryConfig.logPath}/log/metrics.log.%d{yyyy-MM-dd}"
-			append="true">
-			<PatternLayout pattern="[%p][%d][%-4r][%t][%F:%L] %m%n" />
-			<Policies>
-				<TimeBasedTriggeringPolicy modulate="true"
-					interval="1" />
-			</Policies>
-			<DefaultRolloverStrategy max="7"/>
-		</RollingFile>			
-
-
-		<RollingFile name="traceLog" fileName="${gateway.queryConfig.logPath}/log/didi.log" filePattern="${gateway.queryConfig.logPath}/log/didi.log.%d{yyyy-MM-dd}"
-			append="true">
-			<PatternLayout pattern="[%p]%d{[yyyy-MM-dd'T'HH:mm:ss.SSSZ]} %m%n" />
-			<Policies>
-				<TimeBasedTriggeringPolicy modulate="true"
-					interval="1" />
-			</Policies>
-			<DefaultRolloverStrategy max="7"/>
-		</RollingFile>	
-		
-		<RollingFile name="auditLog" fileName="${gateway.queryConfig.logPath}/log/audit.log" filePattern="${gateway.queryConfig.logPath}/log/audit.log.%d{yyyy-MM-dd}"
-			append="true">
-			<PatternLayout pattern="[%p][%d}][%-4r][%t][%F:%L] %m%n" />
-			<Policies>
-				<TimeBasedTriggeringPolicy modulate="true"
-					interval="1" />
-			</Policies>
-			<DefaultRolloverStrategy max="7"/>
-		</RollingFile>
-		
-		<RollingFile name="thirdReq" fileName="${gateway.queryConfig.logPath}/log/thirdReq.log"
-					 filePattern="${gateway.queryConfig.logPath}/log/thirdReq-%i.log" append="false">
-			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level - %msg%n"/>
-			<SizeBasedTriggeringPolicy size="100MB"/>
-			<DefaultRolloverStrategy max="2"/>
-		</RollingFile>
-
-		<RollingFile name="gatherInfoLogger" fileName="${gateway.queryConfig.logPath}/log/gather.log"
-					 filePattern="${gateway.queryConfig.logPath}/log/gather.log.%i" append="true">
-			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %L - %msg%xEx%n"/>
-			<SizeBasedTriggeringPolicy size="10MB"/>
-			<DefaultRolloverStrategy max="9"/>
-		</RollingFile>
-		<RollingFile name="gatherWarnLogger" fileName="${gateway.queryConfig.logPath}/log/gather.log"
-					 filePattern="${gateway.queryConfig.logPath}/log/gather.log.%i" append="true">
-			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %L - %msg%xEx%n"/>
-			<SizeBasedTriggeringPolicy size="10MB"/>
-			<DefaultRolloverStrategy max="9"/>
-		</RollingFile>
-		<RollingFile name="gatherErrorLogger" fileName="${gateway.queryConfig.logPath}/log/gather.log"
-					 filePattern="${gateway.queryConfig.logPath}/log/gather.log.%i" append="true">
-			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %L - %msg%xEx%n"/>
-			<SizeBasedTriggeringPolicy size="10MB"/>
-			<DefaultRolloverStrategy max="9"/>
-		</RollingFile>
-
-	</Appenders>
-	<Loggers>
-		<Root level="info">
-			<AppenderRef ref="console" />
-			<AppenderRef ref="file" />
-		</Root>
-        <AsyncLogger level="info" name="bootLog" additivity="false">
-            <AppenderRef ref="bootLog"/>   
-        </AsyncLogger>     
-        <AsyncLogger level="info" name="queryStats" additivity="false">
-			<AppenderRef ref="queryStats"/>
-        </AsyncLogger>
-		<AsyncLogger level="info" name="metrics" additivity="false">
-            <AppenderRef ref="metrics"/>
-        </AsyncLogger>
-        <AsyncLogger level="info" name="traceLog" additivity="false">
-            <AppenderRef ref="traceLog"/>
-        </AsyncLogger>        
-        <AsyncLogger level="info" name="auditLog" additivity="false">
-            <AppenderRef ref="auditLog"/>
-        </AsyncLogger>   
-		<AsyncLogger level="info" name="thirdReq" additivity="false">
-            <AppenderRef ref="thirdReq"/>
-        </AsyncLogger>
-
-		<logger name="gatherInfoLogger" additivity="false">
-			<level value="INFO"/>
-			<AppenderRef ref="gatherInfoLogger"/>
-		</logger>
-
-		<logger name="gatherWarnLogger" additivity="false">
-			<level value="INFO"/>
-			<AppenderRef ref="gatherWarnLogger"/>
-		</logger>
-
-		<logger name="gatherErrorLogger" additivity="false">
-			<level value="INFO"/>
-			<AppenderRef ref="gatherErrorLogger"/>
-		</logger>
-	</Loggers>
+        </ElasticsearchAppender>
+    </Appenders>
+    <Loggers>
+        <root level="INFO">
+            <appender-ref ref="Console" />
+            <appender-ref ref="esAppender" />
+        </root>
+    </Loggers>
 </Configuration>

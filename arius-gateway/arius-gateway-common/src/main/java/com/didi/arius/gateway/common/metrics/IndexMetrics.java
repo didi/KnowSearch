@@ -1,11 +1,11 @@
 package com.didi.arius.gateway.common.metrics;
 
 import com.didi.arius.gateway.common.utils.MetricUtil;
-import com.didiglobal.logi.metrics.MetricsBuilder;
-import com.didiglobal.logi.metrics.MetricsSource;
-import com.didiglobal.logi.metrics.lib.MetricMutablePeriodGaugeLong;
-import com.didiglobal.logi.metrics.lib.MetricMutableStat;
-import com.didiglobal.logi.metrics.lib.MetricsRegistry;
+import com.didiglobal.knowframework.metrics.MetricsBuilder;
+import com.didiglobal.knowframework.metrics.MetricsSource;
+import com.didiglobal.knowframework.metrics.lib.MetricMutablePeriodGaugeLong;
+import com.didiglobal.knowframework.metrics.lib.MetricMutableStat;
+import com.didiglobal.knowframework.metrics.lib.MetricsRegistry;
 
 /**
  * author weizijun

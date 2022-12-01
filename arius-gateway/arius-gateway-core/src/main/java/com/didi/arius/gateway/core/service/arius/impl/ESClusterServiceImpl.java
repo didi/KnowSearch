@@ -14,11 +14,11 @@ import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import com.didi.arius.gateway.remote.AriusAdminRemoteService;
 import com.didi.arius.gateway.remote.response.DataCenterListResponse;
 import com.didi.arius.gateway.remote.response.DataCenterResponse;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import lombok.NoArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -33,8 +33,8 @@ import static com.didi.arius.gateway.common.consts.RestConsts.DEFAULT_WRITE_ACTI
 @Service
 @NoArgsConstructor
 public class ESClusterServiceImpl implements ESClusterService {
-    protected static final Logger logger = LoggerFactory.getLogger(ESClusterServiceImpl.class);
-    protected static final Logger bootLogger = LoggerFactory.getLogger( QueryConsts.BOOT_LOGGER);
+    protected static final ILog logger = LogFactory.getLog(ESClusterServiceImpl.class);
+    protected static final ILog bootLogger = LogFactory.getLog( QueryConsts.BOOT_LOGGER);
     public static final String CLUSTER_NOT_FOUND = "cluster not found:";
     public static final String COLON = ":";
     public static final String COMMA = ",";

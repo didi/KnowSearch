@@ -54,10 +54,10 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService
 import com.didichuxing.datachannel.arius.admin.core.service.template.dcdr.ESDCDRService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
-import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import com.didiglobal.knowframework.elasticsearch.client.response.indices.stats.IndexNodes;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;

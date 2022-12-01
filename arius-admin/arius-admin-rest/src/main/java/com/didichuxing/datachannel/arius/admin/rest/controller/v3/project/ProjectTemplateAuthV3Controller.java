@@ -6,7 +6,7 @@ import com.didichuxing.datachannel.arius.admin.biz.project.ProjectLogicTemplateA
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectTemplateAuthVO;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
-import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.knowframework.elasticsearch.client.response.setting.common.MappingConfig;
 
 import java.util.Set;
 

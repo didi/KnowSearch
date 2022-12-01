@@ -10,8 +10,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.metrics.UserConfi
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.metrics.UserConfigService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.metrics.UserConfigDAO;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

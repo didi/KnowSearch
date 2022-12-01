@@ -1,7 +1,7 @@
 package com.didi.arius.gateway.core.component;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ApplicationContext;
@@ -23,7 +23,7 @@ import java.util.Map;
 public class SpringTool implements ApplicationContextAware, DisposableBean {
     private static ApplicationContext applicationContext = null;
 
-    private static Logger logger             = LoggerFactory.getLogger(SpringTool.class);
+    private static ILog logger             = LogFactory.getLog(SpringTool.class);
 
     /**
      * 去的存储在静态变量中的ApplicationContext

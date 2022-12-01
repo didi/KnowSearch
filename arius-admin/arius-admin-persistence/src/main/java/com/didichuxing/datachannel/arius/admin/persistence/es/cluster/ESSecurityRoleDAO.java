@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
-import com.didiglobal.logi.elasticsearch.client.ESClient;
-import com.didiglobal.logi.elasticsearch.client.request.security.SecurityRole;
-import com.didiglobal.logi.elasticsearch.client.request.security.SecurityRoleIndex;
-import com.didiglobal.logi.elasticsearch.client.response.security.ESGetSecurityRoleResponse;
-import com.didiglobal.logi.elasticsearch.client.response.security.ESPutSecurityRoleResponse;
+import com.didiglobal.knowframework.elasticsearch.client.ESClient;
+import com.didiglobal.knowframework.elasticsearch.client.request.security.SecurityRole;
+import com.didiglobal.knowframework.elasticsearch.client.request.security.SecurityRoleIndex;
+import com.didiglobal.knowframework.elasticsearch.client.response.security.ESGetSecurityRoleResponse;
+import com.didiglobal.knowframework.elasticsearch.client.response.security.ESPutSecurityRoleResponse;
 import com.google.common.collect.Lists;
 import org.springframework.stereotype.Repository;
 

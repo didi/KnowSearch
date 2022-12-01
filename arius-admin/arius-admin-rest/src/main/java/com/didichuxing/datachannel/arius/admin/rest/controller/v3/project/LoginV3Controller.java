@@ -3,10 +3,10 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.project;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_SECURITY;
 
 import com.didichuxing.datachannel.arius.admin.biz.project.LoginManager;
-import com.didiglobal.logi.security.common.Result;
-import com.didiglobal.logi.security.common.constant.Constants;
-import com.didiglobal.logi.security.common.dto.account.AccountLoginDTO;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.security.common.Result;
+import com.didiglobal.knowframework.security.common.constant.Constants;
+import com.didiglobal.knowframework.security.common.dto.account.AccountLoginDTO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import javax.servlet.http.HttpServletRequest;

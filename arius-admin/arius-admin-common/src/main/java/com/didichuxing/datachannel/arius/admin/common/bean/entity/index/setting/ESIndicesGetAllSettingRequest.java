@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.index.setting;
 
-import com.didiglobal.logi.elasticsearch.client.model.RestRequest;
-import com.didiglobal.logi.elasticsearch.client.request.index.getindex.ESIndicesGetIndexRequest;
+import com.didiglobal.knowframework.elasticsearch.client.model.RestRequest;
+import com.didiglobal.knowframework.elasticsearch.client.request.index.getindex.ESIndicesGetIndexRequest;
 
 /**
  * @author lyn

@@ -37,6 +37,8 @@ import com.didi.arius.gateway.remote.response.SlaveInfoResponse;
 import com.didi.arius.gateway.remote.response.TempaletAliasResponse;
 import com.didi.arius.gateway.remote.response.TemplateInfoListResponse;
 import com.didi.arius.gateway.remote.response.TemplateInfoResponse;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,8 +52,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.elasticsearch.gateway.GatewayException;
 import org.elasticsearch.rest.RestStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -60,8 +60,8 @@ import org.springframework.stereotype.Service;
 @NoArgsConstructor
 public class IndexTemplateServiceImpl implements IndexTemplateService {
 
-    private static final Logger bootLogger = LoggerFactory.getLogger( QueryConsts.BOOT_LOGGER);
-    private static final Logger logger = LoggerFactory.getLogger(IndexTemplateServiceImpl.class);
+    private static final ILog bootLogger = LogFactory.getLog( QueryConsts.BOOT_LOGGER);
+    private static final ILog logger = LogFactory.getLog(IndexTemplateServiceImpl.class);
 
     @Autowired
     private AriusAdminRemoteService ariusAdminRemoteService;

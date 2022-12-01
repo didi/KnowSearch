@@ -17,7 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.Variou
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DashBoardMetricsService;
-import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.knowframework.security.service.ProjectService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;

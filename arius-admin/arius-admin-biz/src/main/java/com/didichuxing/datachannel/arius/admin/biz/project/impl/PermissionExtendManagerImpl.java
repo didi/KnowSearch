@@ -2,9 +2,9 @@ package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.project.PermissionExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
-import com.didiglobal.logi.security.common.Result;
-import com.didiglobal.logi.security.common.vo.permission.PermissionTreeVO;
-import com.didiglobal.logi.security.service.PermissionService;
+import com.didiglobal.knowframework.security.common.Result;
+import com.didiglobal.knowframework.security.common.vo.permission.PermissionTreeVO;
+import com.didiglobal.knowframework.security.service.PermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

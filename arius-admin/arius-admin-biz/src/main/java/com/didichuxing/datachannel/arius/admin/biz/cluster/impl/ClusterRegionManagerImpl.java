@@ -39,9 +39,9 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;

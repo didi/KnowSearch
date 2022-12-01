@@ -1,9 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.security.resource;
 
-import com.didiglobal.logi.security.common.PagingData;
-import com.didiglobal.logi.security.common.dto.resource.ResourceDTO;
-import com.didiglobal.logi.security.extend.ResourceExtend;
-import com.didiglobal.logi.security.properties.LogiSecurityProper;
+import com.didiglobal.knowframework.security.common.PagingData;
+import com.didiglobal.knowframework.security.common.dto.resource.ResourceDTO;
+import com.didiglobal.knowframework.security.extend.ResourceExtend;
 import java.util.Collections;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Component;
  *
  * @author shizeying
  * @date 2022/05/23
- * @see LogiSecurityProper#getResourceExtendBeanName()
  * @see ResourceExtend
  */
 @Component

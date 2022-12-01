@@ -1,10 +1,10 @@
 package com.didi.arius.gateway.rest.tcp;
 
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.metrics.MeanMetric;
 import org.elasticsearch.transport.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 */
 @Component("adapter")
 public class Adapter implements TransportServiceAdapter {
-	protected static final Logger tracerLog = LoggerFactory.getLogger(Adapter.class);
+	protected static final ILog tracerLog = LogFactory.getLog(Adapter.class);
 
     final MeanMetric rxMetric = new MeanMetric();
     final MeanMetric txMetric = new MeanMetric();	

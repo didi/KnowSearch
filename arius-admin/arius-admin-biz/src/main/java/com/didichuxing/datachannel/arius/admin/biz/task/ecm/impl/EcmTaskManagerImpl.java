@@ -66,7 +66,9 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.EcmTaskDAO;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
-import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -84,8 +86,6 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -99,7 +99,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @NoArgsConstructor
 public class EcmTaskManagerImpl implements EcmTaskManager {
-    private static final Logger     LOGGER                = LoggerFactory.getLogger(EcmTaskManagerImpl.class);
+    private static final ILog LOGGER                = LogFactory.getLog(EcmTaskManagerImpl.class);
     public static final long        DEFAULT_WORK_ORDER_ID = -1L;
 
     @Value("${es.client.cluster.port}")

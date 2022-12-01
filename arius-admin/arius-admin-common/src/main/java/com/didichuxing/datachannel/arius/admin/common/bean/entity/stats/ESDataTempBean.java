@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.stats;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
-import com.didiglobal.logi.log.util.HostUtil;
+import com.didiglobal.knowframework.log.util.HostUtil;
 import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.Data;

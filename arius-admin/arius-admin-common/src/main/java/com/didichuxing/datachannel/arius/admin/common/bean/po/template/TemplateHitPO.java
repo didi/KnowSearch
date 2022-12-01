@@ -6,8 +6,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.Data;

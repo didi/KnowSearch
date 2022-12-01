@@ -7,8 +7,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboar
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;

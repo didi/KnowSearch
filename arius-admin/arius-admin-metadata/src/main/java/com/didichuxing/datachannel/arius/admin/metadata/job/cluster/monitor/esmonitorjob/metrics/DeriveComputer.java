@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 public class DeriveComputer implements MetricsComputer {
     private static final ILog  LOGGER = LogFactory.getLog(DeriveComputer.class);

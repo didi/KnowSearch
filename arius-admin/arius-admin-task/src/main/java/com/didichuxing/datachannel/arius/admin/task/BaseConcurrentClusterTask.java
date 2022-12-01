@@ -9,8 +9,8 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 /**
  * base任务 集群级别并发处理 记录任务完成时间  检查任务前置依赖

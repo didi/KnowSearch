@@ -19,10 +19,10 @@
 
 package com.didi.arius.gateway.rest.tcp;
 
+import com.didiglobal.knowframework.log.ILog;
 import org.elasticsearch.common.metrics.CounterMetric;
 import org.elasticsearch.common.util.concurrent.ConcurrentCollections;
 import org.jboss.netty.channel.*;
-import org.slf4j.Logger;
 
 import java.util.Set;
 
@@ -36,9 +36,9 @@ public class OpenChannelsHandler implements ChannelUpstreamHandler {
     final CounterMetric openChannelsMetric = new CounterMetric();
     final CounterMetric totalChannelsMetric = new CounterMetric();
 
-    final Logger logger;
+    final ILog logger;
 
-    public OpenChannelsHandler(Logger logger) {
+    public OpenChannelsHandler(ILog logger) {
         this.logger = logger;
     }
 

@@ -17,11 +17,11 @@ import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassE
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
-import com.didiglobal.logi.security.service.UserService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.security.service.ProjectService;
+import com.didiglobal.knowframework.security.service.UserService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -61,7 +61,7 @@ public class OperateRecordManagerImpl implements OperateRecordManager {
      * 0 0 1 * * ? 每天凌晨 1 点执行该方法 定时删除操作日志，根据配置中指定的保存天数对操作日志进行保留
      */
     @Scheduled(cron = "0 0 1 * * ?")
-    private void scheduledDeletionOldOperateRecord() {
+    public void scheduledDeletionOldOperateRecord() {
         Date saveTime = getSaveTime();
         LOGGER.info(
                 "class=OperateRecordServiceImpl||method=scheduledDeletionOldOperateRecord||msg= 操作日志定时删除任务开始执行");

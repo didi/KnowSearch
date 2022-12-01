@@ -19,11 +19,11 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esm
  * under the License.
  */
 
-import com.didiglobal.logi.elasticsearch.client.request.broadcast.ESBroadcastOperationRequestBuilder;
-import com.didiglobal.logi.elasticsearch.client.request.index.stats.IndicesStatsLevel;
+import com.didiglobal.knowframework.elasticsearch.client.request.broadcast.ESBroadcastOperationRequestBuilder;
+import com.didiglobal.knowframework.elasticsearch.client.request.index.stats.IndicesStatsLevel;
 import org.elasticsearch.client.ElasticsearchClient;
 
-import static com.didiglobal.logi.elasticsearch.client.request.index.stats.ESIndicesStatsRequest.*;
+import static com.didiglobal.knowframework.elasticsearch.client.request.index.stats.ESIndicesStatsRequest.*;
 
 /**
  * A request to get indices level nodestats. Allow to enable different nodestats to be returned.

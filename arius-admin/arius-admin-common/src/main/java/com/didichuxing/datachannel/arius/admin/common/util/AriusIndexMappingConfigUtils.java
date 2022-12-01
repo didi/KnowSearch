@@ -6,9 +6,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 /**
  * @author wangshu

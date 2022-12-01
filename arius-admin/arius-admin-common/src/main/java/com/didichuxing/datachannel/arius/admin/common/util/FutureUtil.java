@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;

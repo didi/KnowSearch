@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellWithTemplateVO;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.List;

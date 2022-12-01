@@ -6,6 +6,8 @@ import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.es.tcp.ActionController;
 import com.didi.arius.gateway.core.es.tcp.ActionHandler;
 import com.didi.arius.gateway.core.service.RequestStatsService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.lucene.util.IOUtils;
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.node.DiscoveryNode;
@@ -27,8 +29,6 @@ import org.elasticsearch.transport.support.TransportStatus;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -61,7 +61,7 @@ public class MessageChannelHandler extends SimpleChannelUpstreamHandler {
 	@Autowired
 	protected RequestStatsService requestStatsService;
 
-	private static final Logger logger = LoggerFactory.getLogger(MessageChannelHandler.class);
+	private static final ILog logger = LogFactory.getLog(MessageChannelHandler.class);
 	
 	// node id to actual channel
     protected final ConcurrentMap<DiscoveryNode, NodeChannels> connectedNodes = newConcurrentMap();

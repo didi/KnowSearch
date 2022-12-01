@@ -12,10 +12,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectCon
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
-import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.vo.project.ProjectDeleteCheckVO;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.knowframework.security.common.PagingResult;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectDeleteCheckVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

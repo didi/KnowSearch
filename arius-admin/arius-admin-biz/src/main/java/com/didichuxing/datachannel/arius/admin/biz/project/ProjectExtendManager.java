@@ -5,10 +5,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectExtend
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectQueryExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectBriefExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectExtendVO;
-import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.vo.project.ProjectDeleteCheckVO;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.exception.LogiSecurityException;
+import com.didiglobal.knowframework.security.common.PagingResult;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectDeleteCheckVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
@@ -26,7 +25,6 @@ public interface ProjectExtendManager {
      * @param operator   请求信息
      * @param operatorId
      * @return 项目信息
-     * @throws LogiSecurityException 项目相关的错误信息
      */
     Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator, Integer operatorId);
 
@@ -35,7 +33,6 @@ public interface ProjectExtendManager {
      *
      * @param projectId 项目id
      * @return ProjectVo 项目信息
-     * @throws LogiSecurityException 项目不存在
      */
     Result<ProjectExtendVO> getProjectDetailByProjectId(Integer projectId);
 
@@ -77,7 +74,6 @@ public interface ProjectExtendManager {
      *
      * @param saveDTO 项目信息
      * @param operator 请求信息
-     * @throws LogiSecurityException 项目相关的错误信息
      */
     Result<Void> updateProject(ProjectExtendSaveDTO saveDTO, String operator);
 

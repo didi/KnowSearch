@@ -5,8 +5,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ESUserVO;
-import com.didiglobal.logi.security.common.po.ProjectPO;
-import com.didiglobal.logi.security.common.vo.project.ProjectVO;
+import com.didiglobal.knowframework.security.common.po.ProjectPO;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectVO;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 

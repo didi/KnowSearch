@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
 import com.alibaba.fastjson.JSONObject;
-import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
+import com.didiglobal.knowframework.elasticsearch.client.utils.JsonUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

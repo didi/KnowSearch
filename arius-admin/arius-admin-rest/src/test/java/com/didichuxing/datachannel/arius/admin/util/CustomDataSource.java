@@ -57,10 +57,10 @@ import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.logi.security.common.vo.project.ProjectVO;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

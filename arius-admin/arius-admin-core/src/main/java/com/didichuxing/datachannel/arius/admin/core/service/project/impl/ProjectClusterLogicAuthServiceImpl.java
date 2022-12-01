@@ -22,9 +22,9 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.project.ProjectLogicClusterAuthDAO;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.security.service.ProjectService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

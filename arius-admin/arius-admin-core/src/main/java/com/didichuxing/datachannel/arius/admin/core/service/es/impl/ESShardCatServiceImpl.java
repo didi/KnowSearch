@@ -11,8 +11,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardCatService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESShardDAO;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.task.component;
 
-import com.didiglobal.logi.job.common.TaskResult;
+import com.didiglobal.knowframework.job.common.TaskResult;
 
 public class TaskResultBuilder {
     private StringBuffer failMsg = new StringBuffer();
@@ -13,7 +13,7 @@ public class TaskResultBuilder {
         if (failMsg.length() > 0) {
             return new TaskResult(TaskResult.FAIL_CODE, failMsg.toString());
         } else {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
     }
 

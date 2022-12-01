@@ -9,10 +9,10 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHits;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.elasticsearch.client.response.query.query.ESQueryResponse;
+import com.didiglobal.knowframework.elasticsearch.client.response.query.query.hits.ESHits;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;

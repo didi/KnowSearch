@@ -3,30 +3,29 @@ package com.didi.arius.gateway.core.service.dsl.transform;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.didiglobal.logi.dsl.parse.dsl.ast.DslNode;
-import com.didiglobal.logi.dsl.parse.dsl.ast.aggr.AggrTerms;
-import com.didiglobal.logi.dsl.parse.dsl.ast.aggr.SignificantTerms;
-import com.didiglobal.logi.dsl.parse.dsl.ast.common.KeyWord;
-import com.didiglobal.logi.dsl.parse.dsl.ast.common.Node;
-import com.didiglobal.logi.dsl.parse.dsl.ast.common.key.KeyNode;
-import com.didiglobal.logi.dsl.parse.dsl.ast.common.logic.*;
-import com.didiglobal.logi.dsl.parse.dsl.ast.common.multi.NodeList;
-import com.didiglobal.logi.dsl.parse.dsl.ast.common.multi.NodeMap;
-import com.didiglobal.logi.dsl.parse.dsl.ast.common.script.Script;
-import com.didiglobal.logi.dsl.parse.dsl.ast.common.value.ObjectNode;
-import com.didiglobal.logi.dsl.parse.dsl.ast.query.*;
-import com.didiglobal.logi.dsl.parse.dsl.ast.root.Sort;
-import com.didiglobal.logi.dsl.parse.dsl.ast.root.Timeout;
-import com.didiglobal.logi.dsl.parse.dsl.visitor.basic.OutputVisitor;
+import com.didiglobal.knowframework.dsl.parse.dsl.ast.DslNode;
+import com.didiglobal.knowframework.dsl.parse.dsl.ast.aggr.AggrTerms;
+import com.didiglobal.knowframework.dsl.parse.dsl.ast.aggr.SignificantTerms;
+import com.didiglobal.knowframework.dsl.parse.dsl.ast.common.KeyWord;
+import com.didiglobal.knowframework.dsl.parse.dsl.ast.common.Node;
+import com.didiglobal.knowframework.dsl.parse.dsl.ast.common.key.KeyNode;
+import com.didiglobal.knowframework.dsl.parse.dsl.ast.common.logic.*;
+import com.didiglobal.knowframework.dsl.parse.dsl.ast.common.multi.NodeList;
+import com.didiglobal.knowframework.dsl.parse.dsl.ast.common.multi.NodeMap;
+import com.didiglobal.knowframework.dsl.parse.dsl.ast.common.script.Script;
+import com.didiglobal.knowframework.dsl.parse.dsl.ast.common.value.ObjectNode;
+import com.didiglobal.knowframework.dsl.parse.dsl.ast.query.*;
+import com.didiglobal.knowframework.dsl.parse.dsl.ast.root.Sort;
+import com.didiglobal.knowframework.dsl.parse.dsl.ast.root.Timeout;
+import com.didiglobal.knowframework.dsl.parse.dsl.visitor.basic.OutputVisitor;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Map;
 
 public class BaseRequestVisitor extends OutputVisitor {
 
-    protected static final Logger logger = LoggerFactory.getLogger(BaseRequestVisitor.class);
+    protected static final ILog logger = LogFactory.getLog(BaseRequestVisitor.class);
 
     protected static final String TYPE = "_type";
 

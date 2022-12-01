@@ -21,7 +21,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTe
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

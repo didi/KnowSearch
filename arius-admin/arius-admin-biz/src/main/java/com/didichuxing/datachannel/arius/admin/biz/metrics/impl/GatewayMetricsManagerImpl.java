@@ -29,10 +29,10 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.metadata.service.GatewayMetricsService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.collect.Lists;
 
 @Component

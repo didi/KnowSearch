@@ -15,28 +15,26 @@ import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didiglobal.logi.security.common.PagingData;
-import com.didiglobal.logi.security.common.PagingData.Pagination;
-import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.dto.user.UserBriefQueryDTO;
-import com.didiglobal.logi.security.common.dto.user.UserDTO;
-import com.didiglobal.logi.security.common.entity.UserProject;
-import com.didiglobal.logi.security.common.entity.user.User;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
-import com.didiglobal.logi.security.common.vo.role.RoleBriefVO;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.common.vo.user.UserVO;
-import com.didiglobal.logi.security.dao.ProjectDao;
-import com.didiglobal.logi.security.dao.UserDao;
-import com.didiglobal.logi.security.dao.UserProjectDao;
-import com.didiglobal.logi.security.exception.LogiSecurityException;
-import com.didiglobal.logi.security.service.PermissionService;
-import com.didiglobal.logi.security.service.ProjectService;
-import com.didiglobal.logi.security.service.RolePermissionService;
-import com.didiglobal.logi.security.service.UserService;
-import com.didiglobal.logi.security.util.CopyBeanUtil;
-import com.didiglobal.logi.security.util.PWEncryptUtil;
+import com.didiglobal.knowframework.security.common.PagingData;
+import com.didiglobal.knowframework.security.common.PagingData.Pagination;
+import com.didiglobal.knowframework.security.common.PagingResult;
+import com.didiglobal.knowframework.security.common.dto.user.UserBriefQueryDTO;
+import com.didiglobal.knowframework.security.common.dto.user.UserDTO;
+import com.didiglobal.knowframework.security.common.entity.UserProject;
+import com.didiglobal.knowframework.security.common.entity.user.User;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.knowframework.security.common.vo.role.AssignInfoVO;
+import com.didiglobal.knowframework.security.common.vo.role.RoleBriefVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserVO;
+import com.didiglobal.knowframework.security.dao.UserDao;
+import com.didiglobal.knowframework.security.dao.UserProjectDao;
+import com.didiglobal.knowframework.security.exception.KfSecurityException;
+import com.didiglobal.knowframework.security.service.PermissionService;
+import com.didiglobal.knowframework.security.service.ProjectService;
+import com.didiglobal.knowframework.security.service.RolePermissionService;
+import com.didiglobal.knowframework.security.service.UserService;
+import com.didiglobal.knowframework.security.util.PWEncryptUtil;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -63,9 +61,9 @@ public class UserExtendManagerImpl implements UserExtendManager {
     @Autowired
     private PermissionService     permissionService;
     @Autowired
-    private UserProjectDao        userProjectDao;
+    private UserProjectDao userProjectDao;
     @Autowired
-    private UserDao               userDao;
+    private UserDao userDao;
 
     private final static int NORMAL = 0;
 
@@ -79,7 +77,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
      */
     @Override
     public Result<Void> check(Integer type, String value) {
-        com.didiglobal.logi.security.common.Result<Void> check = userService.check(type, value);
+        com.didiglobal.knowframework.security.common.Result<Void> check = userService.check(type, value);
         if (check.failed()) {
             return Result.build(check.getCode(), check.getMessage());
         }
@@ -227,7 +225,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
      */
     @Override
     public Result<Void> deleteByUserId(Integer userId) {
-        com.didiglobal.logi.security.common.Result<Void> deleteByUserId = userService.deleteByUserId(userId);
+        com.didiglobal.knowframework.security.common.Result<Void> deleteByUserId = userService.deleteByUserId(userId);
         if (deleteByUserId.failed()) {
             return Result.build(deleteByUserId.getCode(), deleteByUserId.getMessage());
         }
@@ -307,7 +305,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
     public Result<List<AssignInfoVO>> getAssignDataByUserId(Integer userId) {
         try {
             return Result.buildSucc(userService.getAssignDataByUserId(userId));
-        } catch (LogiSecurityException e) {
+        } catch (KfSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
@@ -393,7 +391,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
             }
         }
     
-        com.didiglobal.logi.security.common.Result<Void> voidResult = userService.editUser(userDTO, operator);
+        com.didiglobal.knowframework.security.common.Result<Void> voidResult = userService.editUser(userDTO, operator);
     
         if (voidResult.failed()) {
             return Result.build(voidResult.getCode(), voidResult.getMessage());
@@ -437,7 +435,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
     @Override
     public Result<Void> addUser(UserDTO param, String operator) {
         param.setRoleIds(Collections.singletonList(AuthConstant.RESOURCE_OWN_ROLE_ID));
-        final com.didiglobal.logi.security.common.Result<Void> result = userService.addUser(param, operator);
+        final com.didiglobal.knowframework.security.common.Result<Void> result = userService.addUser(param, operator);
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }

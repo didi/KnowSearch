@@ -6,9 +6,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +42,7 @@ import com.google.common.collect.Maps;
  */
 @Service
 public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
-    private static final Logger    LOGGER = LoggerFactory.getLogger(EcmTaskDetailManagerImpl.class);
+    private static final ILog LOGGER = LogFactory.getLog(EcmTaskDetailManagerImpl.class);
 
     @Autowired
     private EcmTaskDetailDAO       ecmTaskDetailDAO;

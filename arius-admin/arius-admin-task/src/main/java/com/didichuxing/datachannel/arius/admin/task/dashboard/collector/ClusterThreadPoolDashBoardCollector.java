@@ -3,8 +3,8 @@ package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterThreadPoolQueueMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;
 import org.springframework.stereotype.Component;
 

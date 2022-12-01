@@ -2,8 +2,8 @@ package com.didi.arius.gateway.common.flowcontrol;
 
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.enums.FlowStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentMap;
 * 
 */
 public class FlowController {
-	private static final Logger logger = LoggerFactory.getLogger(FlowController.class);
+	private static final ILog logger = LogFactory.getLog(FlowController.class);
 	
 	private int appid;
 

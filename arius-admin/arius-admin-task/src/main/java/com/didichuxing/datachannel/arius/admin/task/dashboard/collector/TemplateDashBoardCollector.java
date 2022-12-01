@@ -8,8 +8,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;

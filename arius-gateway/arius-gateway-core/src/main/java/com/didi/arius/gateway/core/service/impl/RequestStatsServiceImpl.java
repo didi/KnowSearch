@@ -11,13 +11,13 @@ import com.didi.arius.gateway.common.metrics.AppMetric;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.component.ThreadPool;
 import com.didi.arius.gateway.core.service.RequestStatsService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import lombok.NoArgsConstructor;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import org.elasticsearch.rest.RestStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentMap;
 @Service
 @NoArgsConstructor
 public class RequestStatsServiceImpl implements RequestStatsService, ApplicationListener<PostResponseEvent> {
-    protected static final Logger bootLogger = LoggerFactory.getLogger(QueryConsts.BOOT_LOGGER);
+    protected static final ILog bootLogger = LogFactory.getLog(QueryConsts.BOOT_LOGGER);
     private ConcurrentMap<String, ActionMetric> actionMetricMap = new ConcurrentHashMap<>();
     private ConcurrentMap<Integer, AppMetric> appMetricMap = new ConcurrentHashMap<>();
 

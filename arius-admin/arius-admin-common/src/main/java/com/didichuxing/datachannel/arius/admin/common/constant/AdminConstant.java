@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.constant;
 
-import com.didiglobal.logi.log.util.HostUtil;
+import com.didiglobal.knowframework.log.util.HostUtil;
 import java.util.Arrays;
 import java.util.List;
 

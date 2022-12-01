@@ -38,8 +38,10 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
-import com.didiglobal.logi.security.service.ProjectService;
-import com.didiglobal.logi.security.service.UserService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.security.service.ProjectService;
+import com.didiglobal.knowframework.security.service.UserService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -50,8 +52,6 @@ import java.util.function.BiFunction;
 import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -64,8 +64,8 @@ import org.springframework.stereotype.Service;
 @NoArgsConstructor
 public class EcmHandleServiceImpl implements EcmHandleService {
 
-    private static final Logger                 LOGGER                           = LoggerFactory
-        .getLogger(EcmHandleServiceImpl.class);
+    private static final ILog LOGGER                           = LogFactory
+        .getLog(EcmHandleServiceImpl.class);
 
     @Autowired
     private ClusterPhyService                   esClusterPhyService;

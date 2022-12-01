@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;

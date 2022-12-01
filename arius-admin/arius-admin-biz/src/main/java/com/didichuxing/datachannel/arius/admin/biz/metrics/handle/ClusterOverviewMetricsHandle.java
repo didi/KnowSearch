@@ -70,9 +70,9 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;
 import java.math.BigDecimal;
 import java.util.Collections;

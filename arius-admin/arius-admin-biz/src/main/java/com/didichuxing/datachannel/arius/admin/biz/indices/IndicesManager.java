@@ -16,7 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShard
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import com.didiglobal.knowframework.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import java.util.List;
 import java.util.function.BiFunction;
 

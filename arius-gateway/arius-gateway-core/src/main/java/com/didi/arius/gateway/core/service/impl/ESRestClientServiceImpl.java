@@ -8,10 +8,10 @@ import com.didi.arius.gateway.common.metadata.ESCluster;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.service.ESRestClientService;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.http.message.BasicHeader;
 import org.apache.logging.log4j.util.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +23,8 @@ import static org.apache.commons.lang.StringUtils.*;
  */
 @Service
 public class ESRestClientServiceImpl implements ESRestClientService {
-    protected static final Logger logger = LoggerFactory.getLogger( ESRestClientServiceImpl.class);
-    protected static final Logger bootLogger = LoggerFactory.getLogger(QueryConsts.BOOT_LOGGER);
+    protected static final ILog logger = LogFactory.getLog( ESRestClientServiceImpl.class);
+    protected static final ILog bootLogger = LogFactory.getLog(QueryConsts.BOOT_LOGGER);
 
     private static final int DEFAULT_MAX_CONN_PER_ROUTE = 500;
     private static final int DEFAULT_MAX_CONN_TOTAL = 3000;

@@ -28,7 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;

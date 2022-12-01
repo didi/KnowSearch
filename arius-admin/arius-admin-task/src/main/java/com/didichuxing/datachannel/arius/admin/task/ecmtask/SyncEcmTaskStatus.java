@@ -2,24 +2,23 @@ package com.didichuxing.datachannel.arius.admin.task.ecmtask;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import com.didichuxing.datachannel.arius.admin.biz.task.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didiglobal.logi.job.common.TaskResult;
-import com.didiglobal.logi.job.core.job.Job;
-import com.didiglobal.logi.job.core.job.JobContext;
+import com.didiglobal.knowframework.job.common.TaskResult;
+import com.didiglobal.knowframework.job.core.job.Job;
+import com.didiglobal.knowframework.job.core.job.JobContext;
 
 /**
  * 定时同步集群任务状态
  */
 //@Task(name = "syncEcmTaskStatus", description = "定时同步集群任务状态", cron = "0 0/2 * * * ?", autoRegister = true)
 public class SyncEcmTaskStatus implements Job {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SyncEcmTaskStatus.class);
+    private static final ILog LOGGER = LogFactory.getLog(SyncEcmTaskStatus.class);
 
     @Autowired
     private EcmTaskManager      ecmTaskManager;
@@ -32,7 +31,7 @@ public class SyncEcmTaskStatus implements Job {
         List<EcmTask> ecmTasks = ecmTaskManager.listRunningEcmTask();
         if (AriusObjUtils.isEmptyList(ecmTasks)) {
             LOGGER.info("class=SyncEcmTaskStatus||method=syncTaskStatus||msg=worktask empty and finished");
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
 
         // todo:对于集群新建，扩缩容这些可能修改物理集群读写地址的任务，可能会出现重试中阻塞的问题，从而影响到下一个任务的执行，考虑是否采用线程池
@@ -48,6 +47,6 @@ public class SyncEcmTaskStatus implements Job {
         }
         LOGGER.info("class=SyncEcmTaskStatus||method=syncTaskStatus||msg=finish");
 
-        return TaskResult.SUCCESS;
+        return TaskResult.buildSuccess();
     }
 }

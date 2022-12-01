@@ -20,8 +20,8 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.*;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;
 
 /**

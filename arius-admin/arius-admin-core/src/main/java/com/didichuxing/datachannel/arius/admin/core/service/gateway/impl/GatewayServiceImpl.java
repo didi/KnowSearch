@@ -14,8 +14,8 @@ import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayServi
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterNodeDAO;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.Date;

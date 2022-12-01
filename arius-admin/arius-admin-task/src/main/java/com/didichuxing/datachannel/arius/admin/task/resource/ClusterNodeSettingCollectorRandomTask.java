@@ -4,12 +4,12 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskExcepti
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
 import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.job.annotation.Task;
-import com.didiglobal.logi.job.common.TaskResult;
-import com.didiglobal.logi.job.core.job.Job;
-import com.didiglobal.logi.job.core.job.JobContext;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.job.annotation.Task;
+import com.didiglobal.knowframework.job.common.TaskResult;
+import com.didiglobal.knowframework.job.core.job.Job;
+import com.didiglobal.knowframework.job.core.job.JobContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Task(name = "ClusterNodeSettingCollectorRandomTask", description = "同步节点配置任务", cron = "0 0/3 * * * ?", autoRegister = true)
@@ -25,9 +25,9 @@ public class ClusterNodeSettingCollectorRandomTask extends BaseConcurrentCluster
         LOGGER.info(
             "class=ClusterNodeSettingCollectorRandomTask||method=execute||msg=ClusterNodeSettingCollectorRandomTask start.");
         if (execute()) {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
-        return TaskResult.FAIL;
+        return TaskResult.buildFail();
     }
 
     /**

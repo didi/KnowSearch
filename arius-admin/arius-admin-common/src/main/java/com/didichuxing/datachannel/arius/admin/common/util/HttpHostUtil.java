@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didiglobal.logi.log.util.HostUtil;
+import com.didiglobal.knowframework.log.util.HostUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;

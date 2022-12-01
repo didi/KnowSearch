@@ -3,9 +3,9 @@ package com.didi.arius.gateway.remote;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AriusAdminRemoteServiceImpl implements AriusAdminRemoteService {
 
-    private static final Logger bootLogger = LoggerFactory.getLogger(QueryConsts.BOOT_LOGGER);
+    private static final ILog bootLogger = LogFactory.getLog(QueryConsts.BOOT_LOGGER);
 
     @Value("${arius.gateway.adminUrl}")
     private String adminUrl;

@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.common;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;

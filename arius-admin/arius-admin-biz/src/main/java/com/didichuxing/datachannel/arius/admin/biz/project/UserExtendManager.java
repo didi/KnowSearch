@@ -5,14 +5,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserExtendDTO
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserQueryExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserWithPwVO;
-import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.dto.user.UserBriefQueryDTO;
-import com.didiglobal.logi.security.common.dto.user.UserDTO;
-import com.didiglobal.logi.security.common.entity.user.User;
-import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.common.vo.user.UserVO;
-import com.didiglobal.logi.security.exception.LogiSecurityException;
+import com.didiglobal.knowframework.security.common.PagingResult;
+import com.didiglobal.knowframework.security.common.dto.user.UserBriefQueryDTO;
+import com.didiglobal.knowframework.security.common.dto.user.UserDTO;
+import com.didiglobal.knowframework.security.common.entity.user.User;
+import com.didiglobal.knowframework.security.common.vo.role.AssignInfoVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserVO;
 import java.util.List;
 
 /**

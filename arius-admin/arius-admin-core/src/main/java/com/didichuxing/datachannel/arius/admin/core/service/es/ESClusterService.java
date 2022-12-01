@@ -10,9 +10,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcomma
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
+import com.didiglobal.knowframework.elasticsearch.client.response.cluster.ESClusterHealthResponse;
+import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
+import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;

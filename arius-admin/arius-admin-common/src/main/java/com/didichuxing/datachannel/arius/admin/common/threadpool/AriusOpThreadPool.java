@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.threadpool;
 
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;

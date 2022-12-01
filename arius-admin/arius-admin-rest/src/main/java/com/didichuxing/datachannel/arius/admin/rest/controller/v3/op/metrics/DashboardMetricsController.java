@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.AriusConfig
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.MetricListVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;

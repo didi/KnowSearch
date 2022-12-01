@@ -11,7 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.DiffUtil;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
 import com.github.difflib.text.DiffRow;
 import java.util.List;
 import java.util.Objects;

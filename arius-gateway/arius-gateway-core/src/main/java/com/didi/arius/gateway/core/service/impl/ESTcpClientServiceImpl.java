@@ -4,13 +4,13 @@ import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.metadata.ESCluster;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.service.ESTcpClientService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import lombok.NoArgsConstructor;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ import static org.apache.commons.lang.StringUtils.*;
 @Service
 @NoArgsConstructor
 public class ESTcpClientServiceImpl implements ESTcpClientService {
-    protected static final Logger bootLogger = LoggerFactory.getLogger(QueryConsts.BOOT_LOGGER);
+    protected static final ILog bootLogger = LogFactory.getLog(QueryConsts.BOOT_LOGGER);
 
     private static final String COLON = ":";
     private static final String COMMA = ",";

@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
-import com.didiglobal.logi.elasticsearch.client.ESClient;
-import com.didiglobal.logi.elasticsearch.client.request.security.SecurityUser;
-import com.didiglobal.logi.elasticsearch.client.response.security.ESGetSecurityUserResponse;
-import com.didiglobal.logi.elasticsearch.client.response.security.ESPutSecurityUserResponse;
+import com.didiglobal.knowframework.elasticsearch.client.ESClient;
+import com.didiglobal.knowframework.elasticsearch.client.request.security.SecurityUser;
+import com.didiglobal.knowframework.elasticsearch.client.response.security.ESGetSecurityUserResponse;
+import com.didiglobal.knowframework.elasticsearch.client.response.security.ESPutSecurityUserResponse;
 import org.springframework.stereotype.Repository;
 
 import java.util.Map;

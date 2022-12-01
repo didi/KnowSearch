@@ -9,9 +9,6 @@ import org.elasticsearch.common.xcontent.XContentParser.Token;
 import org.elasticsearch.rest.BytesRestResponse;
 import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Map;

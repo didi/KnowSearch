@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandShardsQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;

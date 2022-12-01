@@ -2,13 +2,12 @@ package com.didichuxing.datachannel.arius.admin.biz.project;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.RoleExtendVO;
-import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.dto.role.RoleAssignDTO;
-import com.didiglobal.logi.security.common.dto.role.RoleQueryDTO;
-import com.didiglobal.logi.security.common.dto.role.RoleSaveDTO;
-import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
-import com.didiglobal.logi.security.common.vo.role.RoleBriefVO;
-import com.didiglobal.logi.security.exception.LogiSecurityException;
+import com.didiglobal.knowframework.security.common.PagingResult;
+import com.didiglobal.knowframework.security.common.dto.role.RoleAssignDTO;
+import com.didiglobal.knowframework.security.common.dto.role.RoleQueryDTO;
+import com.didiglobal.knowframework.security.common.dto.role.RoleSaveDTO;
+import com.didiglobal.knowframework.security.common.vo.role.AssignInfoVO;
+import com.didiglobal.knowframework.security.common.vo.role.RoleBriefVO;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
@@ -47,7 +46,6 @@ public interface RoleExtendManager {
      * 保存角色
      * @param saveDTO 角色信息
      * @param request 请求信息
-     * @throws LogiSecurityException 参数检查错误信息
      */
     Result<Void> createRole(RoleSaveDTO saveDTO, HttpServletRequest request);
 
@@ -56,7 +54,6 @@ public interface RoleExtendManager {
      * @param roleId 角色id
      * @param userId 用户id
      * @param request 请求信息
-     * @throws LogiSecurityException 该角色已分配给用户，不能删除
      */
     Result<Void> deleteUserFromRole(Integer roleId, Integer userId, HttpServletRequest request);
 
@@ -64,7 +61,6 @@ public interface RoleExtendManager {
      * 更新角色信息
      * @param saveDTO 角色信息
      * @param request 请求信息
-     * @throws LogiSecurityException 参数检查错误信息
      */
     Result<Void> updateRole(RoleSaveDTO saveDTO, HttpServletRequest request);
 
@@ -72,7 +68,6 @@ public interface RoleExtendManager {
      * 分配角色给用户
      * @param assignDTO 分配信息
      * @param request 请求信息
-     * @throws LogiSecurityException 角色分配flag不可为空
      */
     Result<Void> assignRoles(RoleAssignDTO assignDTO, HttpServletRequest request);
 

@@ -2,12 +2,12 @@ package com.didichuxing.datachannel.arius.admin.task.template.srv;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentTemplateTask;
-import com.didiglobal.logi.job.annotation.Task;
-import com.didiglobal.logi.job.common.TaskResult;
-import com.didiglobal.logi.job.core.job.Job;
-import com.didiglobal.logi.job.core.job.JobContext;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.job.annotation.Task;
+import com.didiglobal.knowframework.job.common.TaskResult;
+import com.didiglobal.knowframework.job.core.job.Job;
+import com.didiglobal.knowframework.job.core.job.JobContext;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 @Task(name = "DcdrInfoCollectorRandomTask", description = "采集dcdr相关数据", cron = "0 0/5 * * * ? *", autoRegister = true)
 public class DcdrInfoCollectorRandomTask extends BaseConcurrentTemplateTask implements Job {
@@ -18,9 +18,9 @@ public class DcdrInfoCollectorRandomTask extends BaseConcurrentTemplateTask impl
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=DcdrInfoCollectorRandomTask||method=execute||msg=DcdrInfoCollectorRandomTask start.");
         if (execute()) {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
-        return TaskResult.FAIL;
+        return TaskResult.buildFail();
     }
 
     @Override

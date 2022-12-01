@@ -8,10 +8,10 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
-import com.didiglobal.logi.elasticsearch.client.ESClient;
-import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
-import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import com.didiglobal.knowframework.elasticsearch.client.ESClient;
+import com.didiglobal.knowframework.elasticsearch.client.gateway.direct.DirectRequest;
+import com.didiglobal.knowframework.elasticsearch.client.gateway.direct.DirectResponse;
+import com.didiglobal.knowframework.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;

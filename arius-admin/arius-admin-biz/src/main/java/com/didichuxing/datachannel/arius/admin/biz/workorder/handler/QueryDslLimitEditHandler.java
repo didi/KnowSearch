@@ -14,7 +14,7 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandle
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.QueryDslLimitEditContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslQueryLimit;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisticsService;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
 import com.alibaba.druid.util.StringUtils;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 /**
  * @Author: D10865

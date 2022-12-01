@@ -25,12 +25,12 @@
         </dependency>
 
         <dependency>
-            <groupId>io.github.zqrferrari</groupId>
-            <artifactId>logi-elasticsearch-sql</artifactId>
+            <groupId>io.github.knowstack</groupId>
+            <artifactId>kf-elasticsearch-sql</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.zqrferrari</groupId>
-            <artifactId>logi-dsl-prase</artifactId>
+            <groupId>io.github.knowstack</groupId>
+            <artifactId>kf-dsl-prase</artifactId>
         </dependency>
     </dependencies>
 

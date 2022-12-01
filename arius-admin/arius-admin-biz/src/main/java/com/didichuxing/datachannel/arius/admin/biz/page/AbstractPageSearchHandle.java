@@ -7,9 +7,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.security.service.ProjectService;
 
 /**
  * @author ohushenglin_v

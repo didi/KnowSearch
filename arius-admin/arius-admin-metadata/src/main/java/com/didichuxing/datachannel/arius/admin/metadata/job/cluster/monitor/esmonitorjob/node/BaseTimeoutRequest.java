@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node;
 
-import com.didiglobal.logi.elasticsearch.client.model.ESActionRequest;
+import com.didiglobal.knowframework.elasticsearch.client.model.ESActionRequest;
 
 public abstract class BaseTimeoutRequest<T extends ESActionRequest> extends ESActionRequest<T> {
 

@@ -95,11 +95,11 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Inde
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.ZeusClusterRemoteService;
-import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.knowframework.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

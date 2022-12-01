@@ -4,8 +4,8 @@ import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
 
-import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeDefine;
+import com.didiglobal.knowframework.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.knowframework.elasticsearch.client.response.setting.common.TypeDefine;
 
 /**
  * Created by linyunan on 3/22/22

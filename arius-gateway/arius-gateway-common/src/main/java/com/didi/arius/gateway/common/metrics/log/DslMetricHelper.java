@@ -11,10 +11,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
+
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.util.concurrent.ConcurrentCollections;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author didi
@@ -27,7 +28,7 @@ public class DslMetricHelper {
 
     private static final ConcurrentMap<String, KeyLock> map = ConcurrentCollections.newConcurrentMapWithAggressiveConcurrency();
 
-    protected static final Logger bootLogger = LoggerFactory.getLogger(QueryConsts.BOOT_LOGGER);
+    protected static final ILog bootLogger = LogFactory.getLog(QueryConsts.BOOT_LOGGER);
 
     //这个限制是个大概值，map大小在指定值左右值默认1000
     private static int dslMapSize;

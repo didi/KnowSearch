@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.metadata.utils;
 
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 import java.math.BigDecimal;
 import java.util.*;

@@ -30,9 +30,9 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicAliasService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisticsService;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.knowframework.security.service.ProjectService;
+import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;

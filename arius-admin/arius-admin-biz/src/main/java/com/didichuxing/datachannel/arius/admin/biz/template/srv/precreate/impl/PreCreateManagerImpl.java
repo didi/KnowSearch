@@ -21,8 +21,8 @@ import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPo
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
-import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
+import com.didiglobal.knowframework.elasticsearch.client.response.setting.index.IndexConfig;
+import com.didiglobal.knowframework.elasticsearch.client.response.setting.template.TemplateConfig;
 
 /**
  * @author chengxiang, zqr

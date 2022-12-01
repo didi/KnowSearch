@@ -22,7 +22,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import com.didiglobal.knowframework.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;

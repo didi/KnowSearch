@@ -8,16 +8,17 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentTemplateTask;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
-import com.didiglobal.logi.job.annotation.Task;
-import com.didiglobal.logi.job.common.TaskResult;
-import com.didiglobal.logi.job.core.job.Job;
-import com.didiglobal.logi.job.core.job.JobContext;
+import com.didiglobal.knowframework.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import com.didiglobal.knowframework.job.annotation.Task;
+import com.didiglobal.knowframework.job.common.TaskResult;
+import com.didiglobal.knowframework.job.core.job.Job;
+import com.didiglobal.knowframework.job.core.job.JobContext;
 import java.util.List;
 import java.util.Objects;
+
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -32,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Task(name = "JudgeTemplateBlockWriteTask", description = "检查模版磁盘使用率是否达到上限", cron = "0 */5 * * * ?", autoRegister = true)
 public class JudgeTemplateBlockWriteTask extends BaseConcurrentTemplateTask implements Job {
-    private static final Logger  LOGGER = LoggerFactory.getLogger(JudgeTemplateBlockWriteTask.class);
+    private static final ILog LOGGER = LogFactory.getLog(JudgeTemplateBlockWriteTask.class);
 
     @Autowired
     private IndexTemplateService indexTemplateService;
@@ -59,9 +60,9 @@ public class JudgeTemplateBlockWriteTask extends BaseConcurrentTemplateTask impl
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=JudgeTemplateBlockWriteTask||method=execute||msg=JudgeTemplateBlockWriteTask start.");
         if (execute()) {
-            return TaskResult.SUCCESS;
+            return TaskResult.buildSuccess();
         }
-        return TaskResult.FAIL;
+        return TaskResult.buildFail();
     }
 
     @Override

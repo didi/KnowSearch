@@ -2,12 +2,12 @@ package com.didichuxing.datachannel.arius.admin.task.template.srv;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentTemplateTask;
-import com.didiglobal.logi.job.annotation.Task;
-import com.didiglobal.logi.job.common.TaskResult;
-import com.didiglobal.logi.job.core.job.Job;
-import com.didiglobal.logi.job.core.job.JobContext;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.job.annotation.Task;
+import com.didiglobal.knowframework.job.common.TaskResult;
+import com.didiglobal.knowframework.job.core.job.Job;
+import com.didiglobal.knowframework.job.core.job.JobContext;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 /**
  * 健康随机任务 这是一个每 5 分钟运行一次的任务，名为 HealthRandomTask。
@@ -24,9 +24,9 @@ public class TemplateLogicHealthLogRandomTask extends BaseConcurrentTemplateTask
 	public TaskResult execute(JobContext jobContext) throws Exception {
 		LOGGER.info("class={}||method=execute||msg=HealthRandomTask start",getClass().getSimpleName());
 		if (execute()) {
-			return TaskResult.SUCCESS;
+			return TaskResult.buildSuccess();
 		}
-		return TaskResult.FAIL;
+		return TaskResult.buildFail();
 	}
 	
 

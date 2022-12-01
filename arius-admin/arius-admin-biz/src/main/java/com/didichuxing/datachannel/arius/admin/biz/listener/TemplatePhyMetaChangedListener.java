@@ -5,8 +5,8 @@ import com.didichuxing.datachannel.arius.admin.common.event.template.physical.me
 import com.didichuxing.datachannel.arius.admin.common.event.template.physical.metadata.PhysicalTemplateAliasModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.physical.metadata.PhysicalTemplatePropertiesTypesModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.physical.metadata.PhysicalTemplateSettingsModifyEvent;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 

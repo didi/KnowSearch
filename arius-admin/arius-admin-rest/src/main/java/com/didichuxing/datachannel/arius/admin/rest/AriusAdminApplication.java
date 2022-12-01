@@ -4,8 +4,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.rest.swagger.SwaggerConfiguration;
 import com.didichuxing.datachannel.arius.admin.rest.web.WebConstant;
 import com.didichuxing.datachannel.arius.admin.rest.web.WebRequestLogFilter;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +31,7 @@ import java.io.IOException;
 @EnableScheduling
 @EnableCaching
 @ServletComponentScan
-@SpringBootApplication(scanBasePackages = { "com.didichuxing.datachannel.arius.admin" })
+@SpringBootApplication(scanBasePackages = { "com.didichuxing.datachannel.arius.admin", "com.didiglobal.knowframework.job", "com.didiglobal.knowframework" })
 public class AriusAdminApplication {
 
     private static final ILog LOGGER           = LogFactory.getLog(AriusAdminApplication.class);
@@ -142,4 +142,5 @@ public class AriusAdminApplication {
     }
 
 }
+
 

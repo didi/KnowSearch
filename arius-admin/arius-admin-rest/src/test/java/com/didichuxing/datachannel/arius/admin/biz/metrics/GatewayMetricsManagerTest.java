@@ -38,8 +38,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.Metric
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.metadata.service.GatewayMetricsService;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.knowframework.security.service.ProjectService;
 
 @ActiveProfiles("test")
 @ExtendWith({ SpringExtension.class, MockitoExtension.class })

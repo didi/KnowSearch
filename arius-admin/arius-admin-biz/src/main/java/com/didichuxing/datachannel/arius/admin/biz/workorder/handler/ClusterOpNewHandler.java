@@ -35,7 +35,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;

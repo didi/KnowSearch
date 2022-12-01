@@ -6,11 +6,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.ResourceUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -18,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class CompareUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompareUtil.class);
+    private static final ILog LOGGER = LogFactory.getLog(CompareUtil.class);
 
     private CompareUtil() {
     }

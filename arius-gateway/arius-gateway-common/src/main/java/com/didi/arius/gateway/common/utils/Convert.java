@@ -12,14 +12,13 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.common.Base64;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.search.fetch.source.FetchSourceContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.didi.arius.gateway.common.metadata.AuthRequest;
 import com.didi.arius.gateway.common.metadata.FieldInfo;
 import com.didi.arius.gateway.elasticsearch.client.gateway.search.ESSearchRequest;
@@ -37,7 +36,7 @@ public class Convert {
 
 	private Convert(){}
 
-	protected static final Logger logger = LoggerFactory.getLogger(Convert.class);
+	protected static final ILog logger = LogFactory.getLog(Convert.class);
 	private static String pattern = ".*\\d\\d-*\\d\\d";
 	private static Pattern r = Pattern.compile(pattern);
 	private static final String BASIC = "Basic ";

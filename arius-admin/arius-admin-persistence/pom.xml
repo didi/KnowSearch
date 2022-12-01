@@ -54,8 +54,8 @@
         </dependency>
 
         <dependency>
-            <groupId>io.github.zqrferrari</groupId>
-            <artifactId>logi-elasticsearch-client</artifactId>
+            <groupId>io.github.knowstack</groupId>
+            <artifactId>kf-elasticsearch-client</artifactId>
         </dependency>
 
         <dependency>

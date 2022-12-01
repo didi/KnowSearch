@@ -5,13 +5,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.didi.arius.gateway.elasticsearch.client.model.type.ESVersion;
 import com.didi.arius.gateway.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didi.arius.gateway.elasticsearch.client.response.setting.common.TypeDefine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 import java.util.*;
 
 public class MultiTemplatesConfig {
-    private final Logger LOGGER = LoggerFactory.getLogger(MultiTemplatesConfig.class);
+    private final ILog LOGGER = LogFactory.getLog(MultiTemplatesConfig.class);
 
     private Map<String, TemplateConfig> templateConfigMap = new HashMap<>();
 

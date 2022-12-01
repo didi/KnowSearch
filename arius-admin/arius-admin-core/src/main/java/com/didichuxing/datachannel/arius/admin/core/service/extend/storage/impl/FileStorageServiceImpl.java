@@ -12,8 +12,8 @@ import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.storage.FileStorageService;
 import com.didichuxing.datachannel.arius.admin.remote.storage.FileStorageHandle;
 import com.didichuxing.datachannel.arius.admin.remote.storage.content.FileStorageTypeEnum;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 import javax.annotation.PostConstruct;
 

@@ -16,8 +16,8 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Templ
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateAliasDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhyDAO;
-import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasNode;
-import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasType;
+import com.didiglobal.knowframework.elasticsearch.client.request.index.putalias.PutAliasNode;
+import com.didiglobal.knowframework.elasticsearch.client.request.index.putalias.PutAliasType;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;

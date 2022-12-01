@@ -18,9 +18,9 @@ import com.didi.arius.gateway.core.service.arius.IndexTemplateService;
 import com.didi.arius.gateway.remote.AriusAdminRemoteService;
 import com.didi.arius.gateway.remote.response.AppDetailResponse;
 import com.didi.arius.gateway.remote.response.AppListResponse;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import lombok.NoArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -35,9 +35,9 @@ import java.util.Map;
 @NoArgsConstructor
 public class AppServiceImpl implements AppService {
 
-    private static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
-    private static final Logger bootLogger = LoggerFactory.getLogger(QueryConsts.BOOT_LOGGER);
-    private static final Logger logger = LoggerFactory.getLogger(AppServiceImpl.class);
+    private static final ILog statLogger = LogFactory.getLog(QueryConsts.STAT_LOGGER);
+    private static final ILog bootLogger = LogFactory.getLog(QueryConsts.BOOT_LOGGER);
+    private static final ILog logger = LogFactory.getLog(AppServiceImpl.class);
 
     @Autowired
     private AriusAdminRemoteService ariusAdminRemoteService;

@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.core.component;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ApplicationContext;
@@ -27,7 +27,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class SpringTool implements ApplicationContextAware, DisposableBean {
     private static ApplicationContext applicationContext = null;
 
-    private static Logger             logger             = LoggerFactory.getLogger(SpringTool.class);
+    private static ILog logger             = LogFactory.getLog(SpringTool.class);
 
     /**
      * 去的存储在静态变量中的ApplicationContext

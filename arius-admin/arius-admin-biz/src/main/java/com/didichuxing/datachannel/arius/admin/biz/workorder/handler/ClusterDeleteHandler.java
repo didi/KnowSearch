@@ -18,9 +18,9 @@ import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrd
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;

@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,7 +14,7 @@ public class RandomGenerator {
 
     private static final Random random = new Random();
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RandomGenerator.class);
+    private static final ILog LOGGER = LogFactory.getLog(RandomGenerator.class);
 
     public static Integer randomInt(int low, int high) {
         if (high <= low) {
