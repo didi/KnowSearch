@@ -1,6 +1,7 @@
 package com.didiglobal.logi.op.manager.domain.packages.service;
 
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
+import com.didiglobal.logi.op.manager.domain.packages.entity.value.PackageGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 
 import java.util.List;
@@ -73,4 +74,11 @@ public interface PackageDomainService {
      * @return
      */
     List<Package> listPackageByPackageType(Integer packageType);
+
+    /**
+     * 通过es包版本号获取es配置组
+     * @param version
+     * @return
+     */
+    List<PackageGroupConfig> listPackageGroupConfigByVersion(String version);
 }

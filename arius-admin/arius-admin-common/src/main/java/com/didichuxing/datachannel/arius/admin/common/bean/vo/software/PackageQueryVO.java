@@ -50,6 +50,11 @@ public class PackageQueryVO extends BaseVO {
     @ApiModelProperty("脚本id")
     private Integer scriptId;
     /**
+     * 软件包类型
+     */
+    @ApiModelProperty("软件包类型")
+    private Integer packageType;
+    /**
      * 关联的默认安装包分组配置
      */
     @ApiModelProperty("关联的默认安装包分组配置")

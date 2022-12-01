@@ -62,6 +62,7 @@ public class ScriptManagerImpl implements ScriptManager {
         if (checkResult.failed()) {
             return Result.buildFrom(checkResult);
         }
+        script.setCreator(operator);
         com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> addScriptResult = scriptService.createScript(script);
         return Result.buildFrom(addScriptResult);
     }
@@ -77,6 +78,7 @@ public class ScriptManagerImpl implements ScriptManager {
         if (checkResult.failed()) {
             return Result.buildFrom(checkResult);
         }
+        script.setCreator(operator);
         com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> editScriptResult = scriptService.updateScript(script);
         return Result.buildFrom(editScriptResult);
     }

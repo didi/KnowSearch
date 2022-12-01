@@ -1,18 +1,21 @@
 package com.didiglobal.logi.op.manager.domain.packages.service.impl;
 
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
+import com.didiglobal.logi.op.manager.domain.packages.entity.value.PackageGroupConfig;
 import com.didiglobal.logi.op.manager.domain.packages.repository.PackageGroupConfigRepository;
 import com.didiglobal.logi.op.manager.domain.packages.repository.PackageRepository;
 import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.storage.StorageService;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Objects;
 
 import static com.didiglobal.logi.op.manager.infrastructure.util.FileUtil.getDeleteFileName;
 import static com.didiglobal.logi.op.manager.infrastructure.util.FileUtil.getUniqueFileName;
@@ -113,6 +116,15 @@ public class PackageDomainServiceImpl implements PackageDomainService {
     @Override
     public List<Package> listPackageByPackageType(Integer packageType) {
         return packageRepository.listPackageByPackageType(packageType);
+    }
+
+    @Override
+    public List<PackageGroupConfig> listPackageGroupConfigByVersion(String version) {
+        Package packageByVersion = packageRepository.findByVersion(version);
+        if(Objects.isNull(packageByVersion)){
+            return Lists.newArrayList();
+        }
+        return packageGroupConfigRepository.queryConfigByPackageId(packageByVersion.getId());
     }
 
     @Override

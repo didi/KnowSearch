@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageAddDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageUpdateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageGroupConfigQueryVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackagePageVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageQueryVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageVersionVO;
@@ -71,5 +72,23 @@ public interface PackageManager {
      * @param currentVersion
      * @return
      */
-    Result<List<PackageVersionVO>> listPackageWithHigherVersionByPackageTypeAndVersion(String packageTypeDesc, Integer projectId, String currentVersion);
+    Result<List<PackageVersionVO>> listPackageWithHigherVersionByPackageTypeAndCurrentVersion(String packageTypeDesc, Integer projectId, String currentVersion);
+
+    /**
+     * 通过软件包版本获取软件包配置组
+     * @param version
+     * @param operator
+     * @param projectId
+     * @return
+     */
+    Result<List<PackageGroupConfigQueryVO>> listPackageGroupConfigByVersion(String version, String operator, Integer projectId);
+
+    /**
+     * 通过软件包类型获取软件包版本
+     * @param packageTypeDesc
+     * @param operator
+     * @param projectId
+     * @return
+     */
+    Result<List<PackageVersionVO>> listPackageVersionByPackageType(String packageTypeDesc, String operator, Integer projectId);
 }

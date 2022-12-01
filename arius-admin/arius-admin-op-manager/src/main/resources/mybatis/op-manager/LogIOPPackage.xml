@@ -70,8 +70,9 @@
         select
         <include refid="Base_Column_List"/>
         from logi_op_package
-        where version = #{version}
+        where package_type=1 and version = #{version}
         order by id desc
+        limit 1
     </select>
 
     <select id="query"
