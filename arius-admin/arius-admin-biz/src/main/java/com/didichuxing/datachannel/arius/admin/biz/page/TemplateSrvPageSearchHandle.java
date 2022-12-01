@@ -82,9 +82,6 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         if (!AriusObjUtils.isBlack(templateName) && (templateName.startsWith("*") || templateName.startsWith("?"))) {
             return Result.buildParamIllegal("模板名称不能以*或者?开头");
         }
-        if(AriusObjUtils.isNull(condition.getShowMetadata())){
-            return Result.buildParamIllegal("是否展示元信息参数不能为空");
-        }
         if(AriusObjUtils.isNull(metadataClusterName)){
             return Result.buildParamIllegal("元数据集群配置名称为空");
         }
@@ -93,7 +90,10 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
 
     @Override
     protected void initCondition(TemplateQueryDTO condition, Integer projectId) {
-        // nothing to do
+        //默认展示元数据集群的信息
+        if(AriusObjUtils.isNull(condition.getShowMetadata())){
+            condition.setShowMetadata(true);
+        }
     }
 
     @Override
@@ -118,7 +118,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
      * @return
      */
     private Tuple<Integer, List<IndexTemplate>> pagingGetTemplateSrvByCondition(TemplateQueryDTO condition, Integer projectId) {
-        if (!condition.getShowMetadata() && AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+        if (MetadataControlUtils.showMetadataInfo(!condition.getShowMetadata(), projectId)) {
             List<Integer> metadataLogicClusterIds = getLogicClusterIds(metadataClusterName);
             condition.setMetadataLogicClusterIds(metadataLogicClusterIds);
         }
@@ -136,7 +136,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
      */
     private Tuple<Integer, List<IndexTemplate>> pagingGetTemplateSrvByConditionAndLogicClusterIdList(TemplateQueryDTO condition, Integer projectId) {
         Tuple<Integer, List<IndexTemplate>> indexTemplateTuple = new Tuple<>(0, Collections.emptyList());
-        if (!condition.getShowMetadata() && AuthConstant.SUPER_PROJECT_ID.equals(projectId)
+        if (MetadataControlUtils.showMetadataInfo(!condition.getShowMetadata(), projectId)
                 && condition.getCluster().equals(metadataClusterName)) {
             return indexTemplateTuple;
         } else {

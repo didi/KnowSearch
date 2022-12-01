@@ -186,6 +186,11 @@ public interface IndexTemplateService {
      * @return map，key-逻辑模板ID，value-逻辑模板
      */
     Map<Integer, IndexTemplate> getAllLogicTemplatesMap();
+    /**
+     * 获取全部逻辑模板
+     * @return map，key-逻辑模板ID，value-逻辑模板
+     */
+    Map<Integer, IndexTemplate> getAllLogicTemplatesMapWithCache();
 
     /**
      * 根据列表获取逻辑模板

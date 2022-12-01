@@ -5,6 +5,7 @@ import com.didiglobal.logi.op.manager.domain.packages.repository.PackageReposito
 import com.didiglobal.logi.op.manager.infrastructure.db.PackagePO;
 import com.didiglobal.logi.op.manager.infrastructure.db.converter.PackageConverter;
 import com.didiglobal.logi.op.manager.infrastructure.db.mapper.PackageDao;
+import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -56,6 +57,24 @@ public class PackageRepositoryImpl implements PackageRepository {
         PackagePO po = PackageConverter.convertPackageDO2PO(pk);
         List<PackagePO> pos = packageDao.query(po);
         return PackageConverter.convertPackagePO2DOList(pos);
+    }
+
+    @Override
+    public List<Package> pagingByCondition(Package pagingPackage, Long page, Long size) {
+        PackagePO packagePO = PackageConverter.convertPackageDO2PO(pagingPackage);
+        return PackageConverter.convertPackagePO2DOList(packageDao.pagingByCondition(packagePO,page,size));
+    }
+
+    @Override
+    public List<Package> listPackageByPackageType(Integer packageType) {
+        List<PackagePO> packageList = packageDao.listPackageByPackageType(packageType);
+        return ConvertUtil.list2List(packageList,Package.class);
+    }
+
+    @Override
+    public Long countByCondition(Package pagingPackage) {
+        PackagePO packagePO = PackageConverter.convertPackageDO2PO(pagingPackage);
+        return packageDao.countByCondition(packagePO);
     }
 
     @Override

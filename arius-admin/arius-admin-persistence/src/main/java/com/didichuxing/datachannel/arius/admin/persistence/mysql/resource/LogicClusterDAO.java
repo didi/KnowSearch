@@ -43,4 +43,12 @@ public interface LogicClusterDAO {
     Long getTotalHitByCondition(ClusterLogicConditionDTO param);
     
     List<ClusterLogicPO> listByLevel(Integer level);
+    
+    /**
+     * 获取 projectId 等于给定 projectId 的实体的所有 ID。
+     *
+     * @param projectId 您要为其获取 ID 的项目的 ID。
+     * @return 项目中具有给定 ID 的所有任务 ID 的列表。
+     */
+    List<Long> getAllIdsByProjectId(Integer projectId);
 }

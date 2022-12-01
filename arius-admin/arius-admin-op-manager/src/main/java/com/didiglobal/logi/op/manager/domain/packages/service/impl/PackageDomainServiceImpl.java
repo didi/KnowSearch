@@ -8,15 +8,15 @@ import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainServi
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.storage.StorageService;
-import org.jetbrains.annotations.NotNull;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Objects;
 
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SLASH;
 import static com.didiglobal.logi.op.manager.infrastructure.util.FileUtil.getDeleteFileName;
 import static com.didiglobal.logi.op.manager.infrastructure.util.FileUtil.getUniqueFileName;
 
@@ -85,7 +85,6 @@ public class PackageDomainServiceImpl implements PackageDomainService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> updatePackage(Package pk) {
-
         //更新
         pk.update();
 
@@ -96,7 +95,6 @@ public class PackageDomainServiceImpl implements PackageDomainService {
             }
             pk.setUrl(storageRes.getData());
         }
-
         //更新数据库
         packageRepository.updatePackage(pk);
         int packageId = pk.getId();
@@ -106,9 +104,32 @@ public class PackageDomainServiceImpl implements PackageDomainService {
                 packageGroupConfig.setPackageId(packageId);
                 packageGroupConfigRepository.insertPackageGroupConfig(packageGroupConfig);
             });
-
         }
         return Result.success();
+    }
+
+    @Override
+    public List<Package> pagingByCondition(Package pagingPackage, Long page, Long size) {
+        return packageRepository.pagingByCondition(pagingPackage,page,size);
+    }
+
+    @Override
+    public List<Package> listPackageByPackageType(Integer packageType) {
+        return packageRepository.listPackageByPackageType(packageType);
+    }
+
+    @Override
+    public List<PackageGroupConfig> listPackageGroupConfigByVersion(String version) {
+        Package packageByVersion = packageRepository.findByVersion(version);
+        if(Objects.isNull(packageByVersion)){
+            return Lists.newArrayList();
+        }
+        return packageGroupConfigRepository.queryConfigByPackageId(packageByVersion.getId());
+    }
+
+    @Override
+    public Long countByCondition(Package pagingPackage) {
+        return packageRepository.countByCondition(pagingPackage);
     }
 
     @Override

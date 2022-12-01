@@ -3,6 +3,7 @@
  */
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.task;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.OpTaskPO;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
@@ -89,4 +90,40 @@ public interface OpTaskDAO {
      * @return {@link List}<{@link OpTaskPO}>
      */
     List<OpTaskPO> getSuccessTaskByType(@Param("taskType") Integer taskType);
+
+    /**
+     * 任务中心分页查询数据
+     * @param queryDTO
+     * @param from
+     * @param size
+     * @param sortTerm
+     * @param sortType
+     * @return
+     */
+    List<OpTaskPO> pagingByCondition(@Param("param")OpTaskQueryDTO queryDTO, @Param("from")Long from,
+                                     @Param("size")Long size, @Param("sortTerm")String sortTerm, @Param("sortType")String sortType);
+
+    /**
+     * 任务中心分页查询条数
+     * @param queryDTO
+     * @return
+     */
+    Long countByCondition(OpTaskQueryDTO queryDTO);
+    
+    /**
+     * 按任务类型获取待处理任务
+     *
+     * @param taskTypes 要查询的任务类型。
+     * @return OpTaskPO 对象列表。
+     */
+    List<OpTaskPO> getPendingTaskByTypes(@Param("taskTypes") List<Integer> taskTypes);
+    
+    /**
+     * > 按标题和类型获取任务
+     *
+     * @param title 任务名称
+     * @param type 任务类型，即任务表中任务的类型。
+     * @return 一个 TaskPO 对象
+     */
+    OpTaskPO getTaskByTitleAndType(@Param("title")String title, @Param("taskType")Integer type);
 }

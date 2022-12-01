@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.template;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.DataType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,7 +31,7 @@ public class IndexTemplatePO extends BasePO {
 
     /**
      * 用户数据类型
-     * @see DataTypeEnum
+     * @see DataType
      */
     private Integer dataType;
 

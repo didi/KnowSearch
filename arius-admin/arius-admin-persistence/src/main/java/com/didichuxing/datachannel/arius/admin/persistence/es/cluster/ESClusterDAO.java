@@ -5,7 +5,47 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.Cl
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.HOT_THREAD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.PENDING_TASK;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.TASK_MISSION_ANALYSIS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ACTION;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.COUNT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DESCRIPTION;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DOCS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_MIN_TIMEOUT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_CLIENT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_COORDINATING_ONLY;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_DATA;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_DATA_ONLY;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_INGEST;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER_DATA;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER_ONLY;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.FREE_IN_BYTES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.FREE_PERCENT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.FS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.HEAP_MAX_IN_BYTES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.HEAP_USED_IN_BYTES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDICES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.IP;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.JVM;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.MEM;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.NODE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.NODES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.OS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PARENT_TASK_ID;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PENDING_TASKS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.REBALANCE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.RUNNING_TIME;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.SHARDS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.SIZE_IN_BYTES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.START_TIME;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.STATUS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.STORE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TASK_ID;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TOTAL;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TOTAL_IN_BYTES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.UNASSIGN;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.USED_IN_BYTES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.USED_PERCENT;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -50,6 +90,7 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndi
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -247,12 +288,41 @@ public class ESClusterDAO extends BaseESDAO {
             .map(esCatResponseString2ESResponsePluginInfoListFunc).map(eSResponsePluginInfoList2MapFunc).orElse(null);
 
     }
+    
+    /**
+     * 它获取集群的插件。
+     *
+     * @param cluster 要查询的集群名称
+     * @return 插件列表。
+     */
+    public List<ESResponsePluginInfo> getPlugins(String cluster) throws ESOperateException {
+        ESClient client = esOpClient.getESClient(cluster);
+        if (null == client) {
+            LOGGER.warn(
+                "class=ESClusterDAO||method=getNode2PluginsMap||clusterName={}||errMsg=esClient is null",
+                cluster);
+            throw new NullESClientException(cluster);
+        }
+        
+        ESCatRequest esCatRequest = new ESCatRequest();
+        esCatRequest.setUri("plugins");
+        ESCatResponse esCatResponse = null;
+        try {
+            esCatResponse = client.admin().cluster().execute(ESCatAction.INSTANCE, esCatRequest)
+                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            LOGGER.warn(
+                "class=ESClusterDAO||method=getNode2PluginsMap||clusterName={}"
+                    + "||errMsg=can't get node  plugin",
+                cluster);
+            ParsingExceptionUtils.abnormalTermination(e);
+        }
+        return Optional.ofNullable(esCatResponse).map(ESCatResponse::getResponse)
+            .map(Object::toString)
+            .map(esCatResponseString2ESResponsePluginInfoListFunc).orElse(Collections.emptyList());
+    }
 
-    private final Function<List<ESResponsePluginInfo>, Map<String/*nodeName*/, List<String>/*pluginName*/>> eSResponsePluginInfoList2MapFunc                 = eSResponsePluginInfos -> ConvertUtil
-        .list2MapOfList(eSResponsePluginInfos, ESResponsePluginInfo::getName, ESResponsePluginInfo::getComponent);
-
-    private final Function<String, List<ESResponsePluginInfo>>                                              esCatResponseString2ESResponsePluginInfoListFunc = esCatResponse -> JSON
-        .parseArray(esCatResponse, ESResponsePluginInfo.class);
+    
 
     /**
      * 获取物理集群下各个节点的资源设置信息
@@ -935,4 +1005,10 @@ public class ESClusterDAO extends BaseESDAO {
                 .orElse(false);
         
     }
+    
+    private final Function<List<ESResponsePluginInfo>, Map<String/*nodeName*/, List<String>/*pluginName*/>> eSResponsePluginInfoList2MapFunc                 = eSResponsePluginInfos -> ConvertUtil
+        .list2MapOfList(eSResponsePluginInfos, ESResponsePluginInfo::getName, ESResponsePluginInfo::getComponent);
+
+    private final Function<String, List<ESResponsePluginInfo>>                                              esCatResponseString2ESResponsePluginInfoListFunc = esCatResponse -> JSON
+        .parseArray(esCatResponse, ESResponsePluginInfo.class);
 }

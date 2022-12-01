@@ -8,6 +8,7 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESResponsePluginInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentOnIp;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
@@ -140,7 +141,12 @@ public class ESClusterServiceImpl implements ESClusterService {
     public Map<String, List<String>> syncGetNode2PluginsMap(String cluster) throws ESOperateException {
         return esClusterDAO.getNode2PluginsMap(cluster, 3);
     }
-
+    
+    @Override
+    public List<ESResponsePluginInfo> syncGetPlugins(String cluster) throws ESOperateException {
+        return esClusterDAO.getPlugins(cluster);
+    }
+    
     /**
      * 获取某个集群内索引别名到索引名称的映射
      *

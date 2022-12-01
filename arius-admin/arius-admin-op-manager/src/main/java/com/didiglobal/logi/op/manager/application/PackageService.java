@@ -2,6 +2,7 @@ package com.didiglobal.logi.op.manager.application;
 
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
+import com.didiglobal.logi.op.manager.domain.packages.entity.value.PackageGroupConfig;
 import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
 import com.didiglobal.logi.op.manager.domain.script.service.impl.ScriptDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
@@ -65,7 +66,7 @@ public class PackageService {
         if (checkResult.failed()) {
             return checkResult;
         }
-        Result<Boolean> res = componentDomainService.hasPackageDependComponent(pk.getId());
+        Result<Boolean> res = usingPackage(pk.getId());
         if (res.getData() && null != pk.getUploadFile()) {
             return Result.fail(PACKAGE_IS_DEPEND_UPDATE_ERROR);
         }
@@ -90,11 +91,77 @@ public class PackageService {
         }
 
         //判断,若包已经绑定了组件则不能删除
-        Result<Boolean> res = componentDomainService.hasPackageDependComponent(id);
+        Result<Boolean> res = usingPackage(id);
         if (res.failed() || res.getData()) {
             return Result.fail(PACKAGE_IS_DEPEND_ERROR);
         }
 
         return packageDomainService.deletePackage(pk);
+    }
+
+    /**
+     * 分页查询软件包列表
+     * @param pagingPackage
+     * @param page
+     * @param size
+     * @return
+     */
+    public List<Package> pagingByCondition(Package pagingPackage, Long page, Long size) {
+        List<Package> packageList = packageDomainService.pagingByCondition(pagingPackage, (page - 1) * size, size);
+        return packageList;
+    }
+
+    /**
+     * 查询软件包总数
+     * @param pagingPackage
+     * @return
+     */
+    public Long countByCondition(Package pagingPackage) {
+        return packageDomainService.countByCondition(pagingPackage);
+    }
+
+    /**
+     * 根据id查询软件包
+     * @param id
+     * @return
+     */
+    public Result<Package> getPackageById(Long id) {
+        return packageDomainService.getPackageById(Math.toIntExact(id));
+    }
+
+    /**
+     * 是否正在使用安装包
+     * @param id
+     * @return
+     */
+    public Result<Boolean> usingPackage(Integer id) {
+        return componentDomainService.hasPackageDependComponent(id);
+    }
+
+    /**
+     * 根据软件包类型获取软件包
+     * @param packageType
+     * @return
+     */
+    public List<Package> listPackageByPackageType(Integer packageType){
+        return packageDomainService.listPackageByPackageType(packageType);
+    }
+
+    /**
+     * 分页查询时判断软件包是否正在使用
+     * @param packageIds
+     * @return
+     */
+    public List<Integer> hasPackagesDependComponent(List<Integer> packageIds) {
+        return componentDomainService.hasPackagesDependComponent(packageIds);
+    }
+
+    /**
+     * 通过es包版本号获取es配置组
+     * @param version
+     * @return
+     */
+    public List<PackageGroupConfig> listPackageGroupConfigByVersion(String version) {
+        return packageDomainService.listPackageGroupConfigByVersion(version);
     }
 }

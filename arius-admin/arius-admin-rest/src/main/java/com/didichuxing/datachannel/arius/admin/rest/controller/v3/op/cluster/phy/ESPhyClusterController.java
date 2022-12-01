@@ -11,12 +11,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didiglobal.logi.op.manager.interfaces.vo.GeneralGroupConfigHostVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -212,10 +213,33 @@ public class ESPhyClusterController {
     @PostMapping("{clusterPhyId}/{gatewayClusterId}")
     @ResponseBody
     @ApiOperation(value = "物理集群绑定 gateway",tags = "")
-    public Result<List<ClusterPhyVO>> bindGatewayCluster(@PathVariable("clusterPhyId") Integer clusterPhyId,
+    public Result<Void> bindGatewayCluster(@PathVariable("clusterPhyId") Integer clusterPhyId,
                                                          @PathVariable("gatewayClusterId") Integer gatewayClusterId,
                                                          HttpServletRequest request) {
-        return Result.buildSucc();
+        return clusterPhyManager.bindGatewayCluster(clusterPhyId,gatewayClusterId, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
+    }
+     @GetMapping("/{clusterPhyId}/before-version")
+    @ResponseBody
+    @ApiOperation(value = "获取上个版本号",tags = "")
+    public Result<List<Object>> getBeforeVersionByGatewayClusterId(HttpServletRequest request,
+                                               @PathVariable("clusterPhyId") Integer clusterPhyId) {
+        return clusterPhyManager.getBeforeVersionByClusterId(clusterPhyId);
+    }
+    
+    @GetMapping("health")
+    @ResponseBody
+    @ApiOperation(value = "获取集群健康枚举类",tags = "")
+    public Result<List<TupleTwo<Integer,ClusterHealthEnum>>> getHealthEnum(HttpServletRequest request) {
+        return Result.buildSucc(ClusterHealthEnum.getAll());
+    }
+    
+    
+    @GetMapping("cluster-resource")
+    @ResponseBody
+    @ApiOperation(value = "获取集群资源类型",tags = "")
+    public Result<List<TupleTwo<Integer, ClusterResourceTypeEnum>>> getClusterResourceType(HttpServletRequest request) {
+        return Result.buildSucc(ClusterResourceTypeEnum.getAll());
     }
     
 }

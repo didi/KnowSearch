@@ -2,9 +2,12 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.task;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.OpTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.TaskTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
@@ -66,8 +69,16 @@ public class OpTaskController {
     @ApiOperation(value = "任务列表", notes = "")
     @GetMapping(value = "tasks")
     @ResponseBody
+    @Deprecated
     public Result<List<WorkTaskVO>> getTaskList() {
         return Result.buildSucc(ConvertUtil.list2List(opTaskManager.list().getData(), WorkTaskVO.class));
+    }
+
+    @ApiOperation(value = "任务中心分页列表", notes = "")
+    @PostMapping(value = "page")
+    @ResponseBody
+    public PaginationResult<OpTaskVO> pageGetTasks(@RequestBody OpTaskQueryDTO queryDTO, HttpServletRequest request) throws NotFindSubclassException {
+        return opTaskManager.pageGetTasks(HttpRequestUtil.getProjectId(request), queryDTO);
     }
 
     @PostMapping(path = "/{type}")

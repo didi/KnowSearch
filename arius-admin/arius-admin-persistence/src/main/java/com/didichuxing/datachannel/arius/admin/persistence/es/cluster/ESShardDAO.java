@@ -169,9 +169,9 @@ public class ESShardDAO extends BaseESDAO {
 
             ShardCatCellPO shardCatCellPO = new ShardCatCellPO();
             shardCatCellPO.setClusterPhy(clusterName);
-            shardCatCellPO.setShard(shardStr == null ? 0L : Long.parseLong(shardStr));
-            shardCatCellPO.setStore(storeStr == null ? 0L : SizeUtil.getUnitSize(storeStr));
-            shardCatCellPO.setDocs(docsStr == null ? 0 : Integer.parseInt(docsStr));
+            shardCatCellPO.setShard(shardStr);
+            shardCatCellPO.setStore(storeStr);
+            shardCatCellPO.setDocs(docsStr);
             shardCatCellPO.setIndex(shardInfo.getString(index));
             shardCatCellPO.setIp(shardInfo.getString(ip));
             shardCatCellPO.setNode(shardInfo.getString(node));

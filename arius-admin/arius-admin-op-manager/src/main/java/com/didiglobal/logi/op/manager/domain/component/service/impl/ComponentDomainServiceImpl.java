@@ -1,5 +1,7 @@
 package com.didiglobal.logi.op.manager.domain.component.service.impl;
 
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
+
 import com.alibaba.fastjson.JSON;
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
@@ -13,23 +15,38 @@ import com.didiglobal.logi.op.manager.domain.component.service.handler.ScaleHand
 import com.didiglobal.logi.op.manager.domain.component.service.handler.ScaleHandlerFactory;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralConfigChangeComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralExecuteComponentFunction;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralRestartComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralRollbackComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralScaleComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralUninstallComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralUpgradeComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.DomainEvent;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.SpringEventPublisher;
+import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.REX;
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
 
 /**
  * @author didi
@@ -132,7 +149,13 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
 
     @Override
     public Result<List<ComponentGroupConfig>> getComponentConfig(int componentId) {
-        List<ComponentGroupConfig> configList = componentGroupConfigRepository.getConfigByComponentId(componentId);
+        Component component = componentRepository.getComponentById(componentId);
+        List<ComponentGroupConfig> configList;
+        if(null != component.getDependConfigComponentId()) {
+            configList = componentGroupConfigRepository.getConfigByComponentId(component.getDependConfigComponentId());
+        } else {
+            configList = componentGroupConfigRepository.getConfigByComponentId(componentId);
+        }
         return Result.success(getLatestGroupConfig(configList));
     }
 
@@ -185,6 +208,27 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
         List<Component> componentList = componentRepository.queryComponent(queryComponent);
         return Result.success(componentList);
     }
+    
+    @Override
+    public Result<Component> queryComponentByName(String name) {
+        Component component = componentRepository.queryComponentByName(name);
+        if (Objects.isNull(component)){
+            return Result.fail(ResultCode.COMPONENT_NOT_EXIST_ERROR);
+        }
+        List<ComponentHost> hosts = componentHostRepository.listComponentHost();
+        Map<Integer, List<ComponentHost>> componentId2ListMap = ConvertUtil.list2MapOfList(hosts,
+                                                                                           ComponentHost::getComponentId,
+                                                                                           i -> i);
+        List<ComponentGroupConfig> configs = componentGroupConfigRepository.listGroupConfig();
+        Map<Integer, List<ComponentGroupConfig>> componentId2ConfigListMap = ConvertUtil.list2MapOfList(configs,
+                                                                                                        ComponentGroupConfig::getComponentId,
+                                                                                                        i -> i);
+        component.setHostList(componentId2ListMap.get(component.getId()));
+        component.setGroupConfigList(componentId2ConfigListMap.get(component.getId()));
+    
+        return Result.buildSuccess(component);
+    }
+    
     /**
      * 获取组件下，最新的分组配置信息
      *
@@ -362,5 +406,44 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
         return Result.success();
     }
 
+    @Override
+    public List<Integer> hasPackagesDependComponent(List<Integer> packageIds) {
+        List<Component> componentByPackageIds = componentRepository.getComponentByPackageIds(packageIds);
+        List<Integer> usingPackageIds = Lists.newArrayList();
+        if(!componentByPackageIds.isEmpty()){
+            usingPackageIds = componentByPackageIds.stream().map(Component::getPackageId).collect(Collectors.toList());
+        }
+        return usingPackageIds;
+    }
 
+    @Override
+    public Result<String> queryComponentNameById(Integer componentId) {
+        final Optional<String> nameOpt = componentRepository.queryComponentNameById(componentId);
+        return nameOpt.map(Result::buildSuccess)
+            .orElseGet(() -> Result.fail(ResultCode.COMPONENT_NOT_EXIST_ERROR));
+    }
+    
+    @Override
+    public Result<List<ComponentHost>> queryComponentHostById(Integer componentId) {
+        return Result.buildSuccess(componentHostRepository.listHostByComponentId(componentId));
+    }
+    
+    @Override
+    public Result<Component> queryComponentById(Integer componentId) {
+        final Optional<Component> componentOpt = componentRepository.queryComponentById(componentId);
+        componentOpt.ifPresent(component -> {
+            List<ComponentHost> hosts = componentHostRepository.listComponentHost();
+            Map<Integer, List<ComponentHost>> componentId2ListMap = ConvertUtil.list2MapOfList(hosts,
+                                                                                               ComponentHost::getComponentId,
+                                                                                               i -> i);
+            List<ComponentGroupConfig> configs = componentGroupConfigRepository.listGroupConfig();
+            Map<Integer, List<ComponentGroupConfig>> componentId2ConfigListMap = ConvertUtil.list2MapOfList(configs,
+                                                                                                            ComponentGroupConfig::getComponentId,
+                                                                                                            i -> i);
+            component.setHostList(componentId2ListMap.get(component.getId()));
+            component.setGroupConfigList(componentId2ConfigListMap.get(component.getId()));
+        });
+        return componentOpt.map(Result::buildSuccess).orElseGet(
+                () -> Result.fail(ResultCode.COMPONENT_NOT_EXIST_ERROR));
+    }
 }

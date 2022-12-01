@@ -189,4 +189,11 @@
         <include refid="Base_Column_List"/>
         from project_arius_resource_logic where level=#{level}
     </select>
+    
+    <select id="getAllIdsByProjectId" resultType="java.lang.Long">
+        SELECT id
+        FROM project_arius_resource_logic
+        WHERE project_id = #{projectId}
+           OR FIND_IN_SET(#{projectId}, project_id)
+    </select>
 </mapper>

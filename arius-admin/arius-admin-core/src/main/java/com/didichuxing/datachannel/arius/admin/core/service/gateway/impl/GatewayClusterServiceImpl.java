@@ -74,4 +74,35 @@ public class GatewayClusterServiceImpl implements GatewayClusterService {
 	public boolean editOne(GatewayClusterDTO data) {
 		return gatewayClusterDAO.updateOne(ConvertUtil.obj2Obj(data, GatewayClusterPO.class));
 	}
+	
+	@Override
+	public String getClusterNameById(Integer gatewayClusterId) {
+		return gatewayClusterDAO.getClusterNameById(gatewayClusterId);
+	}
+	
+	@Override
+	public Integer getComponentIdById(Integer gatewayClusterId) {
+		return gatewayClusterDAO.getComponentIdById(gatewayClusterId);
+	}
+
+	@Override
+	public List<GatewayClusterPO> listByNames(List<String> gatewayClusterName) {
+		return gatewayClusterDAO.listByNames(gatewayClusterName);
+	}
+
+		@Override
+		public GatewayClusterPO getOneByName(String name) {
+				return gatewayClusterDAO.getOneByName(name);
+		}
+
+		@Override
+		public GatewayClusterPO getOneByComponentId(Integer componentId) {
+				return gatewayClusterDAO.getOneByComponentId(componentId);
+		}
+
+		@Override
+		public Boolean updateVersion(Integer componentId, String version) {
+
+				return gatewayClusterDAO.updateVersion(componentId,version);
+		}
 }

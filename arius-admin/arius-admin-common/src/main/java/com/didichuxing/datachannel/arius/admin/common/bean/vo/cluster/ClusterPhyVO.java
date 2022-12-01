@@ -104,9 +104,6 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
     @ApiModelProperty("IaaS平台类型")
     private String                                       platformType;
 
-    @ApiModelProperty("SLB地址")
-    private String                                       slbAddress;
-
     /**
      * @see ClusterResourceTypeEnum
      */
@@ -128,7 +125,7 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
     @ApiModelProperty("绑定gateway")
     private Integer gatewayId;
     @ApiModelProperty("是否为ecm接入")
-    private Boolean isWhetherECMAccess;
+    private Boolean ecmAccess;
 
     /**
      * 添加逻辑集群

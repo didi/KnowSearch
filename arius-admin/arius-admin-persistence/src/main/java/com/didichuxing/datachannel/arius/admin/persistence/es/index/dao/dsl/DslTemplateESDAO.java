@@ -486,7 +486,7 @@ public class DslTemplateESDAO extends BaseESDAO {
                                                                                      List<String> templateNameList) throws ESOperateException {
         String mustDsl = buildQueryCriteriaDsl(projectId, queryDTO.getDslTemplateMd5(),
                 queryDTO.getQueryIndex(), queryDTO.getStartTime(), queryDTO.getEndTime());
-        String mustNotDsl = buildMustNotDsl(templateNameList);
+        String mustNotDsl = buildNonContainDslTemplate(templateNameList);
         // 排序条件，默认根据使用时间排序 desc
         String sortInfo = "timeStamp";
         String sortOrder = "desc";
@@ -506,7 +506,7 @@ public class DslTemplateESDAO extends BaseESDAO {
 
     /**************************************** private method ****************************************************/
 
-    private String buildMustNotDsl(List<String> templateNameList) {
+    private String buildNonContainDslTemplate(List<String> templateNameList) {
         List<String> cellList = Lists.newArrayList();
         // 过滤indices=.的
         cellList.add(DSLSearchUtils.getTermCellForPrefixSearch(".", "indices"));

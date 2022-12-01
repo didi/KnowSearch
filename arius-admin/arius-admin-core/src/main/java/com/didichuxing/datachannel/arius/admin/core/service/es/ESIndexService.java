@@ -248,9 +248,11 @@ public interface ESIndexService {
      * @param cluster2        集群2
      * @param indexNames      索引名字
      * @param indexExpression
+     * @param timeout
      * @return true/false
      */
-    boolean ensureDateSame(String cluster1, String cluster2, List<String> indexNames, String indexExpression) throws ESOperateException;
+    boolean ensureDataSame(String cluster1, String cluster2, List<String> indexNames,
+        String indexExpression,Integer timeout) throws ESOperateException;
 
     /**
      * close and open index

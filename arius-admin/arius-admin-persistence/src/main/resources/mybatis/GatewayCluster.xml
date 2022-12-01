@@ -28,12 +28,7 @@
         (#{clusterName},#{componentId},#{ecmAccess},#{health},#{proxyAddress},#{memo},#{dataCenter})
     </insert>
 
-    <select id="getByClusterName" parameterType="string" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from gateway_cluster_info
-        where cluster_name = #{clusterName}
-    </select>
+   
 
     <select id="listAll" resultMap="BaseResultMap">
         select
@@ -44,7 +39,9 @@
     <select id="selectOneByClusterName" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from gateway_cluster_info;
+        from gateway_cluster_info
+        where cluster_name = #{clusterName}
+        limit 1
     </select>
     
     <select id="listByCondition"
@@ -52,14 +49,15 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM gateway_cluster_info
-        WHERE
-        <if test="health != null">
-            health = #{health}
-        </if>
-        <if test="clusterName != null and clusterName != ''">
-            AND cluster_name like  CONCAT('%',#{clusterName},'%')
-        </if>
-         <if test="sortTerm != null">
+        <where>
+            <if test="health != null">
+                health = #{health}
+            </if>
+            <if test="clusterName != null and clusterName != ''">
+                AND cluster_name like CONCAT('%', #{clusterName}, '%')
+            </if>
+        </where>
+        <if test="sortTerm != null">
             order by ${sortTerm} ${sortType}
         </if>
         limit #{from}, #{size}
@@ -69,13 +67,14 @@
     <select id="countByCondition" resultType="long">
         SELECT COUNT(1)
         FROM gateway_cluster_info
-        WHERE
-        <if test="health != null">
-            health = #{health}
-        </if>
-        <if test="clusterName != null and clusterName != ''">
-            AND cluster_name like CONCAT('%', #{clusterName}, '%')
-        </if>
+        <where>
+            <if test="health != null">
+                health = #{health}
+            </if>
+            <if test="clusterName != null and clusterName != ''">
+                AND cluster_name like CONCAT('%', #{clusterName}, '%')
+            </if>
+        </where>
     </select>
     
     <select id="getOneById" resultMap="BaseResultMap">
@@ -105,5 +104,47 @@
             </if>
         </trim>
         WHERE id = #{id}
+    </update>
+    
+    <select id="getClusterNameById" resultType="java.lang.String">
+        SELECT cluster_name
+        FROM gateway_cluster_info
+        WHERE id = #{id}
+    </select>
+    
+    <select id="getComponentIdById" resultType="java.lang.Integer">
+        SELECT component_id
+        FROM gateway_cluster_info
+        WHERE id = #{id}
+    </select>
+    
+    <select id="getOneByName" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM gateway_cluster_info
+        WHERE cluster_name = #{name}
+    </select>
+
+    <select id="listByNames" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from gateway_cluster_info
+        <where>
+            <foreach collection="list" item="clusterName" open="cluster_name in (" separator="," close=")">
+                #{clusterName}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="getOneByComponentId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM gateway_cluster_info
+        WHERE component_id = #{componentId}
+    </select>
+
+    <update id="updateVersion">
+        UPDATE gateway_cluster_info
+        SET version = #{version} where component_id=#{componentId}
     </update>
 </mapper>

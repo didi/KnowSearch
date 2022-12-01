@@ -232,18 +232,16 @@ public class AriusConfigConstant {
     public static final String LOGIC_TEMPLATE_TIME_FORMAT_LIST_DEFAULT_VALUE           = "yyyy-MM-dd HH:mm:ss,yyyy-MM-dd HH:mm:ss.SSS,yyyy-MM-dd HH:mm:ss.SSS Z," +
             "                                                                               yyyy-MM-dd'T'HH:mm:ss,yyyy-MM-dd'T'HH:mm:ss.SSS,yyyy-MM-dd'T'HH:mm:ssZ,yyyy-MM-dd'T'HH:mm:ss.SSSZ,yyyy/MM/dd HH:mm:ss,epoch_second,epoch_millis,yyyy-MM-dd";
 
-    public static final String LOGIC_TEMPLATE_BUSINESS_TYPE_LIST_DEFAULT_VALUE         = "系统数据,日志数据,业务上报数据,RDS数据,离线导入数据";
-
     public static final String CLUSTER_NODE_SPECIFICATION_LIST_DEFAULT_VALUE           = "16c-64g-3072g,16c-48g-3072g";
 
-    public static final String SUPER_APP_DEFALT_DSL_COMMAND_VALUE           = "\"#获取节点状态\\nGET /_nodes/stats\",\n" +
-                                    "\"#获取集群信息\\nGET _cluster/stats\",\n" +
-                                    "\"#获取集群健康信息\\nGET _cluster/health?v\",\n" +
-                                    "\"#查看当前集群的热点线程\\nGET _nodes/hot_threads\",\n" +
-                                    "\"#查看当前集群运行中的任务信息\\nGET _tasks?actions=*&detailed\",\n" +
-                                    "\"#shard分配说明，会在分片未分配的事后去通过这个命令查看下具体原因\\nGET /_cluster/allocation/explain\",\n" +
-                                    "\"#异常shard分配重试，当集群red有shard未分配的情况下会通过这个命令来重试分配\\nPOST /_cluster/reroute?retry_failed=true\",\n" +
-                                    "\"#清除fielddata内存，当集群因为fileddata太大导致熔断或占用很多内存，可以通过此命令释放内存\\nPOST _cache/clear?fielddata=true\"";
+    public static final String SUPER_APP_DEFALT_DSL_COMMAND_VALUE           = "#获取节点状态\nGET /_nodes/stats,\n" +
+                "#获取集群信息\nGET _cluster/stats,\n" +
+                "#获取集群健康信息\nGET _cluster/health?v,\n" +
+                "#查看当前集群的热点线程\nGET _nodes/hot_threads,\n" +
+                "#查看当前集群运行中的任务信息\nGET _tasks?actions=*&detailed,\n" +
+                "#shard分配说明，会在分片未分配的事后去通过这个命令查看下具体原因\nGET /_cluster/allocation/explain,\n" +
+                "#异常shard分配重试，当集群red有shard未分配的情况下会通过这个命令来重试分配\nPOST /_cluster/reroute?retry_failed=true,\n" +
+                "#清除fielddata内存，当集群因为fileddata太大导致熔断或占用很多内存，可以通过此命令释放内存\nPOST _cache/clear?fielddata=true";
 
     /**
      * 节点状态并发采集

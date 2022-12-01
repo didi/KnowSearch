@@ -1,19 +1,34 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.ES_CLUSTER_CONFIG;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ESClusterConfigManager;
+import com.didichuxing.datachannel.arius.admin.biz.page.ESClusterConfigPageSearchHandle;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.ConfigConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESConfigVO;
+import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
+import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESClusterConfigService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didiglobal.logi.op.manager.application.ComponentService;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
+import com.didiglobal.logi.op.manager.interfaces.vo.ComponentGroupConfigVO;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,19 +36,26 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ESClusterConfigManagerImpl implements ESClusterConfigManager {
+    
     @Autowired
     private ESClusterConfigService esClusterConfigService;
     @Autowired
     private OperateRecordService   operateRecordService;
     @Autowired
     private ClusterRoleService     clusterRoleService;
-
+    @Autowired
+    private ComponentService       componentService;
+    @Autowired
+    private ClusterPhyService      clusterPhyService;
+    @Autowired
+    private HandleFactory          handleFactory;
+    
     /**
-     * 编辑configdesc
+     * 编辑 configdesc
      *
      * @param param     入参
      * @param operator  操作人或角色
-     * @param projectId 项目id
+     * @param projectId 项目 id
      * @return {@code Result<Void>}
      */
     @Override
@@ -53,7 +75,7 @@ public class ESClusterConfigManagerImpl implements ESClusterConfigManager {
     }
 
     /**
-     * 获取ES集群模板config
+     * 获取 ES 集群模板 config
      *
      * @param type 类型
      * @return {@code Result<ESConfigVO>}
@@ -87,14 +109,48 @@ public class ESClusterConfigManagerImpl implements ESClusterConfigManager {
     }
 
     /**
-     * 获得ES集群配置
+     * 获得 ES 集群配置
      *
-     * @param clusterId 集群id
+     * @param clusterId 集群 id
      * @return {@code Result<List<ESConfigVO>>}
      */
     @Override
     public Result<List<ESConfigVO>> gainEsClusterConfigs(Long clusterId) {
         Result<List<ESConfig>> listResult = esClusterConfigService.listEsClusterConfigByClusterId(clusterId);
         return Result.buildSucc(ConvertUtil.list2List(listResult.getData(), ESConfigVO.class));
+    }
+    
+    @Override
+    public PaginationResult<ClusterPhyConfigVO> pageGetConfig(ConfigConditionDTO condition,
+        Integer projectId, Integer phyClusterId) {
+        condition.setClusterId(phyClusterId);
+    
+        BaseHandle baseHandle;
+        try {
+            baseHandle = handleFactory.getByHandlerNamePer(
+                ES_CLUSTER_CONFIG.getPageSearchType());
+        } catch (NotFindSubclassException e) {
+            return PaginationResult.buildFail("没有找到对应的处理器");
+        }
+        if (baseHandle instanceof ESClusterConfigPageSearchHandle) {
+        
+            ESClusterConfigPageSearchHandle handler = (ESClusterConfigPageSearchHandle) baseHandle;
+            return handler.doPage(condition, projectId);
+        }
+        return PaginationResult.buildFail("没有找到对应的处理器");
+    }
+    
+    @Override
+    public Result<ComponentGroupConfigVO> getConfigByClusterPhyId(Integer clusterPhyId,
+        Integer configId) {
+        final Integer componentIdById = clusterPhyService.getComponentIdById(clusterPhyId);
+        final Optional<ComponentGroupConfig> componentGroupConfigOptional = Optional.ofNullable(
+                componentService.getComponentConfig(componentIdById).getData())
+            .orElse(Collections.emptyList()).stream()
+            .filter(i -> Objects.equals(i.getId(), configId)).findFirst();
+    
+        return componentGroupConfigOptional.map(
+                i -> ConvertUtil.obj2Obj(i, ComponentGroupConfigVO.class)).map(Result::buildSucc)
+            .orElse(Result.buildSucc());
     }
 }

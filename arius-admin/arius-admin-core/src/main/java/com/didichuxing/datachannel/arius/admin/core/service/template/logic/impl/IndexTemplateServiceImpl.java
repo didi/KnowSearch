@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_CHAR_SET;
 import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MAX;
 import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MIN;
@@ -39,7 +38,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.LevelEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -74,6 +72,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -121,7 +120,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     @Autowired
     private ClusterRegionService               clusterRegionService;
 
-    private Cache<String, List<IndexTemplate>> templateListCache = CacheBuilder.newBuilder()
+    private final Cache<String, List<IndexTemplate>> templateListCache = CacheBuilder.newBuilder()
+        .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
+    private final Cache<String, Map<Integer, IndexTemplate>> INDEX_TEMPLATE_SERVICE_CACHE = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
 
     /**
@@ -512,7 +513,17 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return listAllLogicTemplates().stream()
             .collect(Collectors.toMap(IndexTemplate::getId, indexTemplateLogic -> indexTemplateLogic));
     }
-
+    
+    @Override
+    public Map<Integer, IndexTemplate> getAllLogicTemplatesMapWithCache() {
+        try {
+            return (Map<Integer, IndexTemplate>) INDEX_TEMPLATE_SERVICE_CACHE.get(
+                "getAllLogicTemplatesMapWithCache", this::getAllLogicTemplatesMap);
+        } catch (ExecutionException e) {
+            return getAllLogicTemplatesMap();
+        }
+    }
+    
     @Override
     public List<IndexTemplate> listLogicTemplatesByIds(List<Integer> logicTemplateIds) {
         if (CollectionUtils.isEmpty(logicTemplateIds)) {
@@ -1393,7 +1404,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (param.getProjectId() != null && !projectService.checkProjectExist(param.getProjectId())) {
             return Result.buildParamIllegal("所属应用不存在");
         }
-        if (param.getDataType() != null && DataTypeEnum.UNKNOWN.equals(DataTypeEnum.valueOf(param.getDataType()))) {
+        if (param.getDataType() != null && UNKNOW_DATA_TYPE.getCode().equals(param.getDataType())) {
             return Result.buildParamIllegal("数据类型非法");
         }
         if (param.getShardNum() != null && param.getShardNum() <= 0) {

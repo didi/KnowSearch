@@ -54,6 +54,10 @@ public class OperateRecord {
      */
     private String  projectName;
     /**
+     * 项目id
+     */
+    private Integer  projectId;
+    /**
      * 业务id
      */
     private String  bizId;
@@ -129,6 +133,7 @@ public class OperateRecord {
         setOperateTime(Calendar.getInstance().getTime());
         Optional.ofNullable(builder.triggerWayEnum).map(TriggerWayEnum::getCode).ifPresent(this::setTriggerWayId);
         setProjectName(builder.projectName);
+        setProjectId(builder.projectId);
         setBizId(builder.bizId);
     }
 
@@ -140,6 +145,7 @@ public class OperateRecord {
 
         private String          projectName;
         private String          bizId;
+        private Integer         projectId;
 
         public Builder operationTypeEnum(OperateTypeEnum operationType) {
             this.operateTypeEnum = operationType;
@@ -162,7 +168,10 @@ public class OperateRecord {
         }
 
         public Builder project(ProjectBriefVO project) {
-            this.projectName = Optional.ofNullable(project).map(ProjectBriefVO::getProjectName).orElse(null);
+            Optional.ofNullable(project).ifPresent(projectBriefVO -> {
+                this.projectName = projectBriefVO.getProjectName();
+                this.projectId   = projectBriefVO.getId();
+            });
             return this;
         }
 

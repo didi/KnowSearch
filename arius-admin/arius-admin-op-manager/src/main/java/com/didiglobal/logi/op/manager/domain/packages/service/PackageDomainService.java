@@ -1,6 +1,7 @@
 package com.didiglobal.logi.op.manager.domain.packages.service;
 
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
+import com.didiglobal.logi.op.manager.domain.packages.entity.value.PackageGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 
 import java.util.List;
@@ -51,4 +52,33 @@ public interface PackageDomainService {
      */
     Result<Void> deletePackage(Package pk);
 
+    /**
+     * 分页查询软件包列表
+     * @param pagingPackage
+     * @param page
+     * @param size
+     * @return
+     */
+    List<Package> pagingByCondition(Package pagingPackage, Long page, Long size);
+
+    /**
+     * 软件包总数
+     * @param pagingPackage
+     * @return
+     */
+    Long countByCondition(Package pagingPackage);
+
+    /**
+     * 通过包类型获取list
+     * @param packageType
+     * @return
+     */
+    List<Package> listPackageByPackageType(Integer packageType);
+
+    /**
+     * 通过es包版本号获取es配置组
+     * @param version
+     * @return
+     */
+    List<PackageGroupConfig> listPackageGroupConfigByVersion(String version);
 }

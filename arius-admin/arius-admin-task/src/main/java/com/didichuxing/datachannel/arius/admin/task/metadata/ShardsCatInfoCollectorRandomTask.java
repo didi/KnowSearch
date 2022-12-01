@@ -10,7 +10,7 @@ import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
 import com.didiglobal.logi.job.core.job.JobContext;
 
-@Task(name = "ShardsCatInfoCollectorRandomTask", description = "采集索引Cat/Shards基本信息", cron = "0 0/3 * * * ? *", autoRegister = true)
+//@Task(name = "ShardsCatInfoCollectorRandomTask", description = "采集索引Cat/Shards基本信息", cron = "0 0/3 * * * ? *", autoRegister = true)
 public class ShardsCatInfoCollectorRandomTask implements Job {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShardsCatInfoCollectorRandomTask.class);
 

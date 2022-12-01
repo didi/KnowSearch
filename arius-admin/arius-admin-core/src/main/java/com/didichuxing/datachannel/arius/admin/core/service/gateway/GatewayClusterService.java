@@ -74,4 +74,53 @@ public interface GatewayClusterService {
 	 * @return 布尔值
 	 */
 	boolean editOne(GatewayClusterDTO data);
+	
+	/**
+	 * 它返回具有给定 id 的集群的名称。
+	 *
+	 * @param gatewayClusterId 网关集群的 ID。
+	 * @return 包含集群名称的字符串。
+	 */
+	String getClusterNameById(Integer gatewayClusterId);
+	
+	
+	/**
+	 * 它返回具有给定 id 的网关集群的组件 id。
+	 *
+	 * @param gatewayClusterId 网关集群的 ID。
+	 * @return 网关集群的组件 ID。
+	 */
+	Integer getComponentIdById(Integer gatewayClusterId);
+		
+		
+		/**
+		 * 按名称获取一个 GatewayClusterPO
+		 *
+		 * @param name 网关集群的名称。
+		 * @return GatewayClusterPO 对象
+		 */
+		GatewayClusterPO getOneByName(String name);
+
+	/**
+	 * 通过gateway集群名称查询gateway
+	 * @param gatewayClusterName
+	 * @return
+	 */
+	List<GatewayClusterPO> listByNames(List<String> gatewayClusterName);
+		/**
+		 * 通过 componentId 获取一个 GatewayClusterPO
+		 *
+		 * @param componentId 网关集群的组件 ID。
+		 * @return GatewayClusterPO 对象
+		 */
+		GatewayClusterPO getOneByComponentId(Integer componentId);
+
+		/**
+		 * 使用给定的 ID 更新组件的版本。
+		 *
+		 * @param componentId 您要更新的组件的 ID。
+		 * @param version 要更新的组件的版本。
+		 * @return 一个布尔值。
+		 */
+		Boolean updateVersion(Integer componentId, String version);
 }

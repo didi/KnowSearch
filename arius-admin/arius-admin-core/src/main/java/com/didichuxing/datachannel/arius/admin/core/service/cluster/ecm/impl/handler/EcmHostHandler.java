@@ -136,7 +136,7 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
         }
         esClusterDTO.setRunMode(ClusterConstant.DEFAULT_RUN_MODEL);
 
-        Result<Boolean> clusterResult = esClusterPhyService.createCluster(esClusterDTO, param.getCreator());
+        Result<Boolean> clusterResult = esClusterPhyService.createCluster(esClusterDTO);
         if (clusterResult.failed()) {
             return Result.buildFrom(clusterResult);
         }

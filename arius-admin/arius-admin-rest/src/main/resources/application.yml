@@ -50,13 +50,14 @@ dcdr.fault.tolerant: 5
 
 #依赖的 remote 接口的配置
 #zeus的相关信息
-zeus.server: http://10.96.65.64:8010
-zeus.token: 9e2dbb6e5b1e594d1820e0f21669b240
+zeus.server: 10.96.65.64:8010 #0.3.2修改
+zeus.token: 9e2dbb6e5b1e594d1820e0f21669b240 #0.3.2修改
 zeus.templateId: 3
 zeus.user: root
 zeus.batch: 2
 zeus.timeOut: 300
 zeus.tolerance: 0
+zeus.grpId: 3 #0.3.2新增
 #s3的相关配置
 s3.endpoint: s3-gzpu-inter.didistatic.com
 s3.access-key: AKDD00000000000O5XVS8IBAXT7R9X
@@ -145,6 +146,31 @@ spring:
     resource-extend-bean-name: resourceExtendManager
 #    0.3.1.1新增
     login-extend-bean-name: logiSecurityDefaultLoginExtendImpl
+#  op-manager配置
+  op-manager:
+    data-source-name: logi-op-manager
+    driver-class-name: ${spring.datasource.druid.driver-class-name}
+    url: ${spring.datasource.druid.url}
+    username: ${spring.datasource.druid.username}
+    password: ${spring.datasource.druid.password}
+    min-idle: 10
+    max-wait: 60000
+    time-between-eviction-runs-millis: 1000
+    min-evictable-idle-time-millis: 300000
+    validationQuery: select 'x'
+    pool-prepared-statements: true
+    max-open-prepared-statements: 50
+    filters: stat,wall
+    validation-query-timeout: 5000
+    transaction-query-timeout: 60000
+    max-active: 30
+    keep-alive: true
+    default-auto-commit: true
+    test-while-idle: true
+    test-on-return: false
+    test-on-borrow: true
+    log-abandoned: true
+    initial-size: 10
   application:
     admin:
       enabled:

@@ -2,9 +2,11 @@ package com.didichuxing.datachannel.arius.admin.biz.gateway;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayClusterCreateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterBriefVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterVO;
 import java.util.List;
@@ -70,4 +72,82 @@ public interface GatewayClusterManager {
      * @return 一个 Result<Void> 对象。
      */
     Result<Void> editOne(GatewayClusterDTO data, Integer projectId, String operator);
+    
+		/**
+		 * 验证给定的名称是唯一的。
+		 *
+		 * @param name 资源的名称。
+		 * @return Result<Void>
+		 */
+		Result<Boolean> verifyNameUniqueness(String name);
+		
+		/**
+		 * 创建网关集群。
+		 *
+		 * @param gatewayCluster GatewayClusterDTO 对象
+		 * @param projectId 集群的项目ID
+		 * @param operate 操作类型，可以是“创建”或“更新”
+		 */
+		Result<Void> createWithECM(GatewayClusterCreateDTO gatewayCluster, Integer projectId, String operate);
+		
+		/**
+		 * “给定一个组件 ID，返回组件的名称。”
+		 *
+		 *
+		 * @param componentId 您要获取其名称的组件的组件 ID。
+		 * @return 包含字符串的结果对象。
+		 */
+		Result<String> getNameByComponentId(Integer componentId) ;
+		
+		/**
+		 * 扩展集群中的节点
+		 *
+		 * @param nodes 要扩展的节点列表。
+		 * @return GatewayNodeHostDTO 对象的列表。
+		 */
+		Result<Void> expandNodesWithECM(List<GatewayNodeHostDTO> nodes);
+		
+		/**
+		 * 通过删除指定节点来收缩集群
+		 *
+		 * @param nodes 要收缩的节点列表。
+		 * @param name
+		 * @return GatewayNodeHostDTO 对象的列表。
+		 */
+		Result<Void> shrinkNodesWithECM(List<GatewayNodeHostDTO> nodes, String name);
+		
+		/**
+		 * “更新一个组件的版本。”
+		 *
+		 * 注释的第一行是功能的简要说明。第二行是参数列表，第三行是返回值的说明
+		 *
+		 * @param componentId 要更新的组件的组件 ID。
+		 * @param version 要更新的组件的版本。
+		 * @return 结果 <Void> 对象。
+		 */
+		Result<Void> updateVersionWithECM(Integer componentId, String version);
+		
+		/**
+		 * 按名称获取集群
+		 *
+		 * @param name 要查询的集群名称。
+		 * @return GatewayClusterVO 对象
+		 */
+		Result<GatewayClusterVO> getClusterByName(String name);
+		
+		/**
+		 * 查看解绑资源是否完成
+		 *
+		 * @param data GatewayClusterVO 对象
+		 * @return 返回类型是 CompletableFuture<GatewayClusterVO>
+		 */
+		Result<Void> checkCompleteUnbindResources(GatewayClusterVO data);
+		
+		/**
+		 * OfflineWithECM() 用于使用 ECM 使项目离线
+		 *
+		 * @param id 待下线的项目id。
+		 * @return 一个 Result 对象，里面有一个 Void 对象。
+		 */
+		Result<Void> offlineWithECM(Integer id);
 }
