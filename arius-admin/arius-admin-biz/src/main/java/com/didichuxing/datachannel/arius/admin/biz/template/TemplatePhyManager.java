@@ -11,7 +11,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemp
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface TemplatePhyManager {
@@ -27,9 +30,10 @@ public interface TemplatePhyManager {
      * 元数据同步
      *
      * @param physicalId
+     * @param templateConfigMap 集群全量模版配置信息
      * @return
      */
-    void syncMeta(Long physicalId, int retryCount) throws ESOperateException;
+    void syncMeta(Long physicalId, int retryCount, Map<String, TemplateConfig> templateConfigMap) throws ESOperateException;
 
     /**
      * 删除

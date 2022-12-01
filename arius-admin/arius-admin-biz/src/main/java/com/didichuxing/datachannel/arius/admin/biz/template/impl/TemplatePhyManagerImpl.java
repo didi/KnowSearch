@@ -189,17 +189,15 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     }
 
     @Override
-    public void syncMeta(Long physicalId, int retryCount) throws ESOperateException {
+    public void syncMeta(Long physicalId, int retryCount, Map<String, TemplateConfig> templateConfigMap) throws ESOperateException {
 
         // 从数据库获取物理模板
         IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(physicalId);
         if (indexTemplatePhy == null) {
             return;
         }
-
-        // 从ES集群获取模板配置
-        TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(indexTemplatePhy.getCluster(),
-            indexTemplatePhy.getName());
+        // 获取到ES中的模版配置信息
+        TemplateConfig templateConfig = templateConfigMap.get(indexTemplatePhy.getName());
 
         if (templateConfig == null) {
             // es集群中还没有模板，创建
