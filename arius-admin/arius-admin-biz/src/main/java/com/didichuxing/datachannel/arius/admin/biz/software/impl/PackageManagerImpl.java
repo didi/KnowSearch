@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.software.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.page.PackagePageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.software.PackageManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -79,15 +81,15 @@ public class PackageManagerImpl implements PackageManager {
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
+        List<PackageGroupConfig> packageGroupConfigs = ConvertUtil.str2ObjArrayByJson(packageAddDTO.getGroupConfigList()
+                , PackageGroupConfig.class);
         Package addPackage = ConvertUtil.obj2Obj(packageAddDTO, Package.class);
-        Result<Void> checkResult = checkValid(addPackage, operator, ADD);
+        Result<Void> checkResult = checkValid(addPackage, packageGroupConfigs, operator, ADD);
         if (checkResult.failed()) {
             return Result.buildFrom(checkResult);
         }
         addPackage.setCreator(operator);
         addPackage.setType(packageAddDTO.getIsEnginePlugin());
-        List<PackageGroupConfig> packageGroupConfigs = ConvertUtil.str2ObjArrayByJson(packageAddDTO.getGroupConfigList()
-                                                                                         , PackageGroupConfig.class);
         addPackage.setGroupConfigList(packageGroupConfigs);
         com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> addPackageResult = packageService.createPackage(addPackage);
         return Result.buildFrom(addPackageResult);
@@ -99,15 +101,15 @@ public class PackageManagerImpl implements PackageManager {
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
+        List<PackageGroupConfig> packageGroupConfigs = ConvertUtil.str2ObjArrayByJson(packageUpdateDTO.getGroupConfigList()
+                , PackageGroupConfig.class);
         Package editPackage = ConvertUtil.obj2Obj(packageUpdateDTO, Package.class);
-        Result<Void> checkResult = checkValid(editPackage, operator, EDIT);
+        Result<Void> checkResult = checkValid(editPackage, packageGroupConfigs, operator, EDIT);
         if (checkResult.failed()) {
             return Result.buildFrom(checkResult);
         }
         editPackage.setCreator(operator);
         editPackage.setType(packageUpdateDTO.getIsEnginePlugin());
-        List<PackageGroupConfig> packageGroupConfigs = ConvertUtil.str2ObjArrayByJson(packageUpdateDTO.getGroupConfigList()
-                                                                                            , PackageGroupConfig.class);
         editPackage.setGroupConfigList(packageGroupConfigs);
         com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> editPackageResult = packageService.updatePackage(editPackage);
         return Result.buildFrom(editPackageResult);
@@ -168,11 +170,12 @@ public class PackageManagerImpl implements PackageManager {
      * 校验
      *
      * @param checkPackage
+     * @param packageGroupConfigs
      * @param operator
      * @param operation
      * @return
      */
-    private Result<Void> checkValid(Package checkPackage, String operator, OperationEnum operation) {
+    private Result<Void> checkValid(Package checkPackage, List<PackageGroupConfig> packageGroupConfigs, String operator, OperationEnum operation) {
         if (AriusObjUtils.isNull(checkPackage)) {
             return Result.buildParamIllegal("软件包为空");
         }
@@ -181,6 +184,21 @@ public class PackageManagerImpl implements PackageManager {
         }
         if (operation.equals(UNKNOWN)) {
             return Result.buildParamIllegal("操作类型未知");
+        }
+        //安装目录和用户名配置要必填
+        Boolean checkRequired = packageGroupConfigs.stream().anyMatch(packageGroupConfig -> {
+            String systemConfig = packageGroupConfig.getSystemConfig();
+            JSONObject jsonObject = JSON.parseObject(systemConfig);
+            if (AriusObjUtils.isNull(jsonObject.get("installDirector"))) {
+                return true;
+            }
+            if(AriusObjUtils.isNull(jsonObject.get("user"))){
+                return true;
+            }
+            return false;
+        });
+        if(checkRequired){
+            return Result.buildParamIllegal("安装目录和用户名配置必填");
         }
         if (operation.getCode() == ADD.getCode()) {
             com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> checkCreateParam = checkPackage.checkCreateParam();
