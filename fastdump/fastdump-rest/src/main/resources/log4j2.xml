@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="error" monitorInterval="60">
+	<!--变量配置-->
+	<Properties>
+		<property name="logPath" value="."/>
+	</Properties>
+
+	<Appenders>
+		<console name="CONSOLE" target="SYSTEM_OUT">
+			<!--输出日志的格式-->
+			<PatternLayout pattern="[%-5level][%d{YYYY-MM-dd HH:mm:ss.SSS+0800}][%F:%line] %msg%n"/>
+			<!--控制台只输出level及其以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+			<ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+		</console>
+
+		<RollingFile name="SYSTEM" fileName="${logPath}/log/system.log" filePattern="${logPath}/log/system.log.%d{yyyy-MM-dd}"
+			append="true">
+			<PatternLayout pattern="[%p][%d][%-4r][%t][%F:%L] %m%n" />
+			<Policies>
+				<TimeBasedTriggeringPolicy modulate="true"
+					interval="1" />
+			</Policies>
+			<DefaultRolloverStrategy max="3"/>
+		</RollingFile>
+
+		<RollingFile name="ERROR" fileName="${logPath}/log/error.log" filePattern="${logPath}/log/error.log.%d{yyyy-MM-dd}"
+					 append="true">
+			<PatternLayout pattern="[%p][%d][%-4r][%t][%F:%L] %m%n" />
+			<Policies>
+				<TimeBasedTriggeringPolicy modulate="true"
+										   interval="1" />
+			</Policies>
+			<DefaultRolloverStrategy max="3"/>
+		</RollingFile>
+
+	</Appenders>
+	<Loggers>
+		<Root level="info">
+			<AppenderRef ref="CONSOLE" />
+			<AppenderRef ref="SYSTEM" />
+		</Root>
+		<AsyncLogger level="info" additivity="false">
+			<AppenderRef ref="SYSTEM"/>
+		</AsyncLogger>
+
+		<AsyncLogger level="warn" additivity="false">
+			<AppenderRef ref="SYSTEM"/>
+		</AsyncLogger>
+
+		<AsyncLogger level="error" additivity="false">
+            <AppenderRef ref="ERROR"/>
+        </AsyncLogger>
+	</Loggers>
+</Configuration>
