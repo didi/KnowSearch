@@ -20,12 +20,15 @@ import com.didiglobal.knowframework.security.common.PagingData.Pagination;
 import com.didiglobal.knowframework.security.common.PagingResult;
 import com.didiglobal.knowframework.security.common.dto.user.UserBriefQueryDTO;
 import com.didiglobal.knowframework.security.common.dto.user.UserDTO;
+import com.didiglobal.knowframework.security.common.entity.UserProject;
 import com.didiglobal.knowframework.security.common.entity.user.User;
 import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.knowframework.security.common.vo.role.AssignInfoVO;
 import com.didiglobal.knowframework.security.common.vo.role.RoleBriefVO;
 import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import com.didiglobal.knowframework.security.common.vo.user.UserVO;
+import com.didiglobal.knowframework.security.dao.UserDao;
+import com.didiglobal.knowframework.security.dao.UserProjectDao;
 import com.didiglobal.knowframework.security.exception.KfSecurityException;
 import com.didiglobal.knowframework.security.service.PermissionService;
 import com.didiglobal.knowframework.security.service.ProjectService;
@@ -34,10 +37,7 @@ import com.didiglobal.knowframework.security.service.UserService;
 import com.didiglobal.knowframework.security.util.PWEncryptUtil;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
@@ -61,9 +61,9 @@ public class UserExtendManagerImpl implements UserExtendManager {
     @Autowired
     private PermissionService     permissionService;
     @Autowired
-    private UserProjectDao        userProjectDao;
+    private UserProjectDao userProjectDao;
     @Autowired
-    private UserDao               userDao;
+    private UserDao userDao;
 
     private final static int NORMAL = 0;
 
@@ -178,7 +178,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
      * @throws LogiSecurityException 用户不存在
      */
     @Override
-    public Result<UserVO> getUserDetailByUserId(Integer userId, Integer projectId) {
+    public Result<UserWithPwVO> getUserDetailByUserId(Integer userId, Integer projectId) throws Exception {
         final UserVO userVO = userService.getUserDetailByUserId(userId);
         final List<RoleBriefVO> roleList = Optional.ofNullable(userVO.getRoleList()).orElse(Lists.newArrayList());
         final List<Integer> roleIds = roleList.stream().map(RoleBriefVO::getId).collect(Collectors.toList());

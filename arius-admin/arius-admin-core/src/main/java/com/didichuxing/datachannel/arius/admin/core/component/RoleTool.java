@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  *
  * @author shizeying
  * @date 2022/06/01
- * @see com.didiglobal.logi.security.service.RoleService 实现admin册指定角色任务的判断
+ * @see com.didiglobal.knowframework.security.service.RoleService 实现admin册指定角色任务的判断
  */
 @Component
 public class RoleTool {

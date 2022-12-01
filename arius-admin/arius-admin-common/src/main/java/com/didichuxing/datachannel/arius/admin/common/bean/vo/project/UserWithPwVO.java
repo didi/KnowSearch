@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.project;
 
-import com.didiglobal.logi.security.common.vo.user.UserVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserVO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
