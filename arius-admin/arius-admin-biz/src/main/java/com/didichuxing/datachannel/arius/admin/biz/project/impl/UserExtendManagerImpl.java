@@ -6,9 +6,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserQueryExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserExtendVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserWithPwVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -58,7 +60,13 @@ public class UserExtendManagerImpl implements UserExtendManager {
     private RolePermissionService rolePermissionService;
     @Autowired
     private PermissionService     permissionService;
-    
+    @Autowired
+    private UserProjectDao        userProjectDao;
+    @Autowired
+    private UserDao               userDao;
+
+    private final static int NORMAL = 0;
+
     private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("UserExtendManagerImpl", 10, 10, 100);
     /**
      * 用户注册信息校验
@@ -167,6 +175,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
      * @param userId    用户id
      * @param projectId
      * @return 用户详情
+     * @throws LogiSecurityException 用户不存在
      */
     @Override
     public Result<UserVO> getUserDetailByUserId(Integer userId, Integer projectId) {
@@ -202,8 +211,10 @@ public class UserExtendManagerImpl implements UserExtendManager {
         }
     
         userVO.setProjectList(projectBriefList);
-    
-        return Result.buildSucc(userVO);
+        UserWithPwVO userWithPwVO = ConvertUtil.obj2Obj(userVO, UserWithPwVO.class);
+        userWithPwVO.setPassword(PWEncryptUtil.decode(userDao.selectByUserId(userId).getPw()));
+
+        return Result.buildSucc(userWithPwVO);
     }
 
     /**
@@ -218,6 +229,23 @@ public class UserExtendManagerImpl implements UserExtendManager {
         if (deleteByUserId.failed()) {
             return Result.build(deleteByUserId.getCode(), deleteByUserId.getMessage());
         }
+
+        // 获取该用户对应的所有应用id，删除相关应用下的该用户数据
+        final List<Integer> projectIdList = userProjectDao.selectProjectIdListByUserIdList(
+                Collections.singletonList(userId));
+        if(AriusObjUtils.isEmptyList(projectIdList)){
+            return Result.buildSucc();
+        }
+        List<UserProject> userProjectList = new ArrayList<>(projectIdList.size());
+        projectIdList.forEach(projectId -> {
+            UserProject userProject = new UserProject();
+            userProject.setProjectId(projectId);
+            userProject.setUserId(userId);
+            userProject.setUserType(NORMAL);
+            userProjectList.add(userProject);
+        });
+        userProjectDao.deleteUserProject(userProjectList);
+
         return Result.buildSucc();
     }
 
@@ -271,6 +299,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
      *
      * @param userId 用户id
      * @return 分配角色或者分配用户/列表信息
+     * @throws LogiSecurityException 用户id不可为null
      */
     @Override
     public Result<List<AssignInfoVO>> getAssignDataByUserId(Integer userId) {

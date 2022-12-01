@@ -177,13 +177,13 @@ class ClusterPhyManagerTest {
             "httpAddress", 0, "tags", "code", "idc", 0, "esVersion", "imageName", "nsTree", "plugIds", 0L, esConfigDTO,
             Collections.singletonList(pluginDTO), Collections.singletonList(esClusterRoleDTO),
             Collections.singletonList(esClusterRoleHostDTO), 0, "machineSpec", "operator",  "password",
-            0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0, "gatewayUrl");
+            0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0, "gatewayUrl","","");
 
         clusterPhyVO = new ClusterPhyVO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", 0, "machineSpec", 0, "esVersion", "imageName", null,
             Collections.singletonList(
                 new ESClusterRoleVO(0L, 0L, "roleClusterName", "role", 0, 0, "machineSpec", Lists.newArrayList())),
-            0.0, 0L, 0L, "password", "idc", 0, "writeAction", 0, 0L, "platformType", 0, "gatewayUrl",null,null ,null);
+            0.0, 0L, 0L, "password", "idc", 0, "writeAction", 0, 0L, "platformType", 0, "gatewayUrl",null,null ,null,null,null);
 
         clusterRoleHost = new ClusterRoleHost(0L, 0L, "hostname", "ip", CLUSTER, "port", 0, 0, "rack", "nodeSet",
             "machineSpec", 0, "attributes");
@@ -193,17 +193,17 @@ class ClusterPhyManagerTest {
             "httpWriteAddress", 0, "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName",
             "nsTree", 0, "machineSpec", "password", "creator",
             Collections.singletonList(clusterRoleInfo), Collections.singletonList(clusterRoleHost), 0, "writeAction", 0,
-            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl");
+            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl",null,null);
         privateClusterPhy = new ClusterPhy(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName",
             "nsTree", 0, "machineSpec", "password", "creator",
             Collections.singletonList(clusterRoleInfo), Collections.singletonList(clusterRoleHost), 0, "writeAction", 0,
-            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl");
+            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl",null,null);
         exclusiveClusterPhy = new ClusterPhy(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName",
             "nsTree", 0, "machineSpec", "password", "creator",
             Collections.singletonList(clusterRoleInfo), Collections.singletonList(clusterRoleHost), 0, "writeAction", 0,
-            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl");
+            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl",null,null);
         clusterPhyList = Collections.singletonList(clusterPhy);
         esClusterStatsResponse = new ESClusterStatsResponse("status", 0L, 0L, 0L,new ByteSizeValue(0L, ByteSizeUnit.BYTES), 0L, 0L, 0L, 0L, 0L, 0L,0L, 0L,
             new ByteSizeValue(0L, ByteSizeUnit.BYTES), new ByteSizeValue(0L, ByteSizeUnit.BYTES),
@@ -214,7 +214,7 @@ class ClusterPhyManagerTest {
         clusterPhyVOWithNotRole = new ClusterPhyVO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", 0, "machineSpec", 0, "esVersion", "imageName", null,
             Lists.newArrayList(), 0.0, 0L, 0L, "password", "idc", 0, "writeAction", 0, 0L, "platformType", 1,
-            "gatewayUrl", null,null,null);
+            "gatewayUrl", null,null,null,null,null);
 
         clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0,
            "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
@@ -497,7 +497,7 @@ class ClusterPhyManagerTest {
     void testJoinCluster() throws InvocationTargetException, IllegalAccessException, AdminTaskException {
         Integer projectId = 1;
         ClusterJoinDTO param = new ClusterJoinDTO(0, 0, "clusterPhyName", "esVersion", Lists.newArrayList(),
-            "desc", "passwd", 4, "{\"createSource\":1}", "cn", "acs", 1);
+            "desc", "passwd", 4, "{\"createSource\":1}", "cn", "acs", 1,null,null);
         ESClusterRoleHostDTO roleHostDTO = new ESClusterRoleHostDTO(0L, 0L, "hostname", "", CLUSTER, "port", false, 0,
             0, "nodeSet", 0, "attributes", "16c-32g-1t");
         assertEquals(Result.buildParamIllegal("参数为空").getMessage(),

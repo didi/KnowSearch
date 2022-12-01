@@ -89,7 +89,29 @@ public interface TemplateSrvManager {
      * @return
      */
     List<String> getIndexTemplateContainsSrv(int srvId);
-    
-   
+
+    /**
+     * 用索引模板的写操作。
+     *
+     * @param templateId 要操作的模板的 id
+     * @param status     0：否，1：是
+     * @param operator   触发操作的操作员
+     * @param projectId  项目编号
+     * @return Result<Void>
+     */
+    Result<Void> blockWrite(Integer templateId, Boolean status, String operator, Integer projectId);
+
+    /**
+     * 用于索引模板的读取。
+     *
+     * @param templateId 要操作的模板的 id
+     * @param status     0：否，1：是
+     * @param operator   触发操作的用户
+     * @param projectId  项目编号
+     * @return Result<Void>
+     */
+    Result<Void> blockRead(Integer templateId, Boolean status, String operator, Integer projectId);
+
+
 
 }

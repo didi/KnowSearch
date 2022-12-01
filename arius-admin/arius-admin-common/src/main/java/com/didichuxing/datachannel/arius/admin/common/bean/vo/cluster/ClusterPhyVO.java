@@ -119,6 +119,12 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
     @ApiModelProperty("物理集群绑定的逻辑集群")
     private List<String> bindLogicCluster;
 
+    @ApiModelProperty("kibana外链地址")
+    private String                    kibanaAddress;
+
+    @ApiModelProperty("cerebro外链地址")
+    private String                    cerebroAddress;
+
     /**
      * 添加逻辑集群
      *

@@ -119,6 +119,11 @@ public enum OperateTypeEnum {
      TEMPLATE_MANAGEMENT_EDIT_MAPPING(ModuleEnum.TEMPLATE_MANAGEMENT, "编辑MAPPING", 60),
     TEMPLATE_MANAGEMENT_EDIT_SETTING(ModuleEnum.TEMPLATE_MANAGEMENT, "编辑SETTING", 59),
     /**
+     * 模板管理:读/写状态变更
+     */
+    TEMPLATE_MANAGEMENT_BLOCK_WRITE(ModuleEnum.TEMPLATE_MANAGEMENT, "模板管理写状态变更", 68),
+    TEMPLATE_MANAGEMENT_BLOCK_READ(ModuleEnum.TEMPLATE_MANAGEMENT, "模板管理读状态变更", 69),
+    /**
      * 索引模板管理:索引模板信息修改
      */
     TEMPLATE_MANAGEMENT_INFO_MODIFY(ModuleEnum.TEMPLATE_MANAGEMENT, "索引模板信息修改", 27),
@@ -186,6 +191,10 @@ public enum OperateTypeEnum {
      * 查询模板:DSL查询模板禁用
      */
     QUERY_TEMPLATE_DISABLE(ModuleEnum.QUERY_TEMPLATE, "DSL查询模板禁用", 41),
+    /**
+     * 查询模板:查询模板状态变更
+     */
+    QUERY_TEMPLATE_STATUS_CHANGE(ModuleEnum.QUERY_TEMPLATE, "查询模板状态变更", 67),
     /**
      * DSL查询:查询记录
      */

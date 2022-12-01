@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicSpecCondition;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
@@ -52,6 +53,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import io.swagger.models.auth.In;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,6 +112,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
      * @param clusterLogicType 逻辑集群类型
      * @return
      */
+    @Deprecated
     @Override
     public Result<List<ClusterRegionVO>> listPhyClusterRegionsByLogicClusterTypeAndCluster(String phyCluster,
                                                                                            Integer clusterLogicType) {
@@ -136,6 +140,46 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         return Result.buildSucc(ConvertUtil.list2List(clusterRegions, ClusterRegionVO.class,
             regionVO -> regionVO.setClusterName(phyCluster)));
     }
+
+    /**
+     * 逻辑集群绑定同一个物理集群的region的时候需要根据类型进行过滤，之后再根据cold、region节点数量、节点规格进行过滤
+     * @param phyCluster 物理集群名称
+     * @param clusterLogicType 逻辑集群类型
+     * @param condition 用户侧申请的集群规格（节点数量、机器规格）
+     * @return
+     */
+    @Override
+    public Result<List<ClusterRegionVO>> listPhyClusterRegionsByCondition(String phyCluster,
+                                                                          Integer clusterLogicType,
+                                                                          ClusterLogicSpecCondition condition) {
+        if (!ClusterResourceTypeEnum.isExist(clusterLogicType)) {
+            return Result.buildFail("逻辑集群类型不存在");
+        }
+
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(phyCluster);
+        if (null == clusterPhy) {
+            return Result.buildFail(String.format("物理集群[%s]不存在", phyCluster));
+        }
+
+        int resourceType = clusterPhy.getResourceType();
+        if (clusterLogicType != resourceType) {
+            return Result.buildFail(
+                    String.format("物理集群[%s]类型为[%s], 不满足逻辑集群类型[%s], 请调整类型一致", phyCluster, resourceType, clusterLogicType));
+        }
+
+        // 三层过滤：cold、region节点数量、region节点规格
+        List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster).stream()
+                .filter(notColdTruePreByClusterRegion)
+                .filter(clusterRegion -> checkRegionHostNumAndSpec(clusterRegion.getId(), condition))
+                .filter(clusterRegion -> clusterRegionService.isRegionCanBeBound(clusterRegion,clusterLogicType)).collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(clusterRegions)) {
+            return Result.buildFail(String.format("物理集群[%s]无可用region, 请前往物理集群-region划分进行region创建", phyCluster));
+        }
+        return Result.buildSucc(ConvertUtil.list2List(clusterRegions, ClusterRegionVO.class,
+                regionVO -> regionVO.setClusterName(phyCluster)));
+    }
+
 
     /**
      * 构建regionVO
@@ -362,6 +406,28 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         }
 
     };
+
+    private Boolean checkRegionHostNumAndSpec(Long regionId, ClusterLogicSpecCondition condition){
+        Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(regionId.intValue());
+        if(result.failed()){
+            return Boolean.FALSE;
+        }
+
+        // 要求region节点数要大于等于申请的逻辑集群节点数
+        List<ClusterRoleHost> data = result.getData();
+        if(AriusObjUtils.isEmptyList(data) || data.size() < condition.getHostNum()){
+            return Boolean.FALSE;
+        }
+
+        // 要求region的节点规格都要是申请的逻辑集群的节点规格
+        boolean specCheck = data.stream().allMatch(s -> s.getMachineSpec().equals(condition.getMachineSpec()));
+        if(Boolean.FALSE.equals(specCheck)){
+            return Boolean.FALSE;
+        }
+
+        return Boolean.TRUE;
+    }
+
     /**
      * 对于逻辑集群绑定的物理集群的版本进行一致性校验
      *

@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserQueryExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserExtendVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserWithPwVO;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didiglobal.knowframework.security.common.PagingResult;
 import com.didiglobal.knowframework.security.common.dto.user.UserDTO;
@@ -71,7 +72,7 @@ public class UserV3Controller {
     @GetMapping("/{id}")
     @ApiOperation(value = "获取用户详情", notes = "根据用户id获取用户详情")
     @ApiImplicitParams({ @ApiImplicitParam(name = "id", value = "用户id", dataType = "int", paramType = "query", required = true) })
-    public Result<UserVO> detail(HttpServletRequest request, @PathVariable Integer id) {
+    public Result<UserWithPwVO> detail(HttpServletRequest request, @PathVariable Integer id) throws Exception {
         Integer projectId = Optional.ofNullable(HttpRequestUtil.getProjectId(request)).filter(i -> i > 0).orElse(null);
 
         return userManager.getUserDetailByUserId(id, projectId);
