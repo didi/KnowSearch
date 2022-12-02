@@ -177,7 +177,7 @@ public class ComponentService {
         }
 
         if (taskRes.getData().getStatus() != TaskStatusEnum.FAILED.getStatus()) {
-            return Result.fail("task任务状态不能为failed");
+            return Result.fail("task任务状态必须为failed");
         }
 
         return Result.success();

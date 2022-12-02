@@ -1365,7 +1365,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         // 触发采集
         try {
-            clusterRoleHostService.collectClusterNodeSettings(createDTO.getCluster());
+            clusterRoleHostService.collectClusterNodeSettings(createDTO.getCluster(),
+                createDTO.getComponentId());
         } catch (AdminTaskException ignored) {
         }
         return Result.buildSucc();
@@ -1423,7 +1424,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     public Result<Void> expandNodesWithECM(List<ESClusterRoleHostDTO> nodes, String clusterName) {
         //扩容后触发采集任务进行节点采集刷新
         try {
-            clusterRoleHostService.collectClusterNodeSettings(clusterName);
+            final ClusterPhy cluster = clusterPhyService.getClusterByName(clusterName);
+            clusterRoleHostService.collectClusterNodeSettings(clusterName,
+                cluster.getComponentId());
             return Result.buildSucc();
         } catch (AdminTaskException e) {
             return Result.buildFail(e.getMessage());

@@ -9,7 +9,11 @@ import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEn
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
+import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 
@@ -49,7 +53,23 @@ public class ESClusterRestartTaskHandler extends AbstractESTaskHandler {
 				}
 				final List<ComponentGroupConfig> data = componentConfigRes.getData();
 				//设置配置信息
-				content.setGroupConfigList(ConvertUtil.list2List(data, GeneralGroupConfigDTO.class));
+				final List<GeneralGroupConfigDTO> generalGroupConfigDTOS = ConvertUtil.list2List(data,
+						GeneralGroupConfigDTO.class);
+				//重启的节点
+				final String restartHost = content.getHosts();
+				final List<String> restartHostList =
+						Lists.newArrayList(StringUtils.split(restartHost, ","));
+				if (CollectionUtils.isEmpty(restartHostList)) {
+						for (GeneralGroupConfigDTO generalGroupConfigDTO : generalGroupConfigDTOS) {
+								final String       hosts    = generalGroupConfigDTO.getHosts();
+								final List<String> hostList = Lists.newArrayList(StringUtils.split(hosts, ","));
+								final String restartHosts =
+										restartHostList.stream().filter(hostList::contains)
+												.collect(Collectors.joining(","));
+								generalGroupConfigDTO.setHosts(restartHosts);
+						}
+				}
+				content.setGroupConfigList(generalGroupConfigDTOS);
 				opTask.setExpandData(JSON.toJSONString(content));
 				return Result.buildSucc();
 		}

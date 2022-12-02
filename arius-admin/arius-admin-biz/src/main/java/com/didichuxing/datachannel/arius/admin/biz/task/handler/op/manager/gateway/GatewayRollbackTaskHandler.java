@@ -6,7 +6,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
-import java.util.Objects;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
+import java.util.List;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,21 +24,7 @@ public class GatewayRollbackTaskHandler extends AbstractGatewayTaskHandler {
 		@Override
 		protected Result<Void> validatedAddTaskParam(OpTask param) {
 				final GatewayRollbackContent content = convertString2Content(param.getExpandData());
-				if (Objects.isNull(content.getTaskId()) || Boolean.FALSE.equals(
-						taskService.hasTask(content.getTaskId()).getData())) {
-						return Result.buildFail("回滚任务 id 必须存在");
-				}
-				if (Objects.isNull(content.getComponentId())) {
-						return Result.buildFail("组建 id 不能为空");
-				}
-				// 校验 componentId 是否存在
-				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> result = componentService.queryComponentNameById(
-						content.getComponentId());
-				if (result.failed()) {
-						return Result.buildFrom(result);
-				}
-				
-				return Result.buildSucc();
+				return checkInitRollBackParam(content, OpTaskTypeEnum.GATEWAY_UPGRADE);
 		}
 		
 	
@@ -75,5 +63,17 @@ public class GatewayRollbackTaskHandler extends AbstractGatewayTaskHandler {
 		protected OperateRecord recordCurrentOperationTasks(String expandData) {
 				return new OperateRecord();
 		}
-
+		
+		@Override
+		protected Result<Void> initParam(OpTask opTask) {
+				final GatewayRollbackContent content = convertString2Content(opTask.getExpandData());
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<List<ComponentGroupConfig>> componentConfigRes = componentService.getComponentConfig(
+						content.getComponentId());
+				if (componentConfigRes.failed()) {
+						return Result.buildFrom(componentConfigRes);
+				}
+				opTask.setExpandData(
+						initRollBackParam(content, componentConfigRes.getData(), OperationEnum.UPGRADE));
+				return Result.buildSucc();
+		}
 }

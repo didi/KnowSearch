@@ -70,7 +70,8 @@ public interface ClusterRoleHostService {
      * @throws AdminTaskException
      */
     boolean collectClusterNodeSettings(String cluster) throws AdminTaskException;
-
+    
+    boolean collectClusterNodeSettings(String cluster,Integer componentId) throws AdminTaskException;
     /**
      * 全量录入根据配置的节点信息持久化到MySQL, 包括节点状态
      * @param param 参数
