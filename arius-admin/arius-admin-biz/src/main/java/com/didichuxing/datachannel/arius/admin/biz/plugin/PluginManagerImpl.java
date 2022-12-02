@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginInf
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.plugin.PluginInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
@@ -155,9 +156,10 @@ public class PluginManagerImpl implements PluginManager {
 				return Result.buildFrom(packageByIdResult);
 			}
 			Integer packageType = packageByIdResult.getData().getPackageType();
-			String version = packageByIdResult.getData().getVersion();
-			List<Package> packageList = packageService.listPackageWithLowerVersionByPackageTypeAndVersion(packageType,version);
-			return Result.buildSucc(ConvertUtil.list2List(packageList,PackageVersionVO.class));
+			String currentVersion = packageByIdResult.getData().getVersion();
+			List<Package> listPackageByPackageType = packageService.listPackageByPackageType(packageType);
+			List<Package> listPackage = listPackageByPackageType.stream().filter(aPackage -> ESVersionUtil.compareVersion(aPackage.getVersion(), currentVersion) < 0).collect(Collectors.toList());
+			return Result.buildSucc(ConvertUtil.list2List(listPackage,PackageVersionVO.class));
 		}
 
 	/******************************************private***********************************************/

@@ -2,8 +2,8 @@ package com.didichuxing.datachannel.arius.admin.core.service.gateway.impl;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayClusterNode;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.GatewaySqlConstant;
@@ -16,6 +16,9 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.Gateway
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterNodeDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.op.manager.domain.component.entity.Component;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHost;
+import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.Date;
@@ -44,9 +47,11 @@ public class GatewayServiceImpl implements GatewayService {
 
     @Autowired
     private ESGatewayClient       esGatewayClient;
-
+    
     @Autowired
-    private GatewayClusterNodeDAO gatewayClusterNodeDAO;
+    private GatewayClusterNodeDAO  gatewayClusterNodeDAO;
+    @Autowired
+    private ComponentDomainService componentDomainService;
 
     private Set<String>           clusterNames;
 
@@ -185,6 +190,16 @@ public class GatewayServiceImpl implements GatewayService {
         gatewayClusterNodePO.setHeartbeatTime(new Date());
         gatewayClusterNodePO.setHostName(heartbeat.getHostName().trim());
         gatewayClusterNodePO.setPort(heartbeat.getPort());
+        final GatewayClusterPO clusterPO = gatewayClusterDAO.getOneByName(
+            heartbeat.getClusterName().trim());
+        final com.didiglobal.logi.op.manager.infrastructure.common.Result<Component> component = componentDomainService.getComponentById(
+            clusterPO.getComponentId());
+        if (component.isSuccess()){
+            final List<ComponentHost> hostList = component.getData().getHostList();
+            hostList.stream().filter(i->heartbeat.getHostName().trim().equals(i.getHost()))
+                .findFirst().map(ComponentHost::getMachineSpec).ifPresent(gatewayClusterNodePO::setMachineSpec);
+        }
+    
         return gatewayClusterNodeDAO.recordGatewayNode(gatewayClusterNodePO) > 0;
     }
 

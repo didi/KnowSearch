@@ -4,10 +4,13 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.TaskTypeVO;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskLogEnum;
 import com.didiglobal.logi.op.manager.interfaces.vo.TaskDetailVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +85,17 @@ public class ECMOptaskV3Controller {
 				@RequestParam(value = "taskId", required = true) Integer taskId) {
 			
 				return opTaskManager.getTaskDetail(taskId);
+		}
+		
+		
+		@GetMapping("action-type")
+		@ApiOperation(value = "操作方式")
+		public Result<List<TaskTypeVO>> getActionTypes() {
+				List<TaskTypeVO> voList = new ArrayList<>();
+				for (TaskActionEnum elem : TaskActionEnum.values()) {
+						voList.add(new TaskTypeVO(elem.getStatus(), elem.getAction()));
+				}
+				return Result.buildSucc(voList);
 		}
 		
 		

@@ -1,19 +1,17 @@
 package com.didiglobal.logi.op.manager.domain.component.entity.value;
 
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.REX;
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Sets;
+import java.sql.Timestamp;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
-
-import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Set;
-
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.REX;
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
 
 /**
  * @author didi
@@ -71,7 +69,10 @@ public class ComponentGroupConfig {
      * 更新时间
      */
     private Timestamp updateTime;
-
+        /**
+     * 机器规格
+     */
+    private String    machineSpec;
     public ComponentGroupConfig create() {
         this.version = "1";
         this.createTime = new Timestamp(System.currentTimeMillis());

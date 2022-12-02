@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.plugin.PluginManager;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskHandler;
+import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.GeneralRollbackComponentContent;
 import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.OfflineContent;
 import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.PluginUninstallContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
@@ -15,11 +16,14 @@ import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEn
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.task.OpTaskService;
 import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.op.manager.application.PackageService;
 import com.didiglobal.logi.op.manager.application.TaskService;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
+import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.interfaces.assembler.ComponentAssembler;
@@ -32,6 +36,7 @@ import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralScaleCompone
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralUpgradeComponentDTO;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -395,6 +400,64 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 						return Result.buildFrom(result);
 				}
 				return Result.buildSucc(result.getData());
+		}
+		
+		/**
+		 * > 该函数用于初始化组件的回滚参数
+		 *
+		 * @param content 回滚消息的内容，即发送给消费者的消息内容。
+		 * @param data 要回滚的数据
+		 * @param operationEnum 操作的类型，如增加、删除、修改等。
+		 * @return 一个 JSON 字符串。
+		 */
+		protected <T extends GeneralRollbackComponentContent> String initRollBackParam(T content,
+				List<ComponentGroupConfig> data, OperationEnum operationEnum) {
+					final OpTask opTask = opTaskService.getById(content.getTaskId());
+				final List<GeneralGroupConfigDTO> generalGroupConfigDTOS = ConvertUtil.list2List(data,
+						GeneralGroupConfigDTO.class);
+				content.setGroupConfigList(generalGroupConfigDTOS);
+				// 设置类型
+				content.setType(operationEnum.getType());
+				content.setTaskId(Integer.parseInt(opTask.getBusinessKey()));
+				return JSON.toJSONString(content);
+		}
+		
+		
+		protected <T extends GeneralRollbackComponentContent> Result<Void> checkInitRollBackParam(
+				T content,OpTaskTypeEnum opTaskTypeEnum) {
+				if (Objects.isNull(content.getComponentId())) {
+						return Result.buildFail("组建 ID 不能为空");
+				}
+				if (Objects.isNull(content.getTaskId())) {
+						return Result.buildFail("回滚任务 ID 不能为空");
+				}
+				// 校验 taskID 是否在 op-task 表中
+				final OpTask opTask = opTaskService.getById(content.getTaskId());
+				if (Objects.isNull(opTask)) {
+						return Result.buildFail("taskID 不存在，无法执行回滚任务");
+				}
+				// 判断 task 任务是否为集群升级
+				final Integer taskType = opTask.getTaskType();
+				if (!Objects.equals(OpTaskTypeEnum.valueOfType(taskType),
+						opTaskTypeEnum)) {
+						switch (opTaskTypeEnum) {
+								case ES_CLUSTER_UPGRADE:
+								case GATEWAY_UPGRADE:
+										return Result.buildFail("只支持升级类型的回滚任务");
+								case ES_CLUSTER_CONFIG_EDIT:
+								case GATEWAY_CONFIG_EDIT:
+										return Result.buildFail("只支持配置变更的回滚任务");
+								default:
+										return Result.buildFail("当前操作类型不支持回滚任务");
+						}
+				}
+				// 判断 task 任务是否存在
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Task> taskRes = taskService.getTaskById(
+						Integer.parseInt(opTask.getBusinessKey()));
+				if (taskRes.failed()) {
+						return Result.buildFrom(taskRes);
+				}
+				return Result.buildSucc();
 		}
 		
 }

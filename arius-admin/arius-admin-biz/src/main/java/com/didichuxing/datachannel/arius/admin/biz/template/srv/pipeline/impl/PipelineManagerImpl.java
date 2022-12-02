@@ -245,7 +245,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
      * @return
      */
     private boolean isExpireDayChange(Integer expireTime, Integer hotTime, Integer pipelineExpireDay) {
-        return pipelineExpireDay.equals(expireTime);
+        return !pipelineExpireDay.equals(expireTime);
     }
 
     /**

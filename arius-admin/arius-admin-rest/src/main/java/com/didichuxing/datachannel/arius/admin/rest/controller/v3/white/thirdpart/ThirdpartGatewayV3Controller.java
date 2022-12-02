@@ -72,28 +72,28 @@ public class ThirdpartGatewayV3Controller {
     @ResponseBody
     @ApiOperation(value = "获取APP列表接口", notes = "获取es user列表,包含es user全部元信息")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-GATEWAY-TICKET", value = "接口ticket", required = true) })
-    public Result<List<GatewayESUserVO>> listApp(HttpServletRequest request) {
+    public Result<List<GatewayESUserVO>> listApp(HttpServletRequest request, @RequestParam(value = "gatewayClusterName", required = false) List<String> gatewayClusterName) {
         String ticket = HttpRequestUtil.getHeaderValue(GATEWAY_GET_PROJECT_TICKET_NAME);
         if (!GATEWAY_GET_PROJECT_TICKET.equals(ticket)) {
             return Result.buildParamIllegal("ticket错误");
         }
-        return gatewayManager.listESUserByProject();
+        return gatewayManager.listESUserByProject(gatewayClusterName);
     }
 
     @GetMapping("/template")
     @ResponseBody
     @ApiOperation(value = "获取模板信息", notes = "以map结构组织,key是表达式")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
-    public Result<Map<String, GatewayTemplatePhysicalVO>> getTemplateMap(@RequestParam("cluster") String cluster) {
-        return gatewayManager.getTemplateMap(cluster);
+    public Result<Map<String, GatewayTemplatePhysicalVO>> getTemplateMap(@RequestParam("cluster") String cluster, @RequestParam(value = "gatewayClusterName", required = false) List<String> gatewayClusterName) {
+        return gatewayManager.getTemplateMap(cluster, gatewayClusterName);
     }
 
     @GetMapping("/deploy-info")
     @ResponseBody
     @ApiOperation(value = "获取模板信息", notes = "主主从结构组织")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "dataCenter", value = "数据中心", required = true) })
-    public Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo(@RequestParam(value = "dataCenter") String dataCenter) {
-        return gatewayManager.listDeployInfo();
+    public Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo(@RequestParam(value = "dataCenter") String dataCenter, @RequestParam(value = "gatewayClusterName", required = false) List<String> gatewayClusterName) {
+        return gatewayManager.listDeployInfo(gatewayClusterName);
     }
 
     @PostMapping(path = "dsl/scroll-dsl-template")

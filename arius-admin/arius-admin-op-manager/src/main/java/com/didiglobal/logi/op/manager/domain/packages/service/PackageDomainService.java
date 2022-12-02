@@ -1,6 +1,7 @@
 package com.didiglobal.logi.op.manager.domain.packages.service;
 
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
+import com.didiglobal.logi.op.manager.domain.packages.entity.value.PackageGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 
 import java.util.List;
@@ -68,17 +69,17 @@ public interface PackageDomainService {
     Long countByCondition(Package pagingPackage);
 
     /**
-     * 根据软件包类型获取软件包版本
+     * 通过包类型获取list
      * @param packageType
      * @return
      */
-    List<String> listPackageVersionByPackageType(Integer packageType);
+    List<Package> listPackageByPackageType(Integer packageType);
 
     /**
-     * 通过包类型和当前版本查询比当前版本低的版本
-     * @param packageType
+     * 通过es包版本号获取es配置组
      * @param version
+     * @param packageType
      * @return
      */
-    List<Package> listPackageWithLowerVersionByPackageTypeAndVersion(Integer packageType, String version);
+    List<PackageGroupConfig> listPackageGroupConfigByVersion(String version, Integer packageType);
 }

@@ -2,6 +2,7 @@ package com.didiglobal.logi.op.manager.application;
 
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
+import com.didiglobal.logi.op.manager.domain.packages.entity.value.PackageGroupConfig;
 import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
 import com.didiglobal.logi.op.manager.domain.script.service.impl.ScriptDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
@@ -69,13 +70,6 @@ public class PackageService {
         if (res.getData() && null != pk.getUploadFile()) {
             return Result.fail(PACKAGE_IS_DEPEND_UPDATE_ERROR);
         }
-        //补全参数信息
-        Package originalPackage = packageDomainService.getPackageById(pk.getId()).getData();
-        if (null == originalPackage) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "输入的id参数有问题，未找到软件包");
-        }
-        pk.setName(originalPackage.getName());
-        pk.setVersion(originalPackage.getVersion());
         //修改安装包
         return packageDomainService.updatePackage(pk);
     }
@@ -145,12 +139,12 @@ public class PackageService {
     }
 
     /**
-     * 通过软件包类型获取软件包版本list
+     * 根据软件包类型获取软件包
      * @param packageType
      * @return
      */
-    public List<String> listPackageVersionByPackageType(Integer packageType) {
-        return packageDomainService.listPackageVersionByPackageType(packageType);
+    public List<Package> listPackageByPackageType(Integer packageType){
+        return packageDomainService.listPackageByPackageType(packageType);
     }
 
     /**
@@ -163,12 +157,12 @@ public class PackageService {
     }
 
     /**
-     * 通过包类型和当前版本查询比当前版本低的版本
-     * @param packageType
+     * 通过es包版本号获取es配置组
      * @param version
+     * @param packageType
      * @return
      */
-    public List<Package> listPackageWithLowerVersionByPackageTypeAndVersion(Integer packageType, String version) {
-        return packageDomainService.listPackageWithLowerVersionByPackageTypeAndVersion(packageType,version);
+    public List<PackageGroupConfig> listPackageGroupConfigByVersion(String version, Integer packageType) {
+        return packageDomainService.listPackageGroupConfigByVersion(version, packageType);
     }
 }

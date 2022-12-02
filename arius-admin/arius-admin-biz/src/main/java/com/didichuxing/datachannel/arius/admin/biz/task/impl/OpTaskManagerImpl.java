@@ -197,7 +197,16 @@ public class OpTaskManagerImpl implements OpTaskManager {
             return result;
         }
         final Integer taskId = Integer.valueOf(opTask.getBusinessKey());
-        return Result.buildFromWithData(taskService. operateTask(taskId, action));
+        final com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> voidResult = taskService.operateTask(
+            taskId, action);
+        if (voidResult.isSuccess()) {
+             Result<Void> processTaskRes = refreshOpTask(
+                opTask, taskId);
+            if (processTaskRes.failed()) {
+                return processTaskRes;
+            }
+        }
+        return Result.buildFromWithData(voidResult);
     }
     
     @Override
@@ -210,20 +219,10 @@ public class OpTaskManagerImpl implements OpTaskManager {
         final Integer taskId = Integer.valueOf(opTask.getBusinessKey());
         com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> voidResult = taskService.retryTask(taskId);
         if (voidResult.isSuccess()) {
-            // 更新工单中的状态
-            com.didiglobal.logi.op.manager.infrastructure.common.Result<Task> taskRes = taskService.getTaskById(taskId);
-            Integer status = taskRes.getData().getStatus();
-            OpTaskProcessDTO processDTO = ConvertUtil.obj2Obj(opTask, OpTaskProcessDTO.class);
-            processDTO.setTaskId(opTask.getId());
-            //3. 填充状态
-            processDTO.setStatus(
-                    OpTaskStatusEnum.valueOfStatusByOpManagerEnum(TaskStatusEnum.find(status)).getStatus());
-            try {
-                Result<Void> processTaskRes = processTask(processDTO);
-                if (processTaskRes.failed()) {
-                    return processTaskRes;
-                }
-            } catch (Exception ignore) {
+            Result<Void> processTaskRes = refreshOpTask(
+                opTask, taskId);
+            if (processTaskRes.failed()) {
+                return processTaskRes;
             }
             // 重试后继续执行
             Result<Void> executeRes = execute(id);
@@ -234,6 +233,8 @@ public class OpTaskManagerImpl implements OpTaskManager {
         return Result.buildFromWithData(voidResult);
     }
     
+   
+    
     @Override
     public Result<Void> operateHost(Integer id, String action, String host, String groupName) {
         final OpTask opTask = opTaskService.getById(id);
@@ -242,7 +243,16 @@ public class OpTaskManagerImpl implements OpTaskManager {
             return result;
         }
         final Integer taskId = Integer.valueOf(opTask.getBusinessKey());
-        return Result.buildFromWithData(taskService.operateHost(taskId, action, host, groupName));
+        final com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> voidResult = taskService.operateHost(
+            taskId, action, host, groupName);
+        if (voidResult.isSuccess()) {
+            Result<Void> processTaskRes = refreshOpTask(
+                opTask, taskId);
+            if (processTaskRes.failed()) {
+                return processTaskRes;
+            }
+        }
+        return Result.buildFromWithData(voidResult);
     }
     
     @Override
@@ -306,6 +316,33 @@ public class OpTaskManagerImpl implements OpTaskManager {
         }
         if (StringUtils.equals(SUCCESS, opTask.getStatus())) {
             return Result.buildFail("当前任务执行成功，无需重复执行");
+        }
+        return Result.buildSucc();
+    }
+    
+    /**
+     * > 函数`refreshOpTask`用于更新操作任务的状态
+     *
+     * @param opTask 需要更新的对象
+     * @param taskId 要处理的任务的任务 ID。
+     * @return 结果对象。
+     */
+    private Result<Void> refreshOpTask(OpTask opTask, Integer taskId) {
+        // 更新工单中的状态
+        com.didiglobal.logi.op.manager.infrastructure.common.Result<Task> taskRes = taskService.getTaskById(
+            taskId);
+        Integer          status     = taskRes.getData().getStatus();
+        OpTaskProcessDTO processDTO = ConvertUtil.obj2Obj(opTask, OpTaskProcessDTO.class);
+        processDTO.setTaskId(opTask.getId());
+        //3. 填充状态
+        processDTO.setStatus(
+            OpTaskStatusEnum.valueOfStatusByOpManagerEnum(TaskStatusEnum.find(status)).getStatus());
+        try {
+            Result<Void> processTaskRes = processTask(processDTO);
+            if (processTaskRes.failed()) {
+                return processTaskRes;
+            }
+        } catch (Exception ignore) {
         }
         return Result.buildSucc();
     }

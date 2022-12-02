@@ -37,4 +37,9 @@ public class ScriptPageVO extends BaseVO {
      */
     @ApiModelProperty("创建者")
     private String creator;
+    /**
+     * 文件地址
+     */
+    @ApiModelProperty("文件地址")
+    private String contentUrl;
 }

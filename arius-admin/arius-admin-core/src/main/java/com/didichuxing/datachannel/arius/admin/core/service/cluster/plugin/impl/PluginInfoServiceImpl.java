@@ -50,6 +50,6 @@ public class PluginInfoServiceImpl implements PluginInfoService {
 		@Override
 		public PluginInfoPO selectByClusterIdAndComponentIdAndClusterType(Integer clusterId, Integer componentId,
 		                                                                  Integer clusterType) {
-				return pluginDAO.selectByClusterIdAndComponentIdAndClusterType(clusterId,componentId,clusterType);
+				return pluginDAO.selectByClusterIdAndComponentIdAndClusterType(clusterId,clusterType,componentId);
 		}
 }

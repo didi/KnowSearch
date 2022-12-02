@@ -50,4 +50,9 @@ public class ScriptVO {
      */
     @ApiModelProperty("更新时间")
     private Timestamp updateTime;
+    /**
+     * 创建者
+     */
+    @ApiModelProperty("创建者")
+    private String creator;
 }
