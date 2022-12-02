@@ -49,6 +49,7 @@ public class PackageManagerImpl implements PackageManager {
     private PackageService packageService;
     @Autowired
     private RoleTool roleTool;
+
     @Override
     public PaginationResult<PackagePageVO> pageGetPackages(PackageQueryDTO packageDTO, Integer projectId) throws NotFindSubclassException {
         BaseHandle baseHandle = handleFactory.getByHandlerNamePer(PACKAGE.getPageSearchType());
@@ -142,7 +143,7 @@ public class PackageManagerImpl implements PackageManager {
         }
         List<Package> listPackageByPackageType = packageService.listPackageByPackageType(SoftwarePackageTypeEnum.getPackageTypeByDesc(packageTypeDesc));
         List<Package> listPackage = listPackageByPackageType.stream().filter(aPackage -> ESVersionUtil.compareVersion(aPackage.getVersion(), currentVersion) > 0).collect(Collectors.toList());
-        return Result.buildSucc(ConvertUtil.list2List(listPackage,PackageVersionVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(listPackage, PackageVersionVO.class));
     }
 
     @Override
@@ -153,7 +154,7 @@ public class PackageManagerImpl implements PackageManager {
         }
         Integer packageType = SoftwarePackageTypeEnum.ES_INSTALL_PACKAGE.getPackageType();
         List<PackageGroupConfig> packageGroupConfigs = packageService.listPackageGroupConfigByVersion(version, packageType);
-        return Result.buildSucc(ConvertUtil.list2List(packageGroupConfigs,PackageGroupConfigQueryVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(packageGroupConfigs, PackageGroupConfigQueryVO.class));
     }
 
     @Override
@@ -163,7 +164,7 @@ public class PackageManagerImpl implements PackageManager {
             return Result.buildFail(result.getMessage());
         }
         List<Package> packageList = packageService.listPackageByPackageType(SoftwarePackageTypeEnum.getPackageTypeByDesc(packageTypeDesc));
-        return Result.buildSucc(ConvertUtil.list2List(packageList,PackageVersionVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(packageList, PackageVersionVO.class));
     }
 
     /*************************************************private**********************************************************/
@@ -193,15 +194,18 @@ public class PackageManagerImpl implements PackageManager {
         Boolean checkRequired = packageGroupConfigs.stream().anyMatch(packageGroupConfig -> {
             String systemConfig = packageGroupConfig.getSystemConfig();
             JSONObject jsonObject = JSON.parseObject(systemConfig);
+            if (AriusObjUtils.isNull(jsonObject)) {
+                return true;
+            }
             if (AriusObjUtils.isNull(jsonObject.get("installDirector"))) {
                 return true;
             }
-            if(AriusObjUtils.isNull(jsonObject.get("user"))){
+            if (AriusObjUtils.isNull(jsonObject.get("user"))) {
                 return true;
             }
             return false;
         });
-        if(checkRequired){
+        if (checkRequired) {
             return Result.buildParamIllegal("安装目录和用户名配置必填");
         }
         if (operation.getCode() == ADD.getCode()) {
