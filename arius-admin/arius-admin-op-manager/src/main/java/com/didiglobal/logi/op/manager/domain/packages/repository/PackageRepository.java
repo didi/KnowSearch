@@ -22,9 +22,10 @@ public interface PackageRepository {
      * 根据version获取安装包
      *
      * @param version
+     * @param packageType
      * @return Package
      */
-    Package findByVersion(String version);
+    Package findByVersion(String version, Integer packageType);
 
     /**
      * 根据id获取安装包

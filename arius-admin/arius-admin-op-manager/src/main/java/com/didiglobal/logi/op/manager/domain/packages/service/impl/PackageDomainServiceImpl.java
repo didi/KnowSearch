@@ -45,7 +45,9 @@ public class PackageDomainServiceImpl implements PackageDomainService {
         if (null != packageRepository.findByName(pk.getName())) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(),"安装包名称已存在，请重新输入");
         }
-
+        if (Objects.nonNull(packageRepository.findByVersion(pk.getVersion(), pk.getPackageType()))) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "当前版本已存在");
+        }
         //创建
         pk.create();
 
@@ -119,8 +121,8 @@ public class PackageDomainServiceImpl implements PackageDomainService {
     }
 
     @Override
-    public List<PackageGroupConfig> listPackageGroupConfigByVersion(String version) {
-        Package packageByVersion = packageRepository.findByVersion(version);
+    public List<PackageGroupConfig> listPackageGroupConfigByVersion(String version, Integer packageType) {
+        Package packageByVersion = packageRepository.findByVersion(version, packageType);
         if(Objects.isNull(packageByVersion)){
             return Lists.newArrayList();
         }

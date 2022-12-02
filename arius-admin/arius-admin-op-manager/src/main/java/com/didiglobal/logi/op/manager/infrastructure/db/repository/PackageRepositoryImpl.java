@@ -28,8 +28,8 @@ public class PackageRepositoryImpl implements PackageRepository {
     }
 
     @Override
-    public Package findByVersion(String version) {
-        PackagePO packagePO = packageDao.findByVersion(version);
+    public Package findByVersion(String version, Integer packageType) {
+        PackagePO packagePO = packageDao.findByVersion(version, packageType);
         return PackageConverter.convertPackagePO2DO(packagePO);
     }
 

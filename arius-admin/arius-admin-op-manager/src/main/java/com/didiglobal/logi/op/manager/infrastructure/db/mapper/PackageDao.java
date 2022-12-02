@@ -32,9 +32,10 @@ public interface PackageDao {
      * 通过version获取PackagePo
      *
      * @param version
+     * @param packageType
      * @return PackagePo
      */
-    PackagePO findByVersion(String version);
+    PackagePO findByVersion(@Param("version") String version, @Param("packageType") Integer packageType);
 
     /**
      * 新建安装包

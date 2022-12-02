@@ -159,9 +159,10 @@ public class PackageService {
     /**
      * 通过es包版本号获取es配置组
      * @param version
+     * @param packageType
      * @return
      */
-    public List<PackageGroupConfig> listPackageGroupConfigByVersion(String version) {
-        return packageDomainService.listPackageGroupConfigByVersion(version);
+    public List<PackageGroupConfig> listPackageGroupConfigByVersion(String version, Integer packageType) {
+        return packageDomainService.listPackageGroupConfigByVersion(version, packageType);
     }
 }

@@ -78,7 +78,8 @@ public interface PackageDomainService {
     /**
      * 通过es包版本号获取es配置组
      * @param version
+     * @param packageType
      * @return
      */
-    List<PackageGroupConfig> listPackageGroupConfigByVersion(String version);
+    List<PackageGroupConfig> listPackageGroupConfigByVersion(String version, Integer packageType);
 }

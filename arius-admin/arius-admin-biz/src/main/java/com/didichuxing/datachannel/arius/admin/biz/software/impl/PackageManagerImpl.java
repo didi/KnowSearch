@@ -151,7 +151,8 @@ public class PackageManagerImpl implements PackageManager {
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
-        List<PackageGroupConfig> packageGroupConfigs = packageService.listPackageGroupConfigByVersion(version);
+        Integer packageType = SoftwarePackageTypeEnum.ES_INSTALL_PACKAGE.getPackageType();
+        List<PackageGroupConfig> packageGroupConfigs = packageService.listPackageGroupConfigByVersion(version, packageType);
         return Result.buildSucc(ConvertUtil.list2List(packageGroupConfigs,PackageGroupConfigQueryVO.class));
     }
 
@@ -184,6 +185,9 @@ public class PackageManagerImpl implements PackageManager {
         }
         if (operation.equals(UNKNOWN)) {
             return Result.buildParamIllegal("操作类型未知");
+        }
+        if (!ESVersionUtil.isValid(checkPackage.getVersion())) {
+            return Result.buildParamIllegal("版本号格式不正确, 必须是'1.1.1.1000'类似的格式");
         }
         //安装目录和用户名配置要必填
         Boolean checkRequired = packageGroupConfigs.stream().anyMatch(packageGroupConfig -> {
