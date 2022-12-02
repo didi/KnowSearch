@@ -32,9 +32,10 @@ public interface PackageDao {
      * 通过version获取PackagePo
      *
      * @param version
+     * @param packageType
      * @return PackagePo
      */
-    PackagePO findByVersion(String version);
+    PackagePO findByVersion(@Param("version") String version, @Param("packageType") Integer packageType);
 
     /**
      * 新建安装包
@@ -69,13 +70,6 @@ public interface PackageDao {
     int delete(int id);
 
     /**
-     * 根据软件包类型获取软件包版本
-     * @param packageType
-     * @return
-     */
-    List<PackagePO> listPackageVersionByPackageType(Integer packageType);
-
-    /**
      * 分页查询软件包列表
      * @param packagePO
      * @param from
@@ -92,10 +86,9 @@ public interface PackageDao {
     Long countByCondition(PackagePO packagePO);
 
     /**
-     * 通过包类型和当前版本查询比当前版本低的版本
+     * 通过包类型获取包list
      * @param packageType
-     * @param version
      * @return
      */
-    List<PackagePO> listPackageWithLowerVersionByPackageTypeAndVersion(@Param("packageType") Integer packageType,@Param("version") Integer version);
+    List<PackagePO> listPackageByPackageType(Integer packageType);
 }

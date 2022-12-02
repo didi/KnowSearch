@@ -20,6 +20,16 @@ public class PackageUpdateDTO {
     @ApiModelProperty("安装包id")
     private Integer id;
     /**
+     * 安装包名字
+     */
+    @ApiModelProperty("安装包名字")
+    private String name;
+    /**
+     * 版本
+     */
+    @ApiModelProperty("版本")
+    private String version;
+    /**
      * 描述
      */
     @ApiModelProperty("描述")

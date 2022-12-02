@@ -42,4 +42,8 @@ public class ScriptPO {
      * 更新时间
      */
     private Timestamp updateTime;
+    /**
+     * 创建者
+     */
+    private String creator;
 }

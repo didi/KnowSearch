@@ -8,15 +8,15 @@ import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainServi
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.storage.StorageService;
-import org.apache.commons.lang3.StringUtils;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Objects;
 
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SLASH;
 import static com.didiglobal.logi.op.manager.infrastructure.util.FileUtil.getDeleteFileName;
 import static com.didiglobal.logi.op.manager.infrastructure.util.FileUtil.getUniqueFileName;
 
@@ -45,7 +45,9 @@ public class PackageDomainServiceImpl implements PackageDomainService {
         if (null != packageRepository.findByName(pk.getName())) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(),"安装包名称已存在，请重新输入");
         }
-
+        if (Objects.nonNull(packageRepository.findByVersion(pk.getVersion(), pk.getPackageType()))) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "当前版本已存在");
+        }
         //创建
         pk.create();
 
@@ -114,14 +116,17 @@ public class PackageDomainServiceImpl implements PackageDomainService {
     }
 
     @Override
-    public List<String> listPackageVersionByPackageType(Integer packageType) {
-        return packageRepository.listPackageVersionByPackageType(packageType);
+    public List<Package> listPackageByPackageType(Integer packageType) {
+        return packageRepository.listPackageByPackageType(packageType);
     }
 
     @Override
-    public List<Package> listPackageWithLowerVersionByPackageTypeAndVersion(Integer packageType, String version) {
-        Integer versionCast2Int = Integer.valueOf(StringUtils.replace(version, ".", "").trim());
-        return packageRepository.listPackageWithLowerVersionByPackageTypeAndVersion(packageType,versionCast2Int);
+    public List<PackageGroupConfig> listPackageGroupConfigByVersion(String version, Integer packageType) {
+        Package packageByVersion = packageRepository.findByVersion(version, packageType);
+        if(Objects.isNull(packageByVersion)){
+            return Lists.newArrayList();
+        }
+        return packageGroupConfigRepository.queryConfigByPackageId(packageByVersion.getId());
     }
 
     @Override
