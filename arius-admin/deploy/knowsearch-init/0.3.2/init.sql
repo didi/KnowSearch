@@ -1989,6 +1989,7 @@ CREATE TABLE logi_op_component
 )
     CHARSET = utf8mb4;
 -- auto-generated definition
+-- auto-generated definition
 CREATE TABLE logi_op_component_group_config
 (
     id                       INT(11) UNSIGNED AUTO_INCREMENT COMMENT '自增id'
@@ -2003,20 +2004,23 @@ CREATE TABLE logi_op_component_group_config
     hosts                    VARCHAR(200)  NULL COMMENT '分组下的ip',
     version                  VARCHAR(50)   NULL COMMENT '版本',
     create_time              TIMESTAMP     NULL COMMENT '创建时间',
-    update_time              TIMESTAMP     NULL COMMENT '更新时间'
-)
-    CHARSET = utf8mb4;
+    update_time              TIMESTAMP     NULL COMMENT '更新时间',
+    machine_spec             VARCHAR(500)  NULL COMMENT '机器规格'
+);
+
+
 -- auto-generated definition
 CREATE TABLE logi_op_component_host
 (
-    host         VARCHAR(11) DEFAULT '' NOT NULL COMMENT '主机',
-    component_id INT                    NOT NULL COMMENT '关联组件id',
-    status       INT                    NULL COMMENT '状态（在线或离线）',
-    group_name   VARCHAR(11)            NULL COMMENT '分组名',
-    process_num  INT                    NULL COMMENT '进程数',
-    is_deleted   INT                    NULL COMMENT '是否卸载',
-    create_time  TIMESTAMP              NULL COMMENT '创建时间',
-    update_time  TIMESTAMP              NULL COMMENT '更新时间'
+    host         VARCHAR(11)  DEFAULT '' NOT NULL COMMENT '主机',
+    component_id INT                     NOT NULL COMMENT '关联组件id',
+    status       INT                     NULL COMMENT '状态（在线或离线）',
+    group_name   VARCHAR(11)             NULL COMMENT '分组名',
+    process_num  INT                     NULL COMMENT '进程数',
+    is_deleted   INT                     NULL COMMENT '是否卸载',
+    create_time  TIMESTAMP               NULL COMMENT '创建时间',
+    update_time  TIMESTAMP               NULL COMMENT '更新时间',
+    machine_spec VARCHAR(255) DEFAULT '' NULL COMMENT '机器规格'
 )
     CHARSET = utf8mb4;
 -- auto-generated definition

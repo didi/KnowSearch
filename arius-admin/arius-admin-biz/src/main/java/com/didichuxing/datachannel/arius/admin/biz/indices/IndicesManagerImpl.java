@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.indices;
 
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -23,10 +25,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellWithTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.ESSettingConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
@@ -37,7 +42,16 @@ import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassE
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusOptional;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.IndexSettingsUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.RegexUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -59,17 +73,18 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
 
 /**
  * @author lyn
@@ -578,8 +593,6 @@ public class IndicesManagerImpl implements IndicesManager {
         String phyCluster = getClusterRet.getData();
     
         IndexCatCell indexCatCell = esIndexCatService.syncGetCatIndexInfoById(phyCluster, indexName);
-        indexCatCell.setPriStoreSize(SizeUtil.getUnitSize(Long.parseLong(indexCatCell.getPriStoreSize())));
-        indexCatCell.setStoreSize(SizeUtil.getUnitSize(Long.parseLong(indexCatCell.getStoreSize())));
     
         if (Objects.isNull(indexCatCell)) {
             return Result.buildFail("获取单个索引详情信息失败");

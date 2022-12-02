@@ -66,4 +66,9 @@ public abstract class AbstractGatewayTaskHandler extends AbstractOpManagerTaskHa
 				//TODO 实现抓换
 				return Collections.emptyList();
 		}
+		
+		protected String getHttpPort(String fileConfig) {
+				return null;
+		}
+		
 }

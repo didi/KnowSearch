@@ -21,7 +21,6 @@ import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterCreateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
@@ -63,9 +62,9 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterCreateSourceEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterImportRuleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicLevelEnum;
+import com.didichuxing.datachannel.arius.admin.common.event.region.RegionEditByHostEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterPhyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
@@ -112,8 +111,16 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -1271,28 +1278,63 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
     
     @Override
-    public Result<Void> checkShrinkNodesContainsBindRegion(List<ESClusterRoleHostDTO> nodes, String clusterName) {
+    public Result<Void> checkShrinkNodesContainsBindRegion(List<ESClusterRoleHostDTO> nodes,
+        String clusterName) {
         //1.1 获取所有节点信息
         List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.listNodesByClusters(
-                Collections.singletonList(clusterName));
+            Collections.singletonList(clusterName));
         if (CollectionUtils.isEmpty(clusterRoleHosts)) {
             return Result.buildFail("节点信息不存在，无法进行缩容");
         }
-        Map<Long, ClusterRoleHost> id2CrMap = ConvertUtil.list2Map(clusterRoleHosts, ClusterRoleHost::getId);
-        Map<String, List<Long>> str2IdsMaps = ConvertUtil.list2MapOfList(clusterRoleHosts, i -> String.format(
-                "cluster:[%s];hostname:[%s];ip:[%s];port:[%s]", i.getCluster(), i.getHostname(), i.getIp(),
-                i.getPort()), ClusterRoleHost::getId);
-        // 获取需要删除 ids
-        List<Long> removeIds = nodes.stream()
-                // 拼接出 key
-                .map(i -> String.format("cluster:[%s];hostname:[%s];ip:[%s];port:[%s]", i.getCluster(), i.getHostname(),
-                                        i.getIp(), i.getPort())).filter(str2IdsMaps::containsKey).map(str2IdsMaps::get)
-                .flatMap(Collection::stream).distinct().collect(Collectors.toList());
-        // 对需要删除的 ids 进行校验
-        boolean checkShrinkBindRegion = removeIds.stream().map(id2CrMap::get).map(ClusterRoleHost::getRegionId)
-                .anyMatch(regionId -> Objects.equals(-1, regionId));
-        if (checkShrinkBindRegion) {
-            return Result.buildFail("缩容的节点已经被 Region 绑定了，无法缩容");
+        Map<String, List<ClusterRoleHost>> str2ClusterListMap =
+            ConvertUtil.list2MapOfList(clusterRoleHosts, i -> String.format(
+                    "cluster:[%s];hostname:[%s];ip:[%s]", i.getCluster(), i.getHostname(), i.getIp()),
+                i -> i);
+        // 获取需要删除 ClusterRoleHost
+        List<ClusterRoleHost> removeClusterRoleHostList = nodes.stream()
+            // 拼接出 key
+            .map(i -> String.format("cluster:[%s];hostname:[%s];ip:[%s]", i.getCluster(),
+                i.getHostname(),
+                i.getIp())).filter(str2ClusterListMap::containsKey).map(str2ClusterListMap::get)
+            .flatMap(Collection::stream).collect(Collectors.toList());
+    
+        //1. 先排除元数据 NULL 或者 -1 的 region
+        final List<ClusterRoleHost> existsRegionClusterRoleHostList =
+            clusterRoleHosts.stream().filter(i -> !Objects.equals(-1, i.getRegionId()))
+                .collect(Collectors.toList());
+        if (existsRegionClusterRoleHostList.isEmpty()) {
+            return Result.buildSucc();
+        }
+        //2. 获取要存在 region 对应的节点
+        final Map<Integer, List<ClusterRoleHost>> regionId2ClusterRoleHostListMap = ConvertUtil.list2MapOfList(
+            existsRegionClusterRoleHostList, ClusterRoleHost::getRegionId, i -> i);
+    
+        //3. 获取需要删除的 region 对应 role host
+        //4. 先排除 NULL 或者 -1 的 region
+        final List<ClusterRoleHost> removeExistsRegionClusterRoleHostList = removeClusterRoleHostList.stream()
+            .filter(i -> !Objects.equals(-1, i.getRegionId())).collect(Collectors.toList());
+        //5. 获取要进行缩容的 region 对应的节点
+        final Map<Integer, List<ClusterRoleHost>> removeRegionId2ClusterRoleHostListMap =
+            ConvertUtil.list2MapOfList(
+                removeExistsRegionClusterRoleHostList, ClusterRoleHost::getRegionId,
+                i -> i
+            );
+        for (Entry<Integer, List<ClusterRoleHost>> reginId2ClusterRoles :
+            removeRegionId2ClusterRoleHostListMap.entrySet()) {
+            final Integer regionId = reginId2ClusterRoles.getKey();
+            // 获取 region 中会被缩容的节点
+            final List<Long> removeClusterRoleHosts = reginId2ClusterRoles.getValue().stream()
+                .map(ClusterRoleHost::getId).collect(Collectors.toList());
+            final List<ClusterRoleHost> currentClusterRoleHosts = regionId2ClusterRoleHostListMap.get(
+                regionId);
+            // 进行缩容
+            final long count = currentClusterRoleHosts.stream()
+                // 获取必须要缩容的节点
+                .filter(i -> !removeClusterRoleHosts.contains(i
+                    .getId())).distinct().count();
+            if (count == 0) {
+                return Result.buildFail("region 至少需要一个节点进行绑定，当前节点不支持缩容");
+            }
         }
         return Result.buildSucc();
     }
@@ -1304,14 +1346,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         // 这里其实是需要一个内置 trim 用来保证传输进行的 roleClusterHosts 是正确的
         roleClusterHosts.forEach(roleClusterHostsTrimHostnameAndPort);
     
-        // 设置 region 为 -1
-        for (ESClusterRoleHostDTO roleClusterHost : roleClusterHosts) {
-            if (roleClusterHost.getRegionId() == null) {
-                roleClusterHost.setRegionId(-1);
-            }
-        }
-        List<ESClusterRoleHost> esClusterRoleHosts = ConvertUtil.list2List(roleClusterHosts, ESClusterRoleHost.class,
-                                                                           i->i.setRole(ESClusterNodeRoleEnum.MASTER_NODE.getDesc()));
         // 保存全量节点信息到 DB
         try {
             // 保存集群信息
@@ -1329,55 +1363,74 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Result.buildFail("操作失败, 请联系管理员");
         }
-    
+        // 触发采集
+        try {
+            clusterRoleHostService.collectClusterNodeSettings(createDTO.getCluster(),
+                createDTO.getComponentId());
+        } catch (AdminTaskException ignored) {
+        }
         return Result.buildSucc();
     }
     
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> shrinkNodesWithEcm(List<ESClusterRoleHostDTO> nodes, String clusterName) {
-        //1获取所有节点信息
+        //1 获取所有节点信息
         List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.listNodesByClusters(
-                Collections.singletonList(clusterName));
+            Collections.singletonList(clusterName));
+        final List<ClusterRoleHost> existsRegionClusterRoleLists = clusterRoleHosts.stream()
+            .filter(i -> !Objects.equals(i.getRegionId(), -1)).collect(Collectors.toList());
+        final Map<Long, Integer> id2RegionIdMap = ConvertUtil.list2Map(existsRegionClusterRoleLists,
+            ClusterRoleHost::getId,
+            ClusterRoleHost::getRegionId);
+    
         if (CollectionUtils.isEmpty(clusterRoleHosts)) {
             return Result.buildFail("节点信息不存在，无法进行缩容");
         }
-        //转换为Map形式
-        Map<String, List<Long>> str2IdsMaps = ConvertUtil.list2MapOfList(clusterRoleHosts, i -> String.format(
-                "cluster:[%s];hostname:[%s];ip:[%s];port:[%s]", i.getCluster(), i.getHostname(), i.getIp(),
-                i.getPort()), ClusterRoleHost::getId);
+        // 转换为 Map 形式
+        Map<String, List<Long>> str2IdsMaps = ConvertUtil.list2MapOfList(clusterRoleHosts,
+            i -> String.format(
+                "cluster:[%s];hostname:[%s];ip:[%s]", i.getCluster(), i.getHostname(), i.getIp()
+            ), ClusterRoleHost::getId);
         // 获取需要删除 ids
         List<Integer> removeIds = nodes.stream()
-                // 拼接出 key
-                .map(i -> String.format("cluster:[%s];hostname:[%s];ip:[%s];port:[%s]", i.getCluster(), i.getHostname(),
-                                        i.getIp(), i.getPort())).filter(str2IdsMaps::containsKey).map(str2IdsMaps::get)
-                .flatMap(Collection::stream).distinct().map(Long::intValue).collect(Collectors.toList());
-        Map<Long, Long> id2roleClusterIdMaps = ConvertUtil.list2Map(clusterRoleHosts, ClusterRoleHost::getId,
-                                                           ClusterRoleHost::getRoleClusterId);
-        List<Long> roleClusterIdLists = removeIds.stream().map(Integer::longValue).map(id2roleClusterIdMaps::get)
-                .distinct().collect(Collectors.toList());
-        return Result.build(clusterRoleHostService.deleteByIds(removeIds));
+            // 拼接出 key
+            .map(i -> String.format("cluster:[%s];hostname:[%s];ip:[%s]", i.getCluster(),
+                i.getHostname(),
+                i.getIp())).filter(str2IdsMaps::containsKey).map(str2IdsMaps::get)
+            .flatMap(Collection::stream).distinct().map(Long::intValue)
+            .collect(Collectors.toList());
+        // 获取需要触发缩容的 region
+        final List<Long> regionIdList = removeIds.stream().map(Integer::longValue)
+            .map(id2RegionIdMap::get)
+            .map(Integer::longValue)
+            .distinct().collect(Collectors.toList());
+        final boolean deleteByIds = clusterRoleHostService.deleteByIds(removeIds);
+        if (deleteByIds) {
+            // 触发采集
+            try {
+                clusterRoleHostService.collectClusterNodeSettings(clusterName);
+                // 触发缩容事件
+                SpringTool.publish(new RegionEditByHostEvent(this, regionIdList));
+                return Result.buildSucc();
+            } catch (AdminTaskException e) {
+                return Result.buildFail(e.getMessage());
+            }
+        }
+        return Result.buildFail("缩容失败");
     }
     
     @Override
     public Result<Void> expandNodesWithECM(List<ESClusterRoleHostDTO> nodes, String clusterName) {
-        // 这里其实是需要一个内置 trim 用来保证传输进行的 roleClusterHosts 是正确的
-        nodes.forEach(roleClusterHostsTrimHostnameAndPort);
-    
-        // 设置 region 为 -1
-        for (ESClusterRoleHostDTO roleClusterHost : nodes) {
-            if (roleClusterHost.getRegionId() == null) {
-                roleClusterHost.setRegionId(-1);
-            }
-        }
+        //扩容后触发采集任务进行节点采集刷新
         try {
-            boolean clusterNodeSettings = clusterRoleHostService.createClusterNodeSettings(ConvertUtil.list2List(nodes,ESClusterRoleHost.class), clusterName);
-        } catch (AdminTaskException exception) {
-            return Result.buildFail(exception.getMessage());
+            final ClusterPhy cluster = clusterPhyService.getClusterByName(clusterName);
+            clusterRoleHostService.collectClusterNodeSettings(clusterName,
+                cluster.getComponentId());
+            return Result.buildSucc();
+        } catch (AdminTaskException e) {
+            return Result.buildFail(e.getMessage());
         }
-        //缩容后发布事件，通过模板进行缩容
-
-        return Result.buildSucc();
     }
     
     @Override

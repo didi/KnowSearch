@@ -64,7 +64,7 @@ public abstract class AbstractESTaskHandler extends AbstractOpManagerTaskHandler
 		 * @param fileConfig 文件的内容。
 		 * @return http 服务器的端口号。
 		 */
-		private String getHttpPort(String fileConfig) {
+		protected String getHttpPort(String fileConfig) {
 				Matcher matcher = compile("http.port:\\s+\\d+").matcher(fileConfig);
 				if (matcher.find()) {
 						return matcher.group();

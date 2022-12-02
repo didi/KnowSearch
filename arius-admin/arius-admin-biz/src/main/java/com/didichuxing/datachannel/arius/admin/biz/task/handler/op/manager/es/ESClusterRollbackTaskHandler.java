@@ -6,7 +6,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
-import java.util.Objects;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
+import java.util.List;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,13 +25,7 @@ public class ESClusterRollbackTaskHandler extends AbstractESTaskHandler {
 		protected Result<Void> validatedAddTaskParam(OpTask param) {
 				final ClusterRollbackContent content = convertString2Content(
 						param.getExpandData());
-				if (Objects.isNull(content)) {
-						return Result.buildFail("组建 ID 不能为空");
-				}
-				if (Objects.isNull(content.getTaskId())) {
-						return Result.buildFail("回滚的任务 ID 不能为空");
-				}
-				return Result.buildSucc();
+				return checkInitRollBackParam(content, OpTaskTypeEnum.ES_CLUSTER_UPGRADE);
 		}
 		
 		
@@ -41,6 +37,19 @@ public class ESClusterRollbackTaskHandler extends AbstractESTaskHandler {
 		@Override
 		protected Result<Integer> submitTaskToOpManagerGetId(String expandData) {
 				return rollback(expandData);
+		}
+		
+		@Override
+		protected Result<Void> initParam(OpTask opTask) {
+				final ClusterRollbackContent content = convertString2Content(opTask.getExpandData());
+					final com.didiglobal.logi.op.manager.infrastructure.common.Result<List<ComponentGroupConfig>> componentConfigRes = componentService.getComponentConfig(
+						content.getComponentId());
+				if (componentConfigRes.failed()) {
+						return Result.buildFrom(componentConfigRes);
+				}
+				opTask.setExpandData(initRollBackParam(content,componentConfigRes.getData(),
+						OperationEnum.UPGRADE));
+				return Result.buildSucc();
 		}
 		
 		@Override
