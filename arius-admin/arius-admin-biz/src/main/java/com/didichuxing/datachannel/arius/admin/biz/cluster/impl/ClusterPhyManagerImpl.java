@@ -96,10 +96,13 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.pipeline.ESPipelineService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.ZeusClusterRemoteService;
+import com.didiglobal.logi.elasticsearch.client.request.ingest.Pipeline;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.op.manager.application.ComponentService;
@@ -224,6 +227,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private ZeusClusterRemoteService zeusClusterRemoteService;
     @Autowired
     private ComponentService         componentService;
+
+    @Autowired
+    private ESPipelineService esPipelineService;
     
     private static final FutureUtil<Void>         FUTURE_UTIL               = FutureUtil.init(
             "ClusterPhyManagerImpl", 20, 40, 100);
@@ -326,7 +332,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public void syncTemplateMetaData(String cluster, int retryCount) {
+    public void syncTemplateMetaData(String cluster, int retryCount) throws ESOperateException {
         // 获取物理集群下的所有物理模板
         List<IndexTemplatePhy> physicals = indexTemplatePhyService.getNormalTemplateByCluster(cluster);
         if (CollectionUtils.isEmpty(physicals)) {
@@ -336,13 +342,19 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return;
         }
 
+        // 从ES中获取到集群的全量pipeline
+        Map<String/*pipelineId*/, Pipeline> pipelineMap = esPipelineService.getClusterPipelines(cluster);
+        // 从ES中获取到集群全量模版配置信息
+        Map<String/*templateName*/, TemplateConfig> templateConfigMap = esTemplateService
+                .syncGetAllTemplates(Collections.singletonList(cluster));
+
         // 遍历物理模板
         for (IndexTemplatePhy physical : physicals) {
             try {
                 // 同步模板元数据到ES集群（修改ES集群中的模板）
-                templatePhyManager.syncMeta(physical.getId(), retryCount);
+                templatePhyManager.syncMeta(physical.getId(), retryCount, templateConfigMap);
                 // 同步最新元数据到ES集群pipeline
-                templatePipelineManager.syncPipeline(physical.getLogicId());
+                templatePipelineManager.syncPipeline(physical.getLogicId(), pipelineMap);
             } catch (Exception e) {
                 LOGGER.error(
                     "class=ESClusterPhyServiceImpl||method=syncTemplateMetaData||errMsg={}||cluster={}||template={}",

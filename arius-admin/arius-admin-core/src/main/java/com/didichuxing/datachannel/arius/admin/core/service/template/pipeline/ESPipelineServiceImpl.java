@@ -5,8 +5,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.ESPip
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO;
+import com.didiglobal.logi.elasticsearch.client.request.ingest.Pipeline;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 /**
  * espipelineservice实现
@@ -40,7 +43,17 @@ public class ESPipelineServiceImpl implements ESPipelineService {
     public ESPipelineProcessor get(String cluster, String name) {
         return esPipelineDAO.get(cluster,name);
     }
-    
+
+    /**
+     * 获取集群的全量pipeline
+     * @param cluster 集群
+     * @return
+     */
+    @Override
+    public Map<String, Pipeline> getClusterPipelines(String cluster) throws ESOperateException {
+        return esPipelineDAO.getClusterPipelines(cluster);
+    }
+
     /**
      * 删除
      *

@@ -159,6 +159,35 @@ public class ESPipelineDAO extends BaseESDAO {
         }
     }
 
+    /**
+     * 获取集群的全量pipeline
+     * @param cluster 集群
+     * @return
+     */
+    public Map<String, Pipeline> getClusterPipelines(String cluster) throws ESOperateException {
+        ESClient client = esOpClient.getESClient(cluster);
+        if (client == null) {
+            LOGGER.warn("class={}||method=getClusterPipelines||clusterName={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster);
+            throw new NullESClientException(cluster);
+        }
+        try{
+            ESGetPipelineResponse response = client.admin().indices().prepareGetPipeline().setPipelineId("*")
+                    .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+
+            Map<String, Pipeline> pipelineMap = response.getPipelineMap();
+            if (pipelineMap == null || pipelineMap.isEmpty()) {
+                return null;
+            }
+            return pipelineMap;
+        } catch (Exception e) {
+            LOGGER.error("class={}||method=getClusterPipelines||clusterName={}",
+                    getClass().getSimpleName(), cluster, e);
+            ParsingExceptionUtils.abnormalTermination(e);
+        }
+        return null;
+    }
+
     /**************************************** private method ****************************************************/
 
     private Pipeline getPipeLine(String cluster, String pipelineId) throws ESOperateException {
