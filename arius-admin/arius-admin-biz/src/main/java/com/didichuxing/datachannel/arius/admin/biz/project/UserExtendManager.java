@@ -66,9 +66,11 @@ public interface UserExtendManager {
     /**
      * 根据用户id删除用户
      * @param userId
+     * @param projectId
+     * @param operator
      * @return
      */
-    Result<Void> deleteByUserId(Integer userId);
+    Result<Void> deleteByUserId(Integer userId, Integer projectId, String operator);
 
     /**
      * 获取用户简要信息

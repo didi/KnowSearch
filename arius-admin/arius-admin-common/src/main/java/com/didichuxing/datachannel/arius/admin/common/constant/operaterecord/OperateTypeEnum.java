@@ -223,7 +223,11 @@ public enum OperateTypeEnum {
     ROLE_MANAGER_CREATE(ModuleEnum.ROLE_MANAGER, "创建角色", 53),
     ROLE_MANAGER_UNBIND_USER(ModuleEnum.ROLE_MANAGER, "角色解绑用户", 54),
     ROLE_MANAGER_BIND_USER(ModuleEnum.ROLE_MANAGER, "角色绑定用户", 55),
-    PHYSICAL_CLUSTER_NODE_CHANGE(ModuleEnum.PHYSICAL_CLUSTER, "节点变更", 62);
+    PHYSICAL_CLUSTER_NODE_CHANGE(ModuleEnum.PHYSICAL_CLUSTER, "节点变更", 62),
+    /**
+     * 租户：删除租户
+     */
+    TENANT_DELETE(ModuleEnum.TENANT, "删除租户", 63);
 
     /**
      * 模块

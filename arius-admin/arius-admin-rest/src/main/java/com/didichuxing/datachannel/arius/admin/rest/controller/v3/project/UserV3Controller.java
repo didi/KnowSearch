@@ -116,7 +116,7 @@ public class UserV3Controller {
     @DeleteMapping("/{id}")
     @ApiOperation(value = "删除用户", notes = "根据用户id删除用户")
     @ApiImplicitParam(name = "id", value = "用户id", dataType = "int", required = true)
-    public Result<Void> del(@PathVariable Integer id) {
-        return userManager.deleteByUserId(id);
+    public Result<Void> del(HttpServletRequest request, @PathVariable Integer id) {
+        return userManager.deleteByUserId(id, HttpRequestUtil.getProjectId(request), HttpRequestUtil.getOperator());
     }
 }

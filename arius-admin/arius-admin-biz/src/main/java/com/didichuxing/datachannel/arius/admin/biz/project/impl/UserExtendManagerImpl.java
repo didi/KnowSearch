@@ -27,6 +27,7 @@ import com.didiglobal.knowframework.security.common.vo.role.AssignInfoVO;
 import com.didiglobal.knowframework.security.common.vo.role.RoleBriefVO;
 import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import com.didiglobal.knowframework.security.common.vo.user.UserVO;
+import com.didiglobal.knowframework.security.dao.ProjectDao;
 import com.didiglobal.knowframework.security.dao.UserDao;
 import com.didiglobal.knowframework.security.dao.UserProjectDao;
 import com.didiglobal.knowframework.security.exception.KfSecurityException;
@@ -64,6 +65,8 @@ public class UserExtendManagerImpl implements UserExtendManager {
     private UserProjectDao userProjectDao;
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private ProjectDao projectDao;
 
     private final static int NORMAL = 0;
     private final static int OWNER  = 1;
@@ -236,13 +239,26 @@ public class UserExtendManagerImpl implements UserExtendManager {
      * 根据用户id删除用户
      *
      * @param userId
+     * @param operateProjectId
+     * @param operator
      * @return
      */
     @Override
-    public Result<Void> deleteByUserId(Integer userId) {
+    public Result<Void> deleteByUserId(Integer userId, Integer operateProjectId, String operator) {
+        String userName = userService.getUserDetailByUserId(userId).getUserName();
         com.didiglobal.knowframework.security.common.Result<Void> deleteByUserId = userService.deleteByUserId(userId);
         if (deleteByUserId.failed()) {
             return Result.build(deleteByUserId.getCode(), deleteByUserId.getMessage());
+        }
+
+        final List<ProjectBriefVO> projectBriefList = projectService.getProjectBriefByUserId(userId).getData();
+        String operateContent;
+        if(projectBriefList.isEmpty()) {
+            operateContent = String.format("【%s】用户被删除", userName);
+        }else {
+            StringBuilder sb = new StringBuilder();
+            projectBriefList.forEach(projectBriefVO -> sb.append(projectBriefVO.getProjectName()));
+            operateContent = String.format("【%s】用户被删除，其所属应用为 %s", userName, sb.toString());
         }
 
         // 获取该用户对应的所有应用id，删除相关应用下的该用户数据
@@ -260,6 +276,9 @@ public class UserExtendManagerImpl implements UserExtendManager {
             userProjectList.add(userProject);
         });
         userProjectDao.deleteUserProject(userProjectList);
+
+        operateRecordService.save(new OperateRecord(projectDao.selectByProjectId(operateProjectId).getProjectName(),
+                OperateTypeEnum.TENANT_DELETE, TriggerWayEnum.MANUAL_TRIGGER, operateContent, operator));
 
         return Result.buildSucc();
     }
