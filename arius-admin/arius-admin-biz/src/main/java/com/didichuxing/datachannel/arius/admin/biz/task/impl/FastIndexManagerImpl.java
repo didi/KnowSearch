@@ -779,11 +779,6 @@ public class FastIndexManagerImpl implements FastIndexManager {
             if (null == taskInfo.getTotalDocumentNum()
                 || BigDecimal.ZERO.compareTo(taskInfo.getTotalDocumentNum()) >= 0) {
                 taskInfo.setTotalDocumentNum(BigDecimal.ZERO);
-                taskInfo.setTaskStatus(FastIndexTaskStatusEnum.SUCCESS.getValue());//成功
-                taskInfo.setSuccDocumentNum(BigDecimal.ZERO);
-                taskInfo.setTaskCostTime(BigDecimal.ZERO);
-                taskInfo.setTaskStartTime(new Date());
-                taskInfo.setTaskEndTime(new Date());
             }
             if (null != finalReadFileRateLimit) {
                 taskInfo.setReadFileRateLimit(finalReadFileRateLimit);
@@ -1123,6 +1118,11 @@ public class FastIndexManagerImpl implements FastIndexManager {
             .collect(Collectors.toList());
         BigDecimal finalRateLimit = BigDecimal.valueOf(rateLimit).divide(BigDecimal.valueOf(taskInfoList.size()),
             RoundingMode.UP);
+        //校验任务读取速率
+        Result<List<FastIndexTaskInfo>> checkReadFileRateLimitResult = checkReadFileRateLimit(fastIndexDTO, taskInfoList.size());
+        if (checkReadFileRateLimitResult.failed()) {
+            return Result.buildFrom(checkReadFileRateLimitResult);
+        }
         needModifyIndexTask.forEach(indexTask -> {
             String fastDumpTaskId = indexTask.getFastDumpTaskId();
             if (StringUtils.isNotBlank(fastDumpTaskId)) {
@@ -1325,10 +1325,24 @@ public class FastIndexManagerImpl implements FastIndexManager {
         if (CollectionUtils.isNotEmpty(runningTaskList) || CollectionUtils.isEmpty(needSubmitTaskList)) {
             return Result.buildSucc();
         }
+        //挑选出文档数为0的任务置为成功
+        needSubmitTaskList.forEach(taskInfo -> {
+            if (BigDecimal.ZERO.compareTo(taskInfo.getTotalDocumentNum()) == 0) {
+                taskInfo.setTotalDocumentNum(BigDecimal.ZERO);
+                taskInfo.setTaskStatus(FastIndexTaskStatusEnum.SUCCESS.getValue());//成功
+                taskInfo.setSuccDocumentNum(BigDecimal.ZERO);
+                taskInfo.setTaskCostTime(BigDecimal.ZERO);
+                taskInfo.setTaskStartTime(new Date());
+                taskInfo.setTaskEndTime(new Date());
+                fastIndexTaskService.refreshTask(taskInfo);
+            }
+        });
         //挑选任务提交到内核并更新任务状态
-        needSubmitTaskList.sort(Comparator.comparingInt(FastIndexTaskInfo::getId));
-        List<FastIndexTaskInfo> executeList = needSubmitTaskList.subList(0,
-            Math.min(needSubmitTaskList.size(), TASK_EXECUTE_BATCH_SIZE));
+        List<FastIndexTaskInfo> submitTaskList = needSubmitTaskList.stream()
+                .filter(taskInfo -> !FastIndexTaskStatusEnum.SUCCESS.getValue().equals(taskInfo.getTaskStatus())).collect(Collectors.toList());
+        submitTaskList.sort(Comparator.comparingInt(FastIndexTaskInfo::getId));
+        List<FastIndexTaskInfo> executeList = submitTaskList.subList(0,
+            Math.min(submitTaskList.size(), TASK_EXECUTE_BATCH_SIZE));
 
         executeList.forEach(taskInfo -> {
             ESIndexMoveTaskContext context = buildIndexMoveTaskContext(fastIndexDTO, taskInfo, sourceCluster,
