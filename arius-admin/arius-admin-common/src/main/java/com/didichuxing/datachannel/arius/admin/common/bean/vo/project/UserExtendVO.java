@@ -16,4 +16,7 @@ import lombok.NoArgsConstructor;
 public class UserExtendVO extends UserVO {
     @ApiModelProperty(value = "持有管理员角色的项目成员", dataType = "List<UserBriefVO>", required = false)
     private List<UserBriefVO> userListWithAdminRole;
+
+    @ApiModelProperty(value = "作为责任人的应用列表", dataType = "List<String>", required = false)
+    private List<String> ownProjects;
 }

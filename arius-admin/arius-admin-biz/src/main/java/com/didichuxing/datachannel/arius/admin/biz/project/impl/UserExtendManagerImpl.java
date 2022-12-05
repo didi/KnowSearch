@@ -66,6 +66,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
     private UserDao userDao;
 
     private final static int NORMAL = 0;
+    private final static int OWNER  = 1;
 
     private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("UserExtendManagerImpl", 10, 10, 100);
     /**
@@ -132,8 +133,10 @@ public class UserExtendManagerImpl implements UserExtendManager {
         final List<UserExtendVO> userList = userPage.getBizData();
         //提前获取一下，避免多次查库
         final List<ProjectBriefVO> projectBriefList = projectService.getProjectBriefList();
+        Map<Integer, String> projectId2projectName = projectBriefList.stream()
+                .collect(Collectors.toMap(ProjectBriefVO::getId, ProjectBriefVO::getProjectName));
         if (CollectionUtils.isNotEmpty(userList)) {
-            for (UserVO userVO : userList) {
+            for (UserExtendVO userVO : userList) {
                 FUTURE_UTIL.runnableTask(() -> {
                     //如果可以匹配到管理员角色
                     List<ProjectBriefVO> briefList;
@@ -148,7 +151,19 @@ public class UserExtendManagerImpl implements UserExtendManager {
                     
                     }
                     userVO.setProjectList(briefList);
-                    
+
+                    // 获取以当前user作为负责人的project列表
+                    List<String> ownProjects = new ArrayList<>();
+                    List<Integer> projectIdListByUserId = userProjectDao
+                            .selectProjectIdListByUserIdList(Collections.singletonList(userVO.getId()));
+                    List<UserProject> userProjects = userProjectDao.selectByProjectIds(projectIdListByUserId);
+                    userProjects.forEach(userProject -> {
+                        if(userProject.getUserType() == OWNER) {
+                            ownProjects.add(projectId2projectName.get(userProject.getProjectId()));
+                        }
+                    });
+                    userVO.setOwnProjects(ownProjects);
+
                 });
             
             }
