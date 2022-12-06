@@ -20,4 +20,6 @@ import lombok.NoArgsConstructor;
 public class GeneralRestartComponentContent extends GeneralRestartComponentDTO {
 		private String reason;
 		private Integer pluginType;
+		private String hosts;
+		
 }

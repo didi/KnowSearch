@@ -6,6 +6,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
+import java.util.List;
 import java.util.Objects;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +39,22 @@ public class GatewayConfigRollbackTaskHandler extends AbstractGatewayTaskHandler
 		
 		@Override
 		protected Result<Integer> submitTaskToOpManagerGetId(String expandData) {
-				return configChange(expandData);
+				return rollback(expandData);
+		}
+		
+		@Override
+		protected Result<Void> initParam(OpTask opTask) {
+				final GatewayConfigRollbackContent content = convertString2Content(
+						opTask.getExpandData());
+				
+					final com.didiglobal.logi.op.manager.infrastructure.common.Result<List<ComponentGroupConfig>> componentConfigRes = componentService.getComponentConfig(
+						content.getComponentId());
+				if (componentConfigRes.failed()) {
+						return Result.buildFrom(componentConfigRes);
+				}
+				//获取
+				opTask.setExpandData(initRollBackParam(content,componentConfigRes.getData(),OperationEnum.CONFIG_CHANGE));
+				return Result.buildSucc();
 		}
 		
 		@Override

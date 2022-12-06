@@ -6,7 +6,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
-import java.util.Objects;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
+import java.util.List;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,13 +25,22 @@ public class ESClusterConfigRollbackTaskHandler extends AbstractESTaskHandler {
 		protected Result<Void> validatedAddTaskParam(OpTask param) {
 				final ClusterConfigRollbackContent content = convertString2Content(
 						param.getExpandData());
-				if (Objects.isNull(content.getComponentId())) {
-						return Result.buildFail("组建 ID 不能为空");
-				}
-				
-				return Result.buildSucc();
+				return  checkInitRollBackParam(content, OpTaskTypeEnum.ES_CLUSTER_CONFIG_EDIT);
 		}
 		
+		@Override
+		protected Result<Void> initParam(OpTask opTask) {
+				final ClusterConfigRollbackContent content = convertString2Content(
+						opTask.getExpandData());
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<List<ComponentGroupConfig>> componentConfigRes = componentService.getComponentConfig(
+						content.getComponentId());
+				if (componentConfigRes.failed()) {
+						return Result.buildFrom(componentConfigRes);
+				}
+				opTask.setExpandData(initRollBackParam(content,componentConfigRes.getData(),
+						OperationEnum.CONFIG_CHANGE));
+				return Result.buildSucc();
+		}
 		
 		@Override
 		protected OpTaskTypeEnum operationType() {
@@ -38,7 +49,7 @@ public class ESClusterConfigRollbackTaskHandler extends AbstractESTaskHandler {
 		
 		@Override
 		protected Result<Integer> submitTaskToOpManagerGetId(String expandData) {
-				return configChange(expandData);
+				return rollback(expandData);
 		}
 		
 		@Override

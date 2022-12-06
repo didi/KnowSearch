@@ -5,6 +5,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didiglobal.logi.elasticsearch.client.request.ingest.Pipeline;
+
+import java.util.Map;
 
 /**
  * @author chengxiang, d06679
@@ -49,9 +52,10 @@ public interface PipelineManager {
     /**
      * 同步pipeline
      * @param logicTemplateId 物理模板id
+     * @param pipelineMap 集群全量pipeline信息
      * @return
      */
-    Result<Void> syncPipeline(Integer logicTemplateId);
+    Result<Void> syncPipeline(Integer logicTemplateId, Map<String, Pipeline> pipelineMap);
 
     /**
      * 删除

@@ -62,4 +62,8 @@ public class ComponentGroupConfigPO {
      * 更新时间
      */
     private Timestamp updateTime;
+    /**
+     * 机器规格
+     */
+    private String machineSpec;
 }

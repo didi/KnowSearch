@@ -15,17 +15,23 @@
         <result column="version" jdbcType="VARCHAR" property="version"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="machine_spec" jdbcType="VARBINARY" property="machineSpec"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, component_id, group_name, system_config, running_config, file_config, install_directory_config, process_num_config, hosts, version, create_time, update_time
+        id, component_id, group_name, system_config, running_config, file_config,
+        install_directory_config, process_num_config, hosts, version, create_time, update_time,machine_spec
     </sql>
 
     <insert id="insert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentGroupConfigPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
-        insert into logi_op_component_group_config (component_id, group_name, system_config, running_config, file_config, install_directory_config, process_num_config, hosts, version, create_time, update_time)
-        values (#{componentId}, #{groupName}, #{systemConfig}, #{runningConfig}, #{fileConfig}, #{installDirectoryConfig}, #{processNumConfig}, #{hosts}, #{version}, #{createTime}, #{updateTime})
+        insert into logi_op_component_group_config (component_id, group_name, system_config,
+        running_config, file_config, install_directory_config, process_num_config, hosts,
+        version, create_time, update_time,machine_spec)
+        values (#{componentId}, #{groupName}, #{systemConfig}, #{runningConfig}, #{fileConfig},
+        #{installDirectoryConfig}, #{processNumConfig}, #{hosts}, #{version}, #{createTime},
+        #{updateTime},#{machineSpec})
     </insert>
 
     <select id="getByComponentId"

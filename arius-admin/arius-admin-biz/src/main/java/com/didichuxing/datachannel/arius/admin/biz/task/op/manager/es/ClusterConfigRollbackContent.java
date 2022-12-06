@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es;
 
-import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
-import java.util.List;
+import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.GeneralRollbackComponentContent;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,14 +15,10 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
-public class ClusterConfigRollbackContent extends ClusterConfigContent {
+public class ClusterConfigRollbackContent extends GeneralRollbackComponentContent {
 		
 
 		
-		
-		/**
-		 * 旧的分组配置列表
-		 */
-		private List<GeneralGroupConfigDTO> oldGroupConfigList;
+
 		
 }

@@ -32,9 +32,13 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.template.pipeline.ESPipelineService;
+import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO;
+import com.didiglobal.logi.elasticsearch.client.request.ingest.Pipeline;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -245,7 +249,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
      * @return
      */
     private boolean isExpireDayChange(Integer expireTime, Integer hotTime, Integer pipelineExpireDay) {
-        return pipelineExpireDay.equals(expireTime);
+        return !pipelineExpireDay.equals(expireTime);
     }
 
     /**
@@ -420,7 +424,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
     @Override
-    public Result<Void> syncPipeline(Integer logicTemplateId) {
+    public Result<Void> syncPipeline(Integer logicTemplateId, Map<String, Pipeline> pipelineMap) {
     
       
         IndexTemplate logicTemplate = indexTemplateService.getLogicTemplateById(logicTemplateId);
@@ -434,23 +438,29 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         if (CollectionUtils.isEmpty(templatePhyList)) {
             return Result.buildFail("物理模板不存在");
         }
-        
+
         for (IndexTemplatePhy indexTemplatePhy : templatePhyList) {
             try {
-                esPipelineService.get(indexTemplatePhy.getCluster(),
-                        indexTemplatePhy.getName());
-                ESPipelineProcessor esPipelineProcessor = esPipelineService.get(indexTemplatePhy.getCluster(),
-                        indexTemplatePhy.getName());
-                if (esPipelineProcessor == null) {
+                ESPipelineProcessor esPipelineProcessor = null;
+                Pipeline pipeline = pipelineMap.get(indexTemplatePhy.getName());
+                if (pipeline != null) {
+                    JSONObject process = pipeline.getProcessors().get(0);
+                    if (ESPipelineDAO.FILE_BEATS_PIPELINE_ID_SET.contains(indexTemplatePhy.getName())) {
+                        process = pipeline.getProcessors().get(4);
+                    }
+                    esPipelineProcessor = JSON.parseObject(JSON.toJSONString(process), ESPipelineProcessor.class);
+                }
+
+                if (pipeline == null || esPipelineProcessor == null) {
                     // pipeline processor不存在，创建
                     LOGGER.info(
                             "class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=pipeline not exist, recreate",
                             indexTemplatePhy.getName());
-                    final Result<Void> pipeline = createPipeline(indexTemplatePhy.getId().intValue());
-                    if (pipeline.failed()){
+                    final Result<Void> createPipeline = createPipeline(indexTemplatePhy.getId().intValue());
+                    if (createPipeline.failed()){
                         LOGGER.warn(
                                 "class=TemplatePipelineManagerImpl||method=syncPipeline||indexTemplatePhy={}||errMsg={}",
-                                indexTemplatePhy.getCluster(), indexTemplatePhy.getName(), pipeline.getMessage());
+                                indexTemplatePhy.getCluster(), indexTemplatePhy.getName(), createPipeline.getMessage());
                         //创建失败了，就不应该走入下面的逻辑了，直接跳过就可以了
                         continue;
                     }
