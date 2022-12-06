@@ -915,6 +915,7 @@ public class ESIndexDAO extends BaseESDAO {
         request.setDefaultSettingFlag(true);
         request.mapping(true);
         request.alias(false);
+        request.setIncludeTypeName(true);
         request.setIndices(ListUtils.strList2StringArray(indexNames));
 
         ESIndicesGetIndexResponse response = null;
