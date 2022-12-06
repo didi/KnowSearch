@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,10 +27,6 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
 import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.function.FunctionWithESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
@@ -912,10 +909,13 @@ public class ESIndexDAO extends BaseESDAO {
         }
 
         ESIndicesGetAllSettingRequest request = new ESIndicesGetAllSettingRequest();
-        request.setDefaultSettingFlag(true);
         request.mapping(true);
         request.alias(false);
-        request.setIncludeTypeName(true);
+        if (ESVersionUtil.compareVersion(esClient.getEsVersion(), "8.0.0") < 0) {
+            request.setIncludeTypeName(true);
+        } else {
+            return Maps.newHashMap();
+        }
         request.setIndices(ListUtils.strList2StringArray(indexNames));
 
         ESIndicesGetIndexResponse response = null;
@@ -925,8 +925,8 @@ public class ESIndexDAO extends BaseESDAO {
             } while (tryTimes-- > 0 && null == response);
         } catch (Exception e) {
             LOGGER.warn(
-                "class=ESTemplateDAO||method=getIndexConfigs||get index fail||clusterName={}||indexName={}||msg={}",
-                clusterName, e.getMessage(), e);
+                    "class=ESTemplateDAO||method=getIndexConfigs||get index fail||clusterName={}||indexName={}||msg={}",
+                    clusterName, e.getMessage(), e);
         }
 
         if (response == null) {
