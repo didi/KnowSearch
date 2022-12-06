@@ -49,22 +49,25 @@ public interface GatewayManager {
      * 获取app列表,包含APP全部元信息
      *
      * @return Result<List < GatewayESUserVO>>
+     * @param gatewayClusterName
      */
-    Result<List<GatewayESUserVO>> listESUserByProject();
+    Result<List<GatewayESUserVO>> listESUserByProject(List<String> gatewayClusterName);
 
     /**
      * 以map结构组织,key是表达式
      * @param cluster 集群
+     * @param gatewayClusterName
      * @return Result<Map<String, GatewayTemplatePhysicalVO>>
      */
-    Result<Map<String, GatewayTemplatePhysicalVO>> getTemplateMap(String cluster);
+    Result<Map<String, GatewayTemplatePhysicalVO>> getTemplateMap(String cluster, List<String> gatewayClusterName);
 
     /**
      * 获取模板信息，包含主主从结构组织
      *
      * @return Result<Map < String, GatewayTemplateDeployInfoVO>>
+     * @param gatewayClusterName
      */
-    Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo();
+    Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo(List<String> gatewayClusterName);
 
     /**
      * 滚动获取查询模板数据

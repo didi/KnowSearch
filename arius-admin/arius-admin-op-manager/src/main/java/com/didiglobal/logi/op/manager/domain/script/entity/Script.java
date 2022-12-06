@@ -53,6 +53,10 @@ public class Script {
      * 传输文件
      */
     private MultipartFile uploadFile;
+    /**
+     * 创建者
+     */
+    private String creator;
 
     public Script create() {
         this.createTime = new Timestamp(System.currentTimeMillis());

@@ -42,4 +42,14 @@ public class PackagePageVO extends BaseVO {
      */
     @ApiModelProperty("描述")
     private String describe;
+    /**
+     * 文件地址
+     */
+    @ApiModelProperty("文件地址")
+    private String url;
+    /**
+     * 软件包类型
+     */
+    @ApiModelProperty("软件包类型")
+    private Integer packageType;
 }

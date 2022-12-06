@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.software.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.page.PackagePageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.software.PackageManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -7,8 +9,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageAddDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageUpdateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageGroupConfigQueryVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackagePageVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageQueryVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageVersionVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -16,6 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.software.Software
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
@@ -29,6 +34,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.PACKAGE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
@@ -75,15 +81,15 @@ public class PackageManagerImpl implements PackageManager {
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
+        List<PackageGroupConfig> packageGroupConfigs = ConvertUtil.str2ObjArrayByJson(packageAddDTO.getGroupConfigList()
+                , PackageGroupConfig.class);
         Package addPackage = ConvertUtil.obj2Obj(packageAddDTO, Package.class);
-        Result<Void> checkResult = checkValid(addPackage, operator, ADD);
+        Result<Void> checkResult = checkValid(addPackage, packageGroupConfigs, operator, ADD);
         if (checkResult.failed()) {
             return Result.buildFrom(checkResult);
         }
         addPackage.setCreator(operator);
         addPackage.setType(packageAddDTO.getIsEnginePlugin());
-        List<PackageGroupConfig> packageGroupConfigs = ConvertUtil.str2ObjArrayByJson(packageAddDTO.getGroupConfigList()
-                                                                                         , PackageGroupConfig.class);
         addPackage.setGroupConfigList(packageGroupConfigs);
         com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> addPackageResult = packageService.createPackage(addPackage);
         return Result.buildFrom(addPackageResult);
@@ -95,15 +101,15 @@ public class PackageManagerImpl implements PackageManager {
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
+        List<PackageGroupConfig> packageGroupConfigs = ConvertUtil.str2ObjArrayByJson(packageUpdateDTO.getGroupConfigList()
+                , PackageGroupConfig.class);
         Package editPackage = ConvertUtil.obj2Obj(packageUpdateDTO, Package.class);
-        Result<Void> checkResult = checkValid(editPackage, operator, EDIT);
+        Result<Void> checkResult = checkValid(editPackage, packageGroupConfigs, operator, EDIT);
         if (checkResult.failed()) {
             return Result.buildFrom(checkResult);
         }
         editPackage.setCreator(operator);
         editPackage.setType(packageUpdateDTO.getIsEnginePlugin());
-        List<PackageGroupConfig> packageGroupConfigs = ConvertUtil.str2ObjArrayByJson(packageUpdateDTO.getGroupConfigList()
-                                                                                            , PackageGroupConfig.class);
         editPackage.setGroupConfigList(packageGroupConfigs);
         com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> editPackageResult = packageService.updatePackage(editPackage);
         return Result.buildFrom(editPackageResult);
@@ -129,14 +135,35 @@ public class PackageManagerImpl implements PackageManager {
     }
 
     @Override
-    public Result<List<String>> listPackageVersionByPackageType(String packageTypeDesc, String operator, Integer projectId) {
+    public Result<List<PackageVersionVO>> listPackageWithHigherVersionByPackageTypeAndCurrentVersion(String packageTypeDesc, Integer projectId, String currentVersion) {
         Result<Void> result = ProjectUtils.checkProjectCorrectly(retId -> retId, projectId, projectId);
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
-        List<String> listPackageVersionByPackageType = packageService.listPackageVersionByPackageType
-                (SoftwarePackageTypeEnum.getPackageTypeByDesc(packageTypeDesc));
-        return Result.buildSucc(listPackageVersionByPackageType);
+        List<Package> listPackageByPackageType = packageService.listPackageByPackageType(SoftwarePackageTypeEnum.getPackageTypeByDesc(packageTypeDesc));
+        List<Package> listPackage = listPackageByPackageType.stream().filter(aPackage -> ESVersionUtil.compareVersion(aPackage.getVersion(), currentVersion) > 0).collect(Collectors.toList());
+        return Result.buildSucc(ConvertUtil.list2List(listPackage,PackageVersionVO.class));
+    }
+
+    @Override
+    public Result<List<PackageGroupConfigQueryVO>> listPackageGroupConfigByVersion(String version, String operator, Integer projectId) {
+        Result<Void> result = ProjectUtils.checkProjectCorrectly(retId -> retId, projectId, projectId);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+        Integer packageType = SoftwarePackageTypeEnum.ES_INSTALL_PACKAGE.getPackageType();
+        List<PackageGroupConfig> packageGroupConfigs = packageService.listPackageGroupConfigByVersion(version, packageType);
+        return Result.buildSucc(ConvertUtil.list2List(packageGroupConfigs,PackageGroupConfigQueryVO.class));
+    }
+
+    @Override
+    public Result<List<PackageVersionVO>> listPackageVersionByPackageType(String packageTypeDesc, String operator, Integer projectId) {
+        Result<Void> result = ProjectUtils.checkProjectCorrectly(retId -> retId, projectId, projectId);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+        List<Package> packageList = packageService.listPackageByPackageType(SoftwarePackageTypeEnum.getPackageTypeByDesc(packageTypeDesc));
+        return Result.buildSucc(ConvertUtil.list2List(packageList,PackageVersionVO.class));
     }
 
     /*************************************************private**********************************************************/
@@ -144,11 +171,12 @@ public class PackageManagerImpl implements PackageManager {
      * 校验
      *
      * @param checkPackage
+     * @param packageGroupConfigs
      * @param operator
      * @param operation
      * @return
      */
-    private Result<Void> checkValid(Package checkPackage, String operator, OperationEnum operation) {
+    private Result<Void> checkValid(Package checkPackage, List<PackageGroupConfig> packageGroupConfigs, String operator, OperationEnum operation) {
         if (AriusObjUtils.isNull(checkPackage)) {
             return Result.buildParamIllegal("软件包为空");
         }
@@ -157,6 +185,24 @@ public class PackageManagerImpl implements PackageManager {
         }
         if (operation.equals(UNKNOWN)) {
             return Result.buildParamIllegal("操作类型未知");
+        }
+        if (!ESVersionUtil.isValid(checkPackage.getVersion())) {
+            return Result.buildParamIllegal("版本号格式不正确, 必须是'1.1.1.1000'类似的格式");
+        }
+        //安装目录和用户名配置要必填
+        Boolean checkRequired = packageGroupConfigs.stream().anyMatch(packageGroupConfig -> {
+            String systemConfig = packageGroupConfig.getSystemConfig();
+            JSONObject jsonObject = JSON.parseObject(systemConfig);
+            if (AriusObjUtils.isNull(jsonObject.get("installDirector"))) {
+                return true;
+            }
+            if(AriusObjUtils.isNull(jsonObject.get("user"))){
+                return true;
+            }
+            return false;
+        });
+        if(checkRequired){
+            return Result.buildParamIllegal("安装目录和用户名配置必填");
         }
         if (operation.getCode() == ADD.getCode()) {
             com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> checkCreateParam = checkPackage.checkCreateParam();
