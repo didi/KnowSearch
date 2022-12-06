@@ -161,7 +161,8 @@ public class UserExtendManagerImpl implements UserExtendManager {
                             .selectProjectIdListByUserIdList(Collections.singletonList(userVO.getId()));
                     List<UserProject> userProjects = userProjectDao.selectByProjectIds(projectIdListByUserId);
                     userProjects.forEach(userProject -> {
-                        if(userProject.getUserType() == OWNER) {
+                        if(userVO.getId().equals(userProject.getUserId()) && projectIdListByUserId
+                                .contains(userProject.getProjectId()) && userProject.getUserType() == OWNER) {
                             ownProjects.add(projectId2projectName.get(userProject.getProjectId()));
                         }
                     });
@@ -256,26 +257,26 @@ public class UserExtendManagerImpl implements UserExtendManager {
         if(projectBriefList.isEmpty()) {
             operateContent = String.format("【%s】用户被删除", userName);
         }else {
-            StringBuilder sb = new StringBuilder();
-            projectBriefList.forEach(projectBriefVO -> sb.append(projectBriefVO.getProjectName()));
-            operateContent = String.format("【%s】用户被删除，其所属应用为 %s", userName, sb.toString());
+            List<String> projectNameList = new ArrayList<>();
+            projectBriefList.forEach(projectBriefVO -> projectNameList.add(projectBriefVO.getProjectName()));
+            String nameList = projectNameList.stream().map(String::valueOf).collect(Collectors.joining(","));
+            operateContent = String.format("【%s】用户被删除，其所属应用为【%s】", userName, nameList);
         }
 
         // 获取该用户对应的所有应用id，删除相关应用下的该用户数据
         final List<Integer> projectIdList = userProjectDao.selectProjectIdListByUserIdList(
                 Collections.singletonList(userId));
-        if(AriusObjUtils.isEmptyList(projectIdList)){
-            return Result.buildSucc();
+        if(!AriusObjUtils.isEmptyList(projectIdList)){
+            List<UserProject> userProjectList = new ArrayList<>(projectIdList.size());
+            projectIdList.forEach(projectId -> {
+                UserProject userProject = new UserProject();
+                userProject.setProjectId(projectId);
+                userProject.setUserId(userId);
+                userProject.setUserType(NORMAL);
+                userProjectList.add(userProject);
+            });
+            userProjectDao.deleteUserProject(userProjectList);
         }
-        List<UserProject> userProjectList = new ArrayList<>(projectIdList.size());
-        projectIdList.forEach(projectId -> {
-            UserProject userProject = new UserProject();
-            userProject.setProjectId(projectId);
-            userProject.setUserId(userId);
-            userProject.setUserType(NORMAL);
-            userProjectList.add(userProject);
-        });
-        userProjectDao.deleteUserProject(userProjectList);
 
         operateRecordService.save(new OperateRecord(projectDao.selectByProjectId(operateProjectId).getProjectName(),
                 OperateTypeEnum.TENANT_DELETE, TriggerWayEnum.MANUAL_TRIGGER, operateContent, operator));

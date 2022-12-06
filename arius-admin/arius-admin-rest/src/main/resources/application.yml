@@ -138,11 +138,11 @@ spring:
     claim-strategy: com.didiglobal.knowframework.job.core.consensual.RandomConsensual
     node-name: node1
     job-log-fetcher-extend-bean-name: com.didiglobal.knowframework.job.extend.impl.DefaultJobLogFetcherExtendImpl
-    elasticsearch-address: 116.85.23.222
-    elasticsearch-port: 18303
+    elasticsearch-address: 10.96.75.13
+    elasticsearch-port: 18104
     elasticsearch-user: elastic
     elasticsearch-password: Didiyun@888
-    elasticsearch-index-name: test
+    elasticsearch-index-name: index_observability
     elasticsearch-type-name: type
   kf-security:
     app-name: know_search
