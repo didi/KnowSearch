@@ -3,6 +3,9 @@ package com.didichuxing.datachannel.arius.admin.core.service.template.pipeline;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ESPipelineProcessor;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.ESPipeline;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didiglobal.logi.elasticsearch.client.request.ingest.Pipeline;
+
+import java.util.Map;
 
 /**
  * espipelineservice
@@ -30,7 +33,14 @@ public interface ESPipelineService {
      * @return {@link ESPipelineProcessor}
      */
     ESPipelineProcessor get(String cluster, String name);
-    
+
+    /**
+     * 获取集群的全量pipeline
+     * @param cluster 集群
+     * @return
+     */
+    Map<String, Pipeline> getClusterPipelines(String cluster) throws ESOperateException;
+
     /**
      * 删除
      *

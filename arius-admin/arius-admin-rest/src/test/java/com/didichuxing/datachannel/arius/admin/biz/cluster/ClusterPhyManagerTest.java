@@ -256,7 +256,7 @@ class ClusterPhyManagerTest {
 
         clusterPhyManager.syncTemplateMetaData(CLUSTER, 0);
 
-        verify(mockTemplatePhyManager).syncMeta(PHYSICAL_ID, 0);
+        verify(mockTemplatePhyManager).syncMeta(PHYSICAL_ID, 0, new HashMap<>());
     }
 
     @Test
@@ -267,7 +267,7 @@ class ClusterPhyManagerTest {
 
         clusterPhyManager.syncTemplateMetaData(CLUSTER, 0);
 
-        verify(mockTemplatePhyManager, times(0)).syncMeta(PHYSICAL_ID, 0);
+        verify(mockTemplatePhyManager, times(0)).syncMeta(PHYSICAL_ID, 0, new HashMap<>());
 
     }
 
@@ -275,7 +275,7 @@ class ClusterPhyManagerTest {
     void testSyncTemplateMetaData_TemplatePhyManagerThrowsESOperateException() throws Exception {
         when(mockIndexTemplatePhyService.getNormalTemplateByCluster(CLUSTER)).thenReturn(indexTemplatePhyList);
 
-        doThrow(ESOperateException.class).when(mockTemplatePhyManager).syncMeta(PHYSICAL_ID, 0);
+        doThrow(ESOperateException.class).when(mockTemplatePhyManager).syncMeta(PHYSICAL_ID, 0, new HashMap<>());
 
         clusterPhyManager.syncTemplateMetaData(CLUSTER, 0);
     }

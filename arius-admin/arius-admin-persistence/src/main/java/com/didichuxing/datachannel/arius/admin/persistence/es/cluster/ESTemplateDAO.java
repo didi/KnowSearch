@@ -459,7 +459,7 @@ public class ESTemplateDAO extends BaseESDAO {
                     getClass().getSimpleName(), clusterName, templateName);
             throw new NullESClientException(clusterName);
         }
-        if (!exist(clusterName, templateName)) {
+        if (templateName != null && !exist(clusterName, templateName)) {
             return null;
         }
         ESIndicesGetTemplateRequest request = new ESIndicesGetTemplateRequest();
