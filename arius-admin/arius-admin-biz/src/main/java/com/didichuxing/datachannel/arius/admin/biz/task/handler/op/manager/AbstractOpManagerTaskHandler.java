@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.task.handler.op.manager;
 
+import static java.util.regex.Pattern.compile;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.plugin.PluginManager;
@@ -24,8 +26,10 @@ import com.didiglobal.logi.op.manager.application.PackageService;
 import com.didiglobal.logi.op.manager.application.TaskService;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
+import com.didiglobal.logi.op.manager.domain.task.entity.value.TaskDetail;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
 import com.didiglobal.logi.op.manager.interfaces.assembler.ComponentAssembler;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneraInstallComponentDTO;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralConfigChangeComponentDTO;
@@ -34,9 +38,15 @@ import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralRestartCompo
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralRollbackComponentDTO;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralScaleComponentDTO;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralUpgradeComponentDTO;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -49,6 +59,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		
 		protected final static String           REASON = "reason";
+		protected final static String          PATTERN="有重复未完成任务\\[\\d+\\]||有重名未完成任务\\[\\d+\\]";
 		@Autowired
 		protected OpTaskService        opTaskService;
 		@Autowired
@@ -80,9 +91,21 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 				if (submitTaskToOpManagerGetIdRes.failed()) {
 						if (ResultCode.TASK_REPEAT_ERROR.getCode().equals(submitTaskToOpManagerGetIdRes.getCode())) {
 								String title = getTitle(opTask.getExpandData());
-								OpTaskPO taskPO = opTaskService.getTaskByTitleAndType(title, operationType().getType());
-								return Result.build(ResultCode.TASK_REPEAT_ERROR.getCode(),
-								                    String.format("有重名未完成任务 [%s]", taskPO.getId()));
+								//获取返回结果报错的key
+								final Pattern compile = compile(PATTERN);
+								final Matcher matcher = compile.matcher(submitTaskToOpManagerGetIdRes.getMessage());
+								if (matcher.find()) {
+										final String  group = matcher.group();
+										final Matcher key   = compile("\\d+").matcher(group);
+										if (key.find()) {
+												OpTaskPO taskPO = opTaskService.getTaskByBusinessKey(
+														key.group(0));
+												return Result.build(ResultCode.TASK_REPEAT_ERROR.getCode(),
+														String.format("有重名未完成任务 [%s]", taskPO.getId()));
+										}
+										
+								}
+							
 						}
 						return Result.buildFrom(submitTaskToOpManagerGetIdRes);
 				}
@@ -415,10 +438,38 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 					final OpTask opTask = opTaskService.getById(content.getTaskId());
 				final List<GeneralGroupConfigDTO> generalGroupConfigDTOS = ConvertUtil.list2List(data,
 						GeneralGroupConfigDTO.class);
-				content.setGroupConfigList(generalGroupConfigDTOS);
+			
 				// 设置类型
 				content.setType(operationEnum.getType());
 				content.setTaskId(Integer.parseInt(opTask.getBusinessKey()));
+				//进行ip过滤，找出回滚失败的任务节点进行填充
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<List<TaskDetail>> taskDetailRes = taskService.getTaskDetail(
+						Integer.parseInt(opTask.getBusinessKey()));
+				Map<String,List<String>> groupName2HostsMap= Maps.newHashMap();
+				//过滤出指定的host失败列表
+				if (taskDetailRes.isSuccess()){
+						for (TaskDetail taskDetail : taskDetailRes.getData()) {
+								final String groupName = taskDetail.getGroupName();
+								final String host      = taskDetail.getHost();
+								final Integer status   = taskDetail.getStatus();
+								if (TaskStatusEnum.find(status).equals(TaskStatusEnum.FAILED)){
+										if (groupName2HostsMap.containsKey(groupName)) {
+												groupName2HostsMap.get(groupName).add(host);
+										}else {
+												groupName2HostsMap.put(groupName, Lists.newArrayList(host));
+										}
+								}
+						}
+				}
+				//重新设置host,只会回滚失败的任务
+				for (GeneralGroupConfigDTO generalGroupConfigDTO : generalGroupConfigDTOS) {
+						final List<String> hosts = groupName2HostsMap.get(
+								generalGroupConfigDTO.getGroupName());
+						if (CollectionUtils.isNotEmpty(hosts)) {
+								generalGroupConfigDTO.setHosts(String.join(",", hosts));
+						}
+				}
+					content.setGroupConfigList(generalGroupConfigDTOS);
 				return JSON.toJSONString(content);
 		}
 		
@@ -442,6 +493,7 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 						opTaskTypeEnum)) {
 						switch (opTaskTypeEnum) {
 								case ES_CLUSTER_UPGRADE:
+								case ES_CLUSTER_PLUG_UPGRADE:
 								case GATEWAY_UPGRADE:
 										return Result.buildFail("只支持升级类型的回滚任务");
 								case ES_CLUSTER_CONFIG_EDIT:

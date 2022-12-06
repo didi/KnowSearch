@@ -52,7 +52,7 @@ public class PluginVO extends BaseVO {
     //TODO 需要下线
     private Boolean installed;
     
-    @ApiModelProperty("插件类型:1.es 引擎插件;2.es 平台插件;3.gateway 平台插件")
+    @ApiModelProperty("插件类型:1.平台插件;2.引擎插件;3.内核插件")
     private Integer pluginType;
     @ApiModelProperty("关联的组建 id")
     private Integer componentId;

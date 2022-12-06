@@ -87,8 +87,7 @@ public interface OpTaskService {
 		/**
 		 * It returns the task with the given title and type.
 		 *
-		 * @param title task title
-		 * @param type 1-add, 2-update, 3-delete
+		 * @param businessKey
 		 */
-		OpTaskPO getTaskByTitleAndType(String title, Integer type);
+		OpTaskPO getTaskByBusinessKey(String businessKey);
 }
