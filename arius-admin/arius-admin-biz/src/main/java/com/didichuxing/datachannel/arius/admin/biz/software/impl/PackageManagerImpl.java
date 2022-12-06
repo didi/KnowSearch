@@ -9,10 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageAddDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageUpdateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageGroupConfigQueryVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackagePageVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageQueryVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageVersionVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.*;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -29,6 +26,7 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.op.manager.application.PackageService;
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.didiglobal.logi.op.manager.domain.packages.entity.value.PackageGroupConfig;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -136,14 +134,18 @@ public class PackageManagerImpl implements PackageManager {
     }
 
     @Override
-    public Result<List<PackageVersionVO>> listPackageWithHigherVersionByPackageTypeAndCurrentVersion(String packageTypeDesc, Integer projectId, String currentVersion) {
+    public Result<List<PackageNameVO>> listPackageWithHigherVersionByPackageTypeAndCurrentVersion(String packageTypeDesc, Integer projectId, String name) {
         Result<Void> result = ProjectUtils.checkProjectCorrectly(retId -> retId, projectId, projectId);
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
+        Package packageByName = packageService.queryPackageByName(name);
+        if (AriusObjUtils.isNull(packageByName)) {
+            return Result.buildSucc(Lists.newArrayList());
+        }
         List<Package> listPackageByPackageType = packageService.listPackageByPackageType(SoftwarePackageTypeEnum.getPackageTypeByDesc(packageTypeDesc));
-        List<Package> listPackage = listPackageByPackageType.stream().filter(aPackage -> ESVersionUtil.compareVersion(aPackage.getVersion(), currentVersion) > 0).collect(Collectors.toList());
-        return Result.buildSucc(ConvertUtil.list2List(listPackage, PackageVersionVO.class));
+        List<Package> listPackage = listPackageByPackageType.stream().filter(aPackage -> ESVersionUtil.compareVersion(aPackage.getVersion(), packageByName.getVersion()) > 0).collect(Collectors.toList());
+        return Result.buildSucc(ConvertUtil.list2List(listPackage, PackageNameVO.class));
     }
 
     @Override
