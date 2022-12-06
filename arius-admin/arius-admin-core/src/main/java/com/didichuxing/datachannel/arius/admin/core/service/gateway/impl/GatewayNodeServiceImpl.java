@@ -87,7 +87,7 @@ public class GatewayNodeServiceImpl implements GatewayNodeService {
 		final GatewayClusterNodePO gatewayClusterNode = ConvertUtil.obj2Obj(gatewayNodeHostDTO,
 				GatewayClusterNodePO.class);
 		final int i = gatewayClusterNodeDAO.insert(gatewayClusterNode);
-		gatewayClusterNode.setId(gatewayClusterNode.getId());
+		gatewayNodeHostDTO.setId(gatewayClusterNode.getId().longValue());
 		return i;
 	}
 		

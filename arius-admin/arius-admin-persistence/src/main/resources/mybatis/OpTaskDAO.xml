@@ -216,12 +216,11 @@
     AND status in ('waiting', 'pause', 'running')
   </select>
   
-  <select id="getTaskByTitleAndType" resultMap="WorkTaskMap">
+  <select id="getTaskByBusinessKey" resultMap="WorkTaskMap">
 	  SELECT
 	  <include refid="columns"/>
 	  FROM arius_op_task
-	  WHERE task_type = #{taskType}
-			AND title = #{title}
+	  WHERE business_key=#{businessKey}
 	  ORDER BY create_time DESC
 	  LIMIT 1
   </select>

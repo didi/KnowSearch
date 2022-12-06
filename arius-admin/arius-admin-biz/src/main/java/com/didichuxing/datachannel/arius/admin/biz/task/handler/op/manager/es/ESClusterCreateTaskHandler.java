@@ -57,11 +57,6 @@ public class ESClusterCreateTaskHandler extends AbstractESTaskHandler {
 				if (CollectionUtils.isEmpty(groupConfigList)) {
 						return Result.buildFail("配置为空");
 				}
-				final long count = groupConfigList.stream().map(GeneralGroupConfigDTO::getGroupName)
-						.count();
-				if (count > 1) {
-						return Result.buildFail("配置组的名称不能是重复的");
-				}
 				if (CollectionUtils.isEmpty(content.getDefaultGroupNames())) {
 						return Result.buildFail("默认的配置组名称未进行选择");
 				}
