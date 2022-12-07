@@ -911,9 +911,7 @@ public class ESIndexDAO extends BaseESDAO {
         ESIndicesGetAllSettingRequest request = new ESIndicesGetAllSettingRequest();
         request.mapping(true);
         request.alias(false);
-        if (ESVersionUtil.compareVersion(esClient.getEsVersion(), "8.0.0") < 0) {
-            request.setIncludeTypeName(true);
-        } else {
+        if (ESVersionUtil.compareVersion(esClient.getEsVersion(), "7.0.0") >= 0) {
             return Maps.newHashMap();
         }
         request.setIndices(ListUtils.strList2StringArray(indexNames));
