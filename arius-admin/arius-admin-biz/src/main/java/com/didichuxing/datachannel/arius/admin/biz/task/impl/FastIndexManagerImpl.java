@@ -108,6 +108,7 @@ public class FastIndexManagerImpl implements FastIndexManager {
     private static final String                                      INDEX_VERSION_CREATED          = "index.version.created";
     private static final String                                      INDEX_PROVIDED_NAME          = "index.provided_name";
     private static final String                                      INDEX_ROUTING_ALLOCATION_INCLUDE_NAME          = "index.routing.allocation.include._name";
+    private static final String                                      INDEX_ROUTING_ALLOCATION_INCLUDE_TIER_PREFERENCE          = "index.routing.allocation.include._tier_preference";
     private static final long                                        TASK_WAITING_TIME                     = 5 * 1000L;
 
     @Autowired
@@ -599,6 +600,7 @@ public class FastIndexManagerImpl implements FastIndexManager {
         setting.remove(INDEX_VERSION_CREATED);
         setting.remove(INDEX_PROVIDED_NAME);
         setting.remove(INDEX_ROUTING_ALLOCATION_INCLUDE_NAME);
+        setting.remove(INDEX_ROUTING_ALLOCATION_INCLUDE_TIER_PREFERENCE);
         indexSettingVO.setProperties(JsonUtils.reFlat(setting));
         indexSettingVO.setIndexName(indexName);
         return Result.buildSucc(indexSettingVO);
