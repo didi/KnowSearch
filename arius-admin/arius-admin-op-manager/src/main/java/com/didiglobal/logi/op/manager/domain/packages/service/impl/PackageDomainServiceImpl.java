@@ -121,6 +121,11 @@ public class PackageDomainServiceImpl implements PackageDomainService {
     }
 
     @Override
+    public Package queryPackageByName(String name) {
+        return packageRepository.findByName(name);
+    }
+
+    @Override
     public List<PackageGroupConfig> listPackageGroupConfigByVersion(String version, Integer packageType) {
         Package packageByVersion = packageRepository.findByVersion(version, packageType);
         if(Objects.isNull(packageByVersion)){

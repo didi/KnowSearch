@@ -5,10 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageAddDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageUpdateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageGroupConfigQueryVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackagePageVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageQueryVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageVersionVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.*;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
 import java.util.List;
@@ -69,10 +66,10 @@ public interface PackageManager {
      * 通过软件包类型获取软件包版本list
      * @param packageTypeDesc
      * @param projectId
-     * @param currentVersion
+     * @param name
      * @return
      */
-    Result<List<PackageVersionVO>> listPackageWithHigherVersionByPackageTypeAndCurrentVersion(String packageTypeDesc, Integer projectId, String currentVersion);
+    Result<List<PackageNameVO>> listPackageWithHigherVersionByPackageTypeAndCurrentVersion(String packageTypeDesc, Integer projectId, String name);
 
     /**
      * 通过软件包版本获取软件包配置组
