@@ -1329,7 +1329,7 @@ public class FastIndexManagerImpl implements FastIndexManager {
         }
         //挑选出文档数为0的任务置为成功
         needSubmitTaskList.forEach(taskInfo -> {
-            if (BigDecimal.ZERO.compareTo(taskInfo.getTotalDocumentNum()) == 0) {
+            if (BigDecimal.ZERO.compareTo(Optional.ofNullable(taskInfo.getTotalDocumentNum()).orElse(BigDecimal.ZERO)) == 0) {
                 taskInfo.setTotalDocumentNum(BigDecimal.ZERO);
                 taskInfo.setTaskStatus(FastIndexTaskStatusEnum.SUCCESS.getValue());//成功
                 taskInfo.setSuccDocumentNum(BigDecimal.ZERO);
@@ -1357,6 +1357,7 @@ public class FastIndexManagerImpl implements FastIndexManager {
                 taskInfo.setTaskStartTime(new Date());
             } else {
                 taskInfo.setTaskStatus(FastIndexTaskStatusEnum.FAILED.getValue());
+                taskInfo.setFailedDocumentNum(taskInfo.getTotalDocumentNum());
                 taskInfo.setTaskStartTime(new Date());
                 taskInfo.setTaskEndTime(new Date());
             }
