@@ -72,6 +72,8 @@ public enum OpTaskHandleEnum {
     ES_CLUSTER_ROLLBACK(OpTaskTypeEnum.ES_CLUSTER_ROLLBACK.getType(), OpTaskConstant.ES_CLUSTER_ROLLBACK),
     ES_CLUSTER_CONFIG_ROLLBACK(OpTaskTypeEnum.ES_CLUSTER_CONFIG_ROLLBACK.getType(), OpTaskConstant.ES_CLUSTER_CONFIG_ROLLBACK),
     ES_CLUSTER_OFFLINE(OpTaskTypeEnum.ES_CLUSTER_OFFLINE.getType(), OpTaskConstant.ES_CLUSTER_OFFLINE),
+    ES_CLUSTER_PLUGIN_OFFLINE(OpTaskTypeEnum.ES_CLUSTER_PLUG_ROLLBACK.getType(),
+        OpTaskConstant.ES_CLUSTER_PLUG_ROLLBACK),
 
                               FAST_INDEX(OpTaskTypeEnum.FAST_INDEX.getType(),
                                          OpTaskConstant.FAST_INDEX_TASK),
@@ -151,6 +153,8 @@ class OpTaskConstant {
     public static final String ES_CLUSTER_CONFIG_ROLLBACK = "esClusterConfigRollbackTask";
     public static final String GATEWAY_OFFLINE            = "gatewayOfflineTask";
     public static final String ES_CLUSTER_OFFLINE         = "esClusterOfflineTask";
+    public static final String ES_CLUSTER_PLUG_ROLLBACK   = "esClusterPluginRollbackTask";
+
 
     public static final String FAST_INDEX_TASK             = "fastIndexOpTask";
 

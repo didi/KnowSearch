@@ -318,6 +318,10 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
                 ComponentHost componentHost = new ComponentHost();
                 componentHost.setHost(host);
                 componentHost.setProcessNum(JSON.parseObject(groupConfig.getProcessNumConfig()).getInteger(host));
+                Optional.ofNullable(groupConfig.getMachineSpec())
+                    .map(JSON::parseObject)
+                    .map(i -> i.getString(host))
+                    .ifPresent(componentHost::setMachineSpec);
                 componentHost.setComponentId(componentId);
                 componentHost.setGroupName(groupConfig.getGroupName());
                 if (invalidHosts.contains(host)) {

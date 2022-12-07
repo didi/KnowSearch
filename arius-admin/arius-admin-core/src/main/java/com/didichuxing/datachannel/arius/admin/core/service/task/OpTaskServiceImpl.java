@@ -135,7 +135,7 @@ public class OpTaskServiceImpl implements OpTaskService {
     }
     
     @Override
-    public OpTaskPO getTaskByTitleAndType(String title, Integer type) {
-        return opTaskDao.getTaskByTitleAndType(title,type);
+    public OpTaskPO getTaskByBusinessKey(String businessKey) {
+        return opTaskDao.getTaskByBusinessKey(businessKey);
     }
 }
