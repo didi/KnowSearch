@@ -86,5 +86,5 @@ public interface PluginManager {
 		 * @param gatewayClusterId 网关集群 ID。
 		 * @return 更新前的网关集群版本。
 		 */
-		Result<List<PackageVersionVO>> getBeforeVersionByGatewayClusterId(Integer gatewayClusterId);
+		Result<List<PackageVersionVO>> getLowerVersionByGatewayClusterId(Integer gatewayClusterId);
 }

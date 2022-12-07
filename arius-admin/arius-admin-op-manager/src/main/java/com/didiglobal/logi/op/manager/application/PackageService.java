@@ -165,4 +165,13 @@ public class PackageService {
     public List<PackageGroupConfig> listPackageGroupConfigByVersion(String version, Integer packageType) {
         return packageDomainService.listPackageGroupConfigByVersion(version, packageType);
     }
+
+    /**
+     * 通过软件包名称查询软件包
+     * @param name
+     * @return
+     */
+    public Package queryPackageByName(String name) {
+        return packageDomainService.queryPackageByName(name);
+    }
 }

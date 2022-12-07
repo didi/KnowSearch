@@ -90,12 +90,12 @@ public class GatewayV3Controller {
         return gatewayClusterManager.editOne(data,HttpRequestUtil.getProjectId(request),
             HttpRequestUtil.getOperator(request));
     }
-    @GetMapping("/{gatewayClusterId}/before-version")
+    @GetMapping("/{gatewayClusterId}/lower-versions")
     @ResponseBody
     @ApiOperation(value = "获取更低的版本号",tags = "")
-    public Result<List<PackageVersionVO>> getBeforeVersionByGatewayClusterId(HttpServletRequest request,
+    public Result<List<PackageVersionVO>> getLowerVersionByGatewayClusterId(HttpServletRequest request,
                                                                              @PathVariable("gatewayClusterId") Integer gatewayClusterId) {
-        return pluginManager.getBeforeVersionByGatewayClusterId(gatewayClusterId);
+        return pluginManager.getLowerVersionByGatewayClusterId(gatewayClusterId);
     }
     
     @GetMapping("health")
