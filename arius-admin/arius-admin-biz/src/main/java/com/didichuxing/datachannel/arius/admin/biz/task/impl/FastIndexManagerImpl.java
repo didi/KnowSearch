@@ -1273,6 +1273,7 @@ public class FastIndexManagerImpl implements FastIndexManager {
                 Date taskStartTime = indexTask.getTaskStartTime();
                 if (null == taskStartTime || System.currentTimeMillis() - taskStartTime.getTime() > TASK_WAITING_TIME) {
                     indexTask.setTaskStatus(FastIndexTaskStatusEnum.FAILED.getValue());
+                    indexTask.setFailedDocumentNum(Optional.ofNullable(indexTask.getTotalDocumentNum()).orElse(BigDecimal.ZERO));
                     indexTask.setTaskEndTime(new Date());
                     fastIndexTaskService.refreshTask(indexTask);
                 }
@@ -1357,7 +1358,7 @@ public class FastIndexManagerImpl implements FastIndexManager {
                 taskInfo.setTaskStartTime(new Date());
             } else {
                 taskInfo.setTaskStatus(FastIndexTaskStatusEnum.FAILED.getValue());
-                taskInfo.setFailedDocumentNum(taskInfo.getTotalDocumentNum());
+                taskInfo.setFailedDocumentNum(Optional.ofNullable(taskInfo.getTotalDocumentNum()).orElse(BigDecimal.ZERO));
                 taskInfo.setTaskStartTime(new Date());
                 taskInfo.setTaskEndTime(new Date());
             }
