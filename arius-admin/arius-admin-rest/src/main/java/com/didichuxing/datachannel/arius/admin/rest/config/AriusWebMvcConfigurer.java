@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-@Profile("!test")
+@Profile("!dev")
 public class AriusWebMvcConfigurer implements WebMvcConfigurer {
 
     @Autowired
