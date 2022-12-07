@@ -92,7 +92,7 @@ public class GatewayShrinkTaskHandler extends AbstractGatewayTaskHandler {
 				final List<GatewayNodeHostDTO> nodes = ipAndPortTuples.stream()
 						.map(i -> GatewayNodeHostDTO.builder().port(i.v2())
 								.clusterName(clusterName)
-								.hostname(i.v1())
+								.hostName(i.v1())
 								.build())
 						.distinct()
 						.collect(Collectors.toList());

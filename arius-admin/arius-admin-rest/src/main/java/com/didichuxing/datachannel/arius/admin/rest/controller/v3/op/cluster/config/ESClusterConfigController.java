@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigD
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.ConfigConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESConfigVO;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.interfaces.vo.ComponentGroupConfigVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -97,5 +98,13 @@ public class ESClusterConfigController {
     public PaginationResult<ClusterPhyConfigVO> pageGetGatewayConfig(HttpServletRequest request,
                                                                      @RequestBody ConfigConditionDTO condition,@PathVariable("phyClusterId") Integer phyClusterId) {
         return esClusterConfigManager.pageGetConfig(condition, HttpRequestUtil.getProjectId(request), phyClusterId);
+    }
+    
+     @GetMapping("/{clusterPhyId}/configs")
+    @ResponseBody
+    @ApiOperation(value = "根据 clusterPhyId 获取物理集群配置信息",tags = "")
+    public Result<List<ComponentGroupConfig>> getConfigsByClusterPhyId(HttpServletRequest request,
+                                                                    @PathVariable("clusterPhyId") Integer clusterPhyId) {
+       return esClusterConfigManager.getConfigsByClusterPhyId(clusterPhyId);
     }
 }

@@ -30,7 +30,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClust
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeService;
 import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -104,6 +103,7 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 	}
 		
 		@Override
+		@Transactional(rollbackFor = Exception.class)
 		public Result<Void> createWithECM(GatewayClusterCreateDTO gatewayCluster, Integer projectId,
 		                                  String operate) {
 				Result<Void> result = checkGatewayCreateParam(gatewayCluster);
@@ -320,7 +320,7 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 			return Result.buildFail("节点信息不可为空");
 		}
 		if (param.getGatewayNodeHosts().stream().anyMatch(
-				node -> StringUtils.isEmpty(node.getHostname()) || Objects.isNull(node.getPort()))) {
+				node -> StringUtils.isEmpty(node.getHostName()) || Objects.isNull(node.getPort()))) {
 			return Result.buildFail("传入的节点信息地址和端口号不可为空");
 		}
 		
@@ -349,7 +349,7 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 						return Result.buildFail("节点信息不可为空");
 				}
 				if (data.getNodes().stream().anyMatch(
-						node -> StringUtils.isEmpty(node.getHostname()) || Objects.isNull(node.getPort()))) {
+						node -> StringUtils.isEmpty(node.getHostName()) || Objects.isNull(node.getPort()))) {
 						return Result.buildFail("传入的节点信息地址和端口号不可为空");
 				}
 				return Result.buildSucc();

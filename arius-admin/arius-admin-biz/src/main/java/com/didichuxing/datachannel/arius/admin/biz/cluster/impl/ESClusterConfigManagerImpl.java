@@ -153,4 +153,13 @@ public class ESClusterConfigManagerImpl implements ESClusterConfigManager {
                 i -> ConvertUtil.obj2Obj(i, ComponentGroupConfigVO.class)).map(Result::buildSucc)
             .orElse(Result.buildSucc());
     }
+    
+    @Override
+    public Result<List<ComponentGroupConfig>> getConfigsByClusterPhyId(Integer clusterPhyId) {
+        final Integer componentIdById = clusterPhyService.getComponentIdById(clusterPhyId);
+        if (Objects.isNull(componentIdById)) {
+            return Result.buildSucc(Collections.emptyList());
+        }
+        return Result.buildFromWithData(componentService.getComponentConfig(componentIdById));
+    }
 }

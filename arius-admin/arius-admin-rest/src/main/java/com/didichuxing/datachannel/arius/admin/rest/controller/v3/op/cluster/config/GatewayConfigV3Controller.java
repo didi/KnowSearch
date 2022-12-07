@@ -7,10 +7,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.ConfigConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayConfigVO;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.interfaces.vo.ComponentGroupConfigVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,4 +55,14 @@ public class GatewayConfigV3Controller {
                                                                  @PathVariable("configId") Integer configId) {
         return gatewayClusterConfigManager.getConfigByGatewayId(gatewayClusterId,configId);
     }
+    
+    @GetMapping("/{gatewayClusterId}/configs")
+    @ResponseBody
+    @ApiOperation(value = "根据 gatewayClusterId 获取 gateway 配置信息", tags = "")
+    public Result<List<ComponentGroupConfig>> getConfigsByGatewayId(HttpServletRequest request,
+        @PathVariable("gatewayClusterId") Integer gatewayClusterId) {
+        return gatewayClusterConfigManager.getConfigsByGatewayId(gatewayClusterId);
+    }
+    
+    
 }

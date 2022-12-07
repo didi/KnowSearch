@@ -21,8 +21,8 @@
             parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO"
             keyColumn="id">
         insert into gateway_cluster_node_info
-            (cluster_name, host_name, port, heartbeat_time)
-        values (#{clusterName}, #{hostName}, #{port}, #{heartbeatTime}) ON DUPLICATE KEY
+            (cluster_name, host_name, port, heartbeat_time,machine_spec)
+        values (#{clusterName}, #{hostName}, #{port}, #{heartbeatTime},#{machineSpec}) ON DUPLICATE KEY
         UPDATE heartbeat_time= #{heartbeatTime}
     </insert>
 
@@ -44,9 +44,9 @@
       parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
-        insert into gateway_cluster_node_info
-            (cluster_name, host_name, port,machine_spec)
-        values (#{clusterName}, #{hostName}, #{port}，#{machineSpec})
+        INSERT INTO gateway_cluster_node_info
+            (cluster_name, host_name, `port`,machine_spec)
+        VALUES (#{clusterName},#{hostName},#{port},#{machineSpec})
     </insert>
     
     <select id="selectByBatchClusterName" resultMap="BaseResultMap">

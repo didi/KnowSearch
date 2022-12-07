@@ -17,6 +17,7 @@ import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGro
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.interfaces.vo.ComponentGroupConfigVO;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.NoArgsConstructor;
@@ -71,4 +72,13 @@ public class GatewayClusterConfigManagerImpl implements GatewayClusterConfigMana
 		return componentGroupConfigOptional.map(i-> ConvertUtil.obj2Obj(i,
 				ComponentGroupConfigVO.class)).map(Result::buildSucc).orElse(Result.buildSucc());
 	}
+		
+		@Override
+		public Result<List<ComponentGroupConfig>> getConfigsByGatewayId(Integer gatewayClusterId) {
+				  final Integer componentIdById = gatewayClusterService.getComponentIdById(gatewayClusterId);
+        if (Objects.isNull(componentIdById)) {
+            return Result.buildSucc(Collections.emptyList());
+        }
+        return Result.buildFromWithData(componentService.getComponentConfig(componentIdById));
+		}
 }

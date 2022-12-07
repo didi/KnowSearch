@@ -212,7 +212,7 @@ public class Result<T> extends BaseResult {
         Result<T> resultT = new Result<>();
         resultT.setCode(result.getCode());
         resultT.setMessage(result.getMessage());
-        result.setData(result.getData());
+        resultT.setData(result.getData());
         return resultT;
     }
 }

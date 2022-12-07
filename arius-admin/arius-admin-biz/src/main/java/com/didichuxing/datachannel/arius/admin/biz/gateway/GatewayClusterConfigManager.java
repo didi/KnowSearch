@@ -4,7 +4,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.ConfigConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayConfigVO;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.interfaces.vo.ComponentGroupConfigVO;
+import java.util.List;
 
 /**
  * 网关集群配置
@@ -33,4 +35,12 @@ public interface GatewayClusterConfigManager {
 	 * @return GeneralGroupConfigHostVO
 	 */
 	Result<ComponentGroupConfigVO> getConfigByGatewayId(Integer gatewayClusterId, Integer configId);
+		
+		/**
+		 * 通过网关集群 ID 获取组件组的配置
+		 *
+		 * @param gatewayClusterId 网关集群 ID。
+		 * @return ComponentGroupConfigVO 列表
+		 */
+		Result<List<ComponentGroupConfig>> getConfigsByGatewayId(Integer gatewayClusterId);
 }
