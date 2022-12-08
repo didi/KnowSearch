@@ -70,5 +70,7 @@ public class ClusterJoinDTO extends BaseDTO {
     @ApiModelProperty("http地址-写")
     private String                     httpWriteAddress;
 
+    @ApiModelProperty("代理地址")
+    private String                     proxyAddress;
 
 }
