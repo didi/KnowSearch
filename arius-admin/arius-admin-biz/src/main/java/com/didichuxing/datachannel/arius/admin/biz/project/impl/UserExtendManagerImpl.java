@@ -257,9 +257,9 @@ public class UserExtendManagerImpl implements UserExtendManager {
         if(projectBriefList.isEmpty()) {
             operateContent = String.format("【%s】用户被删除", userName);
         }else {
-            List<String> projectNameList = new ArrayList<>();
-            projectBriefList.forEach(projectBriefVO -> projectNameList.add(projectBriefVO.getProjectName()));
-            String nameList = projectNameList.stream().map(String::valueOf).collect(Collectors.joining(","));
+            Set<String> projectNameSet = new HashSet<>();
+            projectBriefList.forEach(projectBriefVO -> projectNameSet.add(projectBriefVO.getProjectName()));
+            String nameList = projectNameSet.stream().map(String::valueOf).collect(Collectors.joining(","));
             operateContent = String.format("【%s】用户被删除，其所属应用为【%s】", userName, nameList);
         }
 
