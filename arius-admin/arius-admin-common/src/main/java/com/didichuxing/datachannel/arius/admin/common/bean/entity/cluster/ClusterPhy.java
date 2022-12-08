@@ -7,7 +7,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import java.util.List;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
