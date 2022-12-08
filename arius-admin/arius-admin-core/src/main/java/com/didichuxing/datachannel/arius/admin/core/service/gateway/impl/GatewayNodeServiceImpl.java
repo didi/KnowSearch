@@ -93,6 +93,9 @@ public class GatewayNodeServiceImpl implements GatewayNodeService {
 		
 		@Override
 		public Boolean deleteBatch(List<Integer> ids) {
-				return gatewayClusterNodeDAO.deleteBatch(ids)==ids.size();
+				if (CollectionUtils.isEmpty(ids)) {
+						return true;
+				}
+				return gatewayClusterNodeDAO.deleteBatch(ids) == ids.size();
 		}
 }

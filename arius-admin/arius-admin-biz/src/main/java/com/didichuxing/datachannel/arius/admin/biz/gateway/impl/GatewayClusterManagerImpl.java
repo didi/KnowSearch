@@ -171,12 +171,12 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 				//转换未map
 				final Map<String, Integer> string2IdMaps = nodePOS.stream()
 						.map(i -> Tuples.of(i.getId(), String.format("hostname:[%s];clusterName:[%s];port:[%s]",
-								i.getClusterName(), i.getClusterName(), i.getPort())))
+								i.getHostName(), i.getClusterName(), i.getPort())))
 						.collect(Collectors.toMap(TupleTwo::v2, TupleTwo::v1));
 				//转换未相同的信息
 				final List<Integer> ids = nodes.stream()
 						.map(i -> String.format("hostname:[%s];clusterName:[%s];port:[%s]",
-								i.getClusterName(), i.getClusterName(), i.getPort()))
+								i.getHostName(), i.getClusterName(), i.getPort()))
 						.filter(string2IdMaps::containsKey).map(string2IdMaps::get)
 						.collect(Collectors.toList());
 				// 无需写入到操作记录，工单操作中生成操作记录即可
