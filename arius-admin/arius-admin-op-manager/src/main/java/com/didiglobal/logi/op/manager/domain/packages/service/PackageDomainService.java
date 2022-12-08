@@ -82,4 +82,11 @@ public interface PackageDomainService {
      * @return
      */
     List<PackageGroupConfig> listPackageGroupConfigByVersion(String version, Integer packageType);
+
+    /**
+     * 通过软件包名称查询软件包
+     * @param name
+     * @return
+     */
+    Package queryPackageByName(String name);
 }

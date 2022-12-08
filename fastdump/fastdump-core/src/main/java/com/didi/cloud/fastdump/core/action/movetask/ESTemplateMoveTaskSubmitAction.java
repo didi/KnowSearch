@@ -125,7 +125,7 @@ public class ESTemplateMoveTaskSubmitAction extends BaseMoveTaskAction<ESTemplat
             // 检查es版本是否支持
             String esVersion = sourceESRestClient.syncRetryGetClusterVersion(DEFAULT_TIME, DEFAULT_INTERVAL_MILLS);
             if (!ESVersionUtil.checkSupport(esVersion)) {
-                throw new NotSupportESVersionException(esVersion);
+                throw new NotSupportESVersionException(String.format("source cluster[version:%s] are not supported", esVersion));
             }
 
             // 检查源模板是否存在

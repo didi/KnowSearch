@@ -9,10 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageAddDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.software.PackageUpdateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageGroupConfigQueryVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackagePageVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageQueryVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageVersionVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.*;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -29,6 +26,7 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.op.manager.application.PackageService;
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.didiglobal.logi.op.manager.domain.packages.entity.value.PackageGroupConfig;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,6 +47,7 @@ public class PackageManagerImpl implements PackageManager {
     private PackageService packageService;
     @Autowired
     private RoleTool roleTool;
+
     @Override
     public PaginationResult<PackagePageVO> pageGetPackages(PackageQueryDTO packageDTO, Integer projectId) throws NotFindSubclassException {
         BaseHandle baseHandle = handleFactory.getByHandlerNamePer(PACKAGE.getPageSearchType());
@@ -135,14 +134,18 @@ public class PackageManagerImpl implements PackageManager {
     }
 
     @Override
-    public Result<List<PackageVersionVO>> listPackageWithHigherVersionByPackageTypeAndCurrentVersion(String packageTypeDesc, Integer projectId, String currentVersion) {
+    public Result<List<PackageNameVO>> listPackageWithHigherVersionByPackageTypeAndCurrentVersion(String packageTypeDesc, Integer projectId, String name) {
         Result<Void> result = ProjectUtils.checkProjectCorrectly(retId -> retId, projectId, projectId);
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
+        Package packageByName = packageService.queryPackageByName(name);
+        if (AriusObjUtils.isNull(packageByName)) {
+            return Result.buildSucc(Lists.newArrayList());
+        }
         List<Package> listPackageByPackageType = packageService.listPackageByPackageType(SoftwarePackageTypeEnum.getPackageTypeByDesc(packageTypeDesc));
-        List<Package> listPackage = listPackageByPackageType.stream().filter(aPackage -> ESVersionUtil.compareVersion(aPackage.getVersion(), currentVersion) > 0).collect(Collectors.toList());
-        return Result.buildSucc(ConvertUtil.list2List(listPackage,PackageVersionVO.class));
+        List<Package> listPackage = listPackageByPackageType.stream().filter(aPackage -> ESVersionUtil.compareVersion(aPackage.getVersion(), packageByName.getVersion()) > 0).collect(Collectors.toList());
+        return Result.buildSucc(ConvertUtil.list2List(listPackage, PackageNameVO.class));
     }
 
     @Override
@@ -153,7 +156,7 @@ public class PackageManagerImpl implements PackageManager {
         }
         Integer packageType = SoftwarePackageTypeEnum.ES_INSTALL_PACKAGE.getPackageType();
         List<PackageGroupConfig> packageGroupConfigs = packageService.listPackageGroupConfigByVersion(version, packageType);
-        return Result.buildSucc(ConvertUtil.list2List(packageGroupConfigs,PackageGroupConfigQueryVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(packageGroupConfigs, PackageGroupConfigQueryVO.class));
     }
 
     @Override
@@ -163,7 +166,7 @@ public class PackageManagerImpl implements PackageManager {
             return Result.buildFail(result.getMessage());
         }
         List<Package> packageList = packageService.listPackageByPackageType(SoftwarePackageTypeEnum.getPackageTypeByDesc(packageTypeDesc));
-        return Result.buildSucc(ConvertUtil.list2List(packageList,PackageVersionVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(packageList, PackageVersionVO.class));
     }
 
     /*************************************************private**********************************************************/
@@ -193,15 +196,18 @@ public class PackageManagerImpl implements PackageManager {
         Boolean checkRequired = packageGroupConfigs.stream().anyMatch(packageGroupConfig -> {
             String systemConfig = packageGroupConfig.getSystemConfig();
             JSONObject jsonObject = JSON.parseObject(systemConfig);
+            if (AriusObjUtils.isNull(jsonObject)) {
+                return true;
+            }
             if (AriusObjUtils.isNull(jsonObject.get("installDirector"))) {
                 return true;
             }
-            if(AriusObjUtils.isNull(jsonObject.get("user"))){
+            if (AriusObjUtils.isNull(jsonObject.get("user"))) {
                 return true;
             }
             return false;
         });
-        if(checkRequired){
+        if (checkRequired) {
             return Result.buildParamIllegal("安装目录和用户名配置必填");
         }
         if (operation.getCode() == ADD.getCode()) {

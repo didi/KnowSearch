@@ -145,7 +145,7 @@ public class PluginManagerImpl implements PluginManager {
 				return Result.buildFail("集群中存在插件未完全卸载，请先卸载集群中存在的插件，才可进行下线集群任务");
 		}
 		@Override
-		public Result<List<PackageVersionVO>> getBeforeVersionByGatewayClusterId(Integer gatewayClusterId) {
+		public Result<List<PackageVersionVO>> getLowerVersionByGatewayClusterId(Integer gatewayClusterId) {
 			Integer componentId = gatewayClusterService.getComponentIdById(gatewayClusterId);
 			com.didiglobal.logi.op.manager.infrastructure.common.Result<com.didiglobal.logi.op.manager.domain.component.entity.Component> componentResult = componentService.queryComponentById(componentId);
 			if (componentResult.failed()) {

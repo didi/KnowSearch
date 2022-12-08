@@ -62,6 +62,7 @@
         from logi_op_package
         where `name` = #{name}
         order by id desc
+        limit 1
     </select>
 
     <select id="findByVersion" resultMap="BaseResultMap">
