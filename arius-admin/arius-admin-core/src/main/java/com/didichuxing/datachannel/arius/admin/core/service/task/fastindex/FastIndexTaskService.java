@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.task.fastindex;
 
 import java.util.List;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexLogsConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.fastindex.FastIndexTaskInfo;
 
 /**
@@ -33,4 +34,6 @@ public interface FastIndexTaskService {
     List<Integer> listTemplateIdByTaskId(Integer taskId);
 
     List<FastIndexTaskInfo> listByTaskIdAndStatus(Integer taskId, List<Integer> taskStatusList);
+
+    List<FastIndexTaskInfo> listFastIndexLogsByCondition(FastIndexLogsConditionDTO condition);
 }

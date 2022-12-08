@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.Fa
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexLogsConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastDumpTaskLogVO;
@@ -75,4 +76,10 @@ public interface FastIndexManager {
      * @return
      */
     Result<IndexTemplatePhySetting> getTemplateSettings(Integer logicId, Long logicClusterId);
+
+    /**
+     * 获取当前支持数据迁移的集群版本,使用动态配置获取支持的版本
+     * @return
+     */
+    List<ClusterPhyVO> clustersSupportedFastDump();
 }

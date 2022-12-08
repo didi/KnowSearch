@@ -68,9 +68,11 @@ public class FastDumpMetricsDAO extends BaseESDAO {
     
 
     private String buildQueryTermDsl(FastIndexLogsConditionDTO logsConditionDTO) {
+        Long startTime = logsConditionDTO.getStartTime() != null ? logsConditionDTO.getStartTime().getTime() : null;
+        Long endTime = logsConditionDTO.getEndTime() != null ? logsConditionDTO.getEndTime().getTime() : null;
+
         return "[" + buildTermCell(logsConditionDTO.getFastDumpTaskIdList(),logsConditionDTO.getExecutionNode(),
-            logsConditionDTO.getIndexName(), logsConditionDTO.getLogLevel(),
-            logsConditionDTO.getStartTime(), logsConditionDTO.getEndTime()) + "]";
+            logsConditionDTO.getIndexName(), logsConditionDTO.getLogLevel(),startTime,endTime) + "]";
     }
 
     private String buildTermCell(List<String> fastDumpTaskIdList, String executionNode, String indexName,
@@ -80,7 +82,7 @@ public class FastDumpMetricsDAO extends BaseESDAO {
         termCellList.add(DSLSearchUtils.getTermCellsForExactSearch(fastDumpTaskIdList, "taskId"));
 
         termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(executionNode, "ip"));
-        termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(indexName, "sourceIndex"));
+        termCellList.add(DSLSearchUtils.getTermCellForExactSearch(indexName, "sourceIndex"));
 
         //get level term
         termCellList.add(DSLSearchUtils.getTermCellForExactSearch(logLevel, "level"));

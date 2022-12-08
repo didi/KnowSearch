@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.persistence.mysql.task;
 
 import java.util.List;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.po.task.fastindex.FastIndexLogsConditionPO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -60,4 +61,12 @@ public interface FastIndexTaskInfoDAO {
     List<FastIndexTaskInfo> listByTaskIdAndStatus(@Param("taskId") Integer taskId, @Param("taskStatusList") List<Integer> taskStatusList);
 
     List<Integer> listTemplateIdByTaskId(Integer taskId);
+
+    /**
+     * 查询子任务返回日志
+     * @param fastIndexLogsConditionPO
+     * @return
+     */
+    List<FastIndexTaskInfo> listFastIndexLogsByCondition(@Param("param") FastIndexLogsConditionPO fastIndexLogsConditionPO,@Param("sortTerm") String sortTerm,
+                                                         @Param("sortType") String sortType);
 }

@@ -1,8 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.FastIndexTaskStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.HttpHostUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,21 +32,19 @@ import com.google.common.collect.Lists;
 
 @Component
 public class FastIndexTaskLogPageSearchHandle extends
-                                              AbstractPageSearchHandle<FastIndexLogsConditionDTO, FastDumpTaskLogVO> {
-    private static final String    DEFAULT_SORT_TERM     = "timestamp";
+        AbstractPageSearchHandle<FastIndexLogsConditionDTO, FastDumpTaskLogVO> {
+    private static final String DEFAULT_SORT_TERM = "timestamp";
 
-    private static final Long      QUERY_COUNT_THRESHOLD = 10000L;
+    private static final Long QUERY_COUNT_THRESHOLD = 10000L;
+    private static final String LOG_LEVEL_ERROR = "ERROR";
 
+    private static final FutureUtil FUTURE_UTIL = FutureUtil.init("FastIndexTaskLogPageSearchHandle");
     @Autowired
-    private FastIndexTaskService   fastIndexTaskService;
+    private FastIndexTaskService fastIndexTaskService;
     @Autowired
-    private OpTaskService          opTaskService;
+    private OpTaskService opTaskService;
     @Autowired
-    private ESIndexMoveTaskService esIndexMoveTaskService;
-    @Autowired
-    private HandleFactory          handleFactory;
-    @Autowired
-    private FastDumpMetricsDAO     fastDumpMetricsDAO;
+    private FastDumpMetricsDAO fastDumpMetricsDAO;
 
     @Override
     protected Result<Boolean> checkCondition(FastIndexLogsConditionDTO condition, Integer projectId) {
@@ -75,7 +79,6 @@ public class FastIndexTaskLogPageSearchHandle extends
         if (null == condition.getSize() || 0 == condition.getSize()) {
             condition.setSize(10L);
         }
-        condition.setFrom((condition.getPage() - 1) * condition.getSize());
 
         if (AriusObjUtils.isBlack(condition.getSortTerm())) {
             condition.setSortTerm(DEFAULT_SORT_TERM);
@@ -83,25 +86,25 @@ public class FastIndexTaskLogPageSearchHandle extends
 
         List<FastIndexTaskInfo> taskInfoList = fastIndexTaskService.listByTaskId(condition.getTaskId());
         List<FastIndexTaskInfo> ret = taskInfoList;
-        List<String> fastDumpTaskIdList = Lists.newArrayList("");
+        List<String> fastDumpTaskIdList = Lists.newArrayList();
         if (StringUtils.isNotBlank(condition.getFastDumpTaskId())) {
             ret = taskInfoList.stream()
-                .filter(obj -> StringUtils.equals(condition.getFastDumpTaskId(), obj.getFastDumpTaskId()))
-                .collect(Collectors.toList());
+                    .filter(obj -> StringUtils.equals(condition.getFastDumpTaskId(), obj.getFastDumpTaskId()))
+                    .collect(Collectors.toList());
         }
 
         if (StringUtils.isNotBlank(condition.getTemplateName())) {
             ret = taskInfoList.stream()
-                .filter(obj -> StringUtils.equals(condition.getTemplateName(), obj.getTemplateName()))
-                .collect(Collectors.toList());
+                    .filter(obj -> StringUtils.equals(condition.getTemplateName(), obj.getTemplateName()))
+                    .collect(Collectors.toList());
         }
         if (StringUtils.isNotBlank(condition.getIndexName())) {
             ret = taskInfoList.stream().filter(obj -> StringUtils.equals(condition.getIndexName(), obj.getIndexName()))
-                .collect(Collectors.toList());
+                    .collect(Collectors.toList());
         }
 
         fastDumpTaskIdList.addAll(ret.stream().map(FastIndexTaskInfo::getFastDumpTaskId).filter(StringUtils::isNotBlank)
-            .distinct().collect(Collectors.toList()));
+                .distinct().collect(Collectors.toList()));
 
         condition.setFastDumpTaskIdList(fastDumpTaskIdList);
     }
@@ -109,25 +112,94 @@ public class FastIndexTaskLogPageSearchHandle extends
     @Override
     protected PaginationResult<FastDumpTaskLogVO> buildPageData(FastIndexLogsConditionDTO condition,
                                                                 Integer projectId) {
+        List<FastDumpTaskLogVO> fastDumpTaskLogVOS = Lists.newCopyOnWriteArrayList();
+        AtomicLong totalCount = new AtomicLong(0L);
+        Long size = condition.getSize();
+        Long page = condition.getPage();
+        FUTURE_UTIL.runnableTask(() -> {
+            List<FastDumpTaskLogVO> listMysqlLogMessage = listMysqlLogMessage(condition);
+            if (StringUtils.isNotBlank(condition.getExecutionNode())) {
+                List<FastDumpTaskLogVO> filterListMysqlLogMessage = listMysqlLogMessage.stream()
+                        .filter(fastDumpTaskLogVO -> fastDumpTaskLogVO.getIp().equals(condition.getExecutionNode())).collect(Collectors.toList());
+                fastDumpTaskLogVOS.addAll(filterListMysqlLogMessage);
+                totalCount.addAndGet(filterListMysqlLogMessage.size());
+            } else {
+                fastDumpTaskLogVOS.addAll(listMysqlLogMessage);
+                totalCount.addAndGet(listMysqlLogMessage.size());
+            }
+        }).runnableTask(() -> {
+            Tuple<Long, List<FastDumpTaskLogVO>> listESLogMessage = listESLogMessage(condition);
+            fastDumpTaskLogVOS.addAll(listESLogMessage.getV2());
+            totalCount.addAndGet(listESLogMessage.getV2().size());
+        }).waitExecute();
+        List<FastDumpTaskLogVO> pageFastDumpTaskLogList = fastDumpTaskLogVOS.subList(0,
+                Math.min(fastDumpTaskLogVOS.size(), size.intValue()));
+        return PaginationResult.buildSucc(pageFastDumpTaskLogList, totalCount.get(), page, size);
+    }
 
+    /**
+     * 当内核校验通过，数据迁移失败时，从es查出异常日志
+     *
+     * @param condition
+     * @return
+     */
+    private Tuple<Long, List<FastDumpTaskLogVO>> listESLogMessage(FastIndexLogsConditionDTO condition) {
         try {
+            condition.setFrom(0L);
+            condition.setSize(QUERY_COUNT_THRESHOLD);
             Tuple<Long, List<FastDumpTaskLogVO>> totalHitAndTaskLogsListTuple = fastDumpMetricsDAO
-                .getTaskLogs(condition);
+                    .getTaskLogs(condition);
 
             if (null == totalHitAndTaskLogsListTuple) {
                 LOGGER.warn(
-                    "class=FastIndexTaskLogPageSearchHandle||method=buildPageData||conditionDTO={}||errMsg=get empty Task Logs from es",
-                    JSON.toJSONString(condition));
-                return PaginationResult.buildSucc(Lists.newArrayList(), 0, condition.getPage(), condition.getSize());
+                        "class=FastIndexTaskLogPageSearchHandle||method=buildPageData||conditionDTO={}||errMsg=get empty Task Logs from es",
+                        JSON.toJSONString(condition));
+                return new Tuple<>(0L, Lists.newArrayList());
             }
             // 构建index信息
-            return PaginationResult.buildSucc(totalHitAndTaskLogsListTuple.getV2(),
-                totalHitAndTaskLogsListTuple.getV1(), condition.getPage(), condition.getSize());
+            return totalHitAndTaskLogsListTuple;
         } catch (Exception e) {
             LOGGER.error("class=FastIndexTaskLogPageSearchHandle||method=buildPageData||conditionDTO={}||errMsg={}",
-                JSON.toJSONString(condition), e.getMessage(), e);
-            return PaginationResult.buildFail("获取分页索引列表失败");
+                    JSON.toJSONString(condition), e.getMessage(), e);
+            return new Tuple<>(0L, Lists.newArrayList());
         }
+    }
 
+    /**
+     * 当内核校验不通过时，直接从返回信息中获取异常日志
+     *
+     * @param condition
+     * @return
+     */
+    private List<FastDumpTaskLogVO> listMysqlLogMessage(FastIndexLogsConditionDTO condition) {
+        OpTask opTask = opTaskService.getById(condition.getTaskId());
+        if (null == opTask) {
+            return new ArrayList<>();
+        }
+        FastIndexDTO fastIndexDTO = JSON.parseObject(opTask.getExpandData(), FastIndexDTO.class);
+        if (AriusObjUtils.isNull(fastIndexDTO)) {
+            return new ArrayList<>();
+        }
+        List<FastIndexTaskInfo> fastIndexTaskList = fastIndexTaskService.listFastIndexLogsByCondition(condition).stream()
+                .filter(fastIndexTaskInfo -> fastIndexTaskInfo.getTaskStatus().compareTo(FastIndexTaskStatusEnum.FAILED.getValue()) == 0
+                        && StringUtils.isNotBlank(fastIndexTaskInfo.getTaskSubmitResult())
+                        && StringUtils.isBlank(fastIndexTaskInfo.getFastDumpTaskId()))
+                .collect(Collectors.toList());
+        List<FastDumpTaskLogVO> fastDumpTaskLogList = fastIndexTaskList.stream().map(fastIndexTaskInfo -> {
+            FastDumpTaskLogVO fastDumpTaskLogVO = new FastDumpTaskLogVO();
+            fastDumpTaskLogVO.setLevel(LOG_LEVEL_ERROR);
+            fastDumpTaskLogVO.setFailedLuceneDataPath("");
+            fastDumpTaskLogVO.setSourceClusterName(fastIndexDTO.getSourceCluster());
+            fastDumpTaskLogVO.setTargetClusterName(fastIndexDTO.getTargetCluster());
+            fastDumpTaskLogVO.setIp(HttpHostUtil.getIpFromTransportAddress(fastIndexDTO.getTaskSubmitAddress()));
+            fastDumpTaskLogVO.setTaskId(String.valueOf(opTask.getId()));
+            fastDumpTaskLogVO.setSourceIndex(fastIndexTaskInfo.getIndexName());
+            fastDumpTaskLogVO.setTargetIndex(fastIndexTaskInfo.getTargetIndexName());
+            Optional.ofNullable(fastIndexTaskInfo.getTaskEndTime()).ifPresent(date -> fastDumpTaskLogVO.setTimestamp(date.getTime()));
+            JSONObject jsonObject = JSONObject.parseObject(fastIndexTaskInfo.getTaskSubmitResult());
+            fastDumpTaskLogVO.setMessage("cluster["+fastIndexDTO.getSourceCluster() + "],indexName[" + fastIndexTaskInfo.getIndexName() + "],the reason is " + jsonObject.getString("message"));
+            return fastDumpTaskLogVO;
+        }).collect(Collectors.toList());
+        return fastDumpTaskLogList;
     }
 }

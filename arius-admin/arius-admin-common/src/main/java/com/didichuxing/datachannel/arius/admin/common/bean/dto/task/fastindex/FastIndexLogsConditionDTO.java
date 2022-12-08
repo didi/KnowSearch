@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex;
 
+import java.util.Date;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
@@ -30,9 +31,9 @@ public class FastIndexLogsConditionDTO extends PageDTO {
     @ApiModelProperty("日志级别：1.DEBUG 2.INFO 3.WARNING 4.ERROR 5.CRITICAL")
     private String  logLevel;
     @ApiModelProperty("开始时间")
-    private Long    startTime;
+    private Date    startTime;
     @ApiModelProperty("结束时间")
-    private Long    endTime;
+    private Date endTime;
 
     @ApiModelProperty("排序字段 时间timeStamp")
     private String  sortTerm;

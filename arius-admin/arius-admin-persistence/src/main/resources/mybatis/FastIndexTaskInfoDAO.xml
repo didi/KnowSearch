@@ -403,4 +403,24 @@
         where id in
         <foreach collection="list" index="index" item="item" separator=",">#{item}</foreach>
     </update>
+    <select id="listFastIndexLogsByCondition"
+            resultType="com.didichuxing.datachannel.arius.admin.common.bean.entity.task.fastindex.FastIndexTaskInfo">
+        select
+        <include refid="Base_Column_List"/>
+        from fast_index_task_info
+        where task_id = #{param.taskId}
+        <if test="param.templateName != null">
+            and template_name = #{param.templateName}
+        </if>
+        <if test="param.indexName != null">
+            and index_name = #{param.indexName}
+        </if>
+        <if test="param.startTime != null">
+            and task_end_time &gt;= #{param.startTime}
+        </if>
+        <if test="param.endTime != null">
+            and task_end_time &lt;= #{param.endTime}
+        </if>
+        order by  ${sortTerm}  ${sortType}
+    </select>
 </mapper>

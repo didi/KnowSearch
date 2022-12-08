@@ -2,6 +2,9 @@ package com.didichuxing.datachannel.arius.admin.core.service.task.fastindex;
 
 import java.util.List;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexLogsConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.task.fastindex.FastIndexLogsConditionPO;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,8 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.FastIndexT
  */
 @Service
 public class FastIndexTaskServiceImpl implements FastIndexTaskService {
+
+    private static final String DEFAULT_SORT_TERM = "timestamp";
 
     @Autowired
     private FastIndexTaskInfoDAO fastIndexTaskInfoDAO;
@@ -50,6 +55,16 @@ public class FastIndexTaskServiceImpl implements FastIndexTaskService {
     @Override
     public List<Integer> listTemplateIdByTaskId(Integer taskId) {
         return fastIndexTaskInfoDAO.listTemplateIdByTaskId(taskId);
+    }
+
+    @Override
+    public List<FastIndexTaskInfo> listFastIndexLogsByCondition(FastIndexLogsConditionDTO condition) {
+        String sortTerm = "task_end_time";
+        if(!DEFAULT_SORT_TERM.equals(condition.getSortTerm())){
+            sortTerm = condition.getSortTerm();
+        }
+        String sortType = condition.getOrderByDesc() ? "desc" : "asc";
+        return fastIndexTaskInfoDAO.listFastIndexLogsByCondition(ConvertUtil.obj2Obj(condition, FastIndexLogsConditionPO.class), sortTerm, sortType);
     }
 
     @Override

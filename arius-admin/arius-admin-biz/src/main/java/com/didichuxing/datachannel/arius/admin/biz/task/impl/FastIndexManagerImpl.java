@@ -3,20 +3,26 @@ package com.didichuxing.datachannel.arius.admin.biz.task.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.FAST_INDEX_TASK_LOG;
 import static com.didichuxing.datachannel.arius.admin.common.constant.task.FastIndexConstant.*;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_INDEX_INCLUDE_NODE_NAME;
+import static java.util.regex.Pattern.compile;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastIndexBriefVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.*;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
@@ -61,10 +67,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.Fas
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.FastIndexConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.FastIndexTaskStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -110,6 +112,7 @@ public class FastIndexManagerImpl implements FastIndexManager {
     private static final String                                      INDEX_ROUTING_ALLOCATION_INCLUDE_NAME          = "index.routing.allocation.include._name";
     private static final String                                      INDEX_ROUTING_ALLOCATION_INCLUDE_TIER_PREFERENCE          = "index.routing.allocation.include._tier_preference";
     private static final long                                        TASK_WAITING_TIME                     = 5 * 1000L;
+    public static final String                                   VERSION_PREFIX_PATTERN                      = "^\\d*.\\d*.\\d*";
 
     @Autowired
     protected IndexTemplateService                                   indexTemplateService;
@@ -529,6 +532,16 @@ public class FastIndexManagerImpl implements FastIndexManager {
         processDTO.setStatus(opTask.getStatus());
         processDTO.setExpandData(JSON.toJSONString(fastIndexDTO));
         return processTask(processDTO);
+    }
+
+    @Override
+    public List<ClusterPhyVO> clustersSupportedFastDump() {
+        ClusterPhyDTO clusterPhyDTO = new ClusterPhyDTO();
+        List<ClusterPhy> clusterPhyList = clusterPhyService.listClustersByCondt(clusterPhyDTO).stream()
+                .filter(clusterPhy -> FastDumpSupportESVersionEnum.isExist(getESBigVersion(clusterPhy.getEsVersion())))
+                .collect(Collectors.toList());
+        List<ClusterPhyVO> clusterPhyVOList = ConvertUtil.list2List(clusterPhyList, ClusterPhyVO.class);
+        return clusterPhyVOList;
     }
 
     @Override
@@ -1469,4 +1482,18 @@ public class FastIndexManagerImpl implements FastIndexManager {
         return Result.buildSucc();
     }
 
+    /**
+     * 获取es的版本前缀
+     *
+     * @param esVersion
+     * @return {@link String}
+     */
+    private static String getESBigVersion(String esVersion) {
+        Pattern pattern = compile(VERSION_PREFIX_PATTERN);
+        final Matcher matcher = pattern.matcher(esVersion);
+        if (matcher.find()) {
+            return matcher.group(0);
+        }
+        return "";
+    }
 }

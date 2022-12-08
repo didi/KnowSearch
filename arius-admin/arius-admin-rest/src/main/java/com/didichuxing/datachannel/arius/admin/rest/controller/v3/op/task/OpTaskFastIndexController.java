@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.Fa
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexLogsConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.fastindex.FastIndexRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.fastindex.FastDumpTaskLogVO;
@@ -109,16 +110,25 @@ public class OpTaskFastIndexController {
 
     @GetMapping("/{cluster}/{indexName}/setting")
     @ResponseBody
-    @ApiOperation(value = "查询setting")
+    @ApiOperation(value = "获取索引setting")
     public Result<IndexSettingVO> getSetting(@PathVariable String cluster, @PathVariable String indexName,
                                              HttpServletRequest request) {
         return fastIndexManager.getSetting(cluster, indexName, HttpRequestUtil.getProjectId(request));
     }
+
     @GetMapping("/template/{logicClusterId}/{logicId}/setting")
     @ResponseBody
     @ApiOperation(value = "获取模板Setting接口")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<IndexTemplatePhySetting> getTemplateSettings(@PathVariable("logicId") Integer logicId, @PathVariable("logicClusterId") Long logicClusterId) {
         return fastIndexManager.getTemplateSettings(logicId, logicClusterId);
+    }
+
+    @GetMapping("/clusters/supported/fast-dump")
+    @ResponseBody
+    @ApiOperation(value = "获取当前支持数据迁移的集群版本,使用动态配置获取支持的版本")
+    public Result<List<ClusterPhyVO>> clustersSupportedFastDump(HttpServletRequest request) {
+        List<ClusterPhyVO> fastDump = fastIndexManager.clustersSupportedFastDump();
+        return Result.buildSucc(fastDump);
     }
 }
