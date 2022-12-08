@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.ConfigConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayConfigVO;
-import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.op.manager.ComponentGroupConfigWithHostVO;
 import com.didiglobal.logi.op.manager.interfaces.vo.ComponentGroupConfigVO;
 import java.util.List;
 
@@ -42,5 +42,5 @@ public interface GatewayClusterConfigManager {
 		 * @param gatewayClusterId 网关集群 ID。
 		 * @return ComponentGroupConfigVO 列表
 		 */
-		Result<List<ComponentGroupConfig>> getConfigsByGatewayId(Integer gatewayClusterId);
+		Result<List<ComponentGroupConfigWithHostVO>> getConfigsByGatewayId(Integer gatewayClusterId);
 }

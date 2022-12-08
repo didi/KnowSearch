@@ -67,16 +67,18 @@ public class ECMOptaskV3Controller {
 		@ApiOperation(value = "zeus 查看任务执行完成后的标准输出")
 		public Result<String> getTaskStdOuts(
 				@RequestParam(value = "taskId", required = true) Integer taskId,
-				@RequestParam(value = "hostname", required = true) String hostname) {
-				return opTaskManager.getTaskLog(taskId, hostname, TaskLogEnum.STDOUT.getType());
+				@RequestParam(value = "hostname", required = true) String hostname,
+				@RequestParam(value = "groupName", required = true) String groupName) {
+				return opTaskManager.getTaskLog(taskId, hostname, groupName, TaskLogEnum.STDOUT.getType());
 		}
 		
 		@GetMapping("/log/stderr")
 		@ApiOperation(value = "zeus 查看任务执行完成后的错误输出")
 		public Result<String> getTaskStdErrs(
 				@RequestParam(value = "taskId", required = true) Integer taskId,
-				@RequestParam(value = "hostname", required = true) String hostname) {
-				return opTaskManager.getTaskLog(taskId, hostname, TaskLogEnum.STDERR.getType());
+				@RequestParam(value = "hostname", required = true) String hostname,
+				@RequestParam(value = "groupName", required = true) String groupName) {
+				return opTaskManager.getTaskLog(taskId, hostname, groupName, TaskLogEnum.STDERR.getType());
 		}
 		
 		@GetMapping("/detail-info")

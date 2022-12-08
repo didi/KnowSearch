@@ -30,8 +30,11 @@ import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClust
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeService;
 import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
+import com.google.common.collect.Lists;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -130,8 +133,35 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		
 		@Override
 		public Result<Void> expandNodesWithECM(List<GatewayNodeHostDTO> nodes) {
-			// 无需写入到操作记录，工单操作中生成操作记录即可
-			return Result.build(gatewayNodeService.insertBatch(nodes));
+				// 无需写入到操作记录，工单操作中生成操作记录即可
+				// 校验节点是否已经写入
+				final List<GatewayClusterNodePO> gatewayClusterNodePOS = gatewayNodeService.listByClusterName(
+						nodes.get(0).getClusterName());
+				final Map<String, GatewayNodeHostDTO> expandKey2DTOMap = ConvertUtil.list2Map(
+						nodes, i -> String.format("%s-%s-%s", i.getClusterName(),
+								i.getHostName(), i.getPort()));
+				
+				final List<String> key = gatewayClusterNodePOS.stream()
+						.map(i -> String.format("%s-%s-%s", i.getClusterName(),
+								i.getHostName(), i.getPort()))
+						.collect(Collectors.toList());
+				final List<String> keyExpand = nodes.stream()
+						.map(i -> String.format("%s-%s-%s", i.getClusterName(),
+								i.getHostName(), i.getPort()))
+						.collect(Collectors.toList());
+				
+				if (new HashSet<>(key).containsAll(keyExpand)) {
+						return Result.buildSucc();
+				}
+				List<GatewayNodeHostDTO> expands = Lists.newArrayList();
+				// 过滤出未呗写入的节点
+				for (Entry<String, GatewayNodeHostDTO> keyGatewayNodeHostDTOEntry :
+						expandKey2DTOMap.entrySet()) {
+						if (!key.contains(keyGatewayNodeHostDTOEntry.getKey())) {
+								expands.add(keyGatewayNodeHostDTOEntry.getValue());
+						}
+				}
+				return Result.build(gatewayNodeService.insertBatch(expands));
 		}
 		
 		@Override

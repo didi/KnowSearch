@@ -256,14 +256,14 @@ public class OpTaskManagerImpl implements OpTaskManager {
     }
     
     @Override
-    public Result<String> getTaskLog(Integer id, String hostname, int type) {
+    public Result<String> getTaskLog(Integer id, String hostname, String groupName, int type) {
         final OpTask opTask = opTaskService.getById(id);
         Result<Void> result = checkCorrectnessTask(opTask);
         if (result.failed()){
             return Result.buildFrom(result);
         }
         final Integer taskId = Integer.valueOf(opTask.getBusinessKey());
-        return Result.buildFromWithData(taskService.getTaskLog(taskId, hostname, type));
+        return Result.buildFromWithData(taskService.getTaskLog(taskId, hostname, type,groupName));
     }
     
     @Override

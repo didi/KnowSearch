@@ -8,21 +8,29 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.ConfigConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayConfigVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.op.manager.ComponentGroupConfigWithHostVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClusterService;
 import com.didiglobal.logi.op.manager.application.ComponentService;
+import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHost;
+import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.interfaces.vo.ComponentGroupConfigVO;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+
+;
 
 /**
  * 网关集群配置
@@ -31,13 +39,15 @@ import org.springframework.stereotype.Component;
  * @date 2022/11/04
  * @since 0.3.2
  */
-@Component
+@org.springframework.stereotype.Component
 @NoArgsConstructor
 public class GatewayClusterConfigManagerImpl implements GatewayClusterConfigManager {
 	@Autowired
 	private GatewayClusterService gatewayClusterService;
 	@Autowired
 	private ComponentService      componentService;
+	@Autowired
+	private ComponentDomainService componentDomainService;
 	@Autowired
 	private HandleFactory         handleFactory;
 	@Override
@@ -74,11 +84,36 @@ public class GatewayClusterConfigManagerImpl implements GatewayClusterConfigMana
 	}
 		
 		@Override
-		public Result<List<ComponentGroupConfig>> getConfigsByGatewayId(Integer gatewayClusterId) {
-				  final Integer componentIdById = gatewayClusterService.getComponentIdById(gatewayClusterId);
-        if (Objects.isNull(componentIdById)) {
-            return Result.buildSucc(Collections.emptyList());
-        }
-        return Result.buildFromWithData(componentService.getComponentConfig(componentIdById));
+		public Result<List<ComponentGroupConfigWithHostVO>> getConfigsByGatewayId(Integer gatewayClusterId) {
+				final Integer componentIdById = gatewayClusterService.getComponentIdById(gatewayClusterId);
+				if (Objects.isNull(componentIdById)) {
+						return Result.buildSucc(Collections.emptyList());
+				}
+				
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Component> componentRes = componentService.queryComponentById(
+						componentIdById);
+				if (Objects.isNull(componentRes.getData()) || CollectionUtils.isEmpty(
+						componentRes.getData().getGroupConfigList())) {
+						return Result.buildSucc(Collections.emptyList());
+				}
+				final List<Integer> groupConfigIds = componentService.getComponentConfig(
+								componentIdById).getData().stream().map(ComponentGroupConfig::getId)
+						.collect(Collectors.toList());
+				
+				final Map<String, List<ComponentHost>> groupName2HostLists = ConvertUtil.list2MapOfList(
+						componentRes.getData().getHostList(),
+						ComponentHost::getGroupName, i -> i);
+				
+				final List<ComponentGroupConfig> data = componentRes.getData().getGroupConfigList()
+						.stream().filter(i->groupConfigIds.contains(i.getId())).collect(Collectors.toList());
+				final List<ComponentGroupConfigWithHostVO> hostVOS = ConvertUtil.list2List(data,
+						ComponentGroupConfigWithHostVO.class);
+				for (ComponentGroupConfigWithHostVO hostVO : hostVOS) {
+						final String              groupName      = hostVO.getGroupName();
+						final List<ComponentHost> componentHosts = groupName2HostLists.get(groupName);
+						hostVO.setComponentHosts(componentHosts);
+				}
+				
+				return Result.buildSucc(hostVOS);
 		}
 }
