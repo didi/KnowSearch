@@ -497,6 +497,10 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
             param.setHttpWriteAddress("");
         }
 
+        if (param.getHttpAddress() == null) {
+            param.setHttpAddress("");
+        }
+
         if (param.getPassword() == null) {
             param.setPassword("");
         }
