@@ -63,4 +63,12 @@ public class ClusterJoinDTO extends BaseDTO {
 
     @ApiModelProperty("cerebro外链地址")
     private String                    cerebroAddress;
+
+    @ApiModelProperty("http地址-读")
+    private String                     httpAddress;
+
+    @ApiModelProperty("http地址-写")
+    private String                     httpWriteAddress;
+
+
 }
