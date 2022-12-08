@@ -125,6 +125,9 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
     @ApiModelProperty("cerebro外链地址")
     private String                    cerebroAddress;
 
+    @ApiModelProperty("代理地址")
+    private String                    proxyAddress;
+
     /**
      * 添加逻辑集群
      *

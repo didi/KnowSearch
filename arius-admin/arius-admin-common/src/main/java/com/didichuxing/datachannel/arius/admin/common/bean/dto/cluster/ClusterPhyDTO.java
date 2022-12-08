@@ -95,7 +95,6 @@ public class ClusterPhyDTO extends PageDTO {
 
     @ApiModelProperty("集群创建人")
     private String                     creator;
-    
 
     @ApiModelProperty("集群密码")
     private String                     password;
@@ -138,4 +137,7 @@ public class ClusterPhyDTO extends PageDTO {
 
     @ApiModelProperty("cerebro外链地址")
     private String                    cerebroAddress;
+
+    @ApiModelProperty("代理地址")
+    private String                    proxyAddress;
 }

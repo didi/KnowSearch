@@ -562,6 +562,9 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         if (null == param.getCerebroAddress()) {
             param.setCerebroAddress("");
         }
+        if (null == param.getProxyAddress()) {
+            param.setProxyAddress("");
+        }
     }
 
     /**

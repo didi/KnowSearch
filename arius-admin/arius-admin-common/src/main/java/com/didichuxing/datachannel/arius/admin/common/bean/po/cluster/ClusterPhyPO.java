@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.po.cluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -169,6 +170,11 @@ public class ClusterPhyPO extends BasePO {
      * cerebro外链地址
      */
     private String                    cerebroAddress;
+
+    /**
+     * 代理地址
+     */
+    private String                    proxyAddress;
 
     @Override
     public boolean equals(Object obj) {
