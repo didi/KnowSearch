@@ -86,7 +86,7 @@ public class FastIndexTaskLogPageSearchHandle extends
 
         List<FastIndexTaskInfo> taskInfoList = fastIndexTaskService.listByTaskId(condition.getTaskId());
         List<FastIndexTaskInfo> ret = taskInfoList;
-        List<String> fastDumpTaskIdList = Lists.newArrayList();
+        List<String> fastDumpTaskIdList = Lists.newArrayList("");
         if (StringUtils.isNotBlank(condition.getFastDumpTaskId())) {
             ret = taskInfoList.stream()
                     .filter(obj -> StringUtils.equals(condition.getFastDumpTaskId(), obj.getFastDumpTaskId()))
