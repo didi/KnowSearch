@@ -888,6 +888,7 @@ public class FastIndexManagerImpl implements FastIndexManager {
     private Result<List<FastIndexTaskInfo>> checkReadFileRateLimit(FastIndexDTO fastIndexDTO, int size) {
         Long taskReadRate = fastIndexDTO.getTaskReadRate();
         if (null != taskReadRate && taskReadRate > 0) {
+            //当没有索引时
             if (size == 0 && taskReadRate < 1000L) {
                 return Result.buildFail(String.format(GET_READ_FILE_RATE_LIMIT_MSG, 1000));
             }
@@ -1134,7 +1135,9 @@ public class FastIndexManagerImpl implements FastIndexManager {
         BigDecimal finalRateLimit = BigDecimal.valueOf(rateLimit).divide(BigDecimal.valueOf(taskInfoList.size()),
             RoundingMode.UP);
         //校验任务读取速率
-        Result<List<FastIndexTaskInfo>> checkReadFileRateLimitResult = checkReadFileRateLimit(fastIndexDTO, taskInfoList.size());
+        FastIndexDTO newFastIndexDTO = new FastIndexDTO();
+        newFastIndexDTO.setTaskReadRate(rateLimit.longValue());
+        Result<List<FastIndexTaskInfo>> checkReadFileRateLimitResult = checkReadFileRateLimit(newFastIndexDTO, taskInfoList.size());
         if (checkReadFileRateLimitResult.failed()) {
             return Result.buildFrom(checkReadFileRateLimitResult);
         }
