@@ -1,5 +1,6 @@
 package com.didi.arius.gateway.core.component;
 
+import com.didiglobal.knowframework.observability.Observability;
 import org.elasticsearch.common.util.concurrent.EsExecutors;
 import org.jboss.netty.util.ThreadRenamingRunnable;
 import org.springframework.stereotype.Component;
@@ -24,12 +25,12 @@ public class ThreadPool {
 
 	@PostConstruct
 	public void init() {
-		scheduleThreadPool = Executors.newScheduledThreadPool(
+		scheduleThreadPool = Observability.wrap(Executors.newScheduledThreadPool(
 				scheduleThreadNum, new DeamondThreadFactory(
-						"scheduleThreadPool"));
+						"scheduleThreadPool")));
 		
-		searchExecutor = EsExecutors.newFixed("search", searchSize, searchQueueSize, new DeamondThreadFactory(
-				"searchThreadPool"));
+		searchExecutor = Observability.wrap(EsExecutors.newFixed("search", searchSize, searchQueueSize, new DeamondThreadFactory(
+				"searchThreadPool")));
 	}
 	
 	public void submitScheduleAtFixTask(Runnable runnable, long initialDelay,

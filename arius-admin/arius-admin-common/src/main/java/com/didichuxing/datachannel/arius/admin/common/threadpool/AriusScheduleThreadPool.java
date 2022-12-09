@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.threadpool;
 
+import com.didiglobal.knowframework.observability.Observability;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -17,8 +18,8 @@ public class AriusScheduleThreadPool {
 
     @PostConstruct
     public void init() {
-        scheduleThreadPool = new ScheduledThreadPoolExecutor(scheduleThreadNum,
-            new DesmondThreadFactory("scheduleThreadPool"));
+        scheduleThreadPool = Observability.wrap(new ScheduledThreadPoolExecutor(scheduleThreadNum,
+                new DesmondThreadFactory("scheduleThreadPool")));
     }
 
     public void submitScheduleAtFixedRateTask(Runnable runnable, long initialDelay, long period) {

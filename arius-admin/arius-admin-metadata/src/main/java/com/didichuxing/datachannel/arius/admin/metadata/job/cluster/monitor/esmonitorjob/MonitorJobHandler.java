@@ -23,6 +23,7 @@ import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmo
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor.AriusMetaJobClusterDistributeDAO;
 import com.didiglobal.knowframework.elasticsearch.client.ESClient;
+import com.didiglobal.knowframework.observability.Observability;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -38,10 +39,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_FAILED;
@@ -125,7 +123,7 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
     @Value("${monitorJob.threadPool.maxsize:30}")
     private int                                                                        maxPoolSize;
 
-    private ThreadPoolExecutor                                                         threadPool;
+    private ExecutorService threadPool;
 
     /**
      * 监控采集任务执行情况
@@ -521,12 +519,12 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
      */
     private boolean checkThreadPool() {
         if (threadPool == null || threadPool.isShutdown()) {
-            threadPool = new ThreadPoolExecutor(poolSize, maxPoolSize + 10, 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(100),
-                new BasicThreadFactory.Builder().namingPattern("monitor-cluster-data-collect-%d").build());
+            threadPool = Observability.wrap(new ThreadPoolExecutor(poolSize, maxPoolSize + 10, 0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<>(100),
+                    new BasicThreadFactory.Builder().namingPattern("monitor-cluster-data-collect-%d").build()));
         }
 
-        long blockSize = threadPool.getQueue().size();
+        long blockSize = ((ThreadPoolExecutor) threadPool).getQueue().size();
         if (blockSize > WARN_BLOCK_SIZE) {
             LOGGER.warn(
                 "class=MonitorJobHandler||method=checkThreadPool||blockSize={}||msg=collect thread pool has block task",

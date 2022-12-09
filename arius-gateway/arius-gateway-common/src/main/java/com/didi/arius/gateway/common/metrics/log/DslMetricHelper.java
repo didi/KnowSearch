@@ -14,6 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.observability.Observability;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.util.concurrent.ConcurrentCollections;
 
@@ -127,10 +128,10 @@ public class DslMetricHelper {
 
 
     private static ExecutorService newFixedThreadPool() {
-        return new ThreadPoolExecutor(threadSize, threadSize, 0L, TimeUnit.MILLISECONDS,
+        return Observability.wrap(new ThreadPoolExecutor(threadSize, threadSize, 0L, TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<>(queueSize), (runnable, threadPoolExecutor) ->
                 //拒绝了就直接丢弃
-                bootLogger.warn("deal log busy so discard log"));
+                bootLogger.warn("deal log busy so discard log")));
     }
 
     public static void resetMap() {

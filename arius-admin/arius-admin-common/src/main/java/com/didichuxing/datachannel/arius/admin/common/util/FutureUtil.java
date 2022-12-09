@@ -6,6 +6,7 @@ import java.util.concurrent.*;
 
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.observability.Observability;
 import com.google.common.collect.Lists;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -15,18 +16,18 @@ import org.apache.lucene.util.NamedThreadFactory;
 public class FutureUtil<T> {
     private static final ILog                             LOGGER        = LogFactory.getLog(FutureUtil.class);
 
-    private ThreadPoolExecutor                            executor;
+    private ExecutorService                            executor;
     private String                                        name;
 
     private Map<Long/*currentThreadId*/, List<Future<T>>> futuresMap;
 
     public final static FutureUtil<Void>                  DEAULT_FUTURE = FutureUtil.init("default");
 
-    public void setExecutor(ThreadPoolExecutor executor) {
+    public void setExecutor(ExecutorService executor) {
         this.executor = executor;
     }
 
-    public ThreadPoolExecutor getExecutor() {
+    public ExecutorService getExecutor() {
         return executor;
     }
 
@@ -41,9 +42,9 @@ public class FutureUtil<T> {
     public static <T> FutureUtil<T> init(String name, int corePoolSize, int maxPoolSize, int queueSize) {
         FutureUtil<T> futureUtil = new FutureUtil<>();
 
-        ThreadPoolExecutor exe = new ThreadPoolExecutor(corePoolSize, maxPoolSize, 3000, TimeUnit.MILLISECONDS,
-            new LinkedBlockingDeque<>(queueSize), new NamedThreadFactory("Arius-admin-FutureUtil-" + name),
-            new ThreadPoolExecutor.DiscardOldestPolicy());//对拒绝任务不抛弃，而是抛弃队列里面等待最久的一个线程，然后把拒绝任务加到队列。
+        ExecutorService exe = Observability.wrap(new ThreadPoolExecutor(corePoolSize, maxPoolSize, 3000, TimeUnit.MILLISECONDS,
+                new LinkedBlockingDeque<>(queueSize), new NamedThreadFactory("Arius-admin-FutureUtil-" + name),
+                new ThreadPoolExecutor.DiscardOldestPolicy()));//对拒绝任务不抛弃，而是抛弃队列里面等待最久的一个线程，然后把拒绝任务加到队列。
 
         futureUtil.setExecutor(exe);
         futureUtil.setName(name);

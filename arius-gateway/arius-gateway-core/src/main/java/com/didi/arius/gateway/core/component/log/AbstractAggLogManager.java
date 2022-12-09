@@ -3,6 +3,7 @@ package com.didi.arius.gateway.core.component.log;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.observability.Observability;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -26,7 +27,7 @@ public abstract class AbstractAggLogManager {
      * @param interval   处理间隔
      */
     public void init(int threadSize, Runnable runnable, int interval) {
-        scheduleThreadPool = Executors.newScheduledThreadPool(threadSize);
+        scheduleThreadPool = Observability.wrap(Executors.newScheduledThreadPool(threadSize));
         scheduleThreadPool.scheduleWithFixedDelay(runnable, interval, interval, TimeUnit.MINUTES);
     }
 }

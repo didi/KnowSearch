@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeSt
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.*;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.observability.Observability;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.lucene.util.NamedThreadFactory;
@@ -15,6 +16,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -34,11 +36,11 @@ public class MetaDataMonitorMetrics2ZHListener implements ApplicationListener<Me
     //@Value("${zh.metrics.kafka.topic}")
     private String              zhMetricsKafkaTopic;
 
-    private ThreadPoolExecutor  esExecutor = new ThreadPoolExecutor(10, 20, 1000, TimeUnit.MILLISECONDS,
-        new LinkedBlockingDeque<>(4000), new NamedThreadFactory("Arius-Meta-MonitorMetricsSender-ZH"),
-        (r, e) -> LOGGER.warn(
-            "class=MetaDataMonitorMetrics2ZHListener||msg=Arius-Meta-MonitorMetricsSender-ZH Deque is blocked, taskCount:{}"
-                              + e.getTaskCount()));
+    private ExecutorService esExecutor = Observability.wrap(new ThreadPoolExecutor(10, 20, 1000,TimeUnit.MILLISECONDS,
+            new LinkedBlockingDeque<>(4000), new NamedThreadFactory("Arius-Meta-MonitorMetricsSender-ZH"),
+            (r, e) -> LOGGER.warn(
+                    "class=MetaDataMonitorMetrics2ZHListener||msg=Arius-Meta-MonitorMetricsSender-ZH Deque is blocked, taskCount:{}"
+                            + e.getTaskCount())));
 
     @Override
     public void onApplicationEvent(MetaDataMetricsEvent event) {

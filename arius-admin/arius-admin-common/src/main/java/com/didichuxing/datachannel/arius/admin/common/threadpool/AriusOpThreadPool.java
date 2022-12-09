@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.threadpool;
 
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.observability.Observability;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
@@ -32,8 +33,8 @@ public class AriusOpThreadPool implements Executor {
     @PostConstruct
     public void init() {
         LOG.info("class=AriusOpThreadPool||method=init||AriusOpThreadPool init start..");
-        pool = new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<Runnable>(), springThreadFactory);
+        pool = Observability.wrap(new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(), springThreadFactory));
         Runtime.getRuntime().addShutdownHook(new Thread() {
 
             @Override

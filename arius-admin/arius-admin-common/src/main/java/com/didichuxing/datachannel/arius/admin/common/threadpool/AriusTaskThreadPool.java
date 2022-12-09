@@ -5,6 +5,7 @@ import java.util.concurrent.*;
 
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.observability.Observability;
 import lombok.NoArgsConstructor;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
@@ -31,8 +32,8 @@ public class AriusTaskThreadPool {
 
         // 这里注意需要 LinkedBlockingQueue 的容量大小设置，默认为接近无限大,
         // 随着worker数量积增，会导致内存压力持续上升，若部署在容器中, 服务会被容器主动kill掉
-        pool = new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<>(queueLen), springThreadFactory);
+        pool = Observability.wrap(new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(queueLen), springThreadFactory));
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             pool.shutdown();

@@ -3,6 +3,7 @@ package com.didi.arius.gateway.rest.tcp;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.observability.Observability;
 import org.elasticsearch.common.network.NetworkUtils;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
@@ -62,12 +63,12 @@ public class NettyTransport {
 	public void init() {
 		OpenChannelsHandler serverOpenChannels = new OpenChannelsHandler(logger);
 
-		ExecutorService bossThreadPool = Executors
+		ExecutorService bossThreadPool = Observability.wrap(Executors
 				.newCachedThreadPool(new DeamondThreadFactory(
-						"boss"));
-		ExecutorService workerThreadPool = Executors
+						"boss")));
+		ExecutorService workerThreadPool = Observability.wrap(Executors
 				.newCachedThreadPool(new DeamondThreadFactory(
-						"worker"));
+						"worker")));
 		NioServerSocketChannelFactory serverNioFactory = new NioServerSocketChannelFactory(bossThreadPool,
 				bossThreadCount, workerThreadPool,
 				workerCount);

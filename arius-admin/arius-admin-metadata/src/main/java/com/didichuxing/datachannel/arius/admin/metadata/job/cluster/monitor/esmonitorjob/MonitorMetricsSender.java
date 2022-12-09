@@ -2,11 +2,13 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esm
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
+import com.didiglobal.knowframework.observability.Observability;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.lucene.util.NamedThreadFactory;
 import org.springframework.stereotype.Component;
@@ -36,11 +38,11 @@ public class MonitorMetricsSender {
 
     private static final int    THRESHOLD  = 100;
 
-    private ThreadPoolExecutor  esExecutor = new ThreadPoolExecutor(30, 60, 6000, TimeUnit.MILLISECONDS,
-        new LinkedBlockingDeque<>(4000), new NamedThreadFactory("Arius-Meta-MonitorMetricsSender-ES"),
-        (r, e) -> LOGGER
-            .warn("class=MonitorMetricsSender||msg=Arius-Meta-MonitorMetricsSender-ES Deque is blocked, taskCount:{}"
-                  + e.getTaskCount()));
+    private ExecutorService esExecutor = Observability.wrap(new ThreadPoolExecutor(30, 60, 6000,TimeUnit.MILLISECONDS,
+            new LinkedBlockingDeque<>(4000), new NamedThreadFactory("Arius-Meta-MonitorMetricsSender-ES"),
+            (r, e) -> LOGGER
+                    .warn("class=MonitorMetricsSender||msg=Arius-Meta-MonitorMetricsSender-ES Deque is blocked, taskCount:{}"
+                            + e.getTaskCount())));
 
     public void sendNodeInfo(List<ESNodeStats> esNodeStatsList) {
         send2es(AriusStatsEnum.NODE_INFO, esNodeStatsList);
