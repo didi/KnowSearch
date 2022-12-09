@@ -347,10 +347,9 @@ public class ESTemplateServiceImpl implements ESTemplateService {
             return esTemplateDAO.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
                     templateHealthEnum);
         } catch (ESOperateException e) {
-            LOGGER.error("class={}||method=hasMatchHealthIndexByExpressionTemplateHealthEnum||clusterName={}",
-                    getClass().getSimpleName(), cluster, e);
-            return false;
+            //pass
         }
-        
+        return false;
+
     }
 }

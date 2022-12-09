@@ -136,10 +136,8 @@ public class FutureUtil<T> {
             futuresMap.remove(currentThreadId);
         }
 
-        if (!EnvUtil.isOnline()) {
-            LOGGER.info("class=FutureUtil||method={}||futuresSize={}||msg=all future excu done!", name,
-                currentFutures.size());
-        }
+        LOGGER.debug("class=FutureUtil||method={}||futuresSize={}||msg=all future excu done!", name, currentFutures.size());
+
     }
 
     /**
@@ -178,10 +176,8 @@ public class FutureUtil<T> {
             futuresMap.remove(currentThreadId);
         }
 
-        if (!EnvUtil.isOnline()) {
-            LOGGER.info("class=FutureUtil||method={}||futuresSize={}||msg=all future excu done!", name,
-                currentFutures.size());
-        }
+        LOGGER.debug("class=FutureUtil||method={}||futuresSize={}||msg=all future excu done!", name,currentFutures.size());
+
     }
 
     public void waitExecute() {
@@ -217,10 +213,7 @@ public class FutureUtil<T> {
             futuresMap.remove(currentThreadId);
         }
 
-        if (!EnvUtil.isOnline()) {
-            LOGGER.info("class=FutureUtil||method={}||futuresSize={}||msg=all future excu done!", name,
-                currentFutures.size());
-        }
+        LOGGER.debug("class=FutureUtil||method={}||futuresSize={}||msg=all future excu done!", name,currentFutures.size());
         return list;
     }
 

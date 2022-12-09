@@ -22,9 +22,9 @@ public class ESNodeToIndexComputer {
         try {
             //无需计算
             if (computeType == MetricsComputeType.NONE) {
-                if (EnvUtil.isTest()) {
-                    LOGGER.warn("class=ESNodeToIndexComputer||method=compute||valueName={}", dataBean.getValueName());
-                }
+
+                LOGGER.debug("class=ESNodeToIndexComputer||method=compute||valueName={}", dataBean.getValueName());
+
 
                 return String.valueOf(dataBean.getValue());
             }
@@ -50,18 +50,16 @@ public class ESNodeToIndexComputer {
         Double second = metricsRegister.getBeforeComputeData(divisorKey);
 
         if (first == null || second == null) {
-            if (EnvUtil.isTest()) {
-                LOGGER.warn("class=ESNodeToIndexComputer||method=devireCompute||keyPre={}||value={}", keyPre,
-                    dataBean.getValueName());
-            }
+
+            LOGGER.debug("class=ESNodeToIndexComputer||method=devireCompute||keyPre={}||value={}", keyPre, dataBean.getValueName());
+
             return null;
         }
 
         Object value = computeType.compute(new ESNodeToIndexTempBean(first), new ESNodeToIndexTempBean(second));
         if (value == null) {
-            if (EnvUtil.isTest()) {
-                LOGGER.warn("class=ESNodeToIndexComputer||method=devireCompute||dataBean={}", dataBean);
-            }
+            LOGGER.debug("class=ESNodeToIndexComputer||method=devireCompute||dataBean={}", dataBean);
+
             return null;
         }
 
@@ -73,28 +71,24 @@ public class ESNodeToIndexComputer {
         ESNodeToIndexTempBean beforeData = metricsRegister.getBeforeNodeToIndexData(key);
         metricsRegister.putBeforeNodeToIndexData(key, dataBean);
         if (beforeData == null) {
-            if (EnvUtil.isTest()) {
-                LOGGER.warn("class=ESNodeToIndexComputer||method=simpleCompute||key={}", key);
-            }
+
+            LOGGER.debug("class=ESNodeToIndexComputer||method=simpleCompute||key={}", key);
+
             return null;
         } else {
 
             if (dataBean.getValue() == null) {
-                if (EnvUtil.isTest()) {
-                    LOGGER.warn(
-                        "class=ESNodeToIndexComputer||method=simpleCompute||dataBean={}||msg=dataValue is null!",
-                        dataBean);
-                }
+
+                LOGGER.debug("class=ESNodeToIndexComputer||method=simpleCompute||dataBean={}||msg=dataValue is null!", dataBean);
+
                 return null;
             }
 
             Double value = computeType.compute(beforeData, dataBean);
             if (value == null) {
-                if (EnvUtil.isTest()) {
-                    LOGGER.warn(
-                        "class=ESNodeToIndexComputer||method=simpleCompute||dataBean={}||msg=computer value is null!",
-                        dataBean);
-                }
+
+                LOGGER.debug("class=ESNodeToIndexComputer||method=simpleCompute||dataBean={}||msg=computer value is null!", dataBean);
+
                 return null;
             }
 

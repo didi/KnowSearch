@@ -166,9 +166,7 @@ public class MetaDataMonitorMetrics2ZHListener implements ApplicationListener<Me
     //        for(ZHMetricsData zhMetricsData : datas){
     //            if(null == zhMetricsData){continue;}
     //
-    //            if(!EnvUtil.isOnline()) {
-    //                LOGGER.warn("class=ZHMetricsSenderService||method=sendData||datas={}", JSON.toJSONString(zhMetricsData));
-    //            }
+    //                LOGGER.debug("class=ZHMetricsSenderService||method=sendData||datas={}", JSON.toJSONString(zhMetricsData));
     //
     //            ZHKafkaWriterService.sendMessage(zhMetricsKafkaTopic, JSON.toJSONString(zhMetricsData), (recordMetadata, e) -> {
     //                if(null != e){

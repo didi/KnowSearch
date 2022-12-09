@@ -92,10 +92,9 @@ public class MonitorMetricsSender {
             return true;
         }
 
-        if (EnvUtil.isPre()) {
-            LOGGER.info("class=MonitorMetricsSender||method=send2es||ariusStats={}||size={}", ariusStats.getType(),
+        LOGGER.debug("class=MonitorMetricsSender||method=send2es||ariusStats={}||size={}", ariusStats.getType(),
                 statsList.size());
-        }
+
 
         BaseAriusStatsESDAO baseAriusStatsEsDao = BaseAriusStatsESDAO.getByStatsType(ariusStats);
         if (Objects.isNull(baseAriusStatsEsDao)) {

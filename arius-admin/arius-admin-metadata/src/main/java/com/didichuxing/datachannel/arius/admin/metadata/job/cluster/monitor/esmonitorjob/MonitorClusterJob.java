@@ -290,7 +290,7 @@ public class MonitorClusterJob {
             clusterNodeStatsMap = getClusterNodeStatsConcurrently(esClient);
         }
 
-        LOGGER.info("class=MonitorClusterJob||method=getClusterNodeStats||clusterName={}||clusterNodeStatsMapSize={}",
+        LOGGER.debug("class=MonitorClusterJob||method=getClusterNodeStats||clusterName={}||clusterNodeStatsMapSize={}",
             clusterName, clusterNodeStatsMap.size());
 
         return clusterNodeStatsMap;
@@ -469,7 +469,7 @@ public class MonitorClusterJob {
             indexStatsMap = getIndexStatsByOnce(esClient);
         }
 
-        LOGGER.info("class=MonitorClusterJob||method=getIndexStats||clusterName={}||clusterNodeStatsMapSize={}",
+        LOGGER.debug("class=MonitorClusterJob||method=getIndexStats||clusterName={}||clusterNodeStatsMapSize={}",
             clusterName, indexStatsMap.size());
 
         return indexStatsMap;
@@ -1149,11 +1149,7 @@ public class MonitorClusterJob {
         try {
             return indexTemplateCache.get(cluster + "@" + indexName, () -> getTemplateName(cluster, indexName));
         } catch (Exception e) {
-            if (EnvUtil.isTest()) {
-                LOGGER.warn("class=MonitorJobHandler||method=getTemplateNameForCache||cluster={}||indexName={}"
-                            + "||msg=exception, indexName`s IndexTemplate is null!",
-                    cluster, indexName);
-            }
+            //pass
         }
         return null;
     }
