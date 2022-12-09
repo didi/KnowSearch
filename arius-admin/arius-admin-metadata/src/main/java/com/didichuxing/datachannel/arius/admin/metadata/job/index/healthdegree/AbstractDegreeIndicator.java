@@ -41,11 +41,10 @@ public abstract class AbstractDegreeIndicator implements IDegreeIndicator {
             }
         }
 
-        if (EnvUtil.isPre()) {
-            LOGGER.info("class=AbstractDegreeIndicator||method=exec||index={}||type={}||score={}||weightScore=={}",
+        LOGGER.debug("class=AbstractDegreeIndicator||method=exec||index={}||type={}||score={}||weightScore=={}",
                 degreeParam.getIndexTemplate().getName(), getType().getName(), baseRealTimePO.getScore(),
                 baseRealTimePO.getWeightScore());
-        }
+
 
         return baseRealTimePO;
     }

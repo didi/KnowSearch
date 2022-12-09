@@ -378,10 +378,8 @@ public class ESGatewayClient {
                 new ESQueryRequest().indices(indexName).types(typeName).source(queryDsl));
         } while (tryTimes-- > 0 && null == esQueryResponse);
 
-        if (!EnvUtil.isOnline()) {
-            LOGGER.warn("class=GatewayClient||method=performRequest||dataCenter={}||indexName={}||queryDsl={}||ret={}",
+        LOGGER.debug("class=GatewayClient||method=performRequest||dataCenter={}||indexName={}||queryDsl={}||ret={}",
                 EnvUtil.getDC(), indexName, queryDsl, JSON.toJSONString(esQueryResponse));
-        }
 
         return func.apply(esQueryResponse);
     }
@@ -394,11 +392,8 @@ public class ESGatewayClient {
                 new ESQueryRequest().routing(routingValue).indices(indexName).types(typeName).source(queryDsl));
         } while (tryTimes-- > 0 && null == esQueryResponse);
 
-        if (!EnvUtil.isOnline()) {
-            LOGGER.warn(
-                "class=GatewayClient||method=performRequestWithRouting||dataCenter={}||indexName={}||queryDsl={}||ret={}",
+        LOGGER.debug("class=GatewayClient||method=performRequestWithRouting||dataCenter={}||indexName={}||queryDsl={}||ret={}",
                 EnvUtil.getDC(), indexName, queryDsl, JSON.toJSONString(esQueryResponse));
-        }
 
         return func.apply(esQueryResponse);
     }
@@ -886,10 +881,8 @@ public class ESGatewayClient {
 
         ESClient esClient = queryClientMap.get(esUser);
 
-        if (!EnvUtil.isOnline()) {
-            LOGGER.info("class=GatewayClient||method=getGatewayClientByDataCenterAndIndexName||esUser={}||indexName={}",
+        LOGGER.debug("class=GatewayClient||method=getGatewayClientByDataCenterAndIndexName||esUser={}||indexName={}",
                 esUser, indexName);
-        }
 
         Header esUserHeader = esUserHeaderMap.get(esUser);
         if (esClient != null) {

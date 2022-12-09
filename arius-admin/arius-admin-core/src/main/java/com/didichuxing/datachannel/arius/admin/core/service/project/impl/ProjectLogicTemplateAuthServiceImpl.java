@@ -395,10 +395,9 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
      * @return result
      */
     private Result<Void> validateTemplateAuth(ProjectTemplateAuthDTO authDTO, OperationEnum operation) {
-        if (!EnvUtil.isOnline()) {
-            LOGGER.info("class=AppAuthServiceImpl||method=validateTemplateAuth||authDTO={}",
-                JSON.toJSONString(authDTO));
-        }
+
+        LOGGER.debug("class=AppAuthServiceImpl||method=validateTemplateAuth||authDTO={}",JSON.toJSONString(authDTO));
+
 
         if (authDTO == null) {
             return Result.buildParamIllegal("权限信息为空");

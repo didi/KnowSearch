@@ -38,11 +38,9 @@ public class TemplateProjectIdChangedListener implements ApplicationListener<Log
     private void handleTemplateProjectId(IndexTemplate oldIndexTemplate, IndexTemplate newIndexTemplate) {
         Integer logicTemplateId = oldIndexTemplate.getId();
 
-        if (!EnvUtil.isOnline()) {
-            LOGGER.info(
+        LOGGER.debug(
                 "class=LogicTemplateModifyEventListener||method=handleTemplateProjectId||oldIndexTemplate={}||newIndexTemplate={}",
                 JSON.toJSONString(oldIndexTemplate), JSON.toJSONString(newIndexTemplate));
-        }
 
         if (null == newIndexTemplate) {
             return;
@@ -57,9 +55,7 @@ public class TemplateProjectIdChangedListener implements ApplicationListener<Log
             oldIndexTemplate.getProjectId(), logicTemplateId, ProjectTemplateAuthEnum.RW,
              AriusUser.SYSTEM.getDesc());
 
-        if (!EnvUtil.isOnline()) {
-            LOGGER.info("class=LogicTemplateModifyEventListener||method=handleTemplateProjectId||result={}",
-                result.success());
-        }
+        LOGGER.debug("class=LogicTemplateModifyEventListener||method=handleTemplateProjectId||result={}", result.success());
+
     }
 }

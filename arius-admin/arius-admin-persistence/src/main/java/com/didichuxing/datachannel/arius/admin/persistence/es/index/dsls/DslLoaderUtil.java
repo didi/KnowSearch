@@ -101,9 +101,8 @@ public class DslLoaderUtil {
         // 格式化查询语句
         String dsl = trimJsonBank(String.format(loadDslContent, args));
         // 如果不是线上环境，则输出dsl语句
-        if (!EnvUtil.isOnline()) {
-            LOGGER.info("class=DslLoaderUtil||method=getFormatDslByFileName||dsl={}", dsl);
-        }
+        LOGGER.debug("class=DslLoaderUtil||method=getFormatDslByFileName||dsl={}", dsl);
+
 
         return dsl;
     }

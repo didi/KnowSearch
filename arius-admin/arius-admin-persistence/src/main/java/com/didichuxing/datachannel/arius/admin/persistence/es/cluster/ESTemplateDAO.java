@@ -430,10 +430,7 @@ public class ESTemplateDAO extends BaseESDAO {
             return null;
         }
 
-        if (!EnvUtil.isOnline()) {
-            LOGGER.warn("class=ESTemplateDAO||method=getTemplates||clusterName={}||templateName={}", clusterName,
-                templateName);
-        }
+        LOGGER.debug("class=ESTemplateDAO||method=getTemplates||clusterName={}||templateName={}", clusterName, templateName);
 
         return response.getMultiTemplatesConfig();
     }
