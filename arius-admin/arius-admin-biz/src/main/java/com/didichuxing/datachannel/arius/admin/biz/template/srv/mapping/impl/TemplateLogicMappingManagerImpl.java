@@ -718,9 +718,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             }
         }
 
-        if (!EnvUtil.isOnline()) {
-            LOGGER.warn("method=convert2Fields||ret={}||mapping={}", ret, mapping);
-        }
+        LOGGER.debug("method=convert2Fields||ret={}||mapping={}", ret, mapping);
+
 
         return ret;
     }

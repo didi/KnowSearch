@@ -233,11 +233,10 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
             }
             return Integer.valueOf(configInfoPO.getValue());
         } catch (NumberFormatException e) {
-            if (!EnvUtil.isOnline()) {
-                LOGGER.warn(
-                    "class=AriusConfigInfoServiceImpl||method=intSetting||group={}||name={}||msg=get config error!",
+
+            LOGGER.debug("class=AriusConfigInfoServiceImpl||method=intSetting||group={}||name={}||msg=get config error!",
                     group, name);
-            }
+
         }
         return defaultValue;
     }
@@ -258,11 +257,9 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
             }
             return Long.valueOf(configInfoPO.getValue());
         } catch (Exception e) {
-            if (!EnvUtil.isOnline()) {
-                LOGGER.warn(
-                    "class=AriusConfigInfoServiceImpl||method=longSetting||group={}||name={}||msg=get config error!",
+            LOGGER.debug("class=AriusConfigInfoServiceImpl||method=longSetting||group={}||name={}||msg=get config error!",
                     group, name);
-            }
+
         }
         return defaultValue;
     }
@@ -283,11 +280,7 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
             }
             return Double.valueOf(configInfoPO.getValue());
         } catch (Exception e) {
-            if (!EnvUtil.isOnline()) {
-                LOGGER.warn(
-                    "class=AriusConfigInfoServiceImpl||method=doubleSetting||group={}||name={}||msg=get config error!",
-                    group, name, e);
-            }
+            LOGGER.debug("class=AriusConfigInfoServiceImpl||method=doubleSetting||group={}||name={}||msg=get config error!",group, name, e);
         }
         return defaultValue;
     }
@@ -308,11 +301,7 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
             }
             return configInfoPO.getValue();
         } catch (Exception e) {
-            if (!EnvUtil.isOnline()) {
-                LOGGER.warn(
-                    "class=AriusConfigInfoServiceImpl||method=stringSetting||group={}||name={}||msg=get config error!",
-                    group, name, e);
-            }
+            LOGGER.debug("class=AriusConfigInfoServiceImpl||method=stringSetting||group={}||name={}||msg=get config error!",group, name, e);
         }
         return defaultValue;
     }
@@ -365,11 +354,7 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
             }
             return JSON.parseObject(configInfoPO.getValue(), clazz);
         } catch (Exception e) {
-            if (!EnvUtil.isOnline()) {
-                LOGGER.warn(
-                    "class=AriusConfigInfoServiceImpl||method=objectSetting||group={}||name={}||msg=get config error!",
-                    group, name, e);
-            }
+            LOGGER.debug("class=AriusConfigInfoServiceImpl||method=objectSetting||group={}||name={}||msg=get config error!", group, name, e);
         }
         return defaultValue;
     }

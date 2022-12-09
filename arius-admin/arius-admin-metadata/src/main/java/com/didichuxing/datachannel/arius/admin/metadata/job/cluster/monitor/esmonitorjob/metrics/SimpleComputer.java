@@ -24,18 +24,15 @@ public class SimpleComputer implements MetricsComputer {
             ESDataTempBean beforeData = metricsRegister.getBeforeEsData(key);
             metricsRegister.putBeforeEsData(key, esDataTempBean);
             if (beforeData == null) {
-                if (EnvUtil.isPre()) {
-                    LOGGER.info("class=SimpleComputer||method=compute||key={}||msg=beforeData is null!", key);
-                }
+                LOGGER.debug("class=SimpleComputer||method=compute||key={}||msg=beforeData is null!", key);
+
                 //防止启动AMS时误报
                 esDataTempBean.setSendToN9e(false);
                 return null;
             } else {
                 if (esDataTempBean.getValue() == null) {
-                    if (EnvUtil.isPre()) {
-                        LOGGER.error("class=SimpleComputer||method=compute||msg=collect data value is null. {}",
-                            esDataTempBean);
-                    }
+                    LOGGER.debug("class=SimpleComputer||method=compute||msg=collect data value is null. {}", esDataTempBean);
+
                     return null;
                 }
 

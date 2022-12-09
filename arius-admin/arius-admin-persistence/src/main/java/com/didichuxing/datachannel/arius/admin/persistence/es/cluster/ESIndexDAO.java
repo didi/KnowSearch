@@ -853,9 +853,8 @@ public class ESIndexDAO extends BaseESDAO {
             return null;
         }
 
-        if (!EnvUtil.isOnline()) {
-            LOGGER.warn("class=ESTemplateDAO||method=getIndexConfigs||response={}", JSON.toJSONString(response));
-        }
+        LOGGER.debug("class=ESTemplateDAO||method=getIndexConfigs||response={}", JSON.toJSONString(response));
+
 
         return response.getIndexsMapping();
     }

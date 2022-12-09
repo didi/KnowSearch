@@ -404,10 +404,9 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
      * @return result
      */
     private Result<Void> validateLogicClusterAuth(ProjectLogicClusterAuthDTO authDTO, OperationEnum operation) {
-        if (!EnvUtil.isOnline()) {
-            LOGGER.info("class=AppAuthServiceImpl||method=validateTemplateAuth||authDTO={}||operator={}",
+
+        LOGGER.debug("class=AppAuthServiceImpl||method=validateTemplateAuth||authDTO={}||operator={}",
                 JSON.toJSONString(authDTO), operation);
-        }
 
         if (authDTO == null) {
             return Result.buildParamIllegal("权限信息为空");
