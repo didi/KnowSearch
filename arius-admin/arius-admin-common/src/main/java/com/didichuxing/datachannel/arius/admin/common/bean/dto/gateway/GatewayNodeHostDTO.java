@@ -29,7 +29,7 @@ public class GatewayNodeHostDTO extends BaseDTO {
     private Long id;
     
     @ApiModelProperty("主机名称")
-    private String hostname;
+    private String hostName;
     
     @ApiModelProperty(value = "gateway集群名称",hidden = true)
     private String clusterName;

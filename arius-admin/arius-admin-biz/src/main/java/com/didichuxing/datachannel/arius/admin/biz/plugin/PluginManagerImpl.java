@@ -22,19 +22,20 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.op.manager.application.PackageService;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * 插件对应能力
@@ -43,7 +44,7 @@ import org.springframework.stereotype.Component;
  * @date 2022/11/15
  * @since 0.3.2
  */
-@Component
+@org.springframework.stereotype.Component
 public class PluginManagerImpl implements PluginManager {
 		
 		private static final ILog                          LOGGER                   = LogFactory.getLog(
@@ -95,6 +96,16 @@ public class PluginManagerImpl implements PluginManager {
 				final Result<List<PluginVO>> listResult = listESKernelPluginCache(cluster.getCluster());
 				final List<PluginVO>         list       = ConvertUtil.list2List(pluginList, PluginVO.class);
 				list.addAll(listResult.getData());
+				// 设置配置信息
+				for (PluginVO pluginVO : list) {
+						if (Objects.nonNull(pluginVO.getComponentId()) && pluginVO.getComponentId() > 0) {
+								final com.didiglobal.logi.op.manager.infrastructure.common.Result<List<ComponentGroupConfig>> componentConfigRes = componentService.getComponentConfig(
+										pluginVO.getComponentId());
+								Optional.ofNullable(componentConfigRes)
+										.map(com.didiglobal.logi.op.manager.infrastructure.common.Result::getData)
+										.ifPresent(pluginVO::setComponentGroupConfigs);
+						}
+				}
 				return Result.buildSucc(list);
 		}
 		

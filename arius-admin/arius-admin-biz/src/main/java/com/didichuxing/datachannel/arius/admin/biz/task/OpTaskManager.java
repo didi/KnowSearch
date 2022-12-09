@@ -157,12 +157,13 @@ public interface OpTaskManager {
     /**
      * 获取任务日志
      *
-     * @param id 要获取日志的任务的任务 ID。
-     * @param hostname 运行任务的机器的主机名。
-     * @param type 0-stdout，1-stderr
+     * @param id        要获取日志的任务的任务 ID。
+     * @param hostname  运行任务的机器的主机名。
+     * @param groupName
+     * @param type      0-stdout，1-stderr
      * @return 包含任务日志的 Result 对象。
      */
-    Result<String> getTaskLog(Integer id, String hostname, int type);
+    Result<String> getTaskLog(Integer id, String hostname,String groupName, int type);
     
     /**
      * > 通过id获取任务详情

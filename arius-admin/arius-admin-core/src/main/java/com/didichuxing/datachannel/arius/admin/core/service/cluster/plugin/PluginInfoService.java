@@ -56,4 +56,12 @@ public interface PluginInfoService {
 		 * @param clusterType 1-k8s，2 个月
 		 */
 		PluginInfoPO selectByClusterIdAndComponentIdAndClusterType(Integer clusterId, Integer componentId, Integer clusterType);
+		
+		/**
+		 * 获取插件通过id
+		 *
+		 * @param pluginId 插件id
+		 * @return {@link PluginInfoPO}
+		 */
+		PluginInfoPO getPluginById(Long pluginId);
 }

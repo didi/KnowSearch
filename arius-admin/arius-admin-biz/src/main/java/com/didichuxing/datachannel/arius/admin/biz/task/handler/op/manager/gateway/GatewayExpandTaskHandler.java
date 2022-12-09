@@ -75,7 +75,7 @@ public class GatewayExpandTaskHandler extends AbstractGatewayTaskHandler {
 				Map<String, Integer> ip2PortMap = ConvertUtil.list2Map(ipAndPortTuples, TupleTwo::v1, TupleTwo::v2);
 				final List<GatewayNodeHostDTO> nodes = componentResult.getData().getHostList().stream()
 								
-								.filter(i -> ip2PortMap.containsKey(i.getHost())).map(i -> GatewayNodeHostDTO.builder().hostname(
+								.filter(i -> ip2PortMap.containsKey(i.getHost())).map(i -> GatewayNodeHostDTO.builder().hostName(
 																i.getHost()).clusterName(clusterName).port(ip2PortMap.get(i.getHost()))
 												.machineSpec(i.getMachineSpec()).build()).collect(Collectors.toList());
 			// 扩容节点写入

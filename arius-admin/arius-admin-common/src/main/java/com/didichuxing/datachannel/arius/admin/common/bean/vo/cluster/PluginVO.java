@@ -2,8 +2,10 @@ package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -59,8 +61,9 @@ public class PluginVO extends BaseVO {
     @ApiModelProperty("备注")
     private String  memo;
     @ApiModelProperty("插件状态:-1:unknown;1.green；2.yellow;3.red")
-    private Integer status;
-    
+    private Integer                    status;
+    @ApiModelProperty("插件配置")
+    private List<ComponentGroupConfig> componentGroupConfigs;
     
     
 }

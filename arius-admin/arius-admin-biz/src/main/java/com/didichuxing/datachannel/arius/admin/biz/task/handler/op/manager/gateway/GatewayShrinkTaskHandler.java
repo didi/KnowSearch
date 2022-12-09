@@ -86,13 +86,13 @@ public class GatewayShrinkTaskHandler extends AbstractGatewayTaskHandler {
 						return Result.buildFrom(nameRes);
 				}
 				final String clusterName = nameRes.getData();
-				// 将扩容的节点获取到
+				// 将缩容的节点获取到
 				final List<TupleTwo<String, Integer>> ipAndPortTuples = convertFGeneralGroupConfigDTO2IpAndPortTuple(
 						gatewayShrinkContent.getGroupConfigList());
 				final List<GatewayNodeHostDTO> nodes = ipAndPortTuples.stream()
 						.map(i -> GatewayNodeHostDTO.builder().port(i.v2())
 								.clusterName(clusterName)
-								.hostname(i.v1())
+								.hostName(i.v1())
 								.build())
 						.distinct()
 						.collect(Collectors.toList());

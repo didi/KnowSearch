@@ -139,8 +139,18 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     }
 
     @Override
-    public Result<String> getTaskLog(int taskId, String hostname, int taskLogEnumType) {
-        return deploymentService.deployTaskLog(taskId, hostname, taskLogEnumType);
+    public Result<String> getTaskLog(int taskId, String hostname, int taskLogEnumType,
+        String groupName) {
+        Task task = taskRepository.getTaskById(taskId);
+        if (null == task) {
+            return Result.fail(ResultCode.TASK_NOT_EXIST_ERROR);
+        }
+        // 获取正在执行的任务 id
+        Integer executeTaskId = getExecuteIdByHostnameAndGroupName(taskId, hostname, groupName);
+        if (executeTaskId == null) {
+            return Result.success();
+        }
+        return deploymentService.deployTaskLog(executeTaskId, hostname, taskLogEnumType);
     }
 
     @Override
@@ -241,6 +251,17 @@ public class TaskDomainServiceImpl implements TaskDomainService {
         ).findFirst();
 
         return optional.map(TaskDetail::getExecuteTaskId).orElse(null);
+    }
+    
+    private Integer getExecuteIdByHostnameAndGroupName(int taskId, String hostname,
+        String groupName) {
+        List<TaskDetail> detailList = taskDetailRepository.listTaskDetailByTaskId(taskId);
+        return detailList.stream().filter(detail ->
+            null != detail.getExecuteTaskId() && detail.getHost().equals(hostname)
+                && detail.getGroupName().equals(groupName)
+        
+        ).findFirst().map(TaskDetail::getExecuteTaskId).orElse(null);
+        
     }
 
     @NotNull
