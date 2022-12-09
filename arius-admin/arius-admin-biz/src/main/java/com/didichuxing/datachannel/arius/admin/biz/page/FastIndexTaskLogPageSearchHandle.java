@@ -180,12 +180,20 @@ public class FastIndexTaskLogPageSearchHandle extends
         if (AriusObjUtils.isNull(fastIndexDTO)) {
             return new ArrayList<>();
         }
-        List<FastIndexTaskInfo> fastIndexTaskList = fastIndexTaskService.listFastIndexLogsByCondition(condition).stream()
+        List<FastIndexTaskInfo> fastIndexTaskList = fastIndexTaskService.listFastIndexLogsByCondition(condition);
+        //提交不成功，校验失败时
+        List<FastIndexTaskInfo> fastDumpCheckErrorLogs = fastIndexTaskList.stream()
                 .filter(fastIndexTaskInfo -> fastIndexTaskInfo.getTaskStatus().compareTo(FastIndexTaskStatusEnum.FAILED.getValue()) == 0
                         && StringUtils.isNotBlank(fastIndexTaskInfo.getTaskSubmitResult())
                         && StringUtils.isBlank(fastIndexTaskInfo.getFastDumpTaskId()))
                 .collect(Collectors.toList());
-        List<FastDumpTaskLogVO> fastDumpTaskLogList = fastIndexTaskList.stream().map(fastIndexTaskInfo -> {
+        //提交成功，但是数据迁移失败
+        List<FastIndexTaskInfo> fastDumpErrorLogs = fastIndexTaskList.stream().filter(fastIndexTaskInfo ->
+                fastIndexTaskInfo.getTaskStatus().compareTo(FastIndexTaskStatusEnum.FAILED.getValue()) == 0
+                        && StringUtils.isNoneBlank(fastIndexTaskInfo.getFastDumpTaskId())).collect(Collectors.toList());
+        fastDumpErrorLogs.addAll(fastDumpCheckErrorLogs);
+        //组装参数
+        List<FastDumpTaskLogVO> fastDumpTaskLogList = fastDumpErrorLogs.stream().map(fastIndexTaskInfo -> {
             FastDumpTaskLogVO fastDumpTaskLogVO = new FastDumpTaskLogVO();
             fastDumpTaskLogVO.setLevel(LOG_LEVEL_ERROR);
             fastDumpTaskLogVO.setFailedLuceneDataPath("");
