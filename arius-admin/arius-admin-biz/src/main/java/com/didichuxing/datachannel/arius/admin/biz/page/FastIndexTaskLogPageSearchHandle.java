@@ -204,8 +204,15 @@ public class FastIndexTaskLogPageSearchHandle extends
             fastDumpTaskLogVO.setSourceIndex(fastIndexTaskInfo.getIndexName());
             fastDumpTaskLogVO.setTargetIndex(fastIndexTaskInfo.getTargetIndexName());
             Optional.ofNullable(fastIndexTaskInfo.getTaskEndTime()).ifPresent(date -> fastDumpTaskLogVO.setTimestamp(date.getTime()));
-            JSONObject jsonObject = JSONObject.parseObject(fastIndexTaskInfo.getTaskSubmitResult());
-            fastDumpTaskLogVO.setMessage("cluster["+fastIndexDTO.getSourceCluster() + "],indexName[" + fastIndexTaskInfo.getIndexName() + "],the reason is " + jsonObject.getString("message"));
+            if (fastDumpCheckErrorLogs.size() != 0) {
+                JSONObject jsonObject = JSONObject.parseObject(fastIndexTaskInfo.getTaskSubmitResult());
+                fastDumpTaskLogVO.setMessage("cluster["+fastIndexDTO.getSourceCluster() + "]" +
+                        ",indexName[" + fastIndexTaskInfo.getIndexName() + "],the reason is " + jsonObject.getString("message"));
+            }else{
+                JSONObject jsonObject = JSONObject.parseObject(fastIndexTaskInfo.getLastResponse());
+                fastDumpTaskLogVO.setMessage("cluster["+fastIndexDTO.getSourceCluster() + "]" +
+                        ",indexName[" + fastIndexTaskInfo.getIndexName() + "],the reason is " + jsonObject);
+            }
             return fastDumpTaskLogVO;
         }).collect(Collectors.toList());
         return fastDumpTaskLogList;

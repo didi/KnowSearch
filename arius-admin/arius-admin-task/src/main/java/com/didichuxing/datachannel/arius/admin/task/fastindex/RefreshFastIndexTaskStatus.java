@@ -27,7 +27,7 @@ import com.google.common.collect.Sets;
  * 定时同步数据迁移任务状态
  * @author didi
  */
-@Task(name = "RefreshFastIndexTaskStatus", description = "定时同步数据迁移任务状态", cron = "0 0/1 * * * ?", autoRegister = true)
+@Task(name = "RefreshFastIndexTaskStatus", description = "定时同步数据迁移任务状态", cron = "0 0/1 * * * ? *", autoRegister = true)
 public class RefreshFastIndexTaskStatus implements Job {
     private static final Logger LOGGER = LoggerFactory.getLogger(RefreshFastIndexTaskStatus.class);
 
