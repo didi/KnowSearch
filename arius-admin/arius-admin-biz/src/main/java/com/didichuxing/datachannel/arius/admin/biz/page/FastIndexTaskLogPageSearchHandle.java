@@ -211,7 +211,7 @@ public class FastIndexTaskLogPageSearchHandle extends
             }else{
                 JSONObject jsonObject = JSONObject.parseObject(fastIndexTaskInfo.getLastResponse());
                 fastDumpTaskLogVO.setMessage("cluster["+fastIndexDTO.getSourceCluster() + "]" +
-                        ",indexName[" + fastIndexTaskInfo.getIndexName() + "],the reason is " + jsonObject);
+                        ",indexName[" + fastIndexTaskInfo.getIndexName() + "],the reason is " + jsonObject.toJSONString());
             }
             return fastDumpTaskLogVO;
         }).collect(Collectors.toList());
