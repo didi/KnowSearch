@@ -398,6 +398,8 @@ CREATE TABLE `es_cluster_phy_info`
     `platform_type`           varchar(100)        NOT NULL DEFAULT '' COMMENT 'IaaS 平台类型 ',
     `resource_type`           tinyint(4)          NOT NULL DEFAULT '-1' COMMENT '集群资源类型，1- 共享资源，2- 独立资源，3- 独享资源',
     `gateway_url`             varchar(200)        NOT NULL DEFAULT '' COMMENT ' 集群 gateway 地址 ',
+    `kibana_address`          varchar(200)                 DEFAULT '' COMMENT 'kibana外链地址',
+    `cerebro_address`         varchar(200)                 DEFAULT '' COMMENT 'cerebro外链地址',
     PRIMARY KEY (`id`),
     KEY `idx_cluster` (`cluster`)
 ) ENGINE = InnoDB
