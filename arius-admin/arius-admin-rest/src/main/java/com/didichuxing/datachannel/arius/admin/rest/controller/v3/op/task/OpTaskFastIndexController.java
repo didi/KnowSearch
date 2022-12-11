@@ -124,11 +124,11 @@ public class OpTaskFastIndexController {
         return fastIndexManager.getTemplateSettings(logicId, logicClusterId);
     }
 
-    @GetMapping("/clusters/supported/fast-dump")
+    @GetMapping("/support/es-cluster/versions")
     @ResponseBody
     @ApiOperation(value = "获取当前支持数据迁移的集群版本,使用动态配置获取支持的版本")
-    public Result<List<ClusterPhyVO>> clustersSupportedFastDump(HttpServletRequest request) {
-        List<ClusterPhyVO> fastDump = fastIndexManager.clustersSupportedFastDump();
+    public Result<List<ClusterPhyVO>> supportESClusterVersions(HttpServletRequest request) {
+        List<ClusterPhyVO> fastDump = fastIndexManager.supportESClusterVersions();
         return Result.buildSucc(fastDump);
     }
 }

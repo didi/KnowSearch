@@ -65,4 +65,12 @@ public interface ESIndexMoveTaskService {
      * @return {@link Result}<{@link Void}>
      */
     Result<Boolean> checkHealth(FastIndexDTO fastIndexDTO);
+
+    /**
+     * 获取fastdump支持的版本
+     *
+     * @param fastIndexDTO 数据迁移任务信息
+     * @return {@link Result}<{@link List}<{@link String}>>
+     */
+    Result<List<String>> getSupportESVersion(FastIndexDTO fastIndexDTO);
 }

@@ -535,13 +535,27 @@ public class FastIndexManagerImpl implements FastIndexManager {
     }
 
     @Override
-    public List<ClusterPhyVO> clustersSupportedFastDump() {
+    public List<ClusterPhyVO> supportESClusterVersions() {
         ClusterPhyDTO clusterPhyDTO = new ClusterPhyDTO();
-        List<ClusterPhy> clusterPhyList = clusterPhyService.listClustersByCondt(clusterPhyDTO).stream()
+        List<ClusterPhy> supportESVersionList;
+        List<ClusterPhy> clusterPhyList = clusterPhyService.listClustersByCondt(clusterPhyDTO);
+        //获取成功的数据迁移任务，去内核获取es版本
+        Optional<OpTask> opTaskOptional = opTaskService.getSuccessTaskByType(OpTaskTypeEnum.FAST_INDEX.getType()).stream()
+                .sorted(Comparator.comparing(OpTask::getId).reversed()).limit(1).findFirst();
+        if (opTaskOptional.isPresent()) {
+            FastIndexDTO fastIndexDTO = JSON.parseObject(opTaskOptional.get().getExpandData(), FastIndexDTO.class);
+            Result<List<String>> res = esIndexMoveTaskService.getSupportESVersion(fastIndexDTO);
+            if (res.success()) {
+                supportESVersionList = clusterPhyList.stream()
+                        .filter(clusterPhy -> res.getData().contains(getESBigVersion(clusterPhy.getEsVersion())))
+                        .collect(Collectors.toList());
+                return ConvertUtil.list2List(supportESVersionList, ClusterPhyVO.class);
+            }
+        }
+        supportESVersionList = clusterPhyList.stream()
                 .filter(clusterPhy -> FastDumpSupportESVersionEnum.isExist(getESBigVersion(clusterPhy.getEsVersion())))
                 .collect(Collectors.toList());
-        List<ClusterPhyVO> clusterPhyVOList = ConvertUtil.list2List(clusterPhyList, ClusterPhyVO.class);
-        return clusterPhyVOList;
+        return ConvertUtil.list2List(supportESVersionList, ClusterPhyVO.class);
     }
 
     @Override

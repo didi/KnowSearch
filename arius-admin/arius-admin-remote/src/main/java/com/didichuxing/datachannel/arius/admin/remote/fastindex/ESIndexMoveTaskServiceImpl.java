@@ -50,6 +50,22 @@ public class ESIndexMoveTaskServiceImpl implements ESIndexMoveTaskService {
     }
 
     @Override
+    public Result<List<String>> getSupportESVersion(FastIndexDTO fastIndexDTO) {
+        String response = get(fastIndexDTO.getTaskSubmitAddress(), fastIndexDTO.getSourceClusterPassword(),
+                "/support/es-versions");
+        if (StringUtils.isNotBlank(response)) {
+            Result result = JSON.parseObject(response, Result.class);
+            if (FAST_DUMP_SUCC_CODE == result.getCode()) {
+                if (null != result.getData()) {
+                    return Result.buildSucc(ConvertUtil.str2ObjArrayByJson(JSON.toJSONString(result.getData()), String.class));
+                }
+                return Result.buildSucc();
+            }
+        }
+        return Result.buildFail("请求失败");
+    }
+
+    @Override
     public Result<List<ESIndexMoveTaskStats>> getAllTaskStats(FastIndexDTO fastIndexDTO) {
         String response = get(fastIndexDTO.getTaskSubmitAddress(), fastIndexDTO.getSourceClusterPassword(),
             "/index-move/all/stats");

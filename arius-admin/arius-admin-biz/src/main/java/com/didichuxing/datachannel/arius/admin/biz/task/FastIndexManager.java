@@ -81,5 +81,5 @@ public interface FastIndexManager {
      * 获取当前支持数据迁移的集群版本,使用动态配置获取支持的版本
      * @return
      */
-    List<ClusterPhyVO> clustersSupportedFastDump();
+    List<ClusterPhyVO> supportESClusterVersions();
 }
