@@ -4,7 +4,7 @@
         <Console name="Console" target="SYSTEM_OUT">
 
         </Console>
-        <ElasticsearchAppender name="esAppender" address="10.96.75.13" port="18104" user="elastic" password="Didiyun@888" indexName="index_observability" typeName="type" threshold="all" bufferSize="1000" numberOfShards="1" numberOfReplicas="0" logExpire="7" extendsMappingClass="" requestTimeoutMillis="3000">
+        <ElasticsearchAppender name="esAppender" address="10.96.75.13" port="18143" user="elastic" password="Didiyun@888" indexName="index_observability" typeName="type" threshold="all" bufferSize="1000" numberOfShards="1" numberOfReplicas="0" logExpire="7" extendsMappingClass="" requestTimeoutMillis="3000">
 
         </ElasticsearchAppender>
     </Appenders>

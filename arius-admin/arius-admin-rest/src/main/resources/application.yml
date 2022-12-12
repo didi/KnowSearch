@@ -139,7 +139,7 @@ spring:
     node-name: node1
     job-log-fetcher-extend-bean-name: com.didiglobal.knowframework.job.extend.impl.DefaultJobLogFetcherExtendImpl
     elasticsearch-address: 10.96.75.13
-    elasticsearch-port: 18104
+    elasticsearch-port: 18143
     elasticsearch-user: elastic
     elasticsearch-password: Didiyun@888
     elasticsearch-index-name: index_observability
