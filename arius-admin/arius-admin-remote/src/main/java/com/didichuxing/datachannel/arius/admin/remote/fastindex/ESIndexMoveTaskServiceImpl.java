@@ -54,12 +54,17 @@ public class ESIndexMoveTaskServiceImpl implements ESIndexMoveTaskService {
         String response = get(fastIndexDTO.getTaskSubmitAddress(), fastIndexDTO.getSourceClusterPassword(),
                 "/support/es-versions");
         if (StringUtils.isNotBlank(response)) {
-            Result result = JSON.parseObject(response, Result.class);
-            if (FAST_DUMP_SUCC_CODE == result.getCode()) {
-                if (null != result.getData()) {
-                    return Result.buildSucc(ConvertUtil.str2ObjArrayByJson(JSON.toJSONString(result.getData()), String.class));
+            try {
+                Result result = JSON.parseObject(response, Result.class);
+                if (FAST_DUMP_SUCC_CODE == result.getCode()) {
+                    if (null != result.getData()) {
+                        return Result.buildSucc(ConvertUtil.str2ObjArrayByJson(JSON.toJSONString(result.getData()), String.class));
+                    }
+                    return Result.buildSucc();
                 }
-                return Result.buildSucc();
+            } catch (Exception e) {
+                LOGGER.error("fastdump返回异常：", e);
+                return Result.buildFail("请求失败");
             }
         }
         return Result.buildFail("请求失败");
