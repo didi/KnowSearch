@@ -30,9 +30,11 @@ import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClust
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeService;
 import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
-import java.util.Collections;
+import com.google.common.collect.Lists;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -104,6 +106,7 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 	}
 		
 		@Override
+		@Transactional(rollbackFor = Exception.class)
 		public Result<Void> createWithECM(GatewayClusterCreateDTO gatewayCluster, Integer projectId,
 		                                  String operate) {
 				Result<Void> result = checkGatewayCreateParam(gatewayCluster);
@@ -130,8 +133,35 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		
 		@Override
 		public Result<Void> expandNodesWithECM(List<GatewayNodeHostDTO> nodes) {
-			// 无需写入到操作记录，工单操作中生成操作记录即可
-			return Result.build(gatewayNodeService.insertBatch(nodes));
+				// 无需写入到操作记录，工单操作中生成操作记录即可
+				// 校验节点是否已经写入
+				final List<GatewayClusterNodePO> gatewayClusterNodePOS = gatewayNodeService.listByClusterName(
+						nodes.get(0).getClusterName());
+				final Map<String, GatewayNodeHostDTO> expandKey2DTOMap = ConvertUtil.list2Map(
+						nodes, i -> String.format("%s-%s-%s", i.getClusterName(),
+								i.getHostName(), i.getPort()));
+				
+				final List<String> key = gatewayClusterNodePOS.stream()
+						.map(i -> String.format("%s-%s-%s", i.getClusterName(),
+								i.getHostName(), i.getPort()))
+						.collect(Collectors.toList());
+				final List<String> keyExpand = nodes.stream()
+						.map(i -> String.format("%s-%s-%s", i.getClusterName(),
+								i.getHostName(), i.getPort()))
+						.collect(Collectors.toList());
+				
+				if (new HashSet<>(key).containsAll(keyExpand)) {
+						return Result.buildSucc();
+				}
+				List<GatewayNodeHostDTO> expands = Lists.newArrayList();
+				// 过滤出未呗写入的节点
+				for (Entry<String, GatewayNodeHostDTO> keyGatewayNodeHostDTOEntry :
+						expandKey2DTOMap.entrySet()) {
+						if (!key.contains(keyGatewayNodeHostDTOEntry.getKey())) {
+								expands.add(keyGatewayNodeHostDTOEntry.getValue());
+						}
+				}
+				return Result.build(gatewayNodeService.insertBatch(expands));
 		}
 		
 		@Override
@@ -141,12 +171,12 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 				//转换未map
 				final Map<String, Integer> string2IdMaps = nodePOS.stream()
 						.map(i -> Tuples.of(i.getId(), String.format("hostname:[%s];clusterName:[%s];port:[%s]",
-								i.getClusterName(), i.getClusterName(), i.getPort())))
+								i.getHostName(), i.getClusterName(), i.getPort())))
 						.collect(Collectors.toMap(TupleTwo::v2, TupleTwo::v1));
 				//转换未相同的信息
 				final List<Integer> ids = nodes.stream()
 						.map(i -> String.format("hostname:[%s];clusterName:[%s];port:[%s]",
-								i.getClusterName(), i.getClusterName(), i.getPort()))
+								i.getHostName(), i.getClusterName(), i.getPort()))
 						.filter(string2IdMaps::containsKey).map(string2IdMaps::get)
 						.collect(Collectors.toList());
 				// 无需写入到操作记录，工单操作中生成操作记录即可
@@ -320,7 +350,7 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 			return Result.buildFail("节点信息不可为空");
 		}
 		if (param.getGatewayNodeHosts().stream().anyMatch(
-				node -> StringUtils.isEmpty(node.getHostname()) || Objects.isNull(node.getPort()))) {
+				node -> StringUtils.isEmpty(node.getHostName()) || Objects.isNull(node.getPort()))) {
 			return Result.buildFail("传入的节点信息地址和端口号不可为空");
 		}
 		
@@ -349,7 +379,7 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 						return Result.buildFail("节点信息不可为空");
 				}
 				if (data.getNodes().stream().anyMatch(
-						node -> StringUtils.isEmpty(node.getHostname()) || Objects.isNull(node.getPort()))) {
+						node -> StringUtils.isEmpty(node.getHostName()) || Objects.isNull(node.getPort()))) {
 						return Result.buildFail("传入的节点信息地址和端口号不可为空");
 				}
 				return Result.buildSucc();

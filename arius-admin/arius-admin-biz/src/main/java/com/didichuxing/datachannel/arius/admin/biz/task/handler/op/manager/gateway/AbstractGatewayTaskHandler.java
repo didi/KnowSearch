@@ -68,12 +68,12 @@ public abstract class AbstractGatewayTaskHandler extends AbstractOpManagerTaskHa
 				// 获取端口号
 				final String portStr =
 						JSON.parseObject(fileConfig).values().stream().map(String::valueOf)
-								.filter(i -> i.matches("gateway.httpTransport.port=\\d+"))
+								.filter(i -> StringUtils.countMatches(i,"gateway.httpTransport.port=")>0)
 								.findFirst().get();
 				final Matcher matcher = compile("gateway.httpTransport.port=\\d+").matcher(portStr);
 				if (matcher.find()) {
-						final Matcher portMat = compile("gateway.httpTransport.port=\\d+").matcher(
-								portStr);
+						final Matcher portMat = compile("\\d+").matcher(
+								matcher.group());
 						if (portMat.find()) {
 								return portMat.group(0);
 						}

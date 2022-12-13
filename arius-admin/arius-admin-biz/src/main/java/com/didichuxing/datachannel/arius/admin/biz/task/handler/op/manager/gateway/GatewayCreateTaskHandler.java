@@ -120,7 +120,7 @@ public class GatewayCreateTaskHandler extends AbstractGatewayTaskHandler {
 				final List<GatewayNodeHostDTO> nodes = ip2PortTuples.stream()
 						.map(i -> GatewayNodeHostDTO.builder().port(i.v2())
 								.clusterName(gatewayCreateContent.getName())
-								.hostname(i.v1())
+								.hostName(i.v1())
 								.build()).collect(Collectors.toList());
 				return GatewayClusterCreateDTO.builder()
 						.clusterName(gatewayCreateContent.getName())

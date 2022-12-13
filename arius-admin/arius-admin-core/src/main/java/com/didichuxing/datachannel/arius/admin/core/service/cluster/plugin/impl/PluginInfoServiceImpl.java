@@ -52,4 +52,9 @@ public class PluginInfoServiceImpl implements PluginInfoService {
 		                                                                  Integer clusterType) {
 				return pluginDAO.selectByClusterIdAndComponentIdAndClusterType(clusterId,clusterType,componentId);
 		}
+		
+		@Override
+		public PluginInfoPO getPluginById(Long pluginId) {
+				return pluginDAO.selectByPrimaryKey(pluginId);
+		}
 }

@@ -4,12 +4,10 @@ import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
+import java.sql.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.catalina.webresources.CachedResource;
-
-import java.sql.Timestamp;
 
 /**
  * @author didi
@@ -94,8 +92,7 @@ public class TaskDetail {
      * @return true 正常，false 非正常
      */
     public boolean isNormalStatus() {
-        return status == TaskStatusEnum.SUCCESS.getStatus() ||
-                status == TaskStatusEnum.IGNORED.getStatus() ||
+        return status == TaskStatusEnum.IGNORED.getStatus() ||
                 status == TaskStatusEnum.KILLED.getStatus();
     }
 

@@ -9,7 +9,10 @@ import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEn
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
+import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.springframework.stereotype.Component;
 
 /**
@@ -47,8 +50,23 @@ public class GatewayRestartTaskHandler extends AbstractGatewayTaskHandler {
 						return Result.buildFrom(componentConfigRes);
 				}
 				final List<ComponentGroupConfig> data = componentConfigRes.getData();
-				// 设置配置信息
-				content.setGroupConfigList(ConvertUtil.list2List(data, GeneralGroupConfigDTO.class));
+				final Map<String, ComponentGroupConfig> groupName2ComMap = ConvertUtil.list2Map(
+						data, ComponentGroupConfig::getGroupName);
+				
+				final List<GeneralGroupConfigDTO> groupConfigList = content.getGroupConfigList();
+				final Map<String, GeneralGroupConfigDTO> groupName2ComDTOMap = ConvertUtil.list2Map(
+						groupConfigList, GeneralGroupConfigDTO::getGroupName);
+				List<GeneralGroupConfigDTO> generalGroupConfigList = Lists.newArrayList();
+				for (Entry<String, GeneralGroupConfigDTO> groupConfigDTOEntry : groupName2ComDTOMap.entrySet()) {
+						final String               groupName            = groupConfigDTOEntry.getKey();
+						final ComponentGroupConfig componentGroupConfig = groupName2ComMap.get(groupName);
+						final GeneralGroupConfigDTO generalGroupConfigDTO = ConvertUtil.obj2Obj(
+								componentGroupConfig, GeneralGroupConfigDTO.class);
+						// 设置 hosts
+						generalGroupConfigDTO.setHosts(groupConfigDTOEntry.getValue().getHosts());
+						generalGroupConfigList.add(generalGroupConfigDTO);
+				}
+				content.setGroupConfigList(generalGroupConfigList);
 				opTask.setExpandData(JSON.toJSONString(content));
 				return Result.buildSucc();
 		}

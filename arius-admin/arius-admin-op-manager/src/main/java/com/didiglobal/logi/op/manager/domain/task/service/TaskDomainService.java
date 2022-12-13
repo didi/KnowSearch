@@ -155,9 +155,10 @@ public interface TaskDomainService {
      * @param taskId          任务id
      * @param hostname        主机名
      * @param taskLogEnumType 要获取的输出类型的type
+     * @param groupName
      * @return String
      */
-    Result<String> getTaskLog(int taskId, String hostname, int taskLogEnumType);
+    Result<String> getTaskLog(int taskId, String hostname, int taskLogEnumType, String groupName);
     
     /**
      * 按 ID 获取任务列表。

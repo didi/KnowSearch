@@ -6,6 +6,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigD
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.ConfigConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESConfigVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.op.manager.ComponentGroupConfigWithHostVO;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.interfaces.vo.ComponentGroupConfigVO;
 import java.util.List;
 import java.util.Set;
@@ -71,4 +73,12 @@ public interface ESClusterConfigManager {
      * @return GeneralGroupConfigHostVO
      */
     Result<ComponentGroupConfigVO> getConfigByClusterPhyId(Integer clusterPhyId, Integer configId);
+		
+		/**
+		 * 通过集群物理id获取组件组配置
+		 *
+		 * @param clusterPhyId 集群的物理 ID。
+		 * @return ComponentGroupConfigVO 列表
+		 */
+		Result<List<ComponentGroupConfigWithHostVO>> getConfigsByClusterPhyId(Integer clusterPhyId);
 }

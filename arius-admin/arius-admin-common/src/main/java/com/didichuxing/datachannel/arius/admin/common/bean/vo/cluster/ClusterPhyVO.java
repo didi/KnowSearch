@@ -126,6 +126,8 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
     private Integer gatewayId;
     @ApiModelProperty("是否为ecm接入")
     private Boolean ecmAccess;
+    @ApiModelProperty("componentId")
+    private Integer componentId;
 
     /**
      * 添加逻辑集群

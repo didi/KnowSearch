@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Cl
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESConfigVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.op.manager.ComponentGroupConfigWithHostVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -24,13 +25,16 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHost;
 import com.didiglobal.logi.op.manager.interfaces.vo.ComponentGroupConfigVO;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -152,5 +156,36 @@ public class ESClusterConfigManagerImpl implements ESClusterConfigManager {
         return componentGroupConfigOptional.map(
                 i -> ConvertUtil.obj2Obj(i, ComponentGroupConfigVO.class)).map(Result::buildSucc)
             .orElse(Result.buildSucc());
+    }
+    
+    @Override
+    public Result<List<ComponentGroupConfigWithHostVO>> getConfigsByClusterPhyId(Integer clusterPhyId) {
+        final Integer componentIdById = clusterPhyService.getComponentIdById(clusterPhyId);
+        if (Objects.isNull(componentIdById)) {
+            return Result.buildSucc(Collections.emptyList());
+        }
+        final com.didiglobal.logi.op.manager.infrastructure.common.Result<com.didiglobal.logi.op.manager.domain.component.entity.Component> componentRes = componentService.queryComponentById(
+            componentIdById);
+        if (Objects.isNull(componentRes.getData()) || CollectionUtils.isEmpty(
+            componentRes.getData().getGroupConfigList())) {
+            return Result.buildSucc(Collections.emptyList());
+        }
+        	final List<Integer> groupConfigIds = componentService.getComponentConfig(
+								componentIdById).getData().stream().map(ComponentGroupConfig::getId)
+						.collect(Collectors.toList());
+        final Map<String, List<ComponentHost>> groupName2HostLists = com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil.list2MapOfList(
+            componentRes.getData().getHostList(),
+            ComponentHost::getGroupName, i -> i);
+        final List<ComponentGroupConfig> data = componentRes.getData().getGroupConfigList().stream()
+            .filter(i -> groupConfigIds.contains(i.getId())).collect(Collectors.toList());
+        final List<ComponentGroupConfigWithHostVO> hostVOS = com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil.list2List(
+            data,
+            ComponentGroupConfigWithHostVO.class);
+        for (ComponentGroupConfigWithHostVO hostVO : hostVOS) {
+            final String              groupName      = hostVO.getGroupName();
+            final List<ComponentHost> componentHosts = groupName2HostLists.get(groupName);
+            hostVO.setComponentHosts(componentHosts);
+        }
+				return Result.buildSucc(hostVOS);
     }
 }

@@ -1,5 +1,7 @@
 package com.didiglobal.logi.op.manager.application.scheduler;
 
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.REX;
+
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
@@ -11,19 +13,16 @@ import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.DeploymentService;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.REX;
 
 /**
  * @author didi
@@ -51,7 +50,7 @@ public class ComponentStatusScheduler {
     public final String key = "packageId2TemplateIdMap";
 
     //TODO 这里是否需要考虑分布式处理组件的监控
-    //@Scheduled(initialDelay = 10000, fixedDelay = 300000)
+    @Scheduled(initialDelay = 10000, fixedDelay = 300000)
     public void monitor() {
         try {
             LOGGER.info("start monitor task");
