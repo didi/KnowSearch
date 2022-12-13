@@ -225,31 +225,36 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     }
 
     /**
-     * 获取当前支持的所有划分方式
+     * 获取当前集群支持的所有attribute划分方式
+     * @param clusterId 物理集群id
      * @return
      */
     @Override
-    public Result<Set<String>> getAttributeDivideType() {
-        List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.listAllNodeByRole(DATA_NODE.getCode());
+    public Result<Set<String>> getClusterAttributeDivideType(Long clusterId) {
+        // 获取当前集群所有attribute属性集合
+        List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getByRoleAndClusterId(clusterId, DATA_NODE.getDesc());
         if(AriusObjUtils.isEmptyList(clusterRoleHostList)){
             return Result.buildSucc();
         }
         List<String> attributesList = clusterRoleHostList.stream().map(ClusterRoleHost::getAttributes)
                 .distinct().collect(Collectors.toList());
-        Set<String> divideTypeSet = Sets.newHashSet();
+        Set<String> attributeKeySet = Sets.newHashSet();
         attributesList.forEach((attributes) -> {
             Map<String, String> attributeMap = ConvertUtil.str2Map(attributes);
-            divideTypeSet.addAll(attributeMap.keySet());
+            attributeKeySet.addAll(attributeMap.keySet());
         });
 
-        if(!divideTypeSet.isEmpty()) {
+        if(!attributeKeySet.isEmpty()) {
             // 获取平台不支持的划分方式
-            Set<String> unsupportedType = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
+            Set<String> unsupportedTypeSet = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
                     CLUSTER_REGION_UNSUPPORTED_DIVIDE_TYPE, "", ",");
-            divideTypeSet.removeAll(unsupportedType);
+            // 过滤掉平台不支持的划分方式
+            Set<String> clusterSupportedTypes = attributeKeySet.stream()
+                    .filter(attributeKey -> !unsupportedTypeSet.contains(attributeKey)).collect(Collectors.toSet());
+            return Result.buildSucc(clusterSupportedTypes);
         }
 
-        return Result.buildSucc(divideTypeSet);
+        return Result.buildSucc(attributeKeySet);
     }
 
     /**

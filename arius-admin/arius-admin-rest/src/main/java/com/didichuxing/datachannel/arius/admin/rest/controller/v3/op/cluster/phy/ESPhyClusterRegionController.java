@@ -66,11 +66,11 @@ public class ESPhyClusterRegionController {
         return clusterRegionManager.listClusterRegionWithNodeInfoByClusterName(clusterName);
     }
 
-    @GetMapping("/divideType")
+    @GetMapping("/divideType/{clusterId}")
     @ResponseBody
-    @ApiOperation(value = "获取当前支持的所有attribute划分方式")
-    public Result<Set<String>> getAttributeDivideType() {
-        return clusterRegionManager.getAttributeDivideType();
+    @ApiOperation(value = "获取当前集群支持的所有attribute划分方式")
+    public Result<Set<String>> getClusterAttributeDivideType(@PathVariable Long clusterId) {
+        return clusterRegionManager.getClusterAttributeDivideType(clusterId);
     }
 
     @GetMapping("/divide/{divideType}/{clusterName}")

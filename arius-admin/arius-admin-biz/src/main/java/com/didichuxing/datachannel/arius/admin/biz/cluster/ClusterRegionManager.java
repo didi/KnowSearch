@@ -50,10 +50,11 @@ public interface ClusterRegionManager {
     Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionWithNodeInfoByClusterName(String clusterName);
 
     /**
-     * 获取当前支持的所有划分方式
+     * 获取当前集群支持的所有attribute划分方式
+     * @param clusterId 物理集群id
      * @return
      */
-    Result<Set<String>> getAttributeDivideType();
+    Result<Set<String>> getClusterAttributeDivideType(Long clusterId);
 
     /**
      * 根据物理集群名称和划分方式获region信息，包含region中的数据节点信息
