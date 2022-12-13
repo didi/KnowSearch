@@ -939,4 +939,9 @@ public class DslsConstant {
      * 获取List类型 Dashboard维度统计信息(带数据值的类型)
      */
     public static final String FETCH_LIST_VALUE_METRIC                                       = "AriusStatsDashBoardInfoESDAO/fetchListValueMetrics";
+
+    /**
+     * pageSearch 查询公用dsl模版语句，项目中有很多相同的语句可以逐步替换为统一的语句模板
+     */
+    public static final String BASE_PAGE_SEARCH                                       = "base/basePageSearch";
 }

@@ -1,8 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.task;
 
-import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.List;
+
+import com.google.common.collect.Lists;
 
 /**
  * 任务枚举类型
@@ -39,6 +40,8 @@ public enum OpTaskTypeEnum {
                             @Deprecated
                             //TODO 移除：全部改走 配置编辑
                             CLUSTER_CONFIG_DELETE(13, "集群配置删除", "cluster-config-delete"),
+
+                            FAST_INDEX(14, "数据迁移任务", "fast-index"),
 
     //gateway
     GATEWAY_NEW(21, "GATEWAY集群新建", "gateway-create"),
@@ -121,7 +124,7 @@ public enum OpTaskTypeEnum {
 
         return OpTaskTypeEnum.UNKNOWN;
     }
-    
+
     /**
      * > 它返回由 OpManager 管理的所有任务类型的列表
      *

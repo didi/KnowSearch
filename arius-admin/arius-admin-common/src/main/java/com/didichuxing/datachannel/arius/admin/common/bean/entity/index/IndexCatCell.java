@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.index;
 
 import java.util.List;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,6 +39,8 @@ public class IndexCatCell {
     private List<String> aliases;
     private Boolean      translogAsync;
     private Integer      priorityLevel;
+
+    private List<String> indexTypeList;
 
     public String getKey() {
         return cluster + "@" + index;

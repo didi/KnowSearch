@@ -53,18 +53,18 @@ public enum OpTaskHandleEnum {
     GATEWAY_OFFLINE(OpTaskTypeEnum.GATEWAY_OFFLINE.getType(), OpTaskConstant.GATEWAY_OFFLINE),
     //ES相关操作 0.3.2
     ES_CLUSTER_NEW(OpTaskTypeEnum.ES_CLUSTER_NEW.getType(), OpTaskConstant.ES_CLUSTER_CREATE),
-    
+
     ES_CLUSTER_EXPAND(OpTaskTypeEnum.ES_CLUSTER_EXPAND.getType(), OpTaskConstant.ES_CLUSTER_EXPAND),
-    
+
     ES_CLUSTER_SHRINK(OpTaskTypeEnum.ES_CLUSTER_SHRINK.getType(), OpTaskConstant.ES_CLUSTER_SHRINK),
-    
+
     ES_CLUSTER_RESTART(OpTaskTypeEnum.ES_CLUSTER_RESTART.getType(), OpTaskConstant.ES_CLUSTER_RESTART),
-    
+
     ES_CLUSTER_UPGRADE(OpTaskTypeEnum.ES_CLUSTER_UPGRADE.getType(), OpTaskConstant.ES_CLUSTER_UPGRADE),
-    
-    
+
+
     ES_CLUSTER_CONFIG_EDIT(OpTaskTypeEnum.ES_CLUSTER_CONFIG_EDIT.getType(), OpTaskConstant.ES_CLUSTER_CONFIG_EDIT),
-    
+
     ES_CLUSTER_PLUG_INSTALL(OpTaskTypeEnum.ES_CLUSTER_PLUG_INSTALL.getType(), OpTaskConstant.ES_CLUSTER_PLUG_INSTALL),
     ES_CLUSTER_PLUG_UNINSTALL(OpTaskTypeEnum.ES_CLUSTER_PLUG_UNINSTALL.getType(), OpTaskConstant.ES_CLUSTER_PLUG_UNINSTALL),
     ES_CLUSTER_PLUG_UPGRADE(OpTaskTypeEnum.ES_CLUSTER_PLUG_UPGRADE.getType(), OpTaskConstant.ES_CLUSTER_PLUG_UPGRADE),
@@ -74,6 +74,9 @@ public enum OpTaskHandleEnum {
     ES_CLUSTER_OFFLINE(OpTaskTypeEnum.ES_CLUSTER_OFFLINE.getType(), OpTaskConstant.ES_CLUSTER_OFFLINE),
     ES_CLUSTER_PLUGIN_OFFLINE(OpTaskTypeEnum.ES_CLUSTER_PLUG_ROLLBACK.getType(),
         OpTaskConstant.ES_CLUSTER_PLUG_ROLLBACK),
+
+                              FAST_INDEX(OpTaskTypeEnum.FAST_INDEX.getType(),
+                                         OpTaskConstant.FAST_INDEX_TASK),
 
                               UNKNOWN(OpTaskTypeEnum.UNKNOWN.getType(), OpTaskConstant.UNKNOWN);
 
@@ -110,9 +113,7 @@ public enum OpTaskHandleEnum {
 }
 
 class OpTaskConstant {
-    
-    
-    
+
     private OpTaskConstant() {
     }
 
@@ -153,6 +154,9 @@ class OpTaskConstant {
     public static final String GATEWAY_OFFLINE            = "gatewayOfflineTask";
     public static final String ES_CLUSTER_OFFLINE         = "esClusterOfflineTask";
     public static final String ES_CLUSTER_PLUG_ROLLBACK   = "esClusterPluginRollbackTask";
-    
+
+
+    public static final String FAST_INDEX_TASK             = "fastIndexOpTask";
+
     public static final String UNKNOWN                     = "unknown";
 }
