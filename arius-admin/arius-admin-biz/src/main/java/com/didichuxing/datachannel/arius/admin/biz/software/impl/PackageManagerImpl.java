@@ -160,6 +160,16 @@ public class PackageManagerImpl implements PackageManager {
     }
 
     @Override
+    public Result<List<PackageGroupConfigQueryVO>> listPackageGroupConfigByName(String name, Integer projectId) {
+        Result<Void> result = ProjectUtils.checkProjectCorrectly(retId -> retId, projectId, projectId);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+        List<PackageGroupConfig> packageGroupConfigs = packageService.listPackageGroupConfigByName(name);
+        return Result.buildSucc(ConvertUtil.list2List(packageGroupConfigs, PackageGroupConfigQueryVO.class));
+    }
+
+    @Override
     public Result<List<PackageVersionVO>> listPackageVersionByPackageType(String packageTypeDesc, String operator, Integer projectId) {
         Result<Void> result = ProjectUtils.checkProjectCorrectly(retId -> retId, projectId, projectId);
         if (result.failed()) {

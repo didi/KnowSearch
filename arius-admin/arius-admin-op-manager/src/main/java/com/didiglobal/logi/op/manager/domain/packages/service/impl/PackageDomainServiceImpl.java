@@ -121,6 +121,15 @@ public class PackageDomainServiceImpl implements PackageDomainService {
     }
 
     @Override
+    public List<PackageGroupConfig> listPackageGroupConfigByName(String name) {
+        Package packageByName = packageRepository.findByName(name);
+        if(Objects.isNull(packageByName)){
+            return Lists.newArrayList();
+        }
+        return packageGroupConfigRepository.queryConfigByPackageId(packageByName.getId());
+    }
+
+    @Override
     public Package queryPackageByName(String name) {
         return packageRepository.findByName(name);
     }
