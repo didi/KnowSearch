@@ -19,4 +19,7 @@ public class UserExtendVO extends UserVO {
 
     @ApiModelProperty(value = "作为责任人的应用列表", dataType = "List<String>", required = false)
     private List<String> ownProjects;
+
+    @ApiModelProperty(value = "作为唯一责任人的应用列表", dataType = "List<String>", required = false)
+    private List<String> singleOwnerOfProjects;
 }

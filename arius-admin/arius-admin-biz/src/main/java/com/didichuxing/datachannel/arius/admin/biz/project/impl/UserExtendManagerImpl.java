@@ -23,6 +23,7 @@ import com.didiglobal.knowframework.security.common.dto.user.UserDTO;
 import com.didiglobal.knowframework.security.common.entity.UserProject;
 import com.didiglobal.knowframework.security.common.entity.user.User;
 import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVOWithUser;
 import com.didiglobal.knowframework.security.common.vo.role.AssignInfoVO;
 import com.didiglobal.knowframework.security.common.vo.role.RoleBriefVO;
 import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
@@ -156,17 +157,33 @@ public class UserExtendManagerImpl implements UserExtendManager {
                     userVO.setProjectList(briefList);
 
                     // 获取以当前user作为负责人的project列表
-                    List<String> ownProjects = new ArrayList<>();
+                    List<String> ownProjectNameList = new ArrayList<>();
+                    List<Integer> ownProjectIdList = new ArrayList<>();
                     List<Integer> projectIdListByUserId = userProjectDao
                             .selectProjectIdListByUserIdList(Collections.singletonList(userVO.getId()));
                     List<UserProject> userProjects = userProjectDao.selectByProjectIds(projectIdListByUserId);
                     userProjects.forEach(userProject -> {
                         if(userVO.getId().equals(userProject.getUserId()) && projectIdListByUserId
                                 .contains(userProject.getProjectId()) && userProject.getUserType() == OWNER) {
-                            ownProjects.add(projectId2projectName.get(userProject.getProjectId()));
+                            ownProjectNameList.add(projectId2projectName.get(userProject.getProjectId()));
+                            ownProjectIdList.add(userProject.getProjectId());
                         }
                     });
-                    userVO.setOwnProjects(ownProjects);
+                    userVO.setOwnProjects(ownProjectNameList);
+
+                    // 获取以当前user为唯一负责人的项目列表
+                    if(!ownProjectIdList.isEmpty()){
+                        List<String> singleOwnerOfProjects = new ArrayList<>();
+                        List<ProjectBriefVOWithUser> projectBriefVOWithUsers = projectService.listProjectBriefVOWithUserByProjectIds(ownProjectIdList);
+                        projectBriefVOWithUsers.forEach(projectBriefVOWithUser -> {
+                            if(projectBriefVOWithUser.getOwnerList().size() == 1 &&
+                                    projectBriefVOWithUser.getOwnerList().get(0).getId().equals(userVO.getId())){
+                                singleOwnerOfProjects.add(projectBriefVOWithUser.getProjectName());
+                            }
+                        });
+                        userVO.setSingleOwnerOfProjects(singleOwnerOfProjects);
+                    }
+
 
                 });
             
