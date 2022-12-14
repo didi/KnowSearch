@@ -158,6 +158,7 @@ public class PackageService {
 
     /**
      * 通过es包版本号获取es配置组
+     * 软件包类型+软件包版本是唯一
      * @param version
      * @param packageType
      * @return
@@ -173,5 +174,15 @@ public class PackageService {
      */
     public Package queryPackageByName(String name) {
         return packageDomainService.queryPackageByName(name);
+    }
+
+    /**
+     * 通过软件包名称获取配置组列表
+     * 软件包名称是唯一的
+     * @param name
+     * @return
+     */
+    public List<PackageGroupConfig> listPackageGroupConfigByName(String name) {
+        return packageDomainService.listPackageGroupConfigByName(name);
     }
 }

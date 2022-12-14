@@ -84,4 +84,10 @@ public class PackageV3Controller {
         return packageManager.listPackageGroupConfigByVersion(version, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
+
+    @GetMapping("/package-name/package-group-configs")
+    @ApiOperation(value = "通过软件包名称获取配置组列表", notes = "")
+    public Result<List<PackageGroupConfigQueryVO>> listPackageGroupConfigByName(HttpServletRequest request, String name) {
+        return packageManager.listPackageGroupConfigByName(name, HttpRequestUtil.getProjectId(request));
+    }
 }

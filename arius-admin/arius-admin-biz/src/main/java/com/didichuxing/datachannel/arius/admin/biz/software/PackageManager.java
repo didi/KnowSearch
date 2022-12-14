@@ -88,4 +88,12 @@ public interface PackageManager {
      * @return
      */
     Result<List<PackageVersionVO>> listPackageVersionByPackageType(String packageTypeDesc, String operator, Integer projectId);
+
+    /**
+     * 通过软件包名称获取配置组列表
+     * @param name
+     * @param projectId
+     * @return
+     */
+    Result<List<PackageGroupConfigQueryVO>> listPackageGroupConfigByName(String name, Integer projectId);
 }

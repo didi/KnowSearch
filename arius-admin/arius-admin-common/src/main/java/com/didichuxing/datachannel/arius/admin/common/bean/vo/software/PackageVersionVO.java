@@ -21,4 +21,9 @@ public class PackageVersionVO {
      */
     @ApiModelProperty("版本")
     private String version;
+    /**
+     * 安装包名称
+     */
+    @ApiModelProperty("安装包名称")
+    private String name;
 }

@@ -89,4 +89,11 @@ public interface PackageDomainService {
      * @return
      */
     Package queryPackageByName(String name);
+
+    /**
+     * 通过软件包名称获取配置组列表
+     * @param name
+     * @return
+     */
+    List<PackageGroupConfig> listPackageGroupConfigByName(String name);
 }
