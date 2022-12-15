@@ -5,13 +5,17 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearch
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.GatewayNodePageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterNodeVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeService;
+import java.util.List;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,4 +59,10 @@ public class GatewayClusterNodeManagerImpl implements GatewayClusterNodeManager 
 		}
 		return PaginationResult.buildFail("没有找到对应的处理器");
 	}
+		
+		@Override
+		public Result<List<GatewayClusterNodeVO>> getByClusterNames(List<String> clusterNames) {
+				List<GatewayClusterNodePO> nodes = gatewayNodeService.listByClusterNames(clusterNames);
+				return Result.buildSucc(ConvertUtil.list2List(nodes, GatewayClusterNodeVO.class));
+		}
 }

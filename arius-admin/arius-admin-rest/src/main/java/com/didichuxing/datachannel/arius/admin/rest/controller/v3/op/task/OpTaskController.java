@@ -4,10 +4,13 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterExpandContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.op.manager.ESClusterExpandWithPluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.op.manager.ESClusterShrinkWithPluginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.OpTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.TaskTypeVO;
@@ -25,7 +28,10 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -107,6 +113,85 @@ public class OpTaskController {
         }
         return Result.buildSucc(ConvertUtil.obj2Obj(result.getData(), WorkTaskVO.class));
     }
+    
+    @PostMapping(path = "/es-cluster-shrink")
+    @ResponseBody
+    @ApiOperation(value = "提交es缩容任务接口", notes = "")
+    public Result<WorkTaskVO> addTaskESShrink(HttpServletRequest request, @RequestBody ESClusterShrinkWithPluginDTO data) throws NotFindSubclassException {
+        String user = HttpRequestUtil.getOperator(request);
+        //生成插件安装的任务DTO
+        final List<OpTaskDTO> pluginInstallList =
+                Optional.ofNullable( data.getUnInstallPlugins()).orElse(Collections.emptyList()).stream().map(JSON::toJSONString).map(
+                content -> {
+                    final OpTaskDTO opTaskDTO = new OpTaskDTO();
+                    opTaskDTO.setTaskType(OpTaskTypeEnum.ES_CLUSTER_PLUG_UNINSTALL.getType());
+                    opTaskDTO.setCreator(user);
+                    opTaskDTO.setExpandData(content);
+                    return opTaskDTO;
+                }).collect(Collectors.toList());
+    
+        final OpTaskDTO opTaskDTO = new OpTaskDTO();
+        final ClusterExpandContent content = ConvertUtil.obj2Obj(data, ClusterExpandContent.class);
+        String dataCenter = opTaskDTO.getDataCenter();
+        opTaskDTO.setExpandData(JSON.toJSONString(content));
+        opTaskDTO.setTaskType(OpTaskTypeEnum.ES_CLUSTER_SHRINK.getType());
+        opTaskDTO.setCreator(user);
+        LOGGER.info(
+                "class=OpTaskController||method=OpTaskController.addTask||workTaskDTO={}||envInfo={}||dataCenter={}",
+                JSON.toJSONString(opTaskDTO), EnvUtil.getStr(), dataCenter);
+        //生成安装插件的任务
+        for (OpTaskDTO taskDTO : pluginInstallList) {
+            opTaskManager.addTask(taskDTO, AuthConstant.SUPER_PROJECT_ID);
+        }
+        Result<OpTask> result = opTaskManager.addTask(opTaskDTO, AuthConstant.SUPER_PROJECT_ID);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+        
+        return Result.buildSucc(ConvertUtil.obj2Obj(result.getData(), WorkTaskVO.class));
+    }
+    
+    @PostMapping(path = "/es-cluster-expand")
+    @ResponseBody
+    @ApiOperation(value = "提交es扩容任务接口", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "任务类型", required = true) })
+    public Result<WorkTaskVO> addTaskESExpand(HttpServletRequest request,
+                                              @RequestBody ESClusterExpandWithPluginDTO data) throws NotFindSubclassException {
+        String user = HttpRequestUtil.getOperator(request);
+        //生成插件安装的任务DTO
+        final List<OpTaskDTO> pluginInstallList =
+                Optional.ofNullable( data.getInstallPlugins()).orElse(Collections.emptyList()).stream().map(JSON::toJSONString).map(
+                content -> {
+                    final OpTaskDTO opTaskDTO = new OpTaskDTO();
+                    opTaskDTO.setTaskType(OpTaskTypeEnum.ES_CLUSTER_PLUG_INSTALL.getType());
+                    opTaskDTO.setCreator(user);
+                    opTaskDTO.setExpandData(content);
+                    return opTaskDTO;
+                }).collect(Collectors.toList());
+    
+        final OpTaskDTO opTaskDTO = new OpTaskDTO();
+        final ClusterExpandContent content = ConvertUtil.obj2Obj(data, ClusterExpandContent.class);
+        String dataCenter = opTaskDTO.getDataCenter();
+        opTaskDTO.setExpandData(JSON.toJSONString(content));
+        opTaskDTO.setTaskType(OpTaskTypeEnum.ES_CLUSTER_EXPAND.getType());
+        opTaskDTO.setCreator(user);
+        LOGGER.info(
+                "class=OpTaskController||method=OpTaskController.addTask||workTaskDTO={}||envInfo={}||dataCenter={}",
+                JSON.toJSONString(opTaskDTO), EnvUtil.getStr(), dataCenter);
+        //生成安装插件的任务
+        for (OpTaskDTO taskDTO : pluginInstallList) {
+           opTaskManager.addTask(taskDTO, AuthConstant.SUPER_PROJECT_ID);
+           
+        }
+        Result<OpTask> result = opTaskManager.addTask(opTaskDTO, AuthConstant.SUPER_PROJECT_ID);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+        
+        return Result.buildSucc(ConvertUtil.obj2Obj(result.getData(), WorkTaskVO.class));
+    }
+    
     
     @ApiOperation(value = "ecm 任务类型", notes = "")
     @GetMapping(value = "/ecm-type-enums")

@@ -1,5 +1,8 @@
 package com.didiglobal.logi.op.manager.domain.component.service.handler;
 
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.MAP_SIZE;
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
+
 import com.alibaba.fastjson.JSON;
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
@@ -11,12 +14,13 @@ import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralScaleComponent;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.*;
-
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.MAP_SIZE;
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
 
 /**
  * @author didi
@@ -41,6 +45,8 @@ public class ExpandHandler implements ScaleHandler {
         componentHost.setProcessNum(JSON.parseObject(config.getProcessNumConfig()).getInteger(host));
         componentHost.setComponentId(componentId);
         componentHost.setGroupName(config.getGroupName());
+        Optional.ofNullable(config.getMachineSpec()).map(JSON::parseObject).map(i -> i.getString(host)).ifPresent(
+                componentHost::setMachineSpec);
         componentHost.create();
         componentHostRepository.saveComponentHost(componentHost);
     }

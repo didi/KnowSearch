@@ -284,4 +284,12 @@ public class ComponentService {
         Integer componentId) {
         return componentDomainService.getComponentConfig(componentId);
     }
+    
+    /**
+     * 缓存
+     * @return
+     */
+    public Result<List<Component>> listComponentWithAll() {
+        return componentDomainService.listComponentWithAll();
+    }
 }

@@ -1,5 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.rest.interceptor;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.HEALTH;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.SWAGGER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_THIRD_PART;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_SECURITY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_WHITE_PART;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.REQUEST_INTERCEPTOR_SWITCH_OPEN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.REQUEST_INTERCEPTOR_SWITCH_OPEN_DEFAULT_VALUE;
+
 import com.didichuxing.datachannel.arius.admin.biz.project.LoginManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParam;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -7,19 +17,16 @@ import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.google.common.collect.Lists;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
 
 /**
  * 登陆拦截 && 权限校验
@@ -56,7 +63,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
                 request.getRequestURI(), e);
         }
         List<String> whiteMappingValues = Lists.newArrayList(HEALTH, V2_THIRD_PART, V3_THIRD_PART, V3_WHITE_PART,
-            V3_SECURITY);
+                                                             V3_SECURITY, Constants.API_PREFIX);
 
         return loginManager.interceptorCheck(request, response, classRequestMappingValue, whiteMappingValues);
     }

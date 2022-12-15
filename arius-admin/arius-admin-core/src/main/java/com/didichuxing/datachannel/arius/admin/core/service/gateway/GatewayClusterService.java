@@ -123,4 +123,12 @@ public interface GatewayClusterService {
 		 * @return 一个布尔值。
 		 */
 		Boolean updateVersion(Integer componentId, String version);
+		
+		/**
+		 * 更新
+		 *
+		 * @param gatewayClusterDTO 网关集群dto
+		 * @return boolean
+		 */
+		boolean update(GatewayClusterDTO gatewayClusterDTO);
 }

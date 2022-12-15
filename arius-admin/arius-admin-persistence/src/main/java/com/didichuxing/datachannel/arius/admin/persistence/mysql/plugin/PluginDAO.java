@@ -84,4 +84,12 @@ public interface PluginDAO {
 		 * @param componentId 插件的组件 ID。
 		 */
 		PluginInfoPO selectByClusterIdAndComponentIdAndClusterType(@Param("clusterId")Integer clusterId, @Param("clusterType") Integer clusterType, @Param("componentId") Integer componentId);
+		
+		/**
+		 * 按条件选择
+		 *
+		 * @param pluginInfoPO 插件信息po
+		 * @return {@link PluginInfoPO}
+		 */
+		PluginInfoPO selectByCondition(PluginInfoPO pluginInfoPO);
 }

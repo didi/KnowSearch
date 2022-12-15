@@ -24,10 +24,13 @@ import com.google.common.collect.Sets;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,21 +188,37 @@ public class GatewayServiceImpl implements GatewayService {
     }
 
     private boolean recordHeartbeat(GatewayHeartbeat heartbeat) {
-        GatewayClusterNodePO gatewayClusterNodePO = new GatewayClusterNodePO();
+        GatewayClusterNodePO gatewayClusterNodePO = ConvertUtil.obj2Obj(heartbeat,GatewayClusterNodePO.class);
         gatewayClusterNodePO.setClusterName(heartbeat.getClusterName().trim());
         gatewayClusterNodePO.setHeartbeatTime(new Date());
-        gatewayClusterNodePO.setHostName(heartbeat.getHostName().trim());
-        gatewayClusterNodePO.setPort(heartbeat.getPort());
         final GatewayClusterPO clusterPO = gatewayClusterDAO.getOneByName(
             heartbeat.getClusterName().trim());
-        final com.didiglobal.logi.op.manager.infrastructure.common.Result<Component> component = componentDomainService.getComponentById(
-            clusterPO.getComponentId());
-        if (component.isSuccess()){
-            final List<ComponentHost> hostList = component.getData().getHostList();
-            hostList.stream().filter(i->heartbeat.getHostName().trim().equals(i.getHost()))
-                .findFirst().map(ComponentHost::getMachineSpec).ifPresent(gatewayClusterNodePO::setMachineSpec);
+        if (Objects.nonNull(clusterPO) && Objects.nonNull(clusterPO.getComponentId())
+            && clusterPO.getComponentId() > 0) {
+            final com.didiglobal.logi.op.manager.infrastructure.common.Result<Component> component = componentDomainService.getComponentById(
+                    clusterPO.getComponentId());
+            if (component.isSuccess() && Objects.nonNull(component.getData())) {
+                final List<ComponentHost> hostList = component.getData().getHostList();
+                if (CollectionUtils.isNotEmpty(hostList)) {
+                    hostList.stream().filter(
+                                    i -> StringUtils.equals(StringUtils.trim(heartbeat.getHostName()), i.getHost())).findFirst()
+                            .map(ComponentHost::getMachineSpec).ifPresent(gatewayClusterNodePO::setMachineSpec);
+                }
+            }
         }
+        final List<GatewayClusterNodePO> gatewayClusterNodePOS = gatewayClusterNodeDAO.selectByClusterName(
+                heartbeat.getClusterName());
+        if (CollectionUtils.isNotEmpty(gatewayClusterNodePOS)){
+            final Optional<GatewayClusterNodePO> clusterNodePOOptional = gatewayClusterNodePOS.stream().filter(
+                    i -> StringUtils.equals(gatewayClusterNodePO.getClusterName(), i.getClusterName())
+                         && StringUtils.equals(gatewayClusterNodePO.getHostName(), i.getHostName()) && Objects.equals(
+                            gatewayClusterNodePO.getPort(), i.getPort())).findFirst();
+            if (clusterNodePOOptional.isPresent()) {
+                gatewayClusterNodePO.setId(clusterNodePOOptional.get().getId());
+                return gatewayClusterNodeDAO.update(gatewayClusterNodePO);
+            }
     
+        }
         return gatewayClusterNodeDAO.recordGatewayNode(gatewayClusterNodePO) > 0;
     }
 

@@ -105,4 +105,9 @@ public class GatewayClusterServiceImpl implements GatewayClusterService {
 
 				return gatewayClusterDAO.updateVersion(componentId,version);
 		}
+		
+		@Override
+		public boolean update(GatewayClusterDTO gatewayClusterDTO) {
+				return gatewayClusterDAO.updateOne(ConvertUtil.obj2Obj(gatewayClusterDTO,GatewayClusterPO.class));
+		}
 }

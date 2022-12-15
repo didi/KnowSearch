@@ -78,4 +78,12 @@ public interface  GatewayNodeService {
 	 * @return 一个布尔值。
 	 */
 	Boolean deleteBatch(List<Integer> ids);
+		
+		/**
+		 * 按群集名称列出
+		 *
+		 * @param clusterNames 群集名称
+		 * @return {@link List}<{@link GatewayClusterNodePO}>
+		 */
+		List<GatewayClusterNodePO> listByClusterNames(List<String> clusterNames);
 }

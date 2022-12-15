@@ -1,5 +1,7 @@
 package com.didiglobal.logi.op.manager.domain.component.entity;
 
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.MAP_SIZE;
+
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHost;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
@@ -8,19 +10,17 @@ import com.didiglobal.logi.op.manager.infrastructure.common.enums.DeleteEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TSLEnum;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.elasticsearch.common.Strings;
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.MAP_SIZE;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.elasticsearch.common.Strings;
+import org.springframework.util.CollectionUtils;
 
 /**
  * @author didi
@@ -131,9 +131,12 @@ public class Component {
 
     public Map<String, List<String>> groupNameToHost() {
         Map<String, List<String>> groupToHostList = new HashMap<>(MAP_SIZE);
-        for (ComponentHost componentHost : this.getHostList()) {
-            List<String> hostList = groupToHostList.computeIfAbsent(componentHost.getGroupName(), k -> new ArrayList<>());
-            hostList.add(componentHost.getHost());
+        if (!CollectionUtils.isEmpty(this.getHostList())) {
+            for (ComponentHost componentHost : this.getHostList()) {
+                List<String> hostList = groupToHostList.computeIfAbsent(componentHost.getGroupName(),
+                                                                        k -> new ArrayList<>());
+                hostList.add(componentHost.getHost());
+            }
         }
         return groupToHostList;
     }
@@ -143,6 +146,9 @@ public class Component {
      * @return 状态，全在线green，在线数小于离线数red，在线数大于离线数yellow
      */
     public int convergeHostStatus() {
+        if (CollectionUtils.isEmpty(this.getHostList())) {
+            return ComponentStatusEnum.RED.getStatus();
+        }
         int onLineNum = 0;
         int offLineNum = 0 ;
         for (ComponentHost componentHost : this.getHostList()) {

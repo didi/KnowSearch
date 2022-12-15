@@ -9,20 +9,22 @@
         <result column="port" jdbcType="INTEGER" property="port"/>
         <result column="machine_spec" jdbcType="VARCHAR" property="machineSpec"/>
         <result column="heartbeat_time" jdbcType="TIMESTAMP" property="heartbeatTime"/>
+        <result column="cpu_usage" jdbcType="DOUBLE" property="cpuUsage"/>
+        <result column="http_connection_num" jdbcType="INTEGER" property="httpConnectionNum"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, cluster_name, host_name, port, heartbeat_time, create_time, update_time,node_name,machine_spec
+        id, cluster_name, host_name, port, heartbeat_time, create_time, update_time,node_name,machine_spec,cpu_usage,http_connection_num
     </sql>
 
     <insert id="recordGatewayNode"
             parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO"
             keyColumn="id">
         insert into gateway_cluster_node_info
-            (cluster_name, host_name, port, heartbeat_time,machine_spec)
-        values (#{clusterName}, #{hostName}, #{port}, #{heartbeatTime},#{machineSpec}) ON DUPLICATE KEY
+            (cluster_name, host_name, port, heartbeat_time,machine_spec,cpu_usage,http_connection_num)
+        values (#{clusterName}, #{hostName}, #{port}, #{heartbeatTime},#{machineSpec},#{cpuUsage},#{httpConnectionNum}) ON DUPLICATE KEY
         UPDATE heartbeat_time= #{heartbeatTime}
     </insert>
 
@@ -45,8 +47,8 @@
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         INSERT INTO gateway_cluster_node_info
-            (cluster_name, host_name, `port`,machine_spec)
-        VALUES (#{clusterName},#{hostName},#{port},#{machineSpec})
+            (cluster_name, host_name, `port`,machine_spec,cpu_usage,http_connection_num)
+        VALUES (#{clusterName},#{hostName},#{port},#{machineSpec},#{cpuUsage},#{httpConnectionNum})
     </insert>
     
     <select id="selectByBatchClusterName" resultMap="BaseResultMap">
@@ -121,4 +123,30 @@
             #{id}
         </foreach>
     </delete>
+    
+    <update id="update">
+        <!--@mbg.generated-->UPDATE `gateway_cluster_node_info`
+        <set>
+            <if test="clusterName != null and clusterName != ''">`cluster_name` = #{clusterName},</if>
+            <if test="hostName != null and hostName != ''">
+                `host_name` = #{hostName},</if>
+            <if test="port != null">
+                `port` = #{port},</if>
+            <if test="heartbeatTime != null">
+                `heartbeat_time` = #{heartbeatTime},</if>
+            <if test="createTime != null">
+                `create_time` = #{createTime},</if>
+            <if test="updateTime != null">
+                `update_time` = #{updateTime},</if>
+            <if test="nodeName != null and nodeName != ''">
+                `node_name` = #{nodeName},</if>
+            <if test="machineSpec != null and machineSpec != ''">
+                `machine_spec` = #{machineSpec},</if>
+            <if test="cpuUsage != null">
+                `cpu_usage` = #{cpuUsage},</if>
+            <if test="httpConnectionNum != null">
+                `http_connection_num` = #{httpConnectionNum},</if>
+        </set>
+        WHERE `id` = #{id}
+    </update>
 </mapper>

@@ -100,4 +100,12 @@ public interface GatewayClusterNodeDAO {
      * @return 受删除影响的行数。
      */
     int deleteBatch(@Param("ids")List<Integer> ids);
+		
+		/**
+		 * 按条件更新 GatewayClusterNodePO
+		 *
+		 * @param condition 更新的条件，即 GatewayClusterNodePO 对象。
+		 */
+		boolean update(GatewayClusterNodePO condition);
+  
 }

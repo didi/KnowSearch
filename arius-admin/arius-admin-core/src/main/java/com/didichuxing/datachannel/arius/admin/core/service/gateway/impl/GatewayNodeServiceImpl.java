@@ -98,4 +98,12 @@ public class GatewayNodeServiceImpl implements GatewayNodeService {
 				}
 				return gatewayClusterNodeDAO.deleteBatch(ids) == ids.size();
 		}
+		
+		@Override
+		public List<GatewayClusterNodePO> listByClusterNames(List<String> clusterNames) {
+				if (CollectionUtils.isEmpty(clusterNames)) {
+						return Collections.emptyList();
+				}
+				return gatewayClusterNodeDAO.selectByBatchClusterName(clusterNames);
+		}
 }

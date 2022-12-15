@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.plugin.PluginCrea
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.plugin.PluginInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.op.manager.ComponentGroupConfigWithHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageVersionVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginHealthEnum;
@@ -22,14 +23,17 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.op.manager.application.PackageService;
+import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHost;
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -92,6 +96,16 @@ public class PluginManagerImpl implements PluginManager {
 				}
 				List<PluginInfoPO> pluginList = pluginInfoService.listByClusterId(clusterPhyId,
 						PluginClusterTypeEnum.ES);
+				
+				final List<Integer> componentIds = pluginList.stream().map(PluginInfoPO::getComponentId).filter(Objects::nonNull)
+								.distinct().collect(Collectors.toList());
+				//获取插件状态
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<List<Component>> result = componentService.listComponentWithAll();
+					final Map<Integer, Component> id2ComponentAllMap = result.getData().stream().collect(
+								Collectors.toMap(Component::getId, i -> i));
+				final Map<Integer, Component> id2ComponentMap = result.getData().stream().filter(
+								component -> componentIds.contains(component.getId())).collect(
+								Collectors.toMap(Component::getId, i -> i));
 				// 获取内核的插件列表
 				final Result<List<PluginVO>> listResult = listESKernelPluginCache(cluster.getCluster());
 				final List<PluginVO>         list       = ConvertUtil.list2List(pluginList, PluginVO.class);
@@ -99,11 +113,47 @@ public class PluginManagerImpl implements PluginManager {
 				// 设置配置信息
 				for (PluginVO pluginVO : list) {
 						if (Objects.nonNull(pluginVO.getComponentId()) && pluginVO.getComponentId() > 0) {
-								final com.didiglobal.logi.op.manager.infrastructure.common.Result<List<ComponentGroupConfig>> componentConfigRes = componentService.getComponentConfig(
-										pluginVO.getComponentId());
-								Optional.ofNullable(componentConfigRes)
-										.map(com.didiglobal.logi.op.manager.infrastructure.common.Result::getData)
-										.ifPresent(pluginVO::setComponentGroupConfigs);
+							
+								final Component component = id2ComponentMap.get(pluginVO.getComponentId());
+								if (component == null) {
+										// 如果组件为 null，则默认给未知
+										pluginVO.setStatus(PluginHealthEnum.UNKNOWN.getCode());
+								} else {
+										final List<ComponentHost> hostList = component.getHostList();
+										// 确认节点是否存在离线
+										if (hostList.stream().anyMatch(i -> i.getStatus() == 1)) {
+												pluginVO.setStatus(PluginHealthEnum.RED.getCode());
+										}
+										pluginVO.setStatus(PluginHealthEnum.GREEN.getCode());
+										if (PluginInfoTypeEnum.ENGINE.equals(PluginInfoTypeEnum.find(pluginVO.getPluginType()))) {
+												// 获取依赖的组件
+												final Component componentDepend = id2ComponentAllMap.get(
+																component.getDependConfigComponentId());
+												// 获取对应的配置项
+												final List<ComponentGroupConfig> groupConfigList = componentDepend.getGroupConfigList();
+												// 排序后获取最新的配置项为正在使用的配置项：ecm 规定
+												groupConfigList.stream().max(Comparator.comparing(i -> Integer.parseInt(i.getVersion()))).map(
+																componentGroupConfig -> ConvertUtil.obj2Obj(componentGroupConfig,
+																                                            ComponentGroupConfigWithHostVO.class, i -> {
+																						i.setComponentHosts(component.getHostList());
+																						i.setPackageId(component.getPackageId());
+																						
+																				})).map(
+																Collections::singletonList).ifPresent(pluginVO::setComponentGroupConfigs);
+												
+												
+										} else if (PluginInfoTypeEnum.PLATFORM.equals(PluginInfoTypeEnum.find(pluginVO.getPluginType()))) {
+												component.getGroupConfigList().stream().max(
+																Comparator.comparing(i -> Integer.parseInt(i.getVersion()))).map(
+																componentGroupConfig -> ConvertUtil.obj2Obj(componentGroupConfig,
+																                                            ComponentGroupConfigWithHostVO.class, i -> {
+																						i.setComponentHosts(component.getHostList());
+																						i.setPackageId(component.getPackageId());
+																						
+																				})).map(Collections::singletonList).ifPresent(
+																pluginVO::setComponentGroupConfigs);
+										}
+								}
 						}
 				}
 				return Result.buildSucc(list);
@@ -123,6 +173,10 @@ public class PluginManagerImpl implements PluginManager {
 		public Result<Void> createWithECM(PluginCreateDTO pluginCreateDTO) {
 				// 无需记录：工单记录即可
 				PluginInfoPO pluginInfoPO = ConvertUtil.obj2Obj(pluginCreateDTO, PluginInfoPO.class);
+				// 确定插件是否已经被写入
+				if (pluginInfoService.selectByCondition(pluginInfoPO) != null) {
+						return Result.buildSucc();
+				}
 				return Result.build(pluginInfoService.create(pluginInfoPO));
 		}
 		

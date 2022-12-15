@@ -7,6 +7,7 @@
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
         <result column="component_id" jdbcType="INTEGER" property="componentId"/>
+        <result column="health" jdbcType="INTEGER" property="health"/>
         <result column="ecm_access" jdbcType="TINYINT" property="ecmAccess"/>
         <result column="memo" jdbcType="VARCHAR" property="memo"/>
         <result column="version" jdbcType="VARCHAR" property="version"/>
@@ -101,6 +102,9 @@
             </if>
             <if test="dataCenter != null and dataCenter != ''">
                 , data_center=#{dataCenter}
+            </if>
+            <if test="health != null">
+                , health=#{health}
             </if>
         </trim>
         WHERE id = #{id}

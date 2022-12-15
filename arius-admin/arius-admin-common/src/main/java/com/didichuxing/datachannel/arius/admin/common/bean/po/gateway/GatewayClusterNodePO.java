@@ -44,5 +44,9 @@ public class GatewayClusterNodePO extends BasePO {
      * 机器规格
      */
     private String machineSpec;
+    
+    private Double cpuUsage;
+    
+    private Integer httpConnectionNum;
 
 }
