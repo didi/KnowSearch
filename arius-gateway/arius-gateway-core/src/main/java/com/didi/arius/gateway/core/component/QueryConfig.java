@@ -1,12 +1,12 @@
 package com.didi.arius.gateway.core.component;
 
+import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.metrics.log.DslMetricHelper;
+import java.util.concurrent.Semaphore;
+import javax.annotation.PostConstruct;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-
-import javax.annotation.PostConstruct;
-import java.util.concurrent.Semaphore;
 
 /**
 * @author fitz
@@ -86,6 +86,8 @@ public class QueryConfig {
 
 	@Value("${gateway.write.log.content.open:false}")
 	private boolean writeLogContentOpen;
+		@Value("${arius.gateway.name:" + QueryConsts.GATEWAY_GROUP + "}")
+		private String clusterName;
 
 	public QueryConfig() {
 		// pass

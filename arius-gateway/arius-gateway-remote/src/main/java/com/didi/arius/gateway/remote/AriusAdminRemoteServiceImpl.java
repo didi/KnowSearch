@@ -1,22 +1,29 @@
 package com.didi.arius.gateway.remote;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.didi.arius.gateway.common.consts.QueryConsts;
+import com.didi.arius.gateway.common.exception.ServerException;
+import com.didi.arius.gateway.common.metadata.TemplateAlias;
+import com.didi.arius.gateway.common.utils.HttpClient;
+import com.didi.arius.gateway.common.utils.OshiUtils;
+import com.didi.arius.gateway.remote.response.ActiveCountResponse;
+import com.didi.arius.gateway.remote.response.AppListResponse;
+import com.didi.arius.gateway.remote.response.BaseAdminResponse;
+import com.didi.arius.gateway.remote.response.DSLTemplateListResponse;
+import com.didi.arius.gateway.remote.response.DataCenterListResponse;
+import com.didi.arius.gateway.remote.response.DynamicConfigListResponse;
+import com.didi.arius.gateway.remote.response.IndexTemplateListResponse;
+import com.didi.arius.gateway.remote.response.TempaletAliasResponse;
+import com.didi.arius.gateway.remote.response.TemplateInfoListResponse;
 import java.util.HashMap;
 import java.util.Map;
-
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSON;
-import com.didi.arius.gateway.common.consts.QueryConsts;
-import com.didi.arius.gateway.common.exception.ServerException;
-import com.didi.arius.gateway.common.metadata.TemplateAlias;
-import com.didi.arius.gateway.common.utils.HttpClient;
-import com.didi.arius.gateway.remote.response.*;
-
-import lombok.NoArgsConstructor;
 
 /**
  * @author fitz
@@ -136,8 +143,16 @@ public class AriusAdminRemoteServiceImpl implements AriusAdminRemoteService {
     }
 
     @Override
-    public void heartbeat(String clusterName, String hostName, Integer port) {
-        String heartBeatBody = String.format("{\"clusterName\":\"%s\",\"hostName\":\"%s\",\"port\":%d}", clusterName, hostName, port);
+    public void heartbeat(String clusterName, String hostName, Integer port, int connectionSize) {
+        final double processCpu = OshiUtils.getMemUseInfo();
+        String heartBeatBody = new JSONObject()
+                .fluentPut("clusterName",clusterName)
+                .fluentPut("hostName",hostName)
+                .fluentPut("port",port)
+                .fluentPut("cpuUsage", processCpu)
+                .fluentPut("httpConnectionNum",connectionSize)
+                .toJSONString();
+              
         BaseAdminResponse response = HttpClient.forward(adminUrl + GATEWAY_HEARTBEAT_SUFFIX, "PUT", heartBeatBody, headerParams, null, BaseAdminResponse.class);
         if (response.getCode() != 0) {
             bootLogger.error("HeartBeatSchedule heartbeat error, code={}, message={}", response.getCode(), response.getMessage());

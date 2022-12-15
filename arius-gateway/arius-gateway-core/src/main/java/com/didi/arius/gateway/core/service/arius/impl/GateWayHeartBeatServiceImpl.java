@@ -5,16 +5,16 @@ import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.component.ThreadPool;
 import com.didi.arius.gateway.core.service.arius.GateWayHeartBeatService;
+import com.didi.arius.gateway.core.service.connectioncontrl.InboundConnectionHolder;
 import com.didi.arius.gateway.remote.AriusAdminRemoteService;
 import com.didi.arius.gateway.remote.response.ActiveCountResponse;
+import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
 
 @Service
 @NoArgsConstructor
@@ -24,6 +24,8 @@ public class GateWayHeartBeatServiceImpl implements GateWayHeartBeatService {
 
     @Autowired
     private AriusAdminRemoteService ariusAdminRemoteService;
+    @Autowired
+    private InboundConnectionHolder inboundConnectionHolder;
 
     @Autowired
     private QueryConfig queryConfig;
@@ -33,6 +35,7 @@ public class GateWayHeartBeatServiceImpl implements GateWayHeartBeatService {
 
     @Value("${arius.gateway.adminSchedulePeriod}")
     private long adminSchedulePeriod;
+    
 
     @Autowired
     private ThreadPool threadPool;
@@ -61,7 +64,8 @@ public class GateWayHeartBeatServiceImpl implements GateWayHeartBeatService {
 
     /************************************************************** private method **************************************************************/
     private void heartbeat(){
-        ariusAdminRemoteService.heartbeat(QueryConsts.GATEWAY_GROUP, Convert.getHostName(), port);
+        ariusAdminRemoteService.heartbeat(queryConfig.getClusterName(), Convert.getIpAddr(), port,
+                                          inboundConnectionHolder.connectionSize());
     }
 
     /**
@@ -69,7 +73,7 @@ public class GateWayHeartBeatServiceImpl implements GateWayHeartBeatService {
      * 节点数量跟当前保存的节点数量不一致时，更新dsl限流值
      */
     private void resetActiveCount() {
-        ActiveCountResponse response = ariusAdminRemoteService.getAliveCount(QueryConsts.GATEWAY_GROUP);
+        ActiveCountResponse response = ariusAdminRemoteService.getAliveCount(queryConfig.getClusterName());
         int activeCount = response.getData();
 
         if (activeCount < 1) {
