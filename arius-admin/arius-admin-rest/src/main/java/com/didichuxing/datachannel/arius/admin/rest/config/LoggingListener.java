@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 /**
  * 读取yml配置传递到log4jXml中
  *
- * @author Clay
+ * @author slhu
  */
 @Component
 public class LoggingListener implements ApplicationListener<ApplicationEvent>, Ordered {
