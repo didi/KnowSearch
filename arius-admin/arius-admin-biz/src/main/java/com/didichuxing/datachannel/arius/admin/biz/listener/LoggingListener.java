@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.rest.config;
+package com.didichuxing.datachannel.arius.admin.biz.listener;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;

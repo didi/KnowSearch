@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.rest;
 
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.rest.config.LoggingListener;
+import com.didichuxing.datachannel.arius.admin.biz.listener.LoggingListener;
 import com.didichuxing.datachannel.arius.admin.rest.swagger.SwaggerConfiguration;
 import com.didichuxing.datachannel.arius.admin.rest.web.WebConstant;
 import com.didichuxing.datachannel.arius.admin.rest.web.WebRequestLogFilter;
