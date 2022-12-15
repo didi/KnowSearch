@@ -24,6 +24,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor.AriusMetaJobClusterDistributeDAO;
 import com.didiglobal.knowframework.elasticsearch.client.ESClient;
 import com.didiglobal.knowframework.observability.Observability;
+import com.didiglobal.knowframework.observability.conponent.thread.ContextExecutorService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -35,15 +36,19 @@ import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.elasticsearch.common.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.ReflectUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.PostConstruct;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_FAILED;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.*;
 
 /**
  * 通过查数据库观察每个节点采集es集群名称
@@ -523,8 +528,11 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
                     new LinkedBlockingQueue<>(100),
                     new BasicThreadFactory.Builder().namingPattern("monitor-cluster-data-collect-%d").build()));
         }
+        long blockSize = Optional.ofNullable(ReflectionUtils.findField(ContextExecutorService.class, "delegate")).map(field -> {
+            field.setAccessible(true);
+            return (ThreadPoolExecutor) ReflectionUtils.getField(field, threadPool);
+        }).map(ThreadPoolExecutor::getQueue).map(Collection::size).orElse(0);
 
-        long blockSize = ((ThreadPoolExecutor) threadPool).getQueue().size();
         if (blockSize > WARN_BLOCK_SIZE) {
             LOGGER.warn(
                 "class=MonitorJobHandler||method=checkThreadPool||blockSize={}||msg=collect thread pool has block task",
