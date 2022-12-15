@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.rest;
 
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.rest.config.LoggingListener;
 import com.didichuxing.datachannel.arius.admin.rest.swagger.SwaggerConfiguration;
 import com.didichuxing.datachannel.arius.admin.rest.web.WebConstant;
 import com.didichuxing.datachannel.arius.admin.rest.web.WebRequestLogFilter;
@@ -83,7 +84,11 @@ public class AriusAdminApplication {
 
             EnvUtil.setLoadActiveProfiles(args);
             SwaggerConfiguration.initEnv(args);
-            ApplicationContext ctx = SpringApplication.run(AriusAdminApplication.class, args);
+            SpringApplication ariusAdminApplication = new SpringApplication(AriusAdminApplication.class);
+            // 添加 日志监听器，使 log4j2-xx.xml 可以间接读取到配置文件的属性
+            ariusAdminApplication.addListeners(new LoggingListener());
+
+            ApplicationContext ctx = ariusAdminApplication.run(args);
             for (String profile : ctx.getEnvironment().getActiveProfiles()) {
                 LOGGER.info("class=AriusAdminApplication||method=main||Spring Boot use profile: {}", profile);
             }

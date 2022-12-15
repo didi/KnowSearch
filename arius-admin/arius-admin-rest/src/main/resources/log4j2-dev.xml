@@ -1,17 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration package="org.apache.logging.log4j.core,com.didiglobal.logi.log.log4j2.appender" >
+<Configuration package="org.apache.logging.log4j.core,com.didiglobal.logi.log.log4j2.appender">
+    <Properties>
+        <Property name="address" value="${sys:spring.logi-job.elasticsearch-address}"/>
+        <Property name="port" value="${sys:spring.logi-job.elasticsearch-port}"/>
+        <Property name="user" value="${sys:spring.logi-job.elasticsearch-user}"/>
+        <Property name="password" value="${sys:spring.logi-job.elasticsearch-password}"/>
+        <Property name="indexName" value="${sys:spring.logi-job.elasticsearch-index-name}"/>
+        <Property name="typeName" value="${sys:spring.logi-job.elasticsearch-type-name}"/>
+    </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
 
         </Console>
-        <ElasticsearchAppender name="esAppender" address="10.96.75.13" port="18143" user="elastic" password="Didiyun@888" indexName="index_observability" typeName="type" threshold="all" bufferSize="1000" numberOfShards="1" numberOfReplicas="0" logExpire="7" extendsMappingClass="" requestTimeoutMillis="3000" discardWhenBufferIsFull="true">
-
+        <ElasticsearchAppender name="esAppender" address="${address}" port="${port}" user="${user}"
+                               password="${password}" indexName="${indexName}" typeName="${typeName}" threshold="all"
+                               bufferSize="1000" numberOfShards="1" numberOfReplicas="0" logExpire="7"
+                               extendsMappingClass="" requestTimeoutMillis="3000" discardWhenBufferIsFull="true">
         </ElasticsearchAppender>
     </Appenders>
     <Loggers>
         <root level="INFO">
-            <appender-ref ref="Console" />
-            <appender-ref ref="esAppender" />
+            <appender-ref ref="Console"/>
+            <appender-ref ref="esAppender"/>
         </root>
     </Loggers>
 </Configuration>
