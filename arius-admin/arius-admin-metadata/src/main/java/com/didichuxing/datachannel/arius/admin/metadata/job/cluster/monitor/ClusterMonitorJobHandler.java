@@ -33,13 +33,12 @@ import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.Ar
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateAccessESDAO;
 import com.didiglobal.knowframework.elasticsearch.client.response.cluster.ESClusterHealthResponse;
 import com.didiglobal.knowframework.observability.Observability;
+import com.didiglobal.knowframework.observability.conponent.thread.ContextExecutorService;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -49,6 +48,7 @@ import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * 集群维度采集监控数据，包含 es节点存活检查；es集群tps/qps掉底报警
@@ -564,7 +564,11 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
                     new BasicThreadFactory.Builder().namingPattern("cluster-monitor-cluster-data-collect-%d").build()));
         }
 
-        long blockSize = ((ThreadPoolExecutor) threadPool).getQueue().size();
+        long blockSize = Optional.ofNullable(ReflectionUtils.findField(ContextExecutorService.class, "delegate")).map(field -> {
+            field.setAccessible(true);
+            return (ThreadPoolExecutor) ReflectionUtils.getField(field, threadPool);
+        }).map(ThreadPoolExecutor::getQueue).map(Collection::size).orElse(0);
+
         if (blockSize > WARN_BLOCK_SIZE) {
             LOGGER.warn(
                 "class=ClusterMonitorJobHandler||method=checkThreadPool||blockSize={}||msg=collect thread pool has block task",
