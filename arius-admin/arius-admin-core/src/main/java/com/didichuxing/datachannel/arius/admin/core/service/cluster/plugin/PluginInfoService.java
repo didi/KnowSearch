@@ -64,4 +64,12 @@ public interface PluginInfoService {
 		 * @return {@link PluginInfoPO}
 		 */
 		PluginInfoPO getPluginById(Long pluginId);
+		
+		/**
+		 * 查询
+		 *
+		 * @param pluginInfoPO 插件信息po
+		 * @return {@link PluginInfoPO}
+		 */
+		PluginInfoPO selectByCondition(PluginInfoPO pluginInfoPO);
 }

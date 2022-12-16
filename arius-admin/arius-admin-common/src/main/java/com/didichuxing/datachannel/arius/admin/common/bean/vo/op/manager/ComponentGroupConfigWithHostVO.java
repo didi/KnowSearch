@@ -21,5 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ComponentGroupConfigWithHostVO extends ComponentGroupConfig {
 		private List<ComponentHost> componentHosts;
+		
+		private Integer packageId;
 
 }

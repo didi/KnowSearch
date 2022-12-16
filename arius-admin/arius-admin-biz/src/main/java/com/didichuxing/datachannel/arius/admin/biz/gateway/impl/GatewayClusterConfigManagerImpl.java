@@ -112,6 +112,7 @@ public class GatewayClusterConfigManagerImpl implements GatewayClusterConfigMana
 						final String              groupName      = hostVO.getGroupName();
 						final List<ComponentHost> componentHosts = groupName2HostLists.get(groupName);
 						hostVO.setComponentHosts(componentHosts);
+						hostVO.setPackageId(componentRes.getData().getPackageId());
 				}
 				
 				return Result.buildSucc(hostVOS);

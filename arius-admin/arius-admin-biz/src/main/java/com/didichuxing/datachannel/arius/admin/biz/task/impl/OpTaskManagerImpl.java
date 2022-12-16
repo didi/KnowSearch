@@ -219,16 +219,18 @@ public class OpTaskManagerImpl implements OpTaskManager {
         final Integer taskId = Integer.valueOf(opTask.getBusinessKey());
         com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> voidResult = taskService.retryTask(taskId);
         if (voidResult.isSuccess()) {
-            Result<Void> processTaskRes = refreshOpTask(
-                opTask, taskId);
-            if (processTaskRes.failed()) {
-                return processTaskRes;
-            }
-            // 重试后继续执行
+             // 重试后继续执行
             Result<Void> executeRes = execute(id);
             if (executeRes.failed()) {
                 return executeRes;
             }
+            OpTaskProcessDTO processDTO = ConvertUtil.obj2Obj(opTask, OpTaskProcessDTO.class);
+            processDTO.setTaskId(opTask.getId());
+            processDTO.setStatus(OpTaskStatusEnum.RUNNING.getStatus());
+            try {
+                processTask(processDTO);
+            } catch (Exception ignore) {}
+           
         }
         return Result.buildFromWithData(voidResult);
     }

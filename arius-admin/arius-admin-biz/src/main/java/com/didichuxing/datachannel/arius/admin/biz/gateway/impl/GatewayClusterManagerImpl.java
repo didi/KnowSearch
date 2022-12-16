@@ -230,6 +230,11 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		}
 		
 		@Override
+		public Result<Void> update(GatewayClusterDTO gatewayClusterDTO) {
+				return Result.build(gatewayClusterService.update(gatewayClusterDTO));
+		}
+		
+		@Override
 	public PaginationResult<GatewayClusterVO> pageGetCluster(GatewayConditionDTO condition,
 			Integer projectId) {
 		BaseHandle baseHandle = null;

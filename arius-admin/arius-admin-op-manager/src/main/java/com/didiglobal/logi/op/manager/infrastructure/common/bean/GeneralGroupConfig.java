@@ -70,4 +70,8 @@ public class GeneralGroupConfig {
      * 配置依赖组件
      */
     private Integer dependConfigComponentId;
+    /**
+     * 机器规格
+     */
+    private String machineSpec;
 }

@@ -150,4 +150,12 @@ public interface GatewayClusterManager {
 		 * @return 一个 Result 对象，里面有一个 Void 对象。
 		 */
 		Result<Void> offlineWithECM(Integer id);
+		
+		/**
+		 * 更新
+		 *
+		 * @param gatewayClusterDTO 网关集群dto
+		 * @return {@link Result}<{@link Void}>
+		 */
+		Result<Void> update(GatewayClusterDTO gatewayClusterDTO);
 }

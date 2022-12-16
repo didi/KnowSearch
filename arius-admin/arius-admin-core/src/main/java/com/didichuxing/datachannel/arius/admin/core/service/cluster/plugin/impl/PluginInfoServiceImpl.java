@@ -57,4 +57,9 @@ public class PluginInfoServiceImpl implements PluginInfoService {
 		public PluginInfoPO getPluginById(Long pluginId) {
 				return pluginDAO.selectByPrimaryKey(pluginId);
 		}
+		
+		@Override
+		public PluginInfoPO selectByCondition(PluginInfoPO pluginInfoPO) {
+				return pluginDAO.selectByCondition(pluginInfoPO);
+		}
 }

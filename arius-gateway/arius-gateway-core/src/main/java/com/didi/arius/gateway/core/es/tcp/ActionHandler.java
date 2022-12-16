@@ -7,8 +7,15 @@ import com.didi.arius.gateway.common.metadata.ActionContext;
 import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.es.http.ESBase;
-import com.didi.arius.gateway.core.service.*;
+import com.didi.arius.gateway.core.service.ESTcpClientService;
+import com.didi.arius.gateway.core.service.MetricsService;
+import com.didi.arius.gateway.core.service.RateLimitService;
+import com.didi.arius.gateway.core.service.RequestStatsService;
 import com.didiglobal.logi.log.LogGather;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.concurrent.TimeUnit;
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.cluster.block.ClusterBlockException;
@@ -22,11 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.concurrent.TimeUnit;
-
 /**
 * @author weizijun
 * @date：2016年9月18日
@@ -37,23 +39,24 @@ public abstract class ActionHandler extends ESBase {
 	protected static final Logger logger = LoggerFactory.getLogger(ActionHandler.class);
 	protected static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
 	protected static final Logger traceLogger = LoggerFactory.getLogger(QueryConsts.TRACE_LOGGER);
+		
+		@Autowired
+		protected ActionController controller;
+		
+		@Autowired
+		protected ESTcpClientService esTcpClientService;
+		
+		@Autowired
+		protected RateLimitService rateLimitService;
+		
+		@Autowired
+		protected QueryConfig queryConfig;
+		
+		@Autowired
+		protected RequestStatsService requestStatsService;
+		@Autowired
+		protected MetricsService      metricsService;
 	
-	@Autowired
-	protected ActionController controller;
-	
-	@Autowired
-	protected ESTcpClientService esTcpClientService;
-	
-    @Autowired
-    protected RateLimitService rateLimitService;
-
-	@Autowired
-	protected QueryConfig queryConfig;
-
-	@Autowired
-	protected RequestStatsService requestStatsService;
-	@Autowired
-	protected MetricsService metricsService;
 	
 	public void handleRequest(ActionContext actionContext) throws IOException {
 		try {
@@ -108,8 +111,10 @@ public abstract class ActionHandler extends ESBase {
 	
 	protected void preRequest(ActionContext actionContext) {
 		statLogger.info(QueryConsts.DLFLAG_PREFIX + "query_tcp_request||appid={}||requestId={}||action={}||group={}||clusterId={}||clusterName={}||user={}||remoteAddr={}||requestLen={}",
-				actionContext.getAppid(), actionContext.getRequestId(), actionContext.getActionName(), QueryConsts.GATEWAY_GROUP, actionContext.getClusterId(), actionContext.getCluster(), actionContext.getUser(),
-				actionContext.getRemoteAddr(), actionContext.getRequestLength());
+		                actionContext.getAppid(), actionContext.getRequestId(), actionContext.getActionName(),
+		                queryConfig.getClusterName(), actionContext.getClusterId(), actionContext.getCluster(),
+		                actionContext.getUser(),
+		                actionContext.getRemoteAddr(), actionContext.getRequestLength());
 		actionContext.setRequestTime(System.currentTimeMillis());
 		
 

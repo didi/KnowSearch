@@ -105,4 +105,19 @@
 			AND cluster_type = #{clusterType}
 			AND cluster_id = #{clusterId}
 	</select>
+	
+	<select id="selectByCondition" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM plugin_info
+		<where>
+			<if test="clusterId != null">AND component_id = #{componentId}</if>
+			<if test="clusterType != null">
+				AND cluster_type = #{clusterType}</if>
+			<if test="componentId != null">
+				AND component_id = #{componentId}</if>
+			<if test="name != null and name != ''">
+				AND name = #{name}</if>
+		</where>
+	</select>
 </mapper>

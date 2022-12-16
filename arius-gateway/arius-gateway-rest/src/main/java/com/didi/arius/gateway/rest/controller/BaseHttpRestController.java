@@ -1,7 +1,9 @@
 package com.didi.arius.gateway.rest.controller;
 
+import com.didi.arius.gateway.common.connectioncontrl.ConnectionLimitResult;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.consts.RestConsts;
+import com.didi.arius.gateway.common.exception.ConnectionLimitException;
 import com.didi.arius.gateway.common.exception.QueryDslLengthException;
 import com.didi.arius.gateway.common.metadata.AppDetail;
 import com.didi.arius.gateway.common.metadata.JoinLogContext;
@@ -11,6 +13,7 @@ import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.es.http.RestActionListenerImpl;
 import com.didi.arius.gateway.core.service.ESRestClientService;
+import com.didi.arius.gateway.core.service.InboundConnectionLimitService;
 import com.didi.arius.gateway.core.service.RateLimitService;
 import com.didi.arius.gateway.core.service.RequestStatsService;
 import com.didi.arius.gateway.core.service.arius.AppService;
@@ -25,17 +28,24 @@ import com.didi.arius.gateway.elasticsearch.client.model.ESActionRequest;
 import com.didi.arius.gateway.rest.http.IRestHandler;
 import com.didi.arius.gateway.rest.http.RestController;
 import com.didiglobal.logi.log.LogGather;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.*;
+import org.elasticsearch.rest.BytesRestResponse;
+import org.elasticsearch.rest.RestChannel;
+import org.elasticsearch.rest.RestRequest;
+import org.elasticsearch.rest.RestResponse;
+import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.rest.support.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
 
 public abstract class BaseHttpRestController implements IRestHandler {
 
@@ -71,6 +81,8 @@ public abstract class BaseHttpRestController implements IRestHandler {
 
     @Autowired
     protected RateLimitService rateLimitService;
+    @Autowired
+    protected InboundConnectionLimitService inboundConnectionLimitService;
 
     protected String actionName = this.getClass().getSimpleName();
 
@@ -86,6 +98,8 @@ public abstract class BaseHttpRestController implements IRestHandler {
         try {
 
             checkToken(queryContext);
+            
+            checkConnectionLimitAndBindConnection2App(queryContext);
 
             preRequest(queryContext);
 
@@ -142,7 +156,32 @@ public abstract class BaseHttpRestController implements IRestHandler {
         String encode = Base64.getEncoder().encodeToString(String.format("%s", "user_" + queryContext.getAppid() + ":" + queryContext.getAppDetail().getVerifyCode()).getBytes(StandardCharsets.UTF_8));
         queryContext.getRequest().putHeader(AUTHORIZATION, "Basic " + encode);
     }
-
+    
+    protected void checkConnectionLimitAndBindConnection2App(QueryContext queryContext) {
+        // 因为节点连接数上限需要断开连接
+        boolean isIgnoreConnection = inboundConnectionLimitService.isIgnore(queryContext);
+        if (isIgnoreConnection) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("发现要忽略的连接, 触发主动断开, appid {}, remoteAddress {}", queryContext.getAppid(),
+                             queryContext.getRemoteAddr());
+            }
+            throw new ConnectionLimitException("node connection limit err, please try again later and contact us!");
+        }
+        // 因为实例连接数上限需要断开连接
+        ConnectionLimitResult connectionLimit = inboundConnectionLimitService.appLimitResult(queryContext);
+        if (connectionLimit.isOverConnected()) {
+            boolean isNewConnection = inboundConnectionLimitService.isNew(queryContext);
+            if (isNewConnection) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("实例接入连接数达到上限, appid {}, count: {}, limit {}，触发主动断开",
+                                 queryContext.getAppid(), connectionLimit.getCount(), connectionLimit.getLimit());
+                }
+                throw new ConnectionLimitException("app connection limit err, please try again later and contact us!");
+            }
+        }
+        inboundConnectionLimitService.onHandle(queryContext);
+    }
+    
     protected void preRequest(QueryContext queryContext) {
         if (queryContext.isFromKibana() || (AppUtil.isAdminAppid(queryContext.getAppDetail())
                                             && StringUtils.isNotBlank(queryContext.getClusterId()))) {

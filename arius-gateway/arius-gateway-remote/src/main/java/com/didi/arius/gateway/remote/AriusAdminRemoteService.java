@@ -1,7 +1,14 @@
 package com.didi.arius.gateway.remote;
 
 import com.didi.arius.gateway.common.metadata.TemplateAlias;
-import com.didi.arius.gateway.remote.response.*;
+import com.didi.arius.gateway.remote.response.ActiveCountResponse;
+import com.didi.arius.gateway.remote.response.AppListResponse;
+import com.didi.arius.gateway.remote.response.DSLTemplateListResponse;
+import com.didi.arius.gateway.remote.response.DataCenterListResponse;
+import com.didi.arius.gateway.remote.response.DynamicConfigListResponse;
+import com.didi.arius.gateway.remote.response.IndexTemplateListResponse;
+import com.didi.arius.gateway.remote.response.TempaletAliasResponse;
+import com.didi.arius.gateway.remote.response.TemplateInfoListResponse;
 
 /**
  * @author fitz
@@ -48,12 +55,12 @@ public interface AriusAdminRemoteService {
     DynamicConfigListResponse listQueryConfig();
 
     /**
-     *
      * @param clusterName
      * @param hostName
      * @param port
+     * @param connectionSize
      */
-    void heartbeat(String clusterName, String hostName, Integer port);
+    void heartbeat(String clusterName, String hostName, Integer port, int connectionSize);
 
     /**
      *
