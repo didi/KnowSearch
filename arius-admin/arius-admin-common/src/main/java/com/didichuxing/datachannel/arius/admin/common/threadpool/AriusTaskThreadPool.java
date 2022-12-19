@@ -1,13 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.common.threadpool;
 
-import java.util.List;
-import java.util.concurrent.*;
-
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.observability.Observability;
+import com.didiglobal.knowframework.observability.conponent.thread.ContextExecutorService;
 import lombok.NoArgsConstructor;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
+import org.springframework.util.ReflectionUtils;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.*;
 
 /**
  * admin执行任务的线程池
@@ -69,7 +73,9 @@ public class AriusTaskThreadPool {
     }
 
     public int getCurrentQueueWorkerSize() {
-        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) pool;
-        return threadPoolExecutor.getQueue().size();
+        return Optional.ofNullable(ReflectionUtils.findField(ContextExecutorService.class, "delegate")).map(field -> {
+            field.setAccessible(true);
+            return (ThreadPoolExecutor) ReflectionUtils.getField(field, pool);
+        }).map(ThreadPoolExecutor::getQueue).map(Collection::size).orElse(0);
     }
 }
