@@ -94,8 +94,8 @@ public class GatewayManagerTest {
     @Test
     void heartbeatTest1() {
         // Setup
-        final GatewayHeartbeat heartbeat = new GatewayHeartbeat("clusterName", "hostName", 0);
-        when(mockGatewayService.heartbeat(new GatewayHeartbeat("clusterName", "hostName", 0)))
+        final GatewayHeartbeat heartbeat = new GatewayHeartbeat("clusterName", "hostName", 0,null,null);
+        when(mockGatewayService.heartbeat(new GatewayHeartbeat("clusterName", "hostName", 0,null,null)))
             .thenReturn(Result.buildFail(null));
 
         // Run the test
