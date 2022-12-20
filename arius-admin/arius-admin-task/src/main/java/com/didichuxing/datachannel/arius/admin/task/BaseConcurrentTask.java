@@ -103,21 +103,6 @@ public abstract class BaseConcurrentTask<T> {
             LOGGER.warn("class=BaseConcurrentTask||method=execute||ConcurrentClusterTask Interrupted||task={}",
                 getTaskName(), e);
         }
-        try {
-            //记录任务的完成任务时间
-            long cost = System.currentTimeMillis() - start;
-            //operateRecordService.save(new OperateRecord.Builder()
-            //                .bizId(getTaskName())
-            //                .content(getTaskName() + "完成，耗时：" + cost)
-            //                .operationTypeEnum(OperateTypeEnum.SENSE_OP_EDIT)
-            //                .triggerWayEnum(TriggerWayEnum.TIMING_TASK)
-            //                .userOperation(SYSTEM.getDesc())
-            //        .build());
-
-        } catch (Exception e) {
-            LOGGER.error("class=BaseConcurrentTask||method=execute||errMsg={}", e.getMessage(), e);
-        }
-
         return succ.get();
     }
 
