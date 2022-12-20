@@ -9,9 +9,12 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * base任务 集群级别并发处理 记录任务完成时间  检查任务前置依赖
@@ -57,16 +60,21 @@ public abstract class BaseConcurrentClusterLogicTask extends BaseConcurrentTask<
         }
 
         boolean succ = true;
+        List<String> succeedClusterList = Lists.newArrayList();
+        List<String> failedClusterList = Lists.newArrayList();
+
+        LOGGER.info(
+                "class=BaseConcurrentClusterLogicTask||method=executeByBatch||taskBatch executeByClusterLogic begin||task={}||clusterListSize={}||clusters={}",
+                getTaskName(), items.size(), items.stream().map(ClusterLogic::getName).collect(Collectors.joining(",")));
 
         // 只要有一个集群失败就认为batch失败
         for (ClusterLogic item : items) {
             try {
-                LOGGER.info("executeByClusterLogic begin||cluster={}||task={}", item.getName(), getTaskName());
                 if (executeByClusterLogic(item.getId())) {
-                    LOGGER.info("executeByClusterLogic succ||cluster={}||task={}", item.getName(), getTaskName());
+                    succeedClusterList.add(item.getName());
                 } else {
                     succ = false;
-                    LOGGER.warn("executeByClusterLogic fail||cluster={}||task={}", item.getName(), getTaskName());
+                    failedClusterList.add(item.getName());
                 }
             } catch (Exception e) {
                 succ = false;
@@ -74,7 +82,15 @@ public abstract class BaseConcurrentClusterLogicTask extends BaseConcurrentTask<
                     getTaskName(), e.getMessage(), e);
             }
         }
-
+        if (succ) {
+            LOGGER.info(
+                    "class=BaseConcurrentClusterLogicTask||method=executeByBatch||taskBatch executeByClusterLogic succ||task={}||clusterListSize={}||clusters={}",
+                    getTaskName(), succeedClusterList.size(), String.join(",", succeedClusterList));
+        } else {
+            LOGGER.info(
+                    "class=BaseConcurrentClusterLogicTask||method=executeByBatch||taskBatch executeByClusterLogic fail||task={}||clusterListSize={}||succeedClusterListSize={}||failedClusterListSize={}||succeedClusters={}||failedClusters={}",
+                    getTaskName(), items.size(), succeedClusterList.size(), failedClusterList.size(), StringUtils.join(succeedClusterList, ","), StringUtils.join(failedClusterList, ","));
+        }
         return succ;
     }
 
