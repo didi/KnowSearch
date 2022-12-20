@@ -74,6 +74,10 @@ public enum OpTaskHandleEnum {
     ES_CLUSTER_OFFLINE(OpTaskTypeEnum.ES_CLUSTER_OFFLINE.getType(), OpTaskConstant.ES_CLUSTER_OFFLINE),
     ES_CLUSTER_PLUGIN_OFFLINE(OpTaskTypeEnum.ES_CLUSTER_PLUG_ROLLBACK.getType(),
         OpTaskConstant.ES_CLUSTER_PLUG_ROLLBACK),
+     ES_CLUSTER_PLUG_CONFIG_ROLLBACK(OpTaskTypeEnum.ES_CLUSTER_PLUG_CONFIG_ROLLBACK.getType(),
+        OpTaskConstant.ES_CLUSTER_PLUG_CONFIG_ROLLBACK),
+     ES_CLUSTER_PLUG_CONFIG(OpTaskTypeEnum.ES_CLUSTER_PLUG_CONFIG.getType(),
+        OpTaskConstant.ES_CLUSTER_PLUG_CONFIG),
 
                               FAST_INDEX(OpTaskTypeEnum.FAST_INDEX.getType(),
                                          OpTaskConstant.FAST_INDEX_TASK),
@@ -85,9 +89,9 @@ public enum OpTaskHandleEnum {
         this.message = message;
     }
 
-    private Integer type;
+    private final Integer type;
 
-    private String  message;
+    private final String message;
 
     public Integer getType() {
         return type;
@@ -154,8 +158,9 @@ class OpTaskConstant {
     public static final String GATEWAY_OFFLINE            = "gatewayOfflineTask";
     public static final String ES_CLUSTER_OFFLINE         = "esClusterOfflineTask";
     public static final String ES_CLUSTER_PLUG_ROLLBACK   = "esClusterPluginRollbackTask";
-
-
+    
+    public static final String ES_CLUSTER_PLUG_CONFIG_ROLLBACK = "esClusterPluginConfigRollbackTask";
+    public static final String ES_CLUSTER_PLUG_CONFIG          = "esClusterPluginConfigEditTask";
     public static final String FAST_INDEX_TASK             = "fastIndexOpTask";
 
     public static final String UNKNOWN                     = "unknown";

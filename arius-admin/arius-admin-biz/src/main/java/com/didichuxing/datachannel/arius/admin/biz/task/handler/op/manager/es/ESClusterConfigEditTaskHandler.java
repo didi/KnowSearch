@@ -4,12 +4,16 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterConfigContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.ConfigOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
-import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -96,8 +100,30 @@ public class ESClusterConfigEditTaskHandler extends AbstractESTaskHandler {
 		}
 		
 		@Override
-		protected OperateRecord recordCurrentOperationTasks(String expandData) {
-				return new OperateRecord();
+		protected OperateRecord recordCurrentOperationTasks(OpTask opTask) {
+					final ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
+						AuthConstant.SUPER_PROJECT_ID);
+				final ClusterConfigContent content = convertString2Content(
+						opTask.getExpandData());
+				final Component component = componentService.queryComponentById(content.getComponentId())
+						.getData();
+				// 有且仅会有一个配置
+				final GeneralGroupConfigDTO target = content.getGroupConfigList().get(0);
+				final GeneralGroupConfigDTO source = componentService.getComponentConfig(
+								content.getComponentId()).getData()
+						.stream()
+						.filter(i -> i.getGroupName().equals(target.getGroupName()))
+						.findFirst()
+						.map(i -> ConvertUtil.obj2Obj(i, GeneralGroupConfigDTO.class)).get();
+				final Integer id = clusterPhyManager.getIdByComponentId(
+						content.getComponentId()).getData();
+				return new OperateRecord.Builder()
+						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_CONF_CHANGE)
+						.content(new ConfigOperateRecord(component.getName(), source, target).toString())
+						.project(briefVO)
+						.bizId(id)
+						.userOperation(opTask.getCreator())
+						.build();
 		}
 		
 		@Override

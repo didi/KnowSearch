@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.ConfigConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterNodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -13,6 +14,7 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHost;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,43 +66,72 @@ public class GatewayClusterConfigPageSearchHandle extends
 	@Override
 	protected PaginationResult<GatewayConfigVO> buildPageData(ConfigConditionDTO condition,
 			Integer projectId) {
-		Integer componentId = gatewayClusterService.getComponentIdById(condition.getClusterId());
-		// 如果找不到
-		if (Objects.isNull(componentId)) {
-			return PaginationResult.buildSucc(Collections.emptyList(), 0L, condition.getPage(),
-					condition.getSize());
-		}
-		final List<ComponentGroupConfig> data = componentService.getComponentConfig(
-				componentId).getData();
-		if (CollectionUtils.isEmpty(data)) {
-			return PaginationResult.buildSucc(Collections.emptyList(), 0L, condition.getPage(),
-					condition.getSize());
-		}
-		//获取host列表
-			final List<String> hostsList = data.stream().map(this::hostsConvertHostList)
-				.flatMap(Collection::stream).distinct()
-				.collect(Collectors.toList());
-		//1.获取全量的node节点信息
-		List<GatewayClusterNodePO> gatewayClusterNodeList=gatewayNodeService.listByHosts(hostsList);
-		final List<GatewayClusterNodeVO> nodes = ConvertUtil.list2List(
-				gatewayClusterNodeList, GatewayClusterNodeVO.class);
-		//进行对应的转换
-		final Map<Integer, Integer> configIdComponentIdMap = ConvertUtil.list2Map(data,
-				ComponentGroupConfig::getId, ComponentGroupConfig::getComponentId);
-		final Map<Integer, List<GatewayClusterNodeVO>> hostComponentId2NodesMaps = ConvertUtil.list2MapOfList(
-				nodes, GatewayClusterNodeVO::getComponentId, i -> i);
-		//通过ComponentId进行选出对应的对应填充
-		final List<GatewayConfigVO> gatewayConfigList = ConvertUtil.list2List(data,
-				GatewayConfigVO.class, i -> Optional.ofNullable(configIdComponentIdMap.get(i.getId()))
-						.map(hostComponentId2NodesMaps::get)
-						.ifPresent(i::setNodes));
-		final List<GatewayConfigVO> gatewayConfigPage = gatewayConfigList.stream()
-				.filter(i -> filterByConfigConditionDTO(i, condition)).collect(Collectors.toList());
-		int total = gatewayConfigList.size();
-		final List<GatewayConfigVO> records = gatewayConfigPage.stream()
-				.skip((condition.getPage() - 1) * condition.getSize()).limit(condition.getSize()).
-				collect(Collectors.toList());
-		return PaginationResult.buildSucc(records,total,condition.getPage(),condition.getSize());
+			final GatewayClusterPO clusterPO   = gatewayClusterService.getOneById(
+					condition.getClusterId());
+			final Integer          componentId = clusterPO.getComponentId();
+			// 如果找不到
+			if (Objects.isNull(componentId) || componentId <= 0) {
+					return PaginationResult.buildSucc(Collections.emptyList(), 0L, condition.getPage(),
+							condition.getSize());
+			}
+			final com.didiglobal.logi.op.manager.domain.component.entity.Component component = componentService.queryComponentById(
+					componentId).getData();
+			if (Objects.isNull(component)) {
+					return PaginationResult.buildSucc(Collections.emptyList(), 0L, condition.getPage(),
+							condition.getSize());
+			}
+			final List<ComponentGroupConfig> data = component.getGroupConfigList();
+			if (CollectionUtils.isEmpty(data)) {
+					return PaginationResult.buildSucc(Collections.emptyList(), 0L, condition.getPage(),
+							condition.getSize());
+			}
+			// 获取可以编辑的配置 id
+			final List<Integer> ids = componentService.getComponentConfig(componentId).getData()
+					.stream().map(ComponentGroupConfig::getId).collect(
+							Collectors.toList());
+			// 获取 host 列表
+			final List<ComponentHost> hostList = component.getHostList();
+			final Map<String, List<ComponentHost>> groupName2HostsMaps = ConvertUtil.list2MapOfList(
+					hostList,
+					ComponentHost::getGroupName, i -> i);
+			
+			//1. 获取全量的 node 节点信息
+			List<GatewayClusterNodePO> gatewayClusterNodeList =
+					gatewayNodeService.listByClusterNames(
+							Collections.singletonList(clusterPO.getClusterName()));
+			final List<GatewayClusterNodeVO> nodes = ConvertUtil.list2List(
+					gatewayClusterNodeList, GatewayClusterNodeVO.class);
+			
+			// 进行对应的转换
+			final Map<String, List<GatewayClusterNodeVO>> ip2ListMap = ConvertUtil.list2MapOfList(
+					nodes, GatewayClusterNodeVO::getHostName, i -> i);
+			// 通过 ComponentId 进行选出对应的对应填充
+			final List<GatewayConfigVO> gatewayConfigList = ConvertUtil.list2List(data,
+					GatewayConfigVO.class);
+			for (GatewayConfigVO gatewayConfigVO : gatewayConfigList) {
+					final String              groupName      = gatewayConfigVO.getGroupName();
+					final List<ComponentHost> componentHosts = groupName2HostsMaps.get(groupName);
+					final List<GatewayClusterNodeVO> nodesList = Optional.ofNullable(componentHosts)
+							.orElse(Collections.emptyList())
+							.stream()
+							.map(ComponentHost::getHost)
+							.map(ip2ListMap::get)
+							.filter(Objects::nonNull)
+							.flatMap(Collection::stream)
+							.collect(Collectors.toList());
+					gatewayConfigVO.setNodes(nodesList);
+					if (ids.contains(gatewayConfigVO.getId())) {
+							gatewayConfigVO.setSupportEditAndRollback(true);
+					}
+			}
+			
+			final List<GatewayConfigVO> gatewayConfigPage = gatewayConfigList.stream()
+					.filter(i -> filterByConfigConditionDTO(i, condition)).collect(Collectors.toList());
+			int total = gatewayConfigList.size();
+			final List<GatewayConfigVO> records = gatewayConfigPage.stream()
+					.skip((condition.getPage() - 1) * condition.getSize()).limit(condition.getSize()).
+					collect(Collectors.toList());
+			return PaginationResult.buildSucc(records, total, condition.getPage(), condition.getSize());
 	}
 	
 	/**

@@ -1,9 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.task;
 
+import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.List;
-
-import com.google.common.collect.Lists;
 
 /**
  * 任务枚举类型
@@ -82,6 +81,8 @@ public enum OpTaskTypeEnum {
     ES_CLUSTER_CONFIG_ROLLBACK(43, "ES 集群配置回滚", "es-cluster-config-rollback"),
     ES_CLUSTER_OFFLINE(44, "ES 集群下线操作", "es-cluster-offline"),
     ES_CLUSTER_PLUG_ROLLBACK(45, "ES 集群插件回滚", "es-cluster-plugin-rollback"),
+    ES_CLUSTER_PLUG_CONFIG(46, "ES 集群插件配置变更", "es-cluster-plugin-config"),
+    ES_CLUSTER_PLUG_CONFIG_ROLLBACK(47, "ES 集群配置回滚", "es-cluster-plugin-config-rollback"),
                             UNKNOWN(-1, "unknown");
 
     OpTaskTypeEnum(Integer type, String message) {
@@ -95,10 +96,10 @@ public enum OpTaskTypeEnum {
         this.apiPath = apiPath;
     }
 
-    private Integer type;
+    private final Integer type;
 
-    private String  message;
-    private String  apiPath;
+    private final String message;
+    private       String apiPath;
 
     public Integer getType() {
         return type;
@@ -137,7 +138,7 @@ public enum OpTaskTypeEnum {
             ES_CLUSTER_PLUG_RESTART,  ES_CLUSTER_PLUG_UNINSTALL,
             ES_CLUSTER_PLUG_UPGRADE, ES_CLUSTER_RESTART, ES_CLUSTER_ROLLBACK, ES_CLUSTER_SHRINK,
             ES_CLUSTER_UPGRADE,GATEWAY_CONFIG_ROLLBACK,GATEWAY_OFFLINE,ES_CLUSTER_OFFLINE,
-            ES_CLUSTER_PLUG_ROLLBACK);
+            ES_CLUSTER_PLUG_ROLLBACK,ES_CLUSTER_PLUG_CONFIG_ROLLBACK,ES_CLUSTER_PLUG_CONFIG);
     }
 
     public static OpTaskTypeEnum valueOfPath(String apiPath) {

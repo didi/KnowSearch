@@ -5,9 +5,12 @@ import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.gateway.Gatew
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -60,8 +63,19 @@ public class GatewayRollbackTaskHandler extends AbstractGatewayTaskHandler {
 		}
 		
 		@Override
-		protected OperateRecord recordCurrentOperationTasks(String expandData) {
-				return new OperateRecord();
+		protected OperateRecord recordCurrentOperationTasks(OpTask opTask) {
+				final ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
+						AuthConstant.SUPER_PROJECT_ID);
+				final GatewayRollbackContent content = convertString2Content(
+						opTask.getExpandData());
+				final String name = componentService.queryComponentNameById(content.getComponentId())
+						.getData();
+				return new OperateRecord.Builder()
+						.operationTypeEnum(OperateTypeEnum.GATEWAY_ROLLBACK)
+						.content(name)
+						.project(briefVO)
+						.userOperation(opTask.getCreator())
+						.build();
 		}
 		
 		@Override

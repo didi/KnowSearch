@@ -40,6 +40,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.plugin.PluginInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVOWithProjects;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
@@ -59,6 +60,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDy
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterCreateSourceEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterImportRuleEnum;
@@ -89,6 +91,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.plugin.PluginInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
@@ -227,6 +230,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private ZeusClusterRemoteService zeusClusterRemoteService;
     @Autowired
     private ComponentService         componentService;
+    @Autowired
+    private PluginInfoService        pluginInfoService;
 
     @Autowired
     private ESPipelineService esPipelineService;
@@ -890,14 +895,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         if (deleteClusterResult.failed()) {
             return Result.buildFrom(deleteClusterResult);
         }
-        if (Objects.nonNull(clusterPhy.getComponentId())&&clusterPhy.getComponentId()>0){
-            com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> offLineComponentRes =
-                    componentService.offLineComponent(
-                    clusterPhy.getComponentId());
-            if (offLineComponentRes.failed()){
-                return Result.buildFrom(offLineComponentRes);
-            }
-        }
+       
 
         SpringTool.publish(new ClusterPhyEvent(clusterPhy.getCluster(), operator));
          operateRecordService.saveOperateRecordWithManualTrigger(String.format("删除集群：%s", clusterPhy.getCluster()), operator,
@@ -1290,6 +1288,15 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
     
     @Override
+    public Result<ClusterPhyVO> getOneByComponentId(Integer componentId) {
+        ClusterPhyPO clusterPhy = clusterPhyService.getOneByComponentId(componentId);
+        if (Objects.isNull(clusterPhy)) {
+            return Result.buildFail("无法匹配到具有组件 ID【%s】的集群信息");
+        }
+        return Result.buildSucc(ConvertUtil.obj2Obj(clusterPhy,ClusterPhyVO.class));
+    }
+    
+    @Override
     public Result<Void> checkShrinkNodesContainsBindRegion(List<ESClusterRoleHostDTO> nodes,
         String clusterName) {
         //1.1 获取所有节点信息
@@ -1500,11 +1507,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
 
-    @Override
-    public Result<List<Object>> getBeforeVersionByClusterId(Integer clusterPhyId) {
-        return Result.buildSucc(Collections.emptyList());
-    }
-
+   
     /**************************************** private method ***************************************************/
 
     private Result<Boolean> checkClusterExistAndConfigType(MultiClusterSettingDTO param) {
@@ -1564,6 +1567,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             if (deleteClusterResult.failed()) {
                 throw new AdminOperateException(String.format("删除集群[%s]信息失败", clusterPhy.getCluster()));
             }
+            if (Objects.nonNull(clusterPhy.getComponentId()) && clusterPhy.getComponentId() > 0) {
+                offlineCluster(clusterPhy);
+            }
         } catch (AdminOperateException e) {
             LOGGER.error("class=ClusterPhyManagerImpl||method=deleteClusterInfo||clusterName={}||errMsg={}||e={}",
                 clusterPhy.getCluster(), e.getMessage(), e);
@@ -1573,7 +1579,64 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         return Result.buildSucc(true);
     }
-
+    
+    /**
+     * 下线集群
+     *
+     * @param clusterPhy 集群
+     * @throws AdminOperateException 管理操作Exception
+     */
+    private void offlineCluster(ClusterPhy clusterPhy)
+        throws AdminOperateException {
+        // 下线对应的插件
+        final List<PluginInfoPO> pluginInfoPOS = pluginInfoService.listByClusterId(
+            clusterPhy.getId(), PluginClusterTypeEnum.ES);
+        if (CollectionUtils.isNotEmpty(pluginInfoPOS)) {
+            final List<Long> pluginIds = pluginInfoPOS.stream().map(PluginInfoPO::getId)
+                .collect(Collectors.toList());
+            final boolean deleteByIds = pluginInfoService.deleteByIds(pluginIds);
+            final List<Integer> deletePluginComIds = pluginInfoPOS.stream()
+                .map(PluginInfoPO::getComponentId).distinct().collect(
+                    Collectors.toList());
+            final boolean b = deletePluginComIds.stream()
+                .filter(i->Boolean.TRUE.equals(componentService.checkComponent(i).getData()))
+                .map(componentService::offLineComponent)
+                .allMatch(
+                    com.didiglobal.logi.op.manager.infrastructure.common.Result::isSuccess);
+            if (!deleteByIds || !b) {
+                throw new AdminOperateException("集群关联插件下线失败");
+            }
+        }
+        final com.didiglobal.logi.op.manager.domain.component.entity.Component component = componentService.queryComponentById(
+            clusterPhy.getComponentId()).getData();
+        if (Objects.nonNull(component)) {
+            for (String componentId : StringUtils.split(component.getContainComponentIds(), ",")) {
+                if (StringUtils.isNumeric(componentId)) {
+                    // 如果这个组建 ID 是存在的
+                    if (Boolean.TRUE.equals(
+                        componentService.checkComponent(Integer.parseInt(componentId)).getData())) {
+                        final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> integerResult = componentService.offLineComponent(
+                            Integer.parseInt(componentId));
+                        if (integerResult.failed()) {
+                            throw new AdminOperateException(String.format("删除集群 [%s] 信息失败",
+                                integerResult.getMessage()));
+                        }
+                    
+                    }
+                }
+            
+            }
+            com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> offLineComponentRes = componentService.offLineComponent(
+               clusterPhy.getComponentId());
+            //下线最终集群
+            if (offLineComponentRes.failed()) {
+                throw new AdminOperateException(
+                    String.format("删除集群 [%s] 信息失败", offLineComponentRes.getMessage()));
+            }
+        }
+      
+    }
+    
     /**
      * 更新物理模板setting single_type为true
      * @param cluster  集群
@@ -2037,18 +2100,15 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
               operateRecordService.saveOperateRecordWithManualTrigger(String.format("cluster:[%s]删除物理集群角色;[%d]", clusterPhy.getCluster(), clusterPhy.getId()), operator,
                     projectId, clusterPhy.getId(), OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE);
         }
-        if (Objects.nonNull(clusterPhy.getComponentId()) && clusterPhy.getComponentId() > 0) {
-            com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> offLineComponentRes = componentService.offLineComponent(
-                    clusterPhy.getComponentId());
-            if (offLineComponentRes.failed()) {
-                throw new AdminOperateException(String.format("解绑物理集群 (%s) 组件失败", clusterPhy.getCluster()));
-            }
-        }
+       
         Result<Void> deleteRoleClusterHostResult = clusterRoleHostService.deleteByCluster(clusterPhy.getCluster(),
             projectId);
         if (deleteRoleClusterHostResult.failed()) {
             throw new AdminOperateException(String.format("删除物理集群节点(%s)失败", clusterPhy.getCluster()));
         } else {
+            if (Objects.nonNull(clusterPhy.getComponentId()) && clusterPhy.getComponentId() > 0) {
+                offlineCluster(clusterPhy);
+            }
             //删除物理集群角色
              operateRecordService.saveOperateRecordWithManualTrigger(String.format("cluster:[%s] 删除物理集群节点", clusterPhy.getCluster()), operator,
                     projectId, clusterPhy.getId(), OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE);

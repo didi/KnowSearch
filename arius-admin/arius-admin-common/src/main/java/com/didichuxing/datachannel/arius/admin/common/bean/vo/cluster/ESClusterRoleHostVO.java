@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -83,7 +82,5 @@ public class ESClusterRoleHostVO extends BaseVO {
 
     @ApiModelProperty("region划分类型对应的attribute值")
     private String  attributeValue;
-    //TODO 0.3.2新增
-    @ApiModelProperty("绑定的componentHostId")
-    private Integer componentHostId;
+    
 }

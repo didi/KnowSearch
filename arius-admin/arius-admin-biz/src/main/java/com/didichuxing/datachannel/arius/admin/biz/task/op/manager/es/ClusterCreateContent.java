@@ -22,5 +22,6 @@ public class ClusterCreateContent extends GeneraInstallComponentContent {
     private String memo;
     private String dataCenter;
     private String proxyAddress;
-    private String clusterType;
+    private Integer clusterType;
+		private String platformType;
 }

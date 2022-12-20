@@ -5,10 +5,13 @@ import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterRes
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
@@ -93,8 +96,19 @@ public class ESClusterRestartTaskHandler extends AbstractESTaskHandler {
 		}
 		
 		@Override
-		protected OperateRecord recordCurrentOperationTasks(String expandData) {
-				return new OperateRecord();
+		protected OperateRecord recordCurrentOperationTasks(OpTask opTask) {
+				final ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
+						AuthConstant.SUPER_PROJECT_ID);
+				final ClusterRestartContent content = convertString2Content(
+						opTask.getExpandData());
+				final String name = componentService.queryComponentNameById(content.getComponentId())
+						.getData();
+				return new OperateRecord.Builder()
+						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_RESTART)
+						.content(name)
+						.project(briefVO)
+						.userOperation(opTask.getCreator())
+						.build();
 		}
 		
 		protected String getName(String expandData) {

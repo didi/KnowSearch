@@ -5,11 +5,14 @@ import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterUpg
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -80,8 +83,26 @@ public class ESClusterUpgradeTaskHandler extends AbstractESTaskHandler {
 		}
 		
 		@Override
-		protected OperateRecord recordCurrentOperationTasks(String expandData) {
-				return new OperateRecord();
+		protected OperateRecord recordCurrentOperationTasks(OpTask opTask) {
+				final ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
+						AuthConstant.SUPER_PROJECT_ID);
+				final ClusterUpgradeContent content = convertString2Content(
+						opTask.getExpandData());
+				final com.didiglobal.logi.op.manager.domain.component.entity.Component component = componentService.queryComponentById(
+						content.getComponentId()).getData();
+				final Integer packageId = component.getPackageId();
+				final String beforeVersion = packageService.getPackageById(packageId.longValue()).getData()
+						.getVersion();
+				final String afterVersion =
+						packageService.getPackageById(content.getPackageId().longValue()).getData()
+								.getVersion();
+				return new OperateRecord.Builder()
+						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_UPGRADE)
+						.content(String.format("集群：【%s】，升级：【%s->%s】", component.getName(), beforeVersion,
+								afterVersion))
+						.project(briefVO)
+						.userOperation(opTask.getCreator())
+						.build();
 		}
 		
 		@Override

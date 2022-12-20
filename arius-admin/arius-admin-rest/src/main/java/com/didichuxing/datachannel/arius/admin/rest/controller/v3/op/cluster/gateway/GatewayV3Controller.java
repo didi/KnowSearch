@@ -56,7 +56,8 @@ public class GatewayV3Controller {
     @PostMapping("/join")
     @ApiOperation(value = "gateway 集群接入", tags = "")
     public Result<GatewayClusterVO> joinCluster(HttpServletRequest request, @RequestBody GatewayClusterJoinDTO param) {
-        return gatewayClusterManager.join(param, HttpRequestUtil.getProjectId(request));
+        return gatewayClusterManager.join(param, HttpRequestUtil.getProjectId(request),
+            HttpRequestUtil.getOperator(request));
     }
     
     @PostMapping("/page")
@@ -80,7 +81,8 @@ public class GatewayV3Controller {
     @ApiOperation(value = "gateway 集群下线",tags = "")
     public Result<Void> deleteById(HttpServletRequest request,
                                                        @PathVariable("gatewayClusterId") Integer gatewayClusterId) {
-        return gatewayClusterManager.deleteById(gatewayClusterId,HttpRequestUtil.getProjectId(request));
+        return gatewayClusterManager.deleteById(gatewayClusterId,
+            HttpRequestUtil.getProjectId(request),HttpRequestUtil.getOperator(request));
     }
     
     @PutMapping("/{gatewayClusterId}")

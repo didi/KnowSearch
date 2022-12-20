@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.OpTaskPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -38,6 +39,7 @@ import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralRestartCompo
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralRollbackComponentDTO;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralScaleComponentDTO;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralUpgradeComponentDTO;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.Date;
@@ -47,6 +49,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -72,6 +75,8 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		protected PackageService       packageService;
 		@Autowired
 		protected PluginManager        pluginManager;
+		@Autowired
+		protected ProjectService       projectService;
 		
 		
 		@Override
@@ -90,7 +95,6 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 				final Result<Integer> submitTaskToOpManagerGetIdRes = submitTaskToOpManagerGetId(opTask.getExpandData());
 				if (submitTaskToOpManagerGetIdRes.failed()) {
 						if (ResultCode.TASK_REPEAT_ERROR.getCode().equals(submitTaskToOpManagerGetIdRes.getCode())) {
-								String title = getTitle(opTask.getExpandData());
 								//获取返回结果报错的key
 								final Pattern compile = compile(PATTERN);
 								final Matcher matcher = compile.matcher(submitTaskToOpManagerGetIdRes.getMessage());
@@ -118,8 +122,9 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 				opTask.setDeleteFlag(false);
 				final boolean insert = opTaskService.insert(opTask);
 				if (insert) {
-						final OperateRecord operateRecord = recordCurrentOperationTasks(opTask.getExpandData());
-						//operateRecordService.save(operateRecord);
+						final OperateRecord operateRecord = recordCurrentOperationTasks(opTask);
+						operateRecord.setTriggerWayId(TriggerWayEnum.MANUAL_TRIGGER.getCode());
+						operateRecordService.save(operateRecord);
 				}
 				
 				return Result.buildSucc(opTask);
@@ -145,7 +150,7 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 					String expandDataNew = settingTaskStatus(expandData, afterSuccessTaskExecutionRes);
 					if (afterSuccessTaskExecutionRes.failed()) {
 							// 如果后置操作失败，那么暂停任务即可
-							opTask.setStatus(OpTaskStatusEnum.PAUSE.getStatus());
+							opTask.setStatus(OpTaskStatusEnum.RUNNING.getStatus());
 					}
 				opTask.setExpandData(expandDataNew);
 			}
@@ -269,10 +274,10 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		/**
 		 * > 记录当前的操作任务
 		 *
-		 * @param expandData 需要记录的数据，比如用户当前操作，用户当前操作，用户当前操作，用户当前操作，用户当前操作，用户当前操作 user，用户当前的操作，
+		 * @param opTask 需要记录的数据，比如用户当前操作，用户当前操作，用户当前操作，用户当前操作，用户当前操作，用户当前操作 user，用户当前的操作，
 		 * @return 一个 OperateRecord 对象。
 		 */
-		protected abstract OperateRecord recordCurrentOperationTasks(String expandData);
+		protected abstract OperateRecord recordCurrentOperationTasks(OpTask opTask);
 		
 		
 		/**
@@ -282,8 +287,8 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 * @return 结果对象。
 		 */
 		protected Result<Integer> install(String expandData) {
-				final GeneraInstallComponentDTO dto =
-						(GeneraInstallComponentDTO) convertString2Content(expandData);
+				final GeneraInstallComponentDTO dto = convertString2Content(expandData);
+				dto.setGroupConfigList(unescapeJavaScriptDTO(dto.getGroupConfigList()));
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
 						componentService.installComponent(
 								ComponentAssembler.toInstallComponent(dto));
@@ -300,9 +305,10 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 * @return 结果对象。
 		 */
 		protected Result<Integer> expand(String expandData) {
-				final GeneralScaleComponentDTO dto = (GeneralScaleComponentDTO) convertString2Content(
+				final GeneralScaleComponentDTO dto = convertString2Content(
 						expandData);
 				dto.setType(OperationEnum.EXPAND.getType());
+				dto.setGroupConfigList(unescapeJavaScriptDTO(dto.getGroupConfigList()));
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
 						componentService.scaleComponent(
 								ComponentAssembler.toScaleComponent(dto));
@@ -319,6 +325,7 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 */
 		protected Result<Integer> shrink(String expandData) {
 				final GeneralScaleComponentDTO dto = convertString2Content(expandData);
+				dto.setGroupConfigList(unescapeJavaScriptDTO(dto.getGroupConfigList()));
 				dto.setType(OperationEnum.SHRINK.getType());
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
 						componentService.scaleComponent(
@@ -337,6 +344,7 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 */
 		protected Result<Integer> configChange(String expandData) {
 				final GeneralConfigChangeComponentDTO dto = convertString2Content(expandData);
+				dto.setGroupConfigList(unescapeJavaScriptDTO(dto.getGroupConfigList()));
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
 						componentService.configChangeComponent(ComponentAssembler.toConfigChangeComponent(dto));
 				if (result.failed()) {
@@ -353,6 +361,7 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 */
 		protected Result<Integer> restart(String expandData) {
 				final GeneralRestartComponentDTO dto = convertString2Content(expandData);
+				dto.setGroupConfigList(unescapeJavaScriptDTO(dto.getGroupConfigList()));
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
 						componentService.restartComponent(ComponentAssembler.toRestartComponent(dto));
 				if (result.failed()) {
@@ -369,6 +378,7 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 */
 		protected Result<Integer> upgrade(String expandData) {
 				final GeneralUpgradeComponentDTO dto = convertString2Content(expandData);
+				dto.setGroupConfigList(unescapeJavaScriptDTO(dto.getGroupConfigList()));
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
 						componentService.upgradeComponent(ComponentAssembler.toUpgradeComponent(dto));
 				if (result.failed()) {
@@ -385,6 +395,7 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 */
 		protected Result<Integer> rollback(String expandData) {
 				final GeneralRollbackComponentDTO dto = convertString2Content(expandData);
+				dto.setGroupConfigList(unescapeJavaScriptDTO(dto.getGroupConfigList()));
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
 						componentService.rollbackComponent(ComponentAssembler.toRollbackComponent(dto));
 				if (result.failed()) {
@@ -511,5 +522,21 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 				}
 				return Result.buildSucc();
 		}
+		
+		private List<GeneralGroupConfigDTO> unescapeJavaScriptDTO(List<GeneralGroupConfigDTO> dtos) {
+				for (GeneralGroupConfigDTO dto : dtos) {
+						final String installDirectoryConfig = dto.getInstallDirectoryConfig();
+						final String fileConfig             = dto.getFileConfig();
+						final String processNumConfig       = dto.getProcessNumConfig();
+						final String systemConfig           = dto.getSystemConfig();
+						dto.setInstallDirectoryConfig(
+								StringEscapeUtils.unescapeJavaScript(installDirectoryConfig));
+						dto.setProcessNumConfig(StringEscapeUtils.unescapeJavaScript(processNumConfig));
+						dto.setSystemConfig(StringEscapeUtils.unescapeJavaScript(systemConfig));
+						dto.setFileConfig(StringEscapeUtils.unescapeJavaScript(fileConfig));
+				}
+				return dtos;
+		}
+		
 		
 }

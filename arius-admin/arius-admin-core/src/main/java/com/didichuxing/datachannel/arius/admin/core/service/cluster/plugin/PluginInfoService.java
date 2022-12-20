@@ -72,4 +72,12 @@ public interface PluginInfoService {
 		 * @return {@link PluginInfoPO}
 		 */
 		PluginInfoPO selectByCondition(PluginInfoPO pluginInfoPO);
+		
+		/**
+		 * 删除由ids
+		 *
+		 * @param pluginIds 插件id
+		 * @return {@link Boolean}
+		 */
+		Boolean deleteByIds(List<Long> pluginIds);
 }

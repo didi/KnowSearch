@@ -20,6 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClu
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
@@ -76,7 +77,8 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 	
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public Result<GatewayClusterVO> join(GatewayClusterJoinDTO param, Integer projectId) {
+	public Result<GatewayClusterVO> join(GatewayClusterJoinDTO param, Integer projectId,
+			String operator) {
 		Result<Void> result = checkGatewayJoinParam(param, projectId);
 		if (result.failed()) {
 			return Result.buildFrom(result);
@@ -96,9 +98,9 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 					GatewayClusterVO.class);
 			gatewayClusterVO.setNodes(
 					ConvertUtil.list2List(gatewayNodeHosts, GatewayClusterNodeVO.class));
-			String content = String.format("gateway 集群 %s 接入成功", gatewayClusterVO.getClusterName());
-			//operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,
-			//		data.getId(), OperateTypeEnum.TEMPLATE_SERVICE);
+				operateRecordService.saveOperateRecordWithManualTrigger(gatewayClusterVO.getClusterName(),
+						operator, projectId,
+						gatewayDTO.getId(), OperateTypeEnum.GATEWAY_JOIN);
 			return Result.buildSucc(gatewayClusterVO);
 		}
 		
@@ -127,6 +129,15 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		public Result<String> getNameByComponentId(Integer componentId) {
 				GatewayClusterPO gatewayClusterPO = gatewayClusterService.getOneByComponentId(componentId);
 				return Optional.ofNullable(gatewayClusterPO).map(GatewayClusterPO::getClusterName)
+						.map(Result::buildSucc).orElse(
+								Result.buildFail(String.format("组建 ID【%s】绑定未匹配到对应的集群", componentId)));
+		}
+		
+		@Override
+		public Result<GatewayClusterVO> getOneByComponentId(Integer componentId) {
+				GatewayClusterPO gatewayClusterPO = gatewayClusterService.getOneByComponentId(componentId);
+				return Optional.ofNullable(gatewayClusterPO).map(i -> ConvertUtil.obj2Obj(i,
+								GatewayClusterVO.class))
 						.map(Result::buildSucc).orElse(
 								Result.buildFail(String.format("组建 ID【%s】绑定未匹配到对应的集群", componentId)));
 		}
@@ -255,7 +266,7 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 	public Result<GatewayClusterVO> getOneById(Integer gatewayClusterId) {
 		final GatewayClusterVO gatewayClusterVO = ConvertUtil.obj2Obj(gatewayClusterService.getOneById(gatewayClusterId),
 						GatewayClusterVO.class);
-		if (Objects.isNull(gatewayClusterId)) {
+		if (Objects.isNull(gatewayClusterVO)) {
 			return Result.buildFail(String.format("id:%s 不存在", gatewayClusterId));
 		}
 		final String clusterName = gatewayClusterVO.getClusterName();
@@ -270,7 +281,7 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 	
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public Result<Void> deleteById(Integer gatewayClusterId, Integer projectId) {
+	public Result<Void> deleteById(Integer gatewayClusterId, Integer projectId, String operator) {
 			Result<Void> result = checkDeleteById(gatewayClusterId, projectId);
 			if (result.failed()) {
 					return result;
@@ -280,15 +291,39 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 					return Result.buildSucc();
 			}
 			
-			if (Objects.nonNull(gatewayCluster.getComponentId()) || gatewayCluster.getComponentId() > 0) {
+			if (Objects.nonNull(gatewayCluster.getComponentId()) && gatewayCluster.getComponentId() > 0) {
 					// 下线 op
-					com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> componentRes = componentService.offLineComponent(
-									gatewayCluster.getComponentId());
-					if (componentRes.failed()) {
-							// 这里显示回滚处理特殊异常场景
-							TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-							return Result.buildFrom(componentRes);
-					}
+				    final com.didiglobal.logi.op.manager.domain.component.entity.Component component = componentService.queryComponentById(
+            gatewayCluster.getComponentId()).getData();
+        if (Objects.nonNull(component)) {
+            for (String componentId : StringUtils.split(component.getContainComponentIds(), ",")) {
+                if (StringUtils.isNumeric(componentId)) {
+                    // 如果这个组建 ID 是存在的
+                    if (Boolean.TRUE.equals(
+                        componentService.checkComponent(Integer.parseInt(componentId)).getData())) {
+		                    final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> integerResult = componentService.offLineComponent(
+				                    Integer.parseInt(componentId));
+		                    if (integerResult.failed()) {
+				                    // 这里显示回滚处理特殊异常场景
+				                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+				                    return Result.buildFail(
+						                    String.format("关联组建下线失败，%s", integerResult.getMessage()));
+                        }
+                    
+                    }
+                }
+            
+            }
+            com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> offLineComponentRes = componentService.offLineComponent(
+                gatewayCluster.getComponentId());
+            //下线最终集群
+		        if (offLineComponentRes.failed()) {
+				        // 这里显示回滚处理特殊异常场景
+				        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+				        return Result.buildFail(
+						        String.format("下线失败，%s", offLineComponentRes.getMessage()));
+		        }
+        }
 			}
 			// 先下线 node
 			boolean deleteByClusterName = gatewayNodeService.deleteByClusterName(gatewayCluster.getClusterName());
@@ -298,10 +333,9 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 					return Result.buildFail("下线失败，请联系管理员");
 			}
-			//TODO 后续补齐操作记录
-			String content = String.format("gateway 集群 %s 下线成功", gatewayCluster.getClusterName());
-			//operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,
-			//		data.getId(), OperateTypeEnum.TEMPLATE_SERVICE);
+			operateRecordService.saveOperateRecordWithManualTrigger(gatewayCluster.getClusterName(),
+					operator, projectId,
+					gatewayClusterId, OperateTypeEnum.GATEWAY_OFFLINE);
 			return Result.buildSuccWithMsg("下线 gateway 集群成功");
 	}
 	
@@ -314,11 +348,10 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		final GatewayClusterPO gatewayCluster =gatewayClusterService.getOneById(data.getId());
 		boolean edit = gatewayClusterService.editOne(data);
 		if (edit) {
-			//TODO 后续补齐操作记录
-			String content = String.format("编辑 gateway 集群 %s 的备注:【%s】->【%s】",
+			String content = String.format("%s修改集群描述，【%s】->【%s】",
 					gatewayCluster.getClusterName(),gatewayCluster.getMemo(),data.getMemo());
-			//operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,
-			//		data.getId(), OperateTypeEnum.TEMPLATE_SERVICE);
+			operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,
+					data.getId(), OperateTypeEnum.GATEWAY_INFO_EDIT);
 		}
 		return Result.build(edit);
 	}

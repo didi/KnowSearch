@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.biz.plugin.PluginManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.op.manager.ComponentGroupConfigWithHostVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginInfoTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -85,6 +86,14 @@ public class PhyClusterPluginController {
     public Result<List<PluginVO>> listByClusterPhyId(HttpServletRequest request,
                                                @RequestParam("clusterPhyId") Integer clusterPhyId) {
         return pluginManager.listESPluginByClusterId(clusterPhyId);
+    }
+    
+    @GetMapping("{pluginId}/configs")
+    @ResponseBody
+    @ApiOperation(value = "获取ES集群插件列表")
+     public Result<List<ComponentGroupConfigWithHostVO>>getConfigsByPluginId(@PathVariable(value =
+        "pluginId") Long pluginId) {
+        return pluginManager.getConfigsByPluginId(pluginId);
     }
     
     @GetMapping("plugin-health")

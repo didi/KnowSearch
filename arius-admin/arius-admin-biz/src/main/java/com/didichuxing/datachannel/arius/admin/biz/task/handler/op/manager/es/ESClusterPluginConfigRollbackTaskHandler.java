@@ -1,12 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.task.handler.op.manager.es;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterPluginRollbackContent;
+import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterPluginConfigRollbackContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginInfoTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
@@ -16,26 +16,42 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 /**
- * es 集群回滚任务处理程序
+ * es-cluster 配置回滚任务处理程序
  *
  * @author shizeying
  * @date 2022/11/15
  * @since 0.3.2
  */
-@Component("esClusterPluginRollbackTaskHandler")
-public class ESClusterPluginRollbackTaskHandler extends AbstractESTaskHandler {
+@Component("esClusterPluginConfigRollbackTaskHandler")
+public class ESClusterPluginConfigRollbackTaskHandler extends AbstractESTaskHandler {
 		
 		@Override
 		protected Result<Void> validatedAddTaskParam(OpTask param) {
-				final ClusterPluginRollbackContent content = convertString2Content(
+				final ClusterPluginConfigRollbackContent content = convertString2Content(
 						param.getExpandData());
-				return checkInitRollBackParam(content, OpTaskTypeEnum.ES_CLUSTER_PLUG_UPGRADE);
+				if (!PluginInfoTypeEnum.find(content.getPluginType()).equals(PluginInfoTypeEnum.PLATFORM)){
+						return Result.buildFail("只有平台插件支持配置变更");
+				}
+				return  checkInitRollBackParam(content, OpTaskTypeEnum.ES_CLUSTER_CONFIG_EDIT);
 		}
 		
+		@Override
+		protected Result<Void> initParam(OpTask opTask) {
+				final ClusterPluginConfigRollbackContent content = convertString2Content(
+						opTask.getExpandData());
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<List<ComponentGroupConfig>> componentConfigRes = componentService.getComponentConfig(
+						content.getComponentId());
+				if (componentConfigRes.failed()) {
+						return Result.buildFrom(componentConfigRes);
+				}
+				opTask.setExpandData(initRollBackParam(content,componentConfigRes.getData(),
+						OperationEnum.CONFIG_CHANGE));
+				return Result.buildSucc();
+		}
 		
 		@Override
 		protected OpTaskTypeEnum operationType() {
-				return OpTaskTypeEnum.ES_CLUSTER_PLUG_ROLLBACK;
+				return OpTaskTypeEnum.ES_CLUSTER_PLUG_CONFIG_ROLLBACK;
 		}
 		
 		@Override
@@ -44,59 +60,44 @@ public class ESClusterPluginRollbackTaskHandler extends AbstractESTaskHandler {
 		}
 		
 		@Override
-		protected Result<Void> initParam(OpTask opTask) {
-				final ClusterPluginRollbackContent content = convertString2Content(opTask.getExpandData());
-					final com.didiglobal.logi.op.manager.infrastructure.common.Result<List<ComponentGroupConfig>> componentConfigRes = componentService.getComponentConfig(
-						content.getComponentId());
-				if (componentConfigRes.failed()) {
-						return Result.buildFrom(componentConfigRes);
-				}
-				opTask.setExpandData(initRollBackParam(content,componentConfigRes.getData(),
-						OperationEnum.UPGRADE));
-				return Result.buildSucc();
-		}
-		
-		@Override
 		protected String getTitle(String expandData) {
-				final ClusterPluginRollbackContent content     = convertString2Content(expandData);
-				final Integer                componentId = content.getComponentId();
+				final ClusterPluginConfigRollbackContent content = convertString2Content(
+						expandData);
+				final Integer componentId = convertString2Content(expandData).getComponentId();
 				final String name = componentService.queryComponentNameById(componentId)
 				                                    .getData();
-				return String.format("%s【%s】", operationType().getMessage(), name);
+				final String clusterName = componentService.queryComponentNameById(
+						content.getComponentId()).getData();
+				return String.format("集群【%s】-%s【%s】",clusterName, operationType().getMessage(), name);
 		}
 		
 		@Override
-		protected ClusterPluginRollbackContent convertString2Content(String expandData) {
-				return JSON.parseObject(expandData, ClusterPluginRollbackContent.class);
+		protected ClusterPluginConfigRollbackContent convertString2Content(String expandData) {
+				return JSON.parseObject(expandData,
+						ClusterPluginConfigRollbackContent.class);
 		}
 		
 		@Override
 		protected OperateRecord recordCurrentOperationTasks(OpTask opTask) {
 				final ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
 						AuthConstant.SUPER_PROJECT_ID);
-				final ClusterPluginRollbackContent content = convertString2Content(
+				final ClusterPluginConfigRollbackContent content = convertString2Content(
 						opTask.getExpandData());
 				final com.didiglobal.logi.op.manager.domain.component.entity.Component component = componentService.queryComponentById(
 								content.getComponentId())
 						.getData();
-				final Integer dependComponentId = component.getDependComponentId();
-				final ClusterPhyVO clusterPhyVO = clusterPhyManager.getOneByComponentId(
-						dependComponentId).getData();
 				return new OperateRecord.Builder()
-						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_PLUGIN_ROLLBACK)
+						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_PLUGIN_CONFIG_ROLLBACK)
 						.content(
-								String.format("%s 插件升级回滚：回滚任务 ID：【%s】", component.getName(),
+								String.format("%s 配置回滚：回滚任务 ID：【%s】", component.getName(),
 										content.getTaskId()))
 						.project(briefVO)
-						.bizId(clusterPhyVO.getId())
 						.userOperation(opTask.getCreator())
 						.build();
 		}
-		
 		@Override
 		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
-				//TODO 后续考虑下如果端口号变更的情况，那么需要怎么做，这里需要补充更新到节点信息中
 				return Result.buildSucc();
 		}
-	
+		
 }

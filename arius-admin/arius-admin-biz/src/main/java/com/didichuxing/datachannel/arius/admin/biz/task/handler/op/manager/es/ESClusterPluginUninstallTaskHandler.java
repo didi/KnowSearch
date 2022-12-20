@@ -5,8 +5,12 @@ import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterPlu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginClusterTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.Objects;
 import org.springframework.stereotype.Component;
 
@@ -76,8 +80,26 @@ public class ESClusterPluginUninstallTaskHandler extends AbstractESTaskHandler {
 		}
 		
 		@Override
-		protected OperateRecord recordCurrentOperationTasks(String expandData) {
-				return new OperateRecord();
+		protected OperateRecord recordCurrentOperationTasks(OpTask opTask) {
+				final ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
+						AuthConstant.SUPER_PROJECT_ID);
+				final ClusterPluginUninstallContent content = convertString2Content(
+						opTask.getExpandData());
+				
+				final Integer dependComponentId = content.getDependComponentId();
+				final com.didiglobal.logi.op.manager.domain.component.entity.Component component = componentService.queryComponentById(
+								dependComponentId)
+						.getData();
+				final ClusterPhyVO clusterPhyVO = clusterPhyManager.getOneByComponentId(
+						dependComponentId).getData();
+				return new OperateRecord.Builder()
+						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_PLUGIN_UNINSTALL)
+						.content(String.format("集群：【%s】插件卸载【%s】", clusterPhyVO.getCluster(),
+								component.getName()))
+						.project(briefVO)
+						.bizId(clusterPhyVO.getId())
+						.userOperation(opTask.getCreator())
+						.build();
 		}
 		
 		@Override

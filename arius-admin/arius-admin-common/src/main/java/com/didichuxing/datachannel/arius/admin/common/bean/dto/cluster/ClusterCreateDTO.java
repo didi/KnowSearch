@@ -63,8 +63,7 @@ public class ClusterCreateDTO extends BaseDTO {
 		private Integer componentId;
 		@ApiModelProperty("代理地址")
 		private String  proxyAddress;
-		@ApiModelProperty("集群类型")
-		private String clusterType;
+	
 		@ApiModelProperty("是否接入 ecm")
 		private Boolean ecmAccess;
 

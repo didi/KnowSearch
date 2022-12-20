@@ -219,13 +219,7 @@ public class ESPhyClusterController {
         return clusterPhyManager.bindGatewayCluster(clusterPhyId,gatewayClusterId, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
-     @GetMapping("/{clusterPhyId}/before-version")
-    @ResponseBody
-    @ApiOperation(value = "获取上个版本号",tags = "")
-    public Result<List<Object>> getBeforeVersionByGatewayClusterId(HttpServletRequest request,
-                                               @PathVariable("clusterPhyId") Integer clusterPhyId) {
-        return clusterPhyManager.getBeforeVersionByClusterId(clusterPhyId);
-    }
+   
     
     @GetMapping("health")
     @ResponseBody
