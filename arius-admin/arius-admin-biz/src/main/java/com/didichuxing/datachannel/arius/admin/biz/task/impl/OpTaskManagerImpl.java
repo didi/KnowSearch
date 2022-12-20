@@ -184,17 +184,12 @@ public class OpTaskManagerImpl implements OpTaskManager {
             return result;
         }
         final Integer      taskId     = Integer.valueOf(opTask.getBusinessKey());
-        final Result<Void> voidResult = Result.buildFromWithData(taskService.execute(taskId));
-        if (voidResult.success()) {
-            OpTaskProcessDTO processDTO = ConvertUtil.obj2Obj(opTask, OpTaskProcessDTO.class);
-            processDTO.setTaskId(opTask.getId());
-            processDTO.setStatus(OpTaskStatusEnum.RUNNING.getStatus());
-            try {
-                processTask(processDTO);
-            } catch (Exception ignore) {
-            }
+        final com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> execute = taskService.execute(taskId);
+        if (execute.isSuccess()) {
+            opTask.setStatus(OpTaskStatusEnum.RUNNING.getStatus());
+            opTaskService.update(opTask);
         }
-        return voidResult;
+        return  Result.buildFromWithData(execute);
     }
     
     
@@ -229,17 +224,9 @@ public class OpTaskManagerImpl implements OpTaskManager {
         final Integer taskId = Integer.valueOf(opTask.getBusinessKey());
         com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> voidResult = taskService.retryTask(taskId);
         if (voidResult.isSuccess()) {
-             // 重试后继续执行
-            OpTaskProcessDTO processDTO = ConvertUtil.obj2Obj(opTask, OpTaskProcessDTO.class);
-            processDTO.setTaskId(opTask.getId());
-            processDTO.setStatus(OpTaskStatusEnum.RUNNING.getStatus());
-            try {
-                processTask(processDTO);
-            } catch (Exception ignore) {}
-            Result<Void> executeRes = execute(id);
-            if (executeRes.failed()) {
-                return executeRes;
-            }
+            // 重试后继续执行
+            opTask.setStatus(OpTaskStatusEnum.RUNNING.getStatus());
+            opTaskService.update(opTask);
            
         }
         return Result.buildFromWithData(voidResult);

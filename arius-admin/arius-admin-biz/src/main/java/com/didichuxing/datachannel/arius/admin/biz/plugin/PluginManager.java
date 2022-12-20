@@ -89,11 +89,11 @@ public interface PluginManager {
 		 */
 		Result<List<PackageVersionVO>> getLowerVersionByGatewayClusterId(Integer gatewayClusterId);
 		
-		/**
-		 * 获取配置通过插件 id
-		 *
-		 * @param pluginId 插件 id
-		 * @return {@link Result}<{@link List}<{@link ComponentGroupConfigWithHostVO}>>
-		 */
-		Result<List<ComponentGroupConfigWithHostVO>> getConfigsByPluginId(Long pluginId);
+		    /**
+     * 获取配置通过插件id
+     *
+     * @param pluginId 插件id
+     * @return {@link Result}<{@link List}<{@link ComponentGroupConfigWithHostVO}>>
+     */
+    Result<List<ComponentGroupConfigWithHostVO>> getConfigsByPluginId(Long pluginId);
 }
