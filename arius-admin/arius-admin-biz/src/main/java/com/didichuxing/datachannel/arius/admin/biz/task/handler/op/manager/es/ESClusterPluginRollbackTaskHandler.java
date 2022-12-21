@@ -5,14 +5,16 @@ import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterPlu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.stereotype.Component;
 
 /**
@@ -29,6 +31,13 @@ public class ESClusterPluginRollbackTaskHandler extends AbstractESTaskHandler {
 		protected Result<Void> validatedAddTaskParam(OpTask param) {
 				final ClusterPluginRollbackContent content = convertString2Content(
 						param.getExpandData());
+				final Integer componentId = content.getComponentId();
+				final Result<PluginVO> pluginVOResultRes = pluginManager.getClusterByComponentId(
+						componentId, PluginClusterTypeEnum.ES);
+				if (Objects.isNull(pluginVOResultRes.getData())) {
+						return Result.buildFail("回滚的插件不存在");
+				}
+				
 				return checkInitRollBackParam(content, OpTaskTypeEnum.ES_CLUSTER_PLUG_UPGRADE);
 		}
 		
@@ -77,19 +86,14 @@ public class ESClusterPluginRollbackTaskHandler extends AbstractESTaskHandler {
 				final ClusterPluginRollbackContent content = convertString2Content(
 						opTask.getExpandData());
 				final com.didiglobal.logi.op.manager.domain.component.entity.Component component = componentService.queryComponentById(
-								content.getComponentId())
-						.getData();
-				final Integer dependComponentId = component.getDependComponentId();
-				final ClusterPhyVO clusterPhyVO = clusterPhyManager.getOneByComponentId(
-						dependComponentId).getData();
-				return new OperateRecord.Builder()
-						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_PLUGIN_ROLLBACK)
-						.content(
+								content.getComponentId()).getData();
+				final Result<PluginVO> pluginVOResultRes = pluginManager.getClusterByComponentId(
+						content.getComponentId(), PluginClusterTypeEnum.ES);
+				return new OperateRecord.Builder().operationTypeEnum(
+								OperateTypeEnum.PHYSICAL_CLUSTER_PLUGIN_ROLLBACK).content(
 								String.format("%s 插件升级回滚：回滚任务 ID：【%s】", component.getName(),
-										content.getTaskId()))
-						.project(briefVO)
-						.bizId(clusterPhyVO.getId())
-						.userOperation(opTask.getCreator())
+										content.getTaskId())).project(briefVO)
+						.bizId(pluginVOResultRes.getData().getClusterId()).userOperation(opTask.getCreator())
 						.build();
 		}
 		

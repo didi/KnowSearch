@@ -92,4 +92,13 @@ public interface PluginDAO {
 		 * @return {@link PluginInfoPO}
 		 */
 		PluginInfoPO selectByCondition(PluginInfoPO pluginInfoPO);
+		
+		/**
+		 * 选择一个通过组件id和集群类型
+		 *
+		 * @param componentId 组件id
+		 * @param clusterType 集群类型
+		 * @return {@link PluginInfoPO}
+		 */
+		PluginInfoPO selectOneByComponentIdAndClusterType(@Param("componentId")Integer componentId,  @Param("clusterType") Integer clusterType);
 }

@@ -80,4 +80,13 @@ public interface PluginInfoService {
 		 * @return {@link Boolean}
 		 */
 		Boolean deleteByIds(List<Long> pluginIds);
+		
+		/**
+		 * 获取一个通过组件id
+		 *
+		 * @param componentId 组件id
+		 * @param typeEnum    枚举类型
+		 * @return {@link PluginInfoPO}
+		 */
+		PluginInfoPO getOneByComponentId(Integer componentId, PluginClusterTypeEnum typeEnum);
 }

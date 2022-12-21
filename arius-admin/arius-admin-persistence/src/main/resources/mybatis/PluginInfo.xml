@@ -120,4 +120,12 @@
 				AND name = #{name}</if>
 		</where>
 	</select>
+	
+	<select id="selectOneByComponentIdAndClusterType" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM plugin_info
+		WHERE component_id = #{componentId}
+			AND cluster_type = #{clusterType}
+	</select>
 </mapper>

@@ -478,8 +478,14 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 		if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
 			return Result.buildFail(AuthConstant.PROJECT_WITHOUT_PERMISSION);
 		}
-		//TODO 校验网关是否被物理集群绑定
-		//TODO 校验网关是否是 admin 绑定的网关
+			final List<ClusterPhyPO> clusterPhyPOS = clusterPhyService.listClusterByGatewayId(
+					gatewayClusterId);
+			if (CollectionUtils.isNotEmpty(clusterPhyPOS)) {
+					String clusterNames = clusterPhyPOS.stream().map(ClusterPhyPO::getCluster)
+							.collect(Collectors.joining(","));
+					return Result.buildFail(
+							String.format("当前 gateway 绑定如下集群【%s】，无法下线", clusterNames));
+			}
 		return Result.buildSucc();
 	}
 }

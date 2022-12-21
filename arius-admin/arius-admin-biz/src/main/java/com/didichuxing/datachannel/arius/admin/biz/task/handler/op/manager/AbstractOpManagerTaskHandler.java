@@ -499,20 +499,17 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 						return Result.buildFail("taskID 不存在，无法执行回滚任务");
 				}
 				// 判断 task 任务是否为集群升级
-				final Integer taskType = opTask.getTaskType();
-				if (!Objects.equals(OpTaskTypeEnum.valueOfType(taskType),
-						opTaskTypeEnum)) {
-						switch (opTaskTypeEnum) {
-								case ES_CLUSTER_UPGRADE:
-								case ES_CLUSTER_PLUG_UPGRADE:
-								case GATEWAY_UPGRADE:
-										return Result.buildFail("只支持升级类型的回滚任务");
-								case ES_CLUSTER_CONFIG_EDIT:
-								case GATEWAY_CONFIG_EDIT:
-										return Result.buildFail("只支持配置变更的回滚任务");
-								default:
-										return Result.buildFail("当前操作类型不支持回滚任务");
-						}
+				final List<OpTaskTypeEnum> rollbackTypes = Lists.newArrayList(
+						OpTaskTypeEnum.ES_CLUSTER_UPGRADE,
+						OpTaskTypeEnum.ES_CLUSTER_PLUG_UPGRADE,
+						OpTaskTypeEnum.GATEWAY_UPGRADE,
+						OpTaskTypeEnum.ES_CLUSTER_CONFIG_EDIT,
+						OpTaskTypeEnum.ES_CLUSTER_PLUG_CONFIG_ROLLBACK,
+						OpTaskTypeEnum.GATEWAY_CONFIG_EDIT
+				);
+			
+				if (!rollbackTypes.contains(opTaskTypeEnum)) {
+						return Result.buildFail("只支持升级类型或者配置变更的回滚任务");
 				}
 				// 判断 task 任务是否存在
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Task> taskRes = taskService.getTaskById(

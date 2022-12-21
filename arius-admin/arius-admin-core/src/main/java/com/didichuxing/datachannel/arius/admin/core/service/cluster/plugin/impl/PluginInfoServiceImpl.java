@@ -71,4 +71,9 @@ public class PluginInfoServiceImpl implements PluginInfoService {
 				}
 				return pluginIds.stream().map(pluginDAO::deleteByPrimaryKey).count() == pluginIds.size();
 		}
+		
+		@Override
+		public PluginInfoPO getOneByComponentId(Integer componentId, PluginClusterTypeEnum typeEnum) {
+				return pluginDAO.selectOneByComponentIdAndClusterType(componentId,typeEnum.getClusterType());
+		}
 }

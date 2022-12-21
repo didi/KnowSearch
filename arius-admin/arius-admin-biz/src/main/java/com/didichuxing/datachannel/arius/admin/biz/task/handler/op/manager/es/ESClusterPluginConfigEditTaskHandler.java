@@ -98,7 +98,7 @@ public class ESClusterPluginConfigEditTaskHandler extends AbstractESTaskHandler 
 				final Integer componentId = content.getComponentId();
 				final String  name        = componentService.queryComponentNameById(componentId).getData();
 				final String clusterName = componentService.queryComponentNameById(
-						content.getComponentId()).getData();
+						content.getDependComponentId()).getData();
 				return String.format("集群【%s】-%s【%s】", clusterName, operationType().getMessage(), name);
 		}
 		

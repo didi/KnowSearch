@@ -258,6 +258,13 @@ public class PluginManagerImpl implements PluginManager {
 		}
 		
 		@Override
+		public Result<PluginVO> getClusterByComponentId(Integer componentId,
+				PluginClusterTypeEnum typeEnum) {
+				PluginInfoPO pluginPO = pluginInfoService.getOneByComponentId(componentId, typeEnum);
+				return Result.buildSucc(ConvertUtil.obj2Obj(pluginPO, PluginVO.class));
+		}
+		
+		@Override
 		public Result<List<ComponentGroupConfigWithHostVO>> getConfigsByPluginId(Long pluginId) {
 				final PluginInfoPO pluginById = pluginInfoService.getPluginById(pluginId);
 				final Integer      componentId = pluginById.getComponentId();

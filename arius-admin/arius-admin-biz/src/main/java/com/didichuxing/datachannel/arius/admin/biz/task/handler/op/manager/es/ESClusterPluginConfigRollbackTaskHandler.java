@@ -32,7 +32,7 @@ public class ESClusterPluginConfigRollbackTaskHandler extends AbstractESTaskHand
 				if (!PluginInfoTypeEnum.find(content.getPluginType()).equals(PluginInfoTypeEnum.PLATFORM)){
 						return Result.buildFail("只有平台插件支持配置变更");
 				}
-				return  checkInitRollBackParam(content, OpTaskTypeEnum.ES_CLUSTER_CONFIG_EDIT);
+				return  checkInitRollBackParam(content, OpTaskTypeEnum.ES_CLUSTER_PLUG_CONFIG_ROLLBACK);
 		}
 		
 		@Override
@@ -63,11 +63,11 @@ public class ESClusterPluginConfigRollbackTaskHandler extends AbstractESTaskHand
 		protected String getTitle(String expandData) {
 				final ClusterPluginConfigRollbackContent content = convertString2Content(
 						expandData);
-				final Integer componentId = convertString2Content(expandData).getComponentId();
+				final Integer componentId = content.getComponentId();
 				final String name = componentService.queryComponentNameById(componentId)
 				                                    .getData();
 				final String clusterName = componentService.queryComponentNameById(
-						content.getComponentId()).getData();
+						content.getDependComponentId()).getData();
 				return String.format("集群【%s】-%s【%s】",clusterName, operationType().getMessage(), name);
 		}
 		

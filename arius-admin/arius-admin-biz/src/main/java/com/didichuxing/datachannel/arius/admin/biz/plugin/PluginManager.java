@@ -96,4 +96,13 @@ public interface PluginManager {
      * @return {@link Result}<{@link List}<{@link ComponentGroupConfigWithHostVO}>>
      */
     Result<List<ComponentGroupConfigWithHostVO>> getConfigsByPluginId(Long pluginId);
+		
+		/**
+		 * 获取集群通过组件id
+		 *
+		 * @param componentId 组件id
+		 * @param typeEnum          type
+		 * @return {@link Result}<{@link PluginVO}>
+		 */
+		Result<PluginVO> getClusterByComponentId(Integer componentId, PluginClusterTypeEnum typeEnum);
 }

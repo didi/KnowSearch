@@ -63,6 +63,7 @@ public class PluginVO extends BaseVO {
     private Integer                              status;
     @ApiModelProperty("插件配置")
     private List<ComponentGroupConfigWithHostVO> componentGroupConfigs;
-    
+    @ApiModelProperty("关联的集群 id")
+    private Integer clusterId;
     
 }
