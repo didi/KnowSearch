@@ -1105,23 +1105,40 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return true;
         
         }
-
-        String expression = indexTemplateWithPhyTemplates.getMasterPhyTemplate().getExpression();
-        // 从 arius_stats_index_info 元数据索引中获取模版所有索引的health状态，根据index health确定模版health。
         try {
-            Integer templateHealthCode = esTemplateService.getTemplateHealthCode(masterCluster, expression);
-            templatePO.setHealth(templateHealthCode);
-            boolean result = indexTemplateService.update(templatePO);
-            if(!result) {
-                LOGGER.error("class=TemplateLogicManagerImpl||method=updateTemplateHealthByLogicId||logicId={}, update DB failed!", logicId);
-                return false;
+            String cluster = indexTemplateWithPhyTemplates.getMasterPhyTemplate().getCluster();
+            String expression = indexTemplateWithPhyTemplates.getMasterPhyTemplate().getExpression();
+            if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
+                    TemplateHealthEnum.RED)) {
+                templatePO.setHealth(TemplateHealthEnum.RED.getCode());
+                indexTemplateService.update(templatePO);
+                return true;
             }
-        }catch (Exception e) {
-            LOGGER.error("class=TemplateLogicManagerImpl||method=updateTemplateHealthByLogicId||logicId={}, update template health failed", logicId);
+             if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
+                    TemplateHealthEnum.YELLOW)) {
+                templatePO.setHealth(TemplateHealthEnum.YELLOW.getCode());
+                indexTemplateService.update(templatePO);
+                return true;
+            }
+            
+            if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
+                    TemplateHealthEnum.GREEN)) {
+                templatePO.setHealth(TemplateHealthEnum.GREEN.getCode());
+                indexTemplateService.update(templatePO);
+                return true;
+            }
+    
+           
+    
+            
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("class=TemplateLogicManagerImpl||method=updateTemplateHealthByLogicId||logicId={}", logicId, e);
             return false;
         }
-
-        return true;
+        
+        
+        
     }
     
     /**

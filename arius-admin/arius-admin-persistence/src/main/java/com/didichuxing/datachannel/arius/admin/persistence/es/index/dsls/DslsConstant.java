@@ -716,11 +716,6 @@ public class DslsConstant {
     
     public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_ID  = "IndexCatESDAO/getPlatformCreateCatIndexById";
 
-    /**
-     * 获取模版所有索引健康状态
-     */
-    public static final String GET_TEMPLATE_INDICES_HEALTH                                   = "IndexCatESDAO/getTemplateIndicesHealth";
-
     /************************************************************      ShardCatESDAO     **************************************************************/
     /**
      * 条件查询索引cat/shard信息
