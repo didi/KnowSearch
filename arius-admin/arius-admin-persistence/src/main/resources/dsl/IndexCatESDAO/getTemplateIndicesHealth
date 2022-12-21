@@ -1,0 +1,23 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "wildcard": {
+            "index": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": "now-3m"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": "health"
+}
