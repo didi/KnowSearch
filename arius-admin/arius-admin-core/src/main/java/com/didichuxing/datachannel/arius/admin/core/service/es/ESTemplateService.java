@@ -209,4 +209,11 @@ public interface ESTemplateService {
     boolean hasMatchHealthIndexByExpressionTemplateHealthEnum(String cluster, String expression,
                                                                      TemplateHealthEnum templateHealthEnum) ;
 
+    /**
+     * 从元数据索引 arius_cat_index_info 中获取模版每个索引的health状态，从而确定模版health
+     * @param cluster 集群名称
+     * @param expression 索引的表达式，如“log-*”
+     * @return  模版健康状态
+     */
+    Integer getTemplateHealthCode(String cluster, String expression);
 }
