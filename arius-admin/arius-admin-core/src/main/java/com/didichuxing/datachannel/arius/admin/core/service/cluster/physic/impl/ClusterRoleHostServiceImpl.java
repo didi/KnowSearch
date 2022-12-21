@@ -187,12 +187,12 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
                 if (StringUtils.isNotBlank(machineSpec)) {
                     nodePO.setMachineSpec(machineSpec);
                 }
-                LOGGER.info(
+                LOGGER.debug(
                     "class=RoleClusterHostServiceImpl||method=collectClusterNodeSettings||nodeName={}||id={}||msg=node has exist!",
                     nodePO.getNodeSet(), nodePO.getId());
                 shouldEdit.add(nodePO);
             } else {
-                LOGGER.info(
+                LOGGER.debug(
                     "class=RoleClusterHostServiceImpl||method=collectClusterNodeSettings||ip={}||msg=node is new!",
                     nodePO.getIp());
                 shouldAdd.add(nodePO);

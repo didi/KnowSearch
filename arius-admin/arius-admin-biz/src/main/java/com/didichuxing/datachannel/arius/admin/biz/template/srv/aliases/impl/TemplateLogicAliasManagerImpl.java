@@ -100,8 +100,8 @@ public class TemplateLogicAliasManagerImpl extends BaseTemplateSrvImpl implement
             }
 
         } catch (ESOperateException e) {
-            LOGGER.info(
-                "class=TemplateLogicAliasesManagerImpl||method=listAlias||" + "msg=esTemplateNotFound||clusters={}",
+            LOGGER.error(
+                "class=TemplateLogicAliasesManagerImpl||method=listAlias||msg=esTemplateNotFound||clusters={}",
                 clusters);
         }
 

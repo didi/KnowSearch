@@ -214,9 +214,6 @@ public class TemplatePhyAliasManagerImpl implements TemplatePhyAliasManager {
                                          List<IndexTemplatePhyAlias> templateAliases) throws ESOperateException {
         TemplateConfig templateConfig = fetchTemplateConfig(cluster, templateName);
         if (CollectionUtils.isEmpty(templateAliases)) {
-            Logger.info("class=TemplatePhyAliasesManagerImpl||method=deleteTemplateAliases||"
-                        + "msg=templateNotFound||cluster={}||template={}",
-                cluster, templateName);
             throw new ESOperateException("非法的参数");
         }
 
@@ -269,7 +266,7 @@ public class TemplatePhyAliasManagerImpl implements TemplatePhyAliasManager {
 
         TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(cluster, templateName);
         if (templateConfig == null) {
-            Logger.info("class=TemplatePhyAliasesManagerImpl||method=deleteTemplateAlias||"
+            Logger.info("class=TemplatePhyAliasesManagerImpl||method=fetchTemplateConfig||"
                         + "msg=templateNotFound||cluster={}||template={}",
                 cluster, templateName);
             throw new ESOperateException("模板配置不存在");
@@ -285,7 +282,7 @@ public class TemplatePhyAliasManagerImpl implements TemplatePhyAliasManager {
 
         Map<String, TemplateConfig> templateConfigMap = esTemplateService.syncGetAllTemplates(clusters);
         if (templateConfigMap == null) {
-            Logger.info("class=TemplatePhyAliasesManagerImpl||method=deleteTemplateAlias||"
+            Logger.info("class=TemplatePhyAliasesManagerImpl||method=fetchAllTemplateConfig||"
                         + "msg=templateNotFound||cluster={}",
                 clusters);
             throw new ESOperateException("模板配置不存在");
