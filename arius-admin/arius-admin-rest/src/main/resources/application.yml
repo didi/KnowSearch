@@ -14,22 +14,22 @@ history.query.time: now-93d
 #admin相关配置
 admin.port.web: 8010
 admin.contextPath: /admin/api
-admin.url.console: http://10.96.75.13/
-admin.url.kibana: http://10.96.75.13:18967/
+admin.url.console: http://10.190.6.107/
+admin.url.kibana: http://10.160.80.135:8061/
 admin.thread.size.op: 20
 
 #gateway相关配置
-es.gateway.url: 10.96.75.13
-es.gateway.port: 18278
+es.gateway.url: 10.190.44.150,10.190.42.122
+es.gateway.port: 8200
 es.user: 1
 es.password: azAWiJhxkho33ac
 scroll.timeout: 60s
 
 #ES元数据集群相关配置
-es.update.cluster.name: logi-elasticsearch-meta
+es.update.cluster.name: logi-elasticsearch-7.6.0
 
 #ES客户端相关配置
-es.client.cluster.port: 18143
+es.client.cluster.port: 8061
 es.client.io.thread.count: 8
 
 #可观测性相关配置
