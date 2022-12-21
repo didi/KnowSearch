@@ -43,6 +43,8 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.*;
 import org.elasticsearch.rest.support.RestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -53,7 +55,7 @@ import java.util.*;
 public abstract class BaseHttpRestController implements IRestHandler {
 
     protected static final ILog logger = LogFactory.getLog(BaseHttpRestController.class);
-    protected static final ILog statLogger = LogFactory.getLog(QueryConsts.STAT_LOGGER);
+    protected static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
     protected static final ILog traceLogger = LogFactory.getLog(QueryConsts.TRACE_LOGGER);
     protected static final ILog auditLogger = LogFactory.getLog(QueryConsts.AUDIT_LOGGER);
     protected static final String AUTHORIZATION = "Authorization";

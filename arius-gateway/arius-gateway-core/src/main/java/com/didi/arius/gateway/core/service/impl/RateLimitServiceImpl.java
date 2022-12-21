@@ -13,6 +13,8 @@ import com.didi.arius.gateway.core.service.RateLimitService;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import lombok.NoArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
@@ -30,7 +32,7 @@ public class RateLimitServiceImpl implements RateLimitService, ApplicationListen
 
     private static final ILog logger = LogFactory.getLog(RateLimitServiceImpl.class);
     private static final ILog bootLogger = LogFactory.getLog(QueryConsts.BOOT_LOGGER);
-    private static final ILog statLogger = LogFactory.getLog(QueryConsts.STAT_LOGGER);
+    protected static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
 
     private AtomicLong totalByteIn = new AtomicLong();
 
