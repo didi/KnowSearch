@@ -5,8 +5,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.op.manager.ESClusterExpandWithPluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.op.manager.ESClusterShrinkWithPluginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.OpTaskVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.op.manager.interfaces.vo.TaskDetailVO;
@@ -172,4 +175,26 @@ public interface OpTaskManager {
      * @return TaskDetailVO 对象的列表。
      */
     Result<List<TaskDetailVO>> getTaskDetail(Integer id);
+    
+    /**
+     * 添加任务esexpand
+     *
+     * @param data      数据
+     * @param operator  操作人或角色
+     * @param projectId 项目id
+     * @return {@link Result}<{@link WorkTaskVO}>
+     */
+    Result<WorkTaskVO> addTaskESExpand(ESClusterExpandWithPluginDTO data, String operator, Integer projectId)
+        throws NotFindSubclassException;
+    
+    /**
+     * 添加任务esshrink
+     *
+     * @param data      数据
+     * @param operator  操作人或角色
+     * @param projectId 项目id
+     * @return {@link Result}<{@link WorkTaskVO}>
+     */
+    Result<WorkTaskVO> addTaskESShrink(ESClusterShrinkWithPluginDTO data, String operator, Integer projectId)
+        throws NotFindSubclassException;
 }

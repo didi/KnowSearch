@@ -2,17 +2,23 @@ package com.didichuxing.datachannel.arius.admin.biz.task.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TASK;
 
+import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.page.TaskPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskHandler;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterExpandContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.op.manager.ESClusterExpandWithPluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.op.manager.ESClusterShrinkWithPluginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.OpTaskVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskHandleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
@@ -20,6 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEn
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.task.OpTaskService;
 import com.didiglobal.logi.log.ILog;
@@ -31,8 +38,11 @@ import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum
 import com.didiglobal.logi.op.manager.interfaces.assembler.TaskDetailAssembler;
 import com.didiglobal.logi.op.manager.interfaces.vo.TaskDetailVO;
 import com.didiglobal.logi.security.service.UserService;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -281,8 +291,82 @@ public class OpTaskManagerImpl implements OpTaskManager {
         }
         return Result.buildSucc(TaskDetailAssembler.toVOList((List<TaskDetail>) res.getData()));
     }
-     
-     /**
+    
+    @Override
+    public Result<WorkTaskVO> addTaskESExpand(ESClusterExpandWithPluginDTO data, String operator,
+        Integer projectId) throws NotFindSubclassException {
+        // 生成插件安装的任务 DTO
+        final List<OpTaskDTO> pluginInstallList =
+            Optional.ofNullable(data.getInstallPlugins()).orElse(Collections.emptyList()).stream()
+                .map(JSON::toJSONString).map(
+                    content -> {
+                        final OpTaskDTO opTaskDTO = new OpTaskDTO();
+                        opTaskDTO.setTaskType(OpTaskTypeEnum.ES_CLUSTER_PLUG_INSTALL.getType());
+                        opTaskDTO.setCreator(operator);
+                        opTaskDTO.setExpandData(content);
+                        return opTaskDTO;
+                    }).collect(Collectors.toList());
+        
+        final OpTaskDTO            opTaskDTO  = new OpTaskDTO();
+        final ClusterExpandContent content    = ConvertUtil.obj2Obj(data,
+            ClusterExpandContent.class);
+        String                     dataCenter = opTaskDTO.getDataCenter();
+        opTaskDTO.setExpandData(JSON.toJSONString(content));
+        opTaskDTO.setTaskType(OpTaskTypeEnum.ES_CLUSTER_EXPAND.getType());
+        opTaskDTO.setCreator(operator);
+        LOGGER.info(
+            "class={}||method=addTaskESExpand||workTaskDTO={}||envInfo={}||dataCenter={}",
+            this.getClass().getSimpleName(),JSON.toJSONString(opTaskDTO), EnvUtil.getStr(), dataCenter);
+        // 生成安装插件的任务
+        for (OpTaskDTO taskDTO : pluginInstallList) {
+            addTask(taskDTO, AuthConstant.SUPER_PROJECT_ID);
+            
+        }
+        Result<OpTask> result = addTask(opTaskDTO, AuthConstant.SUPER_PROJECT_ID);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+        
+        return Result.buildSucc(ConvertUtil.obj2Obj(result.getData(), WorkTaskVO.class));
+    }
+    
+    @Override
+    public Result<WorkTaskVO> addTaskESShrink(ESClusterShrinkWithPluginDTO data, String operator,
+        Integer projectId) throws NotFindSubclassException {
+        //生成插件安装的任务DTO
+        final List<OpTaskDTO> pluginInstallList =
+                Optional.ofNullable( data.getUnInstallPlugins()).orElse(Collections.emptyList()).stream().map(
+                    JSON::toJSONString).map(
+                content -> {
+                    final OpTaskDTO opTaskDTO = new OpTaskDTO();
+                    opTaskDTO.setTaskType(OpTaskTypeEnum.ES_CLUSTER_PLUG_UNINSTALL.getType());
+                    opTaskDTO.setCreator(operator);
+                    opTaskDTO.setExpandData(content);
+                    return opTaskDTO;
+                }).collect(Collectors.toList());
+    
+        final OpTaskDTO            opTaskDTO  = new OpTaskDTO();
+        final ClusterExpandContent content    = ConvertUtil.obj2Obj(data, ClusterExpandContent.class);
+        String                     dataCenter = opTaskDTO.getDataCenter();
+        opTaskDTO.setExpandData(JSON.toJSONString(content));
+        opTaskDTO.setTaskType(OpTaskTypeEnum.ES_CLUSTER_SHRINK.getType());
+        opTaskDTO.setCreator(operator);
+        LOGGER.info(
+                "class={}||method=addTaskESShrink||workTaskDTO={}||envInfo={}||dataCenter={}",
+                this.getClass().getSimpleName(),JSON.toJSONString(opTaskDTO), EnvUtil.getStr(), dataCenter);
+        //生成安装插件的任务
+        for (OpTaskDTO taskDTO : pluginInstallList) {
+            addTask(taskDTO, AuthConstant.SUPER_PROJECT_ID);
+        }
+        Result<OpTask> result = addTask(opTaskDTO, AuthConstant.SUPER_PROJECT_ID);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+        
+        return Result.buildSucc(ConvertUtil.obj2Obj(result.getData(), WorkTaskVO.class));
+    }
+    
+    /**
       * > 检查任务是否为 ECM 任务，任务 id 是否正确
       *
       * @param opTask 需要检查的任务对象

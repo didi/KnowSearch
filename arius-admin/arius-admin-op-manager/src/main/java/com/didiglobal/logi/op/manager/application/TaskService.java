@@ -21,6 +21,9 @@ import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.google.common.base.Strings;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -164,6 +167,12 @@ public class TaskService {
             configResult.getData().setIsOpenTSL(component.getIsOpenTSL());
             configResult.getData().setDependConfigComponentId(component.getDependConfigComponentId());
         }
+        Optional.ofNullable(configResult.getData())
+            .ifPresent(i -> {
+                if (StringUtils.isNotEmpty(i.getFileConfig())) {
+                    i.setFileConfig(StringEscapeUtils.unescapeJavaScript(i.getFileConfig()));
+                }
+            });
         return Result.success(configResult.getData());
     }
 

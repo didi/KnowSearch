@@ -49,7 +49,6 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -288,7 +287,6 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 */
 		protected Result<Integer> install(String expandData) {
 				final GeneraInstallComponentDTO dto = convertString2Content(expandData);
-				dto.setGroupConfigList(unescapeJavaScriptDTO(dto.getGroupConfigList()));
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
 						componentService.installComponent(
 								ComponentAssembler.toInstallComponent(dto));
@@ -308,7 +306,6 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 				final GeneralScaleComponentDTO dto = convertString2Content(
 						expandData);
 				dto.setType(OperationEnum.EXPAND.getType());
-				dto.setGroupConfigList(unescapeJavaScriptDTO(dto.getGroupConfigList()));
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
 						componentService.scaleComponent(
 								ComponentAssembler.toScaleComponent(dto));
@@ -325,7 +322,6 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 */
 		protected Result<Integer> shrink(String expandData) {
 				final GeneralScaleComponentDTO dto = convertString2Content(expandData);
-				dto.setGroupConfigList(unescapeJavaScriptDTO(dto.getGroupConfigList()));
 				dto.setType(OperationEnum.SHRINK.getType());
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
 						componentService.scaleComponent(
@@ -344,7 +340,6 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 */
 		protected Result<Integer> configChange(String expandData) {
 				final GeneralConfigChangeComponentDTO dto = convertString2Content(expandData);
-				dto.setGroupConfigList(unescapeJavaScriptDTO(dto.getGroupConfigList()));
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
 						componentService.configChangeComponent(ComponentAssembler.toConfigChangeComponent(dto));
 				if (result.failed()) {
@@ -361,7 +356,6 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 */
 		protected Result<Integer> restart(String expandData) {
 				final GeneralRestartComponentDTO dto = convertString2Content(expandData);
-				dto.setGroupConfigList(unescapeJavaScriptDTO(dto.getGroupConfigList()));
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
 						componentService.restartComponent(ComponentAssembler.toRestartComponent(dto));
 				if (result.failed()) {
@@ -378,7 +372,6 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 */
 		protected Result<Integer> upgrade(String expandData) {
 				final GeneralUpgradeComponentDTO dto = convertString2Content(expandData);
-				dto.setGroupConfigList(unescapeJavaScriptDTO(dto.getGroupConfigList()));
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
 						componentService.upgradeComponent(ComponentAssembler.toUpgradeComponent(dto));
 				if (result.failed()) {
@@ -395,7 +388,6 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 */
 		protected Result<Integer> rollback(String expandData) {
 				final GeneralRollbackComponentDTO dto = convertString2Content(expandData);
-				dto.setGroupConfigList(unescapeJavaScriptDTO(dto.getGroupConfigList()));
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
 						componentService.rollbackComponent(ComponentAssembler.toRollbackComponent(dto));
 				if (result.failed()) {
@@ -520,20 +512,7 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 				return Result.buildSucc();
 		}
 		
-		private List<GeneralGroupConfigDTO> unescapeJavaScriptDTO(List<GeneralGroupConfigDTO> dtos) {
-				for (GeneralGroupConfigDTO dto : dtos) {
-						final String installDirectoryConfig = dto.getInstallDirectoryConfig();
-						final String fileConfig             = dto.getFileConfig();
-						final String processNumConfig       = dto.getProcessNumConfig();
-						final String systemConfig           = dto.getSystemConfig();
-						dto.setInstallDirectoryConfig(
-								StringEscapeUtils.unescapeJavaScript(installDirectoryConfig));
-						dto.setProcessNumConfig(StringEscapeUtils.unescapeJavaScript(processNumConfig));
-						dto.setSystemConfig(StringEscapeUtils.unescapeJavaScript(systemConfig));
-						dto.setFileConfig(StringEscapeUtils.unescapeJavaScript(fileConfig));
-				}
-				return dtos;
-		}
+	
 		
 		
 }
