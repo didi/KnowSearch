@@ -1111,8 +1111,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         try {
             Integer templateHealthCode = esTemplateService.getTemplateHealthCode(masterCluster, expression);
             templatePO.setHealth(templateHealthCode);
-            boolean result = indexTemplateService.update(templatePO);
-            if(!result) {
+            boolean updateResult = indexTemplateService.update(templatePO);
+            if(!updateResult) {
                 LOGGER.error("class=TemplateLogicManagerImpl||method=updateTemplateHealthByLogicId||logicId={}, update DB failed!", logicId);
                 return false;
             }
