@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 ;
@@ -116,5 +117,39 @@ public class GatewayClusterConfigManagerImpl implements GatewayClusterConfigMana
 				}
 				
 				return Result.buildSucc(hostVOS);
+		}
+		
+		@Override
+		public Result<List<ComponentGroupConfig>> getRollbackConfigsByClusterPhyId(
+				Integer gatewayClusterId, Integer configId) {
+				final Integer componentIdById = gatewayClusterService.getComponentIdById(gatewayClusterId);
+				if (Objects.isNull(componentIdById)) {
+						return Result.buildSucc(Collections.emptyList());
+				}
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<com.didiglobal.logi.op.manager.domain.component.entity.Component> componentRes = componentService.queryComponentById(
+						componentIdById);
+				if (Objects.isNull(componentRes.getData()) || CollectionUtils.isEmpty(
+						componentRes.getData().getGroupConfigList())) {
+						return Result.buildSucc(Collections.emptyList());
+				}
+				// 获取配置列表
+				final List<ComponentGroupConfig> groupConfigList = componentRes.getData()
+						.getGroupConfigList();
+				final Optional<ComponentGroupConfig> groupConfigOptional = groupConfigList.stream()
+						.filter(i -> Objects.equals(i.getId(), configId))
+						.findFirst();
+				if (!groupConfigOptional.isPresent()) {
+						return Result.buildSucc(Collections.emptyList());
+				}
+				final String groupName = groupConfigOptional.get().getGroupName();
+				final String version   = groupConfigOptional.get().getVersion();
+				if (!StringUtils.isNumeric(version)) {
+						return Result.buildSucc(Collections.emptyList());
+				}
+				final List<ComponentGroupConfig> rollbackConfigs = groupConfigList.stream()
+						.filter(i -> StringUtils.equals(groupName, i.getGroupName()))
+						.filter(i -> Integer.parseInt(i.getVersion()) < Integer.parseInt(version))
+						.collect(Collectors.toList());
+				return Result.buildSucc(rollbackConfigs);
 		}
 }
