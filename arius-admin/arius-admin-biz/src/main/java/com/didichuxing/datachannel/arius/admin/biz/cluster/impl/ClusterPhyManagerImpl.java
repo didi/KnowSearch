@@ -1728,19 +1728,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     /**
      * 构建物理集群详情
-     * @param phyClusters 物理集群元数据信息
-     */
-//    private List<ClusterPhyVO> buildPhyClusters(List<ClusterPhyVO> phyClusters) {
-//
-//        phyClusters.parallelStream().forEach(this::buildPhyCluster);
-//
-//        Collections.sort(phyClusters);
-//
-//        return phyClusters;
-//    }
-
-    /**
-     * 构建物理集群详情
      * @param clusterPhyVO 物理集群元数据信息
      * @return
      */
