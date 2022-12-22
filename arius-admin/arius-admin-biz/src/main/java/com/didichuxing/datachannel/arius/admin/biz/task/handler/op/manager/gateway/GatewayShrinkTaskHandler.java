@@ -6,9 +6,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -71,8 +74,23 @@ public class GatewayShrinkTaskHandler extends AbstractGatewayTaskHandler {
 		}
 		
 		@Override
-		protected OperateRecord recordCurrentOperationTasks(String expandData) {
-				return new OperateRecord();
+		protected OperateRecord recordCurrentOperationTasks(OpTask opTask) {
+				final ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
+						AuthConstant.SUPER_PROJECT_ID);
+				final GatewayShrinkContent content = convertString2Content(
+						opTask.getExpandData());
+				final String name = componentService.queryComponentNameById(content.getComponentId())
+						.getData();
+				final String hosts = content.getGroupConfigList().stream()
+						.map(GeneralGroupConfigDTO::getHosts)
+						.distinct()
+						.collect(Collectors.joining(","));
+				return new OperateRecord.Builder()
+						.operationTypeEnum(OperateTypeEnum.GATEWAY_SHRINK)
+						.content(String.format("集群：【%s】，缩容：【%s】", name, hosts))
+						.project(briefVO)
+						.userOperation(opTask.getCreator())
+						.build();
 		}
 		
 		@Override

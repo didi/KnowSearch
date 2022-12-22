@@ -5,15 +5,19 @@ import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterPlu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 /**
@@ -119,8 +123,32 @@ public class ESClusterPluginRestartTaskHandler extends AbstractESTaskHandler {
 		}
 		
 		@Override
-		protected OperateRecord recordCurrentOperationTasks(String expandData) {
-				return new OperateRecord();
+		protected OperateRecord recordCurrentOperationTasks(OpTask opTask) {
+				final ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
+						AuthConstant.SUPER_PROJECT_ID);
+				final ClusterPluginRestartContent content = convertString2Content(
+						opTask.getExpandData());
+				
+				final Integer dependComponentId = content.getDependComponentId();
+				final com.didiglobal.logi.op.manager.domain.component.entity.Component component = componentService.queryComponentById(
+								dependComponentId)
+						.getData();
+				final Integer clusterPhyId = clusterPhyManager.getIdByComponentId(
+						dependComponentId).getData();
+				final String hosts = content.getGroupConfigList()
+						.stream()
+						.map(GeneralGroupConfigDTO::getHosts)
+						.collect(Collectors.joining(","));
+				final String pluginName = componentService.queryComponentNameById(content.getComponentId())
+						.getData();
+				return new OperateRecord.Builder()
+						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_PLUGIN_RESTART)
+						.content(String.format("集群：【%s】插件【%s】重启：【%s】", component.getName(),
+								pluginName, hosts))
+						.project(briefVO)
+						.bizId(clusterPhyId)
+						.userOperation(opTask.getCreator())
+						.build();
 		}
 		
 }

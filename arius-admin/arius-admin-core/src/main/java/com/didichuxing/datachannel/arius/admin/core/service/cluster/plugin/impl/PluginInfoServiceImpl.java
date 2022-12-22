@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.plugin.PluginDA
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -61,5 +62,18 @@ public class PluginInfoServiceImpl implements PluginInfoService {
 		@Override
 		public PluginInfoPO selectByCondition(PluginInfoPO pluginInfoPO) {
 				return pluginDAO.selectByCondition(pluginInfoPO);
+		}
+		
+		@Override
+		public Boolean deleteByIds(List<Long> pluginIds) {
+				if (CollectionUtils.isEmpty(pluginIds)) {
+						return true;
+				}
+				return pluginIds.stream().map(pluginDAO::deleteByPrimaryKey).count() == pluginIds.size();
+		}
+		
+		@Override
+		public PluginInfoPO getOneByComponentId(Integer componentId, PluginClusterTypeEnum typeEnum) {
+				return pluginDAO.selectOneByComponentIdAndClusterType(componentId,typeEnum.getClusterType());
 		}
 }

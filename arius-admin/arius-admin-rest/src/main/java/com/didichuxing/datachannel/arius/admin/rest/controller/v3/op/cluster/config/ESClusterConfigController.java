@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.ConfigCond
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.op.manager.ComponentGroupConfigWithHostVO;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.interfaces.vo.ComponentGroupConfigVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -100,11 +101,25 @@ public class ESClusterConfigController {
         return esClusterConfigManager.pageGetConfig(condition, HttpRequestUtil.getProjectId(request), phyClusterId);
     }
     
-     @GetMapping("/{clusterPhyId}/configs")
+    @GetMapping("/{clusterPhyId}/configs")
     @ResponseBody
-    @ApiOperation(value = "根据 clusterPhyId 获取物理集群配置信息",tags = "")
-    public Result<List<ComponentGroupConfigWithHostVO>> getConfigsByClusterPhyId(HttpServletRequest request,
-                                                                    @PathVariable("clusterPhyId") Integer clusterPhyId) {
-       return esClusterConfigManager.getConfigsByClusterPhyId(clusterPhyId);
+    @ApiOperation(value = "根据 clusterPhyId 获取物理集群配置信息", tags = "")
+    public Result<List<ComponentGroupConfigWithHostVO>> getConfigsByClusterPhyId(
+        HttpServletRequest request,
+        @PathVariable("clusterPhyId") Integer clusterPhyId) {
+        return esClusterConfigManager.getConfigsByClusterPhyId(clusterPhyId);
     }
+    
+    @GetMapping("/{clusterPhyId}/{configId}/rollback")
+    @ResponseBody
+    @ApiOperation(value = "根据 clusterPhyId 和configId获取可以回滚的配置信息", tags = "")
+    public Result<List<ComponentGroupConfig>> getRollbackConfigsByClusterPhyId(
+        HttpServletRequest request,
+        @PathVariable("clusterPhyId") Integer clusterPhyId,
+        @PathVariable("configId") Integer configId) {
+        return esClusterConfigManager.getRollbackConfigsByClusterPhyId(clusterPhyId, configId);
+    }
+    
+    
+    
 }

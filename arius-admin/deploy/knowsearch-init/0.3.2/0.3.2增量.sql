@@ -25,6 +25,12 @@ ALTER TABLE index_template_info
 
 ALTER TABLE gateway_cluster_node_info
     ADD node_name VARCHAR(50) DEFAULT '' NULL COMMENT ' 节点名称 ';
+ALTER TABLE gateway_cluster_node_info
+    ADD machine_spec VARCHAR(255) DEFAULT '' NULL COMMENT '机器规格';
+ALTER TABLE gateway_cluster_node_info
+    ADD cpu_usage  DOUBLE DEFAULT 0.0 NULL COMMENT 'cpu使用率';
+ALTER TABLE gateway_cluster_node_info
+    ADD http_connection_num BIGINT DEFAULT 0 NULL COMMENT 'http连接数';
 
 
 # es_cluster_phy_info 表修改
@@ -99,16 +105,20 @@ CREATE TABLE logi_op_component_group_config
     update_time              TIMESTAMP     NULL COMMENT '更新时间'
 );
 -- auto-generated definition
+-- auto-generated definition
 CREATE TABLE logi_op_component_host
 (
-    host         VARCHAR(11) DEFAULT '' NOT NULL COMMENT '主机',
-    component_id INT                    NOT NULL COMMENT '关联组件id',
-    status       INT                    NULL COMMENT '状态（在线或离线）',
-    group_name   VARCHAR(11)            NULL COMMENT '分组名',
-    process_num  INT                    NULL COMMENT '进程数',
-    is_deleted   INT                    NULL COMMENT '是否卸载',
-    create_time  TIMESTAMP              NULL COMMENT '创建时间',
-    update_time  TIMESTAMP              NULL COMMENT '更新时间'
+    host         VARCHAR(11)  DEFAULT '' NOT NULL COMMENT '主机',
+    component_id INT                     NOT NULL COMMENT '关联组件id',
+    status       INT                     NULL COMMENT '状态（在线或离线）',
+    group_name   VARCHAR(50)             NULL COMMENT '分组名',
+    process_num  INT                     NULL COMMENT '进程数',
+    is_deleted   INT                     NULL COMMENT '是否卸载',
+    create_time  TIMESTAMP               NULL COMMENT '创建时间',
+    update_time  TIMESTAMP               NULL COMMENT '更新时间',
+    machine_spec VARCHAR(255) DEFAULT '' NULL COMMENT '机器规格',
+    CONSTRAINT logi_op_component_host_pk
+        UNIQUE (host, component_id, group_name)
 );
 
 -- auto-generated definition
@@ -275,8 +285,7 @@ values (5601, 1, 1883, '2022-12-21 15:08:22', '2022-12-21 15:10:32', 0, 'know_se
        (5657, 2, 1909, '2022-12-21 15:08:22', '2022-12-21 15:10:32', 0, 'know_search'),
        (5659, 2, 1911, '2022-12-21 15:08:22', '2022-12-21 15:10:32', 0, 'know_search');
 
-ALTER TABLE gateway_cluster_node_info
-    ADD machine_spec VARCHAR(255) DEFAULT '' NULL COMMENT '机器规格\n';
+
 
 
 -- 新增平台配置初始化数据
@@ -324,3 +333,15 @@ create index idx_scheduled_task_start_time
 
 create index idx_task_id
     on fast_index_task_info (task_id);
+
+# 权限点新增
+INSERT INTO logi_security_permission ( id, permission_name, parent_id, leaf, level, description
+                                     , is_delete, app_name)
+VALUES (1882, '插件安装', 1593, 1, 2, '插件安装', 0, 'know_search');
+INSERT INTO logi_security_permission (id, permission_name, parent_id, leaf, level, description,
+                                      is_delete, app_name)
+VALUES (1883, '数据迁移', 1593, 1, 2, '数据迁移', 0, 'know_search');
+INSERT INTO logi_security_role_permission (role_id, permission_id, is_delete, app_name)
+VALUES (1, 1882, 0, 'know_search');
+INSERT INTO logi_security_role_permission (role_id, permission_id, is_delete, app_name)
+VALUES (1, 1883, 0, 'know_search');

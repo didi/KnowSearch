@@ -75,6 +75,9 @@ public class SyncOpManagerECMTask implements Job {
 						}
 						final com.didiglobal.logi.op.manager.domain.task.entity.Task task = id2TaskMap.get(
 								Integer.parseInt(opTask.getBusinessKey()));
+						if (task==null){
+								continue;
+						}
 						//3.填充状态
 						processDTO.setStatus(OpTaskStatusEnum.valueOfStatusByOpManagerEnum(TaskStatusEnum.find(task.getStatus())).getStatus());
 						//4.更新状态

@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.plugin.PluginCreateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.op.manager.ComponentGroupConfigWithHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageVersionVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginClusterTypeEnum;
 import java.util.List;
@@ -87,4 +88,21 @@ public interface PluginManager {
 		 * @return 更新前的网关集群版本。
 		 */
 		Result<List<PackageVersionVO>> getLowerVersionByGatewayClusterId(Integer gatewayClusterId);
+		
+		    /**
+     * 获取配置通过插件id
+     *
+     * @param pluginId 插件id
+     * @return {@link Result}<{@link List}<{@link ComponentGroupConfigWithHostVO}>>
+     */
+    Result<List<ComponentGroupConfigWithHostVO>> getConfigsByPluginId(Long pluginId);
+		
+		/**
+		 * 获取集群通过组件id
+		 *
+		 * @param componentId 组件id
+		 * @param typeEnum          type
+		 * @return {@link Result}<{@link PluginVO}>
+		 */
+		Result<PluginVO> getClusterByComponentId(Integer componentId, PluginClusterTypeEnum typeEnum);
 }

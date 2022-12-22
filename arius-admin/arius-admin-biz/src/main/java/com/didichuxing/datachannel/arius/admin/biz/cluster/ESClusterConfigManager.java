@@ -81,4 +81,14 @@ public interface ESClusterConfigManager {
 		 * @return ComponentGroupConfigVO 列表
 		 */
 		Result<List<ComponentGroupConfigWithHostVO>> getConfigsByClusterPhyId(Integer clusterPhyId);
+		
+		/**
+		 * 获取回滚配置通过集群体育id
+		 *
+		 * @param clusterPhyId 集群体育id
+		 * @param configId
+		 * @return {@link Result}<{@link List}<{@link ComponentGroupConfigVO}>>
+		 */
+		Result<List<ComponentGroupConfig>> getRollbackConfigsByClusterPhyId(Integer clusterPhyId,
+				Integer configId);
 }

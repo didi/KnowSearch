@@ -228,10 +228,14 @@ public class ComponentService {
 
     public Result<Integer> offLineComponent(Integer componentId) {
         Result<Integer> res = componentDomainService.offLine(componentId);
-        if (res.getData() != 0) {
+        if (res.getData() != null && res.getData() != 0) {
             return Result.fail("组件未删除或者多删除");
         }
         return res;
+    }
+    
+    public Result<Boolean> checkComponent(Integer componentId) {
+        return componentDomainService.checkComponent(componentId);
     }
     
     /**

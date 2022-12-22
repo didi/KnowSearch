@@ -113,7 +113,7 @@ public class CustomDataSource {
         esZeusConfigDTO.setEnginName("engin");
         esZeusConfigDTO.setTypeName("es");
         esZeusConfigDTO.setContent("");
-        esZeusConfigDTO.setClusterId(1l);
+        esZeusConfigDTO.setClusterId(1L);
         return esZeusConfigDTO;
     }
 
@@ -127,7 +127,7 @@ public class CustomDataSource {
 
     public static ESConfigDTO esConfigDTOFactory() {
         ESConfigDTO esConfigDTO = new ESConfigDTO();
-        esConfigDTO.setClusterId(1l);
+        esConfigDTO.setClusterId(1L);
         esConfigDTO.setEnginName("wpkEngin");
         esConfigDTO.setTypeName("wpk");
         esConfigDTO.setVersionConfig(1);
@@ -425,7 +425,7 @@ public class CustomDataSource {
         ProjectTemplateAuth projectTemplateAuth = new ProjectTemplateAuth();
         projectTemplateAuth.setProjectId(1);
         projectTemplateAuth.setTemplateId(1);
-        projectTemplateAuth.setId(1l);
+        projectTemplateAuth.setId(1L);
         return projectTemplateAuth;
     }
 
@@ -662,7 +662,7 @@ public class CustomDataSource {
     public static ESClusterRoleHostVO getESClusterRoleHostVO() {
         return new ESClusterRoleHostVO(0L, 0L, "hostname", "ip", PHY_CLUSTER_NAME, "clusterLogicNames", "port", 1, 0,
             "rack", "machineSpec", "nodeSet", 0, "logicDepart", "attributes", "regionName", 0.0,
-            2L, 1L, "",null);
+            2L, 1L, "");
     }
 
     public static ClusterRoleInfo getClusterRoleInfo() {

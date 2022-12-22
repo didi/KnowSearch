@@ -433,6 +433,11 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     }
     
     @Override
+    public Result<Boolean> checkComponent(Integer componentId) {
+        return Result.buildSuccess(Objects.nonNull( componentRepository.getComponentById(componentId)));
+    }
+    
+    @Override
     public Result<Component> queryComponentById(Integer componentId) {
         final Optional<Component> componentOpt = componentRepository.queryComponentById(componentId);
         componentOpt.ifPresent(component -> {

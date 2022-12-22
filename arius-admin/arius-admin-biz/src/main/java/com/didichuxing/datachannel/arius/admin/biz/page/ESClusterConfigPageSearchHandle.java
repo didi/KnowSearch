@@ -14,7 +14,7 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
-import com.google.common.collect.Lists;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHost;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -69,39 +69,63 @@ public class ESClusterConfigPageSearchHandle extends
 		protected PaginationResult<ClusterPhyConfigVO> buildPageData(ConfigConditionDTO condition,
 				Integer projectId) {
 				final ClusterPhy cluster     = clusterPhyService.getClusterById(condition.getClusterId());
+				if (Objects.isNull(cluster)){
+						return PaginationResult.buildFail("未匹配到集群");
+				}
 				Integer          componentId = cluster.getComponentId();
-
 				// 如果找不到
 				if (Objects.isNull(componentId)) {
 						return PaginationResult.buildSucc(Collections.emptyList(), 0L, condition.getPage(),
 								condition.getSize());
 				}
-				final List<ComponentGroupConfig> data = componentService.getComponentConfig(
+				final com.didiglobal.logi.op.manager.domain.component.entity.Component component = componentService.queryComponentById(
 						componentId).getData();
+				if (Objects.isNull(component)) {
+						return PaginationResult.buildSucc(Collections.emptyList(), 0L, condition.getPage(),
+								condition.getSize());
+				}
+				final List<ComponentGroupConfig> data =  component.getGroupConfigList();
 				if (CollectionUtils.isEmpty(data)) {
 						return PaginationResult.buildSucc(Collections.emptyList(), 0L, condition.getPage(),
 								condition.getSize());
 				}
+				//获取可以编辑的配置id
+				final List<Integer> ids = componentService.getComponentConfig(componentId).getData()
+						.stream().map(ComponentGroupConfig::getId).collect(
+								Collectors.toList());
 				// 获取 host 列表
-				final List<String> hostsList = data.stream().map(this::hostsConvertHostList)
-						.flatMap(Collection::stream).distinct()
-						.collect(Collectors.toList());
+				final List<ComponentHost> hostList = component.getHostList();
+				final Map<String, List<ComponentHost>> groupName2HostsMaps = ConvertUtil.list2MapOfList(hostList,
+						ComponentHost::getGroupName, i -> i);
 				//1. 获取全量的 node 节点信息
 				final List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.listNodesByClusters(
-						hostsList);
+						Collections.singletonList(cluster.getCluster()));
 				final List<ESClusterRoleHostVO> nodes = ConvertUtil.list2List(
 						clusterRoleHosts, ESClusterRoleHostVO.class);
+				final Map<String, List<ESClusterRoleHostVO>> ip2ListMap = ConvertUtil.list2MapOfList(
+						nodes, ESClusterRoleHostVO::getIp, i -> i);
 				
-				// 进行对应的转换
-				final Map<Integer, Integer> configIdComponentIdMap = ConvertUtil.list2Map(data,
-						ComponentGroupConfig::getId, ComponentGroupConfig::getComponentId);
-				final Map<Integer, List<ESClusterRoleHostVO>> hostComponentId2NodesMaps = ConvertUtil.list2MapOfList(
-						nodes, ESClusterRoleHostVO::getComponentHostId, i -> i);
+				
 				// 通过 ComponentId 进行选出对应的对应填充
 				final List<ClusterPhyConfigVO> clusterPhyConfigVOS = ConvertUtil.list2List(data,
-						ClusterPhyConfigVO.class, i -> Optional.ofNullable(configIdComponentIdMap.get(i.getId()))
-								.map(hostComponentId2NodesMaps::get)
-								.ifPresent(i::setNodes));
+						ClusterPhyConfigVO.class);
+				for (ClusterPhyConfigVO clusterPhyConfigVO : clusterPhyConfigVOS) {
+						final String              groupName      = clusterPhyConfigVO.getGroupName();
+						final List<ComponentHost> componentHosts = groupName2HostsMaps.get(groupName);
+						final List<ESClusterRoleHostVO> nodesList = Optional.ofNullable(componentHosts)
+								.orElse(Collections.emptyList())
+								.stream()
+								.map(ComponentHost::getHost)
+								.map(ip2ListMap::get)
+								.filter(Objects::nonNull)
+								.flatMap(Collection::stream)
+								.collect(Collectors.toList());
+						clusterPhyConfigVO.setNodes(nodesList);
+						if (ids.contains(clusterPhyConfigVO.getId())) {
+								clusterPhyConfigVO.setSupportEditAndRollback(true);
+						}
+						
+				}
 				final List<ClusterPhyConfigVO> gatewayConfigPage = clusterPhyConfigVOS.stream()
 						.filter(i -> filterByConfigConditionDTO(i, condition)).collect(Collectors.toList());
 				int total = clusterPhyConfigVOS.size();
@@ -126,15 +150,7 @@ public class ESClusterConfigPageSearchHandle extends
 				return StringUtils.containsAny(condition.getGroupName(), clusterPhyConfigVO.getGroupName());
 		}
 		
-		/**
-		 * > 将逗号分隔的主机列表转换为字符串列表
-		 *
-		 * @param componentGroupConfig 传入方法的 ComponentGroupConfig 对象。
-		 * @return 字符串列表
-		 */
-		private List<String> hostsConvertHostList(ComponentGroupConfig componentGroupConfig) {
-				return Lists.newArrayList(StringUtils.split(",", componentGroupConfig.getHosts()));
-		}
+
 		
 		
 }

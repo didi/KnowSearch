@@ -4,7 +4,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESResponsePluginInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.plugin.PluginCreateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.plugin.PluginInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.op.manager.ComponentGroupConfigWithHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.software.PackageVersionVO;
@@ -16,6 +20,8 @@ import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleTh
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.plugin.PluginInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClusterService;
@@ -29,16 +35,19 @@ import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHos
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -60,13 +69,17 @@ public class PluginManagerImpl implements PluginManager {
 		@Autowired
 		private              ESClusterNodeService          esClusterNodeService;
 		@Autowired
-		private              AriusScheduleThreadPool       ariusScheduleThreadPool;
+		private AriusScheduleThreadPool ariusScheduleThreadPool;
 		@Autowired
-		private GatewayClusterService gatewayClusterService;
+		private GatewayClusterService   gatewayClusterService;
 		@Autowired
-		private ComponentService componentService;
+		private ComponentService        componentService;
 		@Autowired
-		private PackageService packageService;
+		private PackageService          packageService;
+		@Autowired
+		private ClusterRoleService      clusterRoleService;
+		@Autowired
+		private ClusterRoleHostService  clusterRoleHostService;
 		/**
 		 * 插件列表的缓存:ES 集群维度
 		 */
@@ -96,6 +109,7 @@ public class PluginManagerImpl implements PluginManager {
 				}
 				List<PluginInfoPO> pluginList = pluginInfoService.listByClusterId(clusterPhyId,
 						PluginClusterTypeEnum.ES);
+				final Integer dependComponentId = clusterPhyService.getComponentIdById(clusterPhyId);
 				
 				final List<Integer> componentIds = pluginList.stream().map(PluginInfoPO::getComponentId).filter(Objects::nonNull)
 								.distinct().collect(Collectors.toList());
@@ -110,12 +124,14 @@ public class PluginManagerImpl implements PluginManager {
 				final Result<List<PluginVO>> listResult = listESKernelPluginCache(cluster.getCluster());
 				final List<PluginVO>         list       = ConvertUtil.list2List(pluginList, PluginVO.class);
 				list.addAll(listResult.getData());
+				
 				// 设置配置信息
 				for (PluginVO pluginVO : list) {
 						if (Objects.nonNull(pluginVO.getComponentId()) && pluginVO.getComponentId() > 0) {
 							
 								final Component component = id2ComponentMap.get(pluginVO.getComponentId());
 								if (component == null) {
+										
 										// 如果组件为 null，则默认给未知
 										pluginVO.setStatus(PluginHealthEnum.UNKNOWN.getCode());
 								} else {
@@ -132,11 +148,18 @@ public class PluginManagerImpl implements PluginManager {
 												// 获取对应的配置项
 												final List<ComponentGroupConfig> groupConfigList = componentDepend.getGroupConfigList();
 												// 排序后获取最新的配置项为正在使用的配置项：ecm 规定
-												groupConfigList.stream().max(Comparator.comparing(i -> Integer.parseInt(i.getVersion()))).map(
+												groupConfigList.stream().
+														max(Comparator.comparing(i -> Integer.parseInt(i.getVersion()))).map(
 																componentGroupConfig -> ConvertUtil.obj2Obj(componentGroupConfig,
 																                                            ComponentGroupConfigWithHostVO.class, i -> {
-																						i.setComponentHosts(component.getHostList());
-																						i.setPackageId(component.getPackageId());
+																				final List<ComponentHost> hosts = componentDepend.getHostList()
+																						.stream().filter(
+																								host -> StringUtils.equals(host.getGroupName(),
+																										i.getGroupName())).collect(Collectors.toList());
+																				i.setComponentHosts(hosts);
+																				i.setPackageId(component.getPackageId());
+																				i.setComponentId(pluginVO.getComponentId());
+																				i.setDependComponentId(dependComponentId);
 																						
 																				})).map(
 																Collections::singletonList).ifPresent(pluginVO::setComponentGroupConfigs);
@@ -147,8 +170,15 @@ public class PluginManagerImpl implements PluginManager {
 																Comparator.comparing(i -> Integer.parseInt(i.getVersion()))).map(
 																componentGroupConfig -> ConvertUtil.obj2Obj(componentGroupConfig,
 																                                            ComponentGroupConfigWithHostVO.class, i -> {
-																						i.setComponentHosts(component.getHostList());
-																						i.setPackageId(component.getPackageId());
+																				final List<ComponentHost> hosts = component.getHostList()
+																						.stream().filter(host ->
+																								StringUtils.equals(host.getGroupName(),
+																										i.getGroupName()))
+																						.collect(Collectors.toList());
+																				i.setComponentHosts(hosts);
+																				i.setPackageId(component.getPackageId());
+																				i.setComponentId(pluginVO.getComponentId());
+																				i.setDependComponentId(dependComponentId);
 																						
 																				})).map(Collections::singletonList).ifPresent(
 																pluginVO::setComponentGroupConfigs);
@@ -226,8 +256,87 @@ public class PluginManagerImpl implements PluginManager {
 			List<Package> listPackage = listPackageByPackageType.stream().filter(aPackage -> ESVersionUtil.compareVersion(aPackage.getVersion(), currentVersion) < 0).collect(Collectors.toList());
 			return Result.buildSucc(ConvertUtil.list2List(listPackage,PackageVersionVO.class));
 		}
-
-	/******************************************private***********************************************/
+		
+		@Override
+		public Result<PluginVO> getClusterByComponentId(Integer componentId,
+				PluginClusterTypeEnum typeEnum) {
+				PluginInfoPO pluginPO = pluginInfoService.getOneByComponentId(componentId, typeEnum);
+				return Result.buildSucc(ConvertUtil.obj2Obj(pluginPO, PluginVO.class));
+		}
+		
+		@Override
+		public Result<List<ComponentGroupConfigWithHostVO>> getConfigsByPluginId(Long pluginId) {
+				final PluginInfoPO pluginById = pluginInfoService.getPluginById(pluginId);
+				final Integer      componentId = pluginById.getComponentId();
+				final Integer      clusterId = pluginById.getClusterId();
+				final Integer      dependComponentId = clusterPhyService.getComponentIdById(clusterId);
+				if (Objects.isNull(pluginById) || Objects.isNull(componentId)
+						|| componentId <= 0) {
+						return Result.buildSucc(Collections.emptyList());
+				}
+				
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Component> componentRes = componentService.queryComponentById(
+						componentId);
+				final Component component = componentRes.getData();
+				if (Objects.isNull(component) ) {
+						return Result.buildSucc(Collections.emptyList());
+				}
+				final com.didiglobal.logi.op.manager.infrastructure.common.Result<List<ComponentGroupConfig>> componentConfigRes = componentService.getComponentConfig(
+						componentId);
+				
+				final List<ComponentGroupConfig> componentGroupConfigs = componentConfigRes.getData();
+				final List<ComponentGroupConfigWithHostVO> hostVOS = ConvertUtil.list2List(
+						componentGroupConfigs, ComponentGroupConfigWithHostVO.class);
+				// 获取依赖的配置 ID
+				List<ComponentHost> hostList          =component.getHostList();
+				if (component.getDependConfigComponentId() != null) {
+						hostList =
+								componentService.queryComponentHostById(component.getDependConfigComponentId())
+										.getData();
+				}
+				final Map<String, List<ComponentHost>> groupName2HostLists = com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil.list2MapOfList(
+						hostList,
+						ComponentHost::getGroupName, i -> i);
+				 List<ClusterRoleInfo> clusterRoleInfos =
+						 clusterRoleService.getAllRoleClusterByClusterId(pluginById.getClusterId());
+				 List<ESClusterRoleVO> roleClusters = ConvertUtil.list2List(clusterRoleInfos, ESClusterRoleVO.class);
+				List<Long> roleClusterIds = Optional.ofNullable(roleClusters).orElse(Collections.emptyList()).stream()
+						.map(ESClusterRoleVO::getId).collect(Collectors.toList());
+				Map<Long, List<ClusterRoleHost>> roleIdsMap = clusterRoleHostService.getByRoleClusterIds(
+						roleClusterIds);
+				final List<ClusterRoleHost> clusterRoleHosts = roleIdsMap.values().stream()
+						.filter(Objects::nonNull)
+						.flatMap(Collection::stream).collect(Collectors.toList());
+				final List<ESClusterRoleHostVO> esClusterRoleHostVOS = ConvertUtil.list2List(
+						clusterRoleHosts, ESClusterRoleHostVO.class);
+				final Map<String, List<ESClusterRoleHostVO>> ip2VOSMap = ConvertUtil.list2MapOfList(
+						esClusterRoleHostVOS, ESClusterRoleHostVO::getIp, i -> i);
+				
+				for (ComponentGroupConfigWithHostVO hostVO : hostVOS) {
+						final String              groupName      = hostVO.getGroupName();
+						
+						final List<ComponentHost> componentHosts = groupName2HostLists.get(groupName);
+						hostVO.setComponentHosts(componentHosts);
+						hostVO.setComponentId(componentId);
+						hostVO.setDependComponentId(dependComponentId);
+						hostVO.setPackageId(component.getPackageId());
+						if (PluginInfoTypeEnum.ENGINE.equals(PluginInfoTypeEnum.find(pluginById.getPluginType()))){
+								final List<ESClusterRoleHostVO> clusterRoleHostVOS = Optional.ofNullable(componentHosts)
+										.orElse(Collections.emptyList())
+										.stream()
+										.filter(i -> ip2VOSMap.containsKey(i.getHost()))
+										.map(i -> ip2VOSMap.get(i.getHost()))
+										.filter(Objects::nonNull)
+										.flatMap(Collection::stream)
+										.distinct()
+										.collect(Collectors.toList());
+								hostVO.setEsClusterRoles(clusterRoleHostVOS);
+						}
+				}
+				return Result.buildSucc(hostVOS);
+		}
+		
+		/******************************************private***********************************************/
 		private void refreshClusterPhyPluginInfo() {
 				for (String clusterName : clusterPhyService.listClusterNames()) {
 						try {

@@ -631,20 +631,26 @@ create table gateway_cluster_info
 -- ----------------------------
 -- Table structure for gateway_cluster_node_info
 -- ----------------------------
-CREATE TABLE `gateway_cluster_node_info`
+CREATE TABLE gateway_cluster_node_info
 (
-    `id`             bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键 自增',
-    `cluster_name`   varchar(50)         NOT NULL DEFAULT '' COMMENT ' 集群名称 ',
-    `host_name`      varchar(50)         NOT NULL DEFAULT '' COMMENT ' 主机名 ',
-    `port`           int(10)             NOT NULL DEFAULT '-1' COMMENT '端口',
-    `heartbeat_time` timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '心跳时间',
-    `create_time`    timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`    timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uniq_ip_port` (`host_name`, `port`)
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 490264
-  DEFAULT CHARSET = utf8 COMMENT ='gateway 节点信息';
+    id                  BIGINT UNSIGNED AUTO_INCREMENT COMMENT '主键 自增'
+        PRIMARY KEY,
+    cluster_name        VARCHAR(50)  DEFAULT ''                NOT NULL COMMENT ' 集群名称 ',
+    host_name           VARCHAR(50)  DEFAULT ''                NOT NULL COMMENT ' 主机名 ',
+    port                INT(10)      DEFAULT -1                NOT NULL COMMENT '端口',
+    heartbeat_time      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '心跳时间',
+    create_time         TIMESTAMP    DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
+    update_time         TIMESTAMP    DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    node_name           VARCHAR(50)  DEFAULT ''                NULL COMMENT '节点名称',
+    machine_spec        VARCHAR(255) DEFAULT ''                NULL COMMENT '机器规格
+',
+    cpu_usage           DOUBLE                                 NULL COMMENT 'cpu使用率
+',
+    http_connection_num BIGINT                                 NULL COMMENT 'http连接数',
+    CONSTRAINT uniq_ip_port
+        UNIQUE (host_name, port)
+)
+    COMMENT 'gateway 节点信息' CHARSET = utf8;
 
 -- ----------------------------
 -- Table structure for index_template_alias
@@ -2015,14 +2021,15 @@ CREATE TABLE logi_op_component_host
     host         VARCHAR(11)  DEFAULT '' NOT NULL COMMENT '主机',
     component_id INT                     NOT NULL COMMENT '关联组件id',
     status       INT                     NULL COMMENT '状态（在线或离线）',
-    group_name   VARCHAR(11)             NULL COMMENT '分组名',
+    group_name   VARCHAR(50)             NULL COMMENT '分组名',
     process_num  INT                     NULL COMMENT '进程数',
     is_deleted   INT                     NULL COMMENT '是否卸载',
     create_time  TIMESTAMP               NULL COMMENT '创建时间',
     update_time  TIMESTAMP               NULL COMMENT '更新时间',
-    machine_spec VARCHAR(255) DEFAULT '' NULL COMMENT '机器规格'
-)
-    CHARSET = utf8mb4;
+    machine_spec VARCHAR(255) DEFAULT '' NULL COMMENT '机器规格',
+    CONSTRAINT logi_op_component_host_pk
+        UNIQUE (host, component_id, group_name)
+);
 -- auto-generated definition
 CREATE TABLE logi_op_package
 (
@@ -2187,8 +2194,6 @@ values (5601, 1, 1883, '2022-12-21 15:08:22', '2022-12-21 15:10:32', 0, 'know_se
        (5657, 2, 1909, '2022-12-21 15:08:22', '2022-12-21 15:10:32', 0, 'know_search'),
        (5659, 2, 1911, '2022-12-21 15:08:22', '2022-12-21 15:10:32', 0, 'know_search');
 
-ALTER TABLE gateway_cluster_node_info
-    ADD machine_spec VARCHAR(255) DEFAULT '' NULL COMMENT '机器规格\n';
 
 -- auto-generated definition
 create table fast_index_task_info
@@ -2231,4 +2236,3 @@ create index idx_scheduled_task_start_time
 
 create index idx_task_id
     on fast_index_task_info (task_id);
-

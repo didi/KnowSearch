@@ -8,6 +8,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterCr
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterTag;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterCreateSourceEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
@@ -19,11 +21,14 @@ import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -39,7 +44,7 @@ public class ESClusterCreateTaskHandler extends AbstractESTaskHandler {
 		@Override
 		protected Result<Void> validatedAddTaskParam(OpTask param) {
 				final ClusterCreateContent content = convertString2Content(param.getExpandData());
-				if (StringUtils.isBlank(content.getClusterType())) {
+				if (Objects.isNull(content.getClusterType())) {
 						return Result.buildFail("ES集群类型不可为空");
 				}
 				// 校验 port 的正确性
@@ -60,6 +65,13 @@ public class ESClusterCreateTaskHandler extends AbstractESTaskHandler {
 				if (CollectionUtils.isEmpty(content.getDefaultGroupNames())) {
 						return Result.buildFail("默认的配置组名称未进行选择");
 				}
+				final List<String> groupNames = groupConfigList.stream()
+						.map(GeneralGroupConfigDTO::getGroupName).distinct().collect(
+								Collectors.toList());
+				if (!new HashSet<>(groupNames).containsAll(content.getDefaultGroupNames())) {
+						return Result.buildFail("默认的配置组名称未匹配到");
+				}
+				
 				return Result.buildSucc();
 		}
 		
@@ -90,8 +102,15 @@ public class ESClusterCreateTaskHandler extends AbstractESTaskHandler {
 		}
 		
 		@Override
-		protected OperateRecord recordCurrentOperationTasks(String expandData) {
-				return new OperateRecord();
+		protected OperateRecord recordCurrentOperationTasks(OpTask opTask) {
+				final ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
+						AuthConstant.SUPER_PROJECT_ID);
+				return new OperateRecord.Builder()
+						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_NEW)
+						.content(convertString2Content(opTask.getExpandData()).getName())
+						.project(briefVO)
+						.userOperation(opTask.getCreator())
+						.build();
 		}
 		
 		@Override
@@ -120,9 +139,12 @@ public class ESClusterCreateTaskHandler extends AbstractESTaskHandler {
 				final Map<String, GeneralGroupConfigDTO> groupName2GroupConfigDTOMap = ConvertUtil.list2Map(
 						content.getGroupConfigList(), GeneralGroupConfigDTO::getGroupName);
 				//2.获取指定的配置
-				final List<GeneralGroupConfigDTO> configDTOS = content.getDefaultGroupNames().stream()
+				List<GeneralGroupConfigDTO> configDTOS = content.getDefaultGroupNames().stream()
 						.map(groupName2GroupConfigDTOMap::get).collect(
 								Collectors.toList());
+				if (CollectionUtils.isEmpty(configDTOS)) {
+						configDTOS = Collections.singletonList(content.getGroupConfigList().get(0));
+				}
 				//3.获取指定配置的ip和端口号
 				final List<TupleTwo<String, Integer>> ip2PortTuples = convertFGeneralGroupConfigDTO2IpAndPortTuple(
 								configDTOS);
@@ -143,8 +165,11 @@ public class ESClusterCreateTaskHandler extends AbstractESTaskHandler {
 				return ClusterCreateDTO.builder().type(ESClusterTypeEnum.ES_HOST.getCode()).cluster(content.getName())
 								.esVersion(pac.getVersion()).roleClusterHosts(nodes).password(
 												String.format("%s:%s", content.getUsername(), content.getPassword())).tags(JSON.toJSONString(clusterTag)).dataCenter(
-												content.getDataCenter()).componentId(component.getId()).clusterType(content.getClusterType())
-								.ecmAccess(Boolean.TRUE)
+								content.getDataCenter()).componentId(component.getId())
+						.ecmAccess(Boolean.TRUE)
+						.proxyAddress(content.getProxyAddress())
+						.resourceType(content.getClusterType())
+						.platformType(content.getPlatformType()).phyClusterDesc(content.getMemo())
 								.build();
 		}
 		

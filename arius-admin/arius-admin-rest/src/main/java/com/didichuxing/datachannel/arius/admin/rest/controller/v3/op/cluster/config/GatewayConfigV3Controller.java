@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.ConfigConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.op.manager.ComponentGroupConfigWithHostVO;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.interfaces.vo.ComponentGroupConfigVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -65,4 +66,13 @@ public class GatewayConfigV3Controller {
     }
     
     
+    @GetMapping("/{gatewayClusterId}/{configId}/rollback")
+    @ResponseBody
+    @ApiOperation(value = "根据 gatewayClusterId 和configId获取可以回滚的配置信息", tags = "")
+    public Result<List<ComponentGroupConfig>> getRollbackConfigsByClusterPhyId(
+        HttpServletRequest request,
+        @PathVariable("gatewayClusterId") Integer gatewayClusterId,
+        @PathVariable("configId") Integer configId) {
+        return gatewayClusterConfigManager.getRollbackConfigsByClusterPhyId(gatewayClusterId, configId);
+    }
 }

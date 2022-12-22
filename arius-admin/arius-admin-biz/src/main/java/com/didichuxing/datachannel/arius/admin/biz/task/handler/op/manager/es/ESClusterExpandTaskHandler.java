@@ -2,16 +2,19 @@ package com.didichuxing.datachannel.arius.admin.biz.task.handler.op.manager.es;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterExpandContent;
-import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.gateway.GatewayExpandContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
+import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -67,13 +70,27 @@ public class ESClusterExpandTaskHandler extends AbstractESTaskHandler {
 		}
 		
 		@Override
-		protected OperateRecord recordCurrentOperationTasks(String expandData) {
-				return new OperateRecord();
+		protected OperateRecord recordCurrentOperationTasks(OpTask opTask) {
+				final ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
+						AuthConstant.SUPER_PROJECT_ID);
+				final ClusterExpandContent content = convertString2Content(
+						opTask.getExpandData());
+				final String name = componentService.queryComponentNameById(content.getComponentId())
+						.getData();
+				final String hosts = content.getGroupConfigList().stream()
+						.map(GeneralGroupConfigDTO::getHosts)
+						.distinct()
+						.collect(Collectors.joining(","));
+				return new OperateRecord.Builder()
+						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_CAPACITY)
+						.content(String.format("集群：【%s】，扩容：【%s】", name, hosts))
+						.project(briefVO)
+						.userOperation(opTask.getCreator())
+						.build();
 		}
 		
 		protected String getName(String expandData) {
-				final GatewayExpandContent gatewayExpandContent = JSON.parseObject(expandData,
-						GatewayExpandContent.class);
+				final ClusterExpandContent gatewayExpandContent = convertString2Content(expandData);
 				return componentService.queryComponentNameById(gatewayExpandContent.getComponentId()).getData();
 		}
 		

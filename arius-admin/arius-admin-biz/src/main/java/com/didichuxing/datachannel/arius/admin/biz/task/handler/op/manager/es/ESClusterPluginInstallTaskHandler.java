@@ -6,13 +6,19 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.plugin.PluginCreateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginInfoTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.didiglobal.logi.op.manager.interfaces.assembler.ComponentAssembler;
+import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -38,6 +44,11 @@ public class ESClusterPluginInstallTaskHandler extends AbstractESTaskHandler {
 				if (Objects.isNull(content.getPackageId())) {
 						return Result.buildFail("组建包 ID 不可为空");
 				}
+				if (!content.getGroupConfigList().stream().map(GeneralGroupConfigDTO::getHosts).allMatch(
+						StringUtils::isNotEmpty)){
+						return Result.buildFail("hosts列表不可为空");
+				}
+				
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<String> stringResult = componentService.queryComponentNameById(
 						content.getDependComponentId());
 				if (stringResult.failed()) {
@@ -87,8 +98,24 @@ public class ESClusterPluginInstallTaskHandler extends AbstractESTaskHandler {
 		}
 		
 		@Override
-		protected OperateRecord recordCurrentOperationTasks(String expandData) {
-				return new OperateRecord();
+		protected OperateRecord recordCurrentOperationTasks(OpTask opTask) {
+				final ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
+						AuthConstant.SUPER_PROJECT_ID);
+				final ClusterPluginInstallContent content = convertString2Content(
+						opTask.getExpandData());
+				
+				final Integer dependComponentId = content.getDependComponentId();
+				final ClusterPhyVO clusterPhyVO = clusterPhyManager.getOneByComponentId(
+						dependComponentId).getData();
+				
+				return new OperateRecord.Builder()
+						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_PLUGIN_INSTALL)
+						.content(String.format("集群：【%s】安装【%s】：【%s】", clusterPhyVO.getCluster(),
+								PluginInfoTypeEnum.find(content.getPluginType()).getDesc(), content.getName()))
+						.project(briefVO)
+						.bizId(clusterPhyVO.getId())
+						.userOperation(opTask.getCreator())
+						.build();
 		}
 		
 		@Override

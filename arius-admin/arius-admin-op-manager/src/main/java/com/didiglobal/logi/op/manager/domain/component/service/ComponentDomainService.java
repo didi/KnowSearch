@@ -222,4 +222,6 @@ public interface ComponentDomainService {
      * @return 一个组件对象。
      */
     Result<Component> queryComponentById(Integer componentId);
+    
+    Result<Boolean> checkComponent(Integer componentId);
 }

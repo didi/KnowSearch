@@ -32,9 +32,10 @@ public interface GatewayClusterManager {
      *
      * @param param     加入集群所需的参数。
      * @param projectId 项目id
+     * @param operator
      * @return 网关集群VO
      */
-    Result<GatewayClusterVO> join(GatewayClusterJoinDTO param, Integer projectId);
+    Result<GatewayClusterVO> join(GatewayClusterJoinDTO param, Integer projectId, String operator);
     
     /**
      * 按页面获取网关集群列表
@@ -59,9 +60,10 @@ public interface GatewayClusterManager {
      *
      * @param gatewayClusterId 要删除的网关集群的ID。
      * @param projectId
+     * @param operator
      * @return 一个 CompletableFuture<Void>
      */
-    Result<Void> deleteById(Integer gatewayClusterId, Integer projectId);
+    Result<Void> deleteById(Integer gatewayClusterId, Integer projectId, String operator);
     
     /**
      * 编辑一个网关集群
@@ -98,6 +100,14 @@ public interface GatewayClusterManager {
 		 * @return 包含字符串的结果对象。
 		 */
 		Result<String> getNameByComponentId(Integer componentId) ;
+		
+		/**
+		 * 获取一个通过组件id
+		 *
+		 * @param componentId 组件id
+		 * @return {@link Result}<{@link String}>
+		 */
+		Result<GatewayClusterVO> getOneByComponentId(Integer componentId) ;
 		
 		/**
 		 * 扩展集群中的节点

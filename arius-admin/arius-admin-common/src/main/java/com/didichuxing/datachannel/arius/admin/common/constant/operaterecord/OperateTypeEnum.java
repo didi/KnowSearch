@@ -1,12 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.operaterecord;
 
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 
 /**
  * 操作类型枚举
@@ -224,7 +223,29 @@ public enum OperateTypeEnum {
 
     PHYSICAL_CLUSTER_FAST_INDEX(ModuleEnum.PHYSICAL_CLUSTER, "数据迁移", 63),
 
-    TEMPLATE_MANAGEMENT_TRANSFER(ModuleEnum.TEMPLATE_MANAGEMENT, "模版转让", 64);
+    TEMPLATE_MANAGEMENT_TRANSFER(ModuleEnum.TEMPLATE_MANAGEMENT, "模版转让", 64),
+    GATEWAY_JOIN(ModuleEnum.GATEWAY,"Gateway集群接入",70),
+    GATEWAY_CREATE(ModuleEnum.GATEWAY,"Gateway集群新建",71),
+    GATEWAY_OFFLINE(ModuleEnum.GATEWAY,"Gateway集群下线",72),
+    GATEWAY_EXPAND(ModuleEnum.GATEWAY,"Gateway集群扩容",73),
+    GATEWAY_SHRINK(ModuleEnum.GATEWAY,"Gateway集群缩容",74),
+    GATEWAY_RESTART(ModuleEnum.GATEWAY,"Gateway集群重启",75),
+    GATEWAY_INFO_EDIT(ModuleEnum.GATEWAY,"Gateway集群信息修改",76),
+    GATEWAY_UPGRADE(ModuleEnum.GATEWAY,"Gateway集群升级",77),
+    GATEWAY_CONFIG_EDIT(ModuleEnum.GATEWAY,"Gateway配置文件变更",78),
+    GATEWAY_CONFIG_EDIT_ROLLBACK(ModuleEnum.GATEWAY,"Gateway配置文件回滚",79),
+    GATEWAY_ROLLBACK(ModuleEnum.GATEWAY,"Gateway升级回滚",80),
+    PHYSICAL_CLUSTER_CONF_CHANGE(ModuleEnum.PHYSICAL_CLUSTER, "配置变更", 81),
+    PHYSICAL_CLUSTER_CONF_CHANGE_ROLLBACK(ModuleEnum.PHYSICAL_CLUSTER, "配置变更回滚", 82),
+    PHYSICAL_CLUSTER_PLUGIN_INSTALL(ModuleEnum.PHYSICAL_CLUSTER, "集群插件安装", 83),
+    PHYSICAL_CLUSTER_PLUGIN_RESTART(ModuleEnum.PHYSICAL_CLUSTER, "集群插件重启", 84),
+    PHYSICAL_CLUSTER_PLUGIN_ROLLBACK(ModuleEnum.PHYSICAL_CLUSTER, "集群插件回滚", 85),
+    PHYSICAL_CLUSTER_PLUGIN_UNINSTALL(ModuleEnum.PHYSICAL_CLUSTER, "集群插件卸载", 86),
+    PHYSICAL_CLUSTER_ROLLBACK(ModuleEnum.PHYSICAL_CLUSTER, "集群升级回滚", 87),
+    PHYSICAL_CLUSTER_PLUGIN_UPGRADE(ModuleEnum.PHYSICAL_CLUSTER, "集群插件升级", 88),
+     PHYSICAL_CLUSTER_PLUGIN_CONFIG(ModuleEnum.PHYSICAL_CLUSTER, "集群平台插件配置变更", 89),
+     PHYSICAL_CLUSTER_PLUGIN_CONFIG_ROLLBACK(ModuleEnum.PHYSICAL_CLUSTER, "集群平台插件配置回滚", 90),
+    ;
 
     /**
      * 模块

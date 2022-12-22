@@ -72,4 +72,21 @@ public interface PluginInfoService {
 		 * @return {@link PluginInfoPO}
 		 */
 		PluginInfoPO selectByCondition(PluginInfoPO pluginInfoPO);
+		
+		/**
+		 * 删除由ids
+		 *
+		 * @param pluginIds 插件id
+		 * @return {@link Boolean}
+		 */
+		Boolean deleteByIds(List<Long> pluginIds);
+		
+		/**
+		 * 获取一个通过组件id
+		 *
+		 * @param componentId 组件id
+		 * @param typeEnum    枚举类型
+		 * @return {@link PluginInfoPO}
+		 */
+		PluginInfoPO getOneByComponentId(Integer componentId, PluginClusterTypeEnum typeEnum);
 }

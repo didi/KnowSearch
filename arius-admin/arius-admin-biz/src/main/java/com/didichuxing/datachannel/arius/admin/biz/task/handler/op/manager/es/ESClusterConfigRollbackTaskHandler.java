@@ -5,9 +5,12 @@ import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterCon
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -67,8 +70,22 @@ public class ESClusterConfigRollbackTaskHandler extends AbstractESTaskHandler {
 		}
 		
 		@Override
-		protected OperateRecord recordCurrentOperationTasks(String expandData) {
-				return new OperateRecord();
+		protected OperateRecord recordCurrentOperationTasks(OpTask opTask) {
+				final ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
+						AuthConstant.SUPER_PROJECT_ID);
+				final ClusterConfigRollbackContent content = convertString2Content(
+						opTask.getExpandData());
+				final com.didiglobal.logi.op.manager.domain.component.entity.Component component = componentService.queryComponentById(
+								content.getComponentId())
+						.getData();
+				return new OperateRecord.Builder()
+						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_PLUGIN_ROLLBACK)
+						.content(
+								String.format("%s 配置回滚：回滚任务 ID：【%s】", component.getName(),
+										content.getTaskId()))
+						.project(briefVO)
+						.userOperation(opTask.getCreator())
+						.build();
 		}
 		@Override
 		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {

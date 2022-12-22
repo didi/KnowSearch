@@ -9,11 +9,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNo
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.GatewayHealthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -80,8 +82,15 @@ public class GatewayCreateTaskHandler extends AbstractGatewayTaskHandler {
 		}
 		
 		@Override
-		protected OperateRecord recordCurrentOperationTasks(String expandData) {
-				return new OperateRecord();
+		protected OperateRecord recordCurrentOperationTasks(OpTask opTask) {
+				final ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
+						AuthConstant.SUPER_PROJECT_ID);
+				return new OperateRecord.Builder()
+						.operationTypeEnum(OperateTypeEnum.GATEWAY_CREATE)
+						.content(convertString2Content(opTask.getExpandData()).getName())
+						.project(briefVO)
+						.userOperation(opTask.getCreator())
+						.build();
 		}
 		
 		@Override
@@ -129,6 +138,7 @@ public class GatewayCreateTaskHandler extends AbstractGatewayTaskHandler {
 						.memo(gatewayCreateContent.getMemo())
 						.componentId(component.getId())
 						.version(pack.getVersion())
+						
 						.proxyAddress(gatewayCreateContent.getProxyAddress())
 						.dataCenter(gatewayCreateContent.getProxyAddress())
 						.nodes(nodes)

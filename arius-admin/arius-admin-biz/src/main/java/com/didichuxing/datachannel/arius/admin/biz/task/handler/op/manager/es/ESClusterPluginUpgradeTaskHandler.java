@@ -5,12 +5,16 @@ import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterPlu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginClusterTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.stereotype.Component;
@@ -96,8 +100,32 @@ public class ESClusterPluginUpgradeTaskHandler extends AbstractESTaskHandler {
 		}
 		
 		@Override
-		protected OperateRecord recordCurrentOperationTasks(String expandData) {
-				return new OperateRecord();
+		protected OperateRecord recordCurrentOperationTasks(OpTask opTask) {
+				final ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
+						AuthConstant.SUPER_PROJECT_ID);
+				final ClusterPluginUpgradeContent content = convertString2Content(
+						opTask.getExpandData());
+				
+				final Integer dependComponentId = content.getDependComponentId();
+				final com.didiglobal.logi.op.manager.domain.component.entity.Component component = componentService.queryComponentById(
+								dependComponentId)
+						.getData();
+				final ClusterPhyVO clusterPhyVO = clusterPhyManager.getOneByComponentId(
+						dependComponentId).getData();
+				final Integer packageId = component.getPackageId();
+				final String beforeVersion = packageService.getPackageById(packageId.longValue()).getData()
+						.getVersion();
+				final String afterVersion =
+						packageService.getPackageById(content.getPackageId().longValue()).getData()
+								.getVersion();
+				return new OperateRecord.Builder()
+						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_PLUGIN_UPGRADE)
+						.content(String.format("集群：【%s】插件【%s】升级:【%s->%s】", clusterPhyVO.getCluster(),
+								component.getName(), beforeVersion, afterVersion))
+						.project(briefVO)
+						.bizId(clusterPhyVO.getId())
+						.userOperation(opTask.getCreator())
+						.build();
 		}
 		
 		@Override

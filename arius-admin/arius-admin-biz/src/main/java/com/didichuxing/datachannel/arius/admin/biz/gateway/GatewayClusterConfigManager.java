@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.ConfigConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.op.manager.ComponentGroupConfigWithHostVO;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.interfaces.vo.ComponentGroupConfigVO;
 import java.util.List;
 
@@ -43,4 +44,13 @@ public interface GatewayClusterConfigManager {
 		 * @return ComponentGroupConfigVO 列表
 		 */
 		Result<List<ComponentGroupConfigWithHostVO>> getConfigsByGatewayId(Integer gatewayClusterId);
+		
+		/**
+		 * 获取回滚配置通过集群体育id
+		 *
+		 * @param gatewayClusterId 集群id
+		 * @param configId  配置id
+		 * @return {@link Result}<{@link List}<{@link ComponentGroupConfig}>>
+		 */
+		Result<List<ComponentGroupConfig>> getRollbackConfigsByClusterPhyId(Integer gatewayClusterId, Integer configId);
 }

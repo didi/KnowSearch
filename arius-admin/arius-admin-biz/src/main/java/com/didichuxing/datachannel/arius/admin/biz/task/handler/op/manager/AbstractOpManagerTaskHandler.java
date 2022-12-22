@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.OpTaskPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -38,6 +39,7 @@ import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralRestartCompo
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralRollbackComponentDTO;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralScaleComponentDTO;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralUpgradeComponentDTO;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.Date;
@@ -72,6 +74,8 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		protected PackageService       packageService;
 		@Autowired
 		protected PluginManager        pluginManager;
+		@Autowired
+		protected ProjectService       projectService;
 		
 		
 		@Override
@@ -90,7 +94,6 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 				final Result<Integer> submitTaskToOpManagerGetIdRes = submitTaskToOpManagerGetId(opTask.getExpandData());
 				if (submitTaskToOpManagerGetIdRes.failed()) {
 						if (ResultCode.TASK_REPEAT_ERROR.getCode().equals(submitTaskToOpManagerGetIdRes.getCode())) {
-								String title = getTitle(opTask.getExpandData());
 								//获取返回结果报错的key
 								final Pattern compile = compile(PATTERN);
 								final Matcher matcher = compile.matcher(submitTaskToOpManagerGetIdRes.getMessage());
@@ -118,8 +121,9 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 				opTask.setDeleteFlag(false);
 				final boolean insert = opTaskService.insert(opTask);
 				if (insert) {
-						final OperateRecord operateRecord = recordCurrentOperationTasks(opTask.getExpandData());
-						//operateRecordService.save(operateRecord);
+						final OperateRecord operateRecord = recordCurrentOperationTasks(opTask);
+						operateRecord.setTriggerWayId(TriggerWayEnum.MANUAL_TRIGGER.getCode());
+						operateRecordService.save(operateRecord);
 				}
 				
 				return Result.buildSucc(opTask);
@@ -145,7 +149,7 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 					String expandDataNew = settingTaskStatus(expandData, afterSuccessTaskExecutionRes);
 					if (afterSuccessTaskExecutionRes.failed()) {
 							// 如果后置操作失败，那么暂停任务即可
-							opTask.setStatus(OpTaskStatusEnum.PAUSE.getStatus());
+							opTask.setStatus(OpTaskStatusEnum.RUNNING.getStatus());
 					}
 				opTask.setExpandData(expandDataNew);
 			}
@@ -269,10 +273,10 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		/**
 		 * > 记录当前的操作任务
 		 *
-		 * @param expandData 需要记录的数据，比如用户当前操作，用户当前操作，用户当前操作，用户当前操作，用户当前操作，用户当前操作 user，用户当前的操作，
+		 * @param opTask 需要记录的数据，比如用户当前操作，用户当前操作，用户当前操作，用户当前操作，用户当前操作，用户当前操作 user，用户当前的操作，
 		 * @return 一个 OperateRecord 对象。
 		 */
-		protected abstract OperateRecord recordCurrentOperationTasks(String expandData);
+		protected abstract OperateRecord recordCurrentOperationTasks(OpTask opTask);
 		
 		
 		/**
@@ -282,8 +286,7 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 * @return 结果对象。
 		 */
 		protected Result<Integer> install(String expandData) {
-				final GeneraInstallComponentDTO dto =
-						(GeneraInstallComponentDTO) convertString2Content(expandData);
+				final GeneraInstallComponentDTO dto = convertString2Content(expandData);
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
 						componentService.installComponent(
 								ComponentAssembler.toInstallComponent(dto));
@@ -300,7 +303,7 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 		 * @return 结果对象。
 		 */
 		protected Result<Integer> expand(String expandData) {
-				final GeneralScaleComponentDTO dto = (GeneralScaleComponentDTO) convertString2Content(
+				final GeneralScaleComponentDTO dto = convertString2Content(
 						expandData);
 				dto.setType(OperationEnum.EXPAND.getType());
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> result =
@@ -488,20 +491,17 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 						return Result.buildFail("taskID 不存在，无法执行回滚任务");
 				}
 				// 判断 task 任务是否为集群升级
-				final Integer taskType = opTask.getTaskType();
-				if (!Objects.equals(OpTaskTypeEnum.valueOfType(taskType),
-						opTaskTypeEnum)) {
-						switch (opTaskTypeEnum) {
-								case ES_CLUSTER_UPGRADE:
-								case ES_CLUSTER_PLUG_UPGRADE:
-								case GATEWAY_UPGRADE:
-										return Result.buildFail("只支持升级类型的回滚任务");
-								case ES_CLUSTER_CONFIG_EDIT:
-								case GATEWAY_CONFIG_EDIT:
-										return Result.buildFail("只支持配置变更的回滚任务");
-								default:
-										return Result.buildFail("当前操作类型不支持回滚任务");
-						}
+				final List<OpTaskTypeEnum> rollbackTypes = Lists.newArrayList(
+						OpTaskTypeEnum.ES_CLUSTER_UPGRADE,
+						OpTaskTypeEnum.ES_CLUSTER_PLUG_UPGRADE,
+						OpTaskTypeEnum.GATEWAY_UPGRADE,
+						OpTaskTypeEnum.ES_CLUSTER_CONFIG_EDIT,
+						OpTaskTypeEnum.ES_CLUSTER_PLUG_CONFIG_ROLLBACK,
+						OpTaskTypeEnum.GATEWAY_CONFIG_EDIT
+				);
+			
+				if (!rollbackTypes.contains(opTaskTypeEnum)) {
+						return Result.buildFail("只支持升级类型或者配置变更的回滚任务");
 				}
 				// 判断 task 任务是否存在
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Task> taskRes = taskService.getTaskById(
@@ -511,5 +511,8 @@ public abstract class AbstractOpManagerTaskHandler implements OpTaskHandler {
 				}
 				return Result.buildSucc();
 		}
+		
+	
+		
 		
 }

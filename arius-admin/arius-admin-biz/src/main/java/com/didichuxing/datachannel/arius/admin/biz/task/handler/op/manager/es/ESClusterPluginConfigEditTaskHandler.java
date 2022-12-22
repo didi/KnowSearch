@@ -1,12 +1,13 @@
-package com.didichuxing.datachannel.arius.admin.biz.task.handler.op.manager.gateway;
+package com.didichuxing.datachannel.arius.admin.biz.task.handler.op.manager.es;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.gateway.GatewayConfigContent;
+import com.didichuxing.datachannel.arius.admin.biz.task.op.manager.es.ClusterPluginConfigContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.ConfigOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginInfoTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -22,20 +23,23 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * 网关创建任务处理程序
+ * 网关配置编辑
  *
  * @author shizeying
- * @date 2022/11/08
+ * @date 2022/11/15
  * @since 0.3.2
  */
-@org.springframework.stereotype.Component("gatewayConfigEditTaskHandler")
-public class GatewayConfigEditTaskHandler extends AbstractGatewayTaskHandler {
+@org.springframework.stereotype.Component("esClusterPluginConfigEditTaskHandler")
+public class ESClusterPluginConfigEditTaskHandler extends AbstractESTaskHandler {
 		
 		@Override
 		protected Result<Void> validatedAddTaskParam(OpTask param) {
-				final GatewayConfigContent content = convertString2Content(param.getExpandData());
+				final ClusterPluginConfigContent content = convertString2Content(param.getExpandData());
 				if (Objects.isNull(content.getComponentId())) {
 						return Result.buildFail("组建 id 不能为空");
+				}
+				if (!PluginInfoTypeEnum.find(content.getPluginType()).equals(PluginInfoTypeEnum.PLATFORM)){
+						return Result.buildFail("只有平台插件支持配置变更");
 				}
 				// 校验 componentId 是否存在
 				final com.didiglobal.logi.op.manager.infrastructure.common.Result<Component> result =
@@ -76,12 +80,10 @@ public class GatewayConfigEditTaskHandler extends AbstractGatewayTaskHandler {
 				return Result.buildSucc();
 		}
 		
-	
-		
 		
 		@Override
 		protected OpTaskTypeEnum operationType() {
-				return OpTaskTypeEnum.GATEWAY_CONFIG_EDIT;
+				return OpTaskTypeEnum.ES_CLUSTER_PLUG_CONFIG;
 		}
 		
 		@Override
@@ -91,29 +93,25 @@ public class GatewayConfigEditTaskHandler extends AbstractGatewayTaskHandler {
 		
 		@Override
 		protected String getTitle(String expandData) {
-				final Integer componentId = convertString2Content(expandData).getComponentId();
-				final String name = componentService.queryComponentNameById(componentId)
-				                                    .getData();
-				return String.format("%s【%s】", operationType().getMessage(), name);
+				final ClusterPluginConfigContent content = convertString2Content(
+						expandData);
+				final Integer componentId = content.getComponentId();
+				final String  name        = componentService.queryComponentNameById(componentId).getData();
+				final String clusterName = componentService.queryComponentNameById(
+						content.getDependComponentId()).getData();
+				return String.format("集群【%s】-%s【%s】", clusterName, operationType().getMessage(), name);
 		}
 		
 		@Override
-		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
-				//TODO 后续考虑下如果端口号变更的情况，那么需要怎么做，这里需要补充更新到节点信息中
-				return Result.buildSucc();
-		}
-		
-		@Override
-		protected GatewayConfigContent convertString2Content(String expandData) {
-				return JSON.parseObject(expandData,
-						GatewayConfigContent.class);
+		protected ClusterPluginConfigContent convertString2Content(String expandData) {
+				return JSON.parseObject(expandData, ClusterPluginConfigContent.class);
 		}
 		
 		@Override
 		protected OperateRecord recordCurrentOperationTasks(OpTask opTask) {
-				final ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
+					final ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(
 						AuthConstant.SUPER_PROJECT_ID);
-				final GatewayConfigContent content = convertString2Content(
+				final ClusterPluginConfigContent content = convertString2Content(
 						opTask.getExpandData());
 				final Component component = componentService.queryComponentById(content.getComponentId())
 						.getData();
@@ -125,15 +123,20 @@ public class GatewayConfigEditTaskHandler extends AbstractGatewayTaskHandler {
 						.filter(i -> i.getGroupName().equals(target.getGroupName()))
 						.findFirst()
 						.map(i -> ConvertUtil.obj2Obj(i, GeneralGroupConfigDTO.class)).get();
-				final Integer id = gatewayClusterManager.getOneByComponentId(
-						content.getComponentId()).getData().getId();
+				final Integer id = clusterPhyManager.getIdByComponentId(
+						content.getComponentId()).getData();
 				return new OperateRecord.Builder()
-						.operationTypeEnum(OperateTypeEnum.GATEWAY_CONFIG_EDIT)
+						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_PLUGIN_CONFIG)
 						.content(new ConfigOperateRecord(component.getName(), source, target).toString())
 						.project(briefVO)
 						.bizId(id)
 						.userOperation(opTask.getCreator())
 						.build();
+		}
+		
+		@Override
+		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
+				return Result.buildSucc();
 		}
 		
 }

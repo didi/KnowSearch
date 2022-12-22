@@ -11,7 +11,10 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.GeneralGroupConfigDTO;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import lombok.NoArgsConstructor;
@@ -51,11 +54,12 @@ public abstract class AbstractESTaskHandler extends AbstractOpManagerTaskHandler
 		@Override
 		protected List<TupleTwo<String, Integer>> convertFGeneralGroupConfigDTO2IpAndPortTuple(
 				List<GeneralGroupConfigDTO> dtos) {
-				//TODO 实现抓换
-				return dtos.stream()
-								.map(i-> hostsConvertsIpAndPortList(i.getHosts(),getPortByHttpPort(getHttpPort(i.getFileConfig()))))
-								.flatMap(Collection::stream)
-								.collect(Collectors.toList());
+				return Optional.ofNullable(dtos).orElse(Collections.emptyList()).stream()
+						.map(i -> hostsConvertsIpAndPortList(i.getHosts(),
+								getPortByHttpPort(getHttpPort(i.getFileConfig()))))
+						.flatMap(Collection::stream)
+						.filter(Objects::nonNull)
+						.collect(Collectors.toList());
 		}
 		
 		/**
