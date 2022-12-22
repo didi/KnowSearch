@@ -133,7 +133,7 @@ public class StatLineOfMethodTest {
      * 从配置文件中取出规定的不能超过的标准行数赋值给standardLineOfMethod变量
      */
     private void initProperties() throws IOException {
-        String[] ymlPaths = { "arius-admin-rest", "target", "classes", "application.yml" };
+        String[] ymlPaths = { "arius-admin-rest", "target", "classes", "application.yml"};
         String path = System.getProperty("user.dir");
         path = path.substring(0, path.lastIndexOf(File.separator) + 1) + StringUtils.join(ymlPaths, File.separator);
         String standardLine = YamlUtil.getValue(path, "stat.method.line.standardLineOfMethod");

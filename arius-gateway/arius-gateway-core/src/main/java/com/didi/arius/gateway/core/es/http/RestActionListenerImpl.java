@@ -24,10 +24,12 @@ import org.elasticsearch.rest.BytesRestResponse;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestResponse;
 import org.elasticsearch.rest.RestStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RestActionListenerImpl<T extends ESActionResponse> implements ActionListener<T> {
 	protected static final ILog logger = LogFactory.getLog(RestActionListenerImpl.class);
-	private static final ILog statLogger = LogFactory.getLog(QueryConsts.STAT_LOGGER);
+	protected static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
 	protected static final ILog traceLogger = LogFactory.getLog(QueryConsts.TRACE_LOGGER);
 	protected static final String ERROR = "error";
 	

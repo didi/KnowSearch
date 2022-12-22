@@ -17,6 +17,8 @@ import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.rest.RestResponse;
 import org.elasticsearch.rest.support.RestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.didi.arius.gateway.common.consts.QueryConsts;
@@ -59,7 +61,7 @@ import com.google.common.collect.Lists;
 
 public abstract class HttpRestHandler extends ESBase {
     protected static final ILog logger = LogFactory.getLog(HttpRestHandler.class);
-    protected static final ILog statLogger = LogFactory.getLog(QueryConsts.STAT_LOGGER);
+    protected static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
 
     @Autowired
     protected DynamicConfigService dynamicConfigService;

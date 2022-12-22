@@ -21,6 +21,8 @@ import lombok.NoArgsConstructor;
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.xcontent.XContentHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +39,7 @@ import java.util.Objects;
 @NoArgsConstructor
 public class DslRewriterServiceImpl implements DslRewriterService {
     private static final ILog logger = LogFactory.getLog(DslRewriterServiceImpl.class);
-    private static final ILog statLogger = LogFactory.getLog(QueryConsts.STAT_LOGGER);
+    protected static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
     public static final String QUERY = "query";
     public static final String POST_FILTER = "post_filter";
     public static final String AGG = "aggregations";

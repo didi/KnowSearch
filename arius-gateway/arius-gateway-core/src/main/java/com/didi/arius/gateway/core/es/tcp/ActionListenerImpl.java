@@ -10,6 +10,9 @@ import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.log.LogGather;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 
 /**
@@ -19,7 +22,7 @@ import java.io.IOException;
 */
 public class ActionListenerImpl<T extends ActionResponse> implements ActionListener<T> {
 	protected static final ILog logger = LogFactory.getLog(ActionListenerImpl.class);
-	private static final ILog statLogger = LogFactory.getLog(QueryConsts.STAT_LOGGER);
+	protected static final Logger statLogger = LoggerFactory.getLogger(QueryConsts.STAT_LOGGER);
 	protected static final ILog traceLogger = LogFactory.getLog(QueryConsts.TRACE_LOGGER);
 	
 	protected ActionContext actionContext;
