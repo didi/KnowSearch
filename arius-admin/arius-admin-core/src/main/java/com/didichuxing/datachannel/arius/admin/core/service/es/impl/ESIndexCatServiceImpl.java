@@ -2,13 +2,22 @@ package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getShards2NodeInfoRequestContent;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellUpdatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellUpdatePO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
@@ -21,18 +30,6 @@ import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * Created by linyunan on 2021-10-14
@@ -59,9 +56,13 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
         hitTotal2catIndexInfoTuple.setV1(hitTotal2catIndexInfoTuplePO.getV1());
         List<IndexCatCell> indexCatCells = new ArrayList<>();
         hitTotal2catIndexInfoTuplePO.getV2().forEach(indexCatCellUpdatePO -> {
-            IndexCatCell indexCatCell = ConvertUtil.obj2Obj(indexCatCellUpdatePO,IndexCatCell.class);
-            indexCatCell.setPriStoreSize(SizeUtil.getUnitSize(indexCatCellUpdatePO.getPriStoreSize()));
-            indexCatCell.setStoreSize(SizeUtil.getUnitSize(indexCatCellUpdatePO.getStoreSize()));
+            IndexCatCell indexCatCell = ConvertUtil.obj2Obj(indexCatCellUpdatePO, IndexCatCell.class);
+            if (null != indexCatCellUpdatePO.getPriStoreSize()) {
+                indexCatCell.setPriStoreSize(SizeUtil.getUnitSize(indexCatCellUpdatePO.getPriStoreSize()));
+            }
+            if (null != indexCatCellUpdatePO.getStoreSize()) {
+                indexCatCell.setStoreSize(SizeUtil.getUnitSize(indexCatCellUpdatePO.getStoreSize()));
+            }
             indexCatCells.add(indexCatCell);
         });
         hitTotal2catIndexInfoTuple.setV2(indexCatCells);
