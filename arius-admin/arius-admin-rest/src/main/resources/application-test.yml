@@ -74,13 +74,9 @@ integrate.test.es.port: 8888
 integrate.test.esuser: 1
 integrate.test.operator: admin
 
-
-#统计项目对应各方法代码行相关配置
-stat.method.line.standardLineOfMethod: 60
-
 #日志相关配置
 logging.pattern.file: "[%level][%d{yyyy-MM-dd'T'HH:mm:ss.SSS}][%t] %msg%xEx%n"
-logging.config: classpath:log4j2-dev.xml
+logging.config: classpath:log4j2-test.xml
 logging.path: .
 logging.file.max-history: 5
 
@@ -94,7 +90,7 @@ spring:
   messages:
     encoding: UTF-8
   profiles:
-    active: dev
+    active: test
   datasource:
     name: data
     type: com.alibaba.druid.pool.DruidDataSource
@@ -144,7 +140,7 @@ spring:
     password: ${spring.datasource.druid.password}
     username: ${spring.datasource.druid.username}
     resource-extend-bean-name: resourceExtendManager
-#    0.3.1.1新增
+    #    0.3.1.1新增
     login-extend-bean-name: logiSecurityDefaultLoginExtendImpl
 #  op-manager配置
   op-manager:
@@ -153,7 +149,6 @@ spring:
     url: ${spring.datasource.druid.url}
     username: ${spring.datasource.druid.username}
     password: ${spring.datasource.druid.password}
-    min-idle: 10
     max-wait: 60000
     time-between-eviction-runs-millis: 1000
     min-evictable-idle-time-millis: 300000
@@ -171,6 +166,7 @@ spring:
     test-on-borrow: true
     log-abandoned: true
     initial-size: 10
+    min-idle: 10
   application:
     admin:
       enabled:
