@@ -1,0 +1,22 @@
+{
+  "level":1,
+  "expression": "index_observability",
+  "dateFormat": "",
+  "dataCenter": "cn",
+  "dataType": 0,
+  "dateField": "",
+  "expireTime": "-1",
+  "physicalInfos": [
+    {
+      "cluster": "logi-elasticsearch-7.6.0",
+      "resourceId": 63,
+      "role": 1,
+      "shard": "4"
+    }
+  ],
+  "quota": 30,
+  "appId": 1,
+  "responsible": "admin",
+  "name": "index_observability",
+  "desc": "日志数据上报索引"
+}

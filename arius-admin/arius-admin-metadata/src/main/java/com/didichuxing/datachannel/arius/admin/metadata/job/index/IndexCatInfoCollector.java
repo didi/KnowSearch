@@ -211,9 +211,6 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
 
         LOGGER.info("class=IndexCatInfoCollector||method=handleJobTask||timeOut={}", System.currentTimeMillis() - currentTimeMillis);
 
-        //延迟2s, 等待 updateNotCollectorIndexNames 方法更新删除标识
-        sleep(2000L);
-
         //TODO: 部署多台admin，这里会出现过滤失败的问题
         //移除已删除索引, 不采集
         Function<Entry<String, List<IndexCatCellDTO>>, IndexCatCellDTO> filterOneIndexCatCellDTOFunc = key2indexCatCellDTOListEntry -> {
