@@ -248,7 +248,6 @@ public class IndicesManagerImpl implements IndicesManager {
         if (voidResult.isPresent()) {
             return Result.buildFrom(voidResult.get());
         }
-        sleep(1000L);
         return Result.buildSucc(true);
     }
 
@@ -857,14 +856,6 @@ public class IndicesManagerImpl implements IndicesManager {
         IndexShardInfoVO indexShardInfoVO = ConvertUtil.obj2Obj(indexShardInfo, IndexShardInfoVO.class);
         indexShardInfoVO.setStoreInByte(SizeUtil.getUnitSize(indexShardInfo.getStore()));
         return indexShardInfoVO;
-    }
-
-    private void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 
     /**
