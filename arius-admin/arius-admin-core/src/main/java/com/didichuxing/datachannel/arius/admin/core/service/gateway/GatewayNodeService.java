@@ -3,6 +3,8 @@ package com.didichuxing.datachannel.arius.admin.core.service.gateway;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.gateway.GatewayNodeHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
+import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 
 /**
@@ -37,7 +39,7 @@ public interface  GatewayNodeService {
 	 * @param clusterName 集群的名称。
 	 * @return GatewayClusterNodeVO 对象列表
 	 */
-	List<GatewayClusterNodePO> listByClusterName(String clusterName);
+	List<GatewayClusterNodePO> listByClusterName(@Param("clusterName") String clusterName);
 	
 	/**
 	 * 删除具有给定名称的所有集群
