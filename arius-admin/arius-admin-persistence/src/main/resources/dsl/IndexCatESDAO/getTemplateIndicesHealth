@@ -1,4 +1,5 @@
 {
+  "size": 0,
   "query": {
     "bool": {
       "must": [
@@ -19,5 +20,11 @@
       ]
     }
   },
-  "_source": "health"
+  "aggs": {
+    "health": {
+      "terms": {
+        "field": "health"
+      }
+    }
+  }
 }

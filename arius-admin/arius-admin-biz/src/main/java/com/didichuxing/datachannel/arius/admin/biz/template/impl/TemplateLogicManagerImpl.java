@@ -1106,10 +1106,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         
         }
 
-        String expression = indexTemplateWithPhyTemplates.getMasterPhyTemplate().getExpression();
+        // 通配符value
+        String wildcard = indexTemplateWithPhyTemplates.getMasterPhyTemplate().getName() + "*";
         // 从 arius_stats_index_info 元数据索引中获取模版所有索引的health状态，根据index health确定模版health。
         try {
-            Integer templateHealthCode = esTemplateService.getTemplateHealthCode(masterCluster, expression);
+            Integer templateHealthCode = esTemplateService.getTemplateHealthCode(masterCluster, wildcard);
             templatePO.setHealth(templateHealthCode);
             boolean updateResult = indexTemplateService.update(templatePO);
             if(!updateResult) {
