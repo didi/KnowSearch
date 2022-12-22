@@ -70,7 +70,7 @@ public abstract class BaseConcurrentTemplateTask extends BaseConcurrentTask<Inde
                     failedTemplateNameList.add(logicPO.getName());
                 }
 
-                Thread.sleep(TimeUnit.SECONDS.toMillis(TaskConcurrentConstants.SLEEP_SECONDS_PER_EXECUTE));
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 LOGGER.warn(

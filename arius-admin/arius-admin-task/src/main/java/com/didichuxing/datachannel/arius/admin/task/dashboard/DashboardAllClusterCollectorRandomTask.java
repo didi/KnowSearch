@@ -52,8 +52,6 @@ public class DashboardAllClusterCollectorRandomTask implements Job {
             }
             try {
                 collector.collectAllCluster(clusterNameList, currentTime);
-                // 采集缓冲, 每个collector停顿2s, 避免集群多个采集器爆炸式访问网关, 空闲出cpu
-                Thread.sleep(2000);
             } catch (Exception e) {
                 Thread.currentThread().interrupt();
                 String errLog = "class=DashboardAllClusterCollectorRandomTask||collectorName=" + collector.getName()
