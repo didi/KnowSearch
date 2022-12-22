@@ -14,7 +14,7 @@
         </Console>
         <ElasticsearchAppender name="esAppender" address="${address}" port="${port}" user="${user}"
                                password="${password}" indexName="${indexName}" typeName="${typeName}" threshold="all"
-                               bufferSize="1000" numberOfShards="1" numberOfReplicas="0" logExpire="7"
+                               bufferSize="10000" numberOfShards="5" numberOfReplicas="0" logExpire="1"
                                extendsMappingClass="" requestTimeoutMillis="3000" discardWhenBufferIsFull="true">
         </ElasticsearchAppender>
     </Appenders>
