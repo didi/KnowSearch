@@ -138,7 +138,7 @@ public interface ClusterLogicManager {
      * @return
      */
     PaginationResult<ClusterLogicVO> pageGetClusterLogics(ClusterLogicConditionDTO condition,
-                                                          Integer projectId) throws NotFindSubclassException;
+                                                          Integer projectId) throws NotFindSubclassException, ESOperateException;
 
     /**
      * 更新逻辑集群状态
@@ -261,4 +261,6 @@ public interface ClusterLogicManager {
      * @return 列表<ClusterPhyWithLogicClusterVO>
      */
     Result<List<ClusterPhyWithLogicClusterVO>> listLogicClusterWithClusterPhyByProjectId(Integer projectId);
+
+    Result<List<ClusterLogicVO>> listClusterLogicByPhyName(String phyClusterName);
 }

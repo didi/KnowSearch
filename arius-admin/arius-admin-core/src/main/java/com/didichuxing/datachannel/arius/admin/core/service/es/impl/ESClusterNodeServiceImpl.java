@@ -1,11 +1,27 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.INSERT_PRDER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.ONE_BILLION;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.PRIORITY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.SOURCE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TASKS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TIME_IN_QUEUE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.GET_PENDING_TASKS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigIndicesRequestContent;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getShards2NodeRequestContent;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESResponsePluginInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.BigIndexMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ClusterMemInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.PendingTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginConstant;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -38,6 +54,15 @@ import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,19 +70,6 @@ import org.elasticsearch.rest.RestStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.*;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 
 /**
  * Created by linyunan on 2021-08-09
@@ -156,7 +168,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     }
 
     @Override
-    public List<PendingTask> syncGetPendingTask(String clusterName) {
+    public List<PendingTask> syncGetPendingTask(String clusterName) throws ESOperateException {
         DirectResponse directResponse = esClusterNodeDAO.getDirectResponse(clusterName, "Get", GET_PENDING_TASKS);
         List<PendingTask> pendingTasks = Lists.newArrayList();
         if (directResponse.getRestStatus() == RestStatus.OK
@@ -197,7 +209,14 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     @Override
     public Map<String/*node*/, Long /*shardNum*/> syncGetNode2ShardNumMap(String clusterName) {
         String bigShardsRequestContent = getShards2NodeRequestContent("20s");
-        DirectResponse directResponse = esClusterNodeDAO.getDirectResponse(clusterName, "Get", bigShardsRequestContent);
+        DirectResponse directResponse = null;
+        try {
+            directResponse = esClusterNodeDAO.getDirectResponse(clusterName, "Get", bigShardsRequestContent);
+        } catch (ESOperateException e) {
+            LOGGER.error("class=ESClusterNodeServiceImpl||method=syncGetNode2ShardNumMap||clusterName={}||errMsg=fail to get directresponse",
+                    clusterName);
+            return Maps.newHashMap();
+        }
 
         Map<String/*node*/, Long /*shardNum*/> node2ShardNumMap = Maps.newHashMap();
         if (directResponse.getRestStatus() == RestStatus.OK
@@ -218,7 +237,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     }
 
     @Override
-    public List<BigIndexMetrics> syncGetBigIndices(String clusterName) {
+    public List<BigIndexMetrics> syncGetBigIndices(String clusterName) throws ESOperateException {
 
         String indicesRequestContent = getBigIndicesRequestContent("20s");
 
@@ -244,7 +263,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     }
 
     @Override
-    public int syncGetIndicesCount(String cluster, String nodes) {
+    public int syncGetIndicesCount(String cluster, String nodes) throws ESOperateException {
         return esClusterNodeDAO.getIndicesCount(cluster, nodes);
     }
 
@@ -361,7 +380,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     }
 
     @Override
-    public Map<String, Integer> syncGetNodesCpuNum(String cluster) {
+    public Map<String, Integer> syncGetNodesCpuNum(String cluster) throws ESOperateException {
         Map<String, Integer> node2CpuNumMap = Maps.newHashMap();
         //这里直接使用 esClient.admin().cluster().nodes(new ESClusterNodesRequest().flag("os")).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);无法正确获取到数据，所以使用
         DirectResponse directResponse = esClusterNodeDAO.getDirectResponse(cluster, "GET", "/_nodes/os");
@@ -404,7 +423,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
      * @return {@code List<TupleTwo<String, List<String>>>}
      */
     @Override
-    public List<TupleTwo<String, List<String>>> syncGetNodePluginTupleList(String phyCluster) {
+    public List<TupleTwo<String, List<String>>> syncGetNodePluginTupleList(String phyCluster) throws ESOperateException {
         return esClusterNodeDAO.syncGetNodesPlugins(phyCluster);
     }
     
@@ -415,8 +434,15 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     @Override
     public TupleTwo<Boolean, Boolean> existDCDRAndPipelineModule(String phyClusterName) {
         //获取物理集群侧的插件列表
-        final List<TupleTwo<String, List<String>>> syncGetNodePluginTupleList = syncGetNodePluginTupleList(
-                phyClusterName);
+        final List<TupleTwo<String, List<String>>> syncGetNodePluginTupleList;
+        try {
+            syncGetNodePluginTupleList = syncGetNodePluginTupleList(
+                    phyClusterName);
+        } catch (ESOperateException e) {
+            LOGGER.error("class=ESClusterNodeServiceImpl||method=existDCDRAndPipelineModule||clusterName={}||errMsg=fail to syncGetNodePluginTupleList",
+                    phyClusterName,e);
+            return Tuples.of(Boolean.FALSE, Boolean.FALSE);
+        }
         if (CollectionUtils.isEmpty(syncGetNodePluginTupleList)) {
             return Tuples.of(Boolean.FALSE, Boolean.FALSE);
         }

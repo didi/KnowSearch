@@ -23,6 +23,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OrderStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -121,16 +122,38 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
             "class=WorkOrderManagerImpl||method=WorkOrderController.process||workOrderDTO={}||envInfo={}||dataCenter={}",
             workOrderJsonString, EnvUtil.getStr(), workOrderDTO.getDataCenter());
 
-        initWorkOrderDTO(workOrderDTO);
+        try {
+            initWorkOrderDTO(workOrderDTO);
+        } catch (OperateForbiddenException e) {
+            LOGGER.error(
+                    "class=WorkOrderManagerImpl||method=submit||workOrderDTO={}||envInfo={}||dataCenter={}||errMsg=fail to init workOrderDTO",
+                    workOrderJsonString, EnvUtil.getStr(), workOrderDTO.getDataCenter(),e.getMessage(),e);
+            Result.buildFail("初始化工单异常");
+        }
 
         Result<Void> submitValidResult = checkSubmitValid(workOrderDTO);
         if (submitValidResult.failed()) {
             return Result.buildFrom(submitValidResult);
         }
 
-        WorkOrderHandler handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(workOrderDTO.getType());
+        WorkOrderHandler handler = null;
+        try {
+            handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(workOrderDTO.getType());
+        } catch (ESOperateException e) {
+            LOGGER.error(
+                    "class=WorkOrderManagerImpl||method=submit||workOrderDTO={}||envInfo={}||dataCenter={}||errMsg=fail to get WorkOrderHandler",
+                    workOrderJsonString, EnvUtil.getStr(), workOrderDTO.getDataCenter(),e.getMessage(),e);
+            Result.buildFail("获取WorkOrderHandler异常");
+        }
 
-        Result<WorkOrderPO> submitResult = handler.submit(ConvertUtil.obj2Obj(workOrderDTO, WorkOrder.class));
+        Result<WorkOrderPO> submitResult = null;
+        try {
+            submitResult = handler.submit(ConvertUtil.obj2Obj(workOrderDTO, WorkOrder.class));
+        } catch (AdminOperateException e) {
+            LOGGER.error("class=WorkOrderManagerImpl||method=submit||workOrderDTO={}||envInfo={}||dataCenter={}||errMsg=fail to get WorkOrderHandler",
+                    workOrderJsonString, EnvUtil.getStr(), workOrderDTO.getDataCenter(),e);
+            Result.buildFail("工单提交异常");
+        }
         if (submitResult.failed()) {
             return Result.buildFail(submitResult.getMessage());
         }
@@ -139,7 +162,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     @Override
-    public Result<Void> process(WorkOrderProcessDTO processDTO, Integer projectId) throws NotFindSubclassException {
+    public Result<Void> process(WorkOrderProcessDTO processDTO, Integer projectId) throws NotFindSubclassException, ESOperateException {
         final Result<Void> voidResult = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (voidResult.failed()){
             return voidResult;
@@ -162,7 +185,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
      * @return
      */
     @Override
-    public Result<Void> processByJoinLogicCluster(WorkOrderProcessDTO processDTO, Integer projectId) throws NotFindSubclassException {
+    public Result<Void> processByJoinLogicCluster(WorkOrderProcessDTO processDTO, Integer projectId) throws NotFindSubclassException, ESOperateException {
         
         
         return process(processDTO, projectId);
@@ -343,7 +366,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     @Override
-    public OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) throws NotFindSubclassException {
+    public OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) throws NotFindSubclassException, ESOperateException {
         if (AriusObjUtils.isNull(orderPO)) {
             return null;
         }
@@ -462,7 +485,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     private Result<Void> doProcessByWorkOrderHandle(WorkOrderPO orderPO,
-                                                    WorkOrderProcessDTO processDTO) throws NotFindSubclassException {
+                                                    WorkOrderProcessDTO processDTO) throws NotFindSubclassException, ESOperateException {
         WorkOrderHandler handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(orderPO.getType());
 
         Result<Void> checkAuthResult = handler.checkAuthority(orderPO, processDTO.getAssignee());

@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandIndicesQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandShardsQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -55,7 +56,7 @@ public class ESPhyClusterQuickCommandController {
     @ResponseBody
     @ApiOperation(value = "shard分布")
     public PaginationResult<ShardDistributionVO> shardDistribution(HttpServletRequest request,
-                                                               @RequestBody ClusterPhyQuickCommandShardsQueryDTO condition) throws NotFindSubclassException {
+                                                               @RequestBody ClusterPhyQuickCommandShardsQueryDTO condition) throws ESOperateException {
         return clusterPhyQuickCommandManager.shardDistributionPage(condition, HttpRequestUtil.getProjectId(request));
     }
 

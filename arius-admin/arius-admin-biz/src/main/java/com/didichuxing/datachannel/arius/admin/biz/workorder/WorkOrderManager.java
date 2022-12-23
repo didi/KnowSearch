@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import java.util.List;
@@ -41,7 +42,7 @@ public interface WorkOrderManager {
      * @param projectId
      * @return {@link Result}<{@link Void}>
      */
-    Result<Void> process(WorkOrderProcessDTO workOrderProcessDTO, Integer projectId) throws NotFindSubclassException;
+    Result<Void> process(WorkOrderProcessDTO workOrderProcessDTO, Integer projectId) throws NotFindSubclassException, ESOperateException;
 
     /**新增
      * 插入一条工单
@@ -122,7 +123,7 @@ public interface WorkOrderManager {
      @param orderPO 订单订单
       * @return {@link OrderInfoDetail}
      */
-    OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) throws NotFindSubclassException;
+    OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) throws NotFindSubclassException, ESOperateException;
 
     /**获取订单批准列表通过状态
      * 根据状态获取工单列表
@@ -134,5 +135,5 @@ public interface WorkOrderManager {
     Result<AriusWorkOrderInfoSubmittedVO> submitByJoinLogicCluster(WorkOrderDTO workOrderDTO)
             throws AdminOperateException;
     
-    Result<Void> processByJoinLogicCluster(WorkOrderProcessDTO processDTO, Integer projectId) throws NotFindSubclassException;
+    Result<Void> processByJoinLogicCluster(WorkOrderProcessDTO processDTO, Integer projectId) throws NotFindSubclassException, ESOperateException;
 }
