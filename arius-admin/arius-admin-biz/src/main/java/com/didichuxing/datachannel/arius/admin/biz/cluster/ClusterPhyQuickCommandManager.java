@@ -106,5 +106,5 @@ public interface ClusterPhyQuickCommandManager {
      * @return ShardDistributionVO
      */
     PaginationResult<ShardDistributionVO> shardDistributionPage(ClusterPhyQuickCommandShardsQueryDTO condition,
-                                                                Integer projectId) throws ESOperateException;
+                                                                Integer projectId);
 }

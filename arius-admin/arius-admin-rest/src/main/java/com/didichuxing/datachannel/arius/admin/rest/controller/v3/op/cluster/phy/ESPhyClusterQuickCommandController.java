@@ -56,7 +56,7 @@ public class ESPhyClusterQuickCommandController {
     @ResponseBody
     @ApiOperation(value = "shard分布")
     public PaginationResult<ShardDistributionVO> shardDistribution(HttpServletRequest request,
-                                                               @RequestBody ClusterPhyQuickCommandShardsQueryDTO condition) throws ESOperateException {
+                                                               @RequestBody ClusterPhyQuickCommandShardsQueryDTO condition) {
         return clusterPhyQuickCommandManager.shardDistributionPage(condition, HttpRequestUtil.getProjectId(request));
     }
 

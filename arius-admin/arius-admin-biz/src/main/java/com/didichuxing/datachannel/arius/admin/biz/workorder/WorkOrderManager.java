@@ -42,7 +42,7 @@ public interface WorkOrderManager {
      * @param projectId
      * @return {@link Result}<{@link Void}>
      */
-    Result<Void> process(WorkOrderProcessDTO workOrderProcessDTO, Integer projectId) throws NotFindSubclassException, ESOperateException;
+    Result<Void> process(WorkOrderProcessDTO workOrderProcessDTO, Integer projectId) throws NotFindSubclassException;
 
     /**新增
      * 插入一条工单
@@ -135,5 +135,5 @@ public interface WorkOrderManager {
     Result<AriusWorkOrderInfoSubmittedVO> submitByJoinLogicCluster(WorkOrderDTO workOrderDTO)
             throws AdminOperateException;
     
-    Result<Void> processByJoinLogicCluster(WorkOrderProcessDTO processDTO, Integer projectId) throws NotFindSubclassException, ESOperateException;
+    Result<Void> processByJoinLogicCluster(WorkOrderProcessDTO processDTO, Integer projectId) throws NotFindSubclassException;
 }

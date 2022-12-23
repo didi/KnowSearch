@@ -139,7 +139,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         WorkOrderHandler handler = null;
         try {
             handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(workOrderDTO.getType());
-        } catch (ESOperateException e) {
+        } catch (NotFindSubclassException e) {
             LOGGER.error(
                     "class=WorkOrderManagerImpl||method=submit||workOrderDTO={}||envInfo={}||dataCenter={}||errMsg=fail to get WorkOrderHandler",
                     workOrderJsonString, EnvUtil.getStr(), workOrderDTO.getDataCenter(),e.getMessage(),e);
@@ -162,7 +162,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     @Override
-    public Result<Void> process(WorkOrderProcessDTO processDTO, Integer projectId) throws NotFindSubclassException, ESOperateException {
+    public Result<Void> process(WorkOrderProcessDTO processDTO, Integer projectId) throws NotFindSubclassException {
         final Result<Void> voidResult = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (voidResult.failed()){
             return voidResult;
@@ -185,7 +185,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
      * @return
      */
     @Override
-    public Result<Void> processByJoinLogicCluster(WorkOrderProcessDTO processDTO, Integer projectId) throws NotFindSubclassException, ESOperateException {
+    public Result<Void> processByJoinLogicCluster(WorkOrderProcessDTO processDTO, Integer projectId) throws NotFindSubclassException {
         
         
         return process(processDTO, projectId);
@@ -485,7 +485,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     private Result<Void> doProcessByWorkOrderHandle(WorkOrderPO orderPO,
-                                                    WorkOrderProcessDTO processDTO) throws NotFindSubclassException, ESOperateException {
+                                                    WorkOrderProcessDTO processDTO) throws NotFindSubclassException {
         WorkOrderHandler handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(orderPO.getType());
 
         Result<Void> checkAuthResult = handler.checkAuthority(orderPO, processDTO.getAssignee());
