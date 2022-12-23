@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.task.metadata;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.LogicClusterMonitorJobHandler;
 import com.didiglobal.knowframework.job.annotation.Task;
 import com.didiglobal.knowframework.job.common.TaskResult;
+import com.didiglobal.knowframework.job.core.consensual.ConsensualEnum;
 import com.didiglobal.knowframework.job.core.job.Job;
 import com.didiglobal.knowframework.job.core.job.JobContext;
 import com.didiglobal.knowframework.log.ILog;

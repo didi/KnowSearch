@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.lo
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

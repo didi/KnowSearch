@@ -37,10 +37,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.plugin.PluginInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVOWithProjects;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
@@ -94,8 +90,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
@@ -122,8 +116,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import java.util.*;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -221,11 +213,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Autowired
     private ESOpClient                                           esOpClient;
 
-    @Autowired
-    private GatewayClusterService                                gatewayClusterService;
-
-    @Autowired
-    private GatewayNodeService                                   gatewayNodeService;
     @Autowired
     private RoleTool                 roleTool;
     @Autowired
@@ -1311,22 +1298,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      */
     private void buildPhyCluster(ClusterPhyVO clusterPhyVO,ClusterPhy clusterPhy) {
         if (!AriusObjUtils.isNull(clusterPhyVO)) {
-            List<String> gatewayIdsStr = new ArrayList<>();
-            if (StringUtils.isNotBlank(clusterPhy.getGatewayIds())){
-                String[] gatewayIds = clusterPhy.getGatewayIds().split(",");
-                for (int i = 0; i < gatewayIds.length; i++) {
-                    GatewayClusterPO gatewayClusterPO = gatewayClusterService.getOneById(Integer.valueOf(gatewayIds[i]));
-                    if(StringUtils.isNotBlank(gatewayClusterPO.getProxyAddress())){
-                        gatewayIdsStr.add(gatewayClusterPO.getProxyAddress());
-                    }else {
-                        List<GatewayClusterNodePO> gatewayClusterNodePOS = gatewayNodeService.listByClusterName(gatewayClusterPO.getClusterName());
-                        for (GatewayClusterNodePO node:gatewayClusterNodePOS) {
-                            gatewayIdsStr.add(node.getHostName()+":"+node.getPort());
-                        }
-                    }
-                }
-            }
-            clusterPhyVO.setGatewayUrl(String.join(",",gatewayIdsStr));
+            clusterPhyVO.setGatewayUrl(esGatewayClient.getSingleGatewayAddress());
             buildPhyClusterStatics(clusterPhyVO);
             buildClusterRole(clusterPhyVO);
             buildClusterPhyWithLogicAndRegion(Collections.singletonList(clusterPhyVO));

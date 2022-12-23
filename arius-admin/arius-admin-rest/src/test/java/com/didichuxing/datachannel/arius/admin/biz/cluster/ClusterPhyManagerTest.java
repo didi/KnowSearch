@@ -177,7 +177,7 @@ class ClusterPhyManagerTest {
             "httpAddress", 0, "tags", "code", "idc", 0, "esVersion", "imageName", "nsTree", "plugIds", 0L, esConfigDTO,
             Collections.singletonList(pluginDTO), Collections.singletonList(esClusterRoleDTO),
             Collections.singletonList(esClusterRoleHostDTO), 0, "machineSpec", "operator",  "password",
-            0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0, "gatewayUrl","","","");
+            0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0, "gatewayUrl","","","",false,-1);
 
         clusterPhyVO = new ClusterPhyVO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", 0, "machineSpec", 0, "esVersion", "imageName", null,
