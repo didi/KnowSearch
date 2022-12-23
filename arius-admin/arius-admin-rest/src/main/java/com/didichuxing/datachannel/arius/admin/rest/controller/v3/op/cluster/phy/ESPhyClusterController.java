@@ -206,5 +206,4 @@ public class ESPhyClusterController {
         return clusterPhyManager.addCluster(param, HttpRequestUtil.getOperator(request),
             HttpRequestUtil.getProjectId(request));
     }
-
 }

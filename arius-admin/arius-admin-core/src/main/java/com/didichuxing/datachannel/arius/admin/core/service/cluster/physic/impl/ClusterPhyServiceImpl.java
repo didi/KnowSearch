@@ -138,7 +138,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         initClusterParam(param);
 
         ClusterPhyPO clusterPO = ConvertUtil.obj2Obj(param, ClusterPhyPO.class);
-
         boolean succ = (1 == clusterDAO.insert(clusterPO));
         if (succ) {
             param.setId(clusterPO.getId());
