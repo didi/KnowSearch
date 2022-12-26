@@ -12,7 +12,7 @@
 				{
                      "term": {
                          "physicCluster": {
-                        	 "value": "1"
+                        	 "value": "%s"
                           }
                      }
                 },

@@ -14,6 +14,7 @@ import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.security.common.entity.user.User;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.didiglobal.knowframework.security.service.UserService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -90,7 +91,9 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
 
         //2. initialization
         init(param);
-
+        if (StringUtils.isNotBlank(param.getClusterLogicName())){
+            return Result.buildSucc(buildClusterLogicMetricsVO(param));
+        }
         return Result.buildSucc(buildClusterPhyMetricsVO(param));
     }
 
@@ -162,6 +165,16 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
      * @return 集群指标类型视图
      */
     protected MetricsVO buildClusterPhyMetricsVO(MetricsClusterPhyDTO param) {
+        return null;
+    }
+
+    /**
+     * 构建逻辑集群的整体指标
+     *
+     * @param param 物理集群指标
+     * @return 集群指标类型视图
+     */
+    protected MetricsVO buildClusterLogicMetricsVO(MetricsClusterPhyDTO param) {
         return null;
     }
 

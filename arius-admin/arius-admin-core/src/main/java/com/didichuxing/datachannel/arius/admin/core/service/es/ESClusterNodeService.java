@@ -130,7 +130,14 @@ public interface ESClusterNodeService {
      * SearchRejected数
      *
      * @param cluster 集群 WriteRejectedNum
+     * @param node
      * @return {@code Long}
      */
     public Long getSearchRejectedNum(String cluster,String node);
-}
+
+    /**
+     * 获取nodeStats信息
+     * @param cluster
+     * @return
+     */
+    List<ClusterNodeStats> syncGetNodeStats(String cluster);}

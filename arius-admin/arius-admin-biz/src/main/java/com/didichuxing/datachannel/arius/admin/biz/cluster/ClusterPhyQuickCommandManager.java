@@ -95,7 +95,7 @@ public interface ClusterPhyQuickCommandManager {
      * @param projectId 项目
      * @return IndicesDistributionVO
      */
-    PaginationResult<IndicesDistributionVO> indicesDistributionPage(ClusterPhyQuickCommandIndicesQueryDTO condition,
+    List<IndicesDistributionVO> indicesDistributionPage(ClusterPhyQuickCommandIndicesQueryDTO condition,
                                                                     Integer projectId) throws NotFindSubclassException;
     
     /**
@@ -105,6 +105,6 @@ public interface ClusterPhyQuickCommandManager {
      * @param projectId 项目
      * @return ShardDistributionVO
      */
-    PaginationResult<ShardDistributionVO> shardDistributionPage(ClusterPhyQuickCommandShardsQueryDTO condition,
-                                                                Integer projectId);
+    List<ShardDistributionVO> shardDistributionPage(ClusterPhyQuickCommandShardsQueryDTO condition,
+                                                                Integer projectId) throws ESOperateException;
 }

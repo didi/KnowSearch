@@ -1,0 +1,41 @@
+{
+	"size": 0,
+	"query": {
+		"bool": {
+			"must": [
+			{
+                        		"term": {
+                        			"cluster": {
+                        				"value": "%s"
+                        			}
+                        		}
+                        	},{
+					"terms": {
+                    	"node": %s
+                    }
+				},
+				{
+					"range": {
+						"timestamp": {
+							"gte": "%s",
+							"lte": "%s"
+						}
+					}
+				}
+			]
+		}
+	},
+	"aggs": {
+		"percentiles": {
+			"percentiles": {
+				"field": "metrics.fs-total-disk_free_percent",
+				"percents": [1, 5, 25, 45]
+			}
+		},
+		"avg": {
+			"avg": {
+				"field": "metrics.fs-total-disk_free_percent"
+			}
+		}
+	}
+}

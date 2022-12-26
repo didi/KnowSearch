@@ -116,6 +116,11 @@ public class DslsConstant {
      */
     public static final String GET_CLUSTER_REAL_TIME_TPS_QPS_INFO                            = "AriusStatsIndexInfoEsDao/getClusterTpsQpsInfo";
     /**
+     * 获取逻辑集群实时总的tps/qps信息
+     */
+    public static final String GET_CLUSTER_LOGIC_REAL_TIME_TPS_QPS_INFO                      = "AriusStatsIndexInfoEsDao/getClusterLogicTpsQpsInfo";
+
+    /**
      * 获取某个索引模板最近一段时间tps总和
      */
     public static final String GET_AVG_TPS_BY_LOGIC_ID_AND_TIME_RANGE                        = "AriusStatsIndexInfoEsDao/getAvgTpsByLogicIdAndTimeRange";
@@ -203,6 +208,10 @@ public class DslsConstant {
      */
     public static final String GET_CLUSTER_REAL_TIME_RX_TX_INFO                              = "AriusStatsNodeInfoEsDao/getClusterRxTxInfo";
     /**
+     * 获取逻辑集群实时总的发送流量和接收流量信息
+     */
+    public static final String GET_CLUSTER_LOGIC_REAL_TIME_RX_TX_INFO                        = "AriusStatsNodeInfoEsDao/getClusterLogicRxTxInfo";
+    /**
      * 获取集群实时cpu平均使用率
      */
     public static final String GET_CLUSTER_REAL_TIME_CPU_AVG_INFO                            = "AriusStatsNodeInfoEsDao/getClusterCpuAvgInfo";
@@ -213,14 +222,32 @@ public class DslsConstant {
     public static final String AGG_CLUSTER_REAL_TIME_AVG_AND_PERCENT                         = "AriusStatsNodeInfoEsDao/aggClusterAvgAndPercentiles";
 
     /**
+     * 获取集群实时分位值和平均使用率
+     */
+    public static final String AGG_CLUSTER_LOGIC_REAL_TIME_AVG_AND_PERCENT                         = "AriusStatsNodeInfoEsDao/aggClusterLogicAvgAndPercentiles";
+
+
+    /**
      * 获取集群查询/写入总耗时
      */
     public static final String AGG_CLUSTER_INDEXING_SEARCH_TIME_SUM                         = "AriusStatsNodeInfoEsDao/aggClusterIndexingOrSearchTimeSum";
 
     /**
+     * 获取集群查询/写入总耗时
+     */
+    public static final String AGG_CLUSTER_LOGIC_INDEXING_SEARCH_TIME_SUM                         = "AriusStatsNodeInfoEsDao/aggClusterLogicIndexingOrSearchTimeSum";
+
+
+    /**
      * 获取集群磁盘空闲率实时分位值和平均使用率
      */
     public static final String AGG_CLUSTER_AVG_AND_PERCENT_FOR_DISK_FREE_USAGE_PERCENT       = "AriusStatsNodeInfoEsDao/aggClusterAvgAndPercentilesForDiskFreeUsagePercent";
+
+    /**
+     * 获取逻辑集群磁盘空闲率实时分位值和平均使用率
+     */
+    public static final String AGG_CLUSTER_LOGIC_AVG_AND_PERCENT_FOR_DISK_FREE_USAGE_PERCENT       = "AriusStatsNodeInfoEsDao/aggClusterLogicAvgAndPercentilesForDiskFreeUsagePercent";
+
 
     /**
      * 获取获取集群写入耗时最大值
@@ -816,6 +843,12 @@ public class DslsConstant {
      * 获取集群task耗时分位图
      */
     public static final String AGG_CLUSTER_TASK_REAL_TIME_AVG_AND_PERCENT                    = "AriusStatsClusterTaskInfoEsDao/aggClusterTaskCostAvgAndPercentiles";
+
+    /**
+     * 获取逻辑集群task耗时分位图
+     */
+    public static final String AGG_CLUSTER_LOGIC_TASK_REAL_TIME_AVG_AND_PERCENT                    = "AriusStatsClusterTaskInfoEsDao/aggClusterLogicTaskCostAvgAndPercentiles";
+
 
     /**
      * 获取集群task数量

@@ -177,7 +177,7 @@ class ClusterPhyManagerTest {
             "httpAddress", 0, "tags", "code", "idc", 0, "esVersion", "imageName", "nsTree", "plugIds", 0L, esConfigDTO,
             Collections.singletonList(pluginDTO), Collections.singletonList(esClusterRoleDTO),
             Collections.singletonList(esClusterRoleHostDTO), 0, "machineSpec", "operator",  "password",
-            0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0, "gatewayUrl","","","");
+            0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0, "gatewayUrl","","","",false,-1);
 
         clusterPhyVO = new ClusterPhyVO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", 0, "machineSpec", 0, "esVersion", "imageName", null,
@@ -497,7 +497,7 @@ class ClusterPhyManagerTest {
     void testJoinCluster() throws InvocationTargetException, IllegalAccessException, AdminTaskException, ESOperateException {
         Integer projectId = 1;
         ClusterJoinDTO param = new ClusterJoinDTO(0, 0, "clusterPhyName", "esVersion", Lists.newArrayList(),
-            "desc", "passwd", 4, "{\"createSource\":1}", "cn", "acs", 1,null,null,null,null,null);
+                "desc", "passwd", 4, "{\"createSource\":1}", "cn", "acs", 1,null,null,null,null,null);
         ESClusterRoleHostDTO roleHostDTO = new ESClusterRoleHostDTO(0L, 0L, "hostname", "", CLUSTER, "port", false, 0,
             0, "nodeSet", 0, "attributes", "16c-32g-1t");
         assertEquals(Result.buildParamIllegal("参数为空").getMessage(),

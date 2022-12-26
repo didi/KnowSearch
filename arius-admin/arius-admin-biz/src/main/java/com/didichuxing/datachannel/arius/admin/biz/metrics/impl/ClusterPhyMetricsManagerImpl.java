@@ -272,7 +272,7 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
     private List<String> buildItemsUnderClusterLogic(ClusterPhyTypeMetricsEnum metricsTypeEnum,
                                                      ClusterRegion clusterRegion) {
         //节点名称列表
-        if (Objects.equals(metricsTypeEnum, ClusterPhyTypeMetricsEnum.NODE)) {
+        if (Objects.equals(metricsTypeEnum, ClusterPhyTypeMetricsEnum.NODE)||Objects.equals(metricsTypeEnum, ClusterPhyTypeMetricsEnum.CLUSTER)) {
             Result<List<ClusterRoleHost>> result = clusterRoleHostService
                     .listByRegionId(Math.toIntExact(clusterRegion.getId()));
             return result.getData().stream().map(ClusterRoleHost::getNodeSet)

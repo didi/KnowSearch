@@ -115,6 +115,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -211,7 +212,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Autowired
     private ESOpClient                                           esOpClient;
-    
+
     @Autowired
     private RoleTool                 roleTool;
     @Autowired
@@ -455,7 +456,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         ClusterPhyVO clusterPhyVO = ConvertUtil.obj2Obj(clusterPhy, ClusterPhyVO.class);
         // 构建overView信息
-        buildPhyCluster(clusterPhyVO);
+        buildPhyCluster(clusterPhyVO,clusterPhy);
         return clusterPhyVO;
     }
 
@@ -1161,7 +1162,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     public List<ClusterPhy> pagingGetClusterPhyByCondition(ClusterPhyConditionDTO condition) {
         return  clusterPhyService.pagingGetClusterPhyByCondition(condition);
     }
-    
+
     /**************************************** private method ***************************************************/
 
     private Result<Boolean> deleteClusterInner(Integer clusterPhyId, Integer projectId) {
@@ -1299,23 +1300,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     /**
      * 构建物理集群详情
-     * @param phyClusters 物理集群元数据信息
-     */
-    private List<ClusterPhyVO> buildPhyClusters(List<ClusterPhyVO> phyClusters) {
-
-        phyClusters.parallelStream().forEach(this::buildPhyCluster);
-
-        Collections.sort(phyClusters);
-
-        return phyClusters;
-    }
-
-    /**
-     * 构建物理集群详情
      * @param clusterPhyVO 物理集群元数据信息
      * @return
      */
-    private void buildPhyCluster(ClusterPhyVO clusterPhyVO) {
+    private void buildPhyCluster(ClusterPhyVO clusterPhyVO,ClusterPhy clusterPhy) {
         if (!AriusObjUtils.isNull(clusterPhyVO)) {
             clusterPhyVO.setGatewayUrl(esGatewayClient.getSingleGatewayAddress());
             buildPhyClusterStatics(clusterPhyVO);
@@ -1336,8 +1324,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     private ClusterPhyDTO buildPhyClusters(ClusterJoinDTO param, String operator) {
         ClusterPhyDTO clusterDTO = ConvertUtil.obj2Obj(param, ClusterPhyDTO.class);
-
-        String clientAddress = clusterRoleHostService.buildESClientHttpAddressesStr(param.getRoleClusterHosts());
+        String clientAddress = "";
+        if (StringUtils.isNotBlank(param.getProxyAddress())){
+            clientAddress = param.getProxyAddress();
+        }else {
+            clientAddress = clusterRoleHostService.buildESClientHttpAddressesStr(param.getRoleClusterHosts());
+        }
 
         clusterDTO.setDesc(param.getPhyClusterDesc());
         if (StringUtils.isBlank(clusterDTO.getDataCenter())) {
@@ -1357,6 +1349,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         clusterDTO.setCreator(operator);
         clusterDTO.setRunMode(RunModeEnum.READ_WRITE_SHARE.getRunMode());
         clusterDTO.setHealth(DEFAULT_CLUSTER_HEALTH);
+        clusterDTO.setEcmAccess(Boolean.FALSE);
+        clusterDTO.setComponentId(-1);
         return clusterDTO;
     }
 

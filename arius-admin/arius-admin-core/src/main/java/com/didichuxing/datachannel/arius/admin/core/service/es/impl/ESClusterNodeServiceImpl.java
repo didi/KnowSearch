@@ -465,6 +465,11 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         return ariusStatsNodeInfoESDAO.getSearchRejectedNum(cluster, node);
     }
 
+    @Override
+    public List<ClusterNodeStats> syncGetNodeStats(String cluster) {
+        return esClusterNodeDAO.getNodeState(cluster);
+    }
+
 
     /*********************************************private******************************************/
 
