@@ -36,6 +36,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.Cl
  */
 @Repository
 public class ESShardDAO extends BaseESDAO {
+
     @Value("${es.update.cluster.name}")
     private String              metadataClusterName;
 
