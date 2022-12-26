@@ -34,7 +34,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterNodeSepc;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
@@ -105,6 +104,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -1065,9 +1065,20 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * 5. 获取gateway地址
      */
     private void buildClusterNodeInfo(ClusterLogicVO clusterLogicVO) {
-
         //获取gateway地址
         clusterLogicVO.setGatewayAddress(esGatewayClient.getGatewayAddress());
+        //获取活跃分片数
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicVO.getId());
+        AtomicReference<Long> activeShardNum = new AtomicReference<>(0L);
+        if (Objects.nonNull(clusterRegion)){
+            Map<String/*node*/, Long /*shardNum*/>  nodeShardsNum = eSClusterNodeService.syncGetNode2ShardNumMap(clusterRegion.getPhyClusterName());
+            Result<List<ESClusterRoleHostVO>>  ESClusterRoleHostVORes =clusterNodeManager.listClusterLogicNode(Math.toIntExact(clusterLogicVO.getId()));
+            ESClusterRoleHostVORes.getData().stream().forEach(node->{
+                activeShardNum.updateAndGet(v -> v + nodeShardsNum.get(node.getNodeSet()));
+            });
+        }
+
+        clusterLogicVO.setActiveShardNum(activeShardNum.get());
     }
 
     private TupleTwo<Result<Void>, /*projectId*/Integer> checkIndices(List<String> delIndices, Integer logicId) {
