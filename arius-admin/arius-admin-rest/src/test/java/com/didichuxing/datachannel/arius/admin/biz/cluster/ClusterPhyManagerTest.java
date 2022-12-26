@@ -494,7 +494,7 @@ class ClusterPhyManagerTest {
     }
 
     @Test
-    void testJoinCluster() throws InvocationTargetException, IllegalAccessException, AdminTaskException {
+    void testJoinCluster() throws InvocationTargetException, IllegalAccessException, AdminTaskException, ESOperateException {
         Integer projectId = 1;
         ClusterJoinDTO param = new ClusterJoinDTO(0, 0, "clusterPhyName", "esVersion", Lists.newArrayList(),
                 "desc", "passwd", 4, "{\"createSource\":1}", "cn", "acs", 1,null,null,null,null,null);
@@ -745,7 +745,7 @@ class ClusterPhyManagerTest {
     }
 
     @Test
-    void testUpdateClusterHealth() {
+    void testUpdateClusterHealth() throws ESOperateException {
         when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(null);
         assertFalse(clusterPhyManager.updateClusterHealth(CLUSTER, "operator"));
 
@@ -778,7 +778,7 @@ class ClusterPhyManagerTest {
     }
 
     @Test
-    void testCheckClusterHealth() {
+    void testCheckClusterHealth() throws ESOperateException {
         when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(null);
         assertFalse(clusterPhyManager.checkClusterHealth(CLUSTER, "operator").success());
         ClusterPhy clusterPhy = new ClusterPhy();

@@ -22,6 +22,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -89,13 +90,20 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
 
         // 对于datanode的缩容，如果该节点上存在数据分片,做出警告
         if (content.getOperationType() == OpTaskTypeEnum.CLUSTER_SHRINK.getType()) {
-            Map<String, Integer> segmentsOfIpByCluster = esClusterService
-                .synGetSegmentsOfIpByCluster(content.getPhyClusterName());
+            Map<String, Integer> segmentsOfIpByCluster = null;
+            try {
+                segmentsOfIpByCluster = esClusterService
+                        .synGetSegmentsOfIpByCluster(content.getPhyClusterName());
+            } catch (ESOperateException e) {
+                LOGGER.error("class=ClusterScaleTaskHandler||method=validateHostParam||errMsg=fail to get get segments of ip by cluster",
+                        e);
+                Result.buildFail("获取集群ip上的segment数目异常");
+            }
 
             for (ESClusterRoleHost esClusterRoleHost : content.getClusterRoleHosts()) {
                 if (esClusterRoleHost.getRole().equals(ESClusterNodeRoleEnum.DATA_NODE.getDesc())
-                    && segmentsOfIpByCluster.containsKey(esClusterRoleHost.getHostname())
-                    && !segmentsOfIpByCluster.get(esClusterRoleHost.getHostname()).equals(0)) {
+                        && segmentsOfIpByCluster.containsKey(esClusterRoleHost.getHostname())
+                        && !segmentsOfIpByCluster.get(esClusterRoleHost.getHostname()).equals(0)) {
                     return Result.buildFail("数据节点上存在分片，请迁移分片之后再进行该节点的缩容");
                 }
             }

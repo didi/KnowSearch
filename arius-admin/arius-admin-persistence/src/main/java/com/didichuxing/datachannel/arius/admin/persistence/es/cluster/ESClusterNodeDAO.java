@@ -3,7 +3,9 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESResponsePluginInfo;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
@@ -17,14 +19,13 @@ import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodess
 import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Repository;
 
@@ -43,18 +44,31 @@ public class ESClusterNodeDAO extends BaseESDAO {
      * @param nodes 节点
      * @return 个数
      */
-    public int getIndicesCount(String cluster, String nodes) {
+    public int getIndicesCount(String cluster, String nodes) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
-        ESClusterNodesStatsResponse response = client.admin().cluster().prepareNodeStats().setNodesIds(nodes)
-            .setIndices(true).level("indices").execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        int count = 0;
-        Map<String, ClusterNodeStats> nodeStatsMap = response.getNodes();
-        for (ClusterNodeStats nodeStats : nodeStatsMap.values()) {
-            count += nodeStats.getIndices().getIndices().size();
+        if (client == null) {
+            LOGGER.warn(
+                    "class={}||method=getIndicesCount||clusterName={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster);
+            throw new NullESClientException(cluster);
         }
+        try {
+            ESClusterNodesStatsResponse response = client.admin().cluster().prepareNodeStats().setNodesIds(nodes)
+                    .setIndices(true).level("indices").execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
-        return count;
+            int count = 0;
+            Map<String, ClusterNodeStats> nodeStatsMap = response.getNodes();
+            for (ClusterNodeStats nodeStats : nodeStatsMap.values()) {
+                count += nodeStats.getIndices().getIndices().size();
+            }
+
+            return count;
+        } catch (Exception e) {
+            LOGGER.error("class=ESClusterNodeDao||method=getIndicesCount||clusterName={}",
+                    cluster);
+            ParsingExceptionUtils.abnormalTermination(e);
+        }
+        return 0;
     }
 
     public List<ClusterNodeStats> syncGetNodesStats(String clusterName) throws ESOperateException {
@@ -71,9 +85,9 @@ public class ESClusterNodeDAO extends BaseESDAO {
             response = esClient.admin().cluster().prepareNodeStats().setFs(true).setOs(true).setJvm(true)
                     .setThreadPool(true).level("node").execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class=ESClusterNodeServiceImpl||method=syncGetNodeFsStatsMap||clusterName={}", clusterName,
                     e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         return Optional.ofNullable(response).map(ESClusterNodesStatsResponse::getNodes).filter(MapUtils::isNotEmpty)
                 .map(m->Lists.<ClusterNodeStats>newArrayList(m.values())).orElse(Lists.newArrayList());
@@ -100,7 +114,7 @@ public class ESClusterNodeDAO extends BaseESDAO {
         return Lists.newArrayList();
     }
     
-    public List<TupleTwo</*node name*/String,/*plugin names*/List<String>>> syncGetNodesPlugins(String clusterName){
+    public List<TupleTwo</*node name*/String,/*plugin names*/List<String>>> syncGetNodesPlugins(String clusterName) throws ESOperateException {
         final DirectResponse directResponse = getDirectResponse(clusterName, "GET", GET_NODE_PLUGINS);
         if (directResponse == null) {
             return Lists.newArrayList();
@@ -116,7 +130,7 @@ public class ESClusterNodeDAO extends BaseESDAO {
                 .map(JSONObject.class::cast)
                 .map(this::buildNodeNamePlugins)
                 .collect(Collectors.toList());
-                
+
     }
     private  TupleTwo<String,List<String>> buildNodeNamePlugins(JSONObject jsonObject){
         final String nodeName = jsonObject.getString(NAME);

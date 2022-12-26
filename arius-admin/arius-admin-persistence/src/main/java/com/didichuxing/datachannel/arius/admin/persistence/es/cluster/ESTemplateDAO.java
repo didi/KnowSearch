@@ -9,7 +9,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
 import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.knowframework.elasticsearch.client.ESClient;
@@ -50,31 +49,36 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param expression 表达式
      * @return result
      */
-    public boolean updateExpression(String cluster, String name, String expression) {
+    public boolean updateExpression(String cluster, String name, String expression) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (client == null) {
             LOGGER.warn("class={}||method=updateExpression||clusterName={}||expression={}||errMsg=esClient is null",
                     getClass().getSimpleName(), cluster, expression);
-            return false;
+            throw new NullESClientException(cluster);
         }
+        try {
+            // 获取es中原来index template的配置
+            ESIndicesGetTemplateResponse getTemplateResponse = client.admin().indices().prepareGetTemplate(name).execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
 
-        // 获取es中原来index template的配置
-        ESIndicesGetTemplateResponse getTemplateResponse = client.admin().indices().prepareGetTemplate(name).execute()
-            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
+            // 修改表达式
+            if (StringUtils.isNotBlank(expression)) {
+                templateConfig.setTemplate(expression);
+            }
 
-        // 修改表达式
-        if (StringUtils.isNotBlank(expression)) {
-            templateConfig.setTemplate(expression);
+            // 设置ES版本
+            templateConfig.setVersion(client.getEsVersion());
+
+            ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
+                    .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            LOGGER.error("class=ESTemplateDAO||method=updateExpression||clusterName={}||templateName=={}||expression={}", cluster, name, expression, e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
-
-        // 设置ES版本
-        templateConfig.setVersion(client.getEsVersion());
-
-        ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
-            .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        return response.getAcknowledged();
+        return false;
     }
 
     /**
@@ -89,7 +93,7 @@ public class ESTemplateDAO extends BaseESDAO {
         if (client == null) {
             LOGGER.warn("class={}||method=updateShardNum||clusterName={}||shardNum={}||errMsg=esClient is null",
                     getClass().getSimpleName(), cluster, shardNum);
-            throw new ESOperateException(String.format("集群【%s】异常，无法更新模版【%s】分片",cluster,name));
+            throw new NullESClientException(cluster);
         }
 
         // 获取es中原来index template的配置
@@ -105,11 +109,16 @@ public class ESTemplateDAO extends BaseESDAO {
 
         // 设置ES版本
         templateConfig.setVersion(client.getEsVersion());
+        try {
+            ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
+                    .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
-        ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
-            .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        return response.getAcknowledged();
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            LOGGER.error("class=ESTemplateDAO||method=updateShardNum||clusterName={}||templateName={}||shardNum={}", cluster, name, shardNum, e);
+            ParsingExceptionUtils.abnormalTermination(e);
+        }
+        return false;
     }
 
     /**
@@ -119,30 +128,33 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param shard shard
      * @return result
      */
-    public boolean updateShard(String cluster, String name, Integer shard, Integer shardRouting) {
+    public boolean updateShard(String cluster, String name, Integer shard, Integer shardRouting) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (client == null) {
-            LOGGER.warn("class={}||method=updateShard||clusterName={}||shardNum={}||errMsg=esClient is null",
-                    getClass().getSimpleName(), cluster, shard);
-            return false;
+            throw new NullESClientException(cluster);
         }
+        try {
+            // 获取es中原来index template的配置
+            ESIndicesGetTemplateResponse getTemplateResponse = client.admin().indices().prepareGetTemplate(name).execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
 
-        // 获取es中原来index template的配置
-        ESIndicesGetTemplateResponse getTemplateResponse = client.admin().indices().prepareGetTemplate(name).execute()
-            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
+            if (shard != null && shard > 0) {
+                templateConfig.setSettings(INDEX_SHARD_NUM, String.valueOf(shard));
+            }
 
-        if (shard != null && shard > 0) {
-            templateConfig.setSettings(INDEX_SHARD_NUM, String.valueOf(shard));
+            // 设置ES版本
+            templateConfig.setVersion(client.getEsVersion());
+
+            ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
+                    .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            LOGGER.error("class=ESTemplateDAO||method=updateShard||clusterName={}||templateName={}", cluster, name, e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
-
-        // 设置ES版本
-        templateConfig.setVersion(client.getEsVersion());
-
-        ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
-            .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        return response.getAcknowledged();
+        return false;
     }
 
     /**
@@ -169,8 +181,8 @@ public class ESTemplateDAO extends BaseESDAO {
             response = client.admin().indices().prepareDeleteTemplate(templateName).execute()
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.warn("class=ESTemplateDAO||method=delete||cluster={}||name={}", cluster, templateName, e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
         return Optional.ofNullable(response).map(ESIndicesDeleteTemplateResponse::getAcknowledged).orElse(false);
     }
@@ -189,10 +201,10 @@ public class ESTemplateDAO extends BaseESDAO {
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS).getMultiTemplatesConfig().getTemplateConfigMap();
             return templateConfigMap.containsKey(templateName);
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.warn("class=ESTemplateDAO||method=delete||cluster={}||name={}", cluster, templateName, e);
-            return false;
+            ParsingExceptionUtils.abnormalTermination(e);
         }
+        return false;
     }
 
     /**
@@ -258,12 +270,11 @@ public class ESTemplateDAO extends BaseESDAO {
                 return client.admin().indices().preparePutTemplate(name).setTemplateConfig(templateConfig)
                         .execute().actionGet(time, unit);
             } catch (Exception e) {
-                ParsingExceptionUtils.abnormalTermination(e);
                 LOGGER.error("class=ESTemplateDAO||method=create||msg=put template fail||cluster={}||name={}", cluster,
                         name, e);
-                return null;
+                ParsingExceptionUtils.abnormalTermination(e);
             }
-        
+            return null;
         };
         ESIndicesPutTemplateResponse esIndicesPutTemplateResponse =getESIndicesPutTemplateResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT),
                             TimeUnit.SECONDS);
@@ -291,11 +302,11 @@ public class ESTemplateDAO extends BaseESDAO {
                         .actionGet(time, unit);
             
             } catch (Exception e) {
-                ParsingExceptionUtils.abnormalTermination(e);
                 LOGGER.error("class=ESTemplateDAO||method=create||put templates fail||clusterName={}||templateName={}",
                         cluster, name, e);
-                throw new ESOperateException("模板创建失败");
+                ParsingExceptionUtils.abnormalTermination(e);
             }
+            return null;
         };
         ESIndicesPutTemplateResponse esIndicesPutTemplateResponse = responseBiFunction.apply(
                 Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS);
@@ -332,11 +343,11 @@ public class ESTemplateDAO extends BaseESDAO {
         try {
             response = esClient.admin().indices().putTemplate(request).actionGet(120, TimeUnit.SECONDS);
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.warn(
-                "class=ESTemplateDAO||method=updateTemplate||update template fail||clusterName={}||templateName={}||esVersion={}||templateConfig={}||msg={}",
-                clusterName, templateName, esClient.getEsVersion(),
-                templateConfig.toJson(ESVersion.valueBy(esClient.getEsVersion())), e.getMessage(), e);
+                    "class=ESTemplateDAO||method=updateTemplate||update template fail||clusterName={}||templateName={}||esVersion={}||templateConfig={}||msg={}",
+                    clusterName, templateName, esClient.getEsVersion(),
+                    templateConfig.toJson(ESVersion.valueBy(esClient.getEsVersion())), e.getMessage(), e);
+            ParsingExceptionUtils.abnormalTermination(e);
            
         }
 
@@ -444,7 +455,7 @@ public class ESTemplateDAO extends BaseESDAO {
                     getClass().getSimpleName(), clusterName, templateName);
             throw new NullESClientException(clusterName);
         }
-        if (!exist(clusterName, templateName)) {
+        if (templateName != null && !exist(clusterName, templateName)) {
             return null;
         }
         ESIndicesGetTemplateRequest request = new ESIndicesGetTemplateRequest();
@@ -455,12 +466,12 @@ public class ESTemplateDAO extends BaseESDAO {
                 return esClient.admin().indices().getTemplate(request).actionGet(time, unit);
             
             } catch (Exception e) {
-                ParsingExceptionUtils.abnormalTermination(e);
                 LOGGER.warn(
                         "class=ESTemplateDAO||method=getTemplates||get templates fail||clusterName={}||templateName={}||msg={}",
                         clusterName, templateName, e.getMessage(), e);
-                return null;
+                ParsingExceptionUtils.abnormalTermination(e);
             }
+            return null;
         };
         
         return responseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT),
@@ -498,10 +509,11 @@ public class ESTemplateDAO extends BaseESDAO {
                     .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return response.getAcknowledged();
         } catch (Exception e) {
+            LOGGER.error("class=ESTemplateDAO||method=upsertSetting||clusterName={}", cluster,
+                    e);
             ParsingExceptionUtils.abnormalTermination(e);
-            return false;
         }
-       
+        return false;
     }
     
     
@@ -550,13 +562,12 @@ public class ESTemplateDAO extends BaseESDAO {
                     .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return response.getAcknowledged();
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error(
-                "class=ESTemplateDAO||method=updateSettingCheckAllocationAndShard||cluster={}||name={}",
-                cluster, name,  e);
-            return false;
+                    "class=ESTemplateDAO||method=updateSettingCheckAllocationAndShard||cluster={}||name={}",
+                    cluster, name,  e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
-       
+        return false;
     }
 
     /**
@@ -603,10 +614,10 @@ public class ESTemplateDAO extends BaseESDAO {
             response = tgtClient.admin().indices().preparePutTemplate(tgtTemplateName)
                 .setTemplateConfig(tgtTemplateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error(
-                "class=ESTemplateDAO||method=copyMappingAndAlias||srcCluster={}||srcTemplateName={}||tgtCluster={}||tgtTemplateName={}",
-                srcCluster, srcTemplateName, tgtCluster, tgtTemplateName, e);
+                    "class=ESTemplateDAO||method=copyMappingAndAlias||srcCluster={}||srcTemplateName={}||tgtCluster={}||tgtTemplateName={}",
+                    srcCluster, srcTemplateName, tgtCluster, tgtTemplateName, e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
 
         return response.getAcknowledged();
@@ -661,13 +672,12 @@ public class ESTemplateDAO extends BaseESDAO {
         try {
             return client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
+            LOGGER.error("class=BaseESDAO||method=getDirectResponseByClusterAndUrl||uri={}",
+                    client.getClusterName(), e.getMessage(), e);
             ParsingExceptionUtils.abnormalTermination(e);
-             LOGGER.error("class=BaseESDAO||method=getDirectResponseByClusterAndUrl||uri={}",
-                client.getClusterName(), e.getMessage(), e);
-            final DirectResponse directResponse = new DirectResponse();
-            directResponse.setRestStatus(RestStatus.SERVICE_UNAVAILABLE);
-            return directResponse;
         }
-    
+        final DirectResponse directResponse = new DirectResponse();
+        directResponse.setRestStatus(RestStatus.SERVICE_UNAVAILABLE);
+        return directResponse;
     }
 }

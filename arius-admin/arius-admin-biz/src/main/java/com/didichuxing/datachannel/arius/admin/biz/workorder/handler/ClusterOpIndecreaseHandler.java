@@ -32,11 +32,9 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.Getter;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -128,8 +126,15 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
 
             // 对于datanode的缩容，如果该节点上存在数据分片,做出警告
             if (content.getOperationType() == OpTaskTypeEnum.CLUSTER_SHRINK.getType()) {
-                Map<String, Integer> segmentsOfIpByCluster = esClusterService
-                    .synGetSegmentsOfIpByCluster(content.getPhyClusterName());
+                Map<String, Integer> segmentsOfIpByCluster = null;
+                try {
+                    segmentsOfIpByCluster = esClusterService
+                        .synGetSegmentsOfIpByCluster(content.getPhyClusterName());
+                } catch (ESOperateException e) {
+                    LOGGER.error("class=ClusterOpIndecreaseHandler||method=validateConsoleParam||errMsg=fail to get segments of ip by cluster",
+                            e);
+                    Result.buildFail("获取集群ip上的segment数目异常");
+                }
 
                 for (ESClusterRoleHost esClusterRoleHost : content.getClusterRoleHosts()) {
                     if (esClusterRoleHost.getRole().equals(ESClusterNodeRoleEnum.DATA_NODE.getDesc())
