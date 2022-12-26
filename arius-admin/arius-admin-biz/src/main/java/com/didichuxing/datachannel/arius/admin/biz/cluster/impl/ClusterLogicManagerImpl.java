@@ -38,7 +38,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterNodeSepc;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
@@ -85,6 +84,25 @@ import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.ElasticsearchTimeoutException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Component
 public class ClusterLogicManagerImpl implements ClusterLogicManager {
@@ -1064,9 +1082,20 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * 5. 获取gateway地址
      */
     private void buildClusterNodeInfo(ClusterLogicVO clusterLogicVO) {
-
         //获取gateway地址
         clusterLogicVO.setGatewayAddress(esGatewayClient.getGatewayAddress());
+        //获取活跃分片数
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicVO.getId());
+        AtomicReference<Long> activeShardNum = new AtomicReference<>(0L);
+        if (Objects.nonNull(clusterRegion)){
+            Map<String/*node*/, Long /*shardNum*/>  nodeShardsNum = eSClusterNodeService.syncGetNode2ShardNumMap(clusterRegion.getPhyClusterName());
+            Result<List<ESClusterRoleHostVO>>  ESClusterRoleHostVORes =clusterNodeManager.listClusterLogicNode(Math.toIntExact(clusterLogicVO.getId()));
+            ESClusterRoleHostVORes.getData().stream().forEach(node->{
+                activeShardNum.updateAndGet(v -> v + nodeShardsNum.get(node.getNodeSet()));
+            });
+        }
+
+        clusterLogicVO.setActiveShardNum(activeShardNum.get());
     }
 
     private TupleTwo<Result<Void>, /*projectId*/Integer> checkIndices(List<String> delIndices, Integer logicId) {
