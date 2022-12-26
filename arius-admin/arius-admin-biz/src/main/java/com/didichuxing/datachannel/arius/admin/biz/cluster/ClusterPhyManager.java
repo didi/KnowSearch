@@ -51,7 +51,7 @@ public interface ClusterPhyManager {
      * @param retryCount 重试次数
      * @return
      */
-    void syncTemplateMetaData(String cluster, int retryCount);
+    void syncTemplateMetaData(String cluster, int retryCount) throws ESOperateException;
 
     /**
      * 集群是否存在

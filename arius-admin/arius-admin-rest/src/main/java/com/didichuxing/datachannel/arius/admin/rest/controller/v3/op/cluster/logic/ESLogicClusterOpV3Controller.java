@@ -14,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhy
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyWithLogicClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -86,7 +87,7 @@ public class ESLogicClusterOpV3Controller {
     @ResponseBody
     @ApiOperation(value = "条件获取逻辑集群列表")
     public PaginationResult<ClusterLogicVO> pageGetClusterLogics(HttpServletRequest request,
-                                                                 @RequestBody ClusterLogicConditionDTO condition) throws NotFindSubclassException {
+                                                                 @RequestBody ClusterLogicConditionDTO condition) throws NotFindSubclassException, ESOperateException {
         return clusterLogicManager.pageGetClusterLogics(condition, HttpRequestUtil.getProjectId(request));
     }
 
@@ -184,5 +185,12 @@ public class ESLogicClusterOpV3Controller {
     public Result<List<ClusterPhyWithLogicClusterVO>> listLogicClusterWithClusterPhyByProjectId(HttpServletRequest request,
                                                                                                 @PathVariable("projectId")Integer projectId) {
         return clusterLogicManager.listLogicClusterWithClusterPhyByProjectId(projectId);
+    }
+
+    @GetMapping("/logic-cluster-by-phy-name")
+    @ResponseBody
+    @ApiOperation(value = "获取物理集群所对应的逻辑集群名")
+    public Result<List<ClusterLogicVO>> listClusterLogicByPhyName(@RequestParam(value = "phyClusterName", required = false) String phyClusterName) {
+        return clusterLogicManager.listClusterLogicByPhyName(phyClusterName);
     }
 }

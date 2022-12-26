@@ -27,8 +27,6 @@ public class ESUserDTO extends BaseDTO {
     @ApiModelProperty("验证码")
     private String  verifyCode;
 
-   
-
     @ApiModelProperty("备注")
     private String  memo;
 
@@ -46,7 +44,10 @@ public class ESUserDTO extends BaseDTO {
 
     @ApiModelProperty("数据中心")
     private String  dataCenter;
+
     @ApiModelProperty("项目id")
     private Integer projectId;
 
+    @ApiModelProperty("项目默认使用的es user")
+    private Boolean defaultDisplay;
 }

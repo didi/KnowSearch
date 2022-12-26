@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
+import static com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil.obj2Obj;
 import static com.didichuxing.datachannel.arius.admin.core.service.project.impl.ESUserServiceImpl.VERIFY_CODE_LENGTH;
 
 import com.didichuxing.datachannel.arius.admin.biz.project.ESUserManager;
@@ -8,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
@@ -15,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESU
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
@@ -23,15 +26,16 @@ import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
+import java.util.Collections;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.security.common.vo.project.ProjectVO;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.didiglobal.knowframework.security.util.HttpRequestUtil;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -55,7 +59,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ESUserManagerImpl implements ESUserManager {
     private static final ILog    LOGGER = LogFactory.getLog(ESUserManagerImpl.class);
-    private static final String ES_USER_ERROR_MSG="应用下未匹配到逻辑集群，es user 不可以被设置为 %s 和 %s";
+    private static final String ES_USER_ERROR_MSG="应用下未匹配到逻辑集群，ES_User 不可以被设置为 %s 和 %s";
     @Autowired
     private ProjectService       projectService;
     @Autowired
@@ -66,6 +70,8 @@ public class ESUserManagerImpl implements ESUserManager {
     private RoleTool            roleTool;
     @Autowired
     private ClusterLogicService  clusterLogicService;
+    @Autowired
+    private ClusterPhyService    clusterPhyService;
     @Autowired
     private ClusterRegionService clusterRegionService;
 
@@ -118,6 +124,13 @@ public class ESUserManagerImpl implements ESUserManager {
         }
         initESUser(appDTO, projectId);
 
+        //检查esuser选择的集群并设置集群
+        Result<Void> checkClusterResult = checkClusterAuthAndSetCluster(appDTO);
+        if (checkClusterResult.failed()){
+            LOGGER.warn("class=ESUserManagerImpl||method=registerESUser||fail msg={}", checkClusterResult.getMessage());
+            return Result.buildFail(checkClusterResult.getMessage());
+        }
+
         final TupleTwo</*创建的es user*/Result, /*创建的es user po*/ ESUserPO> resultESUserPOTuple = esUserService
             .registerESUser(appDTO, operator);
 
@@ -135,6 +148,47 @@ public class ESUserManagerImpl implements ESUserManager {
    
     
     /**
+     * @param esUserName   esUser
+     * @param projectId
+     * @param operator  操作人
+     * @return {@code Result<Void>}
+     */
+    @Override
+    public Result<Void> setDefaultDisplay(int esUserName, int projectId, String operator) {
+        if (!projectService.checkProjectExist(projectId)) {
+            return Result.buildFail("应用不存在");
+        }
+        if (esUserService.getEsUserById(esUserName) == null) {
+            return Result.buildFail("es User不存在");
+        }
+        if (esUserService.getEsUserById(esUserName).getDefaultDisplay() == true) {
+            return Result.buildFail("该es User是应用默认es User，无需进行设置");
+        }
+
+        //获取当前应用下所有的esuser，并将之前应用默认的es user进行解绑
+        List<ESUser> esUsers = esUserService.listESUsers(Collections.singletonList(projectId));
+        for (ESUser esUser : esUsers) {
+            if (esUser.getDefaultDisplay() == true && esUser.getId()!=esUserName) {
+                Result<Void> result = unBindDefaultDisplay(esUser.getId(), projectId, operator);
+                if (result.failed()) {
+                    return Result.buildFail(String.format("解绑应用默认es User:%s失败，不能设置%s为应用默认es User", esUser.getId(), esUserName));
+                }
+            }
+        }
+        ESUser esUser = esUserService.getEsUserById(esUserName);
+        //将需要设置为默认应用的es user进行存储
+        esUser.setDefaultDisplay(true);
+        TupleTwo<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> resultESUserTuple = esUserService
+                .editUser(obj2Obj(esUser, ESUserDTO.class));
+        if (resultESUserTuple.v1().success()) {
+            //将操作记录进行保存
+            saveOperateRecord(String.format("将项目[%s]中es user:[%s]设置为项目默认的es user", projectId, esUser),
+                    projectId, operator, OperateTypeEnum.APPLICATION_ACCESS_CHANGE);
+        }
+        return resultESUserTuple.v1();
+    }
+
+    /**
      * @param esUserDTO   es user dto
      * @param operator 操作人或角色
      * @return {@code Result<Void>}
@@ -149,20 +203,25 @@ public class ESUserManagerImpl implements ESUserManager {
             LOGGER.warn("class=ESUserManagerImpl||method=editESUser||fail msg={}", checkResult.getMessage());
             return checkResult;
         }
-       
+        Result<Void> checkClusterResult = checkClusterAuthAndSetCluster(esUserDTO);
+        if (checkClusterResult.failed()) {
+            LOGGER.warn("class=ESUserManagerImpl||method=editESUser||fail msg={}", checkClusterResult.getMessage());
+            return checkClusterResult;
+        }
+
         //获取更新之前的po
         final ESUser oldESUser = esUserService.getEsUserById(esUserDTO.getId());
         //校验当前esUserDTO中的projectId是否存在于esUser
         //更新之后的结果获取
         final TupleTwo<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> resultESUserTuple = esUserService
-            .editUser(esUserDTO);
+                .editUser(esUserDTO);
 
         if (resultESUserTuple.v1().success()) {
             // 操作记录
-            saveOperateRecord(String.format("修改访问模式:%s-->%s",
+            saveOperateRecord(String.format("修改访问模式:%s-->%s,修改访问集群:%s-->%s",
                             ProjectSearchTypeEnum.valueOf(oldESUser.getSearchType()).getDesc(),
-                            ProjectSearchTypeEnum.valueOf(esUserDTO.getSearchType()).getDesc()), oldESUser.getProjectId(),
-                    operator, OperateTypeEnum.APPLICATION_ACCESS_MODE);
+                            ProjectSearchTypeEnum.valueOf(esUserDTO.getSearchType()).getDesc(),oldESUser.getCluster(), esUserDTO.getCluster()), oldESUser.getProjectId(),
+                    operator, OperateTypeEnum.APPLICATION_ACCESS_CHANGE);
         }
         return resultESUserTuple.v1();
     }
@@ -268,7 +327,83 @@ public class ESUserManagerImpl implements ESUserManager {
                                    OperateTypeEnum operateTypeEnum) {
         operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,projectId,operateTypeEnum);
     }
-    
+
+    /**
+     * 获取原生模式下项目的访问集群列表
+     * @param projectId
+     * @return Result<List<String>>
+     */
+    @Override
+    public Result<List<String>> listClusterByAppInPrimitiveType(Integer projectId) {
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            //超级projectId返回对应的独立的物理集群
+            List<String> clusterPhyList = clusterPhyService.listAllClusters().stream()
+                    .filter(clusterPhy -> ClusterResourceTypeEnum.PRIVATE.getCode() == clusterPhy.getResourceType())
+                    .map(ClusterPhy::getCluster)
+                    .distinct()
+                    .collect(Collectors.toList());
+            return Result.buildSucc(clusterPhyList);
+        } else {
+            //普通项目返回对应的独立的逻辑集群
+            List<String> clusterLogicList = clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId).stream()
+                    .filter(clusterLogic -> ClusterResourceTypeEnum.PRIVATE.getCode() == clusterLogic.getType())
+                    .map(ClusterLogic::getName)
+                    .distinct().collect(Collectors.toList());
+            return Result.buildSucc(clusterLogicList);
+        }
+    }
+
+    /**
+     * 获取集群模式下项目的访问集群列表
+     * @param projectId
+     * @return Result<List<String>>
+     */
+    @Override
+    public Result<List<String>> listClusterByAppInClusterType(Integer projectId) {
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            //超级projectId返回对应的物理集群
+            List<String> clusterPhyList = clusterPhyService.listAllClusters().stream()
+                    .map(ClusterPhy::getCluster)
+                    .distinct()
+                    .collect(Collectors.toList());
+            return Result.buildSucc(clusterPhyList);
+        } else {
+            //普通项目返回对应的逻辑集群
+            List<String> clusterLogicList = clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId).stream()
+                    .map(ClusterLogic::getName)
+                    .distinct().collect(Collectors.toList());
+            return Result.buildSucc(clusterLogicList);
+        }
+    }
+
+    /**
+     * 对被设置为应用默认的es user进行解绑
+     *
+     * @param esUserName ES用户
+     * @param projectId
+     * @param operator 操作人 {@link   com.didichuxing.datachannel.arius.admin.core.component.RoleTool#isAdmin}
+     * @return {@code Result<Void>}
+     */
+    private Result<Void> unBindDefaultDisplay(int esUserName, int projectId, String operator) {
+        if (!roleTool.isAdmin(operator)) {
+            return Result.buildFail("当前操作者权限不足,需要管理员权限");
+        }
+        if (!projectService.checkProjectExist(projectId)) {
+            return Result.buildFail("应用不存在");
+        }
+        //获取需要进行解绑的默认es user并进行解绑
+        ESUser esUser = esUserService.getEsUserById(esUserName);
+        esUser.setDefaultDisplay(false);
+        TupleTwo<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> resultESUserTuple = esUserService
+                .editUser(obj2Obj(esUser, ESUserDTO.class));
+        if (resultESUserTuple.v1().success()) {
+            //将操作记录进行保存
+            saveOperateRecord(String.format("项目[%s]中es user:[%s],属于项目默认的es user,对其进行解绑", projectId, esUser),
+                    projectId, operator, OperateTypeEnum.APPLICATION_ACCESS_CHANGE);
+        }
+        return resultESUserTuple.v1();
+    }
+
     /**
      *  检查集群并设置集群
      *
@@ -318,7 +453,7 @@ public class ESUserManagerImpl implements ESUserManager {
         }
         // 索引模式默认集群设置未 null
         if (searchTypeEnum.equals(ProjectSearchTypeEnum.TEMPLATE)) {
-            esUserDTO.setCluster(null);
+            esUserDTO.setCluster("");
         }
         return Result.buildSucc();
     }

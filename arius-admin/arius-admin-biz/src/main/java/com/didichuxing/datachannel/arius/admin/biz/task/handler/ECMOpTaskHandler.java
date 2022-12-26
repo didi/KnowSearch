@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.context.ApplicationListener;
@@ -209,7 +210,7 @@ public class ECMOpTaskHandler extends AbstractOpTaskHandler implements Applicati
      *
      * @param ecmTask 任务
      */
-    private void handleSuccessEcmPluginRestartTask(EcmTask ecmTask) {
+    private void handleSuccessEcmPluginRestartTask(EcmTask ecmTask) throws ESOperateException {
         OrderDetailBaseVO orderDetailBaseVO = workOrderManager.getById(ecmTask.getWorkOrderId()).getData();
         PhyClusterPluginOperationContent content = JSON.parseObject(orderDetailBaseVO.getDetail(),
             PhyClusterPluginOperationContent.class);

@@ -314,7 +314,7 @@ public interface ESIndexService {
     /**
      * 获取原生集群索引名称列表,不包含特殊索引（带.开头）
      */
-    List<String> syncGetIndexName(String clusterName);
+    List<String> syncGetIndexName(String clusterName) throws ESOperateException;
 
     /**
      * 索引是否存在
@@ -406,7 +406,7 @@ public interface ESIndexService {
      * @param indexCatCellList 索引cat/index基本信息
      */
     List<IndexCatCell> buildIndexAliasesAndBlockInfo(String cluster, List<IndexCatCell> indexCatCellList);
-    
+
     /**
      * 更新索引映射
      *
@@ -433,7 +433,7 @@ public interface ESIndexService {
      * @param indexName
      * @return boolean
      */
-    boolean deleteIndex(String clusterName, String indexName);
+    boolean deleteIndex(String clusterName, String indexName) throws ESOperateException;
     
     /**
      * 返回与指定别名匹配的索引数

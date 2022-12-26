@@ -174,15 +174,19 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
     
     @Override
     public PaginationResult<ShardDistributionVO> shardDistributionPage(ClusterPhyQuickCommandShardsQueryDTO condition,
-                                                                       Integer projectId)
-            throws NotFindSubclassException {
-        BaseHandle baseHandle = handleFactory.getByHandlerNamePer(
-                PageSearchHandleTypeEnum.QUICK_COMMAND_SHARD.getPageSearchType());
-        if (baseHandle instanceof QuickCommandShardsDistributionPageSearchHandle) {
-            QuickCommandShardsDistributionPageSearchHandle handle = (QuickCommandShardsDistributionPageSearchHandle) baseHandle;
-            return handle.doPage(condition, projectId);
+                                                                       Integer projectId) {
+
+        BaseHandle baseHandle = null;
+        try {
+            baseHandle = handleFactory.getByHandlerNamePer(
+                    PageSearchHandleTypeEnum.QUICK_COMMAND_SHARD.getPageSearchType());
+            if (baseHandle instanceof QuickCommandShardsDistributionPageSearchHandle) {
+                QuickCommandShardsDistributionPageSearchHandle handle = (QuickCommandShardsDistributionPageSearchHandle) baseHandle;
+                return handle.doPage(condition, projectId);
+            }
+        } catch (NotFindSubclassException e) {
+            LOGGER.error("class=IndicesManagerImpl||method=shardDistributionPage||errMsg={}", e.getMessage(), e);
         }
-        
         return PaginationResult.buildFail("获取索引分页信息失败");
     }
     

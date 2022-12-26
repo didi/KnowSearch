@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordina
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ClusterMemInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.PendingTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
@@ -47,20 +48,20 @@ public interface ESClusterNodeService {
     /**
      * 获取ES集群PendingTask
      */
-    List<PendingTask> syncGetPendingTask(String clusterName);
+    List<PendingTask> syncGetPendingTask(String clusterName) throws ESOperateException;
 
     Map<String/*node*/, Long /*shardNum*/> syncGetNode2ShardNumMap(String clusterName);
 
     /**
      * 获取ES集群大索引(大于10亿文档数)信息
      */
-    List<BigIndexMetrics> syncGetBigIndices(String clusterName);
+    List<BigIndexMetrics> syncGetBigIndices(String clusterName) throws ESOperateException;
 
     /**
      * 获取ES集群某个节点上的索引个数
      * @param nodes 主机名或IP集合字符串 , 用逗号分隔  
      */
-    int syncGetIndicesCount(String cluster, String nodes);
+    int syncGetIndicesCount(String cluster, String nodes) throws ESOperateException;
 
     /**
      * 获取ES集群的内存使用统计信息
@@ -99,7 +100,7 @@ public interface ESClusterNodeService {
      * @param cluster 集群
      * @return {@link Map}<{@link String}, {@link Integer}>
      */
-    Map<String, Integer> syncGetNodesCpuNum(String cluster);
+    Map<String, Integer> syncGetNodesCpuNum(String cluster) throws ESOperateException;
     
     /**
      * 同步获取节点插件元组列表
@@ -107,7 +108,7 @@ public interface ESClusterNodeService {
      * @param phyCluster phy集群
      * @return {@code List<TupleTwo<String, List<String>>>}
      */
-    public List<TupleTwo</*node name*/String,/*plugin names*/List<String>>> syncGetNodePluginTupleList(String phyCluster);
+    public List<TupleTwo</*node name*/String,/*plugin names*/List<String>>> syncGetNodePluginTupleList(String phyCluster) throws ESOperateException;
     
     /**
      * 确定dcdr 和pipeline存在于集群中
