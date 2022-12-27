@@ -1465,7 +1465,7 @@ INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edi
 
 
 
-INSERT INTO `es_package` (`id`, `url`, `es_version`, `creator`, `release`, `manifest`, `desc`, `create_time`, `update_time`, `delete_flag`) VALUES (1, 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.16.tar.gz', '5.X', 'admin', 0, '4', '5.X开源版本', '2022-07-12 10:59:32', '2022-07-12 10:59:32', 0);
+INSERT INTO `es_package` (`id`, `url`, `es_version`, `creator`, `release`, `manifest`, `desc`, `create_time`, `update_time`, `delete_flag`) VALUES (1, 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.16.tar.gz', '5.X', 'admin', 0, '4', '5.X社区开源版本', '2022-07-12 10:59:32', '2022-07-12 10:59:32', 0);
 INSERT INTO `es_package` (`id`, `url`, `es_version`, `creator`, `release`, `manifest`, `desc`, `create_time`, `update_time`, `delete_flag`) VALUES (2, 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.8.23.tar.gz', '6.X', 'admin', 0, '4', '6.X社区开源版本', '2022-07-12 10:59:32', '2022-12-27 16:06:30', 0);
 INSERT INTO `es_package` (`id`, `url`, `es_version`, `creator`, `release`, `manifest`, `desc`, `create_time`, `update_time`, `delete_flag`) VALUES (3, 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.17.8-linux-x86_64.tar.gz', '7.X', 'admin', 0, '4', '7.X社区开源版本', '2022-07-12 10:59:32', '2022-12-27 16:06:29', 0);
 INSERT INTO `es_package` (`id`, `url`, `es_version`, `creator`, `release`, `manifest`, `desc`, `create_time`, `update_time`, `delete_flag`) VALUES (4, 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.5.3-linux-x86_64.tar.gz', '8.X', 'admin', 0, '4', '8.X社区开源版本', '2022-07-12 10:59:32', '2022-12-27 15:50:37', 0);
