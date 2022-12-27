@@ -1464,68 +1464,14 @@ INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edi
 INSERT INTO `arius_config_info`(`id`, `value_group`, `value_name`, `value`, `edit`, `dimension`, `status`, `memo`, `create_time`, `update_time`, `search_time`) VALUES (1669, 'arius.dashboard.threshold.group', 'index.shard.big_threshold', '{\"name\":\"index.shard.big_threshold\",\"metrics\":\"shardSize\",\"unit\":\"G\",\"compare\":\">\",\"value\":20}', 1, -1, 1, '索引 [大 shard 阈值] 定义', '2022-08-26 15:25:07', '2022-08-29 10:28:24', '2022-08-26 15:25:07');
 
 
-####
-insert into es_package (id, url, es_version, creator, `release`, manifest, `desc`, create_time, update_time, delete_flag)
-values  (1, 'registry.xiaojukeji.com/didibuild/elasticsearch-image.hnb-pre-v.arius.data-online.fd.didi.com.centos72:9721f7f4', '7.6.1.302', 'linyunan', 0, '3', '', '2021-03-30 20:35:03.0', '2021-10-11 16:07:51.0', 1),
-        (3, 'registry.xiaojukeji.com/didibuild/elasticsearch-image.hnb-pre-v.arius.data-online.fd.didi.com.centos72:06b79e62', '7.6.0.1203', 'linyunan', 0, '3', '', '2021-04-01 14:56:42.0', '2021-04-01 14:56:42.0', 0),
-        (15, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/elasticsearch.tar.gz', '7.6.0.1401', 'linyunan', 0, '4', '', '2021-06-21 14:56:09.0', '2021-09-14 15:33:36.0', 0),
-        (17, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/elasticsearch.tar.gz', '7.6.0.1402', 'admin', 0, '4', 'fdsafsd2', '2021-06-21 14:57:53.0', '2021-10-27 10:34:09.0', 0),
-        (23, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/7.6.0.13%404', '7.6.0.13', 'admin', 0, '4', 'ss', '2021-10-28 12:28:07.0', '2021-10-28 12:30:24.0', 1),
-        (27, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/234.2.3%404', '234.2.3', 'admin', 0, '4', 'dd', '2021-10-28 19:47:08.0', '2021-10-28 19:55:01.0', 1),
-        (29, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/234.2.4%404.tar.gz', '234.2.4', 'admin', 0, '4', 'dd', '2021-10-28 19:54:38.0', '2021-11-23 14:36:35.0', 1),
-        (31, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/2.1.2.1%404.tar.gz', '2.1.2.1', 'admin', 0, '4', 'yyf测试', '2021-11-01 10:41:20.0', '2021-11-01 17:13:38.0', 1),
-        (33, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/2.12.3.4%404.tar.gz', '2.12.3.4', 'admin', 0, '4', 'ceshi ', '2021-11-01 17:19:04.0', '2021-11-02 11:15:43.0', 1),
-        (35, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/2.3.4.5%404.tar.gz', '2.3.4.5', 'admin', 0, '4', 'ceshi ', '2021-11-01 17:19:59.0', '2021-11-02 11:15:41.0', 1),
-        (37, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/4.1.2.2%404.tar.gz', '4.1.2.2', 'admin', 0, '4', '测试沃尔特与会计银行股份大晚上是的法规环境股份的地方VG东风股份更好地发挥过', '2021-11-02 10:56:31.0', '2021-11-02 11:15:38.0', 1),
-        (39, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/3.3.3.3%404.tar.gz', '3.3.3.3', 'admin', 0, '4', '测试', '2021-11-02 11:14:49.0', '2021-11-02 11:15:35.0', 1),
-        (41, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/1.1.1.2%404.tar.gz', '1.1.1.2', 'admin', 0, '4', '测试测试', '2021-11-08 18:27:02.0', '2021-11-08 18:29:20.0', 1),
-        (43, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/8.8.8.8%404.tar.gz', '8.8.8.8', 'admin', 0, '4', '测试请忽略、', '2021-11-17 14:47:20.0', '2021-11-23 14:36:33.0', 1),
-        (45, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/7.7.7.7%404.tar.gz', '7.7.7.7', 'admin', 0, '4', '测试', '2021-11-18 14:48:38.0', '2021-11-23 14:36:30.0', 1),
-        (47, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/1.2.3.4%404.tar.gz', '1.2.3.4', 'admin', 0, '4', '', '2021-11-19 19:08:06.0', '2021-11-23 14:36:27.0', 1),
-        (49, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/1.9.89.1%404.tar.gz', '1.9.89.1', 'admin', 0, '4', '', '2021-11-19 19:08:55.0', '2021-11-23 14:36:23.0', 1),
-        (51, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/2.2.2.2%404.tar.gz', '2.2.2.3', 'admin', 0, '4', '测试测试测试', '2021-11-25 18:00:47.0', '2021-11-25 20:21:44.0', 1),
-        (53, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/2.2.2.5-4.tar.gz', '2.2.2.5', 'admin', 0, '4', null, '2021-11-25 20:16:51.0', '2021-11-25 20:17:23.0', 1),
-        (55, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/6.6.6.6-4.tar.gz', '6.6.6.6', 'admin', 0, '4', '测试', '2021-11-26 10:39:19.0', '2021-11-26 10:39:45.0', 1),
-        (57, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/6.6.6.6-4.tar.gz', '6.6.6.5', 'admin', 0, '4', '测试请忽略人', '2021-12-21 10:49:03.0', '2021-12-21 10:49:38.0', 0),
-        (89, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/7.10.2.0-4.tar.gz', '7.10.2.0', 'admin', 0, '4', 'test', '2021-12-25 11:56:11.0', '2022-06-22 14:38:24.0', 0),
-        (203, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/6.6.1.0-4.tar.gz', '6.6.1.0', 'admin', 0, '4', 'ssd', '2022-01-10 19:14:54.0', '2022-06-13 17:32:19.0', 1),
-        (205, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/6.6.2.0-4.tar.gz', '6.6.2.0', 'admin', 0, '4', 'ss', '2022-01-10 20:23:07.0', '2022-01-10 20:23:07.0', 0),
-        (211, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/2.3.3.5-4.tar.gz', '2.3.3.5', 'admin', 0, '4', 'ss', '2022-01-28 15:59:57.0', '2022-01-28 16:56:42.0', 1),
-        (213, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/2.3.3.6-4.tar.gz', '2.3.3.6', 'admin', 0, '4', 'dd', '2022-01-28 16:58:46.0', '2022-01-28 16:58:46.0', 0),
-        (215, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/1.1.1.1-4.tar.gz', '1.1.1.1', 'admin', 0, '4', '测试请忽略，使用完毕，QA会删除', '2022-02-18 10:49:07.0', '2022-03-23 19:55:04.0', 1),
-        (217, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/2.2.2.2-4.tar.gz', '2.2.2.2', 'admin', 0, '4', '测试请忽略，使用完毕，QA会删除', '2022-02-18 10:49:37.0', '2022-05-17 17:38:47.0', 1),
-        (219, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/3.3.3.3-4.tar.gz', '3.3.3.3', 'admin', 0, '4', '测试请忽略，使用完毕，QA会删除哦f', '2022-02-18 10:50:03.0', '2022-03-29 14:32:32.0', 1),
-        (221, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/4.4.4.4-4.tar.gz', '4.4.4.4', 'admin', 0, '4', '测试', '2022-03-01 11:32:58.0', '2022-03-01 11:33:05.0', 1),
-        (223, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/7.7.7.7-4.tar.gz', '7.7.7.7', 'admin', 0, '4', 'ceshi ', '2022-03-01 17:40:56.0', '2022-05-23 10:17:09.0', 1),
-        (225, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/99.2.2.2222-4.tar.gz', '99.2.2.2222', 'admin', 0, '4', '测试请忽略', '2022-03-29 14:34:50.0', '2022-03-29 14:47:04.0', 1),
-        (227, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/10.20.30.40-4.tar.gz', '10.20.30.40', 'admin', 0, '4', '测试请忽略', '2022-03-29 14:57:14.0', '2022-03-29 14:59:26.0', 1),
-        (233, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/1.2.3.3333-4.tar.gz', '1.2.3.3333', 'yyfQA_admin', 0, '4', '测试请忽略', '2022-04-11 14:18:18.0', '2022-07-04 17:25:18.0', 0),
-        (257, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/elasticsearch.tar.gz', '7.6.2.1', '', 0, '4', 'test', '2021-06-21 14:56:09.0', '2022-06-24 18:16:58.0', 1),
-        (259, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/1.2.2.1-4.tar.gz', '1.2.2.1', '', 0, '4', 'test0624', '2022-06-24 18:07:38.0', '2022-06-24 18:16:53.0', 1),
-        (261, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/9.9.9.9-4.tar.gz', '9.9.9.9', '', 0, '4', '111', '2022-06-24 18:08:22.0', '2022-06-24 18:16:50.0', 1),
-        (263, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/1.1.1.3-4.tar.gz', '1.1.1.4', 'yyfQA_admin', 0, '4', 'test111服务范围框架发改委开复工文件和管控', '2022-06-24 18:17:43.0', '2022-07-05 10:10:46.0', 0),
-        (265, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/9.9.9.9-4.tar.gz', '9.9.9.9', 'admin', 0, '4', 'test', '2022-06-27 10:11:50.0', '2022-08-07 10:45:40.0', 1),
-        (267, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/7.6.2.1-4.tar.gz', '7.6.2.1', 'admin', 0, '4', 'test1', '2022-06-27 18:26:06.0', '2022-07-07 12:13:01.0', 0),
-        (281, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/7.6.0.1403-4.tar.gz', '7.6.0.1403', 'admin', 0, '4', '7.6.0.1401', '2022-07-07 16:15:42.0', '2022-07-07 16:15:42.0', 0),
-        (283, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/5.6.2.0-4.tar.gz', '5.6.2.0', 'yyfQA_admin', 0, '4', '开源版本', '2022-07-12 10:58:51.0', '2022-07-26 15:35:53.0', 1),
-        (285, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/6.6.1.0-4.tar.gz', '6.6.1.0', 'yyfQA_admin', 0, '4', '开源版本', '2022-07-12 10:59:32.0', '2022-07-12 10:59:32.0', 0),
-        (287, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/8.0.1.0-4.tar.gz', '8.0.1.0', 'admin', 0, '4', '开源版本', '2022-07-13 16:51:07.0', '2022-08-08 18:08:44.0', 0),
-        (289, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/1.2.3.4-4.tar.gz', '1.2.3.4', 'admin', 0, '4', '的', '2022-07-21 20:30:03.0', '2022-07-21 20:30:16.0', 1),
-        (291, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/1.2.1.3-null.tar.gz', '1.2.1.3', 'admin', 0, '4', '233', '2022-07-26 15:31:14.0', '2022-08-09 11:43:41.0', 1),
-        (293, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/2.2.2.6-4.tar.gz', '2.2.2.6', 'admin', 0, '4', '9', '2022-07-28 16:06:11.0', '2022-08-07 10:44:22.0', 1),
-        (295, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/1.5.6.1-4.tar.gz', '1.5.6.1', 'admin', 0, '4', '11', '2022-07-28 17:18:50.0', '2022-07-28 17:18:56.0', 1),
-        (297, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/1.1.2.4-4.tar.gz', '1.1.2.4', 'admin', 0, '4', '123', '2022-07-28 20:31:10.0', '2022-08-07 10:44:18.0', 1),
-        (299, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/8.8.1.8-4.tar.gz', '8.8.1.8', 'admin', 0, '4', '测试删除', '2022-08-08 10:29:18.0', '2022-08-08 10:29:23.0', 1),
-        (301, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/7.6.2.0-4.tar.gz', '7.6.2.0', 'admin', 0, '4', '开源版本', '2022-08-08 18:08:30.0', '2022-08-08 18:08:30.0', 0),
-        (303, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/6.8.20.0-4.tar.gz', '6.8.20.0', 'admin', 0, '4', '开源版本', '2022-08-08 18:10:12.0', '2022-08-08 18:10:12.0', 0),
-        (305, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/5.6.2.0-4.tar.gz', '5.6.2.0', 'admin', 0, '4', '开源版本', '2022-08-08 18:11:17.0', '2022-08-08 18:11:17.0', 0),
-        (307, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/2.1.1.2-4.tar.gz', '2.1.1.2', 'admin', 0, '4', 'hhh', '2022-08-08 18:16:44.0', '2022-08-08 18:16:51.0', 1),
-        (309, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/1.2.3.1-4.tar.gz', '1.2.3.1', 'admin', 0, '4', 'lll', '2022-08-09 10:33:14.0', '2022-08-09 10:35:06.0', 1),
-        (311, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/1.2.1.3-4.tar.gz', '1.2.1.3', 'admin', 0, '4', '123', '2022-08-09 11:44:32.0', '2022-08-09 11:45:03.0', 1),
-        (313, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/1.2.1.3-4.tar.gz', '7.6.1.2', 'admin', 0, '4', '123123', '2022-08-09 11:50:30.0', '2022-08-25 20:29:25.0', 0),
-        (317, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/4.3.2.2-4.tar.gz', '4.3.2.2', 'admin', 0, '4', 'temp特色图等待', '2022-08-16 11:12:39.0', '2022-08-16 11:14:00.0', 1),
-        (319, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/6.6.6.3-4.tar.gz', '6.6.6.3', 'admin', 0, '4', '测试', '2022-08-25 21:45:02.0', '2022-08-25 21:45:17.0', 1),
-        (321, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/1.2.3.1-4.tar.gz', '6.6.6.6', 'admin', 0, '4', '1', '2022-08-26 15:47:48.0', '2022-08-27 14:55:35.0', 0);
+
+INSERT INTO `es_package` (`id`, `url`, `es_version`, `creator`, `release`, `manifest`, `desc`, `create_time`, `update_time`, `delete_flag`) VALUES (1, 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.16.tar.gz', '5.X', 'admin', 0, '4', '5.X开源版本', '2022-07-12 10:59:32', '2022-07-12 10:59:32', 0);
+INSERT INTO `es_package` (`id`, `url`, `es_version`, `creator`, `release`, `manifest`, `desc`, `create_time`, `update_time`, `delete_flag`) VALUES (2, 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.8.23.tar.gz', '6.X', 'admin', 0, '4', '6.X社区开源版本', '2022-07-12 10:59:32', '2022-12-27 16:06:30', 0);
+INSERT INTO `es_package` (`id`, `url`, `es_version`, `creator`, `release`, `manifest`, `desc`, `create_time`, `update_time`, `delete_flag`) VALUES (3, 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.17.8-linux-x86_64.tar.gz', '7.X', 'admin', 0, '4', '7.X社区开源版本', '2022-07-12 10:59:32', '2022-12-27 16:06:29', 0);
+INSERT INTO `es_package` (`id`, `url`, `es_version`, `creator`, `release`, `manifest`, `desc`, `create_time`, `update_time`, `delete_flag`) VALUES (4, 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.5.3-linux-x86_64.tar.gz', '8.X', 'admin', 0, '4', '8.X社区开源版本', '2022-07-12 10:59:32', '2022-12-27 15:50:37', 0);
+INSERT INTO `es_package` (`id`, `url`, `es_version`, `creator`, `release`, `manifest`, `desc`, `create_time`, `update_time`, `delete_flag`) VALUES (5, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/6.6.1.0-4.tar.gz', '6.6.1.903', 'admin', 0, '4', '6.6.1.903滴滴内部版本', '2022-07-12 10:59:32', '2022-12-27 15:48:23', 0);
+INSERT INTO `es_package` (`id`, `url`, `es_version`, `creator`, `release`, `manifest`, `desc`, `create_time`, `update_time`, `delete_flag`) VALUES (6, 'https://s3-gzpu-inter.didistatic.com/logi-data-es/elasticsearch.tar.gz', '7.6.0.1401', 'admin', 0, '4', '7.6.0.1401滴滴内部版本', '2022-07-12 10:59:32', '2022-07-12 10:59:32', 0);
+
 /*
 0.3.1原始sql
 UPDATE kf_security_permission SET permission_name = 'Kibana', parent_id = 1609, leaf = 1, level = 2, description = 'Kibana', create_time = '2022-05-24 18:08:26.0', update_time = '2022-06-14 16:44:02.0', is_delete = 0, app_name = 'know_search' WHERE id = 1855;
