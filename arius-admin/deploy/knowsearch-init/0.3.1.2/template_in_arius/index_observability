@@ -1,0 +1,15 @@
+{
+  "dataCenter": "cn",
+  "name": "index_observability",
+  "resourceId": #resourceId,
+  "level": 1,
+  "cyclicalRoll": 0,
+  "expireTime": -1,
+  "dateField": "logTime",
+  "dateFieldFormat": "epoch_millis",
+  "diskSize": 200,
+  "dataType": 0,
+  "desc": "可观测性对接数据上报模版",
+  "mapping": "{\"properties\":{\"logType\":{\"type\":\"keyword\"},\"hostName\":{\"type\":\"keyword\"},\"fileName\":{\"type\":\"keyword\"},\"metricName\":{\"type\":\"keyword\"},\"httpTarget\":{\"type\":\"keyword\"},\"endEpochNanos\":{\"type\":\"long\"},\"logThread\":{\"type\":\"keyword\"},\"diskPath\":{\"type\":\"keyword\"},\"metricValue\":{\"type\":\"double\"},\"className\":{\"type\":\"keyword\"},\"httpMethod\":{\"type\":\"keyword\"},\"deviceName\":{\"type\":\"keyword\"},\"metricUnit\":{\"type\":\"keyword\"},\"spanId\":{\"type\":\"keyword\"},\"metricType\":{\"type\":\"keyword\"},\"logLevel\":{\"type\":\"keyword\"},\"httpUrl\":{\"type\":\"keyword\"},\"instrumentationScopeInfoName\":{\"type\":\"keyword\"},\"tracerName\":{\"type\":\"keyword\"},\"httpHost\":{\"type\":\"keyword\"},\"applicationName\":{\"type\":\"keyword\"},\"traceId\":{\"type\":\"keyword\"},\"sqlStatement\":{\"type\":\"keyword\"},\"spanKind\":{\"type\":\"keyword\"},\"ip\":{\"type\":\"keyword\"},\"methodName\":{\"type\":\"keyword\"},\"exemplarData\":{\"type\":\"keyword\"},\"message\":{\"copy_to\":[\"message_full_name\"],\"type\":\"text\"},\"metricEpochNanos\":{\"type\":\"date\"},\"spentNanos\":{\"type\":\"long\"},\"httpScheme\":{\"type\":\"keyword\"},\"parentSpanId\":{\"type\":\"keyword\"},\"spanName\":{\"type\":\"keyword\"},\"component\":{\"type\":\"keyword\"},\"sqlType\":{\"type\":\"keyword\"},\"startEpochNanos\":{\"type\":\"long\"},\"metricDescription\":{\"type\":\"keyword\"},\"logName\":{\"type\":\"keyword\"},\"TaskName\":{\"type\":\"keyword\"},\"message_full_name\":{\"type\":\"keyword\"},\"logMills\":{\"type\":\"date\"},\"tracerVersion\":{\"type\":\"keyword\"},\"lineNumber\":{\"type\":\"long\"},\"statusData\":{\"type\":\"keyword\"},\"JobClassName\":{\"type\":\"keyword\"}}}",
+  "setting": "{\"index\":{\"translog.durability\":\"async\",\"translog.sync_interval\":\"15s\",\"refresh_interval\":\"1s\"}}"
+}
