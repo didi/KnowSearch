@@ -128,7 +128,7 @@ public enum OperateTypeEnum {
      * 模板管理:读/写状态变更
      */
     TEMPLATE_MANAGEMENT_BLOCK_WRITE(ModuleEnum.TEMPLATE_MANAGEMENT, "模板管理写状态变更", 68),
-    TEMPLATE_MANAGEMENT_BLOCK_READ(ModuleEnum.TEMPLATE_MANAGEMENT, "模板管理读状态变更", 69),
+    TEMPLATE_MANAGEMENT_BLOCK_READ(ModuleEnum.TEMPLATE_MANAGEMENT, "模板管理读状态变更", 70),
     /**
      * 索引模板管理:索引模板信息修改
      */
