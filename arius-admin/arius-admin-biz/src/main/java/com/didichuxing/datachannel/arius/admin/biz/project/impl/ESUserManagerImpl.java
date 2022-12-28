@@ -368,11 +368,22 @@ public class ESUserManagerImpl implements ESUserManager {
                     .collect(Collectors.toList());
             return Result.buildSucc(clusterPhyList);
         } else {
-            //普通项目返回对应的逻辑集群
-            List<String> clusterLogicList = clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId).stream()
-                    .map(ClusterLogic::getName)
+            //普通项目返回对应的物理集群
+            List<Long> logicClusterIds = clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId).stream()
+                    .map(ClusterLogic::getId)
                     .distinct().collect(Collectors.toList());
-            return Result.buildSucc(clusterLogicList);
+
+            // 找到 region
+            List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(logicClusterIds);
+            if (CollectionUtils.isEmpty(regions)) {
+                return Result.buildFail(String.format(ES_USER_ERROR_MSG,
+                        ProjectSearchTypeEnum.PRIMITIVE.getDesc(), ProjectSearchTypeEnum.CLUSTER.getDesc()));
+            }
+            // 找到物理集群
+            List<String> clusterPhyList = regions.stream().map(ClusterRegion::getPhyClusterName).distinct()
+                    .collect(Collectors.toList());
+
+            return Result.buildSucc(clusterPhyList);
         }
     }
 
