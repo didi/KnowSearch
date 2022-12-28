@@ -3,7 +3,14 @@
     <!--变量配置-->
     <Properties>
         <property name="gateway.queryConfig.logPath" value="." />
+        <Property name="address" value="10.96.75.19"/>
+        <Property name="port" value="18938"/>
+        <Property name="user" value=""/>
+        <Property name="password" value=""/>
+        <Property name="indexName" value="index_observability"/>
+        <Property name="typeName" value="_doc"/>
     </Properties>
+
 
     <Appenders>
 
@@ -14,8 +21,10 @@
             <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
         </console>
 
-        <ElasticsearchAppender name="esAppender" address="10.96.75.13" port="18143" user="elastic" password="Didiyun@888" indexName="index_observability" typeName="type" threshold="all" bufferSize="1000" numberOfShards="1" numberOfReplicas="0" logExpire="7" extendsMappingClass="" requestTimeoutMillis="3000">
-
+        <ElasticsearchAppender name="esAppender" address="${address}" port="${port}" user="${user}"
+                               password="${password}" indexName="${indexName}" typeName="${typeName}" threshold="all"
+                               bufferSize="10000" numberOfShards="5" numberOfReplicas="0" logExpire="7"
+                               extendsMappingClass="" requestTimeoutMillis="3000" discardWhenBufferIsFull="true">
         </ElasticsearchAppender>
 
         <RollingFile name="file" fileName="${gateway.queryConfig.logPath}/log/gateway.log" filePattern="${gateway.queryConfig.logPath}/log/gateway.log.%d{yyyy-MM-dd}"
