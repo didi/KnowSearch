@@ -29,3 +29,6 @@ alter table logi_task
 
 alter table logi_worker
     add node_name varchar(100) default '' not null comment 'node 名';
+
+INSERT INTO `kf_security_permission` (`permission_name`, `parent_id`, `leaf`, `level`, `description`, `create_time`, `update_time`, `is_delete`, `app_name`) VALUES ('Grafana', 0, 0, 1, '查看Grafana', '2022-05-24 18:08:26', '2022-12-22 15:16:17', 0, 'know_search');
+INSERT INTO `kf_security_role_permission` (`role_id`, `permission_id`, `create_time`, `update_time`, `is_delete`, `app_name`) VALUES (1, (select id from kf_security_permission ksp where ksp.permission_name='Grafana' and ksp.app_name='know_search' and ksp.is_delete=0 ), '2022-06-01 21:19:42', '2022-08-25 10:31:42', 0, 'know_search');
