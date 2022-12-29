@@ -423,8 +423,7 @@ public class ClusterLogicOverviewMetricsHandle {
         BigDecimal totalHeapMemSizeDec = new BigDecimal(heapTotalSize);
         basicVO.setHeapUsage(storeHeapMemSizeDec.divide(totalHeapMemSizeDec, 5, 1).doubleValue() * 100);
         basicVO.setHeapFreeUsage((100 - basicVO.getHeapUsage()));
-        //设置集群节点信息,从mysql获取，需要获取离线的节点
-        ClusterLogic clusterLogic1 = clclusterLogic
+        //设置集群节点信息
         basicVO.setNumberMasterNodes(clusterStats.getNumberMasterNodes());
         basicVO.setNumberDataNodes((long) itemNamesUnderClusterLogic.size());
         basicVO.setNumberClientNodes(clusterStats.getNumberClientNodes());
