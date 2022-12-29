@@ -193,4 +193,11 @@ public class ESLogicClusterOpV3Controller {
     public Result<List<ClusterLogicVO>> listClusterLogicByPhyName(@RequestParam(value = "phyClusterName", required = false) String phyClusterName) {
         return clusterLogicManager.listClusterLogicByPhyName(phyClusterName);
     }
+
+    @DeleteMapping("/templates-indices-info/{clusterLogicId}")
+    @ResponseBody
+    @ApiOperation(value = "删除从模板及索引数据")
+    public Result<Void> templatesIndicesInfo(@PathVariable Long clusterLogicId,HttpServletRequest request) {
+        return clusterLogicManager.deleteTemplatesIndicesInfo(clusterLogicId,HttpRequestUtil.getProjectId(request),HttpRequestUtil.getOperator(request));
+    }
 }

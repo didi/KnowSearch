@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.metrics.handle;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
@@ -422,7 +423,8 @@ public class ClusterLogicOverviewMetricsHandle {
         BigDecimal totalHeapMemSizeDec = new BigDecimal(heapTotalSize);
         basicVO.setHeapUsage(storeHeapMemSizeDec.divide(totalHeapMemSizeDec, 5, 1).doubleValue() * 100);
         basicVO.setHeapFreeUsage((100 - basicVO.getHeapUsage()));
-        //设置集群节点信息
+        //设置集群节点信息,从mysql获取，需要获取离线的节点
+        ClusterLogic clusterLogic1 = clclusterLogic
         basicVO.setNumberMasterNodes(clusterStats.getNumberMasterNodes());
         basicVO.setNumberDataNodes((long) itemNamesUnderClusterLogic.size());
         basicVO.setNumberClientNodes(clusterStats.getNumberClientNodes());

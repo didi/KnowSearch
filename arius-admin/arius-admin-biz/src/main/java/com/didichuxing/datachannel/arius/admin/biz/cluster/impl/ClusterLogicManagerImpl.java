@@ -1226,6 +1226,33 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return clusterLogicStatis;
     }
 
+    @Override
+    public Result<Void> deleteTemplatesIndicesInfo(Long clusterLogicId,Integer projectId,String operator) {
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(clusterLogicId,projectId);
+        if (Objects.isNull(clusterRegion)){
+            return Result.buildFail("该逻辑集群未绑定region!");
+        }
+        //获取物理模板
+        Result<List<IndexTemplatePhy>> indexTemplatePhys = indexTemplatePhyService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        //获取逻辑模板
+        Result<List<IndexTemplate>> indexTemplates = indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        List<String> indices = esIndexCatService.syncGetIndexListByProjectId(projectId,clusterLogic.getName());
+        if (indexTemplatePhys.getData().size() == 0&&indexTemplates.getData().size() == 0&&indices.size()==0){
+            return Result.buildFail("该逻辑集群下无数据!");
+        }
+        //删除数据
+        for (IndexTemplate indexTemplate:indexTemplates.getData()) {
+            try {
+                indexTemplateService.delTemplate(indexTemplate.getId(),operator);
+                indexTemplatePhyService.delTemplateByLogicId(indexTemplate.getId(),operator);
+            } catch (AdminOperateException e) {
+                return Result.buildFail("数据删除错误!");
+            }
+        }
+        return Result.buildSucc();
+    }
+
     /**
      * 获取逻辑集群状态
      * @return ClusterStatusEnum

@@ -263,4 +263,11 @@ public interface ClusterLogicManager {
     Result<List<ClusterPhyWithLogicClusterVO>> listLogicClusterWithClusterPhyByProjectId(Integer projectId);
 
     Result<List<ClusterLogicVO>> listClusterLogicByPhyName(String phyClusterName);
+
+    /**
+     * 删除从模板及索引数据
+     * @param clusterLogicId
+     * @return
+     */
+    Result<Void> deleteTemplatesIndicesInfo(Long clusterLogicId,Integer projectId,String operator);
 }
