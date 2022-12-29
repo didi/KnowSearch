@@ -1378,7 +1378,7 @@ insert into kf_security_project (id, project_code, project_name, description, de
                                    update_time, is_delete, app_name)
 values (1, 'p14000143', 'SuperApp', '超级应用', 0, 1, '2022-05-26 05:49:08.0', '2022-08-24 11:09:49.0', 0,
         'know_search'),
-       (2, 'p18461793', '元数据模版应用 _ 误删', '元数据模版应用 不可以被删除', 0, 1, '2022-08-25 11:06:04.0',
+       (2, 'p18461793', '元数据模版应用_误删', '元数据模版应用 不可以被删除', 0, 1, '2022-08-25 11:06:04.0',
         '2022-08-25 11:18:45.0', 0, 'know_search');
 insert into arius_es_user (id, index_exp, data_center, is_root, memo, ip, verify_code, is_active,
                            query_threshold, cluster, responsible, search_type, create_time, update_time,
@@ -1386,7 +1386,7 @@ insert into arius_es_user (id, index_exp, data_center, is_root, memo, ip, verify
 values (1, null, 'cn', 1, '管理员 APP', '', 'azAWiJhxkho33ac', 1, 100, 'logi-elasticsearch-meta',
         'admin', 0,
         '2022-05-26 09:35:38.0', '2022-06-23 00:16:47.0', 1, 1),
-       (2, null, 'cn', 0, '元数据模版 APP', '', 'vkDgPEfD3jQJ1YY', 1, 1000, '', null, 1, '2022-07-05 08:16:17.0',
+       (2, null, 'cn', 0, '元数据模版 APP', '', 'vkDgPEfD3jQJ1YY', 1, 1000, '', 'admin', 1, '2022-07-05 08:16:17.0',
         '2022-08-25 21:48:58.0', 2, 1);
 
 
