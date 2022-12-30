@@ -31,7 +31,7 @@ public class ClusterLogicStatsPO {
     /**
      * docNu
      */
-    private double docNu;
+    private Long docNu;
 
     /**
      * 总的磁盘容量

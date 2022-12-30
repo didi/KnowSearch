@@ -60,17 +60,17 @@ public class ESClusterStatsCells {
     /**
      * 集群已使用容量，单位
      */
-    private double storeSize;
+    private Long storeSize;
 
     /**
      * 集群总容量，单位
      */
-    private double totalStoreSize;
+    private Long totalStoreSize;
 
     /**
      * 集群空余容量，单位
      */
-    private double freeStoreSize;
+    private Long freeStoreSize;
 
     /**
      * 索引容量，单位

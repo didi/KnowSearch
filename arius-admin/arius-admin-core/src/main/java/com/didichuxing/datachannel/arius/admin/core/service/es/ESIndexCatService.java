@@ -98,7 +98,8 @@ public interface ESIndexCatService {
      * @return List<String>
      */
     List<String> syncGetIndexListByProjectIdAndFuzzyIndexAndClusterLogic(Integer projectId, String clusterLogicName, String index);
-    
+
+    List<IndexCatCell> syncGetAllCatIndexNameListByClusters(Integer searchSize,List<String> phyClusterNames);
     /**
      * 通过项目id、集群物理名、模糊索引获取索引列表
      *

@@ -209,6 +209,16 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
        return indexCatESDAO.syncGetIndexListByProjectIdAndFuzzyIndexAndClusterLogic(projectId,
                 clusterLogicName,index);
     }
+
+    @Override
+    public List<IndexCatCell> syncGetAllCatIndexNameListByClusters(Integer searchSize,List<String> phyClusterNames) {
+        try {
+            return indexCatESDAO.getAllCatIndexNameListByClusters(searchSize,phyClusterNames);
+        } catch (Exception e) {
+            LOGGER.error("class=ESIndexCatServiceImpl||method=syncGetAllCatIndexNameList||" + "errMsg=failed to get syncGetAllCatIndexNameList", e);
+        }
+        return Collections.emptyList();
+    }
     
     @Override
     public List<String> syncGetIndexListByProjectIdAndFuzzyIndexAndClusterPhy(String clusterPhyName,

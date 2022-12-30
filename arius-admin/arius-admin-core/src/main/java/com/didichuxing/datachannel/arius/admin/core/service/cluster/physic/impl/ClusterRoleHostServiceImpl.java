@@ -437,7 +437,13 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
     public List<ClusterRoleHost> listById(List<Integer> ids) {
         return ConvertUtil.list2List(clusterRoleHostDAO.listByIds(ids),ClusterRoleHost.class);
     }
-    
+
+    @Override
+    public List<ClusterRoleHost> listNodesByClusters(List<String> phyClusterNames) {
+        List<ESClusterRoleHostPO> pos = clusterRoleHostDAO.listByClusters(phyClusterNames);
+        return ConvertUtil.list2List(pos,ClusterRoleHost.class);
+    }
+
     /**
      * @param ids
      * @return

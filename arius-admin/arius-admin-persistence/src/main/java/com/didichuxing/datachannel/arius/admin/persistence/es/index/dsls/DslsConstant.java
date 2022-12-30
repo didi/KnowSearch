@@ -729,6 +729,7 @@ public class DslsConstant {
      */
     public static final String GET_CAT_INDEX_INFO_BY_CONDITION                               = "IndexCatESDAO/getCatIndexInfoByCondition";
 
+    public static final String GET_ALL_CAT_INDEX_NAME_BY_CLUSTERS                            = "IndexCatESDAO/getAllCatIndexNameByClusters";
     /**
      * 条件查询索引cat/index信息
      */

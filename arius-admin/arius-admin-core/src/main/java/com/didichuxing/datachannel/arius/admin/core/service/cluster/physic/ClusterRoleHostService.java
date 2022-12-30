@@ -240,6 +240,7 @@ public interface ClusterRoleHostService {
      * @return 列表<ClusterRoleHost>
      */
     List<ClusterRoleHost> listById(List<Integer> ids);
-    
+
+    List<ClusterRoleHost> listNodesByClusters(List<String> phyClusterNames);
     boolean deleteByIds(List<Integer> ids);
 }

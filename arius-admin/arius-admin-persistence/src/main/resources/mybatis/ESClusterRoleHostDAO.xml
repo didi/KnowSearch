@@ -272,5 +272,15 @@
         
         and delete_flag = '0'
     </select>
+
+    <select id="listByClusters" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_role_host_info
+        where delete_flag = 0
+        <foreach collection="list" separator="," item="item" close=")" open="and cluster in (">
+            #{item}
+        </foreach>
+    </select>
     
 </mapper>
