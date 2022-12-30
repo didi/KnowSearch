@@ -2,22 +2,28 @@ package com.didichuxing.datachannel.arius.admin.biz.metrics.handle;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentileMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.*;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
 import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
@@ -80,6 +86,16 @@ public class ClusterLogicOverviewMetricsHandle {
     private IndexTemplatePhyService       indexTemplatePhyService;
     @Autowired
     private ESIndexService                esIndexService;
+
+    @Autowired
+    private ClusterLogicService           clusterLogicService;
+
+    @Autowired
+    private ClusterRegionService          clusterRegionService;
+
+    @Autowired
+    private IndexTemplateService          indexTemplateService;
+
 
     private static final FutureUtil<Void> getMultipleMetricFutureUtil   = FutureUtil.init("getMultipleMetricFutureUtil",
         10, 10, 100);
@@ -333,7 +349,6 @@ public class ClusterLogicOverviewMetricsHandle {
     private void getElapsedTimeMetrics(ESClusterOverviewMetricsVO metrics) {
         ESClusterPhyBasicMetricsVO basic = metrics.getBasic();
         getClusterBasicInfoFutureUtil
-            .runnableTask(() -> buildBasicMetricsFromEsClusterTemplate(basic, metrics.getClusterName()))
             .runnableTask(() -> buildBasicMetricsFromEsClusterNodeInfo(basic, metrics.getClusterName()))
             .runnableTask(() -> buildBasicMetricsFromEsClusterMemInfo(basic, metrics.getClusterName())).waitExecute();
     }
@@ -342,7 +357,7 @@ public class ClusterLogicOverviewMetricsHandle {
         ESClusterPhyBasicMetricsVO basic = metrics.getBasic();
         getClusterBasicInfoFutureUtil
             .runnableTask(() -> buildBasicMetricsFromClusterStats(basic, metrics.getClusterName(),itemNamesUnderClusterLogic,clusterLogic,projectId))
-            .runnableTask(() -> buildBasicMetricsFromEsClusterTemplate(basic, metrics.getClusterName()))
+            .runnableTask(() -> buildBasicMetricsFromEsClusterTemplate(basic, metrics.getClusterName(),projectId))
             .runnableTask(() -> buildBasicMetricsFromEsClusterNodeInfo(basic, metrics.getClusterName()))
             .runnableTask(() -> buildBasicMetricsFromEsClusterMemInfo(basic, metrics.getClusterName())).waitExecute();
     }
@@ -464,8 +479,15 @@ public class ClusterLogicOverviewMetricsHandle {
      * @param basicVO
      * @param clusterName
      */
-    private void buildBasicMetricsFromEsClusterTemplate(ESClusterPhyBasicMetricsVO basicVO, String clusterName) {
-        basicVO.setTotalTemplateNu((long) indexTemplatePhyService.getNormalTemplateByCluster(clusterName).size());
+    private void buildBasicMetricsFromEsClusterTemplate(ESClusterPhyBasicMetricsVO basicVO, String clusterName, Integer projectId) {
+
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByNameAndProjectId(clusterName,projectId);
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
+        if (Objects.isNull(clusterRegion)){
+            basicVO.setTotalTemplateNu(0L);
+        }else {
+            basicVO.setTotalTemplateNu(Long.valueOf(indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId())).getData().size()));
+        }
     }
 
     /**
