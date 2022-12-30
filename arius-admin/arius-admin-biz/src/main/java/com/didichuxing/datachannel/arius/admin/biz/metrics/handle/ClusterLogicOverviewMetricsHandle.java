@@ -357,7 +357,7 @@ public class ClusterLogicOverviewMetricsHandle {
         ESClusterPhyBasicMetricsVO basic = metrics.getBasic();
         getClusterBasicInfoFutureUtil
             .runnableTask(() -> buildBasicMetricsFromClusterStats(basic, metrics.getClusterName(),itemNamesUnderClusterLogic,clusterLogic,projectId))
-            .runnableTask(() -> buildBasicMetricsFromEsClusterTemplate(basic, metrics.getClusterName(),projectId))
+            .runnableTask(() -> buildBasicMetricsFromEsClusterTemplate(basic, clusterLogic,projectId))
             .runnableTask(() -> buildBasicMetricsFromEsClusterNodeInfo(basic, metrics.getClusterName()))
             .runnableTask(() -> buildBasicMetricsFromEsClusterMemInfo(basic, metrics.getClusterName())).waitExecute();
     }
