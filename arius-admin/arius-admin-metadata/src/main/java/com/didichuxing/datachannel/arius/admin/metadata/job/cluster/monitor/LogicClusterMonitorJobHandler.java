@@ -103,8 +103,6 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
     private void handleLogicClusterStats() {
         // 获取单台机器监控采集的集群名称列表, 当分布式部署分组采集，可分摊采集压力
         List<ClusterPhy> monitorCluster = ariusMetaJobClusterDistributeService.getSingleMachineMonitorCluster(hostName);
-        List<ClusterPhy> clusterPhyList = clusterPhyService.listAllClusters();
-        monitorCluster = clusterPhyList;
         // 2. do handle
         if (CollectionUtils.isNotEmpty(monitorCluster)) {
             Set<String> monitorClusterSet = monitorCluster.stream().map(ClusterPhy::getCluster)
