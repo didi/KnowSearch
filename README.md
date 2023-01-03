@@ -1,4 +1,4 @@
-<img src="./doc/file/KnowSearch.png" style="zoom:50%;"/>
+<img src="./doc/file/KnowSearch.png" width="400"/>
 
 # 1.KnowSearch简介
 

@@ -77,5 +77,5 @@ KnowSearch 的应用架构是一个典型的分层架构，在业务的具体设
 - KnowSearch-Console ：遵从前后端分离架构，基于多租户、内置资源Owner和管理员两种角色，面向ES用户、ES运维，基于业务场景提供了可见、可管、可控的产品功能。
 - KnowSearch-Admin：围绕资源管控（集群、索引、索引模板）、运维管理（安装、部署、升级、配置）、命令执行（zeus-agent）、通用安全（用户、角色、资源）进行领域进行建模。对外基于HTTP+Restful协议提供了核心领域服务。
 - KnowSearch-GateWay：提供一个兼容 ES Restclient 接口的数据网关 ，零侵入、插件化的进行了企业特性增强：查询/写入限流、权限校验、跨集群访问、DSL分析与管控，详细设计参见《GateWay工程架构》。
-- KnowSearch-AMS：围绕集群、节点、索引、索引模板，基于自研的分布式Job执行框架，对ES原生指标进行深度加工，产出了200+观测指标，详细设计参见[《KnowSearch指标系统详设》](./KnowSearch指标系统详设.md)。
+- KnowSearch-AMS：围绕集群、节点、索引、索引模板，基于自研的分布式Job执行框架，对ES原生指标进行深度加工，产出了200+观测指标，详细设计参见[《KnowSearch指标系统详设》](./KnowSearch指标系统详设.md)
 
