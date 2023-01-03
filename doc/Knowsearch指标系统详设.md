@@ -10,7 +10,7 @@ Metrics 指标系统设计，围绕着采集端和查询端两个维度展开，
 
 ### 核心UML类图总览
 
-![ams-uml总览](./file/picture/ams/ams-uml总览.png)
+![ams-uml总览](file/KnowSearch-AMS-UML.png)
 
 核心UML包括三层维度介绍： 
 
@@ -37,7 +37,7 @@ Dashboard包括：
 
 
 
-![uml-采集端](./file/picture/ams/uml-采集端.png)
+![uml-采集端](file/KnowSearch-AMS-UML-Collect.png)
 
 其中AbstractMetaDataJob作为采集器的基类，各种类型采集器需要继承AbstractMetaDataJob，重点关注以下核心处理器：ClusterMonitorJobHandler（集群维度指标采集器）和 MonitorJobHandler（节点和索引指标采集器）。具体实现层面需要重点关注以下代码段：
 
@@ -72,7 +72,7 @@ MonitorClusterJob#collectIndexData
 
 ### 查询端UML类图
 
-![uml-查询端](./file/picture/ams/uml-查询端.png)
+![uml-查询端](file/KnowSearch-AMS-UML-Search.png)
 
 其中重点关注 DashBoardMetricsService、ESClusterPhyStatsService、NodeStatsService、ESIndicesStatsService，分别提供了DashBoard维度、物理集群维度、节点维度、索引维度等各种聚合查询的能力，如topN、各种分位值等。具体实现层面需要关注以下代码段：
 
@@ -128,7 +128,7 @@ ESIndicesStatsService#getAggClusterPhyTemplateMetrics
 
 ### 物理集群维度指标采集流程
 
-![物理集群采集-时序图](./file/picture/ams/物理集群采集-时序图.png)
+![物理集群采集-时序图](file/KnowSearch-AMS-PhyClusterCollect-Sequence.png)
 
 其核心采集流程：
 
@@ -140,7 +140,7 @@ ESIndicesStatsService#getAggClusterPhyTemplateMetrics
 
 ### 节点和索引维度指标采集流程
 
-![节点采集-时序图](./file/picture/ams/节点采集-时序图.png)
+![节点采集-时序图](file/KnowSearch-AMS-NodeCollcet-Sequence.png)
 
 其核心采集流程：
 
@@ -158,7 +158,7 @@ ESIndicesStatsService#getAggClusterPhyTemplateMetrics
 
 DashBoard模板名称为arius_stats_dashboard_info，Dashboard即大盘，将Dashboard划分为物理集群维度指标（cluster）、节点维度指标（node）、模板维度指标（template）、索引维度指标（index）、集群线程池指标（clusterThreadPoolQueue）、集群健康度指标（clusterPhyHealth）等，把各个维度的指标信息集成在arius_stats_dashboard_info，类似多张不同业务的表集成为大宽表，具体结构见下：
 
-![dashboard-mapping](./file/picture/ams/dashboard-mapping.png)
+![dashboard-mapping](file/KnowSearch-AMS-Dashboard-Mapping.png)
 
 
 
@@ -1225,12 +1225,12 @@ DashBoard模板名称为arius_stats_dashboard_info，Dashboard即大盘，将Das
 
 1、BaseConcurrentTemplateTask： 调整睡眠时间为 100ms，每个模版任务执行后睡眠三秒钟，有什么意义？
 
-![FAQ-1](./file/picture/ams/FAQ-1.png)
+![FAQ-1](file/KnowSearch-AMS-FAQ-1.png)
 
 答：这里是缓解任务执行压力，因为这里模板任务的操作会涉及ES内核的元数据变更，变更过于频繁，会对平台稳定性造成影响。
 
 2、BaseConcurrentTask 每个批次的任务加入线程池执行后睡眠两秒钟，有什么意义，是否有必要？
 
-![FAQ-2](./file/picture/ams/FAQ-2.png)
+![FAQ-2](file/KnowSearch-AMS-FAQ-2.png)
 
 答：防止并发执行多个耗时较长的任务，导致cpu突发暴增，这里休眠使得cpu更为平滑。
