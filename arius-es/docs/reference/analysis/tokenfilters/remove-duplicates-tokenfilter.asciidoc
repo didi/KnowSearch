@@ -1,0 +1,8 @@
+[[analysis-remove-duplicates-tokenfilter]]
+=== Remove duplicates token filter
+++++
+<titleabbrev>Remove duplicates</titleabbrev>
+++++
+
+A token filter of type `remove_duplicates` that drops identical tokens at the
+same position.

@@ -1,0 +1,53 @@
+[[indices-delete-index]]
+=== Delete index API
+++++
+<titleabbrev>Delete index</titleabbrev>
+++++
+
+Deletes an existing index.
+
+[source,console]
+--------------------------------------------------
+DELETE /twitter
+--------------------------------------------------
+// TEST[setup:twitter]
+
+
+[[delete-index-api-request]]
+==== {api-request-title}
+
+`DELETE /<index>`
+
+
+[[delete-index-api-path-params]]
+==== {api-path-parms-title}
+
+`<index>`::
++
+--
+(Request, string) Comma-separated list or wildcard expression of indices to
+delete.
+
+In this parameter, wildcard expressions match only open, concrete indices. You
+cannot delete an index using an <<indices-aliases,alias>>.
+
+To delete all indices, use `_all` or `*` . To disallow the deletion of indices
+with `_all` or wildcard expressions, change the
+`action.destructive_requires_name` cluster setting to `true`. You can update
+this setting in the `elasticsearch.yml` file or using the
+<<cluster-update-settings,cluster update settings>> API.
+--
+
+
+[[delete-index-api-query-params]]
+==== {api-query-parms-title}
+
+include::{docdir}/rest-api/common-parms.asciidoc[tag=allow-no-indices]
+
+include::{docdir}/rest-api/common-parms.asciidoc[tag=expand-wildcards]
++
+Defaults to `open`.
+
+include::{docdir}/rest-api/common-parms.asciidoc[tag=index-ignore-unavailable]
+
+include::{docdir}/rest-api/common-parms.asciidoc[tag=timeoutparms]

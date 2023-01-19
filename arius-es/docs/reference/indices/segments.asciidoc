@@ -1,0 +1,217 @@
+[[indices-segments]]
+=== Index segments API
+++++
+<titleabbrev>Index segments</titleabbrev>
+++++
+
+Returns low-level information about the https://lucene.apache.org/core/[Lucene]
+segments in index shards.
+
+[source,console]
+----
+GET /twitter/_segments
+----
+// TEST[setup:twitter]
+
+
+[[index-segments-api-request]]
+==== {api-request-title}
+
+`GET /<index>/_segments`
+
+`GET /_segments`
+
+
+[[index-segments-api-path-params]]
+==== {api-path-parms-title}
+
+include::{docdir}/rest-api/common-parms.asciidoc[tag=index]
+
+
+[[index-segments-api-query-params]]
+==== {api-query-parms-title}
+
+include::{docdir}/rest-api/common-parms.asciidoc[tag=allow-no-indices]
+
+include::{docdir}/rest-api/common-parms.asciidoc[tag=expand-wildcards]
++
+Defaults to `open`.
+
+include::{docdir}/rest-api/common-parms.asciidoc[tag=index-ignore-unavailable]
+
+`verbose`::
+experimental:[]
+(Optional, boolean)
+If `true`, the response includes detailed information
+about Lucene's memory usage.
+Defaults to `false`.
+
+
+[[index-segments-api-response-body]]
+==== {api-response-body-title}
+
+`<segment>`::
+(String)       
+include::{docdir}/rest-api/common-parms.asciidoc[tag=segment]
+
+`generation`::
+(Integer)
+include::{docdir}/rest-api/common-parms.asciidoc[tag=generation]
+
+`num_docs`::
+(Integer)
+include::{docdir}/rest-api/common-parms.asciidoc[tag=docs-count]
+
+`deleted_docs`::
+(Integer)
+include::{docdir}/rest-api/common-parms.asciidoc[tag=docs-deleted]
+
+`size_in_bytes`::
+(Integer)
+include::{docdir}/rest-api/common-parms.asciidoc[tag=segment-size]
+
+`memory_in_bytes`::
+(Integer)
+include::{docdir}/rest-api/common-parms.asciidoc[tag=memory]
+
+`committed`:: 
+(Boolean)
+include::{docdir}/rest-api/common-parms.asciidoc[tag=committed]
+
+`search`::
+(Boolean)
+include::{docdir}/rest-api/common-parms.asciidoc[tag=segment-search]
+
+`version`::
+(String)
+include::{docdir}/rest-api/common-parms.asciidoc[tag=segment-version]
+
+`compound`::
+(Boolean)
+If `true`, Lucene merged all files from the segment
+into a single file to save file descriptors.
+
+`attributes`::
+(Object)
+Contains information about whether high compression was enabled.
+
+
+[[index-segments-api-example]]
+==== {api-examples-title}
+
+
+===== Get segment information for a specific index
+
+[source,console]
+--------------------------------------------------
+GET /test/_segments
+--------------------------------------------------
+// TEST[s/^/PUT test\n{"settings":{"number_of_shards":1, "number_of_replicas": 0}}\nPOST test\/test\?refresh\n{"test": "test"}\n/]
+
+
+===== Get segment information for several indices
+
+[source,console]
+--------------------------------------------------
+GET /test1,test2/_segments
+--------------------------------------------------
+// TEST[s/^/PUT test1\nPUT test2\n/]
+
+
+===== Get segment information for all indices
+
+[source,console]
+--------------------------------------------------
+GET /_segments
+--------------------------------------------------
+// TEST[s/^/PUT test\n{"settings":{"number_of_shards":1, "number_of_replicas": 0}}\nPOST test\/test\?refresh\n{"test": "test"}\n/]
+
+The API returns the following response:
+
+[source,console-response]
+--------------------------------------------------
+{
+  "_shards": ...
+  "indices": {
+    "test": {
+      "shards": {
+        "0": [
+          {
+            "routing": {
+              "state": "STARTED",
+              "primary": true,
+              "node": "zDC_RorJQCao9xf9pg3Fvw"
+            },
+            "num_committed_segments": 0,
+            "num_search_segments": 1,
+            "segments": {
+              "_0": {
+                "generation": 0,
+                "num_docs": 1,
+                "deleted_docs": 0,
+                "size_in_bytes": 3800,
+                "memory_in_bytes": 1410,
+                "committed": false,
+                "search": true,
+                "version": "7.0.0",
+                "compound": true,
+                "attributes": {
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+--------------------------------------------------
+// TESTRESPONSE[s/"_shards": \.\.\./"_shards": $body._shards,/]
+// TESTRESPONSE[s/"node": "zDC_RorJQCao9xf9pg3Fvw"/"node": $body.$_path/]
+// TESTRESPONSE[s/"attributes": \{[^}]*\}/"attributes": $body.$_path/]
+// TESTRESPONSE[s/: (\-)?[0-9]+/: $body.$_path/]
+// TESTRESPONSE[s/7\.0\.0/$body.$_path/]
+
+
+===== Verbose mode
+
+To add additional information that can be used for debugging,
+use the `verbose` flag.
+
+experimental::[]
+
+[source,console]
+--------------------------------------------------
+GET /test/_segments?verbose=true
+--------------------------------------------------
+// TEST[continued]
+
+The API returns the following response:
+
+[source,console-response]
+--------------------------------------------------
+{
+    ...
+        "_0": {
+            ...
+            "ram_tree": [
+                {
+                    "description": "postings [PerFieldPostings(format=1)]",
+                    "size_in_bytes": 2696,
+                    "children": [
+                        {
+                            "description": "format 'Lucene50_0' ...",
+                            "size_in_bytes": 2608,
+                            "children" :[ ... ]
+                        },
+                        ...
+                    ]
+                },
+                ...
+                ]
+
+        }
+    ...
+}
+--------------------------------------------------
+// TESTRESPONSE[skip:Response is too verbose to be fully shown in documentation, so we just show the relevant bit and don't test the response.]

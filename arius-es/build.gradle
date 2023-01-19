@@ -1,0 +1,849 @@
+/*
+ * Licensed to Elasticsearch under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+
+import com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
+import org.apache.tools.ant.taskdefs.condition.Os
+import org.elasticsearch.gradle.BuildPlugin
+import org.elasticsearch.gradle.BwcVersions
+import org.elasticsearch.gradle.Version
+import org.elasticsearch.gradle.VersionProperties
+import org.elasticsearch.gradle.plugin.PluginBuildPlugin
+import org.gradle.plugins.ide.eclipse.model.SourceFolder
+import org.gradle.util.DistributionLocator
+import org.gradle.util.GradleVersion
+
+import static org.elasticsearch.gradle.tool.Boilerplate.maybeConfigure
+
+plugins {
+  id 'lifecycle-base'
+  id 'elasticsearch.global-build-info'
+  id "com.diffplug.gradle.spotless" version "3.24.2" apply false
+}
+
+apply plugin: 'nebula.info-scm'
+apply from: 'gradle/build-scan.gradle'
+apply from: 'gradle/build-complete.gradle'
+apply from: 'gradle/runtime-jdk-provision.gradle'
+
+// common maven publishing configuration
+allprojects {
+  group = 'org.elasticsearch'
+  version = VersionProperties.elasticsearch
+  description = "Elasticsearch subproject ${project.path}"
+  repositories {
+    maven { url 'https://artifactory.intra.xiaojukeji.com/artifactory/libs-release/' }
+    maven { url 'https://artifactory.intra.xiaojukeji.com/artifactory/libs-snapshot/' }
+    maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+    maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
+    mavenCentral()
+  }
+}
+
+BuildPlugin.configureRepositories(project)
+
+String licenseCommit
+if (VersionProperties.elasticsearch.toString().endsWith('-SNAPSHOT')) {
+  licenseCommit = scminfo.change ?: "master" // leniency for non git builds
+} else {
+  licenseCommit = "v${version}"
+}
+String elasticLicenseUrl = "https://raw.githubusercontent.com/elastic/elasticsearch/${licenseCommit}/licenses/ELASTIC-LICENSE.txt"
+
+subprojects {
+  // Default to the apache license
+  project.ext.licenseName = 'The Apache Software License, Version 2.0'
+  project.ext.licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+
+  // But stick the Elastic license url in project.ext so we can get it if we need to switch to it
+  project.ext.elasticLicenseUrl = elasticLicenseUrl
+
+  // we only use maven publish to add tasks for pom generation
+  plugins.withType(MavenPublishPlugin).whenPluginAdded {
+    publishing {
+      publications {
+        // add license information to generated poms
+        all {
+          pom.withXml { XmlProvider xml ->
+            Node node = xml.asNode()
+            node.appendNode('inceptionYear', '2009')
+
+            Node license = node.appendNode('licenses').appendNode('license')
+            license.appendNode('name', project.licenseName)
+            license.appendNode('url', project.licenseUrl)
+            license.appendNode('distribution', 'repo')
+
+            Node developer = node.appendNode('developers').appendNode('developer')
+            developer.appendNode('name', 'Elastic')
+            developer.appendNode('url', 'http://www.elastic.co')
+          }
+        }
+      }
+      repositories {
+        maven { url 'https://artifactory.intra.xiaojukeji.com/artifactory/libs-release/' }
+        maven { url 'https://artifactory.intra.xiaojukeji.com/artifactory/libs-snapshot/' }
+        maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+        maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
+        mavenCentral()
+        maven {
+          name = 'test'
+          url = "${rootProject.buildDir}/local-test-repo"
+        }
+      }
+    }
+  }
+
+  plugins.withType(BuildPlugin).whenPluginAdded {
+    project.licenseFile = project.rootProject.file('licenses/APACHE-LICENSE-2.0.txt')
+    project.noticeFile = project.rootProject.file('NOTICE.txt')
+
+    // Projects that should be formatted and checked with Spotless are
+    // listed here, by project path. Once the number of formatted projects
+    // is greater than the number of unformatted projects, this can be
+    // switched to an exclude list, and eventualy removed completely.
+    def projectPathsToFormat = [
+      ':build-tools',
+      ':distribution:tools:java-version-checker',
+      ':distribution:tools:launchers',
+      ':distribution:tools:plugin-cli',
+      ':x-pack:plugin:enrich'
+    ]
+
+    if (projectPathsToFormat.contains(project.path)) {
+      project.apply plugin: "com.diffplug.gradle.spotless"
+
+      spotless {
+        java {
+          // Normally this isn't necessary, but we have Java sources in
+          // non-standard places
+          target '**/*.java'
+
+          removeUnusedImports()
+          eclipse().configFile rootProject.file('.eclipseformat.xml')
+          trimTrailingWhitespace()
+
+          // See CONTRIBUTING.md for details of when to enabled this.
+          if (System.getProperty('spotless.paddedcell') != null) {
+            paddedCell()
+          }
+        }
+      }
+
+      precommit.dependsOn 'spotlessJavaCheck'
+    }
+  }
+}
+
+/* Introspect all versions of ES that may be tested against for backwards
+ * compatibility. It is *super* important that this logic is the same as the
+ * logic in VersionUtils.java, throwing out alphas because they don't have any
+ * backwards compatibility guarantees and only keeping the latest beta or rc
+ * in a branch if there are only betas and rcs in the branch so we have
+ * *something* to test against. */
+BwcVersions versions = new BwcVersions(file('server/src/main/java/org/elasticsearch/Version.java').readLines('UTF-8'))
+
+task updateCIBwcVersions() {
+  doLast {
+    File yml = file(".ci/bwcVersions")
+    yml.text = ""
+    yml << "BWC_VERSION:\n"
+    versions.indexCompatible.each {
+      yml << "  - \"$it\"\n"
+    }
+  }
+}
+
+// build metadata from previous build, contains eg hashes for bwc builds
+String buildMetadataValue = System.getenv('BUILD_METADATA')
+if (buildMetadataValue == null) {
+  buildMetadataValue = ''
+}
+Map<String, String> buildMetadataMap = buildMetadataValue.tokenize(';').collectEntries {
+  def (String key, String value) = it.split('=')
+  return [key, value]
+}
+
+// injecting groovy property variables into all projects
+allprojects {
+  project.ext {
+    // for ide hacks...
+    isEclipse = System.getProperty("eclipse.launcher") != null ||   // Detects gradle launched from Eclipse's IDE
+      System.getProperty("eclipse.application") != null ||    // Detects gradle launched from the Eclipse compiler server
+      gradle.startParameter.taskNames.contains('eclipse') ||  // Detects gradle launched from the command line to do eclipse stuff
+      gradle.startParameter.taskNames.contains('cleanEclipse')
+    isIdea = System.getProperty("idea.active") != null || gradle.startParameter.taskNames.contains('idea') || gradle.startParameter.taskNames.contains('cleanIdea')
+
+    // for BWC testing
+    bwcVersions = versions
+
+    buildMetadata = buildMetadataMap
+  }
+}
+
+task verifyVersions {
+  doLast {
+    if (gradle.startParameter.isOffline()) {
+      throw new GradleException("Must run in online mode to verify versions")
+    }
+    // Read the list from maven central.
+    // Fetch the metadata an parse the xml into Version instances because it's more straight forward here
+    // rather than bwcVersion ( VersionCollection ).
+    new URL('https://repo1.maven.org/maven2/org/elasticsearch/elasticsearch/maven-metadata.xml').openStream().withStream { s ->
+      bwcVersions.compareToAuthoritative(
+        new XmlParser().parse(s)
+          .versioning.versions.version
+          .collect { it.text() }.findAll { it ==~ /\d+\.\d+\.\d+/ }
+          .collect { Version.fromString(it) }
+      )
+    }
+    String ciYml = file(".ci/bwcVersions").text
+    bwcVersions.indexCompatible.each {
+      if (ciYml.contains("\"$it\"\n") == false) {
+        throw new Exception(".ci/bwcVersions is outdated, run `./gradlew updateCIBwcVersions` and check in the results");
+      }
+    }
+  }
+}
+
+/*
+ * When adding backcompat behavior that spans major versions, temporarily
+ * disabling the backcompat tests is necessary. This flag controls
+ * the enabled state of every bwc task. It should be set back to true
+ * after the backport of the backcompat code is complete.
+ */
+
+boolean bwc_tests_enabled = true
+final String bwc_tests_disabled_issue = "" /* place a PR link here when committing bwc changes */
+if (bwc_tests_enabled == false) {
+  if (bwc_tests_disabled_issue.isEmpty()) {
+    throw new GradleException("bwc_tests_disabled_issue must be set when bwc_tests_enabled == false")
+  }
+  println "========================= WARNING ========================="
+  println "         Backwards compatibility tests are disabled!"
+  println "See ${bwc_tests_disabled_issue}"
+  println "==========================================================="
+}
+if (project.gradle.startParameter.taskNames.find { it.startsWith("checkPart") } != null) {
+  // Disable BWC tests for checkPart* tasks as it's expected that this will run un it's own check
+  bwc_tests_enabled = false
+}
+
+subprojects {
+  ext.bwc_tests_enabled = bwc_tests_enabled
+}
+
+task verifyBwcTestsEnabled {
+  doLast {
+    if (bwc_tests_enabled == false) {
+      throw new GradleException('Bwc tests are disabled. They must be re-enabled after completing backcompat behavior backporting.')
+    }
+  }
+}
+
+task branchConsistency {
+  description 'Ensures this branch is internally consistent. For example, that versions constants match released versions.'
+  group 'Verification'
+  dependsOn verifyVersions, verifyBwcTestsEnabled
+}
+
+allprojects {
+  // ignore missing javadocs
+  tasks.withType(Javadoc).configureEach { Javadoc javadoc ->
+    // the -quiet here is because of a bug in gradle, in that adding a string option
+    // by itself is not added to the options. By adding quiet, both this option and
+    // the "value" -quiet is added, separated by a space. This is ok since the javadoc
+    // command already adds -quiet, so we are just duplicating it
+    // see https://discuss.gradle.org/t/add-custom-javadoc-option-that-does-not-take-an-argument/5959
+    javadoc.options.encoding = 'UTF8'
+    javadoc.options.addStringOption('Xdoclint:all,-missing', '-quiet')
+  }
+
+  project.afterEvaluate {
+    // Handle javadoc dependencies across projects. Order matters: the linksOffline for
+    // org.elasticsearch:elasticsearch must be the last one or all the links for the
+    // other packages (e.g org.elasticsearch.client) will point to server rather than
+    // their own artifacts.
+    if (project.plugins.hasPlugin(BuildPlugin) || project.plugins.hasPlugin(PluginBuildPlugin)) {
+      String artifactsHost = VersionProperties.elasticsearch.endsWith("-SNAPSHOT") ? "https://snapshots.elastic.co" : "https://artifacts.elastic.co"
+      Closure sortClosure = { a, b -> b.group <=> a.group }
+      Closure depJavadocClosure = { shadowed, dep ->
+        if ((dep instanceof ProjectDependency) == false) {
+          return
+        }
+        Project upstreamProject = dep.dependencyProject
+        if (upstreamProject == null) {
+          return
+        }
+        if (shadowed) {
+          /*
+           * Include the source of shadowed upstream projects so we don't
+           * have to publish their javadoc.
+           */
+          project.evaluationDependsOn(upstreamProject.path)
+          project.javadoc.source += upstreamProject.javadoc.source
+          /*
+           * Instead we need the upstream project's javadoc classpath so
+           * we don't barf on the classes that it references.
+           */
+          project.javadoc.classpath += upstreamProject.javadoc.classpath
+        } else {
+          // Link to non-shadowed dependant projects
+          project.javadoc.dependsOn "${upstreamProject.path}:javadoc"
+          String artifactPath = dep.group.replaceAll('\\.', '/') + '/' + dep.name.replaceAll('\\.', '/') + '/' + dep.version
+          project.javadoc.options.linksOffline artifactsHost + "/javadoc/" + artifactPath, "${upstreamProject.buildDir}/docs/javadoc/"
+        }
+      }
+      boolean hasShadow = project.plugins.hasPlugin(ShadowPlugin)
+      project.configurations.compile.dependencies
+        .findAll()
+        .toSorted(sortClosure)
+        .each({ c -> depJavadocClosure(hasShadow, c) })
+      project.configurations.compileOnly.dependencies
+        .findAll()
+        .toSorted(sortClosure)
+        .each({ c -> depJavadocClosure(false, c) })
+      if (hasShadow) {
+        // include any dependencies for shadow JAR projects that are *not* bundled in the shadow JAR
+        project.configurations.shadow.dependencies
+          .findAll()
+          .toSorted(sortClosure)
+          .each({ c -> depJavadocClosure(false, c) })
+      }
+    }
+  }
+}
+
+// Ensure similar tasks in dependent projects run first. The projectsEvaluated here is
+// important because, while dependencies.all will pickup future dependencies,
+// it is not necessarily true that the task exists in both projects at the time
+// the dependency is added.
+gradle.projectsEvaluated {
+  allprojects {
+    if (project.path == ':test:framework') {
+      // :test:framework:test cannot run before and after :server:test
+      return
+    }
+    if (tasks.findByPath('test') != null && tasks.findByPath('integTest') != null) {
+      integTest.mustRunAfter test
+    }
+    configurations.matching { it.canBeResolved }.all { Configuration configuration ->
+      dependencies.matching { it instanceof ProjectDependency }.all { ProjectDependency dep ->
+        Project upstreamProject = dep.dependencyProject
+        if (upstreamProject != null) {
+          if (project.path == upstreamProject.path) {
+            // TODO: distribution integ tests depend on themselves (!), fix that
+            return
+          }
+          for (String taskName : ['test', 'integTest']) {
+            Task task = project.tasks.findByName(taskName)
+            Task upstreamTask = upstreamProject.tasks.findByName(taskName)
+            if (task != null && upstreamTask != null) {
+              task.shouldRunAfter(upstreamTask)
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// intellij configuration
+allprojects {
+  apply plugin: 'idea'
+
+  if (isIdea) {
+    project.buildDir = file('build-idea')
+  }
+  idea {
+    module {
+      inheritOutputDirs = false
+      outputDir = file('build-idea/classes/main')
+      testOutputDir = file('build-idea/classes/test')
+
+      // also ignore other possible build dirs
+      excludeDirs += file('build')
+      excludeDirs += file('build-eclipse')
+    }
+  }
+
+  tasks.named('cleanIdea') {
+    delete 'build-idea'
+  }
+}
+
+idea {
+  project {
+    vcs = 'Git'
+  }
+}
+
+// eclipse configuration
+allprojects {
+  apply plugin: 'eclipse'
+  // Name all the non-root projects after their path so that paths get grouped together when imported into eclipse.
+  if (path != ':') {
+    eclipse.project.name = path
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+      eclipse.project.name = eclipse.project.name.replace(':', '_')
+    }
+  }
+
+  plugins.withType(JavaBasePlugin) {
+    eclipse.classpath.defaultOutputDir = file('build-eclipse')
+    eclipse.classpath.file.whenMerged { classpath ->
+      // give each source folder a unique corresponding output folder
+      int i = 0;
+      classpath.entries.findAll { it instanceof SourceFolder }.each { folder ->
+        i++;
+        folder.output = "build-eclipse/" + i
+      }
+    }
+  }
+
+  File licenseHeaderFile
+  String prefix = ':x-pack'
+  if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+    prefix = prefix.replace(':', '_')
+  }
+  if (eclipse.project.name.startsWith(prefix)) {
+    licenseHeaderFile = new File(project.rootDir, 'buildSrc/src/main/resources/license-headers/elastic-license-header.txt')
+  } else {
+    licenseHeaderFile = new File(project.rootDir, 'buildSrc/src/main/resources/license-headers/oss-license-header.txt')
+  }
+
+  String lineSeparator = Os.isFamily(Os.FAMILY_WINDOWS) ? '\\\\r\\\\n' : '\\\\n'
+  String licenseHeader = licenseHeaderFile.getText('UTF-8').replace(System.lineSeparator(), lineSeparator)
+  tasks.register('copyEclipseSettings', Copy) {
+    mustRunAfter 'wipeEclipseSettings'
+    // TODO: "package this up" for external builds
+    from new File(project.rootDir, 'buildSrc/src/main/resources/eclipse.settings')
+    into '.settings'
+    filter { it.replaceAll('@@LICENSE_HEADER_TEXT@@', licenseHeader) }
+  }
+  // otherwise .settings is not nuked entirely
+  tasks.register('wipeEclipseSettings', Delete) {
+    delete '.settings'
+  }
+  tasks.named('cleanEclipse') { dependsOn 'wipeEclipseSettings' }
+  // otherwise the eclipse merging is *super confusing*
+  tasks.named('eclipse') { dependsOn 'cleanEclipse', 'copyEclipseSettings' }
+}
+
+// we need to add the same --debug-jvm option as
+// the real RunTask has, so we can pass it through
+class Run extends DefaultTask {
+  boolean debug = false
+
+  @Option(
+    option = "debug-jvm",
+    description = "Enable debugging configuration, to allow attaching a debugger to elasticsearch."
+  )
+  public void setDebug(boolean enabled) {
+    project.project(':distribution').run.debug = enabled
+  }
+
+  @Option(
+    option = "data-dir",
+    description = "Override the base data directory used by the testcluster"
+  )
+  public void setDataDir(String dataDirStr) {
+    project.project(':distribution').run.dataDir = dataDirStr
+  }
+}
+
+task run(type: Run) {
+  dependsOn ':distribution:run'
+  description = 'Runs elasticsearch in the foreground'
+  group = 'Verification'
+  impliesSubProjects = true
+}
+
+wrapper {
+  distributionType = 'ALL'
+  doLast {
+    final DistributionLocator locator = new DistributionLocator()
+    final GradleVersion version = GradleVersion.version(wrapper.gradleVersion)
+    final URI distributionUri = locator.getDistributionFor(version, wrapper.distributionType.name().toLowerCase(Locale.ENGLISH))
+    final URI sha256Uri = new URI(distributionUri.toString() + ".sha256")
+    final String sha256Sum = new String(sha256Uri.toURL().bytes)
+    wrapper.getPropertiesFile() << "distributionSha256Sum=${sha256Sum}\n"
+    println "Added checksum to wrapper properties"
+    // Update build-tools to reflect the Gradle upgrade
+    // TODO: we can remove this once we have tests to make sure older versions work.
+    project(':build-tools').file('src/main/resources/minimumGradleVersion').text = gradleVersion
+    println "Updated minimum Gradle Version"
+  }
+}
+
+gradle.projectsEvaluated {
+  subprojects {
+    /*
+     * Remove assemble/dependenciesInfo on all qa projects because we don't
+     * need to publish artifacts for them.
+     */
+    if (project.name.equals('qa') || project.path.contains(':qa:')) {
+      maybeConfigure(project.tasks, 'assemble') {
+        it.enabled = false
+      }
+      maybeConfigure(project.tasks, 'dependenciesInfo') {
+        it.enabled = false
+      }
+    }
+  }
+  // Having the same group and name for distinct projects causes Gradle to consider them equal when resolving
+  // dependencies leading to hard to debug failures. Run a check across all project to prevent this from happening.
+  // see: https://github.com/gradle/gradle/issues/847
+  Map coordsToProject = [:]
+  project.allprojects.forEach { p ->
+    String coords = "${p.group}:${p.name}"
+    if (false == coordsToProject.putIfAbsent(coords, p)) {
+      throw new GradleException(
+        "Detected that two projects: ${p.path} and ${coordsToProject[coords].path} " +
+          "have the same name and group: ${coords}. " +
+          "This doesn't currently work correctly in Gradle, see: " +
+          "https://github.com/gradle/gradle/issues/847"
+      )
+    }
+  }
+}
+
+allprojects {
+  tasks.register('resolveAllDependencies') {
+    dependsOn tasks.matching { it.name == "pullFixture" }
+    doLast {
+      configurations.findAll { it.isCanBeResolved() }.each { it.resolve() }
+    }
+  }
+
+  // helper task to print direct dependencies of a single task
+  project.tasks.addRule("Pattern: <taskName>Dependencies") { String taskName ->
+    if (taskName.endsWith("Dependencies") == false) {
+      return
+    }
+    if (project.tasks.findByName(taskName) != null) {
+      return
+    }
+    String realTaskName = taskName.substring(0, taskName.length() - "Dependencies".length())
+    Task realTask = project.tasks.findByName(realTaskName)
+    if (realTask == null) {
+      return
+    }
+    project.tasks.create(taskName) {
+      doLast {
+        println("${realTask.path} dependencies:")
+        for (Task dep : realTask.getTaskDependencies().getDependencies(realTask)) {
+          println("  - ${dep.path}")
+        }
+      }
+    }
+  }
+
+  def checkPart1 = tasks.register('checkPart1')
+  def checkPart2 = tasks.register('checkPart2')
+  def checkAll = tasks.register("checkAll")
+  def checkCore = tasks.register("checkCore")
+  plugins.withId('lifecycle-base') {
+    if (project.path.startsWith(":x-pack:")) {
+      checkPart2.configure { dependsOn 'check' }
+    } else {
+      checkPart1.configure { dependsOn 'check' }
+    }
+
+    if (false
+      || project.path.equals(":libs:elasticsearch-cli")
+      || project.path.equals(":libs:elasticsearch-core")
+      || project.path.equals(":libs:elasticsearch-dissect")
+      || project.path.equals(":libs:elasticsearch-geo")
+      || project.path.equals(":libs:elasticsearch-grok")
+      || project.path.equals(":libs:elasticsearch-nio")
+      || project.path.equals(":libs:elasticsearch-plugin-classloader")
+      || project.path.equals(":libs:elasticsearch-secure-sm")
+      || project.path.equals(":libs:elasticsearch-ssl-config")
+      || project.path.equals(":libs:elasticsearch-x-content")
+      || project.path.equals(":modules:analysis-common")
+      || project.path.equals(":modules:didi-check-mapping")
+      || project.path.equals(":modules:didi-cross-datacenter-replication")
+      || project.path.equals(":modules:group-balanced-shards-allocator")
+      || project.path.equals(":modules:ingest-index-template")
+      || project.path.equals(":modules:transport-netty4")
+      || project.path.equals(":plugins:analysis-icu")
+      || project.path.equals(":server")
+      || project.path.equals(":distribution:archives:no-jdk-linux-tar")
+    ) {
+      checkCore.configure { dependsOn 'check'}
+    }
+
+    if ( false
+      || project.path.equals(':benchmarks')
+      || project.path.equals(':build-tools')
+      || project.path.equals(':build-tools:reaper')
+      || project.path.equals(':client')
+      || project.path.equals(':client:benchmark')
+      || project.path.equals(':client:client-benchmark-noop-api-plugin')
+      || project.path.equals(':client:rest')
+      || project.path.equals(':client:rest-high-level')
+      || project.path.equals(':client:sniffer')
+      || project.path.equals(':client:test')
+      || project.path.equals(':client:transport')
+//      || project.path.equals(':distribution')
+//      || project.path.equals(':distribution:archives')
+//      || project.path.equals(':distribution:archives:darwin-tar')
+//      || project.path.equals(':distribution:archives:integ-test-zip')
+//      || project.path.equals(':distribution:archives:linux-tar')
+//      || project.path.equals(':distribution:archives:no-jdk-darwin-tar')
+      || project.path.equals(':distribution:archives:no-jdk-linux-tar')
+//      || project.path.equals(':distribution:archives:oss-darwin-tar')
+//      || project.path.equals(':distribution:archives:oss-linux-tar')
+//      || project.path.equals(':distribution:archives:oss-no-jdk-darwin-tar')
+//      || project.path.equals(':distribution:archives:oss-no-jdk-linux-tar')
+//      || project.path.equals(':distribution:bwc')
+//      || project.path.equals(':distribution:bwc:bugfix')
+//      || project.path.equals(':distribution:bwc:maintenance')
+//      || project.path.equals(':distribution:bwc:minor')
+//      || project.path.equals(':distribution:bwc:staged')
+//      || project.path.equals(':distribution:docker')
+//      || project.path.equals(':distribution:docker:docker-build-context')
+//      || project.path.equals(':distribution:docker:docker-export')
+//      || project.path.equals(':distribution:docker:oss-docker-build-context')
+//      || project.path.equals(':distribution:docker:oss-docker-export')
+//      || project.path.equals(':distribution:tools')
+//      || project.path.equals(':distribution:tools:java-version-checker')
+//      || project.path.equals(':distribution:tools:launchers')
+//      || project.path.equals(':distribution:tools:plugin-cli')
+//      || project.path.equals(':docs')
+//      || project.path.equals(':example-plugins')
+//      || project.path.equals(':example-plugins:custom-settings')
+//      || project.path.equals(':example-plugins:custom-suggester')
+//      || project.path.equals(':example-plugins:painless-whitelist')
+//      || project.path.equals(':example-plugins:rescore')
+//      || project.path.equals(':example-plugins:rest-handler')
+//      || project.path.equals(':example-plugins:script-expert-scoring')
+//      || project.path.equals(':example-plugins:security-authorization-engine')
+      || project.path.equals(':libs')
+      || project.path.equals(':libs:elasticsearch-cli')
+      || project.path.equals(':libs:elasticsearch-core')
+      || project.path.equals(':libs:elasticsearch-dissect')
+      || project.path.equals(':libs:elasticsearch-geo')
+      || project.path.equals(':libs:elasticsearch-grok')
+      || project.path.equals(':libs:elasticsearch-nio')
+      || project.path.equals(':libs:elasticsearch-plugin-classloader')
+      || project.path.equals(':libs:elasticsearch-secure-sm')
+      || project.path.equals(':libs:elasticsearch-ssl-config')
+      || project.path.equals(':libs:elasticsearch-x-content')
+      || project.path.equals(':modules')
+      || project.path.equals(':modules:aggs-matrix-stats')
+      || project.path.equals(':modules:analysis-common')
+      || project.path.equals(':modules:didi-check-mapping')
+      || project.path.equals(':modules:didi-cross-datacenter-replication')
+      || project.path.equals(':modules:group-balanced-shards-allocator')
+//      || project.path.equals(':modules:ingest-common')
+      || project.path.equals(':modules:ingest-geoip')
+      || project.path.equals(':modules:ingest-index-template')
+      || project.path.equals(':modules:ingest-user-agent')
+      || project.path.equals(':modules:lang-expression')
+      || project.path.equals(':modules:lang-mustache')
+      || project.path.equals(':modules:lang-painless')
+      || project.path.equals(':modules:lang-painless:spi')
+      || project.path.equals(':modules:mapper-extras')
+      || project.path.equals(':modules:parent-join')
+      || project.path.equals(':modules:percolator')
+      || project.path.equals(':modules:rank-eval')
+//      || project.path.equals(':modules:reindex')
+      || project.path.equals(':modules:repository-url')
+      || project.path.equals(':modules:systemd')
+      || project.path.equals(':modules:transport-netty4')
+      || project.path.equals(':plugins')
+      || project.path.equals(':plugins:analysis-icu')
+      || project.path.equals(':plugins:analysis-kuromoji')
+      || project.path.equals(':plugins:analysis-nori')
+      || project.path.equals(':plugins:analysis-phonetic')
+      || project.path.equals(':plugins:analysis-smartcn')
+      || project.path.equals(':plugins:analysis-stempel')
+      || project.path.equals(':plugins:analysis-ukrainian')
+//      || project.path.equals(':plugins:discovery-azure-classic')
+//      || project.path.equals(':plugins:discovery-ec2')
+//      || project.path.equals(':plugins:discovery-ec2:qa')
+//      || project.path.equals(':plugins:discovery-ec2:qa:amazon-ec2')
+//      || project.path.equals(':plugins:discovery-gce')
+//      || project.path.equals(':plugins:discovery-gce:qa')
+//      || project.path.equals(':plugins:discovery-gce:qa:gce')
+      || project.path.equals(':plugins:ingest-attachment')
+      || project.path.equals(':plugins:mapper-annotated-text')
+      || project.path.equals(':plugins:mapper-murmur3')
+      || project.path.equals(':plugins:mapper-size')
+//      || project.path.equals(':plugins:repository-azure')
+//      || project.path.equals(':plugins:repository-azure:qa')
+//      || project.path.equals(':plugins:repository-azure:qa:microsoft-azure-storage')
+//      || project.path.equals(':plugins:repository-gcs')
+//      || project.path.equals(':plugins:repository-gcs:qa')
+//      || project.path.equals(':plugins:repository-gcs:qa:google-cloud-storage')
+//      || project.path.equals(':plugins:repository-hdfs')
+//      || project.path.equals(':plugins:repository-s3')
+//      || project.path.equals(':plugins:store-smb')
+      || project.path.equals(':plugins:transport-nio')
+      || project.path.equals(':qa')
+      || project.path.equals(':qa:ccs-unavailable-clusters')
+      || project.path.equals(':qa:die-with-dignity')
+      || project.path.equals(':qa:evil-tests')
+//      || project.path.equals(':qa:full-cluster-restart')
+      || project.path.equals(':qa:logging-config')
+//      || project.path.equals(':qa:mixed-cluster')
+      || project.path.equals(':qa:multi-cluster-search')
+      || project.path.equals(':qa:no-bootstrap-tests')
+      || project.path.equals(':qa:remote-clusters')
+//      || project.path.equals(':qa:repository-multi-version')
+//      || project.path.equals(':qa:rolling-upgrade')
+      || project.path.equals(':qa:smoke-test-client')
+      || project.path.equals(':qa:smoke-test-http')
+      || project.path.equals(':qa:smoke-test-ingest-disabled')
+      || project.path.equals(':qa:smoke-test-ingest-with-all-dependencies')
+      || project.path.equals(':qa:smoke-test-multinode')
+      || project.path.equals(':qa:smoke-test-plugins')
+      || project.path.equals(':qa:unconfigured-node-name')
+//      || project.path.equals(':qa:verify-version-constants')
+      || project.path.equals(':qa:wildfly')
+      || project.path.equals(':rest-api-spec')
+      || project.path.equals(':server')
+      || project.path.equals(':server:cli')
+      || project.path.equals(':test')
+      || project.path.equals(':test:fixtures')
+//      || project.path.equals(':test:fixtures:azure-fixture')
+//      || project.path.equals(':test:fixtures:gcs-fixture')
+      || project.path.equals(':test:fixtures:hdfs-fixture')
+//      || project.path.equals(':test:fixtures:krb5kdc-fixture')
+      || project.path.equals(':test:fixtures:minio-fixture')
+//      || project.path.equals(':test:fixtures:old-elasticsearch')
+//      || project.path.equals(':test:fixtures:s3-fixture')
+      || project.path.equals(':test:framework')
+      || project.path.equals(':test:logger-usage')
+      || project.path.equals(':x-pack')
+      || project.path.equals(':x-pack:docs')
+      || project.path.equals(':x-pack:license-tools')
+//      || project.path.equals(':x-pack:plugin')
+      || project.path.equals(':x-pack:plugin:analytics')
+//      || project.path.equals(':x-pack:plugin:ccr')
+//      || project.path.equals(':x-pack:plugin:ccr:qa')
+//      || project.path.equals(':x-pack:plugin:ccr:qa:downgrade-to-basic-license')
+//      || project.path.equals(':x-pack:plugin:ccr:qa:multi-cluster')
+//      || project.path.equals(':x-pack:plugin:ccr:qa:non-compliant-license')
+//      || project.path.equals(':x-pack:plugin:ccr:qa:rest')
+//      || project.path.equals(':x-pack:plugin:ccr:qa:restart')
+//      || project.path.equals(':x-pack:plugin:ccr:qa:security')
+      || project.path.equals(':x-pack:plugin:core')
+      || project.path.equals(':x-pack:plugin:deprecation')
+      || project.path.equals(':x-pack:plugin:enrich')
+      || project.path.equals(':x-pack:plugin:enrich:qa')
+      || project.path.equals(':x-pack:plugin:enrich:qa:common')
+      || project.path.equals(':x-pack:plugin:enrich:qa:rest')
+      || project.path.equals(':x-pack:plugin:enrich:qa:rest-with-security')
+      || project.path.equals(':x-pack:plugin:frozen-indices')
+//      || project.path.equals(':x-pack:plugin:graph')
+//      || project.path.equals(':x-pack:plugin:graph:qa')
+//      || project.path.equals(':x-pack:plugin:graph:qa:with-security')
+//      || project.path.equals(':x-pack:plugin:ilm')
+//      || project.path.equals(':x-pack:plugin:ilm:qa')
+//      || project.path.equals(':x-pack:plugin:ilm:qa:multi-cluster')
+//      || project.path.equals(':x-pack:plugin:ilm:qa:multi-node')
+//      || project.path.equals(':x-pack:plugin:ilm:qa:rest')
+//      || project.path.equals(':x-pack:plugin:ilm:qa:with-security')
+      || project.path.equals(':x-pack:plugin:logstash')
+      || project.path.equals(':x-pack:plugin:mapper-flattened')
+//      || project.path.equals(':x-pack:plugin:ml')
+//      || project.path.equals(':x-pack:plugin:ml:qa')
+//      || project.path.equals(':x-pack:plugin:ml:qa:basic-multi-node')
+//      || project.path.equals(':x-pack:plugin:ml:qa:disabled')
+//      || project.path.equals(':x-pack:plugin:ml:qa:ml-with-security')
+//      || project.path.equals(':x-pack:plugin:ml:qa:native-multi-node-tests')
+//      || project.path.equals(':x-pack:plugin:ml:qa:no-bootstrap-tests')
+//      || project.path.equals(':x-pack:plugin:ml:qa:single-node-tests')
+      || project.path.equals(':x-pack:plugin:monitoring')
+      || project.path.equals(':x-pack:plugin:rollup')
+      || project.path.equals(':x-pack:plugin:search-business-rules')
+      || project.path.equals(':x-pack:plugin:security')
+      || project.path.equals(':x-pack:plugin:security:cli')
+      || project.path.equals(':x-pack:plugin:security:qa')
+      || project.path.equals(':x-pack:plugin:security:qa:basic-enable-security')
+      || project.path.equals(':x-pack:plugin:security:qa:security-basic')
+      || project.path.equals(':x-pack:plugin:security:qa:tls-basic')
+      || project.path.equals(':x-pack:plugin:spatial')
+      || project.path.equals(':x-pack:plugin:sql')
+      || project.path.equals(':x-pack:plugin:sql:jdbc')
+      || project.path.equals(':x-pack:plugin:sql:qa')
+      || project.path.equals(':x-pack:plugin:sql:qa:multi-node')
+      || project.path.equals(':x-pack:plugin:sql:qa:no-sql')
+      || project.path.equals(':x-pack:plugin:sql:qa:security')
+      || project.path.equals(':x-pack:plugin:sql:qa:security:with-ssl')
+      || project.path.equals(':x-pack:plugin:sql:qa:security:without-ssl')
+      || project.path.equals(':x-pack:plugin:sql:qa:single-node')
+      || project.path.equals(':x-pack:plugin:sql:sql-action')
+      || project.path.equals(':x-pack:plugin:sql:sql-cli')
+      || project.path.equals(':x-pack:plugin:sql:sql-client')
+      || project.path.equals(':x-pack:plugin:sql:sql-proto')
+      || project.path.equals(':x-pack:plugin:transform')
+      || project.path.equals(':x-pack:plugin:transform:qa')
+      || project.path.equals(':x-pack:plugin:transform:qa:multi-node-tests')
+      || project.path.equals(':x-pack:plugin:transform:qa:single-node-tests')
+      || project.path.equals(':x-pack:plugin:vectors')
+      || project.path.equals(':x-pack:plugin:voting-only-node')
+      || project.path.equals(':x-pack:plugin:watcher')
+      || project.path.equals(':x-pack:qa')
+      || project.path.equals(':x-pack:qa:core-rest-tests-with-security')
+      || project.path.equals(':x-pack:qa:evil-tests')
+//      || project.path.equals(':x-pack:qa:full-cluster-restart')
+//      || project.path.equals(':x-pack:qa:kerberos-tests')
+      || project.path.equals(':x-pack:qa:multi-cluster-search-security')
+      || project.path.equals(':x-pack:qa:multi-node')
+//      || project.path.equals(':x-pack:qa:oidc-op-tests')
+//      || project.path.equals(':x-pack:qa:openldap-tests')
+//      || project.path.equals(':x-pack:qa:reindex-tests-with-security')
+//      || project.path.equals(':x-pack:qa:rolling-upgrade')
+//      || project.path.equals(':x-pack:qa:rolling-upgrade-basic')
+//      || project.path.equals(':x-pack:qa:rolling-upgrade-multi-cluster')
+//      || project.path.equals(':x-pack:qa:saml-idp-tests')
+      || project.path.equals(':x-pack:qa:security-client-tests')
+      || project.path.equals(':x-pack:qa:security-example-spi-extension')
+      || project.path.equals(':x-pack:qa:security-migrate-tests')
+      || project.path.equals(':x-pack:qa:security-setup-password-tests')
+      || project.path.equals(':x-pack:qa:security-tools-tests')
+      || project.path.equals(':x-pack:qa:smoke-test-monitoring-with-watcher')
+      || project.path.equals(':x-pack:qa:smoke-test-plugins')
+      || project.path.equals(':x-pack:qa:smoke-test-plugins-ssl')
+      || project.path.equals(':x-pack:qa:smoke-test-security-with-mustache')
+      || project.path.equals(':x-pack:qa:smoke-test-watcher')
+      || project.path.equals(':x-pack:qa:smoke-test-watcher-with-security')
+      || project.path.equals(':x-pack:qa:third-party')
+      || project.path.equals(':x-pack:qa:third-party:active-directory')
+      || project.path.equals(':x-pack:qa:third-party:jira')
+      || project.path.equals(':x-pack:qa:third-party:pagerduty')
+      || project.path.equals(':x-pack:qa:third-party:slack')
+      || project.path.equals(':x-pack:qa:transport-client-tests')
+//      || project.path.equals(':x-pack:snapshot-tool')
+//      || project.path.equals(':x-pack:snapshot-tool:qa')
+//      || project.path.equals(':x-pack:snapshot-tool:qa:google-cloud-storage')
+//      || project.path.equals(':x-pack:snapshot-tool:qa:s3')
+      || project.path.equals(':x-pack:test')
+      || project.path.equals(':x-pack:test:feature-aware')
+//      || project.path.equals(':x-pack:test:idp-fixture')
+//      || project.path.equals(':x-pack:test:smb-fixture')
+      || project.path.equals(':x-pack:transport-client')
+    ) {
+      checkAll.configure { dependsOn 'check'}
+    }
+  }
+}

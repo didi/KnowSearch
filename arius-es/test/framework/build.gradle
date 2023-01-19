@@ -1,0 +1,74 @@
+/*
+ * Licensed to Elasticsearch under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+dependencies {
+  compile project(":client:rest")
+  compile project(":client:sniffer")
+  compile project(':libs:elasticsearch-nio')
+  compile project(":server")
+  compile project(":libs:elasticsearch-cli")
+  compile "com.carrotsearch.randomizedtesting:randomizedtesting-runner:${versions.randomizedrunner}"
+  compile "junit:junit:${versions.junit}"
+  compile "org.hamcrest:hamcrest:${versions.hamcrest}"
+  compile "org.apache.lucene:lucene-test-framework:${versions.lucene}"
+  compile "org.apache.lucene:lucene-codecs:${versions.lucene}"
+  compile "commons-logging:commons-logging:${versions.commonslogging}"
+  compile "commons-codec:commons-codec:${versions.commonscodec}"
+  compile "org.elasticsearch:securemock:${versions.securemock}"
+  compile "org.elasticsearch:mocksocket:${versions.mocksocket}"
+}
+
+compileJava.options.compilerArgs << '-Xlint:-cast,-rawtypes,-unchecked'
+compileTestJava.options.compilerArgs << '-Xlint:-rawtypes'
+
+// the main files are actually test files, so use the appropriate forbidden api sigs
+forbiddenApisMain {
+  replaceSignatureFiles 'jdk-signatures', 'es-all-signatures', 'es-test-signatures'
+}
+
+// TODO: should we have licenses for our test deps?
+dependencyLicenses.enabled = false
+dependenciesInfo.enabled = false
+
+thirdPartyAudit.ignoreMissingClasses(
+  // classes are missing
+  'javax.servlet.ServletContextEvent',
+  'javax.servlet.ServletContextListener',
+  'org.apache.avalon.framework.logger.Logger',
+  'org.apache.log.Hierarchy',
+  'org.apache.log.Logger',
+  'org.apache.log4j.Category',
+  'org.apache.log4j.Level',
+  'org.apache.log4j.Logger',
+  'org.apache.log4j.Priority'
+)
+
+test {
+  systemProperty 'tests.gradle_index_compat_versions', bwcVersions.indexCompatible.join(',')
+  systemProperty 'tests.gradle_wire_compat_versions', bwcVersions.wireCompatible.join(',')
+  systemProperty 'tests.gradle_unreleased_versions', bwcVersions.unreleased.join(',')
+}
+
+task integTest(type: Test) {
+  include "**/*IT.class"
+}
+
+tasks.register("verifyVersions") {
+  dependsOn test
+}

@@ -1,0 +1,20 @@
+[[breaking-changes]]
+= Breaking changes
+
+[partintro]
+--
+This section discusses the changes that you need to be aware of to migrate
+your application to {version}. For more information about what's new in this
+release, see the <<release-highlights>> and <<es-release-notes>>.
+
+For information about how to upgrade your cluster, see <<setup-upgrade>>.
+
+--
+
+include::migrate_7_6.asciidoc[]
+include::migrate_7_5.asciidoc[]
+include::migrate_7_4.asciidoc[]
+include::migrate_7_3.asciidoc[]
+include::migrate_7_2.asciidoc[]
+include::migrate_7_1.asciidoc[]
+include::migrate_7_0.asciidoc[]

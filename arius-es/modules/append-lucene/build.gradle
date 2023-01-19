@@ -1,0 +1,4 @@
+esplugin {
+    description 'append lucene segments'
+    classname 'com.didichuxing.datachannel.arius.plugin.appendlucene.AppendLucenePlugin'
+}

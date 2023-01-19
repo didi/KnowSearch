@@ -1,0 +1,18 @@
+esplugin {
+    description 'discovery node region'
+    classname 'org.elasticsearch.region.RegionPlugin'
+}
+
+group 'org.elasticsearch'
+
+repositories {
+  maven { url 'https://artifactory.intra.xiaojukeji.com/artifactory/libs-release/' }
+  maven { url 'https://artifactory.intra.xiaojukeji.com/artifactory/libs-snapshot/' }
+  maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+  maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
+  mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}

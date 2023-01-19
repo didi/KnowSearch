@@ -1,0 +1,216 @@
+[[indices-get-field-mapping]]
+=== Get field mapping API
+++++
+<titleabbrev>Get field mapping</titleabbrev>
+++++
+
+Retrieves <<mapping,mapping definitions>> for one or more fields. This is useful
+if you don't need the <<indices-get-mapping,complete mapping>> of an index or
+your index contains a large number of fields.
+
+[source,console]
+----
+GET /twitter/_mapping/field/user
+----
+// TEST[setup:twitter]
+
+
+[[get-field-mapping-api-request]]
+==== {api-request-title}
+
+`GET /_mapping/field/<field>`
+
+`GET /<index>/_mapping/field/<field>`
+
+
+[[get-field-mapping-api-path-params]]
+==== {api-path-parms-title}
+
+include::{docdir}/rest-api/common-parms.asciidoc[tag=index]
+
+`<field>`::
+(Optional, string) Comma-separated list or wildcard expression of fields used to
+limit returned information.
+
+
+[[get-field-mapping-api-query-params]]
+==== {api-query-parms-title}
+
+include::{docdir}/rest-api/common-parms.asciidoc[tag=allow-no-indices]
+
+include::{docdir}/rest-api/common-parms.asciidoc[tag=expand-wildcards]
+
+include::{docdir}/rest-api/common-parms.asciidoc[tag=include-type-name]
+
+include::{docdir}/rest-api/common-parms.asciidoc[tag=index-ignore-unavailable]
+
+`include_defaults`::
+(Optional, boolean) If `true`, the response includes default mapping values.
+Defaults to `false`.
+
+include::{docdir}/rest-api/common-parms.asciidoc[tag=local]
+
+
+[[get-field-mapping-api-example]]
+==== {api-examples-title}
+
+[[get-field-mapping-api-basic-ex]]
+===== Example with index setup
+
+You can provide field mappings when creating a new index. The following
+<<indices-create-index, create index>> API request creates the `publications`
+index with several field mappings.
+
+[source,console]
+--------------------------------------------------
+PUT /publications
+{
+    "mappings": {
+        "properties": {
+            "id": { "type": "text" },
+            "title":  { "type": "text"},
+            "abstract": { "type": "text"},
+            "author": {
+                "properties": {
+                    "id": { "type": "text" },
+                    "name": { "type": "text" }
+                }
+            }
+        }
+    }
+}
+--------------------------------------------------
+
+The following returns the mapping of the field `title` only:
+
+[source,console]
+--------------------------------------------------
+GET publications/_mapping/field/title
+--------------------------------------------------
+// TEST[continued]
+
+The API returns the following response:
+
+[source,console-result]
+--------------------------------------------------
+{
+   "publications": {
+      "mappings": {
+          "title": {
+             "full_name": "title",
+             "mapping": {
+                "title": {
+                   "type": "text"
+                }
+             }
+          }
+       }
+   }
+}
+--------------------------------------------------
+
+[[get-field-mapping-api-specific-fields-ex]]
+===== Specifying fields
+
+The get mapping api allows you to specify a comma-separated list of fields.
+
+For instance to select the `id` of the `author` field, you must use its full name `author.id`.
+
+[source,console]
+--------------------------------------------------
+GET publications/_mapping/field/author.id,abstract,name
+--------------------------------------------------
+// TEST[continued]
+
+returns:
+
+[source,console-result]
+--------------------------------------------------
+{
+   "publications": {
+      "mappings": {
+        "author.id": {
+           "full_name": "author.id",
+           "mapping": {
+              "id": {
+                 "type": "text"
+              }
+           }
+        },
+        "abstract": {
+           "full_name": "abstract",
+           "mapping": {
+              "abstract": {
+                 "type": "text"
+              }
+           }
+        }
+     }
+   }
+}
+--------------------------------------------------
+
+The get field mapping API also supports wildcard notation.
+
+[source,console]
+--------------------------------------------------
+GET publications/_mapping/field/a*
+--------------------------------------------------
+// TEST[continued]
+
+returns:
+
+[source,console-result]
+--------------------------------------------------
+{
+   "publications": {
+      "mappings": {
+         "author.name": {
+            "full_name": "author.name",
+            "mapping": {
+               "name": {
+                 "type": "text"
+               }
+            }
+         },
+         "abstract": {
+            "full_name": "abstract",
+            "mapping": {
+               "abstract": {
+                  "type": "text"
+               }
+            }
+         },
+         "author.id": {
+            "full_name": "author.id",
+            "mapping": {
+               "id": {
+                  "type": "text"
+               }
+            }
+         }
+      }
+   }
+}
+--------------------------------------------------
+
+[[get-field-mapping-api-multi-index-ex]]
+===== Multiple indices and fields
+
+The get field mapping API can be used to get the mapping of multiple fields from more than one index
+with a single call. General usage of the API follows the
+following syntax: `host:port/<index>/_mapping/field/<field>` where
+`<index>` and `<field>` can stand for comma-separated list of names or wild cards. To
+get mappings for all indices you can use `_all` for `<index>`. The
+following are some examples:
+
+[source,console]
+--------------------------------------------------
+GET /twitter,kimchy/_mapping/field/message
+
+GET /_all/_mapping/field/message,user.id
+
+GET /_all/_mapping/field/*.id
+--------------------------------------------------
+// TEST[setup:twitter]
+// TEST[s/^/PUT kimchy\nPUT book\n/]
