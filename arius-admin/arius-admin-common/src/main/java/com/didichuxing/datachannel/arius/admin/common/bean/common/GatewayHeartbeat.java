@@ -27,5 +27,9 @@ public class GatewayHeartbeat {
      * 端口
      */
     private int    port;
+    
+    private Double cpuUsage;
+    
+    private Integer httpConnectionNum;
 
 }

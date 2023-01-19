@@ -1,10 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.metadata.utils;
 
+import java.math.BigDecimal;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-
-import java.math.BigDecimal;
-import java.util.*;
 
 public class ReadExprValueUtil {
     protected static final ILog LOGGER = LogFactory.getLog(ReadExprValueUtil.class);

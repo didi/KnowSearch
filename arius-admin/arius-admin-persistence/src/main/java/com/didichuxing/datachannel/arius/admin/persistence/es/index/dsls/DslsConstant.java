@@ -645,6 +645,10 @@ public class DslsConstant {
      */
     public static final String GET_DSL_TEMPLATE_BY_CONDITION                                 = "DslTemplateEsDao/getDslTemplateByCondition";
     /**
+     * 根据指定条件分页获取没有元数据集群的dsl查询模版数据
+     */
+    public static final String GET_DSL_TEMPLATE_BY_CONDITION_WITHOUT_METADATA_CLUSTER        = "DslTemplateEsDao/getDslTemplateByConditionWithoutMetadataCluster";
+    /**
      * 获取所有查询模板最近修改时间在(now-1d,now)范围内，并且不启用的查询模板，然后删除过期的查询模板数据
      */
     public static final String GET_EXPIRED_DSL_TEMPLATE       = "DslTemplateEsDao/deleteExpiredDslTemplate";
@@ -729,13 +733,14 @@ public class DslsConstant {
      */
     public static final String GET_CAT_INDEX_INFO_BY_CONDITION                               = "IndexCatESDAO/getCatIndexInfoByCondition";
 
-    public static final String GET_ALL_CAT_INDEX_NAME_BY_CLUSTERS                            = "IndexCatESDAO/getAllCatIndexNameByClusters";
     /**
      * 条件查询索引cat/index信息
      */
     public static final String GET_ALL_CAT_INDEX_INFO_BY_TERMS                               = "IndexCatESDAO/getAllCatIndexInfoByTerms";
 
     public static final String GET_PLATFORM_CREATE_CAT_INDEX  = "IndexCatESDAO/getPlatformCreateCatIndex";
+    public static final String GET_ALL_CAT_INDEX_NAME_BY_CLUSTERS  = "IndexCatESDAO/getAllCatIndexNameByClusters";
+    public static final String GET_ALL_CAT_INDEX_NAME_BY_RESOURCE_ID  = "IndexCatESDAO/getAllCatIndexNameByResourceId";
     public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT  = "IndexCatESDAO/getPlatformCreateCatIndexByIndexProject";
     public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT_AND_FUZZY_INDEX_AND_CLUSTER_LOGIC  = "IndexCatESDAO/getPlatformCreateCatIndexByIndexProjectAndFuzzyIndex";
     public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT_AND_FUZZY_INDEX_AND_CLUSTER_PHY  =
@@ -743,11 +748,6 @@ public class DslsConstant {
     public static final String GET_PLATFORM_CREATE_CAT_INDEX_GROUP_BY_CLUSTER  = "IndexCatESDAO/getPlatformCreateCatIndexGroupByCluster";
     
     public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_ID  = "IndexCatESDAO/getPlatformCreateCatIndexById";
-
-    /**
-     * 获取模版所有索引健康状态
-     */
-    public static final String GET_TEMPLATE_INDICES_HEALTH                                   = "IndexCatESDAO/getTemplateIndicesHealth";
 
     /************************************************************      ShardCatESDAO     **************************************************************/
     /**
@@ -939,4 +939,9 @@ public class DslsConstant {
      * 获取List类型 Dashboard维度统计信息(带数据值的类型)
      */
     public static final String FETCH_LIST_VALUE_METRIC                                       = "AriusStatsDashBoardInfoESDAO/fetchListValueMetrics";
+
+    /**
+     * pageSearch 查询公用dsl模版语句，项目中有很多相同的语句可以逐步替换为统一的语句模板
+     */
+    public static final String BASE_PAGE_SEARCH                                       = "base/basePageSearch";
 }

@@ -1,5 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.core.service.project.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -25,13 +34,6 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.project.Project
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.security.service.ProjectService;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * APP 逻辑集群权限服务
@@ -193,7 +195,8 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
             SpringTool.publish(new ProjectLogicClusterAuthDeleteEvent(this,
                 ConvertUtil.obj2Obj(oldAuthPO, ProjectClusterLogicAuth.class)));
             operateRecordService.save(new OperateRecord.Builder().bizId(oldAuthPO.getId())
-                .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE).userOperation(operator).build());
+                .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE).userOperation(operator)
+                    .operateProject(projectService.getProjectBriefByProjectId(oldAuthPO.getProjectId())).build());
         }
 
         return Result.build(succeed);
@@ -367,6 +370,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
             operateRecordService.save(new OperateRecord.Builder().content(JSON.toJSONString(authPO))
                 .userOperation(operator).operationTypeEnum(OperateTypeEnum.MY_CLUSTER_INFO_MODIFY)
                 .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId())).bizId(authPO.getId())
+                .operateProject(projectService.getProjectBriefByProjectId(authDTO.getProjectId()))
                 .build());
         }
 
@@ -539,7 +543,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
                 ConvertUtil.obj2Obj(oldAuthPO, ProjectClusterLogicAuth.class),
                 ConvertUtil.obj2Obj(logicClusterAuthDAO.getById(authDTO.getId()), ProjectClusterLogicAuth.class)));
             operateRecordService.saveOperateRecordWithManualTrigger(JSON.toJSONString(newAuthPO), operator,
-                    authDTO.getProjectId(), oldAuthPO.getId(), OperateTypeEnum.MY_CLUSTER_INFO_MODIFY);
+                    authDTO.getProjectId(), oldAuthPO.getId(), OperateTypeEnum.MY_CLUSTER_INFO_MODIFY, authDTO.getProjectId());
         }
 
         return Result.build(succeed);

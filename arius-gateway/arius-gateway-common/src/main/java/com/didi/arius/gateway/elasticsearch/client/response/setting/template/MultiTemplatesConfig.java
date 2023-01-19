@@ -1,5 +1,7 @@
 package com.didi.arius.gateway.elasticsearch.client.response.setting.template;
 
+import java.util.*;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didi.arius.gateway.elasticsearch.client.model.type.ESVersion;
@@ -7,8 +9,6 @@ import com.didi.arius.gateway.elasticsearch.client.response.setting.common.Mappi
 import com.didi.arius.gateway.elasticsearch.client.response.setting.common.TypeDefine;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-
-import java.util.*;
 
 public class MultiTemplatesConfig {
     private final ILog LOGGER = LogFactory.getLog(MultiTemplatesConfig.class);

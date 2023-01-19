@@ -16,6 +16,7 @@
 		<result column="operate_time" jdbcType="TIMESTAMP" property="operateTime"/>
 		<result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
 		<result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+		<result column="operate_project_name" jdbcType="VARCHAR" property="operateProjectName"/>
 	</resultMap>
 	
 	<sql id="Base_Column_List">
@@ -30,7 +31,8 @@
 		                                create_time,
 		                                update_time,
 		                                biz_id,
-		                                content
+		                                content,
+										operate_project_name
 	</sql>
 	
 	<insert id="insert"
@@ -38,9 +40,17 @@
 	        useGeneratedKeys="true" keyColumn="id" keyProperty="id">
 		<!--@mbg.generated-->    insert into operate_record_info (project_name, module_id, operate_id, trigger_way_id,
 		                                                     user_operation, operate_time,
-		                                                     content, biz_id)
+		                                                     content, biz_id
+								<if test="operateProjectName != null">
+									,operate_project_name
+								</if>
+		                                                     )
 		                         values (#{projectName}, #{moduleId}, #{operateId}, #{triggerWayId}, #{userOperation},
-		                                 #{operateTime}, #{content}, #{bizId})
+		                                 #{operateTime}, #{content}, #{bizId}
+								<if test="operateProjectName != null">
+									,#{operateProjectName}
+								</if>
+		                                 )
 	</insert>
 	
 	<select id="listByCondition" resultMap="BaseResultMap"
@@ -82,6 +92,9 @@
 				and (content = #{content} OR content LIKE CONCAT(#{content}, '%') OR content LIKE CONCAT('%',
 				                                                                                         #{content}) OR
 				     content LIKE CONCAT('%', #{content}, '%'))
+			</if>
+			<if test="operateProjectName != null and operateProjectName != ''">
+				and operate_project_name LIKE CONCAT('%', #{operateProjectName}, '%')
 			</if>
 		</where>
 		<if test="sortTerm != null">
@@ -139,6 +152,9 @@
 				                                                                                         #{content}) OR
 				     content LIKE CONCAT('%', #{content}, '%'))
 			</if>
+			<if test="operateProjectName != null and operateProjectName != ''">
+				and operate_project_name LIKE CONCAT('%', #{operateProjectName}, '%')
+			</if>
 		</where>
 		ORDER BY id
 	</select>
@@ -171,6 +187,9 @@
 			<if test="userOperation != null  and userOperation != ''">
 				and user_operation = #{userOperation}
 			</if>
+			<if test="operateProjectName != null and operateProjectName != ''">
+				and operate_project_name = #{operateProjectName}
+			</if>
 		</where>
 	</select>
 
@@ -181,6 +200,7 @@
 			<if test="content != null">,`content` = #{content}</if>
 			<if test="operateTime != null">,`operate_time` = #{operateTime}</if>
 			<if test="updateTime != null">,`update_time` = #{updateTime}</if>
+			<if test="operateProjectName != null">,`operate_project_name` = #{operateProjectName}</if>
 		</trim>
 		where id = #{id}
 	</update>
@@ -197,5 +217,19 @@
 		from operate_record_info
 		where cast(operate_time as datetime) &lt; #{saveTime}
 	</update>
+
+	<insert id="insertWithCheck"
+			parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO"
+			useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		insert into operate_record_info (project_name, module_id, operate_id, trigger_way_id,
+		user_operation, operate_time,
+		content, biz_id, operate_project_name)
+		select #{projectName}, #{moduleId}, #{operateId}, #{triggerWayId}, #{userOperation},
+		#{operateTime}, #{content}, #{bizId}, #{operateProjectName}
+		from dual where not exists (
+		    select 1 from operate_record_info where project_name=#{projectName} and module_id=#{moduleId} and operate_id=#{operateId}
+		    and trigger_way_id=#{triggerWayId} and user_operation=#{userOperation} and operate_project_name=#{operateProjectName}
+		)
+	</insert>
 
 </mapper>

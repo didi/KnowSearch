@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setti
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.didiglobal.knowframework.elasticsearch.client.response.cluster.getsetting.ESClusterGetSettingsResponse;
+
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 

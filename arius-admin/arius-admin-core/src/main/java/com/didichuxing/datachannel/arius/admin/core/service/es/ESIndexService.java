@@ -1,5 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -10,13 +18,6 @@ import com.didiglobal.knowframework.elasticsearch.client.response.indices.stats.
 import com.didiglobal.knowframework.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.knowframework.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.knowframework.elasticsearch.client.response.setting.index.MultiIndexsConfig;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
 
 /**
  * @author d06679
@@ -407,6 +408,13 @@ public interface ESIndexService {
      */
     List<IndexCatCell> buildIndexAliasesAndBlockInfo(String cluster, List<IndexCatCell> indexCatCellList);
 
+    /**
+     * 构建索引实时数据（包含translog和恢复优先级）
+     * @param cluster
+     * @param indexCatCellList
+     * @return
+     */
+    List<IndexCatCell> buildIndexSettingsInfo(String cluster, List<IndexCatCell> indexCatCellList);
     /**
      * 更新索引映射
      *

@@ -1,15 +1,10 @@
 package com.didi.arius.gateway.core.es.http.document;
 
-import com.alibaba.fastjson.JSON;
-import com.didi.arius.gateway.common.exception.AccessForbiddenException;
-import com.didi.arius.gateway.common.metadata.IndexTemplate;
-import com.didi.arius.gateway.common.metadata.QueryContext;
-import com.didi.arius.gateway.common.utils.AppUtil;
-import com.didi.arius.gateway.core.es.http.RestActionListenerImpl;
-import com.didi.arius.gateway.elasticsearch.client.ESClient;
-import com.didi.arius.gateway.elasticsearch.client.gateway.document.ESDeleteRequest;
-import com.didi.arius.gateway.elasticsearch.client.gateway.document.ESDeleteResponse;
-import com.didiglobal.knowframework.log.LogGather;
+import static com.didi.arius.gateway.elasticsearch.client.utils.LogUtils.setWriteLog;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.support.replication.ReplicationRequest;
@@ -22,10 +17,16 @@ import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.action.support.RestActions;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.didi.arius.gateway.elasticsearch.client.utils.LogUtils.setWriteLog;
+import com.alibaba.fastjson.JSON;
+import com.didi.arius.gateway.common.exception.AccessForbiddenException;
+import com.didi.arius.gateway.common.metadata.IndexTemplate;
+import com.didi.arius.gateway.common.metadata.QueryContext;
+import com.didi.arius.gateway.common.utils.AppUtil;
+import com.didi.arius.gateway.core.es.http.RestActionListenerImpl;
+import com.didi.arius.gateway.elasticsearch.client.ESClient;
+import com.didi.arius.gateway.elasticsearch.client.gateway.document.ESDeleteRequest;
+import com.didi.arius.gateway.elasticsearch.client.gateway.document.ESDeleteResponse;
+import com.didiglobal.knowframework.log.LogGather;
 
 @Component("restDeleteAction")
 public class RestDeleteAction extends RestBaseWriteAction {

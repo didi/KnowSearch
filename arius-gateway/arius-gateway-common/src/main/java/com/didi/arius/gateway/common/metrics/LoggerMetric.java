@@ -1,7 +1,6 @@
 package com.didi.arius.gateway.common.metrics;
 
 import com.alibaba.fastjson.JSONObject;
-
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.metrics.Metric;

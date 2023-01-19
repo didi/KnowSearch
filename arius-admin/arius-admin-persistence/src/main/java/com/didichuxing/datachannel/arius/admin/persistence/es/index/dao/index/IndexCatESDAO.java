@@ -2,6 +2,21 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -9,16 +24,13 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellUpdatePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ScrollResultVisitor;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
@@ -33,24 +45,8 @@ import com.didiglobal.knowframework.elasticsearch.client.response.query.query.ag
 import com.didiglobal.knowframework.elasticsearch.client.response.query.query.hits.ESHit;
 import com.didiglobal.knowframework.elasticsearch.client.response.query.query.hits.ESHits;
 import com.google.common.collect.Lists;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
+
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Component;
 
 @Component
 @NoArgsConstructor
@@ -97,7 +93,7 @@ public class IndexCatESDAO extends BaseESDAO {
         }
         return false;
     }
-    public boolean batchUpsert(List<IndexCatCellPO> list, int retryCount) {
+    public boolean batchUpsert(List<IndexCatCellUpdatePO> list, int retryCount) {
         try {
             return ESOpTimeoutRetry.esRetryExecute("batchInsert", retryCount,
                     () -> updateClient.batchUpdate(IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, list));
@@ -127,20 +123,22 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param size         每页大小
      * @param sortTerm     排序字段
      * @param orderByDesc  是否降序
+     * @param showMetadata 是否展示元数据信息
      * @return             Tuple<Long, List<IndexCatCellPO>> 命中数 具体数据
      */
-    public Tuple<Long, List<IndexCatCellPO>> getCatIndexInfo(String cluster, String index, String health, String status,
+    public Tuple<Long, List<IndexCatCellUpdatePO>> getCatIndexInfo(String cluster, String index, String health, String status,
                                                              Integer projectId, Long from, Long size, String sortTerm,
-                                                             Boolean orderByDesc) {
-        Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple;
-        String queryTermDsl = buildQueryTermDsl(cluster, index, health, status, projectId);
+                                                             Boolean orderByDesc, Boolean showMetadata) {
+        Tuple<Long, List<IndexCatCellUpdatePO>> totalHitAndIndexCatCellListTuple;
+        String queryTermDsl = showMetadata ? buildQueryTermDsl(cluster, index, health, status, projectId) :
+                buildQueryTermDslWithMustNot(cluster, index, health, status, projectId);
         String sortType = buildSortType(orderByDesc);
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CAT_INDEX_INFO_BY_CONDITION, queryTermDsl,
             sortTerm, sortType, from, size);
         int retryTime = 3;
         do {
             totalHitAndIndexCatCellListTuple = gatewayClient.performRequestListAndGetTotalCount(metadataClusterName,
-                IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, dsl, IndexCatCellPO.class);
+                IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, dsl, IndexCatCellUpdatePO.class);
         } while (retryTime-- > 0 && null == totalHitAndIndexCatCellListTuple);
 
         return totalHitAndIndexCatCellListTuple;
@@ -353,19 +351,22 @@ public class IndexCatESDAO extends BaseESDAO {
         
     }
 
+    /**************************************************private******************************************************/
     /**
-     * 获取多个物理集群下的索引名称
-     *
-     * @return List<IndexCatCell>
+     * 构建带有must not的DSL,为了过滤元数据集群的索引
+     * @param cluster
+     * @param index
+     * @param health
+     * @param status
+     * @param projectId
+     * @return
      */
-    public List<IndexCatCell> getAllCatIndexNameListByClusters(Integer searchSize, List<String> phyClusterNames) {
-        String clusterPhyStr = JSON.toJSONString(phyClusterNames);
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ALL_CAT_INDEX_NAME_BY_CLUSTERS, searchSize,clusterPhyStr);
-        List<IndexCatCell> indexCatCellList = getIndexCellWithScroll(searchSize, dsl);
-        return indexCatCellList;
+    private String buildQueryTermDslWithMustNot(String cluster, String index, String health, String status, Integer projectId) {
+        List<String> termCellList = Lists.newArrayList();
+        termCellList.add(DSLSearchUtils.getTermCellForExactSearch(metadataClusterName, "cluster"));
+        return "[" + buildTermCell(cluster, index, health, status, projectId) + "],\"must_not\":["+ListUtils.strList2String(termCellList)+"]";
     }
 
-    /**************************************************private******************************************************/
     /**
      * 构建模糊查询dsl语法, 如下
      * {
@@ -484,6 +485,29 @@ public class IndexCatESDAO extends BaseESDAO {
                 .orElse(Collections.emptyList()).stream().filter(Objects::nonNull).map(ESHit::getSource)
                 .filter(Objects::nonNull).map(JSONObject.class::cast).map(jsonObject -> jsonObject.getString(INDEX))
                 .filter(Objects::nonNull).distinct().collect(Collectors.toList());
+    }
+
+
+    /**
+     * 获取多个物理集群下的索引名称
+     *
+     * @return List<IndexCatCell>
+     */
+    public List<IndexCatCell> getAllCatIndexNameListByClusters(Integer searchSize, List<String> phyClusterNames) {
+        String clusterPhyStr = JSON.toJSONString(phyClusterNames);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ALL_CAT_INDEX_NAME_BY_CLUSTERS, searchSize,clusterPhyStr);
+        List<IndexCatCell> indexCatCellList = getIndexCellWithScroll(searchSize, dsl);
+        return indexCatCellList;
+    }
+    /**
+     * 获取某个逻辑集群的索引
+     *  @param searchSize
+     *  @param logicClusterId
+     *  @return */
+    public List<IndexCatCell> getIndexNameListByLogicCluster(Integer searchSize, Long logicClusterId) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ALL_CAT_INDEX_NAME_BY_RESOURCE_ID, searchSize, logicClusterId);
+        List<IndexCatCell> indexCatCellList = getIndexCellWithScroll(searchSize, dsl);
+        return indexCatCellList;
     }
 
     private List<IndexCatCell> getIndexCellWithScroll(Integer searchSize, String dsl) {

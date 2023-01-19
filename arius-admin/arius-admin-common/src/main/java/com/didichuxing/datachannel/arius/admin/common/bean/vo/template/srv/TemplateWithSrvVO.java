@@ -54,18 +54,8 @@ public class TemplateWithSrvVO extends BaseVO {
     @ApiModelProperty("模版健康:-1：未知")
     private Integer health;
 
-    /**
-     * 是否禁读
-     */
-    @ApiModelProperty("是否禁读")
-    private Boolean blockRead;
-
-    /**
-     * 是否禁写
-     */
-    @ApiModelProperty("是否禁写")
-    private Boolean blockWrite;
-
+    @ApiModelProperty("模版恢复优先级，10：高优，5：一般，0：低优")
+    private Integer priorityLevel;
     /**
      * 指示主集群的联通状态
      */

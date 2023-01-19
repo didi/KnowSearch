@@ -1,0 +1,15 @@
+---
+# 调试的时候设置为true，生产环境设置为false
+debug: true
+listen: 0.0.0.0:8020
+# task_host分成100张表
+table: 100
+spNoFinStatus:
+  - "timeout"
+  - "failed"
+timeoutNormal: false
+mysql:
+  addr: "root:Work2019@tcp(127.0.0.1:3306)/zeus_es?charset=utf8&parseTime=True&loc=Asia%2FShanghai"
+  idle: 8
+  max: 32
+  showsql: true

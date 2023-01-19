@@ -1,5 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl;
 
+import java.util.List;
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
@@ -34,6 +41,7 @@ import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,6 +193,9 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
             .allMatch(BaseResult::failed)) {
             return Result.buildFail("当前项目不属于超级项目或者持有该操作的项目");
         }
+        //查询模板所属应用，保存到操作记录中
+        Map<Integer, Integer> templateId2OperateProjectId = ConvertUtil.list2Map(indexTemplateService.listLogicTemplatesByIds
+                (templateIdList), IndexTemplate::getId, IndexTemplate::getProjectId);
         for (TupleTwo<IndexTemplate, IndexTemplate> tupleTwo : tupleTwos) {
             final Result<Void> result = indexTemplateService
                 .editTemplateInfoTODB(ConvertUtil.obj2Obj(tupleTwo.v2, IndexTemplateDTO.class));
@@ -192,7 +203,7 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
                 operateRecordService.saveOperateRecordWithManualTrigger(
                         String.format("%s:【%s】", Boolean.TRUE.equals(status) ? "开启模板服务" : "关闭模板服务",
                                 templateSrvName()), operator, projectId, tupleTwo.v2.getId(),
-                        OperateTypeEnum.TEMPLATE_SERVICE);
+                        OperateTypeEnum.TEMPLATE_SERVICE, templateId2OperateProjectId.get(tupleTwo.v2.getId()));
             }
         }
 

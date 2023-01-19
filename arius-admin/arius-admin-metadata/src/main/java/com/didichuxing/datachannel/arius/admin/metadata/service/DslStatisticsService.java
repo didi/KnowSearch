@@ -1,11 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.AuditDsl;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslQueryLimit;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -19,13 +24,6 @@ import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class DslStatisticsService {
@@ -62,7 +60,8 @@ public class DslStatisticsService {
                 operateRecordService.saveOperateRecordWithManualTrigger(String.format("checkMode->%s",
                         dslTemplatePo.getCheckMode()),
                         auditDsl.getUserName(),auditDsl.getProjectId(),String.format("%d_%s", projectId,
-                                dslTemplatePo.getDslTemplateMd5()),OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT);
+                                dslTemplatePo.getDslTemplateMd5()),OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT,
+                        dslTemplatePo.getProjectId());
             }
         }
 
@@ -91,7 +90,7 @@ public class DslStatisticsService {
             operateRecordService.saveOperateRecordWithManualTrigger(String.format("queryLimit %f->%f",
                             originalMap.getOrDefault(dslQueryLimit.getProjectIdDslTemplateMd5(), defaultDsl).getQueryLimit(),
                             dslQueryLimit.getQueryLimit()), operator, null, dslQueryLimit.getProjectIdDslTemplateMd5(),
-                    OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT);
+                    OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT, dslQueryLimit.getProjectId());
         }
 
         return Result.buildSucc(true);

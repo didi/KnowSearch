@@ -58,19 +58,9 @@ public class ClusterJoinDTO extends BaseDTO {
     @ApiModelProperty("集群资源类型(-1 未知 1 共享 2 独立 3 独享)")
     private Integer                    resourceType;
 
-    @ApiModelProperty("kibana外链地址")
-    private String                    kibanaAddress;
-
-    @ApiModelProperty("cerebro外链地址")
-    private String                    cerebroAddress;
-
-    @ApiModelProperty("http地址-读")
-    private String                     httpAddress;
-
-    @ApiModelProperty("http地址-写")
-    private String                     httpWriteAddress;
+    @ApiModelProperty("region划分方式，为空代表根据节点名称划分，否则为attribute属性")
+    private String                     divideAttributeKey;
 
     @ApiModelProperty("代理地址")
     private String                     proxyAddress;
-
 }

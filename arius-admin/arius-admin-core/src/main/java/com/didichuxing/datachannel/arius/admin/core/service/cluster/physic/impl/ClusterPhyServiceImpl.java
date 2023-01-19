@@ -2,6 +2,15 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.impl
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
@@ -34,18 +43,8 @@ import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author didi
@@ -120,15 +119,15 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
     /**
      * 新建集群
-     * @param param    集群信息
-     * @param operator 操作人
+     *
+     * @param param 集群信息
      * @return 成功 true 失败 false
      * <p>
      * 参数不合理
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Boolean> createCluster(ClusterPhyDTO param, String operator) {
+    public Result<Boolean> createCluster(ClusterPhyDTO param) {
         Result<Boolean> checkResult = checkClusterParam(param, OperationEnum.ADD);
         if (checkResult.failed()) {
             LOGGER.warn("class=ESClusterPhyServiceImpl||method=addCluster||msg={}", checkResult.getMessage());
@@ -138,6 +137,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         initClusterParam(param);
 
         ClusterPhyPO clusterPO = ConvertUtil.obj2Obj(param, ClusterPhyPO.class);
+
         boolean succ = (1 == clusterDAO.insert(clusterPO));
         if (succ) {
             param.setId(clusterPO.getId());
@@ -367,8 +367,32 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     public boolean isClusterExistsByPackageId(Long packageId) {
         return clusterDAO.getTotalHitByPackageId(packageId) > 0;
     }
-
-
+    
+    @Override
+    public Integer getComponentIdById(Integer clusterPhyId) {
+        return clusterDAO.getComponentIdById(clusterPhyId);
+    }
+    
+    @Override
+    public boolean hasClusterRelationComponentId(Integer componentId) {
+        return Objects.nonNull(clusterDAO.getOneByComponentId(componentId));
+    }
+    
+    @Override
+    public boolean updateVersion(Integer componentId, String version) {
+        return clusterDAO.updateOneVersionByComponentId(componentId,version);
+    }
+    
+    @Override
+    public ClusterPhyPO getOneByComponentId(Integer componentId) {
+        return clusterDAO.getOneByComponentId(componentId);
+    }
+    
+    @Override
+    public List<ClusterPhyPO> listClusterByGatewayId(Integer gatewayId) {
+        return clusterDAO.listClusterByGatewayId(gatewayId);
+    }
+    
     /**************************************** private method ***************************************************/
     private List<String> buildTcpAddress(String cluster) {
         try {
@@ -497,10 +521,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
             param.setHttpWriteAddress("");
         }
 
-        if (param.getHttpAddress() == null) {
-            param.setHttpAddress("");
-        }
-
         if (param.getPassword() == null) {
             param.setPassword("");
         }
@@ -559,15 +579,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         }
         if (null == param.getGatewayUrl()) {
             param.setGatewayUrl("");
-        }
-        if (null == param.getKibanaAddress()) {
-            param.setKibanaAddress("");
-        }
-        if (null == param.getCerebroAddress()) {
-            param.setCerebroAddress("");
-        }
-        if (null == param.getProxyAddress()) {
-            param.setProxyAddress("");
         }
     }
 

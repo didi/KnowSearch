@@ -1,5 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.impl;
 
+import java.util.*;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplateLogicAliasManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplatePhyAliasManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
@@ -9,11 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleLogicTemplateAliasesDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
@@ -23,16 +26,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * @author zqr
@@ -242,8 +235,9 @@ public class TemplateLogicAliasManagerImpl extends BaseTemplateSrvImpl implement
 
         Result<Void> operationResult = createTemplateAliases(aliases.getLogicId(), aliases.getAliases());
         if (operationResult.success()) {
+            Integer projectIdByTemplateLogicId = indexTemplateService.getProjectIdByTemplateLogicId(aliases.getLogicId());
             operateRecordService.saveOperateRecordWithManualTrigger("别名创建", operator, AuthConstant.SUPER_PROJECT_ID,
-                    aliases.getLogicId(), OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY);
+                    aliases.getLogicId(), OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY, projectIdByTemplateLogicId);
         }
 
         return operationResult;
@@ -262,10 +256,11 @@ public class TemplateLogicAliasManagerImpl extends BaseTemplateSrvImpl implement
 
         Result<Void> operationResult = modifyTemplateAliases(aliases.getLogicId(), aliases.getAliases());
         if (operationResult.success()) {
+            Integer projectIdByTemplateLogicId = indexTemplateService.getProjectIdByTemplateLogicId(aliases.getLogicId());
             operateRecordService
                 .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY)
                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(aliases.getLogicId()).content("别名修改")
-                    .userOperation(operator).build());
+                    .userOperation(operator).operateProject(projectService.getProjectBriefByProjectId(projectIdByTemplateLogicId)).build());
         }
 
         return operationResult;

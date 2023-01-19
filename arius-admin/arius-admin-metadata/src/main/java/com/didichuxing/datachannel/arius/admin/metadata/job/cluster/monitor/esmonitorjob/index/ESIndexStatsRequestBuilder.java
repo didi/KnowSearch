@@ -1,10 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.index;
 
-import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESBroadcastTimeoutRequestBuilder;
-import com.didiglobal.knowframework.elasticsearch.client.request.index.stats.IndicesStatsLevel;
+import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.index.ESIndexStatsRequest.*;
+
 import org.elasticsearch.client.ElasticsearchClient;
 
-import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.index.ESIndexStatsRequest.*;
+import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESBroadcastTimeoutRequestBuilder;
+import com.didiglobal.knowframework.elasticsearch.client.request.index.stats.IndicesStatsLevel;
 
 public class ESIndexStatsRequestBuilder extends
                                         ESBroadcastTimeoutRequestBuilder<ESIndexStatsRequest, ESIndexStatsResponse, ESIndexStatsRequestBuilder> {

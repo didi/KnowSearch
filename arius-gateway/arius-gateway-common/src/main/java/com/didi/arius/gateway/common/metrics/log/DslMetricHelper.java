@@ -1,22 +1,18 @@
 package com.didi.arius.gateway.common.metrics.log;
 
-import com.alibaba.fastjson.JSON;
-import com.didi.arius.gateway.common.consts.QueryConsts;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.elasticsearch.common.Strings;
+import org.elasticsearch.common.util.concurrent.ConcurrentCollections;
+
+import com.alibaba.fastjson.JSON;
+import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.observability.Observability;
-import org.elasticsearch.common.Strings;
-import org.elasticsearch.common.util.concurrent.ConcurrentCollections;
 
 /**
  * @author didi

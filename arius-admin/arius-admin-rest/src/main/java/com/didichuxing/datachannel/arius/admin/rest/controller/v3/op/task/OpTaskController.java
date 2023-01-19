@@ -1,11 +1,23 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.task;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.op.manager.ESClusterExpandWithPluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.op.manager.ESClusterShrinkWithPluginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.OpTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.TaskTypeVO;
@@ -18,18 +30,11 @@ import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.security.util.HttpRequestUtil;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 /**
  * @author fengqiongfeng
@@ -101,6 +106,39 @@ public class OpTaskController {
             return Result.buildFail(result.getMessage());
         }
         return Result.buildSucc(ConvertUtil.obj2Obj(result.getData(), WorkTaskVO.class));
+    }
+    
+    @PostMapping(path = "/es-cluster-shrink")
+    @ResponseBody
+    @ApiOperation(value = "提交 es 缩容任务接口", notes = "")
+    public Result<List<WorkTaskVO>> addTaskESShrink(HttpServletRequest request,
+        @RequestBody ESClusterShrinkWithPluginDTO data) throws NotFindSubclassException {
+        return opTaskManager.addTaskESShrink(data, HttpRequestUtil.getOperator(request),
+            HttpRequestUtil.getProjectId(request));
+        
+    }
+    
+    @PostMapping(path = "/es-cluster-expand")
+    @ResponseBody
+    @ApiOperation(value = "提交 es 扩容任务接口", notes = "")
+    @ApiImplicitParams({
+        @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "任务类型", required = true)})
+    public Result<List<WorkTaskVO>> addTaskESExpand(HttpServletRequest request,
+        @RequestBody ESClusterExpandWithPluginDTO data) throws NotFindSubclassException {
+        return opTaskManager.addTaskESExpand(data, HttpRequestUtil.getOperator(request),
+            HttpRequestUtil.getProjectId(request));
+    }
+    
+    
+    @ApiOperation(value = "ecm 任务类型", notes = "")
+    @GetMapping(value = "/ecm-type-enums")
+    @ResponseBody
+    public Result<List<TaskTypeVO>> getECMOrderTypes() {
+        List<TaskTypeVO> voList = new ArrayList<>();
+        for (OpTaskTypeEnum elem : OpTaskTypeEnum.opManagerTask()) {
+            voList.add(new TaskTypeVO(elem.getType(), elem.getMessage()));
+        }
+        return Result.buildSucc(voList);
     }
 
 }

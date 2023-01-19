@@ -30,13 +30,14 @@
         <result column="open_srv"                jdbcType="VARCHAR" property="openSrv"/>
         <result column="disk_size"               jdbcType="DECIMAL" property="diskSize"/>
         <result column="health"               jdbcType="BIGINT" property="health"/>
+        <result column="priority_level"          jdbcType="INTEGER" property="priorityLevel"/>
     </resultMap>
 
     <sql id="Base_Column_List">
          id, `name`, data_type, date_format, data_center, expire_time, hot_time,
            date_field, date_field_format, id_field, routing_field, expression,
          `desc`, quota, write_rate_limit, project_id, ingest_pipeline,block_read, block_write, resource_id,
-          check_point_diff, has_dcdr, create_time, update_time, `level`, `open_srv`, disk_size,health
+          check_point_diff, has_dcdr, create_time, update_time, `level`, `open_srv`, disk_size,health, priority_level
     </sql>
 
     <select id="listByCondition"
@@ -88,6 +89,12 @@
         <if test="param.hasDCDR != null and param.openSrv != null and param.openSrv != ''">
             and (`has_dcdr` =
                  #{param.hasDCDR} or FIND_IN_SET(#{param.openSrv}, open_srv))
+        </if>
+        <if test="param.metadataLogicClusterIds != null and param.metadataLogicClusterIds.size() != 0">
+            and `resource_id` not in
+            <foreach collection="param.metadataLogicClusterIds" item="resourceId" open="(" separator="," close=")">
+                #{resourceId}
+            </foreach>
         </if>
         order by  ${sortTerm}  ${sortType}
         limit #{from}, #{size}
@@ -157,6 +164,12 @@
         <if test="hasDCDR != null and openSrv != null and openSrv != ''">
             and (`has_dcdr` = #{hasDCDR} OR FIND_IN_SET(#{openSrv}, open_srv))
         </if>
+        <if test="metadataLogicClusterIds != null and metadataLogicClusterIds.size() != 0">
+            and `resource_id` not in
+            <foreach collection="metadataLogicClusterIds" item="resourceId" open="(" separator="," close=")">
+                #{resourceId}
+            </foreach>
+        </if>
        
     </select>
     
@@ -220,12 +233,12 @@
             keyColumn="id" keyProperty="id">
         insert into index_template_info
           (is_active, `name`, data_type, date_format, data_center, expire_time, hot_time,  date_field, date_field_format, id_field, routing_field, expression,
-         `desc`, quota, write_rate_limit, project_id, ingest_pipeline, resource_id, `level`, open_srv, disk_size,health)
+         `desc`, quota, write_rate_limit, project_id, ingest_pipeline, resource_id, `level`, open_srv, disk_size,health,priority_level)
         values
         (1, #{name}, #{dataType}, #{dateFormat}, #{dataCenter}, #{expireTime}, #{hotTime},
           #{dateField}, #{dateFieldFormat}, #{idField},
          #{routingField}, #{expression}, #{desc}, #{quota}, #{writeRateLimit}, #{projectId}, #{ingestPipeline}, #{resourceId}, #{level}
-        , #{openSrv}, #{diskSize},0)
+        , #{openSrv}, #{diskSize},0,#{priorityLevel})
     </insert>
 
     <select id="getById" parameterType="int" resultMap="BaseResultMap">
@@ -284,6 +297,7 @@
             <if test="openSrv != null">,open_srv = #{openSrv}</if>
             <if test="diskSize != null">,disk_size = #{diskSize}</if>
             <if test="health != null">,health = #{health}</if>
+            <if test="priorityLevel != null">,priority_level = #{priorityLevel}</if>
         </trim>
         where id = #{id}
     </update>

@@ -1,0 +1,22 @@
+{
+  "level":1,
+  "expression": "fastdump_move_metrics_info*",
+  "dateFormat": "_yyyy-MM-dd",
+  "dataCenter": "cn",
+  "dataType": 0,
+  "dateField": "timestamp",
+  "expireTime": "180",
+  "physicalInfos": [
+    {
+      "cluster": "logi-elasticsearch-7.6.0",
+      "resourceId": 63,
+      "role": 1,
+      "shard": "4"
+    }
+  ],
+  "quota": 30,
+  "appId": 1,
+  "responsible": "admin",
+  "name": "fastdump_move_metrics_info",
+  "desc": ""
+}

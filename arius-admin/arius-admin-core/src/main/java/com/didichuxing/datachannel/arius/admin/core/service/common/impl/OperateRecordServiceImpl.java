@@ -1,6 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.core.service.common.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import java.util.*;
+import java.util.function.Consumer;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -12,26 +18,16 @@ import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
-import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusTaskThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordDAO;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.knowframework.security.dao.ProjectDao;
-
-import java.util.*;
-import java.util.function.Consumer;
-
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
 
 /**
  *
@@ -50,43 +46,39 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     private static final String  USER_OPERATION = "user_operation";
     private static final String  ID = "id";
 
-    private AriusTaskThreadPool ariusTaskThreadPool;
-
     @Autowired
     private OperateRecordDAO  operateRecordDAO;
     @Autowired
     private ProjectDao projectDao;
+    @Autowired
+    private IndexTemplateService indexTemplateService;
 
-    @PostConstruct
-    public void init() {
-        ariusTaskThreadPool = new AriusTaskThreadPool();
-        ariusTaskThreadPool.init(3, "OperateRecordServiceImpl", 100);
-    }
     
     @Override
     public void deleteExprieData(Date saveTime) {
-    
+
         operateRecordDAO.deleteExprieData(saveTime);
     
     }
-    
-    
+
     @Override
     public Result<Void> save(OperateRecord operateRecord) {
-        ariusTaskThreadPool.run(() -> {
-            try {
-                OperateRecordInfoPO operateRecordInfoPO = ConvertUtil.obj2Obj(operateRecord, OperateRecordInfoPO.class);
-                operateRecordDAO.insert(operateRecordInfoPO);
-            } catch (Exception e) {
-                LOGGER.error(
-                        "class=OperateRecordServiceImply||method=save||errMsg={}||operateId={}",
-                        e.getMessage(), operateRecord.getOperateId(), e);
-            }
-        });
-        return Result.buildSucc();
+        final OperateRecordInfoPO operateRecordInfoPO = ConvertUtil.obj2Obj(operateRecord, OperateRecordInfoPO.class);
+        return Result.build(operateRecordDAO.insert(operateRecordInfoPO) == 1);
 
     }
-    
+
+    @Override
+    public void saveOperateRecordWithManualTrigger(String content, String operator, Integer projectId,
+                                                   Object bizId, OperateTypeEnum operateTypeEnum,
+                                                   Integer operateProjectId) {
+        save(new OperateRecord.Builder().project(ConvertUtil.obj2Obj(projectDao.selectByProjectId(projectId),
+                        ProjectBriefVO.class)).operationTypeEnum(operateTypeEnum)
+                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).content(content).bizId(bizId)
+                .operateProject(ConvertUtil.obj2Obj(projectDao.selectByProjectId(operateProjectId),ProjectBriefVO.class))
+                .build());
+    }
+
     @Override
     public void saveOperateRecordWithManualTrigger(String content, String operator, Integer projectId,
                                                    Object bizId, OperateTypeEnum operateTypeEnum) {
@@ -95,7 +87,18 @@ public class OperateRecordServiceImpl implements OperateRecordService {
                 .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).content(content).bizId(bizId)
                 .build());
     }
-    
+
+    @Override
+    public void saveOperateRecordWithSchedulingTasks(String content, String operator, Integer projectId,
+                                                                      Object bizId, OperateTypeEnum operateTypeEnum,
+                                                                      Integer operateProjectId) {
+        save(new OperateRecord.Builder().project(ConvertUtil.obj2Obj(projectDao.selectByProjectId(projectId),
+                        ProjectBriefVO.class)).operationTypeEnum(operateTypeEnum)
+                .triggerWayEnum(TriggerWayEnum.SCHEDULING_TASKS).userOperation(operator).content(content).bizId(bizId)
+                .operateProject(ConvertUtil.obj2Obj(projectDao.selectByProjectId(operateProjectId),ProjectBriefVO.class))
+                .build());
+    }
+
     @Override
     public void saveOperateRecordWithSchedulingTasks(String content, String operator, Integer projectId, Object bizId,
                                                      OperateTypeEnum operateTypeEnum) {
@@ -119,6 +122,9 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         pageDTO.setSortType(sortType);
         if(StringUtils.isNotBlank(pageDTO.getProjectName())){
             pageDTO.setProjectName(CommonUtils.sqlFuzzyQueryTransfer(pageDTO.getProjectName()));
+        }
+        if(StringUtils.isNotBlank(pageDTO.getOperateProjectName())){
+            pageDTO.setOperateProjectName(CommonUtils.sqlFuzzyQueryTransfer(pageDTO.getOperateProjectName()));
         }
         if(StringUtils.isNotBlank(pageDTO.getContent())){
             pageDTO.setContent(CommonUtils.sqlFuzzyQueryTransfer(pageDTO.getContent()));
@@ -195,7 +201,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         }
         OperateRecordInfoPO selectOneOperateRecordInfoPO = operateRecordDAO.selectOneOperateRecord(operateRecordDTO);
         if (null == selectOneOperateRecordInfoPO) {
-            return insertOperateRecordInfoWithoutCheck(operateRecordDTO);
+            return insertOperateRecordInfoWithCheck(operateRecordDTO);
         }
         OperateRecordInfoPO convertOperateRecordInfoPO = ConvertUtil.obj2Obj(operateRecordDTO, OperateRecordInfoPO.class);
         convertOperateRecordInfoPO.setUpdateTime(new Date());
@@ -206,27 +212,14 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     }
 
     /**
-     * 组装查询参数
-     * @param operateRecordDTO
-     * @return
-     */
-    private QueryWrapper<OperateRecordInfoPO> buildOperateRecordInfoPOQueryWrapper(OperateRecordDTO operateRecordDTO) {
-        QueryWrapper<OperateRecordInfoPO> operateRecordInfoPOQueryWrapper = new QueryWrapper<>();
-        operateRecordInfoPOQueryWrapper.eq(PROJECT_NAME, operateRecordDTO.getProjectName());
-        operateRecordInfoPOQueryWrapper.eq(MODULE_ID, operateRecordDTO.getModuleId());
-        operateRecordInfoPOQueryWrapper.eq(OPERATE_ID, operateRecordDTO.getOperateId());
-        operateRecordInfoPOQueryWrapper.eq(TRIGGER_WAY_ID, operateRecordDTO.getTriggerWayId());
-        operateRecordInfoPOQueryWrapper.eq(USER_OPERATION, operateRecordDTO.getUserOperation());
-        return operateRecordInfoPOQueryWrapper;
-    }
-
-    /**
      * 新增操作记录
      * @param operateRecordDTO
      */
-    private Result<Integer> insertOperateRecordInfoWithoutCheck(OperateRecordDTO operateRecordDTO) {
-        OperateRecord operateRecord = ConvertUtil.obj2Obj(operateRecordDTO,OperateRecord.class);
-        return Result.build(save(operateRecord).success(),operateRecordDTO.getId());
+    private Result<Integer> insertOperateRecordInfoWithCheck(OperateRecordDTO operateRecordDTO) {
+        OperateRecordInfoPO operateRecordInfoPO = ConvertUtil.obj2Obj(operateRecordDTO, OperateRecordInfoPO.class);
+        operateRecordInfoPO.setOperateTime(new Date());
+        boolean succ = (1 == operateRecordDAO.insertWithCheck(operateRecordInfoPO));
+        return Result.build(succ, operateRecordInfoPO.getId());
     }
 
     /**

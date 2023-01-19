@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
  * @author jinbinbin
  * @version $Id: TranslateHttpServletRequestWrapper.java, v 0.1 2018年11月22日 10:28 jinbinbin Exp $
  */
+@Deprecated
 class TranslateHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private String body;

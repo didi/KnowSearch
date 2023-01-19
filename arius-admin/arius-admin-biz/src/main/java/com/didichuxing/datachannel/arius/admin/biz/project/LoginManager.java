@@ -1,13 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.biz.project;
 
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import com.didiglobal.knowframework.security.common.Result;
 import com.didiglobal.knowframework.security.common.dto.account.AccountLoginDTO;
 import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
-import java.io.IOException;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.didiglobal.knowframework.security.exception.KfSecurityException;
 
 /**
  * 登录管理器
@@ -23,6 +26,7 @@ public interface LoginManager {
      * @param loginDTO 登陆信息
      * @param request  请求信息
      * @return token
+     * @throws KfSecurityException 登录错误
      */
     Result<UserBriefVO> verifyLogin(AccountLoginDTO loginDTO, HttpServletRequest request, HttpServletResponse response);
 

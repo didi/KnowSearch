@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.DataType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,7 +29,7 @@ public class IndexTemplate extends BaseEntity implements Comparable<IndexTemplat
 
     /**
      * 用户数据类型
-     * @see DataTypeEnum
+     * @see DataType
      */
     private Integer dataType;
 
@@ -157,6 +157,11 @@ public class IndexTemplate extends BaseEntity implements Comparable<IndexTemplat
      * 模版健康度
      */
     private Integer health;
+
+    /**
+     * 模版恢复优先级
+     */
+    private Integer priorityLevel;
 
     @Override
     public int compareTo(IndexTemplate o) {

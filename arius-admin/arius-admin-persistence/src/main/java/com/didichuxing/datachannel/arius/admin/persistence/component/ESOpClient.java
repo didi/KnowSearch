@@ -1,20 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.persistence.component;
 
-import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
-import com.didiglobal.knowframework.elasticsearch.client.ESClient;
-import com.didiglobal.knowframework.elasticsearch.client.response.cluster.ESClusterHealthResponse;
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
-import com.google.common.collect.Sets;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
@@ -24,6 +18,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
+import com.didiglobal.knowframework.elasticsearch.client.ESClient;
+import com.didiglobal.knowframework.elasticsearch.client.response.cluster.ESClusterHealthResponse;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.google.common.collect.Sets;
 
 /**
  * es的操作需要通过ESOpClient，维护admin与各个集群的链接

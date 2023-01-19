@@ -2,12 +2,21 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.indices;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesIncrementalSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
@@ -18,23 +27,10 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author lyn
@@ -245,4 +241,18 @@ public class IndicesController extends BaseIndicesController {
         return indicesManager.getClusterLogicIndexName(clusterLogicName, HttpRequestUtil.getProjectId(request),index);
     }
 
+    @PutMapping("/mergeSettings")
+    @ResponseBody
+    @ApiOperation(value = "以settings增量方式批量更新索引的settings")
+    public Result<Boolean> updateIndexSettingsByMerge(@RequestBody List<IndicesIncrementalSettingDTO> params,
+                                                 HttpServletRequest request) throws ESOperateException {
+        Result<Boolean> checkClusterValidResult = checkClusterValid(
+                params.stream().map(IndicesIncrementalSettingDTO::getCluster).distinct().collect(Collectors.toList()));
+        if (checkClusterValidResult.failed()) {
+            return Result.buildFrom(checkClusterValidResult);
+        }
+        Result<Void> result = indicesManager.updateIndexSettingsByMerge(params, HttpRequestUtil.getProjectId(request),
+                HttpRequestUtil.getOperator(request));
+        return Result.buildSucc(result.success() ? Boolean.TRUE : Boolean.FALSE);
+    }
 }

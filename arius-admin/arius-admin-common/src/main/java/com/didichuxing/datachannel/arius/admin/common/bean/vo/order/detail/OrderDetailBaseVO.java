@@ -1,11 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
 import java.util.List;
+
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

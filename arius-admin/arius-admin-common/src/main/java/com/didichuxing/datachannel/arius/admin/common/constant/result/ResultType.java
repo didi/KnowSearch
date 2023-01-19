@@ -70,10 +70,10 @@ public enum ResultType {
                         FILE_UPLOAD_ERROR(10029, "upload file failed"),
 
                         NOT_SUPPORT_ERROR(10030, "接口不再支持"),
-    ES_CLIENT_NUL_ERROR(10031, "es client [%s] 集群异常"),
 
-    EVENT_ERROR(10032,"事件处理异常"),
+                        ES_CLIENT_NUL_ERROR(10031, "es client [%s] 集群异常"),
 
+                        EVENT_ERROR(10032,"事件处理异常"),
     ;
 
     private Integer code;

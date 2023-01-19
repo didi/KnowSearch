@@ -560,6 +560,12 @@ public class MonitorCollectMetrics {
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.in_flight_requests.estimated_size_in_bytes")
                 .valueRoute("breakers.in_flight_requests.estimated_size_in_bytes").computeType(NONE).build());
 
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.in_flight_http_requests.limit_size_in_bytes")
+                .valueRoute("breakers.in_flight_http_requests.limit_size_in_bytes").computeType(NONE).build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.in_flight_http_requests.estimated_size_in_bytes")
+                .valueRoute("breakers.in_flight_http_requests.estimated_size_in_bytes").computeType(NONE).build());
+
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.accounting.limit_size_in_bytes")
                 .valueRoute("breakers.accounting.limit_size_in_bytes").computeType(NONE).build());
 

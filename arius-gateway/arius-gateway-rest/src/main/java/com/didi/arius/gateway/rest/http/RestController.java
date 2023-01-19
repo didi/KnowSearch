@@ -1,19 +1,20 @@
 package com.didi.arius.gateway.rest.http;
 
-import com.didi.arius.gateway.common.consts.QueryConsts;
-import com.didi.arius.gateway.common.utils.PathTrie;
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.function.Supplier;
+
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestRequest.Method;
 import org.elasticsearch.rest.support.RestUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.function.Supplier;
+import com.didi.arius.gateway.common.consts.QueryConsts;
+import com.didi.arius.gateway.common.utils.PathTrie;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 /**
 * @author weizijun

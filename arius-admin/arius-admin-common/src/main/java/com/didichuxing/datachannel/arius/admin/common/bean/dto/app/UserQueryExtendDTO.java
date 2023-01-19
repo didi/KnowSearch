@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.app;
 
 import com.didiglobal.knowframework.security.common.dto.user.UserQueryDTO;
+
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;

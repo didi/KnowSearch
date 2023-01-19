@@ -4,6 +4,18 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil.obj2Obj;
 import static com.didichuxing.datachannel.arius.admin.core.service.project.impl.ESUserServiceImpl.VERIFY_CODE_LENGTH;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.project.ESUserManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
@@ -30,20 +42,12 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
-import java.util.Collections;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.security.common.po.ProjectPO;
 import com.didiglobal.knowframework.security.common.vo.project.ProjectVO;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.didiglobal.knowframework.security.util.HttpRequestUtil;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * es user
@@ -325,7 +329,7 @@ public class ESUserManagerImpl implements ESUserManager {
     }
      private void saveOperateRecord(String content, Integer projectId, String operator,
                                    OperateTypeEnum operateTypeEnum) {
-        operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,projectId,operateTypeEnum);
+        operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,projectId,operateTypeEnum,projectId);
     }
 
     /**
@@ -368,22 +372,11 @@ public class ESUserManagerImpl implements ESUserManager {
                     .collect(Collectors.toList());
             return Result.buildSucc(clusterPhyList);
         } else {
-            //普通项目返回对应的物理集群
-            List<Long> logicClusterIds = clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId).stream()
-                    .map(ClusterLogic::getId)
+            //普通项目返回对应的逻辑集群
+            List<String> clusterLogicList = clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId).stream()
+                    .map(ClusterLogic::getName)
                     .distinct().collect(Collectors.toList());
-
-            // 找到 region
-            List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(logicClusterIds);
-            if (CollectionUtils.isEmpty(regions)) {
-                return Result.buildFail(String.format(ES_USER_ERROR_MSG,
-                        ProjectSearchTypeEnum.PRIMITIVE.getDesc(), ProjectSearchTypeEnum.CLUSTER.getDesc()));
-            }
-            // 找到物理集群
-            List<String> clusterPhyList = regions.stream().map(ClusterRegion::getPhyClusterName).distinct()
-                    .collect(Collectors.toList());
-
-            return Result.buildSucc(clusterPhyList);
+            return Result.buildSucc(clusterLogicList);
         }
     }
 
@@ -391,7 +384,7 @@ public class ESUserManagerImpl implements ESUserManager {
      * 对被设置为应用默认的es user进行解绑
      *
      * @param esUserName ES用户
-     * @param projectId
+     * @param projectId {@link ProjectPO#getId()}
      * @param operator 操作人 {@link   com.didichuxing.datachannel.arius.admin.core.component.RoleTool#isAdmin}
      * @return {@code Result<Void>}
      */

@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpRequest;
@@ -26,6 +25,8 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ThirdPartRemoteE
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.log.common.Constants;
+
+import lombok.SneakyThrows;
 
 /**
  * @author jinbinbin

@@ -70,7 +70,8 @@ public interface ClusterRoleHostService {
      * @throws AdminTaskException
      */
     boolean collectClusterNodeSettings(String cluster) throws AdminTaskException;
-
+    
+    boolean collectClusterNodeSettings(String cluster,Integer componentId) throws AdminTaskException;
     /**
      * 全量录入根据配置的节点信息持久化到MySQL, 包括节点状态
      * @param param 参数
@@ -190,11 +191,7 @@ public interface ClusterRoleHostService {
      */
     ClusterRoleHost getByHostName(String hostName);
 
-    /**
-     * 获取已删除节点
-     * @param hostname
-     */
-    ClusterRoleHost getDeleteHostByHostNameAnRoleId(String hostname, Long roleId);
+
 
     /**恢复节点状态
      * @param deleteHost
@@ -240,7 +237,8 @@ public interface ClusterRoleHostService {
      * @return 列表<ClusterRoleHost>
      */
     List<ClusterRoleHost> listById(List<Integer> ids);
+    
+    boolean deleteByIds(List<Integer> ids);
 
     List<ClusterRoleHost> listNodesByClusters(List<String> phyClusterNames);
-    boolean deleteByIds(List<Integer> ids);
 }

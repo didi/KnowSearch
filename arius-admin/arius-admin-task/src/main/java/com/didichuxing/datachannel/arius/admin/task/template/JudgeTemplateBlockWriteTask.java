@@ -1,5 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.task.template;
 
+import java.util.List;
+import java.util.Objects;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
@@ -13,13 +19,8 @@ import com.didiglobal.knowframework.job.annotation.Task;
 import com.didiglobal.knowframework.job.common.TaskResult;
 import com.didiglobal.knowframework.job.core.job.Job;
 import com.didiglobal.knowframework.job.core.job.JobContext;
-import java.util.List;
-import java.util.Objects;
-
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 定时判断是否对模版禁写

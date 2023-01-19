@@ -201,4 +201,18 @@ public class Result<T> extends BaseResult {
         resultT.setMessage(result.getMessage());
         return resultT;
     }
+    
+    public static <T> Result<T> buildFrom(com.didiglobal.logi.op.manager.infrastructure.common.Result<? extends Object> result) {
+        Result<T> resultT = new Result<>();
+        resultT.setCode(result.getCode());
+        resultT.setMessage(result.getMessage());
+        return resultT;
+    }
+    public static <T> Result<T> buildFromWithData(com.didiglobal.logi.op.manager.infrastructure.common.Result<T> result) {
+        Result<T> resultT = new Result<>();
+        resultT.setCode(result.getCode());
+        resultT.setMessage(result.getMessage());
+        resultT.setData(result.getData());
+        return resultT;
+    }
 }

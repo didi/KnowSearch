@@ -4,8 +4,6 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,6 +17,8 @@ import com.didi.arius.gateway.core.service.arius.DslTemplateService;
 import com.didi.arius.gateway.remote.AriusAdminRemoteService;
 import com.didi.arius.gateway.remote.response.DSLTemplateListResponse;
 import com.didi.arius.gateway.remote.response.DSLTemplateResponse;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 import lombok.NoArgsConstructor;
 import net.sf.ehcache.Cache;

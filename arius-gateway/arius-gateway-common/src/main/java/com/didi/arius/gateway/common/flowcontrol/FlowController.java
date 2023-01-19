@@ -1,13 +1,13 @@
 package com.didi.arius.gateway.common.flowcontrol;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.enums.FlowStatus;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
 * @author weizijun
@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentMap;
 */
 public class FlowController {
 	private static final ILog logger = LogFactory.getLog(FlowController.class);
-	
+
 	private int appid;
 
 	/**

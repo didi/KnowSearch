@@ -1,14 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didiglobal.knowframework.log.util.HostUtil;
-import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpHost;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
 
 import java.util.ArrayList;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHost;
+
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didiglobal.knowframework.log.util.HostUtil;
+import com.google.common.collect.Lists;
 
 /**
  * @Author: D10865

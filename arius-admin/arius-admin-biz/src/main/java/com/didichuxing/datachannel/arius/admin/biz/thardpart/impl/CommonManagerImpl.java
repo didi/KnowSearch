@@ -1,5 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.thardpart.impl;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.thardpart.CommonManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -13,9 +18,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigIn
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Sets;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 @Component
 public class CommonManagerImpl implements CommonManager {

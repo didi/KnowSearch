@@ -1,30 +1,25 @@
 package com.didichuxing.datachannel.arius.admin.biz.template;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateIncrementalSettingsDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateClearVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDeleteVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDetailVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateRateLimitVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateCyclicalRollInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
-import java.util.List;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 逻辑模板管理Biz类
@@ -57,7 +52,7 @@ public interface TemplateLogicManager {
      */
     @Transactional(rollbackFor = Exception.class)
     Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator,
-                        Integer projectId) throws AdminOperateException;
+                        Integer projectId);
 
     /**
      * 获取所有逻辑模板聚合
@@ -108,6 +103,11 @@ public interface TemplateLogicManager {
      * 根据项目获取有管理\读写\读权限的逻辑模版
      */
     List<String> getTemplateLogicNames(Integer projectId);
+
+    /**
+     * 获取模板的业务类型
+     */
+    Map<Integer, String> getDataTypeCode2DescMap();
 
     Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId);
 
@@ -253,4 +253,36 @@ public interface TemplateLogicManager {
      * @return Result<Void>
      */
     Result<Void> blockRead(Integer templateId, Boolean status, String operator, Integer projectId);
+
+    /**
+     * 更新模版settings和非分区模版索引的settings(可以用来实现部分模版服务，如异步translog、恢复优先级)
+     * @param param 模版增量settings
+     * @param operator
+     * @param projectId
+     * @return
+     */
+    Result<Void> updateTemplateAndIndexSettings(TemplateIncrementalSettingsDTO param, String operator, Integer projectId) throws AdminOperateException;
+
+    /**
+     * 转让模板
+     *
+     * @param templateId           模板id
+     * @param targetProjectId      目标项目id
+     * @param targetLogicClusterId 目标逻辑集群id
+     * @param phyClusterName       phy集群名称
+     * @return {@link Result}<{@link Integer}>
+     */
+    Result<Integer> transferTemplate(Integer templateId, Integer targetProjectId, Long targetLogicClusterId,
+                                     String phyClusterName);
+
+    /**
+     * 转让模板检查
+     *
+     * @param targetCluster        目标集群
+     * @param targetLogicClusterId 目标逻辑集群id
+     * @param targetProjectId      目标项目id
+     * @return {@link Result}<{@link Void}>
+     */
+    Result<Void> transferTemplateCheck(String targetCluster, Long targetLogicClusterId, Integer targetProjectId);
+
 }

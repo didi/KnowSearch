@@ -2,6 +2,19 @@ package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 
 import static com.didiglobal.knowframework.security.util.HttpRequestUtil.COOKIE_OR_SESSION_MAX_AGE_UNIT_SEC;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.project.LoginManager;
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
@@ -19,16 +32,6 @@ import com.didiglobal.knowframework.security.service.LoginService;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.didiglobal.knowframework.security.util.AESUtils;
 import com.didiglobal.knowframework.security.util.HttpRequestUtil;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * 登录管理器
@@ -54,6 +57,7 @@ public class LoginManagerImpl implements LoginManager {
      * @param request  请求信息
      * @param response
      * @return token
+     * @throws KfSecurityException 登录错误
      */
     @Override
     public Result<UserBriefVO> verifyLogin(AccountLoginDTO loginDTO, HttpServletRequest request,

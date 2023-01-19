@@ -1,5 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+
+import org.springframework.util.StringUtils;
+
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
@@ -7,11 +14,6 @@ import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.security.common.vo.project.ProjectVO;
 import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import org.springframework.util.StringUtils;
 
 public final class ProjectUtils {
     private static final ILog LOGGER = LogFactory.getLog(CommonUtils.class);

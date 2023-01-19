@@ -30,4 +30,7 @@ public class ClusterRegionDTO {
 
     @ApiModelProperty("配置项")
     private String config;
+
+    @ApiModelProperty("Region划分方式")
+    private String divideAttributeKey;
 }

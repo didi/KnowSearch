@@ -1,24 +1,27 @@
 package com.didichuxing.datachannel.arius.admin.remote.storage.s3;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.remote.storage.FileStorageHandle;
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
-import io.minio.*;
-import io.minio.messages.Item;
-import lombok.NoArgsConstructor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.remote.storage.FileStorageHandle;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+
+import io.minio.*;
+import io.minio.messages.Item;
+import lombok.NoArgsConstructor;
 
 /**
  * @author linyunan

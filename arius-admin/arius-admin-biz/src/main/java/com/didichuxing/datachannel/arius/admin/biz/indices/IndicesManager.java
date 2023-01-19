@@ -1,24 +1,22 @@
 package com.didichuxing.datachannel.arius.admin.biz.indices;
 
+import java.util.List;
+import java.util.function.BiFunction;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesBlockSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesIncrementalSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.IndexCatCellWithConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexForceMergeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellWithTemplateVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.*;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.knowframework.elasticsearch.client.response.indices.catindices.CatIndexResult;
-import java.util.List;
-import java.util.function.BiFunction;
 
 /**
  * @author lyn
@@ -277,4 +275,13 @@ public interface IndicesManager {
     List<CatIndexResult> listIndexCatInfoByTemplatePhyId(Long physicalId);
     
     Result<Void> deleteIndexByCLusterPhy(String clusterPhy, List<String> indexNameList, Integer projectId, String operator);
+
+    /**
+     * 以settings增量方式批量更新索引的settings
+     * @param params
+     * @param projectId
+     * @param operator
+     * @return
+     */
+    Result<Void> updateIndexSettingsByMerge(List<IndicesIncrementalSettingDTO> params, Integer projectId, String operator) throws ESOperateException;
 }

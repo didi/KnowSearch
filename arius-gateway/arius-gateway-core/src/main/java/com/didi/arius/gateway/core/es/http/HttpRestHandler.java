@@ -6,8 +6,6 @@ import static com.didi.arius.gateway.elasticsearch.client.utils.LogUtils.setWrit
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.Strings;
@@ -57,6 +55,8 @@ import com.didi.arius.gateway.elasticsearch.client.gateway.search.ESSearchRespon
 import com.didi.arius.gateway.elasticsearch.client.gateway.search.response.Failure;
 import com.didi.arius.gateway.elasticsearch.client.gateway.search.response.src.Hit;
 import com.didi.arius.gateway.elasticsearch.client.model.ESActionRequest;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;
 
 public abstract class HttpRestHandler extends ESBase {

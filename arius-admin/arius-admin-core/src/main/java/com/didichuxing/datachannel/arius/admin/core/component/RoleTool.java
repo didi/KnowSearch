@@ -1,18 +1,20 @@
 package com.didichuxing.datachannel.arius.admin.core.component;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didiglobal.knowframework.security.common.vo.role.RoleVO;
 import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import com.didiglobal.knowframework.security.common.vo.user.UserVO;
 import com.didiglobal.knowframework.security.service.RoleService;
 import com.didiglobal.knowframework.security.service.UserService;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * 角色工具

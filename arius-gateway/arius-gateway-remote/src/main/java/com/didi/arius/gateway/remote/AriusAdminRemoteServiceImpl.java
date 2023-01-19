@@ -3,18 +3,20 @@ package com.didi.arius.gateway.remote;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.exception.ServerException;
 import com.didi.arius.gateway.common.metadata.TemplateAlias;
 import com.didi.arius.gateway.common.utils.HttpClient;
+import com.didi.arius.gateway.common.utils.OshiUtils;
 import com.didi.arius.gateway.remote.response.*;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 import lombok.NoArgsConstructor;
 
@@ -136,8 +138,16 @@ public class AriusAdminRemoteServiceImpl implements AriusAdminRemoteService {
     }
 
     @Override
-    public void heartbeat(String clusterName, String hostName, Integer port) {
-        String heartBeatBody = String.format("{\"clusterName\":\"%s\",\"hostName\":\"%s\",\"port\":%d}", clusterName, hostName, port);
+    public void heartbeat(String clusterName, String hostName, Integer port, int connectionSize) {
+        final double processCpu = OshiUtils.getMemUseInfo();
+        String heartBeatBody = new JSONObject()
+                .fluentPut("clusterName",clusterName)
+                .fluentPut("hostName",hostName)
+                .fluentPut("port",port)
+                .fluentPut("cpuUsage", processCpu)
+                .fluentPut("httpConnectionNum",connectionSize)
+                .toJSONString();
+              
         BaseAdminResponse response = HttpClient.forward(adminUrl + GATEWAY_HEARTBEAT_SUFFIX, "PUT", heartBeatBody, headerParams, null, BaseAdminResponse.class);
         if (response.getCode() != 0) {
             bootLogger.error("HeartBeatSchedule heartbeat error, code={}, message={}", response.getCode(), response.getMessage());

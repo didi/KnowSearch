@@ -2,6 +2,12 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Repository;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ESPipelineProcessor;
@@ -15,15 +21,6 @@ import com.didiglobal.knowframework.elasticsearch.client.response.ingest.ESDelet
 import com.didiglobal.knowframework.elasticsearch.client.response.ingest.ESGetPipelineResponse;
 import com.didiglobal.knowframework.elasticsearch.client.response.ingest.ESPutPipelineResponse;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Repository;
 
 /**
  * @author d06679
@@ -157,6 +154,35 @@ public class ESPipelineDAO extends BaseESDAO {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * 获取集群的全量pipeline
+     * @param cluster 集群
+     * @return
+     */
+    public Map<String, Pipeline> getClusterPipelines(String cluster) throws ESOperateException {
+        ESClient client = esOpClient.getESClient(cluster);
+        if (client == null) {
+            LOGGER.warn("class={}||method=getClusterPipelines||clusterName={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster);
+            throw new NullESClientException(cluster);
+        }
+        try{
+            ESGetPipelineResponse response = client.admin().indices().prepareGetPipeline().setPipelineId("*")
+                    .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+
+            Map<String, Pipeline> pipelineMap = response.getPipelineMap();
+            if (pipelineMap == null || pipelineMap.isEmpty()) {
+                return null;
+            }
+            return pipelineMap;
+        } catch (Exception e) {
+            LOGGER.error("class={}||method=getClusterPipelines||clusterName={}",
+                    getClass().getSimpleName(), cluster, e);
+            ParsingExceptionUtils.abnormalTermination(e);
+        }
+        return null;
     }
 
     /**************************************** private method ****************************************************/

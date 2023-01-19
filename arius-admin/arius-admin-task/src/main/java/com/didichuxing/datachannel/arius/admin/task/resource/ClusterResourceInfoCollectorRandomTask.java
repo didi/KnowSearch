@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.task.resource;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
-import com.didichuxing.datachannel.arius.admin.task.metadata.IndicesCatInfoCollectorRandomTask;
 import com.didiglobal.knowframework.job.annotation.Task;
 import com.didiglobal.knowframework.job.common.TaskResult;
 import com.didiglobal.knowframework.job.core.job.Job;

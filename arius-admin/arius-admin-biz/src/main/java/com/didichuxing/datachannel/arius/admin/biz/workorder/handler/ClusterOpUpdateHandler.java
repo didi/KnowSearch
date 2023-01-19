@@ -2,6 +2,13 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
 
+import java.util.List;
+
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterUpdateContent;
@@ -35,10 +42,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandl
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import com.didiglobal.knowframework.security.service.ProjectService;
-import java.util.List;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * 集群op更新处理程序
@@ -165,12 +168,14 @@ public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
             return Result.buildFail("生成集群新建操作任务失败!");
         }
         //版本升级的操作记录
+        ProjectBriefVO projectBriefByProjectId = projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId());
         final OperateRecord operateRecord = new Builder().userOperation(opTaskDTO.getCreator())
-                .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
-                .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_RESTART)
-                .content(String.format("【%s】->【%s】",beforeEsVersion,
+                .project(projectBriefByProjectId)
+                .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_UPGRADE)
+                .content(String.format("集群升级【%s】->【%s】",beforeEsVersion,
                         content.getEsVersion()))
                 .bizId(content.getPhyClusterId())
+                .operateProject(projectBriefByProjectId)
                 .buildDefaultManualTrigger();
         operateRecordService.save(operateRecord);
         return Result.buildSucc();

@@ -3,38 +3,30 @@ package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getTemplateNameRequestContent;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_DEFAULT_ORDER;
 
-import com.alibaba.fastjson.JSONObject;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.ESConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESTemplateDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslLoaderUtil;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.didiglobal.knowframework.elasticsearch.client.gateway.direct.DirectResponse;
-import com.didiglobal.knowframework.elasticsearch.client.response.query.query.ESQueryResponse;
-import com.didiglobal.knowframework.elasticsearch.client.response.query.query.aggs.ESAggr;
-import com.didiglobal.knowframework.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.didiglobal.knowframework.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.knowframework.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
 import com.didiglobal.knowframework.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -44,29 +36,8 @@ import org.springframework.stereotype.Service;
 public class ESTemplateServiceImpl implements ESTemplateService {
     private static final ILog LOGGER = LogFactory.getLog(ESTemplateServiceImpl.class);
 
-    @Value("${es.update.cluster.name}")
-    private String                                                      metadataClusterName;
-
     @Autowired
     private ESTemplateDAO     esTemplateDAO;
-
-    /**
-     * 加载查询语句工具类
-     */
-    @Autowired
-    private DslLoaderUtil dslLoaderUtil;
-    /**
-     * 查询es客户端
-     */
-    @Autowired
-    private ESGatewayClient gatewayClient;
-
-    /**
-     * 索引type名称为type
-     */
-    private static final String TYPE = "type";
-
-    private static final String HEALTH = "health";
 
     /**
      * 删除模板
@@ -382,56 +353,5 @@ public class ESTemplateServiceImpl implements ESTemplateService {
         }
         return false;
 
-    }
-
-    /**
-     * 从元数据索引 arius_cat_index_info 中获取模版每个索引的health状态，从而确定模版health
-     * @param cluster 集群名称
-     * @param wildcard 通配符，如“log-*”
-     * @return  模版健康状态
-     */
-    @Override
-    public Integer getTemplateHealthCode(String cluster, String wildcard) {
-
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TEMPLATE_INDICES_HEALTH, wildcard);
-        String realIndex = IndexNameUtils.genCurrentDailyIndexName("arius_cat_index_info");
-
-        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
-                s -> getTemplateHealthESQueryResponse(s), 3);
-    }
-
-    /**************************************** private method ***************************************************/
-
-    private Integer getTemplateHealthESQueryResponse(ESQueryResponse response) {
-        if (response == null || response.getAggs() == null) {
-            LOGGER.warn("class=ESTemplateServiceImpl||method=getTemplateHealthESQueryResponse||msg=response is null");
-            return TemplateHealthEnum.GREEN.getCode();
-        }
-
-        ESAggr esAggr = response.getAggs().getEsAggrMap().get(HEALTH);
-        if(esAggr == null) {
-            return TemplateHealthEnum.GREEN.getCode();
-        }
-        List<ESBucket> bucketList = esAggr.getBucketList();
-        boolean yellowFlag = false;
-        if(!bucketList.isEmpty()) {
-            for (ESBucket esBucket : bucketList) {
-                if (esBucket.getUnusedMap() == null || esBucket.getUnusedMap().isEmpty()) {
-                    continue;
-                }
-
-                String health = esBucket.getUnusedMap().get(ESConstant.AGG_KEY).toString();
-                if(TemplateHealthEnum.RED.getDesc().equals(health)){
-                    return TemplateHealthEnum.RED.getCode();
-                }else if(TemplateHealthEnum.YELLOW.getDesc().equals(health)) {
-                    yellowFlag = true;
-                }
-            }
-        }
-
-        if(yellowFlag)  {
-            return TemplateHealthEnum.YELLOW.getCode();
-        }
-        return TemplateHealthEnum.GREEN.getCode();
     }
 }

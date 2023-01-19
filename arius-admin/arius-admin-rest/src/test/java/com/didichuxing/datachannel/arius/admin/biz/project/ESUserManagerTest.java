@@ -1,27 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.project;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
-import com.didichuxing.datachannel.arius.admin.biz.project.impl.ESUserManagerImpl;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserVO;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
-import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
-import com.didiglobal.knowframework.security.common.vo.project.ProjectVO;
-import com.didiglobal.knowframework.security.service.ProjectService;
 import java.util.stream.Collectors;
+
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -39,6 +22,22 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import com.didichuxing.datachannel.arius.admin.biz.project.impl.ESUserManagerImpl;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserVO;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
+import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectVO;
+import com.didiglobal.knowframework.security.service.ProjectService;
 
 @ActiveProfiles("test")
 @ExtendWith({ SpringExtension.class, MockitoExtension.class })

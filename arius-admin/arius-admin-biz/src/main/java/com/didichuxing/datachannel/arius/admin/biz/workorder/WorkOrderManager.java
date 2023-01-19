@@ -10,7 +10,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import java.util.List;
@@ -33,7 +32,7 @@ public interface WorkOrderManager {
       * @return {@link Result}<{@link AriusWorkOrderInfoSubmittedVO}>
      @throws AdminOperateException 管理操作Exception
      */
-    Result<AriusWorkOrderInfoSubmittedVO> submit(WorkOrderDTO workOrderDTO) throws AdminOperateException;
+    Result<AriusWorkOrderInfoSubmittedVO> submit(WorkOrderDTO workOrderDTO);
 
     /**
      * 过程 工单处理流程
@@ -123,7 +122,7 @@ public interface WorkOrderManager {
      @param orderPO 订单订单
       * @return {@link OrderInfoDetail}
      */
-    OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) throws NotFindSubclassException, ESOperateException;
+    OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) throws NotFindSubclassException;
 
     /**获取订单批准列表通过状态
      * 根据状态获取工单列表

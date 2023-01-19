@@ -1,11 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.security.resource;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import com.didiglobal.knowframework.security.common.PagingData;
 import com.didiglobal.knowframework.security.common.dto.resource.ResourceDTO;
 import com.didiglobal.knowframework.security.extend.ResourceExtend;
-import java.util.Collections;
-import java.util.List;
-import org.springframework.stereotype.Component;
+import com.didiglobal.knowframework.security.properties.KfSecurityProper;
 
 /**
  * resourceExtend的实现类在spring容器bean的名称， logi-security 中资源权限管理模块，需要获取具体资源的信息， 所以用户需实现 ResourceExtend
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Component;
  *
  * @author shizeying
  * @date 2022/05/23
+ * @see KfSecurityProper#getResourceExtendBeanName()
  * @see ResourceExtend
  */
 @Component

@@ -109,24 +109,24 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
      */
     @ApiModelProperty("集群资源类型(-1 未知 1 共享 2 独立 3 独享)")
     private Integer                                      resourceType;
-
+    //TODO 0.3.2移除
+    @Deprecated
     @ApiModelProperty("gateway地址")
     private String                                       gatewayUrl;
-    @ApiModelProperty("是否支持 zeus:（扩缩容、升级、重启、配置变更）")
-    private Boolean supportZeus = true;
     @ApiModelProperty("逻辑集群与对应region的列表")
     private List<Tuple<ClusterLogicVOWithProjects, ClusterRegionVO>> logicClusterAndRegionList;
     @ApiModelProperty("物理集群绑定的逻辑集群")
     private List<String> bindLogicCluster;
-
-    @ApiModelProperty("kibana外链地址")
-    private String                    kibanaAddress;
-
-    @ApiModelProperty("cerebro外链地址")
-    private String                    cerebroAddress;
-
+    //TODO 0.3.2新增
     @ApiModelProperty("代理地址")
-    private String                    proxyAddress;
+    private String proxyAddress;
+  ;
+    @ApiModelProperty("绑定gateway")
+    private String gatewayIds;
+    @ApiModelProperty("是否为ecm接入")
+    private Boolean ecmAccess;
+    @ApiModelProperty("componentId")
+    private Integer componentId;
 
     /**
      * 添加逻辑集群

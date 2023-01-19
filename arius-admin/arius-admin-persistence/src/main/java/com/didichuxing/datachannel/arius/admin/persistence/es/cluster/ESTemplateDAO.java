@@ -1,14 +1,24 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SHARD_NUM;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_DEFAULT_ORDER;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.ESSettingConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
 import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.knowframework.elasticsearch.client.ESClient;
@@ -23,15 +33,6 @@ import com.didiglobal.knowframework.elasticsearch.client.response.indices.puttem
 import com.didiglobal.knowframework.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.knowframework.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
 import com.didiglobal.knowframework.elasticsearch.client.response.setting.template.TemplateConfig;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * @author d06679

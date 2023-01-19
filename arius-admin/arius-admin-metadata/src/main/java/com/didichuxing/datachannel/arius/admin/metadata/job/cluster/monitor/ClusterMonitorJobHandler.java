@@ -3,24 +3,29 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.PHY_CLUSTER;
 
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsCells;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorClusterEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpHostUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitortask.AriusMetaJobClusterDistributeService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -38,18 +43,6 @@ import com.didiglobal.knowframework.observability.conponent.thread.ContextExecut
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * 集群维度采集监控数据，包含 es节点存活检查；es集群tps/qps掉底报警
@@ -561,15 +554,14 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
     private boolean checkThreadPool() {
         if (threadPool == null || threadPool.isShutdown()) {
             threadPool = Observability.wrap(new ThreadPoolExecutor(poolSize, maxPoolSize + 10, 0L, TimeUnit.MILLISECONDS,
-                    new LinkedBlockingQueue<>(100),
-                    new BasicThreadFactory.Builder().namingPattern("cluster-monitor-cluster-data-collect-%d").build()));
+                new LinkedBlockingQueue<>(100),
+                new BasicThreadFactory.Builder().namingPattern("cluster-monitor-cluster-data-collect-%d").build()));
         }
 
         long blockSize = Optional.ofNullable(ReflectionUtils.findField(ContextExecutorService.class, "delegate")).map(field -> {
             field.setAccessible(true);
             return (ThreadPoolExecutor) ReflectionUtils.getField(field, threadPool);
         }).map(ThreadPoolExecutor::getQueue).map(Collection::size).orElse(0);
-
         if (blockSize > WARN_BLOCK_SIZE) {
             LOGGER.warn(
                 "class=ClusterMonitorJobHandler||method=checkThreadPool||blockSize={}||msg=collect thread pool has block task",

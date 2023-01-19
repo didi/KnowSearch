@@ -2,8 +2,21 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.LOGIC_CLUSTER;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.stats.ClusterLogicStats;
-import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -27,63 +40,44 @@ import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.MonitorMetricsSender;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterLogicStatsService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsClusterTaskInfoESDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIndexInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
 import com.didiglobal.knowframework.elasticsearch.client.response.indices.clusterindex.IndexStatusResult;
 import com.google.common.collect.Lists;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.*;
 import com.google.common.collect.Maps;
-
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 
 /**
  * 集群维度采集监控数据，包含 es节点存活检查；es集群tps/qps掉底报警
+ *
  * @author ohushenglin_v
  */
 @Component
 public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
 
     @Value("${monitorJob.threadPool.maxsize:30}")
-    private int                                  maxPoolSize;
+    private int maxPoolSize;
     @Autowired
-    private ClusterLogicService                  clusterLogicService;
+    private ClusterLogicService clusterLogicService;
     @Autowired
     private AriusMetaJobClusterDistributeService ariusMetaJobClusterDistributeService;
     @Autowired
-    private MonitorMetricsSender                 monitorMetricsSender;
+    private MonitorMetricsSender monitorMetricsSender;
     @Autowired
-    private ESClusterLogicStatsService           clusterLogicStaticsService;
+    private ESClusterLogicStatsService clusterLogicStaticsService;
     @Autowired
-    private ClusterRegionService                 clusterRegionService;
+    private ClusterRegionService clusterRegionService;
     @Autowired
-    private ClusterPhyService                    clusterPhyService;
+    private ClusterPhyService clusterPhyService;
     @Autowired
-    private ClusterRoleHostService               clusterRoleHostService;
+    private ClusterRoleHostService clusterRoleHostService;
     @Autowired
-    private ESIndexCatService                    esIndexCatService;
+    private ESIndexCatService esIndexCatService;
     @Autowired
-    private AriusStatsNodeInfoESDAO              ariusStatsNodeInfoEsDao;
+    private AriusStatsNodeInfoESDAO ariusStatsNodeInfoEsDao;
     @Autowired
-    private AriusStatsClusterTaskInfoESDAO       ariusStatsClusterTaskInfoESDAO;
-
-    private FutureUtil<ESClusterStats>           clusterLogicFutureUtil;
-    private final String hostName                = HttpHostUtil.HOST_NAME;
-
-
-
-    private static final Integer SEARCH_SIZE     = 5000;
-
+    private AriusStatsClusterTaskInfoESDAO ariusStatsClusterTaskInfoESDAO;
+    private final String hostName = HttpHostUtil.HOST_NAME;
+    private FutureUtil<ESClusterStats> clusterLogicFutureUtil;
+    private static final Integer SEARCH_SIZE = 5000;
 
     private long                                 timestamp = CommonUtils
             .monitorTimestamp2min(System.currentTimeMillis());
@@ -96,17 +90,17 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
 
     @PostConstruct
     public void init() {
-        clusterLogicFutureUtil = FutureUtil.init("ClusterLogicMonitorJobHandler", 3 * maxPoolSize, 3 * maxPoolSize,
-            100);
+        clusterLogicFutureUtil = FutureUtil.init("LogicClusterMonitorJobHandler", 3 * maxPoolSize, 3 * maxPoolSize, 100);
     }
 
     private void handleLogicClusterStats() {
         // 获取单台机器监控采集的集群名称列表, 当分布式部署分组采集，可分摊采集压力
         List<ClusterPhy> monitorCluster = ariusMetaJobClusterDistributeService.getSingleMachineMonitorCluster(hostName);
+//        monitorCluster = clusterPhyService.listAllClusters();
         // 2. do handle
         if (CollectionUtils.isNotEmpty(monitorCluster)) {
             Set<String> monitorClusterSet = monitorCluster.stream().map(ClusterPhy::getCluster)
-                .collect(Collectors.toSet());
+                    .collect(Collectors.toSet());
             doHandleLogicClusterStats(monitorClusterSet);
         }
     }
@@ -152,11 +146,11 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
         Map<String, List<ClusterLogic>> phyClusterNameLogicCluster = Maps.newHashMap();
         Map<String, List<String>> phyClusterNameLogicCLusterIds = regionList.stream()
                 .collect(Collectors.toMap(ClusterRegion::getPhyClusterName, clusterRegion ->
-                                Lists.newArrayList(StringUtils.split(clusterRegion.getLogicClusterIds(), ","))
+                        Lists.newArrayList(StringUtils.split(clusterRegion.getLogicClusterIds(), ","))
                         , (oldList, newList) -> {
-                            oldList.addAll(newList);
-                            return oldList;
-                        }));
+            oldList.addAll(newList);
+            return oldList;
+        }));
         for (Map.Entry<String, List<String>> entry : phyClusterNameLogicCLusterIds.entrySet()) {
             List<ClusterLogic> logicList = entry.getValue().stream().
                     map(logicId -> longClusterLogicMap.get(Long.parseLong(logicId))).filter(Objects::nonNull).collect(Collectors.toList());
@@ -181,53 +175,53 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
                     logicClusterListByPhyClusterName.stream()
                             .filter(logicCluster -> logicClusterNodesNameMap.containsKey(logicCluster.getId().intValue()))
                             .forEach(logicCluster -> {
-                                ClusterLogicStatsPO clusterLogicStatisPO = clusterLogicStaticsService.getLogicClusterStats(logicCluster.getId(),
-                                        ClusterPhyMap.get(phyClusterName), logicClusterNodesNameMap,
-                                        nodeStatsMap, logicClusterIndicesStatsMap, true);
-                                ESClusterStatsCells esClusterStatsBean = new ESClusterStatsCells();
-                                esClusterStatsBean.setStatus(clusterLogicStatisPO.getStatus());
-                                esClusterStatsBean.setStatusType(clusterLogicStatisPO.getStatusType());
-                                esClusterStatsBean.setClusterName(logicCluster.getName());
-                                esClusterStatsBean.setLevel(logicCluster.getLevel());
-                                esClusterStatsBean.setClusterNu(1);
-                                esClusterStatsBean.setTotalIndicesNu(clusterLogicStatisPO.getIndexNu());
-                                esClusterStatsBean.setTotalDocNu(clusterLogicStatisPO.getDocNu());
-                                Optional.ofNullable(clusterLogicStatisPO.getUsedDisk())
-                                        .ifPresent(usedDisk->esClusterStatsBean.setIndexStoreSize(usedDisk.longValue()));
-                                Optional.ofNullable(clusterLogicStatisPO.getUsedDisk())
-                                        .ifPresent(usedDisk->esClusterStatsBean.setStoreSize(usedDisk.longValue()));
-                                Optional.ofNullable(clusterLogicStatisPO.getFreeDisk())
-                                        .ifPresent(freeDisk->esClusterStatsBean.setFreeStoreSize(freeDisk.longValue()));
-                                Optional.ofNullable(clusterLogicStatisPO.getTotalDisk())
-                                        .ifPresent(totalDisk->esClusterStatsBean.setTotalStoreSize(totalDisk.longValue()));
-                                esClusterStatsBean.setNumberDataNodes(clusterLogicStatisPO.getNumberDataNodes());
-                                esClusterStatsBean.setNumberPendingTasks(clusterLogicStatisPO.getNumberPendingTasks());
-                                esClusterStatsBean.setUnAssignedShards(clusterLogicStatisPO.getUnAssignedShards());
-                                esClusterStatsBean.setCpuUsage(clusterLogicStatisPO.getCpuUsedPercent());
-                                esClusterStatsBean.setAlivePercent(clusterLogicStatisPO.getAlivePercent());
-                                if (Objects.nonNull(esClusterStatsBean.getStoreSize()) && Objects.nonNull(esClusterStatsBean.getTotalStoreSize())
-                                        && 0.0 < esClusterStatsBean.getTotalStoreSize()) {
-                                    esClusterStatsBean.setDiskUsage(esClusterStatsBean.getStoreSize().doubleValue() / esClusterStatsBean.getTotalStoreSize());
-                                }
+                        ClusterLogicStatsPO clusterLogicStatisPO = clusterLogicStaticsService.getLogicClusterStats(logicCluster.getId(),
+                                ClusterPhyMap.get(phyClusterName), logicClusterNodesNameMap,
+                                nodeStatsMap, logicClusterIndicesStatsMap, true);
+                        ESClusterStatsCells esClusterStatsBean = new ESClusterStatsCells();
+                        esClusterStatsBean.setStatus(clusterLogicStatisPO.getStatus());
+                        esClusterStatsBean.setStatusType(clusterLogicStatisPO.getStatusType());
+                        esClusterStatsBean.setClusterName(logicCluster.getName());
+                        esClusterStatsBean.setLevel(logicCluster.getLevel());
+                        esClusterStatsBean.setClusterNu(1);
+                        esClusterStatsBean.setTotalIndicesNu(clusterLogicStatisPO.getIndexNu());
+                        esClusterStatsBean.setTotalDocNu(clusterLogicStatisPO.getDocNu());
+                        Optional.ofNullable(clusterLogicStatisPO.getUsedDisk())
+                                .ifPresent(usedDisk->esClusterStatsBean.setIndexStoreSize(usedDisk.longValue()));
+                        Optional.ofNullable(clusterLogicStatisPO.getUsedDisk())
+                                .ifPresent(usedDisk->esClusterStatsBean.setStoreSize(usedDisk.longValue()));
+                        Optional.ofNullable(clusterLogicStatisPO.getFreeDisk())
+                                .ifPresent(freeDisk->esClusterStatsBean.setFreeStoreSize(freeDisk.longValue()));
+                        Optional.ofNullable(clusterLogicStatisPO.getTotalDisk())
+                                .ifPresent(totalDisk->esClusterStatsBean.setTotalStoreSize(totalDisk.longValue()));
+                        esClusterStatsBean.setNumberDataNodes(clusterLogicStatisPO.getNumberDataNodes());
+                        esClusterStatsBean.setNumberPendingTasks(clusterLogicStatisPO.getNumberPendingTasks());
+                        esClusterStatsBean.setUnAssignedShards(clusterLogicStatisPO.getUnAssignedShards());
+                        esClusterStatsBean.setCpuUsage(clusterLogicStatisPO.getCpuUsedPercent());
+                        esClusterStatsBean.setAlivePercent(clusterLogicStatisPO.getAlivePercent());
+                        if (Objects.nonNull(esClusterStatsBean.getStoreSize()) && Objects.nonNull(esClusterStatsBean.getTotalStoreSize())
+                                && 0.0 < esClusterStatsBean.getTotalStoreSize()) {
+                            esClusterStatsBean.setDiskUsage(esClusterStatsBean.getStoreSize().doubleValue() / esClusterStatsBean.getTotalStoreSize());
+                        }
                                 List<String> nodes = getNodesWithClusterLogic(logicCluster.getId());
                                 handlePhysicalClusterStatsForSum(phyClusterName,nodes, esClusterStatsBean);
 
 
-                                //获取不同分位值的指标
-                                Map<String, ESClusterStatsCells> percentilesType2ESClusterStatsCellsMap = getPhysicalClusterStatsPercentiles(logicCluster.getName(), nodes, esClusterStatsBean,phyClusterName);
+                        //获取不同分位值的指标
+                        Map<String, ESClusterStatsCells> percentilesType2ESClusterStatsCellsMap = getPhysicalClusterStatsPercentiles(logicCluster.getName(), nodes, esClusterStatsBean,phyClusterName);
 
-                                percentilesType2ESClusterStatsCellsMap.forEach((percentilesType, esClusterStatsCells) -> {
-                                    ESClusterStats esClusterStats = new ESClusterStats();
-                                    esClusterStats.setStatis(esClusterStatsCells);
-                                    esClusterStats.setCluster(logicCluster.getName());
-                                    esClusterStats.setPercentilesType(percentilesType);
-                                    esClusterStats.setPhysicCluster(LOGIC_CLUSTER);
-                                    esClusterStats.setTimestamp(collectTime);
-                                    esClusterStats.setDataCenter(logicCluster.getDataCenter());
+                        percentilesType2ESClusterStatsCellsMap.forEach((percentilesType, esClusterStatsCells) -> {
+                                 ESClusterStats esClusterStats = new ESClusterStats();
+                                 esClusterStats.setStatis(esClusterStatsCells);
+                                 esClusterStats.setCluster(logicCluster.getName());
+                                 esClusterStats.setPercentilesType(percentilesType);
+                                 esClusterStats.setPhysicCluster(LOGIC_CLUSTER);
+                                 esClusterStats.setTimestamp(collectTime);
+                                 esClusterStats.setDataCenter(logicCluster.getDataCenter());
 
-                                    esLogicClusterStatsList.add(esClusterStats);
-                                });
-                            });
+                                 esLogicClusterStatsList.add(esClusterStats);
+                        });
+                    });
                 }
                 // send cluster status to es and kafka
                 if (CollectionUtils.isNotEmpty(esLogicClusterStatsList)) {

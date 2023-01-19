@@ -1,9 +1,12 @@
 package com.didi.arius.gateway.rest.tcp;
 
-import com.didi.arius.gateway.common.consts.QueryConsts;
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
-import com.didiglobal.knowframework.observability.Observability;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.elasticsearch.common.network.NetworkUtils;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
@@ -19,12 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.didi.arius.gateway.common.consts.QueryConsts;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.observability.Observability;
 
 /**
 * @author weizijun
@@ -34,7 +35,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component("nettyTransport")
 public class NettyTransport {
 	private static final ILog logger = LogFactory.getLog(QueryConsts.BOOT_LOGGER);
-	
 	@Value("${gateway.nettyTransport.port}")
 	private short port;
 

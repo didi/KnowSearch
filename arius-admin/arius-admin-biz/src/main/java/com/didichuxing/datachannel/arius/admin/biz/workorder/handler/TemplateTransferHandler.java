@@ -1,5 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
+import java.util.List;
+
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateTransferContent;
@@ -21,9 +27,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.didiglobal.knowframework.security.service.UserService;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -175,13 +178,23 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
             content.getTgtProjectId(), workOrder.getSubmitor());
 
         if (result.success()) {
+            ProjectBriefVO sourceProjectBrief = projectService.getProjectBriefByProjectId(content.getSourceProjectId());
+            ProjectBriefVO targetProjectBrief = projectService.getProjectBriefByProjectId(content.getTgtProjectId());
             operateRecordService.save(
                 new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE).userOperation(approver)
                     .content(String.format("模板从 项目:[%s】->项目:【%s】",
-                        projectService.getProjectBriefByProjectId(content.getSourceProjectId()).getProjectName(),
-                        projectService.getProjectBriefByProjectId(content.getTgtProjectId()).getProjectName()))
-                    .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId())).build());
+                            sourceProjectBrief.getProjectName(),
+                            targetProjectBrief.getProjectName()))
+                    .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
+                    .operateProjectName(sourceProjectBrief.getProjectName()).build());
 
+            operateRecordService.save(
+                    new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE).userOperation(approver)
+                            .content(String.format("模板从 项目:[%s】->项目:【%s】",
+                                    sourceProjectBrief.getProjectName(),
+                                    targetProjectBrief.getProjectName()))
+                            .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
+                            .operateProjectName(targetProjectBrief.getProjectName()).build());
         }
 
         return Result.buildFrom(result);

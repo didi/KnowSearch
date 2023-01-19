@@ -60,5 +60,9 @@ public class OperateRecordInfoPO extends BasePO {
      * 业务id
      */
     private String  bizId;
+    /**
+     * 用户操作的应用，即资源所属应用
+     */
+    private String  operateProjectName;
 
 }

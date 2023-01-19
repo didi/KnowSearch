@@ -1,5 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.config;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.AriusConfigInfoVO;
@@ -7,19 +18,11 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConsta
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didiglobal.knowframework.security.util.HttpRequestUtil;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 /**
  * 
@@ -98,15 +101,6 @@ public class AriusConfigV3Controller {
         return Result.buildSucc(new ArrayList<>(ariusConfigInfoService.stringSettingSplit2Set(
             AriusConfigConstant.ARIUS_COMMON_GROUP, AriusConfigConstant.CLUSTER_RESOURCE_TYPE_LIST,
             AriusConfigConstant.CLUSTER_RESOURCE_TYPE_LIST_DEFAULT_VALUE, COMMA)));
-    }
-
-    @GetMapping("/logic-template-business-type")
-    @ResponseBody
-    @ApiOperation(value = "获取模板业务类型")
-    public Result<List<String>> listLogicTemplateBusinessType() {
-        return Result.buildSucc(new ArrayList<>(ariusConfigInfoService.stringSettingSplit2Set(
-                AriusConfigConstant.ARIUS_TEMPLATE_GROUP, AriusConfigConstant.LOGIC_TEMPLATE_BUSINESS_TYPE_LIST,
-                AriusConfigConstant.LOGIC_TEMPLATE_BUSINESS_TYPE_LIST_DEFAULT_VALUE, COMMA)));
     }
 
     @GetMapping("/cluster-node-count")

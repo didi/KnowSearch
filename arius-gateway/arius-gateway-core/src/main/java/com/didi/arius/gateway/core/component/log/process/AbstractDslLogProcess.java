@@ -1,5 +1,7 @@
 package com.didi.arius.gateway.core.component.log.process;
 
+import java.util.List;
+
 import com.alibaba.fastjson.JSONObject;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
@@ -7,8 +9,6 @@ import com.didi.arius.gateway.core.service.ESRestClientService;
 import com.didi.arius.gateway.core.service.arius.IndexTemplateService;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-
-import java.util.List;
 
 /**
  * @author didi

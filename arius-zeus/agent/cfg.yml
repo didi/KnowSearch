@@ -1,0 +1,12 @@
+---
+# 留空则自动获取本机hostname，这是一个机器的唯一标识
+# 很多公司可能不是使用hostname来标识一台机器的，可以直接把本机ip填上
+hostname: "172.20.70.55"
+listen: "0.0.0.0:2015"
+metadir: "./data"
+interval: 2
+# exec模块的地址，一般至少配置2台，为了容灾
+servers:
+  - 127.0.0.1:8030
+baseinfo:
+  ip: "ifconfig `route|grep '^default'|awk '{print $NF}'`|grep inet|awk '{print $2}'|awk -F ':' '{print $NF}' | head -n 1"

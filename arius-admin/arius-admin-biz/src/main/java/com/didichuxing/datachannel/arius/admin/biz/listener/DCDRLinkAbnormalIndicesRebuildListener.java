@@ -1,14 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.listener;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.event.template.DCDRLinkAbnormalIndicesRebuildEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import org.apache.logging.log4j.core.tools.picocli.CommandLine.Command;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
 
 /**
  * 这个类是监听 `DCDRLinkAbnormalIndicesRebuildEvent` 事件的监听器

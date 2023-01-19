@@ -1,11 +1,5 @@
 package com.didi.arius.gateway.rest.controller.check;
 
-import com.didi.arius.gateway.common.metadata.QueryContext;
-import com.didi.arius.gateway.core.service.dsl.DslAggsAnalyzerService;
-import com.didi.arius.gateway.rest.controller.AdminController;
-import com.didi.arius.gateway.elasticsearch.client.ESClient;
-import com.didiglobal.knowframework.dsl.parse.DslExtractionUtilV2;
-import com.didiglobal.knowframework.dsl.parse.bean.ExtractResult;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.bytes.BytesReference;
@@ -16,6 +10,13 @@ import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
+import com.didi.arius.gateway.common.metadata.QueryContext;
+import com.didi.arius.gateway.core.service.dsl.DslAggsAnalyzerService;
+import com.didi.arius.gateway.elasticsearch.client.ESClient;
+import com.didi.arius.gateway.rest.controller.AdminController;
+import com.didiglobal.knowframework.dsl.parse.DslExtractionUtilV2;
+import com.didiglobal.knowframework.dsl.parse.bean.ExtractResult;
 
 /**
  * @author fitz

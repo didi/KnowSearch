@@ -1,0 +1,14 @@
+{
+  "dataCenter": "cn",
+  "name": "fastdump_move_metrics_info",
+  "resourceId": #resourceId,
+  "level": 1,
+  "cyclicalRoll": 1,
+  "expireTime": 3,
+  "dateField": "timestamp",
+  "dateFieldFormat": "epoch_millis",
+  "diskSize": 30,
+  "dataType": 0,
+  "mapping": "{\"properties\":{\"failedLuceneDataPath\":{\"type\":\"keyword\"},\"level\":{\"type\":\"keyword\"},\"targetIndex\":{\"type\":\"keyword\"},\"ip\":{\"type\":\"keyword\"},\"sourceIndex\":{\"type\":\"keyword\"},\"message\":{\"type\":\"text\",\"fields\":{\"keyword\":{\"ignore_above\":256,\"type\":\"keyword\"}}},\"sourceClusterName\":{\"type\":\"keyword\"},\"taskId\":{\"type\":\"keyword\"},\"timestamp\":{\"format\":\"epoch_millis\",\"type\":\"date\"},\"targetClusterName\":{\"type\":\"keyword\"}}}",
+   "setting": "{\"index\":{\"translog.durability\":\"async\",\"translog.sync_interval\":\"15s\",\"refresh_interval\":\"30s\"}}"
+}

@@ -1,14 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterThreadPoolQueueMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * Created by linyunan on 3/11/22
@@ -19,7 +21,7 @@ public class ClusterThreadPoolDashBoardCollector extends BaseDashboardCollector 
     private static final ILog LOGGER = LogFactory.getLog(ClusterThreadPoolDashBoardCollector.class);
 
     @Override
-    public void collectSingleCluster(String cluster, long currentTime) {
+    public void collectSingleCluster(String cluster, long currentTime) throws ESOperateException {
         DashBoardStats dashBoardStats = buildInitDashBoardStats(currentTime);
         ClusterThreadPoolQueueMetrics clusterThreadPoolQueueMetrics = new ClusterThreadPoolQueueMetrics();
         clusterThreadPoolQueueMetrics.setTimestamp(currentTime);

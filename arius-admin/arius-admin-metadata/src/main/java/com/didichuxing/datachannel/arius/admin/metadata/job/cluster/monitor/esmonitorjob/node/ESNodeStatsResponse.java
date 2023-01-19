@@ -1,12 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node;
 
+import java.util.Map;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.didiglobal.knowframework.elasticsearch.client.model.ESActionResponse;
 import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
-
-import java.util.Map;
 
 public class ESNodeStatsResponse extends ESActionResponse {
 

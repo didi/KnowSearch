@@ -1,5 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.core.service.task;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
@@ -10,14 +17,9 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.OpTaskDAO;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import com.google.common.collect.Lists;
+
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * op任务服务impl
@@ -87,6 +89,11 @@ public class OpTaskServiceImpl implements OpTaskService {
         return ConvertUtil.list2List(opTaskDao.getPendingTaskByType(taskType), OpTask.class);
     }
     
+    @Override
+    public List<OpTaskPO> getPendingTaskByTypes(List<Integer> taskTypes) {
+        return opTaskDao.getPendingTaskByTypes(taskTypes);
+    }
+    
     /**
      * 获取最新任务
      *
@@ -128,5 +135,10 @@ public class OpTaskServiceImpl implements OpTaskService {
                     e.getMessage(), e);
         }
         return new Tuple<>(count, ConvertUtil.list2List(opTaskPOList,OpTaskVO.class));
+    }
+    
+    @Override
+    public OpTaskPO getTaskByBusinessKey(String businessKey) {
+        return opTaskDao.getTaskByBusinessKey(businessKey);
     }
 }

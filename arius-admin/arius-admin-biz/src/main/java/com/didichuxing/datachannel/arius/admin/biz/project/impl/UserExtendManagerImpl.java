@@ -1,16 +1,28 @@
 package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.project.UserExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserQueryExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserExtendVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserWithPwVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -20,32 +32,18 @@ import com.didiglobal.knowframework.security.common.PagingData.Pagination;
 import com.didiglobal.knowframework.security.common.PagingResult;
 import com.didiglobal.knowframework.security.common.dto.user.UserBriefQueryDTO;
 import com.didiglobal.knowframework.security.common.dto.user.UserDTO;
-import com.didiglobal.knowframework.security.common.entity.UserProject;
 import com.didiglobal.knowframework.security.common.entity.user.User;
 import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVOWithUser;
 import com.didiglobal.knowframework.security.common.vo.role.AssignInfoVO;
 import com.didiglobal.knowframework.security.common.vo.role.RoleBriefVO;
 import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import com.didiglobal.knowframework.security.common.vo.user.UserVO;
-import com.didiglobal.knowframework.security.dao.ProjectDao;
-import com.didiglobal.knowframework.security.dao.UserDao;
-import com.didiglobal.knowframework.security.dao.UserProjectDao;
 import com.didiglobal.knowframework.security.exception.KfSecurityException;
 import com.didiglobal.knowframework.security.service.PermissionService;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.didiglobal.knowframework.security.service.RolePermissionService;
 import com.didiglobal.knowframework.security.service.UserService;
 import com.didiglobal.knowframework.security.util.PWEncryptUtil;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.compress.utils.Lists;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * > 这个类是一个 Spring 组件，实现了 `UserExtendManager` 接口
@@ -62,16 +60,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
     private RolePermissionService rolePermissionService;
     @Autowired
     private PermissionService     permissionService;
-    @Autowired
-    private UserProjectDao userProjectDao;
-    @Autowired
-    private UserDao userDao;
-    @Autowired
-    private ProjectDao projectDao;
-
-    private final static int NORMAL = 0;
-    private final static int OWNER  = 1;
-
+    
     private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("UserExtendManagerImpl", 10, 10, 100);
     /**
      * 用户注册信息校验
@@ -137,10 +126,8 @@ public class UserExtendManagerImpl implements UserExtendManager {
         final List<UserExtendVO> userList = userPage.getBizData();
         //提前获取一下，避免多次查库
         final List<ProjectBriefVO> projectBriefList = projectService.getProjectBriefList();
-        Map<Integer, String> projectId2projectName = projectBriefList.stream()
-                .collect(Collectors.toMap(ProjectBriefVO::getId, ProjectBriefVO::getProjectName));
         if (CollectionUtils.isNotEmpty(userList)) {
-            for (UserExtendVO userVO : userList) {
+            for (UserVO userVO : userList) {
                 FUTURE_UTIL.runnableTask(() -> {
                     //如果可以匹配到管理员角色
                     List<ProjectBriefVO> briefList;
@@ -155,36 +142,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
                     
                     }
                     userVO.setProjectList(briefList);
-
-                    // 获取以当前user作为负责人的project列表
-                    List<String> ownProjectNameList = new ArrayList<>();
-                    List<Integer> ownProjectIdList = new ArrayList<>();
-                    List<Integer> projectIdListByUserId = userProjectDao
-                            .selectProjectIdListByUserIdList(Collections.singletonList(userVO.getId()));
-                    List<UserProject> userProjects = userProjectDao.selectByProjectIds(projectIdListByUserId);
-                    userProjects.forEach(userProject -> {
-                        if(userVO.getId().equals(userProject.getUserId()) && projectIdListByUserId
-                                .contains(userProject.getProjectId()) && userProject.getUserType() == OWNER) {
-                            ownProjectNameList.add(projectId2projectName.get(userProject.getProjectId()));
-                            ownProjectIdList.add(userProject.getProjectId());
-                        }
-                    });
-                    userVO.setOwnProjects(ownProjectNameList);
-
-                    // 获取以当前user为唯一负责人的项目列表
-                    if(!ownProjectIdList.isEmpty()){
-                        List<String> singleOwnerOfProjects = new ArrayList<>();
-                        List<ProjectBriefVOWithUser> projectBriefVOWithUsers = projectService.listProjectBriefVOWithUserByProjectIds(ownProjectIdList);
-                        projectBriefVOWithUsers.forEach(projectBriefVOWithUser -> {
-                            if(projectBriefVOWithUser.getOwnerList().size() == 1 &&
-                                    projectBriefVOWithUser.getOwnerList().get(0).getId().equals(userVO.getId())){
-                                singleOwnerOfProjects.add(projectBriefVOWithUser.getProjectName());
-                            }
-                        });
-                        userVO.setSingleOwnerOfProjects(singleOwnerOfProjects);
-                    }
-
-
+                    
                 });
             
             }
@@ -211,10 +169,10 @@ public class UserExtendManagerImpl implements UserExtendManager {
      * @param userId    用户id
      * @param projectId
      * @return 用户详情
-     * @throws LogiSecurityException 用户不存在
+     * @throws KfSecurityException 用户不存在
      */
     @Override
-    public Result<UserWithPwVO> getUserDetailByUserId(Integer userId, Integer projectId) throws Exception {
+    public Result<UserVO> getUserDetailByUserId(Integer userId, Integer projectId) {
         final UserVO userVO = userService.getUserDetailByUserId(userId);
         final List<RoleBriefVO> roleList = Optional.ofNullable(userVO.getRoleList()).orElse(Lists.newArrayList());
         final List<Integer> roleIds = roleList.stream().map(RoleBriefVO::getId).collect(Collectors.toList());
@@ -247,57 +205,22 @@ public class UserExtendManagerImpl implements UserExtendManager {
         }
     
         userVO.setProjectList(projectBriefList);
-        UserWithPwVO userWithPwVO = ConvertUtil.obj2Obj(userVO, UserWithPwVO.class);
-        userWithPwVO.setPassword(PWEncryptUtil.decode(userDao.selectByUserId(userId).getPw()));
-
-        return Result.buildSucc(userWithPwVO);
+    
+        return Result.buildSucc(userVO);
     }
 
     /**
      * 根据用户id删除用户
      *
      * @param userId
-     * @param operateProjectId
-     * @param operator
      * @return
      */
     @Override
-    public Result<Void> deleteByUserId(Integer userId, Integer operateProjectId, String operator) {
-        String userName = userService.getUserDetailByUserId(userId).getUserName();
+    public Result<Void> deleteByUserId(Integer userId) {
         com.didiglobal.knowframework.security.common.Result<Void> deleteByUserId = userService.deleteByUserId(userId);
         if (deleteByUserId.failed()) {
             return Result.build(deleteByUserId.getCode(), deleteByUserId.getMessage());
         }
-
-        final List<ProjectBriefVO> projectBriefList = projectService.getProjectBriefByUserId(userId).getData();
-        String operateContent;
-        if(projectBriefList.isEmpty()) {
-            operateContent = String.format("【%s】用户被删除", userName);
-        }else {
-            Set<String> projectNameSet = new HashSet<>();
-            projectBriefList.forEach(projectBriefVO -> projectNameSet.add(projectBriefVO.getProjectName()));
-            String nameList = projectNameSet.stream().map(String::valueOf).collect(Collectors.joining(","));
-            operateContent = String.format("【%s】用户被删除，其所属应用为【%s】", userName, nameList);
-        }
-
-        // 获取该用户对应的所有应用id，删除相关应用下的该用户数据
-        final List<Integer> projectIdList = userProjectDao.selectProjectIdListByUserIdList(
-                Collections.singletonList(userId));
-        if(!AriusObjUtils.isEmptyList(projectIdList)){
-            List<UserProject> userProjectList = new ArrayList<>(projectIdList.size());
-            projectIdList.forEach(projectId -> {
-                UserProject userProject = new UserProject();
-                userProject.setProjectId(projectId);
-                userProject.setUserId(userId);
-                userProject.setUserType(NORMAL);
-                userProjectList.add(userProject);
-            });
-            userProjectDao.deleteUserProject(userProjectList);
-        }
-
-        operateRecordService.save(new OperateRecord(projectDao.selectByProjectId(operateProjectId).getProjectName(),
-                OperateTypeEnum.TENANT_DELETE, TriggerWayEnum.MANUAL_TRIGGER, operateContent, operator));
-
         return Result.buildSucc();
     }
 
@@ -351,7 +274,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
      *
      * @param userId 用户id
      * @return 分配角色或者分配用户/列表信息
-     * @throws LogiSecurityException 用户id不可为null
+     * @throws KfSecurityException 用户id不可为null
      */
     @Override
     public Result<List<AssignInfoVO>> getAssignDataByUserId(Integer userId) {

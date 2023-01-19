@@ -1,5 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.cluster.health.ClusterHealthStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.stats.ClusterLogicStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
@@ -12,24 +22,17 @@ import com.didiglobal.knowframework.elasticsearch.client.response.cluster.ESClus
 import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.knowframework.elasticsearch.client.response.indices.clusterindex.IndexStatusResult;
 import com.didiglobal.knowframework.elasticsearch.client.response.model.fs.FSNode;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;
-import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.cluster.health.ClusterHealthStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Service
 public class ESClusterLogicStatsService {
-    protected static final Logger LOGGER = LoggerFactory.getLogger(ESClusterLogicStatsService.class);
+    protected static final ILog logger                        = LogFactory
+            .getLog(ESClusterLogicStatsService.class);
     private static final String STR_GREEN = "green";
     @Autowired
     private ESClusterService esClusterService;
@@ -68,7 +71,7 @@ public class ESClusterLogicStatsService {
             //总存储大小
             statsPO.setTotalDisk(diskTotal);
             //cpu使用率
-            logicNodeStats.stream().filter(Objects::nonNull).map(ClusterLogicStats::getCpuUsedPresent)
+            logicNodeStats.stream().filter(Objects::nonNull).map(ClusterLogicStats::getCpuUsedPrecent)
                     .filter(nodeStats -> Objects.nonNull(nodeStats) && !nodeStats.isNaN())
                     .mapToDouble(Double::doubleValue).max().ifPresent(statsPO::setCpuUsedPercent);
             //调用方是定时任务，则采集下面的指标
@@ -174,7 +177,7 @@ public class ESClusterLogicStatsService {
                     String nodeName = nodeStats.getName();
                     return new ClusterLogicStats(docCount, usageFsBytes, freeInBytes, totalFsBytes, (double) percent, host, nodeName);
                 }catch (Exception e){
-                    LOGGER.error("class=ESClusterLogicStatsService||method=syncGetPhyNodeStats||nodeStats={}||errMsg",nodeStats,e.getMessage(),e);
+                    logger.error("class=ESClusterLogicStatsService||method=syncGetPhyNodeStats||nodeStats={}||errMsg",nodeStats,e.getMessage(),e);
                     return new ClusterLogicStats();
                 }
             }).collect(Collectors.toList());

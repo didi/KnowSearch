@@ -88,4 +88,9 @@ public class OperateRecordDTO extends PageDTO {
     private Boolean orderByDesc = true;
     @ApiModelProperty(hidden = true)
     private String  sortType;
+    /**
+     * 应用id
+     */
+    @ApiModelProperty("资源所属应用")
+    private String  operateProjectName;
 }

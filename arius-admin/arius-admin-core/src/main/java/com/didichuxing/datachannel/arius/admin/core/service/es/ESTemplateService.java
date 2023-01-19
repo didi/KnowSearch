@@ -1,12 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
+import java.util.List;
+import java.util.Map;
+
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.knowframework.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.knowframework.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
 import com.didiglobal.knowframework.elasticsearch.client.response.setting.template.TemplateConfig;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author d06679
@@ -209,11 +210,4 @@ public interface ESTemplateService {
     boolean hasMatchHealthIndexByExpressionTemplateHealthEnum(String cluster, String expression,
                                                                      TemplateHealthEnum templateHealthEnum) ;
 
-    /**
-     * 从元数据索引 arius_cat_index_info 中获取模版每个索引的health状态，从而确定模版health
-     * @param cluster 集群名称
-     * @param wildcard 通配符，如“log-*”
-     * @return  模版健康状态
-     */
-    Integer getTemplateHealthCode(String cluster, String wildcard);
 }

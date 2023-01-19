@@ -1,5 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.project;
 
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectExtendSaveDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectQueryExtendDTO;
@@ -8,8 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectExt
 import com.didiglobal.knowframework.security.common.PagingResult;
 import com.didiglobal.knowframework.security.common.vo.project.ProjectDeleteCheckVO;
 import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
+import com.didiglobal.knowframework.security.exception.KfSecurityException;
 
 /**
  * 基于logi的扩展能力
@@ -25,6 +28,7 @@ public interface ProjectExtendManager {
      * @param operator   请求信息
      * @param operatorId
      * @return 项目信息
+     * @throws KfSecurityException 项目相关的错误信息
      */
     Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator, Integer operatorId);
 
@@ -33,6 +37,7 @@ public interface ProjectExtendManager {
      *
      * @param projectId 项目id
      * @return ProjectVo 项目信息
+     * @throws KfSecurityException 项目不存在
      */
     Result<ProjectExtendVO> getProjectDetailByProjectId(Integer projectId);
 
@@ -74,6 +79,7 @@ public interface ProjectExtendManager {
      *
      * @param saveDTO 项目信息
      * @param operator 请求信息
+     * @throws KfSecurityException 项目相关的错误信息
      */
     Result<Void> updateProject(ProjectExtendSaveDTO saveDTO, String operator);
 
@@ -174,4 +180,11 @@ public interface ProjectExtendManager {
      * @return 一个 Result 对象，里面有一个 Void 对象。
      */
     Result<Void> checkResourcesByProjectId(Integer projectId);
+    
+    /**
+     * 检查项目是否具有网关集群的功能
+     * @param projectId 项目id
+     * @return Result<Boolean>
+     */
+    Result<Boolean> projectExistenceGatewayCluster(Integer projectId);
 }

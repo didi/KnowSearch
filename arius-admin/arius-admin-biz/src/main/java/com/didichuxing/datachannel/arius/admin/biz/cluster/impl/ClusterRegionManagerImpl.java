@@ -1,17 +1,25 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.EXCLUSIVE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.PRIVATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.PUBLIC;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.UNKNOWN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.CLUSTER_REGION_UNSUPPORTED_DIVIDE_TYPE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
+
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicSpecCondition;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
@@ -29,37 +37,18 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import io.swagger.models.auth.In;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ClusterRegionManagerImpl implements ClusterRegionManager {
@@ -88,6 +77,10 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     private OperateRecordService   operateRecordService;
     @Autowired
     private ProjectService         projectService;
+
+    @Autowired
+    private AriusConfigInfoService  ariusConfigInfoService;
+
     private static final String COLD = "cold";
     private static final Integer LOGIC_ASSOCIATED_PHY_MAX_NUMBER = 2 << 9;
     private static final Integer PHY_ASSOCIATED_LOGIC_MAX_NUMBER = 2 << 9;
@@ -112,7 +105,6 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
      * @param clusterLogicType 逻辑集群类型
      * @return
      */
-    @Deprecated
     @Override
     public Result<List<ClusterRegionVO>> listPhyClusterRegionsByLogicClusterTypeAndCluster(String phyCluster,
                                                                                            Integer clusterLogicType) {
@@ -140,46 +132,6 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         return Result.buildSucc(ConvertUtil.list2List(clusterRegions, ClusterRegionVO.class,
             regionVO -> regionVO.setClusterName(phyCluster)));
     }
-
-    /**
-     * 逻辑集群绑定同一个物理集群的region的时候需要根据类型进行过滤，之后再根据cold、region节点数量、节点规格进行过滤
-     * @param phyCluster 物理集群名称
-     * @param clusterLogicType 逻辑集群类型
-     * @param condition 用户侧申请的集群规格（节点数量、机器规格）
-     * @return
-     */
-    @Override
-    public Result<List<ClusterRegionVO>> listPhyClusterRegionsByCondition(String phyCluster,
-                                                                          Integer clusterLogicType,
-                                                                          ClusterLogicSpecCondition condition) {
-        if (!ClusterResourceTypeEnum.isExist(clusterLogicType)) {
-            return Result.buildFail("逻辑集群类型不存在");
-        }
-
-        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(phyCluster);
-        if (null == clusterPhy) {
-            return Result.buildFail(String.format("物理集群[%s]不存在", phyCluster));
-        }
-
-        int resourceType = clusterPhy.getResourceType();
-        if (clusterLogicType != resourceType) {
-            return Result.buildFail(
-                    String.format("物理集群[%s]类型为[%s], 不满足逻辑集群类型[%s], 请调整类型一致", phyCluster, resourceType, clusterLogicType));
-        }
-
-        // 三层过滤：cold、region节点数量、region节点规格
-        List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster).stream()
-                .filter(notColdTruePreByClusterRegion)
-                .filter(clusterRegion -> checkRegionHostNumAndSpec(clusterRegion.getId(), condition))
-                .filter(clusterRegion -> clusterRegionService.isRegionCanBeBound(clusterRegion,clusterLogicType)).collect(Collectors.toList());
-
-        if (CollectionUtils.isEmpty(clusterRegions)) {
-            return Result.buildFail(String.format("物理集群[%s]无可用region, 请前往物理集群-region划分进行region创建", phyCluster));
-        }
-        return Result.buildSucc(ConvertUtil.list2List(clusterRegions, ClusterRegionVO.class,
-                regionVO -> regionVO.setClusterName(phyCluster)));
-    }
-
 
     /**
      * 构建regionVO
@@ -264,6 +216,88 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
         return Result.buildSucc(clusterRegionWithNodeInfoVOS.stream().filter(r -> !AriusObjUtils.isBlank(r.getName()))
             .distinct().collect(Collectors.toList()));
+    }
+
+    /**
+     * 获取当前集群支持的所有attribute划分方式
+     * @param clusterId 物理集群id
+     * @return
+     */
+    @Override
+    public Result<Set<String>> getClusterAttributeDivideType(Long clusterId) {
+        // 获取当前集群所有attribute属性集合
+        List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getByRoleAndClusterId(clusterId, DATA_NODE.getDesc());
+        if(AriusObjUtils.isEmptyList(clusterRoleHostList)){
+            return Result.buildSucc();
+        }
+        List<String> attributesList = clusterRoleHostList.stream().map(ClusterRoleHost::getAttributes)
+                .distinct().collect(Collectors.toList());
+        Set<String> attributeKeySet = Sets.newHashSet();
+        attributesList.forEach((attributes) -> {
+            Map<String, String> attributeMap = ConvertUtil.str2Map(attributes);
+            attributeKeySet.addAll(attributeMap.keySet());
+        });
+
+        if(!attributeKeySet.isEmpty()) {
+            // 获取平台不支持的划分方式
+            Set<String> unsupportedTypeSet = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
+                    CLUSTER_REGION_UNSUPPORTED_DIVIDE_TYPE, "", ",");
+            // 过滤掉平台不支持的划分方式
+            Set<String> clusterSupportedTypes = attributeKeySet.stream()
+                    .filter(attributeKey -> !unsupportedTypeSet.contains(attributeKey)).collect(Collectors.toSet());
+            return Result.buildSucc(clusterSupportedTypes);
+        }
+
+        return Result.buildSucc(attributeKeySet);
+    }
+
+    /**
+     * 根据物理集群名称和划分方式获region信息，包含region中的数据节点信息
+     * @param clusterName  物理集群名称
+     * @param divideType region划分方式
+     * @return
+     */
+    @Override
+    public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionInfoWithDivideType(String clusterName, String divideType){
+        Result<Void> checkResult = divideTypeCheck(clusterName, divideType);
+        if(checkResult.failed()){
+            return Result.buildFail(checkResult.getMessage());
+        }
+
+        List<ClusterRegion> clusterRegions = clusterRegionService.listRegionsByClusterName(clusterName);
+        if (CollectionUtils.isEmpty(clusterRegions)) {
+            return Result.buildSucc();
+        }
+
+        // 构建region中的节点和attribute信息
+        List<ClusterRegionWithNodeInfoVO> clusterRegionWithNodeInfoVOS = ConvertUtil.list2List(clusterRegions,
+                ClusterRegionWithNodeInfoVO.class, region -> region.setClusterName(clusterName));
+
+        for (ClusterRegionWithNodeInfoVO clusterRegionWithNodeInfoVO : clusterRegionWithNodeInfoVOS) {
+            Result<List<ClusterRoleHost>> ret = clusterRoleHostService
+                    .listByRegionId(clusterRegionWithNodeInfoVO.getId().intValue());
+            if (ret.success() && CollectionUtils.isNotEmpty(ret.getData())) {
+                List<ClusterRoleHost> data = ret.getData();
+                // 构建节点信息
+                List<String> nodeNameList = data.stream().filter(Objects::nonNull).map(ClusterRoleHost::getNodeSet)
+                        .distinct().collect(Collectors.toList());
+                String nodeNames = ListUtils.strList2String(nodeNameList);
+                clusterRegionWithNodeInfoVO.setNodeNames(nodeNames);
+                // 构建attribute属性信息
+                Set<String> attributeValueSet = Sets.newHashSet();
+                List<String> attributesList = data.stream().filter(Objects::nonNull)
+                        .map(ClusterRoleHost::getAttributes).collect(Collectors.toList());
+                for (String attributes : attributesList) {
+                    Map<String, String> attributeMap = ConvertUtil.str2Map(attributes);
+                    attributeValueSet.add(attributeMap.get(divideType));
+                }
+                String attributeValues = ListUtils.strSet2String(attributeValueSet);
+                clusterRegionWithNodeInfoVO.setAttributeValues(attributeValues);
+            }
+        }
+
+        return Result.buildSucc(clusterRegionWithNodeInfoVOS.stream().filter(r -> !AriusObjUtils.isBlank(r.getName()))
+                .distinct().collect(Collectors.toList()));
     }
 
     @Override
@@ -382,7 +416,20 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     
     
     /***************************************** private method ****************************************************/
-     private final static Predicate<ClusterRegion> coldTruePreByClusterRegion = clusterRegion -> {
+    private Result<Void> divideTypeCheck(String clusterName, String divideType){
+        if(divideType.isEmpty()){
+            return Result.buildFail("参数有误");
+        }
+        // 如果当前存在region，则只能使用该region的划分方法
+        List<ClusterRegion> clusterRegions = clusterRegionService.listRegionsByClusterName(clusterName);
+        ClusterRegion clusterRegion = clusterRegions.stream().findFirst().orElse(null);
+        if(clusterRegion != null && !divideType.equals(clusterRegion.getDivideAttributeKey())){
+            return Result.buildParamIllegal("当前集群region已存在划分方法，不支持其他划分方法");
+        }
+        return Result.buildSucc();
+    }
+
+    private final static Predicate<ClusterRegion> coldTruePreByClusterRegion = clusterRegion -> {
         if (StringUtils.isBlank(clusterRegion.getConfig())) {
             return Boolean.FALSE;
         }
@@ -406,28 +453,6 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         }
 
     };
-
-    private Boolean checkRegionHostNumAndSpec(Long regionId, ClusterLogicSpecCondition condition){
-        Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(regionId.intValue());
-        if(result.failed()){
-            return Boolean.FALSE;
-        }
-
-        // 要求region节点数要大于等于申请的逻辑集群节点数
-        List<ClusterRoleHost> data = result.getData();
-        if(AriusObjUtils.isEmptyList(data) || data.size() < condition.getHostNum()){
-            return Boolean.FALSE;
-        }
-
-        // 要求region的节点规格都要是申请的逻辑集群的节点规格
-        boolean specCheck = data.stream().allMatch(s -> s.getMachineSpec().equals(condition.getMachineSpec()));
-        if(Boolean.FALSE.equals(specCheck)){
-            return Boolean.FALSE;
-        }
-
-        return Boolean.TRUE;
-    }
-
     /**
      * 对于逻辑集群绑定的物理集群的版本进行一致性校验
      *

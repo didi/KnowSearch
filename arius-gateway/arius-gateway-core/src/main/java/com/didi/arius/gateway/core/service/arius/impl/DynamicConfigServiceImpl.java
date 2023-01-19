@@ -1,5 +1,13 @@
 package com.didi.arius.gateway.core.service.arius.impl;
 
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.metadata.MappingIndexNameWhiteAppIds;
@@ -11,13 +19,8 @@ import com.didi.arius.gateway.remote.response.DynamicConfigListResponse;
 import com.didi.arius.gateway.remote.response.DynamicConfigResponse;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.util.Map;
+import lombok.NoArgsConstructor;
 
 @Service
 @NoArgsConstructor

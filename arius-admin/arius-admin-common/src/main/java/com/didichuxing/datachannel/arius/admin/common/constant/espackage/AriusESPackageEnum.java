@@ -8,7 +8,7 @@ public enum AriusESPackageEnum {
                                 /**
                                  * 外部开源的es程序包，版本为3位
                                  */
-                                OPEN_SOURCE(2, 2, "外部通用"),
+                                OPEN_SOURCE(2, 3, "外部通用"),
                                 /**
                                  * 未知
                                  */

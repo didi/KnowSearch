@@ -1,14 +1,33 @@
 package com.didichuxing.datachannel.arius.admin.persistence.component;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+
+import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
+import org.elasticsearch.common.bytes.BytesReference;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.common.xcontent.XContentHelper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.constant.ESConstant;
 import com.didichuxing.datachannel.arius.admin.common.exception.AriusGatewayException;
-import com.didichuxing.datachannel.arius.admin.common.util.BaseHttpUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didiglobal.knowframework.elasticsearch.client.ESClient;
 import com.didiglobal.knowframework.elasticsearch.client.gateway.document.ESGetRequest;
 import com.didiglobal.knowframework.elasticsearch.client.gateway.document.ESGetResponse;
@@ -22,30 +41,9 @@ import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.message.BasicHeader;
-import org.elasticsearch.common.bytes.BytesReference;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.common.xcontent.XContentHelper;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
  * @Author: zqr
@@ -157,7 +155,7 @@ public class ESGatewayClient {
      * @return
      */
     @Nullable
-    public ESQueryResponse performSQLRequest(String indexName, String sql, String orginalQuery) {
+    public ESQueryResponse performSQLRequest(String indexName, String sql, String orginalQuery) throws ESOperateException {
         return performSQLRequest(null, indexName, sql, orginalQuery);
     }
 
@@ -167,7 +165,7 @@ public class ESGatewayClient {
      * @return
      */
     @Nullable
-    public ESQueryResponse performSQLRequest(String clusterName, String indexName, String sql, String orginalQuery) {
+    public ESQueryResponse performSQLRequest(String clusterName, String indexName, String sql, String orginalQuery) throws ESOperateException {
         Tuple<String, ESClient> gatewayClientTuple = null;
         try {
             gatewayClientTuple = getGatewayClientByDataCenterAndIndexName(clusterName, indexName);
@@ -175,11 +173,12 @@ public class ESGatewayClient {
             return gatewayClientTuple.v2().prepareSQL(sql).get(new TimeValue(120, TimeUnit.SECONDS));
         } catch (Exception e) {
             LOGGER.warn(
-                "class=GatewayClient||method=performSQLRequest||dataCenter={}||gatewayClientTuple={}||clusterName={}||sql={}||md5={}||errMsg=query error. ",
-                EnvUtil.getDC(), JSON.toJSONString(gatewayClientTuple), clusterName, sql,
-                CommonUtils.getMD5(orginalQuery), e);
-            return null;
+                    "class=GatewayClient||method=performSQLRequest||dataCenter={}||gatewayClientTuple={}||clusterName={}||sql={}||md5={}||errMsg=query error. ",
+                    EnvUtil.getDC(), JSON.toJSONString(gatewayClientTuple), clusterName, sql,
+                    CommonUtils.getMD5(orginalQuery), e);
+            ParsingExceptionUtils.abnormalTermination(e);
         }
+        return null;
     }
 
     /**

@@ -1,5 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.UNKNOW_DATA_TYPE;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
@@ -8,22 +19,15 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.DataTypeService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Created by linyunan on 2021-10-14
@@ -35,20 +39,24 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Temp
     private IndexTemplateService          indexTemplateService;
 
     @Autowired
+    private DataTypeService               dataTypeService;
+
+    @Autowired
     private ClusterLogicService           clusterLogicService;
 
     private static final FutureUtil<Void> BUILD_BELONG_CLUSTER_FUTURE_UTIL = FutureUtil
         .init("BUILD_BELONG_CLUSTER_FUTURE_UTIL", 10, 10, 100);
 
-
-
     @Override
     protected Result<Boolean> checkCondition(TemplateConditionDTO templateConditionDTO, Integer projectId) {
 
-        if (null != templateConditionDTO.getDataType() && !DataTypeEnum.isExit(templateConditionDTO.getDataType())) {
+        if (null != templateConditionDTO.getDataType() && !dataTypeService.isExit(templateConditionDTO.getDataType())) {
             return Result.buildParamIllegal("数据类型不存在");
         }
 
+        if (UNKNOW_DATA_TYPE.getCode().equals(templateConditionDTO.getDataType())) {
+            return Result.buildParamIllegal("数据类型非法");
+        }
         String templateName = templateConditionDTO.getName();
         if (!AriusObjUtils.isBlack(templateName) && (templateName.startsWith("*") || templateName.startsWith("?"))) {
             return Result.buildParamIllegal("模板名称不允许带类似*, ?等通配符查询");

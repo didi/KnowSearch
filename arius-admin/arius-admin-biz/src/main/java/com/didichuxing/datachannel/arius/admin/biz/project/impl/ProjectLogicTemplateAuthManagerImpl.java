@@ -1,5 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.project.ProjectLogicTemplateAuthManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
@@ -16,13 +25,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.knowframework.security.service.ProjectService;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Created by linyunan on 2021-06-15
@@ -58,7 +60,7 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
             final ProjectTemplateAuthEnum projectTemplateAuthEnum = ProjectTemplateAuthEnum.valueOf(authDTO.getType());
             operateRecordService.saveOperateRecordWithManualTrigger(
                     String.format("权限变更：%s", projectTemplateAuthEnum.getDesc()), operator, projectId,
-                    authDTO.getId(), OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY);
+                    authDTO.getId(), OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY, authDTO.getProjectId());
 
         }
         return voidResult;
@@ -106,7 +108,7 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
         if (result.success()) {
     
             operateRecordService.saveOperateRecordWithManualTrigger(String.format("删除模板，模板 id：%s", authId),
-                    operator, projectId, authId, OperateTypeEnum.TEMPLATE_MANAGEMENT_OFFLINE);
+                    operator, projectId, authId, OperateTypeEnum.TEMPLATE_MANAGEMENT_OFFLINE, belongToProject);
         }
         return result;
     }
@@ -149,7 +151,7 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
     
             operateRecordService.saveOperateRecordWithManualTrigger(
                     String.format("权限变更：【%s】", projectTemplateAuthEnum.getDesc()), operator, authDTO.getProjectId(),
-                    authDTO.getId(), OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY);
+                    authDTO.getId(), OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY, authDTO.getProjectId());
         }
         return result;
     

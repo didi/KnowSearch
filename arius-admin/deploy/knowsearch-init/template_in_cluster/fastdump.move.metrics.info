@@ -1,0 +1,55 @@
+{
+  "order": 10,
+  "index_patterns": [
+    "fastdump_move_metrics_info*"
+  ],
+  "settings": {
+    "index": {
+      "number_of_shards":"4",
+      "number_of_replicas":"1",
+      "refresh_interval": "10s"
+    }
+  },
+  "mappings": {
+    "properties": {
+      "failedLuceneDataPath": {
+        "type": "keyword"
+      },
+      "level": {
+        "type": "keyword"
+      },
+      "targetIndex": {
+        "type": "keyword"
+      },
+      "ip": {
+        "type": "keyword"
+      },
+      "sourceIndex": {
+        "type": "keyword"
+      },
+      "message": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        }
+      },
+      "sourceClusterName": {
+        "type": "keyword"
+      },
+      "taskId": {
+        "type": "keyword"
+      },
+      "timestamp": {
+        "format": "epoch_millis",
+        "type": "date"
+      },
+      "targetClusterName": {
+        "type": "keyword"
+      }
+    }
+  },
+  "aliases": {}
+}

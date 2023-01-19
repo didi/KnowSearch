@@ -1,23 +1,10 @@
 package com.didi.arius.gateway.core.service.dsl.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.didi.arius.gateway.common.consts.QueryConsts;
-import com.didi.arius.gateway.common.metadata.*;
-import com.didi.arius.gateway.common.utils.Convert;
-import com.didi.arius.gateway.common.metadata.BaseContext;
-import com.didi.arius.gateway.core.service.dsl.transform.RequestVisitorV2;
-import com.didi.arius.gateway.core.service.dsl.transform.RequestVisitorV6;
-import com.didi.arius.gateway.core.service.dsl.transform.RequestVisitorV7;
-import com.didi.arius.gateway.core.service.dsl.DslRewriterService;
-import com.didi.arius.gateway.core.service.arius.IndexTemplateService;
-import com.didiglobal.knowframework.dsl.parse.dsl.ast.DslNode;
-import com.didiglobal.knowframework.dsl.parse.dsl.parser.DslParser;
-import com.didiglobal.knowframework.dsl.parse.dsl.visitor.basic.OutputVisitor;
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
-import lombok.NoArgsConstructor;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
+
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.xcontent.XContentHelper;
@@ -26,10 +13,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.didi.arius.gateway.common.consts.QueryConsts;
+import com.didi.arius.gateway.common.metadata.*;
+import com.didi.arius.gateway.common.utils.Convert;
+import com.didi.arius.gateway.core.service.arius.IndexTemplateService;
+import com.didi.arius.gateway.core.service.dsl.DslRewriterService;
+import com.didi.arius.gateway.core.service.dsl.transform.RequestVisitorV2;
+import com.didi.arius.gateway.core.service.dsl.transform.RequestVisitorV6;
+import com.didi.arius.gateway.core.service.dsl.transform.RequestVisitorV7;
+import com.didiglobal.knowframework.dsl.parse.dsl.ast.DslNode;
+import com.didiglobal.knowframework.dsl.parse.dsl.parser.DslParser;
+import com.didiglobal.knowframework.dsl.parse.dsl.visitor.basic.OutputVisitor;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+
+import lombok.NoArgsConstructor;
 
 /**
  * @author fitz

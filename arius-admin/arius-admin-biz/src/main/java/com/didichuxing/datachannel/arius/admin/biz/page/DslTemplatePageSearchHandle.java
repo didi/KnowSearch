@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.MetadataControlUtils;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslTemplateService;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,18 +33,19 @@ public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<DslTem
 
     @Override
     protected Result<Boolean> checkCondition(DslTemplateConditionDTO condition, Integer projectId) {
-
         String queryIndex = condition.getQueryIndex();
         if (!AriusObjUtils.isBlack(queryIndex) && (queryIndex.startsWith("*") || queryIndex.startsWith("?"))) {
             return Result.buildParamIllegal("查询索引名称不允许带类似*, ?等通配符");
         }
-
         return Result.buildSucc(true);
     }
 
     @Override
     protected void initCondition(DslTemplateConditionDTO condition, Integer projectId) {
-        // Do nothing
+        //默认展示元数据集群的信息
+        if(AriusObjUtils.isNull(condition.getShowMetadata())){
+            condition.setShowMetadata(true);
+        }
     }
 
     @Override
@@ -51,12 +53,15 @@ public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<DslTem
         Tuple<Long, List<DslTemplatePO>> tuple;
         //普通项目只能查该项目下的dsl模板
         try {
-        
             if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
                 tuple = dslTemplateService.getDslTemplatePage(projectId, condition);
                 // 超级项目不带 projectId 条件查询时，可查到所有项目的 dsl 模板
             } else {
-                tuple = dslTemplateService.getDslTemplatePage(condition.getProjectId(), condition);
+                if (MetadataControlUtils.showMetadataInfo(condition.getShowMetadata(), projectId)) {
+                    tuple = dslTemplateService.getDslTemplatePage(condition.getProjectId(), condition);
+                } else {
+                    tuple = dslTemplateService.getDslTemplatePageWithoutMetadataCluster(condition.getProjectId(), condition);
+                }
             }
         } catch (ESOperateException e) {
             return PaginationResult.buildFail(e.getMessage());

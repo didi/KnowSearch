@@ -119,6 +119,7 @@
             <if test="role != null">,role = #{role}</if>
             <if test="config != null">,config = #{config}</if>
             <if test="regionId != null">,region_id = #{regionId}</if>
+            <if test="cluster != null and cluster != '' ">,cluster = #{cluster}</if>
         </trim>
         where id = #{id} and status > 0
     </update>

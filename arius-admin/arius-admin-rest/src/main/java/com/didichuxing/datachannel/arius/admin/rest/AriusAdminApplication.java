@@ -1,13 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.rest;
 
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.biz.listener.LoggingListener;
-import com.didichuxing.datachannel.arius.admin.rest.swagger.SwaggerConfiguration;
-import com.didichuxing.datachannel.arius.admin.rest.web.WebConstant;
-import com.didichuxing.datachannel.arius.admin.rest.web.WebRequestLogFilter;
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
-import lombok.NoArgsConstructor;
+import java.io.IOException;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -19,20 +16,28 @@ import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerF
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import com.didichuxing.datachannel.arius.admin.biz.listener.LoggingListener;
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.rest.swagger.SwaggerConfiguration;
+import com.didichuxing.datachannel.arius.admin.rest.web.WebConstant;
+import com.didichuxing.datachannel.arius.admin.rest.web.WebRequestLogFilter;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+
+import lombok.NoArgsConstructor;
 
 /**
  * 启动类
  */
 @NoArgsConstructor
 @EnableScheduling
+@EnableAsync
 @EnableCaching
 @ServletComponentScan
-@SpringBootApplication(scanBasePackages = { "com.didichuxing.datachannel.arius.admin", "com.didiglobal.knowframework.job", "com.didiglobal.knowframework" })
+@SpringBootApplication(scanBasePackages = { "com.didichuxing.datachannel.arius.admin","com.didiglobal.knowframework","com.didiglobal.logi.op" })
 public class AriusAdminApplication {
 
     private static final ILog LOGGER           = LogFactory.getLog(AriusAdminApplication.class);
@@ -147,5 +152,3 @@ public class AriusAdminApplication {
     }
 
 }
-
-

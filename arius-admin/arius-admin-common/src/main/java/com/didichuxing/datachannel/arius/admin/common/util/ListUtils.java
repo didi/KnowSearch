@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -97,7 +96,7 @@ public class ListUtils {
             return "";
         }
 
-        strList = strList.stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        strList = strList.stream().filter(StringUtils::isNotBlank).distinct().collect(Collectors.toList());
 
         return StringUtils.join(strList, SEPARATOR);
     }

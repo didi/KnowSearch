@@ -1,27 +1,26 @@
 package com.didi.arius.gateway.common.utils;
 
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.common.Base64;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.search.fetch.source.FetchSourceContext;
+
 import com.didi.arius.gateway.common.metadata.AuthRequest;
 import com.didi.arius.gateway.common.metadata.FieldInfo;
 import com.didi.arius.gateway.elasticsearch.client.gateway.search.ESSearchRequest;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -307,5 +306,29 @@ public class Convert {
         
         return hostName;  
 	}
-
+		
+		/**
+		 * > 获取本机第一个非环回IPv4地址
+		 *
+		 * @return 机器的主机名。
+		 */
+		public static String getIpAddr() {
+				try {
+						Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+						while (allNetInterfaces.hasMoreElements()) {
+								NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();
+								Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
+								while (addresses.hasMoreElements()) {
+										InetAddress ip = (InetAddress) addresses.nextElement();
+										if (ip != null && ip instanceof Inet4Address && !ip.isLoopbackAddress()
+										    //loopback 地址即本机地址，IPv4 的 loopback 范围是 127.0.0.0 ~ 127.255.255.255
+										    && ip.getHostAddress().indexOf(":") == -1) {
+												return ip.getHostAddress();
+										}
+								}
+						}
+				} catch (Exception ignore) {
+				}
+				return getHostName();
+		}
 }

@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
 import com.alibaba.fastjson.JSON;
@@ -270,6 +271,24 @@ public class ConvertUtil {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * 把字符串转为map
+     * @param str  key1:value1,key2:value2
+     * @return map
+     */
+    public static Map<String, String> str2Map(String str){
+        Map<String, String> map = new HashMap<>();
+        if(str == null || str.isEmpty()){
+            return map;
+        }
+        List<String> strList = Arrays.asList(StringUtils.split(str, ","));
+        for (String s : strList) {
+            String[] split = StringUtils.split(s.trim(), ":");
+            map.put(split[0].trim(), split[1].trim());
+        }
+        return map;
     }
 
     public static Map<String, Double> sortMapByValue(Map<String, Double> map) {

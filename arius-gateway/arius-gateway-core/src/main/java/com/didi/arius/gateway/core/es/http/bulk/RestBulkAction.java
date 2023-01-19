@@ -1,5 +1,16 @@
 package com.didi.arius.gateway.core.es.http.bulk;
 
+import static com.didi.arius.gateway.elasticsearch.client.utils.LogUtils.setWriteLog;
+
+import java.util.*;
+
+import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.common.Strings;
+import org.elasticsearch.rest.RestChannel;
+import org.elasticsearch.rest.RestRequest;
+import org.elasticsearch.rest.support.RestUtils;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didi.arius.gateway.common.exception.InvalidParameterException;
@@ -10,18 +21,7 @@ import com.didi.arius.gateway.core.es.http.document.RestBaseWriteAction;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import com.didi.arius.gateway.elasticsearch.client.gateway.direct.DirectRequest;
 import com.didi.arius.gateway.elasticsearch.client.gateway.direct.DirectResponse;
-
 import com.didiglobal.knowframework.log.LogGather;
-import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.common.Strings;
-import org.elasticsearch.rest.RestChannel;
-import org.elasticsearch.rest.RestRequest;
-import org.elasticsearch.rest.support.RestUtils;
-import org.springframework.stereotype.Component;
-
-import java.util.*;
-
-import static com.didi.arius.gateway.elasticsearch.client.utils.LogUtils.setWriteLog;
 
 /**
  * <pre>

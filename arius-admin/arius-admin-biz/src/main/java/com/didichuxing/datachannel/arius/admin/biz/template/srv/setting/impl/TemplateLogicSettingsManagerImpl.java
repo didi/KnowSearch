@@ -1,9 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.ASYNC;
-import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.NUMBER_OF_REPLICAS_KEY;
-import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.REQUEST;
-import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.TRANSLOG_DURABILITY_KEY;
+import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.*;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -36,12 +42,6 @@ import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didiglobal.knowframework.elasticsearch.client.utils.JsonUtils;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * 索引setting服务实现
@@ -162,12 +162,12 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
 
         List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
 
-        
 
+        ProjectBriefVO projectBriefByProjectId = projectService.getProjectBriefByProjectId(templateLogicWithPhysical.getProjectId());
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
             try {
                 templatePhySettingManager.mergeTemplateSettings(logicId, templatePhysical.getCluster(),
-                    templatePhysical.getName(), operator, settings.toJSON());
+                    templatePhysical.getName(), operator, settings.toJSON(), projectBriefByProjectId.getProjectName());
             } catch (AdminOperateException adminOperateException) {
                 return Result.buildFail(adminOperateException.getMessage());
             }
@@ -176,6 +176,15 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
         return Result.buildSucc();
     }
 
+    /**
+     * 以全量的方式更新模版settings
+     * @param logicId   逻辑模版ID
+     * @param settings  全量settings
+     * @param operator
+     * @param projectId
+     * @return
+     * @throws AdminOperateException
+     */
     @Override
     public Result<Void> updateSettings(Integer logicId, IndexTemplatePhySetting settings, String operator,
                                        Integer projectId) throws AdminOperateException {
@@ -218,10 +227,12 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
             SpringTool.publish(new ReBuildTomorrowIndexEvent(this, logicId));
         }
         final Result<IndexTemplatePhySetting> afterSetting = getSettings(logicId);
+        ProjectBriefVO projectBriefByProjectId = projectService.getProjectBriefByProjectId(projectId);
         operateRecordService.save(new OperateRecord.Builder()
-            .project(projectService.getProjectBriefByProjectId(projectId)).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+            .project(projectBriefByProjectId).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
             .userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_EDIT_SETTING)
             .content(new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData()).toString())
+            .operateProject(projectBriefByProjectId)
             .bizId(logicId).build());
 
         return Result.buildSucc();
@@ -256,6 +267,52 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
         }
 
         return Result.buildFail("不存在Master角色物理模板，ID：" + logicId);
+    }
+
+    /**
+     * 以增量的方式更新模版settings
+     * @param logicId   模版id
+     * @param incrementalSettings  settings的增量
+     * @param operator
+     * @param projectId
+     * @return
+     * @throws AdminOperateException
+     */
+    @Override
+    public Result<Void> updateSettingsByMerge(Integer logicId, Map<String, String> incrementalSettings, String operator,
+                                       Integer projectId) throws AdminOperateException {
+
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(logicId);
+
+        if (templateLogicWithPhysical == null) {
+            return Result.buildNotExist("逻辑模板不存在, ID:" + logicId);
+        }
+        if (!templateLogicWithPhysical.hasPhysicals()) {
+            return Result.buildNotExist("物理模板不存在，ID:" + logicId);
+        }
+
+        List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+
+        // 获取变更前的setting
+        final IndexTemplatePhySetting beforeSetting = getSettings(logicId).getData();
+        // merge增量settings信息
+        Map<String, String> settingsMap = beforeSetting.flatSettings();
+        IndexTemplatePhySetting afterSetting = new IndexTemplatePhySetting(settingsMap);
+        afterSetting.merge(incrementalSettings);
+        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+            templatePhySettingManager.mergeTemplateSettingsCheckAllocationAndShard(logicId,
+                    templatePhysical.getCluster(), templatePhysical.getName(), afterSetting);
+        }
+
+        SpringTool.publish(new ReBuildTomorrowIndexEvent(this, logicId));
+        operateRecordService.save(new OperateRecord.Builder()
+                .project(projectService.getProjectBriefByProjectId(projectId)).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                .userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_EDIT_SETTING)
+                .content(new TemplateSettingOperateRecord(beforeSetting, afterSetting).toString())
+                .operateProject(projectService.getProjectBriefByProjectId(templateLogicWithPhysical.getProjectId()))
+                .bizId(logicId).build());
+
+        return Result.buildSucc();
     }
 
     /**************************************** private method ****************************************************/

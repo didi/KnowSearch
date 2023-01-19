@@ -1,10 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.core.config;
 
-import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.springframework.util.ErrorHandler;
+
+import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
+import com.didiglobal.knowframework.log.LogFactory;
 
 /**
  * 设置时间广播执行的线程池,所有的事件都会异步执行
@@ -20,6 +23,12 @@ public class ProjectEventMultiConfig {
     public ApplicationEventMulticaster applicationEventMulticaster(AriusOpThreadPool ariusOpThreadPool) {
         SimpleApplicationEventMulticaster applicationEventMulticaster = new SimpleApplicationEventMulticaster();
         applicationEventMulticaster.setTaskExecutor(ariusOpThreadPool);
+        applicationEventMulticaster.setErrorHandler(new ErrorHandler() {
+            @Override
+            public void handleError(Throwable t) {
+                LogFactory.getLog(ProjectEventMultiConfig.class).error("class=ProjectEventMultiConfig||method=ApplicationEventMulticaster||ErrorMsg={}",t.getMessage());
+            }
+        });
         return applicationEventMulticaster;
     }
 }

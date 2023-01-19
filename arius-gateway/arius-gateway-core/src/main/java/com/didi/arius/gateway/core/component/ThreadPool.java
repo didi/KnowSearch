@@ -1,13 +1,15 @@
 package com.didi.arius.gateway.core.component;
 
-import com.didiglobal.knowframework.observability.Observability;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.annotation.PostConstruct;
+
 import org.elasticsearch.common.util.concurrent.EsExecutors;
 import org.jboss.netty.util.ThreadRenamingRunnable;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.didiglobal.knowframework.observability.Observability;
 
 @Component("threadPool")
 public class ThreadPool {
@@ -28,7 +30,7 @@ public class ThreadPool {
 		scheduleThreadPool = Observability.wrap(Executors.newScheduledThreadPool(
 				scheduleThreadNum, new DeamondThreadFactory(
 						"scheduleThreadPool")));
-		
+
 		searchExecutor = Observability.wrap(EsExecutors.newFixed("search", searchSize, searchQueueSize, new DeamondThreadFactory(
 				"searchThreadPool")));
 	}

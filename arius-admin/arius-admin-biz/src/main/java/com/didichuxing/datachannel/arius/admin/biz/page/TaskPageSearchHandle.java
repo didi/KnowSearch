@@ -1,5 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -8,11 +14,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.OpTaskVO;
 import com.didichuxing.datachannel.arius.admin.core.service.task.OpTaskService;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.Collections;
-import java.util.List;
 
 @Component
 public class TaskPageSearchHandle extends AbstractPageSearchHandle<OpTaskQueryDTO, OpTaskVO>{

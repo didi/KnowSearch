@@ -3,6 +3,12 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.workorder.BpmAuditTypeEnum.AGREE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.workorder.BpmAuditTypeEnum.DISAGREE;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderHandler;
@@ -23,7 +29,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OrderStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -43,14 +48,6 @@ import com.didiglobal.knowframework.security.service.DeptService;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.didiglobal.knowframework.security.service.UserService;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -89,14 +86,6 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
             WorkOrderTypeEnum.LOGIC_CLUSTER_INDECREASE.getMessage()));
         orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.LOGIC_CLUSTER_JOIN.getName(),
             WorkOrderTypeEnum.LOGIC_CLUSTER_JOIN.getMessage()));
-        orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.DSL_TEMPLATE_STATUS_CHANGE.getName(),
-                WorkOrderTypeEnum.DSL_TEMPLATE_STATUS_CHANGE.getMessage()));
-        orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.DSL_TEMPLATE_QUERY_LIMIT.getName(),
-                WorkOrderTypeEnum.DSL_TEMPLATE_QUERY_LIMIT.getMessage()));
-        orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.TEMPLATE_LOGIC_BLOCK_READ.getName(),
-                WorkOrderTypeEnum.TEMPLATE_LOGIC_BLOCK_READ.getMessage()));
-        orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.TEMPLATE_LOGIC_BLOCK_WRITE.getName(),
-                WorkOrderTypeEnum.TEMPLATE_LOGIC_BLOCK_WRITE.getMessage()));
         return Result.buildSucc(orderTypeVOList);
     }
     
@@ -115,7 +104,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     
     
     @Override
-    public Result<AriusWorkOrderInfoSubmittedVO> submit(WorkOrderDTO workOrderDTO) throws AdminOperateException {
+    public Result<AriusWorkOrderInfoSubmittedVO> submit(WorkOrderDTO workOrderDTO){
 
         String workOrderJsonString = JSON.toJSONString(workOrderDTO);
         LOGGER.info(
@@ -366,7 +355,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     @Override
-    public OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) throws NotFindSubclassException, ESOperateException {
+    public OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) throws NotFindSubclassException {
         if (AriusObjUtils.isNull(orderPO)) {
             return null;
         }

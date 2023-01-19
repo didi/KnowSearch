@@ -1,9 +1,7 @@
 package com.didi.arius.gateway.rest.tcp;
 
-import com.didi.arius.gateway.common.consts.QueryConsts;
-import com.didi.arius.gateway.common.metadata.ActionContext;
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
+import java.io.IOException;
+
 import org.elasticsearch.Version;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.bytes.ReleasablePagedBytesReference;
@@ -22,7 +20,8 @@ import org.jboss.netty.channel.ChannelFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import com.didi.arius.gateway.common.consts.QueryConsts;
+import com.didi.arius.gateway.common.metadata.ActionContext;
 
 
 /**

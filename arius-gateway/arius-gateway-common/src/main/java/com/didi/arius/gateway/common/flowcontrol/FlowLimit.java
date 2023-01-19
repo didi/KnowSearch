@@ -1,10 +1,10 @@
 package com.didi.arius.gateway.common.flowcontrol;
 
+import java.util.Random;
+
 import com.didi.arius.gateway.common.enums.FlowStatus;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-
-import java.util.Random;
 
 /**
 * @author weizijun

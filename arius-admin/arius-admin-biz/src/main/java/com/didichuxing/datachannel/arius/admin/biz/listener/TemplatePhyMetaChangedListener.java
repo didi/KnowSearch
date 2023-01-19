@@ -1,5 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.listener;
 
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.event.template.physical.metadata.PhysicalMetaDataModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.physical.metadata.PhysicalTemplateAliasModifyEvent;
@@ -7,8 +10,6 @@ import com.didichuxing.datachannel.arius.admin.common.event.template.physical.me
 import com.didichuxing.datachannel.arius.admin.common.event.template.physical.metadata.PhysicalTemplateSettingsModifyEvent;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
 
 @Component
 public class TemplatePhyMetaChangedListener implements ApplicationListener<PhysicalMetaDataModifyEvent> {

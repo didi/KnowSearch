@@ -1,12 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.biz.listener;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.event.index.ReBuildTomorrowIndexEvent;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
 
 @Component
 public class ReBuildTomorrowIndexListener implements ApplicationListener<ReBuildTomorrowIndexEvent> {

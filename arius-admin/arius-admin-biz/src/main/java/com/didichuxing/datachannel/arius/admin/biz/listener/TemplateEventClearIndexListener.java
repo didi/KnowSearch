@@ -1,5 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.biz.listener;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
@@ -8,13 +16,6 @@ import com.didichuxing.datachannel.arius.admin.common.exception.EventException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * 模板事件:删除模板之后，发布事件删除关联的列表

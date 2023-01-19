@@ -84,25 +84,6 @@ import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.ElasticsearchTimeoutException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Component
 public class ClusterLogicManagerImpl implements ClusterLogicManager {
@@ -251,10 +232,13 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
 
         if (StringUtils.isNotBlank(clearDTO.getDelQueryDsl())) {
+            Map<Integer, Integer> templateId2OperateProjectId = ConvertUtil.list2Map(indexTemplateService.listLogicTemplatesByIds
+                            (Lists.newArrayList(clearDTO.getLogicId())), IndexTemplate::getId, IndexTemplate::getProjectId);
             String delIndices = String.join(",", clearDTO.getDelIndices());
             operateRecordService.saveOperateRecordWithManualTrigger(
                     String.format("需要清理的索引列表:%s; 删除条件:%s", delIndices, clearDTO.getDelQueryDsl()),
-                    operator, resultIntegerTuple2.v2, clearDTO.getLogicId(), OperateTypeEnum.TEMPLATE_SERVICE_CLEAN);
+                    operator, resultIntegerTuple2.v2, clearDTO.getLogicId(), OperateTypeEnum.TEMPLATE_SERVICE_CLEAN,
+                    templateId2OperateProjectId.get(clearDTO.getLogicId()));
 
             return Result.buildSucWithTips("删除任务下发成功，请到sense中执行查询语句，确认删除进度");
         } else {
@@ -470,8 +454,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             if (result.success()) {
                 SpringTool.publish(new ClusterLogicEvent(logicClusterId, projectId));
                 //操作记录 集群下线
-                operateRecordService.saveOperateRecordWithManualTrigger(clusterLogic.getName(), operator, projectId, logicClusterId,
-                        OperateTypeEnum.MY_CLUSTER_OFFLINE);
+                operateRecordService.saveOperateRecordWithManualTrigger(clusterLogic.getName(), operator, projectId,
+                        logicClusterId, OperateTypeEnum.MY_CLUSTER_OFFLINE, projectId);
                 return Result.buildSuccWithTips(result.getData(),
                         String.format("逻辑集群%s下线成功", clusterLogic.getName()));
             }
@@ -515,7 +499,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             //操作记录 我的集群信息修改
             if (StringUtils.isNotBlank(param.getMemo())) {
                  operateRecordService.saveOperateRecordWithManualTrigger(String.format("%s 修改集群描述，%s-->%s", logic.getName(), logic.getMemo(),
-                         param.getMemo()), operator, projectId, param.getId(),OperateTypeEnum.MY_CLUSTER_INFO_MODIFY);
+                         param.getMemo()), operator, projectId, param.getId(),OperateTypeEnum.MY_CLUSTER_INFO_MODIFY, projectId);
             
             }
         }
@@ -526,7 +510,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     
     @Override
     public PaginationResult<ClusterLogicVO> pageGetClusterLogics(ClusterLogicConditionDTO condition,
-                                                                 Integer projectId) throws NotFindSubclassException, ESOperateException {
+                                                                 Integer projectId) throws NotFindSubclassException {
         BaseHandle baseHandle = handleFactory.getByHandlerNamePer(CLUSTER_LOGIC.getPageSearchType());
         if (baseHandle instanceof ClusterLogicPageSearchHandle) {
             ClusterLogicPageSearchHandle pageSearchHandle = (ClusterLogicPageSearchHandle) baseHandle;
@@ -589,14 +573,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             return Result.buildSucc(getUnitSize(nodeSpec.split("-")[2]) * count);
         }
         return Result.buildSucc(UNKNOWN_SIZE);
-    }
-
-    @Override
-    public Result<String> getClusterDataNodeSpec(Long clusterLogicId){
-        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
-        Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(clusterRegion.getId().intValue());
-        ClusterRoleHost clusterRoleHost = result.getData().stream().findFirst().orElse(null);
-        return Result.buildSucc(clusterRoleHost.getMachineSpec());
     }
 
     @Override
@@ -808,8 +784,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             return Result.buildFrom(voResult);
         }
         final Integer clusterPhyId = voResult.getData().getId();
-        final Result<List<ESClusterRoleHostWithRegionInfoVO>> listResult = clusterNodeManager.listDivide2ClusterNodeInfo(
-                clusterPhyId.longValue());
+        String regionDivideType = param.getDivideAttributeKey() == null ? "host" : param.getDivideAttributeKey();
+        final Result<List<ESClusterRoleHostWithRegionInfoVO>> listResult = clusterNodeManager.listDivide2ClusterNodeInfoWithDivideType(
+                clusterPhyId.longValue(), regionDivideType);
         if (listResult.failed()) {
             return Result.buildFrom(listResult);
         }
@@ -818,7 +795,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         final ClusterRegionWithNodeInfoDTO clusterRegionWithNodeInfoDTO =
                 new ClusterRegionWithNodeInfoDTOBuilder()
                 .withBindingNodeIds(regionIds).withName(param.getCluster()).withLogicClusterIds("-1")
-                .withPhyClusterName(param.getCluster()).build();
+                .withPhyClusterName(param.getCluster()).withDivideAttributeKey(param.getDivideAttributeKey()).build();
     
         final Result<List<Long>> result = clusterNodeManager.createMultiNode2Region(
                 Lists.newArrayList(clusterRegionWithNodeInfoDTO), AriusUser.SYSTEM.getDesc(), projectId);
@@ -1082,20 +1059,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * 5. 获取gateway地址
      */
     private void buildClusterNodeInfo(ClusterLogicVO clusterLogicVO) {
+
         //获取gateway地址
         clusterLogicVO.setGatewayAddress(esGatewayClient.getGatewayAddress());
-        //获取活跃分片数
-        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicVO.getId());
-        AtomicReference<Long> activeShardNum = new AtomicReference<>(0L);
-        if (Objects.nonNull(clusterRegion)){
-            Map<String/*node*/, Long /*shardNum*/>  nodeShardsNum = eSClusterNodeService.syncGetNode2ShardNumMap(clusterRegion.getPhyClusterName());
-            Result<List<ESClusterRoleHostVO>>  ESClusterRoleHostVORes =clusterNodeManager.listClusterLogicNode(Math.toIntExact(clusterLogicVO.getId()));
-            ESClusterRoleHostVORes.getData().stream().forEach(node->{
-                activeShardNum.updateAndGet(v -> v + nodeShardsNum.get(node.getNodeSet()));
-            });
-        }
-
-        clusterLogicVO.setActiveShardNum(activeShardNum.get());
     }
 
     private TupleTwo<Result<Void>, /*projectId*/Integer> checkIndices(List<String> delIndices, Integer logicId) {
@@ -1224,33 +1190,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             .collect(Collectors.toSet());
         clusterLogicStatis.setStatus(getClusterLogicStatus(statusSet));
         return clusterLogicStatis;
-    }
-
-    @Override
-    public Result<Void> deleteTemplatesIndicesInfo(Long clusterLogicId,Integer projectId,String operator) {
-        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(clusterLogicId,projectId);
-        if (Objects.isNull(clusterRegion)){
-            return Result.buildFail("该逻辑集群未绑定region!");
-        }
-        //获取物理模板
-        Result<List<IndexTemplatePhy>> indexTemplatePhys = indexTemplatePhyService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
-        //获取逻辑模板
-        Result<List<IndexTemplate>> indexTemplates = indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
-        List<String> indices = esIndexCatService.syncGetIndexListByProjectId(projectId,clusterLogic.getName());
-        if (indexTemplatePhys.getData().size() == 0&&indexTemplates.getData().size() == 0&&indices.size()==0){
-            return Result.buildFail("该逻辑集群下无数据!");
-        }
-        //删除数据
-        for (IndexTemplate indexTemplate:indexTemplates.getData()) {
-            try {
-                indexTemplateService.delTemplate(indexTemplate.getId(),operator);
-                indexTemplatePhyService.delTemplateByLogicId(indexTemplate.getId(),operator);
-            } catch (AdminOperateException e) {
-                return Result.buildFail("数据删除错误!");
-            }
-        }
-        return Result.buildSucc();
     }
 
     /**

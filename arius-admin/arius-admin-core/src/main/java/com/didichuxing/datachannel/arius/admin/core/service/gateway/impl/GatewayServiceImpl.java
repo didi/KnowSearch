@@ -1,9 +1,20 @@
 package com.didichuxing.datachannel.arius.admin.core.service.gateway.impl;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayClusterNode;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.GatewaySqlConstant;
@@ -16,19 +27,13 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.Gateway
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterNodeDAO;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.logi.op.manager.domain.component.entity.Component;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHost;
+import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
+
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * @author didi
@@ -44,9 +49,11 @@ public class GatewayServiceImpl implements GatewayService {
 
     @Autowired
     private ESGatewayClient       esGatewayClient;
-
+    
     @Autowired
-    private GatewayClusterNodeDAO gatewayClusterNodeDAO;
+    private GatewayClusterNodeDAO  gatewayClusterNodeDAO;
+    @Autowired
+    private ComponentDomainService componentDomainService;
 
     private Set<String>           clusterNames;
 
@@ -180,11 +187,37 @@ public class GatewayServiceImpl implements GatewayService {
     }
 
     private boolean recordHeartbeat(GatewayHeartbeat heartbeat) {
-        GatewayClusterNodePO gatewayClusterNodePO = new GatewayClusterNodePO();
+        GatewayClusterNodePO gatewayClusterNodePO = ConvertUtil.obj2Obj(heartbeat,GatewayClusterNodePO.class);
         gatewayClusterNodePO.setClusterName(heartbeat.getClusterName().trim());
         gatewayClusterNodePO.setHeartbeatTime(new Date());
-        gatewayClusterNodePO.setHostName(heartbeat.getHostName().trim());
-        gatewayClusterNodePO.setPort(heartbeat.getPort());
+        final GatewayClusterPO clusterPO = gatewayClusterDAO.getOneByName(
+            heartbeat.getClusterName().trim());
+        if (Objects.nonNull(clusterPO) && Objects.nonNull(clusterPO.getComponentId())
+            && clusterPO.getComponentId() > 0) {
+            final com.didiglobal.logi.op.manager.infrastructure.common.Result<Component> component = componentDomainService.getComponentById(
+                    clusterPO.getComponentId());
+            if (component.isSuccess() && Objects.nonNull(component.getData())) {
+                final List<ComponentHost> hostList = component.getData().getHostList();
+                if (CollectionUtils.isNotEmpty(hostList)) {
+                    hostList.stream().filter(
+                                    i -> StringUtils.equals(StringUtils.trim(heartbeat.getHostName()), i.getHost())).findFirst()
+                            .map(ComponentHost::getMachineSpec).ifPresent(gatewayClusterNodePO::setMachineSpec);
+                }
+            }
+        }
+        final List<GatewayClusterNodePO> gatewayClusterNodePOS = gatewayClusterNodeDAO.selectByClusterName(
+                heartbeat.getClusterName());
+        if (CollectionUtils.isNotEmpty(gatewayClusterNodePOS)){
+            final Optional<GatewayClusterNodePO> clusterNodePOOptional = gatewayClusterNodePOS.stream().filter(
+                    i -> StringUtils.equals(gatewayClusterNodePO.getClusterName(), i.getClusterName())
+                         && StringUtils.equals(gatewayClusterNodePO.getHostName(), i.getHostName()) && Objects.equals(
+                            gatewayClusterNodePO.getPort(), i.getPort())).findFirst();
+            if (clusterNodePOOptional.isPresent()) {
+                gatewayClusterNodePO.setId(clusterNodePOOptional.get().getId());
+                return gatewayClusterNodeDAO.update(gatewayClusterNodePO);
+            }
+    
+        }
         return gatewayClusterNodeDAO.recordGatewayNode(gatewayClusterNodePO) > 0;
     }
 

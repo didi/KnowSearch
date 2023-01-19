@@ -20,7 +20,11 @@ public class ESIndicesGetAllSettingRequest extends ESIndicesGetIndexRequest {
         String endPoint = "";
         if (defaultSettingFlag) {
             endPoint = restRequest.getEndpoint() + "?include_defaults=true&pretty";
+        }else{
+            endPoint = restRequest.getEndpoint();
         }
-        return new RestRequest("GET", endPoint, null);
+        RestRequest newRequest = new RestRequest("GET", endPoint, null);
+        newRequest.setParams(restRequest.getParams());
+        return newRequest;
     }
 }

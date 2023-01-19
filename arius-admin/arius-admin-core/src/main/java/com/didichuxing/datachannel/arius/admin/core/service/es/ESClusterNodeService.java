@@ -1,7 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESResponsePluginInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.BigIndexMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ClusterMemInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.PendingTask;
@@ -10,9 +15,6 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by linyunan on 2021-08-09
@@ -140,4 +142,13 @@ public interface ESClusterNodeService {
      * @param cluster
      * @return
      */
-    List<ClusterNodeStats> syncGetNodeStats(String cluster);}
+    List<ClusterNodeStats> syncGetNodeStats(String cluster);
+
+		/**
+		 * 从名为 clusterName 的集群中获取所有插件。
+		 *
+		 * @param clusterName 从中获取插件的集群的名称。
+		 * @return 对象的集合。
+		 */
+	Collection<ESResponsePluginInfo> syncGetPlugins(String clusterName) throws ESOperateException;
+}

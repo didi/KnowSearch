@@ -119,4 +119,5 @@ public class ESUserV3Controller {
     public Result<List<String>> listClusterByAppInClusterType(@PathVariable("projectId") Integer projectId) {
         return esUserManager.listClusterByAppInClusterType(projectId);
     }
+
 }

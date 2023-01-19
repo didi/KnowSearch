@@ -17,7 +17,7 @@ public class ClusterLogicStats {
     //总存储大小
     private Long totalFsBytes;
     // cpu使用率
-    private Double cpuUsedPresent;
+    private Double cpuUsedPrecent;
     //节点主机地址
     private String host;
     //节点名称

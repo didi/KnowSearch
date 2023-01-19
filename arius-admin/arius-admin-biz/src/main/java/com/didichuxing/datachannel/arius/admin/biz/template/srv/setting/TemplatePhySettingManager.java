@@ -29,10 +29,11 @@ public interface TemplatePhySettingManager {
      * @param cluster 集群名称
      * @param template 模板名称
      * @param settings 增量配置
+     * @param projectName
      * @return
      */
     boolean mergeTemplateSettings(Integer logicId, String cluster, String template, String operator,
-                                  Map<String, String> settings) throws AdminOperateException;
+                                  Map<String, String> settings, String projectName) throws AdminOperateException;
 
     /**
      * 更新模板settings

@@ -2,6 +2,13 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -10,12 +17,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.Temp
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.knowframework.security.util.HttpRequestUtil;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 
 /**
  * @author chengxiang
@@ -58,21 +62,4 @@ public class TemplateSrvController {
             HttpRequestUtil.getProjectId(request));
     }
 
-    @PutMapping("/{templateId}/block-write")
-    @ResponseBody
-    @ApiOperation(value = "写变更")
-    public Result<Void> write(HttpServletRequest request, @PathVariable Integer templateId,
-                              @RequestParam("status") Boolean status)  {
-        return templateSrvManager.blockWrite(templateId, status, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
-    }
-
-    @PutMapping("/{templateId}/block-read")
-    @ResponseBody
-    @ApiOperation(value = "读变更")
-    public Result<Void> read(HttpServletRequest request, @PathVariable Integer templateId,
-                             @RequestParam("status") Boolean status) {
-        return templateSrvManager.blockRead(templateId, status, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
-    }
 }

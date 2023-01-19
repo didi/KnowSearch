@@ -2,6 +2,17 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.index;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
 
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
@@ -15,6 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCell
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -29,19 +41,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * @author lyn
@@ -208,7 +207,14 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
 
         List<List<IndexCatCellPO>> lists = INDEX_CAT_INFO_COLLECTOR_FUTURE_UTIL.waitResult();
         List<IndexCatCellDTO> res =  Lists.newArrayList();
-        for (List<IndexCatCellPO> list : lists) { res.addAll(ConvertUtil.list2List(list, IndexCatCellDTO.class));}
+        for (List<IndexCatCellPO> list : lists) {
+            for (IndexCatCellPO indexCatCellPO:list) {
+                IndexCatCellDTO indexCatCellDTO = ConvertUtil.obj2Obj(indexCatCellPO,IndexCatCellDTO.class);
+                Optional.ofNullable(indexCatCellPO.getPriStoreSize()).map(SizeUtil::getUnitSize).ifPresent(indexCatCellDTO::setPriStoreSize);
+                Optional.ofNullable(indexCatCellPO.getStoreSize()).map(SizeUtil::getUnitSize).ifPresent(indexCatCellDTO::setStoreSize);
+                res.add(indexCatCellDTO);
+            }
+        }
 
         LOGGER.info("class=IndexCatInfoCollector||method=handleJobTask||timeOut={}", System.currentTimeMillis() - currentTimeMillis);
 

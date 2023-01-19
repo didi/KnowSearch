@@ -1,17 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.common.threadpool;
 
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
-import com.didiglobal.knowframework.observability.Observability;
-import com.didiglobal.knowframework.observability.conponent.thread.ContextExecutorService;
-import lombok.NoArgsConstructor;
-import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
-import org.springframework.util.ReflectionUtils;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.*;
+
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
+import org.springframework.util.ReflectionUtils;
+
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.observability.Observability;
+import com.didiglobal.knowframework.observability.conponent.thread.ContextExecutorService;
+
+import lombok.NoArgsConstructor;
 
 /**
  * admin执行任务的线程池
@@ -37,7 +39,7 @@ public class AriusTaskThreadPool {
         // 这里注意需要 LinkedBlockingQueue 的容量大小设置，默认为接近无限大,
         // 随着worker数量积增，会导致内存压力持续上升，若部署在容器中, 服务会被容器主动kill掉
         pool = Observability.wrap(new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(queueLen), springThreadFactory));
+            new LinkedBlockingQueue<>(queueLen), springThreadFactory));
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             pool.shutdown();

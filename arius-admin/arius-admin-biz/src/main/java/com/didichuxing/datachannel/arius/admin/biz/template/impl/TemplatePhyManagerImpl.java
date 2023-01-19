@@ -8,6 +8,16 @@ import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFacto
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SHARD_NUM;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_INDEX_INCLUDE_NODE_NAME;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
@@ -19,6 +29,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
@@ -36,23 +47,21 @@ import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTem
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
-import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl;
+import com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant;
 import com.didiglobal.knowframework.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.knowframework.elasticsearch.client.response.setting.template.TemplateConfig;
+import com.didiglobal.knowframework.elasticsearch.client.utils.JsonUtils;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
@@ -61,21 +70,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class TemplatePhyManagerImpl implements TemplatePhyManager {
@@ -129,6 +123,11 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     @Autowired
     private ProjectService                  projectService;
+    @Autowired
+    private ESTemplateService templateService;
+
+    @Autowired
+    private ClusterRegionService            clusterRegionService;
 
     @Override
     public boolean checkMeta() {
@@ -180,17 +179,15 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     }
 
     @Override
-    public void syncMeta(Long physicalId, int retryCount) throws ESOperateException {
+    public void syncMeta(Long physicalId, int retryCount, Map<String, TemplateConfig> templateConfigMap) throws ESOperateException {
 
         // 从数据库获取物理模板
         IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(physicalId);
         if (indexTemplatePhy == null) {
             return;
         }
-
-        // 从ES集群获取模板配置
-        TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(indexTemplatePhy.getCluster(),
-            indexTemplatePhy.getName());
+        // 获取到ES中的模版配置信息
+        TemplateConfig templateConfig = templateConfigMap.get(indexTemplatePhy.getName());
 
         if (templateConfig == null) {
             // es集群中还没有模板，创建
@@ -213,11 +210,11 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             Map<String, String> settings = templateConfig.getSetttings();
             String shardNum = settings.get(INDEX_SHARD_NUM);
 
-            // 校验shard个数
-            if (!String.valueOf(indexTemplatePhy.getShard()).equals(shardNum)) {
-                shardNum = String.valueOf(indexTemplatePhy.getShard());
+            // 校验shard个数:如果相等就跳过 无需进行一次es操作
+            if (String.valueOf(indexTemplatePhy.getShard()).equals(shardNum)) {
+                return;
             }
-
+            shardNum = String.valueOf(indexTemplatePhy.getShard());
             if (esTemplateService.syncUpdateShard(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(),
                 Integer.valueOf(shardNum), indexTemplatePhy.getShardRouting(), retryCount)) {
                 // 同步变化到ES集群
@@ -269,10 +266,11 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             return checkResult;
         } else {
             IndexTemplatePhy oldIndexTemplatePhy = indexTemplatePhyService.getTemplateById(param.getPhysicalId());
+            Integer projectIdByTemplateLogicId = indexTemplateService.getProjectIdByTemplateLogicId(oldIndexTemplatePhy.getLogicId());
             operateRecordService.saveOperateRecordWithManualTrigger(
                     String.format("模版 [%s] 升级版本：%s->%s", oldIndexTemplatePhy.getName(),
                             oldIndexTemplatePhy.getVersion(), param.getVersion()), operator, projectId,
-                    param.getLogicId(), OperateTypeEnum.TEMPLATE_SERVICE_UPGRADED_VERSION);
+                    param.getLogicId(), OperateTypeEnum.TEMPLATE_SERVICE_UPGRADED_VERSION, projectIdByTemplateLogicId);
 
         }
 
@@ -321,6 +319,20 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         tgtTemplateParam.setShard(param.getShard());
         tgtTemplateParam.setVersion(indexTemplatePhy.getVersion());
         tgtTemplateParam.setRegionId(param.getRegionId());
+        // 获取 master 中的集群然后进行 setting 和 mapping 的复制流程
+        Integer logicId = indexTemplatePhy.getLogicId();
+        Optional<IndexTemplatePhy> masterIndexTemplatePhyOption = indexTemplatePhyService.getTemplateByLogicId(logicId)
+                .stream().filter(ip -> ip.getRole().equals(MASTER.getCode())).findAny();
+        if (masterIndexTemplatePhyOption.isPresent()) {
+            IndexTemplatePhy masterIndexTemplatePhy = masterIndexTemplatePhyOption.get();
+            TemplateConfig templateConfig = templateService.syncGetTemplateConfig(masterIndexTemplatePhy.getCluster(),
+                    masterIndexTemplatePhy.getName());
+            if (Objects.isNull(templateConfig)){
+                return Result.buildFail("无法获取源集群模版信息");
+            }
+            tgtTemplateParam.setMappings(templateConfig.getMappings().toJson().toJSONString());
+            tgtTemplateParam.setSettings(JsonUtils.reFlat(templateConfig.getSetttings()).toJSONString());
+        }
 
         Result<Long> addResult = addTemplateWithoutCheck(tgtTemplateParam);
         if (addResult.failed()) {
@@ -328,9 +340,10 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
 
         // 记录操作记录
+        Integer projectIdByTemplateLogicId = indexTemplateService.getProjectIdByTemplateLogicId(logicId);
         operateRecordService.saveOperateRecordWithManualTrigger(
                 String.format("复制【%s】物理模板至【%s】", indexTemplatePhy.getCluster(), param.getCluster()), operator,
-                AuthConstant.SUPER_PROJECT_ID, indexTemplatePhy.getLogicId(), OperateTypeEnum.TEMPLATE_SERVICE);
+                AuthConstant.SUPER_PROJECT_ID, indexTemplatePhy.getLogicId(), OperateTypeEnum.TEMPLATE_SERVICE, projectIdByTemplateLogicId);
 
         if (esTemplateService.syncCopyMappingAndAlias(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(),
             tgtTemplateParam.getCluster(), tgtTemplateParam.getName(), 0)) {
@@ -361,10 +374,11 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (result.success()) {
             String editContent = AriusObjUtils.findChangedWithClear(oldIndexTemplatePhy, param);
             if (StringUtils.isNotBlank(editContent)) {
+                Integer projectIdByTemplateLogicId = indexTemplateService.getProjectIdByTemplateLogicId(oldIndexTemplatePhy.getLogicId());
                 operateRecordService.saveOperateRecordWithManualTrigger(
                         String.format("%s 变更:【%s】", TemplateOperateRecordEnum.CONFIG.getDesc(), editContent),
                         operator, AuthConstant.SUPER_PROJECT_ID, oldIndexTemplatePhy.getLogicId(),
-                        OperateTypeEnum.TEMPLATE_SERVICE);
+                        OperateTypeEnum.TEMPLATE_SERVICE, projectIdByTemplateLogicId);
 
             }
         }
@@ -954,7 +968,9 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (null != shard && shard > 0) {
             settingsMap.put(INDEX_SHARD_NUM, String.valueOf(shard));
         }
-
+        if (null != settings) {
+            settingsMap.putAll(AriusIndexTemplateSetting.flat(JSON.parseObject(settings)));
+        }
         if (null != regionId) {
             Result<List<ClusterRoleHost>> roleHostResult = clusterRoleHostService.listByRegionId(regionId);
             if (roleHostResult.failed()) {
@@ -964,16 +980,34 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             if (CollectionUtils.isEmpty(data)) {
                 throw new AdminOperateException(String.format("获取region[%d]节点列表为空, 请检查region中是否存在数据节点", regionId));
             }
-            List<String> nodeNames = data.stream().map(ClusterRoleHost::getNodeSet)
-                .filter(nodeName -> !AriusObjUtils.isBlank(nodeName)).distinct().collect(Collectors.toList());
-            settingsMap.put(TEMPLATE_INDEX_INCLUDE_NODE_NAME, String.join(",", nodeNames));
+            // 判断region的划分方式，根据划分方式配置settings
+            ClusterRegion region = clusterRegionService.getRegionById(regionId.longValue());
+            if(StringUtils.isBlank(region.getDivideAttributeKey())) {
+                buildSettingMapByDefault(settingsMap, data);
+            }else {
+                buildSettingMapByAttribute(settingsMap, data, region.getDivideAttributeKey());
+            }
         }
-
-        if (null != settings) {
-            settingsMap.putAll(AriusIndexTemplateSetting.flat(JSON.parseObject(settings)));
-        }
-
         return settingsMap;
+    }
+
+    private void buildSettingMapByDefault(Map<String, String> settingsMap, List<ClusterRoleHost> data) {
+        List<String> nodeNames = data.stream().map(ClusterRoleHost::getNodeSet)
+                .filter(nodeName -> !AriusObjUtils.isBlank(nodeName)).distinct().collect(Collectors.toList());
+        settingsMap.put(TEMPLATE_INDEX_INCLUDE_NODE_NAME, String.join(",", nodeNames));
+    }
+
+    private void buildSettingMapByAttribute(Map<String, String> settingsMap, List<ClusterRoleHost> data, String divideAttributeKey) {
+        // 构建attribute属性信息（根据划分方式attribute的属性构建）
+        Set<String> attributeValueSet = Sets.newHashSet();
+        List<String> attributesList = data.stream().map(ClusterRoleHost::getAttributes)
+                .filter(attributes -> !AriusObjUtils.isBlank(attributes)).distinct().collect(Collectors.toList());
+        for (String attributes : attributesList) {
+            Map<String, String> attributeMap = ConvertUtil.str2Map(attributes);
+            attributeValueSet.add(attributeMap.get(divideAttributeKey));
+        }
+        settingsMap.put(ESOperateConstant.TEMPLATE_INDEX_INCLUDE_ATTRIBUTE_PREFIX + divideAttributeKey,
+                String.join(",", attributeValueSet));
     }
 
     private Tuple</*存放冷存索引列表*/Set<String>, /*存放热存索引列表*/Set<String>> getHotAndColdIndexSet(

@@ -1,18 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.biz.listener;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
-import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
-import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateDeleteEvent;
-import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateModifyEvent;
-import com.didichuxing.datachannel.arius.admin.common.event.template.TemplateEvent;
+import com.didichuxing.datachannel.arius.admin.common.event.template.*;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.EventException;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
 
 /**
  * 处理模板pipeline
@@ -22,7 +19,7 @@ import org.springframework.stereotype.Component;
  * @date 2019-09-03
  */
 @Component
-public class TemplateEventPipelineListener implements ApplicationListener<TemplateEvent> {
+public class TemplateEventPipelineListener  extends ApplicationRetryListener<TemplateEvent> {
 
     private static final ILog LOGGER = LogFactory.getLog(TemplateEventPipelineListener.class);
 
@@ -35,7 +32,7 @@ public class TemplateEventPipelineListener implements ApplicationListener<Templa
      * @param event the event to respond to
      */
     @Override
-    public void onApplicationEvent(TemplateEvent event) {
+    public void onApplicationRetryEvent(TemplateEvent event) throws EventException {
         try {
             if (event instanceof PhysicalTemplateAddEvent) {
                 handlePhysicalTemplateAddEvent((PhysicalTemplateAddEvent) event);
@@ -48,29 +45,30 @@ public class TemplateEventPipelineListener implements ApplicationListener<Templa
             }
         } catch (Exception e) {
             LOGGER.error("class=TemplateEventPipelineProcessor||method=onApplicationEvent||errMsg={}", e.getMessage(),
-                e);
+                    e);
+            throw new EventException(e.getMessage(), e);
         }
     }
 
     /****************************************************** private methods ******************************************************/
     private void handlePhysicalTemplateModifyEvent(PhysicalTemplateModifyEvent event) throws ESOperateException {
         PhysicalTemplateModifyEvent e = event;
-        LOGGER.info(
-            "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateModifyEvent||templateName={}",
-            e.getOldTemplate().getName());
+
         if (templatePipelineManager.editFromTemplatePhysical(e.getOldTemplate(), e.getNewTemplate(),
             e.getLogicWithPhysical())) {
             LOGGER.info(
                 "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateModifyEvent||templateName={}||msg=succ",
                 e.getOldTemplate().getName());
+            return;
         } else {
             LOGGER.warn(
                 "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateModifyEvent||templateName={}||msg=fail",
                 e.getOldTemplate().getName());
+            throw new ESOperateException("editFromTemplatePhysical exception!");
         }
     }
 
-    private void handleLogicTemplateModifyEvent(LogicTemplateModifyEvent event) {
+    private void handleLogicTemplateModifyEvent(LogicTemplateModifyEvent event) throws ESOperateException {
         LogicTemplateModifyEvent e = event;
         final Result<Void> result = templatePipelineManager.editFromTemplateLogic(e.getOldTemplate(),
             e.getNewTemplate());
@@ -78,10 +76,12 @@ public class TemplateEventPipelineListener implements ApplicationListener<Templa
             LOGGER.info(
                 "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=LogicTemplateModifyEvent||templateName={}||msg=succ",
                 e.getOldTemplate().getName());
+            return;
         } else {
             LOGGER.warn(
                 "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=LogicTemplateModifyEvent||templateName={}||msg=fail",
                 e.getOldTemplate().getName());
+            throw new ESOperateException("editFromTemplateLogic exception!");
         }
     }
 
@@ -92,10 +92,12 @@ public class TemplateEventPipelineListener implements ApplicationListener<Templa
             LOGGER.info(
                 "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateDeleteEvent||templateName={}||msg=succ",
                 e.getDelTemplate().getName());
+            return;
         } else {
             LOGGER.warn(
                 "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateDeleteEvent||templateName={}||msg={}",
                 e.getDelTemplate().getName(),result.getMessage());
+            throw new ESOperateException("deletePipeline exception!");
         }
     }
 
@@ -105,10 +107,12 @@ public class TemplateEventPipelineListener implements ApplicationListener<Templa
             LOGGER.info(
                 "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateAddEvent||templateName={}||msg=succ",
                 e.getNewTemplate().getName());
+            return;
         } else {
             LOGGER.warn(
                 "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateAddEvent||templateName={}||msg=fail",
                 e.getNewTemplate().getName());
+            throw new ESOperateException("createPipeline exception！");
         }
     }
 }

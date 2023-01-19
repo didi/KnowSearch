@@ -65,5 +65,9 @@ public class OperateRecordVO extends BaseVO {
      */
     @ApiModelProperty("项目")
     private String  projectName;
-
+    /**
+     * 应用id
+     */
+    @ApiModelProperty("资源所属应用")
+    private String  operateProjectName;
 }

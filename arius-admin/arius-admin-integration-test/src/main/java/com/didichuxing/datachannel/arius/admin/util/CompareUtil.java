@@ -1,5 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.util;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+import org.apache.commons.io.FileUtils;
+import org.springframework.util.ResourceUtils;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -8,13 +17,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import org.apache.commons.io.FileUtils;
-import org.springframework.util.ResourceUtils;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
 
 public class CompareUtil {
     private static final ILog LOGGER = LogFactory.getLog(CompareUtil.class);

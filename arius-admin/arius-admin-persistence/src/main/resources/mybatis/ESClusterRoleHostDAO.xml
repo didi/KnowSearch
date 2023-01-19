@@ -18,12 +18,13 @@
         <result column="machine_spec"    jdbcType="VARCHAR"   property="machineSpec"/>
         <result column="region_id"       jdbcType="INTEGER"   property="regionId" />
         <result column="attributes"      jdbcType="LONGVARCHAR" property="attributes" />
+        <result column="component_host_id"      jdbcType="BIGINT" property="componentHostId" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         id, role_cluster_id, hostname,ip, cluster,`port`,`status`,`role`,rack,node_set,create_time, update_time, delete_flag, machine_spec
-        ,region_id, attributes
+        ,region_id, attributes,component_host_id
     </sql>
 
     <!-- 保存 角色对应主机 -->
@@ -31,10 +32,11 @@
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into es_cluster_role_host_info
-        (role_cluster_id, hostname,ip, cluster,`role`, `port`, `status`, node_set, machine_spec, region_id, attributes)
+        (role_cluster_id, hostname,ip, cluster,`role`, `port`, `status`, node_set, machine_spec,
+        region_id, attributes,component_host_id)
         values
         (#{roleClusterId}, #{hostname}, #{ip}, #{cluster},#{role},#{port},#{status}, #{nodeSet}, #{machineSpec}, #{regionId}
-        ,#{attributes})
+        ,#{attributes},#{componentHostId})
     </insert>
 
     <!-- 根据ID  查询详情 -->
@@ -90,6 +92,7 @@
             <if test="machineSpec != null">and machine_spec = #{machineSpec}</if>
             <if test="regionId != null">and region_id = #{regionId}</if>
             <if test="attributes != null">and attributes = #{attributes}</if>
+            <if test="componentHostId != null">AND component_host_id=#{componentHostId}</if>
             and delete_flag = 0
         </trim>
     </select>
@@ -108,6 +111,16 @@
         where cluster = #{cluster} and delete_flag = 0;
     </select>
 
+    <select id="listByClusters" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_role_host_info
+        where delete_flag = 0
+        <foreach collection="list" separator="," item="item" close=")" open="and cluster in (">
+            #{item}
+        </foreach>
+    </select>
+
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRoleHostPO">
         update es_cluster_role_host_info
         <trim prefix="set" prefixOverrides=",">
@@ -123,6 +136,7 @@
             <if test="machineSpec != null">, machine_spec = #{machineSpec}</if>
             <if test="regionId != null">, region_id = #{regionId}</if>
             <if test="attributes != null">, attributes = #{attributes}</if>
+            <if test="componentHostId != null">, component_host_id=#{componentHostId}</if>
         </trim>
         where id = #{id} and delete_flag = 0;
     </update>
@@ -172,10 +186,15 @@
         where cluster = #{cluster}
     </update>
 
-    <update id="restoreByHostNameAndRoleId">
-        update es_cluster_role_host_info
-        set delete_flag = 0, status = 1
-        where hostname = #{hostname} and role_cluster_id = #{roleId} and delete_flag = 1;
+    <update id="restoreByHostNameAndRoleIdAndRoleAndPort">
+        UPDATE es_cluster_role_host_info
+        SET delete_flag = 0,
+            status      = 1
+        WHERE hostname = #{hostname}
+          AND role_cluster_id = #{roleId}
+          AND port = #{port}
+          AND role = #{role}
+          AND delete_flag = 1;
     </update>
 
     <select id="listAll" resultMap="BaseResultMap">
@@ -214,10 +233,15 @@
     </delete>
 
 
-    <select id="getDeleteHostByHostNameAnRoleId" parameterType="map" resultMap="BaseResultMap">
+    <select id="getDeleteHostByHostNameAnRoleIdAndRoleAndPort" parameterType="map" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from es_cluster_role_host_info where hostname = #{hostname} and role_cluster_id = #{roleId} and delete_flag = 1;
+        FROM es_cluster_role_host_info
+        WHERE hostname = #{hostname}
+          AND role_cluster_id = #{roleId}
+          AND port = #{port}
+          AND role = #{role}
+          AND delete_flag = 1;
     </select>
 
     <select id="getPodNumberByRoleId" resultType="java.lang.Integer">
@@ -239,6 +263,7 @@
             <if test="machineSpec != null">, machine_spec = #{machineSpec}</if>
             <if test="regionId != null">, region_id = #{regionId}</if>
             <if test="attributes != null">, attributes = #{attributes}</if>
+            <if test="componentHostId != null">, component_host_id=#{componentHostId}</if>
              ,delete_flag = 0
         </trim>
         where id = #{id}
@@ -271,16 +296,6 @@
         
         
         and delete_flag = '0'
-    </select>
-
-    <select id="listByClusters" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from es_cluster_role_host_info
-        where delete_flag = 0
-        <foreach collection="list" separator="," item="item" close=")" open="and cluster in (">
-            #{item}
-        </foreach>
     </select>
     
 </mapper>

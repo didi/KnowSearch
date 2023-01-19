@@ -1,9 +1,23 @@
 package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil.COMMON;
+import static com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil.TIME;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.NodeMetrics;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -20,18 +34,6 @@ import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
-import static com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil.COMMON;
-import static com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil.TIME;
 
 /**
  * Created by linyunan on 3/11/22
@@ -77,7 +79,7 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
         .init("NodeDashBoardCollector", 10, 10, 100);
 
     @Override
-    public void collectSingleCluster(String cluster, long startTime) {
+    public void collectSingleCluster(String cluster, long startTime) throws ESOperateException {
         List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getNodesByCluster(cluster);
         if (CollectionUtils.isEmpty(clusterRoleHostList)) {
             return;

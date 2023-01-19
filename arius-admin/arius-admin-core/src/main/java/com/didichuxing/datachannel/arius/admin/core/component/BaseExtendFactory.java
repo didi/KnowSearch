@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 

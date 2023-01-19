@@ -1,11 +1,12 @@
 package com.didi.arius.gateway.rest.http;
 
-import com.didi.arius.gateway.rest.controller.es.RestCommonController;
-import com.didiglobal.knowframework.log.LogFactory;
 import org.elasticsearch.http.HttpChannel;
 import org.elasticsearch.http.HttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.didi.arius.gateway.rest.controller.es.RestCommonController;
+import com.didiglobal.knowframework.log.LogFactory;
 
 @Component("nettyHttpController")
 public class NettyHttpController {
@@ -19,7 +20,6 @@ public class NettyHttpController {
     public NettyHttpController() {
         // pass
     }
-
     public void dispatchRequest(HttpRequest request, HttpChannel channel) {
         try {
             LogFactory.setUniqueFlag();
@@ -41,7 +41,7 @@ public class NettyHttpController {
             restHandler = restCommonController;
         }
 
-        if(restHandler != null){
+        if (restHandler != null) {
             restHandler.dispatchRequest(request, channel);
         }
     }

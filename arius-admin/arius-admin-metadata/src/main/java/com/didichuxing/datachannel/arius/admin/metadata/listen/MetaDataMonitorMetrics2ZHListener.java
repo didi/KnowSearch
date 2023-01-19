@@ -1,5 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.metadata.listen;
 
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.lucene.util.NamedThreadFactory;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeStats;
@@ -7,19 +19,6 @@ import com.didichuxing.datachannel.arius.admin.common.event.metrics.*;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.observability.Observability;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.lucene.util.NamedThreadFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 招行内部，把这个实现移动zh-extend中去

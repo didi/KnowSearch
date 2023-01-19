@@ -1,13 +1,24 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION_INNER_NUMBER;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION_NUMBER;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
+
+import java.net.InetAddress;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.compress.utils.Sets;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESResponsePluginInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentOnIp;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
@@ -37,23 +48,6 @@ import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.compress.utils.Sets;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class ESClusterServiceImpl implements ESClusterService {
@@ -140,7 +134,12 @@ public class ESClusterServiceImpl implements ESClusterService {
     public Map<String, List<String>> syncGetNode2PluginsMap(String cluster) throws ESOperateException {
         return esClusterDAO.getNode2PluginsMap(cluster, 3);
     }
-
+    
+    @Override
+    public List<ESResponsePluginInfo> syncGetPlugins(String cluster) throws ESOperateException {
+        return esClusterDAO.getPlugins(cluster);
+    }
+    
     /**
      * 获取某个集群内索引别名到索引名称的映射
      *

@@ -1,5 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.page.OperateRecordPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.project.OperateRecordManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -22,18 +35,6 @@ import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.didiglobal.knowframework.security.service.UserService;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
 
 /**
  * 操作记录
@@ -183,5 +184,6 @@ public class OperateRecordManagerImpl implements OperateRecordManager {
         operateRecordDTO.setTriggerWayId(TriggerWayEnum.MANUAL_TRIGGER.getCode());
         operateRecordDTO.setUserOperation(operator);
         operateRecordDTO.setProjectName(projectName);
+        operateRecordDTO.setOperateProjectName(projectName);
     }
 }

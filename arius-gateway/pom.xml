@@ -27,9 +27,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <lucene.version>5.5.0.0.0.2-SNAPSHOT</lucene.version>
         <es.version>2.3.3</es.version>
         <log4j2.version>2.17.1</log4j2.version>
+        <oshi-core.version>3.5.0</oshi-core.version>
+        <kf-log.version>2.0.4</kf-log.version>
+        <kf-elasticsearch-sql.version>1.0.1</kf-elasticsearch-sql.version>
+        <kf-dsl-prase.version>1.0.1</kf-dsl-prase.version>
+        <kf-metrices.version>1.0.1</kf-metrices.version>
     </properties>
 
     <dependencies>
@@ -55,20 +59,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j2</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>log4j-to-slf4j</artifactId>
-                    <groupId>org.apache.logging.log4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>log4j-slf4j-impl</artifactId>
-                    <groupId>org.apache.logging.log4j</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
@@ -89,14 +79,20 @@
             </exclusions>
         </dependency>
         <dependency>
-            <version>2.0.0</version>
             <groupId>io.github.knowstack</groupId>
             <artifactId>kf-log</artifactId>
+            <version>${kf-log.version}</version>
         </dependency>
     </dependencies>
 
     <dependencyManagement>
         <dependencies>
+            <!-- oshi 方法获取 cpu -->
+            <dependency>
+                <groupId>com.github.oshi</groupId>
+                <artifactId>oshi-core</artifactId>
+                <version>${oshi-core.version}</version>
+            </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
@@ -177,7 +173,7 @@
             <dependency>
                 <groupId>io.github.knowstack</groupId>
                 <artifactId>kf-elasticsearch-sql</artifactId>
-                <version>1.0.0</version>
+                <version>${kf-elasticsearch-sql.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.elasticsearch</groupId>
@@ -199,9 +195,9 @@
 
             <!-- 依赖DSL 解析模块 -->
             <dependency>
-                <version>1.0.0</version>
                 <groupId>io.github.knowstack</groupId>
                 <artifactId>kf-dsl-prase</artifactId>
+                <version>${kf-dsl-prase.version}</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>elasticsearch</artifactId>
@@ -220,14 +216,13 @@
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-log4j12</artifactId>
                     </exclusion>
-
                 </exclusions>
             </dependency>
 
             <dependency>
-                <version>1.0.0</version>
                 <groupId>io.github.knowstack</groupId>
                 <artifactId>kf-metrices</artifactId>
+                <version>${kf-metrices.version}</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>log4j</artifactId>

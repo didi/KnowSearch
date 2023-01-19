@@ -232,8 +232,6 @@ public class AriusConfigConstant {
     public static final String LOGIC_TEMPLATE_TIME_FORMAT_LIST_DEFAULT_VALUE           = "yyyy-MM-dd HH:mm:ss,yyyy-MM-dd HH:mm:ss.SSS,yyyy-MM-dd HH:mm:ss.SSS Z," +
             "                                                                               yyyy-MM-dd'T'HH:mm:ss,yyyy-MM-dd'T'HH:mm:ss.SSS,yyyy-MM-dd'T'HH:mm:ssZ,yyyy-MM-dd'T'HH:mm:ss.SSSZ,yyyy/MM/dd HH:mm:ss,epoch_second,epoch_millis,yyyy-MM-dd";
 
-    public static final String LOGIC_TEMPLATE_BUSINESS_TYPE_LIST_DEFAULT_VALUE         = "系统数据,日志数据,业务上报数据,RDS数据,离线导入数据";
-
     public static final String CLUSTER_NODE_SPECIFICATION_LIST_DEFAULT_VALUE           = "16c-64g-3072g,16c-48g-3072g";
 
     public static final String SUPER_APP_DEFALT_DSL_COMMAND_VALUE           = "#获取节点状态\nGET /_nodes/stats,\n" +
@@ -323,4 +321,6 @@ public class AriusConfigConstant {
      * 集群大shard阈值定义
      */
     public static final double BIG_SHARD                                                                      = 10d;
+
+    public static final String CLUSTER_REGION_UNSUPPORTED_DIVIDE_TYPE                                         = "cluster.region.unsupported_divide_type";
 }

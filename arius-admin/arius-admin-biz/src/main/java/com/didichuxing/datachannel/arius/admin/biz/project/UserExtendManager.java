@@ -1,10 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.project;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserQueryExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserExtendVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserWithPwVO;
 import com.didiglobal.knowframework.security.common.PagingResult;
 import com.didiglobal.knowframework.security.common.dto.user.UserBriefQueryDTO;
 import com.didiglobal.knowframework.security.common.dto.user.UserDTO;
@@ -12,7 +13,7 @@ import com.didiglobal.knowframework.security.common.entity.user.User;
 import com.didiglobal.knowframework.security.common.vo.role.AssignInfoVO;
 import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import com.didiglobal.knowframework.security.common.vo.user.UserVO;
-import java.util.List;
+import com.didiglobal.knowframework.security.exception.KfSecurityException;
 
 /**
  * 用户扩展管理器
@@ -59,18 +60,16 @@ public interface UserExtendManager {
      * @param userId    用户id
      * @param projectId
      * @return 用户详情
-     * @throws LogiSecurityException 用户不存在
+     * @throws KfSecurityException 用户不存在
      */
-    Result<UserWithPwVO> getUserDetailByUserId(Integer userId, Integer projectId) throws Exception;
+    Result<UserVO> getUserDetailByUserId(Integer userId, Integer projectId);
 
     /**
      * 根据用户id删除用户
      * @param userId
-     * @param projectId
-     * @param operator
      * @return
      */
-    Result<Void> deleteByUserId(Integer userId, Integer projectId, String operator);
+    Result<Void> deleteByUserId(Integer userId);
 
     /**
      * 获取用户简要信息

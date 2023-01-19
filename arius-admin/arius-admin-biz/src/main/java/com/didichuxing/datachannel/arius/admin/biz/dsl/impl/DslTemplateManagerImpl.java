@@ -2,6 +2,12 @@ package com.didichuxing.datachannel.arius.admin.biz.dsl.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.DSL_TEMPLATE;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
 import com.didichuxing.datachannel.arius.admin.biz.dsl.DslTemplateManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.DslTemplatePageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -22,10 +28,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.metrics.UserConfigSe
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslTemplateService;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 /**
  * @author cjm
@@ -53,7 +55,7 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
                 operateRecordService.saveOperateRecordWithManualTrigger(
                         String.format("queryLimit %s->%s", entry.getDslTemplateMd5(), entry.getQueryLimit()), operator,
                         projectId, entry.getProjectIdDslTemplateMd5(),
-                        OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT);
+                        OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT, entry.getProjectId());
             }
 
         }
@@ -68,7 +70,7 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
        Boolean succeed = dslTemplateService.updateDslTemplateStatus(projectId, dslTemplateMd5);
         if (Boolean.TRUE.equals(succeed)) {
             operateRecordService.saveOperateRecordWithManualTrigger("变更状态:" + dslTemplateMd5, operator, projectId,
-                    dslTemplateMd5, OperateTypeEnum.QUERY_TEMPLATE_DISABLE);
+                    dslTemplateMd5, OperateTypeEnum.QUERY_TEMPLATE_DISABLE, projectId);
         }
         return Result.build(succeed);
     }

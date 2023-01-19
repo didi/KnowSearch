@@ -1,12 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.common;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Optional;
+
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Optional;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -54,12 +56,20 @@ public class OperateRecord {
      */
     private String  projectName;
     /**
+     * 项目id
+     */
+    private Integer  projectId;
+    /**
      * 业务id
      */
     private String  bizId;
+    /**
+     * 用户操作的应用，即资源所属应用
+     */
+    private String  operateProjectName;
 
     public OperateRecord(String projectName, OperateTypeEnum operateTypeEnum, TriggerWayEnum triggerWayEnum,
-                         String content, String userOperation, Object bizId) {
+                         String content, String userOperation, Object bizId, String operateProjectName) {
         this.moduleId = operateTypeEnum.getModule().getCode();
         this.operateId = operateTypeEnum.getCode();
         this.content = content;
@@ -68,10 +78,11 @@ public class OperateRecord {
         this.triggerWayId = triggerWayEnum.getCode();
         this.projectName = projectName;
         this.bizId = Optional.ofNullable(bizId).map(String::valueOf).orElse(null);
+        this.operateProjectName = operateProjectName;
     }
 
     public OperateRecord(String projectName, OperateTypeEnum operateTypeEnum, TriggerWayEnum triggerWayEnum,
-                         String content, String userOperation) {
+                         String content, String userOperation, String operateProjectName) {
         this.moduleId = operateTypeEnum.getModule().getCode();
         this.operateId = operateTypeEnum.getCode();
         this.content = content;
@@ -79,6 +90,7 @@ public class OperateRecord {
         this.operateTime = Calendar.getInstance().getTime();
         this.triggerWayId = triggerWayEnum.getCode();
         this.projectName = projectName;
+        this.operateProjectName = operateProjectName;
     }
 
     public OperateRecord(OperateTypeEnum operateTypeEnum, TriggerWayEnum triggerWayEnum, String content,
@@ -129,6 +141,7 @@ public class OperateRecord {
         setOperateTime(Calendar.getInstance().getTime());
         Optional.ofNullable(builder.triggerWayEnum).map(TriggerWayEnum::getCode).ifPresent(this::setTriggerWayId);
         setProjectName(builder.projectName);
+        setProjectId(builder.projectId);
         setBizId(builder.bizId);
     }
 
@@ -140,6 +153,8 @@ public class OperateRecord {
 
         private String          projectName;
         private String          bizId;
+        private Integer         projectId;
+        private String  operateProjectName;
 
         public Builder operationTypeEnum(OperateTypeEnum operationType) {
             this.operateTypeEnum = operationType;
@@ -161,8 +176,23 @@ public class OperateRecord {
             return this;
         }
 
+        public Builder operateProject(ProjectBriefVO project) {
+            Optional.ofNullable(project).ifPresent(projectBriefVO -> {
+                this.operateProjectName = projectBriefVO.getProjectName();
+            });
+            return this;
+        }
+
+        public Builder operateProjectName(String operateProjectName) {
+            this.operateProjectName = operateProjectName;
+            return this;
+        }
+
         public Builder project(ProjectBriefVO project) {
-            this.projectName = Optional.ofNullable(project).map(ProjectBriefVO::getProjectName).orElse(null);
+            Optional.ofNullable(project).ifPresent(projectBriefVO -> {
+                this.projectName = projectBriefVO.getProjectName();
+                this.projectId   = projectBriefVO.getId();
+            });
             return this;
         }
 

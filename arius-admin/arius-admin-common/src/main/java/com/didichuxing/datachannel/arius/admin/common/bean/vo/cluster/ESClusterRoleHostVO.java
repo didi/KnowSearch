@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -80,4 +79,8 @@ public class ESClusterRoleHostVO extends BaseVO {
 
     @ApiModelProperty("磁盘使用大小(byte)")
     private Long    diskUsage;
+
+    @ApiModelProperty("region划分类型对应的attribute值")
+    private String  attributeValue;
+    
 }

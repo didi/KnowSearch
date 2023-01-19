@@ -1,14 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.stats;
 
+import java.util.Map;
+import java.util.Objects;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
 import com.didiglobal.knowframework.log.util.HostUtil;
 import com.google.common.collect.Maps;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
-import java.util.Objects;
 
 @Data
 @NoArgsConstructor

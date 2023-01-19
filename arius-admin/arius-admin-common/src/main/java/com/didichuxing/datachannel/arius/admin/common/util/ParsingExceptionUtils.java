@@ -1,5 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import java.io.IOException;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.util.EntityUtils;
+import org.elasticsearch.client.ResponseException;
+import org.elasticsearch.common.util.concurrent.UncategorizedExecutionException;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -8,16 +19,6 @@ import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientExce
 import com.didiglobal.knowframework.elasticsearch.client.model.exception.ESAlreadyExistsException;
 import com.didiglobal.knowframework.elasticsearch.client.model.exception.ESIndexNotFoundException;
 import com.didiglobal.knowframework.elasticsearch.client.model.exception.ESIndexTemplateMissingException;
-import java.io.IOException;
-import java.net.ConnectException;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.util.EntityUtils;
-import org.elasticsearch.client.ResponseException;
-import org.elasticsearch.common.util.concurrent.UncategorizedExecutionException;
 
 /**
  *  `ParsingExceptionUtils` 是一个实用程序类，提供解析异常的方法

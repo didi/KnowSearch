@@ -1,13 +1,13 @@
 package com.didi.arius.gateway.elasticsearch.client.response.query.query;
 
+import java.util.*;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didi.arius.gateway.elasticsearch.client.model.ESActionResponse;
 import com.didi.arius.gateway.elasticsearch.client.response.query.query.aggs.ESAggrMap;
 import com.didi.arius.gateway.elasticsearch.client.response.query.query.hits.ESHit;
 import com.didi.arius.gateway.elasticsearch.client.response.query.query.hits.ESHits;
-
-import java.util.*;
 
 public class ESQueryResponse extends ESActionResponse {
     private static final String HITS_STR = "hits";

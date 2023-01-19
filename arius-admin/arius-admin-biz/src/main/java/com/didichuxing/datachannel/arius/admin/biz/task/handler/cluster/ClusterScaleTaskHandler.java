@@ -24,10 +24,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.Getter;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,7 +90,7 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
             Map<String, Integer> segmentsOfIpByCluster = null;
             try {
                 segmentsOfIpByCluster = esClusterService
-                        .synGetSegmentsOfIpByCluster(content.getPhyClusterName());
+                    .synGetSegmentsOfIpByCluster(content.getPhyClusterName());
             } catch (ESOperateException e) {
                 LOGGER.error("class=ClusterScaleTaskHandler||method=validateHostParam||errMsg=fail to get get segments of ip by cluster",
                         e);
@@ -102,8 +99,8 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
 
             for (ESClusterRoleHost esClusterRoleHost : content.getClusterRoleHosts()) {
                 if (esClusterRoleHost.getRole().equals(ESClusterNodeRoleEnum.DATA_NODE.getDesc())
-                        && segmentsOfIpByCluster.containsKey(esClusterRoleHost.getHostname())
-                        && !segmentsOfIpByCluster.get(esClusterRoleHost.getHostname()).equals(0)) {
+                    && segmentsOfIpByCluster.containsKey(esClusterRoleHost.getHostname())
+                    && !segmentsOfIpByCluster.get(esClusterRoleHost.getHostname()).equals(0)) {
                     return Result.buildFail("数据节点上存在分片，请迁移分片之后再进行该节点的缩容");
                 }
             }

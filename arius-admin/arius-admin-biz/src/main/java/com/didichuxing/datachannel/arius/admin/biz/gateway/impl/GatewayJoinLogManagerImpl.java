@@ -1,13 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.biz.gateway.impl;
 
-import com.didichuxing.datachannel.arius.admin.biz.dsl.impl.DslTemplateManagerImpl;
+import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.GATEWAY_JOIN;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayJoinLogManager;
-import com.didichuxing.datachannel.arius.admin.biz.page.DslTemplatePageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.page.GatewayJoinPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayJoinQueryDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.GatewayJoin;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayJoinVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -15,17 +19,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectConfigService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.GatewayJoinLogService;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.DSL_TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.GATEWAY_JOIN;
 
 @Component
 public class GatewayJoinLogManagerImpl implements GatewayJoinLogManager {

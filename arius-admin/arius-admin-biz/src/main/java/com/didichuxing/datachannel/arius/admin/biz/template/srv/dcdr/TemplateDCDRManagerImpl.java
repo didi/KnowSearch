@@ -3,6 +3,23 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.MASTER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.SLAVE;
 
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
@@ -41,13 +58,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusTaskThreadPool;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
@@ -61,27 +72,6 @@ import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 索引DCDR服务实现
@@ -266,10 +256,12 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             indexTemplatePO.setHasDCDR(true);
             indexTemplatePO.setCheckPointDiff(0L);
             indexTemplateService.update(indexTemplatePO);
+            Map<Integer, Integer> templateId2OperateProjectId = ConvertUtil.list2Map(indexTemplateService.listLogicTemplatesByIds
+                    (Lists.newArrayList(templateId)), IndexTemplate::getId, IndexTemplate::getProjectId);
             operateRecordService.saveOperateRecordWithManualTrigger(
                     String.format("创建 DCDR 链路，主集群：%s，从集群：%s", sourceClusterPhyResult.getData().getCluster(),
                             targetClusterPhyResult.getData().getCluster()), operator, projectId, templateId,
-                    OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING);
+                    OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING, templateId2OperateProjectId.get(templateId));
         }
         return result;
     }
@@ -294,9 +286,11 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         if (checkResult.failed()) {
             return checkResult;
         }
-
+        //查询模板对应的所属项目id
+        Map<Integer, Integer> templateId2OperateProjectId = ConvertUtil.list2Map(indexTemplateService.listLogicTemplatesByIds
+                (Lists.newArrayList(templateId)), IndexTemplate::getId, IndexTemplate::getProjectId);
         return deletePhyDCDR(createDCDRMeta(templateId,isDCDRForce), operator,
-                projectId);
+                projectId, templateId2OperateProjectId);
     }
 
     /**
@@ -353,10 +347,11 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
      * @param param     参数
      * @param operator  操作人
      * @param projectId
+     * @param templateId2OperateProjectId
      * @return result
      */
     @Override
-    public Result<Void> deletePhyDCDR(TemplatePhysicalDCDRDTO param, String operator, Integer projectId) throws ESOperateException {
+    public Result<Void> deletePhyDCDR(TemplatePhysicalDCDRDTO param, String operator, Integer projectId, Map<Integer, Integer> templateId2OperateProjectId) throws ESOperateException {
         Result<Void> checkDCDRResult = checkDCDRParam(param, OperationEnum.DELETE_DCDR);
 
         if (checkDCDRResult.failed()) {
@@ -380,7 +375,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                 }
                 operateRecordService.saveOperateRecordWithManualTrigger("replicaCluster:" + param.getReplicaClusters(),
                         operator, projectId, templatePhysicalPO.getLogicId(),
-                        OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING);
+                        OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING, templateId2OperateProjectId.get(templatePhysicalPO.getLogicId()));
                 return Result.buildSucc();
             }
         }
@@ -423,13 +418,16 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             if (workTaskResult.failed()) {
                 return Result.buildFrom(workTaskResult);
             }
-
+            List<Integer> dcdrTasksTemplateIds = dcdrTasksDetail.getDcdrSingleTemplateMasterSlaveSwitchDetailList().stream()
+                    .map(DCDRSingleTemplateMasterSlaveSwitchDetail::getTemplateId).map(Long::intValue).collect(Collectors.toList());
+            Map<Integer, IndexTemplate> logicTemplatesMapByIds = indexTemplateService.getLogicTemplatesMapByIds(dcdrTasksTemplateIds);
             //2.5 记录操作
             for (DCDRSingleTemplateMasterSlaveSwitchDetail dcdrTask : dcdrTasksDetail
                 .getDcdrSingleTemplateMasterSlaveSwitchDetailList()) {
                 operateRecordService.saveOperateRecordWithManualTrigger(String.format("【%s】%s",
-                                indexTemplateService.getNameByTemplateLogicId(dcdrTask.getTemplateId().intValue()), dcdrType),
-                        operator, projectId, dcdrTask.getTemplateId(), OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING);
+                                logicTemplatesMapByIds.get(dcdrTask.getTemplateId().intValue()).getName(), dcdrType),
+                        operator, projectId, dcdrTask.getTemplateId(), OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING,
+                        logicTemplatesMapByIds.get(dcdrTask.getTemplateId().intValue()).getProjectId());
                 
             }
 
@@ -1068,8 +1066,9 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         dcdrDTO.setPhysicalIds(Arrays.asList(masterTemplate.getId()));
         dcdrDTO.setReplicaClusters(Arrays.asList(slaveTemplate.getCluster()));
         dcdrDTO.setDeleteIndexDcdr(false);
-
-        Result<Void> delTemDCDRResult = deletePhyDCDR(dcdrDTO, operator, AuthConstant.SUPER_PROJECT_ID);
+        Map<Integer, Integer> templateId2OperateProjectId = ConvertUtil.list2Map(indexTemplateService.listLogicTemplatesByIds
+                (Lists.newArrayList(masterTemplate.getLogicId())), IndexTemplate::getId, IndexTemplate::getProjectId);
+        Result<Void> delTemDCDRResult = deletePhyDCDR(dcdrDTO, operator, AuthConstant.SUPER_PROJECT_ID ,templateId2OperateProjectId);
         //删除失败了需要抛出信息
         if (delTemDCDRResult.failed()) {
             return Result.buildFrom(delTemDCDRResult);

@@ -1,5 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.METRICS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TIMESTAMP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.AggMetricsTypeEnum.SUM;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.TopMetrics;
@@ -17,19 +31,6 @@ import com.didiglobal.knowframework.elasticsearch.client.response.query.query.ag
 import com.didiglobal.knowframework.elasticsearch.client.response.query.query.aggs.ESAggrMap;
 import com.didiglobal.knowframework.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Lists;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.METRICS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TIMESTAMP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.AggMetricsTypeEnum.SUM;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum.INDEXING_RATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.*;
 
 @Component
 public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
@@ -480,20 +481,20 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                                                                            long startTime, long endTime) {
         List<String> metricsLimit = new ArrayList<>();
         metrics.forEach(metric -> {
-            if (metric.contains(BREAKERS)&&metric.contains(LIMIT_SIZE_IN_BYTES)) {
+            if (metric.contains(BREAKERS)) {
                 metricsLimit.add(metric.replaceAll(LIMIT_SIZE_IN_BYTES, ESTIMATED_SIZE_IN_BYTES));
             }
         });
-        metricsLimit.addAll(metrics);
+        metrics.addAll(metricsLimit);
         String interval = MetricsUtils.getInterval(endTime - startTime);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_CLUSTER_PHY_SINGLE_NODE_NODE,
-            clusterPhyName, nodeName, startTime, endTime, interval, buildAggsDSL(metricsLimit, aggType));
+            clusterPhyName, nodeName, startTime, endTime, interval, buildAggsDSL(metrics, aggType));
 
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
 
         return gatewayClient.performRequestWithRouting(metadataClusterName, nodeName, realIndexName, TYPE, dsl,
-            s -> fetchSingleAggMetrics(s, metricsLimit, nodeName), 3);
+            s -> fetchSingleAggMetrics(s, metrics, nodeName), 3);
     }
 
     /**

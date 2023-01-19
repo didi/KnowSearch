@@ -1,14 +1,29 @@
 
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.elasticsearch.common.unit.ByteSizeUnit;
+import org.elasticsearch.common.unit.ByteSizeValue;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.impl.ClusterPhyManagerImpl;
@@ -16,13 +31,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -34,7 +43,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
@@ -55,28 +63,6 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didiglobal.knowframework.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.collect.Lists;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import org.apache.commons.beanutils.BeanUtils;
-import org.elasticsearch.common.unit.ByteSizeUnit;
-import org.elasticsearch.common.unit.ByteSizeValue;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
 
 @ActiveProfiles("test")
 @ExtendWith({ SpringExtension.class })
@@ -161,7 +147,7 @@ class ClusterPhyManagerTest {
         indexTemplate = new IndexTemplate(LOGIC_TEMPLATE_ID, "name", 0, 0, DATE_FORMAT, "dataCenter", 0, 0, 0,
            "dateField", "dateFieldFormat", "idField",
             "routingField", EXPRESSION, 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0,
-            0.0,1);
+            0.0,1,0);
         indexTemplatePhy = new IndexTemplatePhy(PHYSICAL_ID, 0, TEMPLATE, EXPRESSION, CLUSTER, "rack", 0, 0, 0, 1, 0,
             "config", 0);
         indexTemplatePhyList = Collections.singletonList(indexTemplatePhy);
@@ -177,33 +163,33 @@ class ClusterPhyManagerTest {
             "httpAddress", 0, "tags", "code", "idc", 0, "esVersion", "imageName", "nsTree", "plugIds", 0L, esConfigDTO,
             Collections.singletonList(pluginDTO), Collections.singletonList(esClusterRoleDTO),
             Collections.singletonList(esClusterRoleHostDTO), 0, "machineSpec", "operator",  "password",
-            0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0, "gatewayUrl","","","",false,-1);
+            0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0, "gatewayUrl",null,null,null,null);
 
-        clusterPhyVO = new ClusterPhyVO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
-            "httpWriteAddress", 0, "tags", "dataCenter", 0, "machineSpec", 0, "esVersion", "imageName", null,
-            Collections.singletonList(
-                new ESClusterRoleVO(0L, 0L, "roleClusterName", "role", 0, 0, "machineSpec", Lists.newArrayList())),
-            0.0, 0L, 0L, "password", "idc", 0, "writeAction", 0, 0L, "platformType", 0, "gatewayUrl",null,null ,null,null,null,null);
+//        clusterPhyVO = new ClusterPhyVO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
+//            "httpWriteAddress", 0, "tags", "dataCenter", 0, "machineSpec", 0, "esVersion", "imageName", null,
+//            Collections.singletonList(
+//                new ESClusterRoleVO(0L, 0L, "roleClusterName", "role", 0, 0, "machineSpec", Lists.newArrayList())),
+//            0.0, 0L, 0L, "password", "idc", 0, "writeAction", 0, 0L, "platformType", 0, "gatewayUrl",null,null ,null);
 
         clusterRoleHost = new ClusterRoleHost(0L, 0L, "hostname", "ip", CLUSTER, "port", 0, 0, "rack", "nodeSet",
-            "machineSpec", 0, "attributes");
+            "machineSpec", 0, "attributes",null);
         clusterRoleInfo = new ClusterRoleInfo(0L, 0L, "roleClusterName", "role", 0, 0, "machineSpec", "esVersion", 0,
             "plugIds", false, Collections.singletonList(clusterRoleHost));
         clusterPhy = new ClusterPhy(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName",
             "nsTree", 0, "machineSpec", "password", "creator",
             Collections.singletonList(clusterRoleInfo), Collections.singletonList(clusterRoleHost), 0, "writeAction", 0,
-            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl",null,null,null);
+            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl",null,null,null,null);
         privateClusterPhy = new ClusterPhy(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName",
             "nsTree", 0, "machineSpec", "password", "creator",
             Collections.singletonList(clusterRoleInfo), Collections.singletonList(clusterRoleHost), 0, "writeAction", 0,
-            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl",null,null,null);
+            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl",null,null,null,null);
         exclusiveClusterPhy = new ClusterPhy(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName",
             "nsTree", 0, "machineSpec", "password", "creator",
             Collections.singletonList(clusterRoleInfo), Collections.singletonList(clusterRoleHost), 0, "writeAction", 0,
-            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl",null,null,null);
+            0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl",null,null,null,null);
         clusterPhyList = Collections.singletonList(clusterPhy);
         esClusterStatsResponse = new ESClusterStatsResponse("status", 0L, 0L, 0L,new ByteSizeValue(0L, ByteSizeUnit.BYTES), 0L, 0L, 0L, 0L, 0L, 0L,0L, 0L,
             new ByteSizeValue(0L, ByteSizeUnit.BYTES), new ByteSizeValue(0L, ByteSizeUnit.BYTES),
@@ -211,17 +197,17 @@ class ClusterPhyManagerTest {
             new ByteSizeValue(0L, ByteSizeUnit.BYTES), new ByteSizeValue(0L, ByteSizeUnit.BYTES),
             new ByteSizeValue(0L, ByteSizeUnit.BYTES));
         clusterRoleInfos = Collections.singletonList(clusterRoleInfo);
-        clusterPhyVOWithNotRole = new ClusterPhyVO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
-            "httpWriteAddress", 0, "tags", "dataCenter", 0, "machineSpec", 0, "esVersion", "imageName", null,
-            Lists.newArrayList(), 0.0, 0L, 0L, "password", "idc", 0, "writeAction", 0, 0L, "platformType", 1,
-            "gatewayUrl", null,null,null,null,null,null);
+//        clusterPhyVOWithNotRole = new ClusterPhyVO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
+//            "httpWriteAddress", 0, "tags", "dataCenter", 0, "machineSpec", 0, "esVersion", "imageName", null,
+//            Lists.newArrayList(), 0.0, 0L, 0L, "password", "idc", 0, "writeAction", 0, 0L, "platformType", 1,
+//            "gatewayUrl", null,null,null);
 
         clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0,
            "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        region = new ClusterRegion(0L, "name", "logicClusterIds", CLUSTER, "config");
+        region = new ClusterRegion(0L, "name", "logicClusterIds", CLUSTER, "config","");
 
         roleHostList = Collections.singletonList(new ClusterRoleHost(0L, 0L, "hostname", "ip", CLUSTER, "port", 0, 0,
-            "rack", "nodeSet", "machineSpec", -1, "attributes"));
+            "rack", "nodeSet", "machineSpec", -1, "attributes",null));
         regions = Collections.singletonList(region);
     }
 
@@ -257,7 +243,7 @@ class ClusterPhyManagerTest {
 
         clusterPhyManager.syncTemplateMetaData(CLUSTER, 0);
 
-        verify(mockTemplatePhyManager).syncMeta(PHYSICAL_ID, 0);
+        verify(mockTemplatePhyManager).syncMeta(PHYSICAL_ID, 0, new HashMap<>());
     }
 
     @Test
@@ -268,7 +254,7 @@ class ClusterPhyManagerTest {
 
         clusterPhyManager.syncTemplateMetaData(CLUSTER, 0);
 
-        verify(mockTemplatePhyManager, times(0)).syncMeta(PHYSICAL_ID, 0);
+        verify(mockTemplatePhyManager, times(0)).syncMeta(PHYSICAL_ID, 0, new HashMap<>());
 
     }
 
@@ -276,7 +262,7 @@ class ClusterPhyManagerTest {
     void testSyncTemplateMetaData_TemplatePhyManagerThrowsESOperateException() throws Exception {
         when(mockIndexTemplatePhyService.getNormalTemplateByCluster(CLUSTER)).thenReturn(indexTemplatePhyList);
 
-        doThrow(ESOperateException.class).when(mockTemplatePhyManager).syncMeta(PHYSICAL_ID, 0);
+        doThrow(ESOperateException.class).when(mockTemplatePhyManager).syncMeta(PHYSICAL_ID, 0, new HashMap<>());
 
         clusterPhyManager.syncTemplateMetaData(CLUSTER, 0);
     }
@@ -497,7 +483,7 @@ class ClusterPhyManagerTest {
     void testJoinCluster() throws InvocationTargetException, IllegalAccessException, AdminTaskException, ESOperateException {
         Integer projectId = 1;
         ClusterJoinDTO param = new ClusterJoinDTO(0, 0, "clusterPhyName", "esVersion", Lists.newArrayList(),
-                "desc", "passwd", 4, "{\"createSource\":1}", "cn", "acs", 1,null,null,null,null,null);
+            "desc", "passwd", 4, "{\"createSource\":1}", "cn", "acs", 1,"127.0.0.1","");
         ESClusterRoleHostDTO roleHostDTO = new ESClusterRoleHostDTO(0L, 0L, "hostname", "", CLUSTER, "port", false, 0,
             0, "nodeSet", 0, "attributes", "16c-32g-1t");
         assertEquals(Result.buildParamIllegal("参数为空").getMessage(),
@@ -601,7 +587,7 @@ class ClusterPhyManagerTest {
             .thenReturn("7.6.0.1401");
         param.setDataCenter("");
         when(mockClusterRoleHostService.collectClusterNodeSettings(CLUSTER)).thenReturn(true);
-        when(mockClusterPhyService.createCluster(Mockito.any(), Mockito.anyString())).thenReturn(Result.buildSucc());
+        when(mockClusterPhyService.createCluster(Mockito.any())).thenReturn(Result.buildSucc());
         assertTrue(clusterPhyManager.joinCluster(param, "admin", projectId).success());
         verify(mockEsOpClient).connect(CLUSTER);
         verify(mockClusterRoleHostService).collectClusterNodeSettings(CLUSTER);
@@ -655,11 +641,7 @@ class ClusterPhyManagerTest {
             .thenReturn(Result.buildFail(false));
         Integer projectId = 1;
         final Result<Boolean> result;
-        try {
-            result = clusterPhyManager.updatePhyClusterDynamicConfig(param, "operator", projectId);
-        } catch (ESOperateException e) {
-            throw new RuntimeException(e);
-        }
+        result = clusterPhyManager.updatePhyClusterDynamicConfig(param, "operator", projectId);
     
         assertEquals(expectedResult, result);
     }
@@ -711,7 +693,7 @@ class ClusterPhyManagerTest {
 
     @Test
     void testAddCluster() {
-        when(mockClusterPhyService.createCluster(clusterPhyDTO, "operator")).thenReturn(Result.buildBoolen(true));
+        when(mockClusterPhyService.createCluster(clusterPhyDTO)).thenReturn(Result.buildBoolen(true));
         assertEquals(Result.buildBoolen(true), clusterPhyManager.addCluster(clusterPhyDTO, "operator", 0));
     }
 
@@ -809,12 +791,12 @@ class ClusterPhyManagerTest {
         // Setup
         final List<ClusterRoleInfo> expectedResult = Arrays.asList(new ClusterRoleInfo(0L, 0L, "roleClusterName",
             "role", 0, 0, "machineSpec", "esVersion", 0, "plugIds", false, Arrays.asList(new ClusterRoleHost(0L, 0L,
-                "hostname", "ip", CLUSTER, "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes"))));
+                "hostname", "ip", CLUSTER, "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes",null))));
 
         // Configure ClusterRoleService.getAllRoleClusterByClusterId(...).
         final List<ClusterRoleInfo> clusterRoleInfos = Arrays.asList(new ClusterRoleInfo(0L, 0L, "roleClusterName",
             "role", 0, 0, "machineSpec", "esVersion", 0, "plugIds", false, Arrays.asList(new ClusterRoleHost(0L, 0L,
-                "hostname", "ip", CLUSTER, "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes"))));
+                "hostname", "ip", CLUSTER, "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes",null))));
         when(mockClusterRoleService.getAllRoleClusterByClusterId(0)).thenReturn(clusterRoleInfos);
 
         // Run the test

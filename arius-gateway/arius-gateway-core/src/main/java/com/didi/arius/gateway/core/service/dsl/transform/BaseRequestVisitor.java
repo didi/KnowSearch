@@ -1,5 +1,9 @@
 package com.didi.arius.gateway.core.service.dsl.transform;
 
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -20,8 +24,6 @@ import com.didiglobal.knowframework.dsl.parse.dsl.ast.root.Timeout;
 import com.didiglobal.knowframework.dsl.parse.dsl.visitor.basic.OutputVisitor;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import org.apache.commons.lang3.StringUtils;
-import java.util.Map;
 
 public class BaseRequestVisitor extends OutputVisitor {
 

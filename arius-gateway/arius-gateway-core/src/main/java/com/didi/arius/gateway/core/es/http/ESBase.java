@@ -1,9 +1,38 @@
 package com.didi.arius.gateway.core.es.http;
 
+import static com.didi.arius.gateway.common.consts.RestConsts.FIELDS;
+import static com.didi.arius.gateway.common.consts.RestConsts.INDEX;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.elasticsearch.action.*;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.MultiGetRequest;
+import org.elasticsearch.action.search.SearchAction;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.client.ElasticsearchClient;
+import org.elasticsearch.common.Strings;
+import org.elasticsearch.common.bytes.BytesReference;
+import org.elasticsearch.common.xcontent.XContentHelper;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.rest.BytesRestResponse;
+import org.elasticsearch.rest.RestRequest;
+import org.elasticsearch.rest.RestStatus;
+import org.elasticsearch.search.fetch.source.FetchSourceContext;
+import org.elasticsearch.threadpool.ThreadPool;
+import org.nlpcn.es4sql.domain.Select;
+import org.nlpcn.es4sql.exception.SqlParseException;
+import org.nlpcn.es4sql.parse.ElasticSqlExprParser;
+import org.nlpcn.es4sql.parse.SqlParser;
+import org.nlpcn.es4sql.query.AggregationQueryAction;
+import org.nlpcn.es4sql.query.DefaultQueryAction;
+import org.nlpcn.es4sql.query.QueryAction;
+import org.nlpcn.es4sql.query.SqlElasticRequestBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.expr.SQLQueryExpr;
@@ -40,34 +69,6 @@ import com.didiglobal.knowframework.log.LogFactory;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.elasticsearch.action.*;
-import org.elasticsearch.action.get.GetRequest;
-import org.elasticsearch.action.get.MultiGetRequest;
-import org.elasticsearch.action.search.SearchAction;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.client.ElasticsearchClient;
-import org.elasticsearch.common.Strings;
-import org.elasticsearch.common.bytes.BytesReference;
-import org.elasticsearch.common.xcontent.XContentHelper;
-import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.rest.BytesRestResponse;
-import org.elasticsearch.rest.RestRequest;
-import org.elasticsearch.rest.RestStatus;
-import org.elasticsearch.search.fetch.source.FetchSourceContext;
-import org.elasticsearch.threadpool.ThreadPool;
-import org.nlpcn.es4sql.domain.Select;
-import org.nlpcn.es4sql.exception.SqlParseException;
-import org.nlpcn.es4sql.parse.ElasticSqlExprParser;
-import org.nlpcn.es4sql.parse.SqlParser;
-import org.nlpcn.es4sql.query.AggregationQueryAction;
-import org.nlpcn.es4sql.query.DefaultQueryAction;
-import org.nlpcn.es4sql.query.QueryAction;
-import org.nlpcn.es4sql.query.SqlElasticRequestBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import static com.didi.arius.gateway.common.consts.RestConsts.FIELDS;
-import static com.didi.arius.gateway.common.consts.RestConsts.INDEX;
 
 /**
 * @author weizijun
@@ -76,7 +77,6 @@ import static com.didi.arius.gateway.common.consts.RestConsts.INDEX;
 */
 public abstract class ESBase {
 	protected static final ILog logger = LogFactory.getLog(ESBase.class);
-	
 	@Autowired
 	protected DslAggsAnalyzerService dslAggsAnalyzerService;
 	@Autowired
@@ -93,7 +93,7 @@ public abstract class ESBase {
 
 	@Autowired
 	protected AppService appService;
-	
+
 	protected ESGetResponse getVersionResponse(int indexVersion, RestRequest request, ESClient client) {
         ESMultiGetRequest multiGetRequest = new ESMultiGetRequest();
         multiGetRequest.refresh(request.param("refresh"));
@@ -118,7 +118,7 @@ public abstract class ESBase {
         	item.parent(request.param("parent"));
         	item.fields(sFields);
         	item.fetchSourceContext(defaultFetchSource);
-        	
+
         	multiGetRequest.add(item);
         }
 
@@ -130,12 +130,12 @@ public abstract class ESBase {
         	if (inResponse == null) {
         		continue;
         	}
-        	
+
         	if (inResponse.isExists()) {
         		getResponse = inResponse;
         		break;
         	}
-        	
+
         	getResponse = inResponse;
         }
 
@@ -252,7 +252,7 @@ public abstract class ESBase {
         	item.routing(request.routing());
         	item.fields(request.fields());
         	item.fetchSourceContext(request.fetchSourceContext());
-        	
+
         	multiGetRequest.add(item);
         }
 
@@ -273,12 +273,12 @@ public abstract class ESBase {
 
 		return fetchFields;
 	}
-	
+
 	private void formFetchFields(BytesReference source, FetchFields fetchFields) {
 		if (source == null || source.length() == 0) {
             return ;
         }
-		
+
 		try {
 			String sourceStr = XContentHelper.convertToJson(source, true);
 			formFetchFields(sourceStr, fetchFields);
@@ -286,28 +286,28 @@ public abstract class ESBase {
 			logger.warn("source_convertToJson_error||source={}||exception={}", source, Convert.logExceptionStack(e));
 		}
 	}
-	
+
 	private void formFetchFields(String source, FetchFields fetchFields) {
 		if (source == null || source.length() == 0) {
             return ;
         }
-        
+
     	JsonParser jsonParser = new JsonParser();
     	JsonObject jsonObject = jsonParser.parse(source).getAsJsonObject();
-    	
+
     	JsonElement sourceContext = jsonObject.get("_source");
-    	
+
     	if (sourceContext != null) {
     		FetchSourceContext fetchSourceContext = Convert.parseFetchSourceContext(sourceContext);
-    	    fetchFields.setFetchSourceContext(fetchSourceContext);	
+    	    fetchFields.setFetchSourceContext(fetchSourceContext);
     	}
-    	
-    	
+
+
     	JsonElement fields = jsonObject.get(FIELDS);
     	if (fields != null) {
     		String[] strFields = Convert.parseFields(fields);
     		fetchFields.setFields(strFields);
-    		
+
     		for (String field : strFields) {
     			if (field.equals(QueryConsts.MESSAGE_FIELD)) {
     				fetchFields.setHasMessageField(true);

@@ -1,7 +1,15 @@
 package com.didi.arius.gateway.remote;
 
+import static org.junit.Assert.assertEquals;
+
 import com.alibaba.fastjson.JSON;
-import com.didi.arius.gateway.remote.response.*;
+import com.didi.arius.gateway.remote.response.ActiveCountResponse;
+import com.didi.arius.gateway.remote.response.AppListResponse;
+import com.didi.arius.gateway.remote.response.DSLTemplateListResponse;
+import com.didi.arius.gateway.remote.response.DataCenterListResponse;
+import com.didi.arius.gateway.remote.response.DynamicConfigListResponse;
+import com.didi.arius.gateway.remote.response.IndexTemplateListResponse;
+import com.didi.arius.gateway.remote.response.TemplateInfoListResponse;
 import com.didi.arius.gateway.rest.AriusGatewayApplication;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,8 +17,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AriusGatewayApplication.class)
@@ -76,7 +82,7 @@ public class AriusAdminRemoteServiceTests {
 
     @Test
     public void testHeartbeat() {
-        ariusAdminRemoteService.heartbeat(CLUSTER, "127.0.0.1", 8200);
+        ariusAdminRemoteService.heartbeat(CLUSTER, "127.0.0.1", 8200, 1);
     }
 
     @Test

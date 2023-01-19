@@ -1,15 +1,22 @@
 package com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_CHAR_SET;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MAX;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MIN;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NOT_EXIST;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_SAVE_BY_DAY_EXPIRE_MAX;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_SAVE_BY_MONTH_EXPIRE_MIN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
+
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -23,13 +30,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateType;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateTypePO;
@@ -39,16 +40,11 @@ import com.didichuxing.datachannel.arius.admin.common.constant.LevelEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
@@ -68,21 +64,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class IndexTemplateServiceImpl implements IndexTemplateService {
@@ -121,7 +102,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     @Autowired
     private ClusterRegionService               clusterRegionService;
 
-    private Cache<String, List<IndexTemplate>> templateListCache = CacheBuilder.newBuilder()
+    private final Cache<String, List<IndexTemplate>> templateListCache = CacheBuilder.newBuilder()
+        .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
+    private final Cache<String, Map<Integer, IndexTemplate>> INDEX_TEMPLATE_SERVICE_CACHE = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
 
     /**
@@ -512,7 +495,17 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return listAllLogicTemplates().stream()
             .collect(Collectors.toMap(IndexTemplate::getId, indexTemplateLogic -> indexTemplateLogic));
     }
-
+    
+    @Override
+    public Map<Integer, IndexTemplate> getAllLogicTemplatesMapWithCache() {
+        try {
+            return (Map<Integer, IndexTemplate>) INDEX_TEMPLATE_SERVICE_CACHE.get(
+                "getAllLogicTemplatesMapWithCache", this::getAllLogicTemplatesMap);
+        } catch (ExecutionException e) {
+            return getAllLogicTemplatesMap();
+        }
+    }
+    
     @Override
     public List<IndexTemplate> listLogicTemplatesByIds(List<Integer> logicTemplateIds) {
         if (CollectionUtils.isEmpty(logicTemplateIds)) {
@@ -1393,7 +1386,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (param.getProjectId() != null && !projectService.checkProjectExist(param.getProjectId())) {
             return Result.buildParamIllegal("所属应用不存在");
         }
-        if (param.getDataType() != null && DataTypeEnum.UNKNOWN.equals(DataTypeEnum.valueOf(param.getDataType()))) {
+        if (param.getDataType() != null && UNKNOW_DATA_TYPE.getCode().equals(param.getDataType())) {
             return Result.buildParamIllegal("数据类型非法");
         }
         if (param.getShardNum() != null && param.getShardNum() <= 0) {

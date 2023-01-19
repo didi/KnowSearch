@@ -37,6 +37,10 @@ public class IndexCatCell {
     private Integer      templateId;
     private Boolean      platformCreateFlag;
     private List<String> aliases;
+    private Boolean      translogAsync;
+    private Integer      priorityLevel;
+
+    private List<String> indexTypeList;
 
     public String getKey() {
         return cluster + "@" + index;

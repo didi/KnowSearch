@@ -1,14 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.index;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.didiglobal.knowframework.elasticsearch.client.gateway.search.response.Shards;
 import com.didiglobal.knowframework.elasticsearch.client.model.ESActionResponse;
 import com.didiglobal.knowframework.elasticsearch.client.response.indices.stats.IndexNodes;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class ESIndexStatsResponse extends ESActionResponse {
 

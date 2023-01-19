@@ -1,16 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.task.resource;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
 import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.job.annotation.Task;
 import com.didiglobal.knowframework.job.common.TaskResult;
 import com.didiglobal.knowframework.job.core.job.Job;
 import com.didiglobal.knowframework.job.core.job.JobContext;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 @Task(name = "ClusterNodeSettingCollectorRandomTask", description = "同步节点配置任务", cron = "0 0/3 * * * ?", autoRegister = true)
 public class ClusterNodeSettingCollectorRandomTask extends BaseConcurrentClusterTask implements Job {

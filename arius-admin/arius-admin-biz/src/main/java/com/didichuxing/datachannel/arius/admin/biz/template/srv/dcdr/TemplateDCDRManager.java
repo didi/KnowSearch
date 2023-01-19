@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateD
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * DCDR服务
@@ -57,10 +58,11 @@ public interface TemplateDCDRManager {
      * @param param
      * @param operator
      * @param projectId
+     * @param templateId2OperateProjectId
      * @return
      * @throws ESOperateException
      */
-    Result<Void> deletePhyDCDR(TemplatePhysicalDCDRDTO param, String operator, Integer projectId) throws ESOperateException;
+    Result<Void> deletePhyDCDR(TemplatePhysicalDCDRDTO param, String operator, Integer projectId, Map<Integer, Integer> templateId2OperateProjectId) throws ESOperateException;
 
     /**
      * 批量DCDR主从切换

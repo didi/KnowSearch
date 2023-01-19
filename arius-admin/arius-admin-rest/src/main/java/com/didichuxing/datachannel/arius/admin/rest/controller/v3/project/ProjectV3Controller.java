@@ -2,6 +2,14 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.project;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_SECURITY;
 
+import java.util.List;
+import java.util.Objects;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import com.didichuxing.datachannel.arius.admin.biz.project.ProjectConfigManager;
 import com.didichuxing.datachannel.arius.admin.biz.project.ProjectExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -16,24 +24,11 @@ import com.didiglobal.knowframework.security.common.PagingResult;
 import com.didiglobal.knowframework.security.common.vo.project.ProjectDeleteCheckVO;
 import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import com.didiglobal.knowframework.security.util.HttpRequestUtil;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
-import java.util.Objects;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 项目v3控制器
@@ -216,6 +211,13 @@ public class ProjectV3Controller {
     public Result<List<UserBriefVO>> getProjectBriefByUserId(HttpServletRequest request) {
 
         return projectExtendManager.listUserListByProjectId(HttpRequestUtil.getProjectId(request));
+    }
+
+    @GetMapping("/check-cluster-bind-gateway")
+    @ResponseBody
+    @ApiOperation(value = "获取当前操作项目下的集群是否绑定gateway", tags = "")
+    public Result<Boolean> projectExistenceGatewayCluster(HttpServletRequest request) {
+        return projectExtendManager.projectExistenceGatewayCluster(HttpRequestUtil.getProjectId(request));
     }
 
 }

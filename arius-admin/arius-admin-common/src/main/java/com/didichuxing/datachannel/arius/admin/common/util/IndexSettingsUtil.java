@@ -1,5 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.compress.utils.Sets;
+import org.apache.commons.lang3.StringUtils;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONValidator;
 import com.alibaba.fastjson.JSONValidator.Type;
@@ -8,12 +15,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.ESSettingConstant;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.knowframework.elasticsearch.client.utils.JsonUtils;
-import org.apache.commons.compress.utils.Sets;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 public class IndexSettingsUtil {
     final static Set<String> ignoreSettings = Sets.newHashSet(

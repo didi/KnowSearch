@@ -1,15 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.task.metadata;
 
-import com.didiglobal.knowframework.job.core.consensual.ConsensualEnum;
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.MonitorJobHandler;
 import com.didiglobal.knowframework.job.annotation.Task;
 import com.didiglobal.knowframework.job.common.TaskResult;
+import com.didiglobal.knowframework.job.core.consensual.ConsensualEnum;
 import com.didiglobal.knowframework.job.core.job.Job;
 import com.didiglobal.knowframework.job.core.job.JobContext;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 @Task(name = "ESNodeAndIndicesMetricsCollectorBroadcastTask", description = "节点和索引指标信息采集调度任务", cron = "0 0/1 * * * ? *", autoRegister = true, consensual = ConsensualEnum.BROADCAST)
 public class ESNodeAndIndicesMetricsCollectorBroadcastTask implements Job {

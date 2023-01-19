@@ -1,5 +1,24 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_FAILED;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
+
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.elasticsearch.common.StopWatch;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
@@ -28,27 +47,8 @@ import com.didiglobal.knowframework.observability.conponent.thread.ContextExecut
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.elasticsearch.common.StopWatch;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cglib.core.ReflectUtils;
-import org.springframework.stereotype.Component;
-import org.springframework.util.ReflectionUtils;
-
-import javax.annotation.PostConstruct;
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_FAILED;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.*;
 
 /**
  * 通过查数据库观察每个节点采集es集群名称
@@ -528,11 +528,11 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
                     new LinkedBlockingQueue<>(100),
                     new BasicThreadFactory.Builder().namingPattern("monitor-cluster-data-collect-%d").build()));
         }
+
         long blockSize = Optional.ofNullable(ReflectionUtils.findField(ContextExecutorService.class, "delegate")).map(field -> {
             field.setAccessible(true);
             return (ThreadPoolExecutor) ReflectionUtils.getField(field, threadPool);
         }).map(ThreadPoolExecutor::getQueue).map(Collection::size).orElse(0);
-
         if (blockSize > WARN_BLOCK_SIZE) {
             LOGGER.warn(
                 "class=MonitorJobHandler||method=checkThreadPool||blockSize={}||msg=collect thread pool has block task",

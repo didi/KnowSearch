@@ -1,12 +1,10 @@
 package com.didi.arius.gateway.core.service.impl;
 
-import com.didi.arius.gateway.common.consts.QueryConsts;
-import com.didi.arius.gateway.common.metadata.ESCluster;
-import com.didi.arius.gateway.core.component.QueryConfig;
-import com.didi.arius.gateway.core.service.ESTcpClientService;
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
-import lombok.NoArgsConstructor;
+import static org.apache.commons.lang.StringUtils.*;
+
+import java.net.InetAddress;
+import java.util.*;
+
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
@@ -15,10 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.net.InetAddress;
-import java.util.*;
+import com.didi.arius.gateway.common.consts.QueryConsts;
+import com.didi.arius.gateway.common.metadata.ESCluster;
+import com.didi.arius.gateway.core.component.QueryConfig;
+import com.didi.arius.gateway.core.service.ESTcpClientService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
-import static org.apache.commons.lang.StringUtils.*;
+import lombok.NoArgsConstructor;
 
 /**
  * @author fitz

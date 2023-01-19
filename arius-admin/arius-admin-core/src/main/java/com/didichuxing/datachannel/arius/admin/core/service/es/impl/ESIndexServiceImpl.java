@@ -518,6 +518,10 @@ public class ESIndexServiceImpl implements ESIndexService {
         return esIndexDAO.getIndicesSetting(cluster, indexNames, tryTimes);
     }
 
+    public Map<String, IndexConfig> syncGetIndexConfig(String cluster, List<String> indexNames, int tryTimes) {
+        return esIndexDAO.getIndicesConfig(cluster, indexNames, tryTimes);
+    }
+
     /**
      * 获取索引主shard个数
      * @param clusterName
@@ -711,7 +715,7 @@ public class ESIndexServiceImpl implements ESIndexService {
         if (CollectionUtils.isNotEmpty(indexCatCellList)) {
             List<String> indexNameList = indexCatCellList.stream().map(IndexCatCell::getIndex)
                 .collect(Collectors.toList());
-            Map<String, IndexConfig> name2IndexConfigMap = this.syncGetIndexSetting(cluster, indexNameList, 3);
+            Map<String, IndexConfig> name2IndexConfigMap = this.syncGetIndexConfig(cluster, indexNameList, 3);
 
             Map<String, List<String>> aliasMap = this.syncGetIndexAliasesByIndices(cluster,
                 indexNameList.toArray(new String[0]));
@@ -719,8 +723,10 @@ public class ESIndexServiceImpl implements ESIndexService {
                 indexCatCell.setAliases(aliasMap.getOrDefault(indexCatCell.getIndex(), Lists.newArrayList()));
 
                 IndexConfig indexConfig = name2IndexConfigMap.get(indexCatCell.getIndex());
+                List<String> indexTypes = getIndexTypes(indexConfig);
                 Tuple<Boolean, Boolean> writeAndReadBlockFromMerge = getWriteAndReadBlock(indexConfig);
 
+                indexCatCell.setIndexTypeList(indexTypes);
                 indexCatCell
                     .setReadFlag(writeAndReadBlockFromMerge.getV1() != null && writeAndReadBlockFromMerge.getV1());
                 indexCatCell
@@ -730,6 +736,39 @@ public class ESIndexServiceImpl implements ESIndexService {
             LOGGER.warn(
                 "class=IndicesPageSearchHandle||method=buildBlockInfo||cluster={}||index={}||errMsg=index is empty",
                 cluster);
+        }
+        return indexCatCellList;
+    }
+
+    private List<String> getIndexTypes(IndexConfig indexConfig) {
+        return Optional.ofNullable(indexConfig).map(IndexConfig::getMappings).map(MappingConfig::getMapping)
+            .map(Map::keySet).map(Lists::newArrayList).orElse(Lists.newArrayList());
+    }
+
+    /**
+     * 构建索引settings相关的实时数据（包含translog和恢复优先级）
+     * @param cluster
+     * @param indexCatCellList
+     * @return
+     */
+    @Override
+    public List<IndexCatCell> buildIndexSettingsInfo(String cluster, List<IndexCatCell> indexCatCellList){
+        if (CollectionUtils.isNotEmpty(indexCatCellList)) {
+            List<String> indexNameList = indexCatCellList.stream().map(IndexCatCell::getIndex)
+                    .collect(Collectors.toList());
+            Map<String, IndexConfig> name2IndexConfigMap = this.syncGetIndexSetting(cluster, indexNameList, 3);
+
+            indexCatCellList.forEach(indexCatCell -> {
+                Map<String, String> settingsMap = name2IndexConfigMap.get(indexCatCell.getIndex()).getSettings();
+                indexCatCell.setTranslogAsync(ESSettingConstant.ASYNC.equals(settingsMap
+                        .getOrDefault(ESSettingConstant.INDEX_TRANSLOG_DURABILITY, ESSettingConstant.REQUEST)));
+                indexCatCell.setPriorityLevel(Integer.valueOf(settingsMap
+                        .getOrDefault(ESSettingConstant.INDEX_PRIORITY, "0")));
+            });
+        } else {
+            LOGGER.warn(
+                    "class=IndicesPageSearchHandle||method=buildIndexTranslogAndPriority||cluster={}||index={}||errMsg=index is empty",
+                    cluster);
         }
         return indexCatCellList;
     }

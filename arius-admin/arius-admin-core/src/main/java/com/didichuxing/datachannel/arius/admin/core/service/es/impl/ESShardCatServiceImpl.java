@@ -1,5 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.ShardCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardDistributionVO;
@@ -13,12 +20,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardCatService
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESShardDAO;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 详细介绍类情况.

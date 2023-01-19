@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.listener;
 
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
-import com.didichuxing.datachannel.arius.admin.common.exception.EventException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterLogicEvent;
+import com.didichuxing.datachannel.arius.admin.common.exception.EventException;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 

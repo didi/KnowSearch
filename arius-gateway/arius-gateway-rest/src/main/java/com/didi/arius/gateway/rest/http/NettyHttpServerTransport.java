@@ -19,9 +19,13 @@
 
 package com.didi.arius.gateway.rest.http;
 
-import com.didi.arius.gateway.common.consts.QueryConsts;
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
+import static org.elasticsearch.common.network.NetworkService.TcpSettings.*;
+import static org.elasticsearch.http.netty.cors.CorsHandler.ANY_ORIGIN;
+
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
+
 import org.elasticsearch.common.Booleans;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.netty.NettyUtils;
@@ -58,12 +62,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.Executors;
-import java.util.regex.Pattern;
-
-import static org.elasticsearch.common.network.NetworkService.TcpSettings.*;
-import static org.elasticsearch.http.netty.cors.CorsHandler.ANY_ORIGIN;
+import com.didi.arius.gateway.common.consts.QueryConsts;
+import com.didi.arius.gateway.core.service.InboundConnectionLimitService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 /**
  *
@@ -144,10 +146,12 @@ public class NettyHttpServerTransport {
     private CorsConfig corsConfig;
 
     private Settings settings;
-
+    
     @Autowired
     private NettyHttpController nettyHttpController;
-
+    
+    @Autowired
+    protected InboundConnectionLimitService inboundConnectionLimitService;
     public NettyHttpServerTransport() {
         // pass
     }
@@ -341,13 +345,14 @@ public class NettyHttpServerTransport {
     }
 
     protected static class HttpChannelPipelineFactory implements ChannelPipelineFactory {
-
+    
         protected final NettyHttpServerTransport transport;
-        protected final HttpRequestHandler requestHandler;
-
+        protected final HttpRequestHandler       requestHandler;
+        protected final InboundConnectionHandler inboundConnectionHandler;
         public HttpChannelPipelineFactory(NettyHttpServerTransport transport, boolean detailedErrorsEnabled) {
             this.transport = transport;
             this.requestHandler = new HttpRequestHandler(transport, detailedErrorsEnabled);
+            this.inboundConnectionHandler = new InboundConnectionHandler(transport.inboundConnectionLimitService);
         }
 
         @Override
@@ -390,4 +395,3 @@ public class NettyHttpServerTransport {
         }
     }
 }
-

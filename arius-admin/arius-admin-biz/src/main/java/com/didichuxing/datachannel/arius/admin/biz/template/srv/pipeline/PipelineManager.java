@@ -1,10 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline;
 
+import java.util.Map;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didiglobal.knowframework.elasticsearch.client.request.ingest.Pipeline;
 
 /**
  * @author chengxiang, d06679
@@ -27,10 +30,6 @@ public interface PipelineManager {
      */
     Result<Void> editFromTemplateLogic(IndexTemplate oldTemplate, IndexTemplate newTemplate);
 
-    //////////////////////////SRV
-
-
-
     /**
      * 创建
      * @param indexTemplatePhysicalInfo 物理模板
@@ -39,8 +38,6 @@ public interface PipelineManager {
      */
     boolean createPipeline(IndexTemplatePhy indexTemplatePhysicalInfo,
                            IndexTemplateWithPhyTemplates logicWithPhysical) throws ESOperateException;
-
-
 
     /**
      * 修改物理字段
@@ -55,9 +52,10 @@ public interface PipelineManager {
     /**
      * 同步pipeline
      * @param logicTemplateId 物理模板id
+     * @param pipelineMap 集群全量pipeline信息
      * @return
      */
-    Result<Void> syncPipeline(Integer logicTemplateId);
+    Result<Void> syncPipeline(Integer logicTemplateId, Map<String, Pipeline> pipelineMap);
 
     /**
      * 删除

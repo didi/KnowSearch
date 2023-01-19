@@ -1,10 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.project;
 
+import java.util.List;
+
 import com.didiglobal.knowframework.security.common.vo.project.ProjectVO;
 import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

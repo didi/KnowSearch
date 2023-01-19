@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.action;
 
-import com.alibaba.fastjson.annotation.JSONField;
-import com.didiglobal.knowframework.elasticsearch.client.response.model.indices.CommonStat;
-
 import java.util.List;
 import java.util.Map;
+
+import com.alibaba.fastjson.annotation.JSONField;
+import com.didiglobal.knowframework.elasticsearch.client.response.model.indices.CommonStat;
 
 public class SimpleIndexNode {
     @JSONField(name = "primaries")

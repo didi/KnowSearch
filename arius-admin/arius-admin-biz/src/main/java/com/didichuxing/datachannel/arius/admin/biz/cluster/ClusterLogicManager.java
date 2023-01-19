@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -10,17 +12,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyWithLogicClusterVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import java.util.List;
 
 /**
  * @description: 逻辑集群manager
@@ -138,7 +135,7 @@ public interface ClusterLogicManager {
      * @return
      */
     PaginationResult<ClusterLogicVO> pageGetClusterLogics(ClusterLogicConditionDTO condition,
-                                                          Integer projectId) throws NotFindSubclassException, ESOperateException;
+                                                          Integer projectId) throws NotFindSubclassException;
 
     /**
      * 更新逻辑集群状态
@@ -163,13 +160,6 @@ public interface ClusterLogicManager {
      * @return
      */
     Result<Long> estimatedDiskSize(Long clusterLogicId, Integer count);
-
-    /**
-     * 获取当前逻辑集群对应region的机器规格
-     * @param clusterLogicId 逻辑集群id
-     * @return
-     */
-    Result<String> getClusterDataNodeSpec(Long clusterLogicId);
 
     /**
      * 根据projectId获取项目下的逻辑集群
@@ -263,11 +253,4 @@ public interface ClusterLogicManager {
     Result<List<ClusterPhyWithLogicClusterVO>> listLogicClusterWithClusterPhyByProjectId(Integer projectId);
 
     Result<List<ClusterLogicVO>> listClusterLogicByPhyName(String phyClusterName);
-
-    /**
-     * 删除从模板及索引数据
-     * @param clusterLogicId
-     * @return
-     */
-    Result<Void> deleteTemplatesIndicesInfo(Long clusterLogicId,Integer projectId,String operator);
 }

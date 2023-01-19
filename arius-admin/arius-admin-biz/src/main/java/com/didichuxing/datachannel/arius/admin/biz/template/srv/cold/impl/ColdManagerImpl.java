@@ -16,12 +16,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionFSInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
@@ -307,10 +309,15 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
 
         LOGGER.info("class=TemplateColdManagerImpl||method=batchChangeHotDay||days={}||count={}||operator={}", days,
             count, operator);
+        //查询模板所属应用，保存到操作记录中
+        Map<Integer, Integer> templateId2OperateProjectId = ConvertUtil.list2Map(indexTemplateService.listLogicTemplatesByIds
+                (templateIdList), IndexTemplate::getId, IndexTemplate::getProjectId);
+
         for (Integer id : templateIdList) {
             operateRecordService.save(
                 new OperateRecord.Builder().userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
                     .bizId(id).project(projectService.getProjectBriefByProjectId(projectId))
+                        .operateProject(projectService.getProjectBriefByProjectId(templateId2OperateProjectId.get(id)))
                     .content("deltaHotDays:" + days).buildDefaultManualTrigger());
         }
 

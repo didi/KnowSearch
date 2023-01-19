@@ -2,6 +2,17 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TEMPLATE_SRV;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateSrvPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager;
@@ -13,36 +24,24 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.SupportSrv;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.stereotype.Service;
 
 /**
  * @author chengxiang
@@ -55,13 +54,11 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         .getLog(TemplateSrvManagerImpl.class);
 
     private static final String                                         NO_PERMISSION_CONTENT                                     = "只有运维或者研发才有权限操作";
-
     private static final String                                         CLUSTER_LOGIC_NOT_EXISTS                                  = "逻辑集群不存在";
     private static final String                                         PHYSICAL_CLUSTER_NOT_EXISTS                               = "物理集群不存在";
 
     private final Map<Integer, BaseTemplateSrv>                         BASE_TEMPLATE_SRV_MAP                                     = Maps
         .newConcurrentMap();
-
 
 
     @Autowired
@@ -74,12 +71,9 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     private HandleFactory                                               handleFactory;
     @Autowired
     private RoleTool                                                    roleTool;
-   
-    @Autowired
-    private ColdManager          coldManager;
 
     @Autowired
-    private OperateRecordService operateRecordService;
+    private ColdManager                                                 coldManager;
 
     @PostConstruct
     public void init() {
@@ -146,8 +140,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
          * 预创建，过期删除（分区才可以操作），冷热分离（分区并且有冷region才能操作），dcdr和pipeline（es有对应module才能操作），rolloer没有限制但是产品侧有提示
          */
         for (TemplateServiceEnum srvEnum : allSrvList) {
-        
-           
+
             //1.非分区模版不支持：预创建、过期删除、冷热划分的能力
             if (Boolean.FALSE.equals(isPartition)&&TemplateServiceEnum.usePartitionService().contains(srvEnum)){
                 final UnavailableTemplateSrv unavailableTemplateSrv = new UnavailableTemplateSrv(srvEnum.getCode(),
@@ -161,7 +154,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                             srvEnum.getServiceName(), srvEnum.getEsClusterVersion().getVersion(),
                             "集群没有冷region，不支持此能力");
                     unavailableSrvList.add(unavailableTemplateSrv);
-                    
+
                 } else
                     //3.dcdr dcdrSupport==true支持
                     if (Boolean.FALSE.equals(dcdrSupport) && srvEnum.equals(TemplateServiceEnum.TEMPLATE_DCDR)) {
@@ -236,16 +229,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         }
     }
 
-
-    
-
-
-
-
-   
-
-
-
     /**
      * 查询开启了某个索引服务的物理集群列表
      *
@@ -254,10 +237,10 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
      */
     @Override
     public List<String> getPhyClusterByOpenTemplateSrv(int srvId) {
-        
+
         return clusterPhyService.listAllClusters().stream().map(ClusterPhy::getCluster).collect(Collectors.toList());
     }
-  
+
     /**
      * 查询开启了某个索引服务的索引模板列表
      *
@@ -272,71 +255,4 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                 .map(IndexTemplate::getName)
                 .collect(Collectors.toList());
     }
-
-    /**
-     * 用索引模板的写操作。
-     *
-     * @param templateId 要操作的模板的id
-     * @param status 0：否，1：是
-     * @param operator 触发操作的操作员
-     * @param projectId 项目编号
-     * @return Result<Void>
-     */
-    @Override
-    public Result<Void> blockWrite(Integer templateId, Boolean status, String operator, Integer projectId) {
-        IndexTemplatePO logicTemplate = indexTemplateService.getLogicTemplatePOById(templateId);
-
-        if (Objects.isNull(logicTemplate)) {
-            return Result.buildFail("索引模板不存在");
-        }
-        Result<Void> checkProjectCorrectly = ProjectUtils.checkProjectCorrectly(IndexTemplatePO::getProjectId,
-                logicTemplate, projectId);
-        if (checkProjectCorrectly.failed()) {
-            return checkProjectCorrectly;
-        }
-
-        Result<Void> result = indexTemplateService.updateBlockWriteState(templateId, status);
-        if (result.success()) {
-            // 是否禁写，0：否，1：是
-            operateRecordService.saveOperateRecordWithManualTrigger(
-                    Objects.equals(status, Boolean.TRUE) ? "禁写" : "开启写", operator, projectId, templateId,
-                    OperateTypeEnum.TEMPLATE_MANAGEMENT_CREATE);
-        }
-
-        return result;
-    }
-
-
-    /**
-     * 用于索引模板的读取。
-     *
-     * @param templateId 要操作的模板的id
-     * @param status 0：否，1：是
-     * @param operator 触发操作的用户
-     * @param projectId 项目编号
-     * @return Result<Void>
-     */
-    @Override
-    public Result<Void> blockRead(Integer templateId, Boolean status, String operator, Integer projectId) {
-        IndexTemplatePO logicTemplate = indexTemplateService.getLogicTemplatePOById(templateId);
-
-        if (Objects.isNull(logicTemplate)) {
-            return Result.buildFail("索引模板不存在");
-        }
-        Result<Void> checkProjectCorrectly = ProjectUtils.checkProjectCorrectly(IndexTemplatePO::getProjectId,
-                logicTemplate, projectId);
-        if (checkProjectCorrectly.failed()) {
-            return checkProjectCorrectly;
-        }
-        Result<Void> result = indexTemplateService.updateBlockReadState(templateId, status);
-        if (result.success()) {
-            // 是否禁写，0：否，1：是
-            operateRecordService.saveOperateRecordWithManualTrigger(
-                    Objects.equals(status, Boolean.TRUE) ? "禁读" : "开启读", operator, projectId, templateId,
-                    OperateTypeEnum.TEMPLATE_MANAGEMENT_CREATE);
-        }
-
-        return result;
-    }
-
 }

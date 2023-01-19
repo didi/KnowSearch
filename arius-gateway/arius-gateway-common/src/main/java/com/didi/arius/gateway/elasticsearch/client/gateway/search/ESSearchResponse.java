@@ -1,17 +1,18 @@
 package com.didi.arius.gateway.elasticsearch.client.gateway.search;
 
-import com.didi.arius.gateway.elasticsearch.client.gateway.search.response.Shards;
-import com.didi.arius.gateway.elasticsearch.client.gateway.search.response.src.Hits;
-import com.didi.arius.gateway.elasticsearch.client.model.ESActionResponse;
-import com.didi.arius.gateway.elasticsearch.client.utils.XContentParserUtils;
+import java.io.IOException;
+import java.util.Map;
+
 import org.elasticsearch.common.xcontent.*;
 import org.elasticsearch.common.xcontent.XContentParser.Token;
 import org.elasticsearch.rest.BytesRestResponse;
 import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestResponse;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.Map;
+
+import com.didi.arius.gateway.elasticsearch.client.gateway.search.response.Shards;
+import com.didi.arius.gateway.elasticsearch.client.gateway.search.response.src.Hits;
+import com.didi.arius.gateway.elasticsearch.client.model.ESActionResponse;
+import com.didi.arius.gateway.elasticsearch.client.utils.XContentParserUtils;
 
 /**
  * @Author: D10865

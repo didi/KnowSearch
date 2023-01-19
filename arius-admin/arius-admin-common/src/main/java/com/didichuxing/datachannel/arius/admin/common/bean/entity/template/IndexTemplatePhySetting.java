@@ -1,12 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
-import com.alibaba.fastjson.JSONObject;
-import com.didiglobal.knowframework.elasticsearch.client.utils.JsonUtils;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.io.Serializable;
 import java.util.Map;
+
+import com.alibaba.fastjson.JSONObject;
+import com.didiglobal.knowframework.elasticsearch.client.utils.JsonUtils;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 物理模板Settings Entity.

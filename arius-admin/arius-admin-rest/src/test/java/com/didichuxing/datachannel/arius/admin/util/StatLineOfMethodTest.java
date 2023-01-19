@@ -1,16 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.util;
 
-import com.didichuxing.datachannel.arius.admin.common.util.YamlUtil;
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtMethod;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -20,6 +9,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import com.didichuxing.datachannel.arius.admin.common.util.YamlUtil;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtMethod;
+
 /**
  * @author wuxuan
  * @Date 2022/7/12
@@ -28,7 +30,7 @@ public class StatLineOfMethodTest {
     /**
      * 将该类运行时抛出的异常记录到日志中
      */
-    private static final ILog LOGGER            = LogFactory.getLog(StatLineOfMethodTest.class);
+    private static final ILog LOGGER = LogFactory.getLog(StatLineOfMethodTest.class);
     /**
      * 统计项目中有多少超过规定代码行数的方法
      */
@@ -133,7 +135,7 @@ public class StatLineOfMethodTest {
      * 从配置文件中取出规定的不能超过的标准行数赋值给standardLineOfMethod变量
      */
     private void initProperties() throws IOException {
-        String[] ymlPaths = { "arius-admin-rest", "target", "classes", "application.yml"};
+        String[] ymlPaths = { "arius-admin-rest", "target", "classes", "application.yml" };
         String path = System.getProperty("user.dir");
         path = path.substring(0, path.lastIndexOf(File.separator) + 1) + StringUtils.join(ymlPaths, File.separator);
         String standardLine = YamlUtil.getValue(path, "stat.method.line.standardLineOfMethod");

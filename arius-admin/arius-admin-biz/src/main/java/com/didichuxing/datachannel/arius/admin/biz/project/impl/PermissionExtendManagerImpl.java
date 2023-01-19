@@ -1,12 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.project.PermissionExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didiglobal.knowframework.security.common.Result;
 import com.didiglobal.knowframework.security.common.vo.permission.PermissionTreeVO;
 import com.didiglobal.knowframework.security.service.PermissionService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * 扩展管理器impl许可

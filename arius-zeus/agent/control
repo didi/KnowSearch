@@ -1,0 +1,112 @@
+#!/bin/bash
+
+CWD=$(cd $(dirname $0)/; pwd)
+APP=zeus-agent
+LOG=logs
+
+start()
+{
+    if [ $(ps aux|grep -v grep|grep "/$APP" -c) -gt 0 ]; then
+        echo "${APP} already started"
+        return
+    fi
+
+    mkdir -p ${LOG}
+    nohup $CWD/$APP &> ${LOG}/app.log &
+
+    for((i=1;i<=10;i++)); do
+        if [ $(ps aux|grep -v grep|grep "/$APP" -c) -gt 0 ]; then
+            echo "${APP} started"
+            return
+        fi
+        sleep 0.2
+    done
+
+    echo "${APP} start fail"
+}
+
+stop()
+{
+    if [ $(ps aux|grep -v grep|grep "/$APP" -c) -eq 0 ]; then
+        echo "${APP} already stopped"
+        return
+    fi
+
+    ps aux|grep -v grep|grep "/$APP"|awk '{print $2}'|xargs kill
+    for((i=1;i<=10;i++)); do
+        if [ $(ps aux|grep -v grep|grep "/$APP" -c) -eq 0 ]; then
+            echo "${APP} stopped"
+            return
+        fi
+        sleep 0.2
+    done
+
+    echo "cannot stop ${APP}"
+    exit 1
+}
+
+restart()
+{
+    stop
+    start
+    status
+}
+
+status()
+{
+    ps aux|grep -v grep|grep "/$APP"
+}
+
+build()
+{
+    go build -o ${APP}
+    if [ $? -ne 0 ]; then
+        exit $?
+    fi
+    ./${APP} -v
+}
+
+pack()
+{
+    build
+    version=`./${APP} -v`
+    tar zcvf ${APP}-$version.tar.gz control ${APP} cfg.yml
+}
+
+packbin()
+{
+    build
+    version=`./${APP} -v`
+    tar zcvf ${APP}-bin-$version.tar.gz ${APP}
+}
+
+usage()
+{
+    echo "$0 build|pack|packbin|start|stop|restart|status"
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        restart
+        ;;
+    status)
+        status
+        ;;
+    build)
+        build
+        ;;
+    pack)
+        pack
+        ;;
+    packbin)
+        packbin
+        ;;
+    *)
+        usage
+esac

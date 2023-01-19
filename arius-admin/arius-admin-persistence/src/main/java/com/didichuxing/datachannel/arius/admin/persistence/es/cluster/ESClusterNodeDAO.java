@@ -2,6 +2,13 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.MapUtils;
+import org.springframework.stereotype.Repository;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -18,16 +25,6 @@ import com.didiglobal.knowframework.elasticsearch.client.request.cluster.nodesta
 import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.knowframework.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.MapUtils;
-import org.springframework.stereotype.Repository;
 
 /**
  * @author d06679
@@ -130,16 +127,28 @@ public class ESClusterNodeDAO extends BaseESDAO {
                 .map(JSONObject.class::cast)
                 .map(this::buildNodeNamePlugins)
                 .collect(Collectors.toList());
-
+                
     }
-    private  TupleTwo<String,List<String>> buildNodeNamePlugins(JSONObject jsonObject){
-        final String nodeName = jsonObject.getString(NAME);
-        final List<String> pluginNames = jsonObject.getJSONArray(MODULES).stream().filter(Objects::nonNull)
-                .map(plugin -> ((JSONObject) plugin).getString(NAME)).collect(Collectors.toList());
-        return Tuples.of(nodeName,pluginNames);
+    /**
+     * 获取集群中节点的插件信息
+     *
+     * @param clusterName 要查询的集群名称
+     * @return ESResponsePluginInfo 对象列表。
+     */
+    public List<ESResponsePluginInfo> syncGetPlugins(String clusterName) throws ESOperateException {
+         final DirectResponse directResponse = getDirectResponse(clusterName, "GET", GET_NODE_PLUGINS);
+        if (directResponse == null) {
+            return Lists.newArrayList();
+        }
+        JSONObject jsonObject = JSON.parseObject(directResponse.getResponseContent());
+        if (jsonObject == null || !jsonObject.containsKey(NODES)) {
+            return Lists.newArrayList();
+        }
+        return JSON.parseObject(directResponse.getResponseContent()).getJSONObject(NODES).values()
+            .stream().map(JSONObject.class::cast).map(this::jsonConvertESResponsePluginInfos)
+            .flatMap(Collection::stream).distinct().collect(Collectors.toList());
+    }
     
-    }
-
     public List<ClusterNodeStats> syncGetNodesStatsWithIndices(String clusterName) {
         ESClient esClient = esOpClient.getESClient(clusterName);
         if (esClient == null) {
@@ -152,5 +161,25 @@ public class ESClusterNodeDAO extends BaseESDAO {
         }
         return Lists.newArrayList();
     }
-
+    
+    /**
+     * 它将 JSON 对象转换为 ESResponsePluginInfo 对象列表。
+     *
+     * @param json Elasticsearch 服务器返回的 JSON 对象。
+     * @return ESResponsePluginInfo 对象列表
+     */
+    private List<ESResponsePluginInfo> jsonConvertESResponsePluginInfos(JSONObject json) {
+        final JSONArray jsonArray = json.getJSONArray(MODULES);
+        return jsonArray.stream().map(JSONObject.class::cast)
+            .map(js -> JSON.toJavaObject(js, ESResponsePluginInfo.class))
+            .collect(Collectors.toList());
+    }
+    private TupleTwo<String, List<String>> buildNodeNamePlugins(JSONObject jsonObject) {
+        final String nodeName = jsonObject.getString(NAME);
+        final List<String> pluginNames = jsonObject.getJSONArray(MODULES).stream()
+            .filter(Objects::nonNull)
+            .map(plugin -> ((JSONObject) plugin).getString(NAME)).collect(Collectors.toList());
+        return Tuples.of(nodeName, pluginNames);
+    
+    }
 }

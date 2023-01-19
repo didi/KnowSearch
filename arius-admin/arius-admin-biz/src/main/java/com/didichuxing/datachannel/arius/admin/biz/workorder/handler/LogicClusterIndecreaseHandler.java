@@ -1,5 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
+import java.util.List;
+import java.util.Optional;
+
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
@@ -26,11 +34,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
-import java.util.List;
-import java.util.Optional;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -203,12 +206,12 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
             clusterLogicService.editClusterLogicNotCheck(esLogicClusterDTO);
         
         }
-        
+        ProjectBriefVO projectBriefByProjectId = projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId());
         operateRecordService.save(new OperateRecord.Builder().bizId(content.getLogicClusterId())
             .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_CAPACITY).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-            .content(String.format("%s：【%d】->【%d】",afterSize>beforeSize?"扩容":"缩容",beforeSize,afterSize))
+            .content(String.format("集群%s：【%d】->【%d】",afterSize>beforeSize?"扩容":"缩容",beforeSize,afterSize))
             .userOperation(workOrder.getSubmitor())
-            .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId())).build());
+            .project(projectBriefByProjectId).operateProject(projectBriefByProjectId).build());
         return Result.buildFrom(regionEditResult);
     }
 }

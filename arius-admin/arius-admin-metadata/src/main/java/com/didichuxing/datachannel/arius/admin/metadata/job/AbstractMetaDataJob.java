@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job;
 
+import java.util.List;
+
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-
-import java.util.List;
 
 public abstract class AbstractMetaDataJob {
     protected static final ILog LOGGER           = LogFactory.getLog(AbstractMetaDataJob.class);

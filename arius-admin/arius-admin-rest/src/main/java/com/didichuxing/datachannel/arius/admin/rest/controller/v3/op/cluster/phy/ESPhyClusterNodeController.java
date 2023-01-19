@@ -2,6 +2,13 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.ph
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -13,21 +20,10 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import com.didiglobal.knowframework.security.util.HttpRequestUtil;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author ohushenglin_v
@@ -51,11 +47,21 @@ public class ESPhyClusterNodeController {
         return clusterNodeManager.listClusterPhyNode(clusterId);
     }
 
+
     @GetMapping("/{clusterId}/region/")
     @ResponseBody
+    @Deprecated
     @ApiOperation(value = "获取可划分至region的节点信息")
     public Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(@PathVariable Long clusterId) {
         return clusterNodeManager.listDivide2ClusterNodeInfo(clusterId);
+    }
+
+    @GetMapping("/{clusterId}/region/{divideType}")
+    @ResponseBody
+    @ApiOperation(value = "获取可划分至region的节点信息")
+    public Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(@PathVariable Long clusterId,
+                                                                                      @PathVariable String divideType) {
+        return clusterNodeManager.listDivide2ClusterNodeInfoWithDivideType(clusterId, divideType);
     }
 
     @PostMapping("/divide-region-check")

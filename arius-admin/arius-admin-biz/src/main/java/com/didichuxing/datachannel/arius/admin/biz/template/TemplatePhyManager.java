@@ -1,5 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.template;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.transaction.annotation.Transactional;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
@@ -10,9 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTe
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import java.util.List;
-import java.util.Set;
-import org.springframework.transaction.annotation.Transactional;
+import com.didiglobal.knowframework.elasticsearch.client.response.setting.template.TemplateConfig;
 
 public interface TemplatePhyManager {
 
@@ -27,9 +31,10 @@ public interface TemplatePhyManager {
      * 元数据同步
      *
      * @param physicalId
+     * @param templateConfigMap 集群全量模版配置信息
      * @return
      */
-    void syncMeta(Long physicalId, int retryCount) throws ESOperateException;
+    void syncMeta(Long physicalId, int retryCount, Map<String, TemplateConfig> templateConfigMap) throws ESOperateException;
 
     /**
      * 删除

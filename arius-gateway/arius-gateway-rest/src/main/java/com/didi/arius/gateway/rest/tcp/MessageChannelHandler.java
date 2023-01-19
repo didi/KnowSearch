@@ -1,13 +1,15 @@
 package com.didi.arius.gateway.rest.tcp;
 
-import com.didi.arius.gateway.common.consts.QueryConsts;
-import com.didi.arius.gateway.common.metadata.ActionContext;
-import com.didi.arius.gateway.core.component.QueryConfig;
-import com.didi.arius.gateway.core.es.tcp.ActionController;
-import com.didi.arius.gateway.core.es.tcp.ActionHandler;
-import com.didi.arius.gateway.core.service.RequestStatsService;
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
+import static org.elasticsearch.common.transport.NetworkExceptionHelper.isCloseConnectionException;
+import static org.elasticsearch.common.transport.NetworkExceptionHelper.isConnectException;
+import static org.elasticsearch.common.util.concurrent.ConcurrentCollections.newConcurrentMap;
+
+import java.net.InetSocketAddress;
+import java.nio.channels.CancelledKeyException;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentMap;
+
 import org.apache.lucene.util.IOUtils;
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.node.DiscoveryNode;
@@ -32,15 +34,14 @@ import org.jboss.netty.channel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.net.InetSocketAddress;
-import java.nio.channels.CancelledKeyException;
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentMap;
-
-import static org.elasticsearch.common.transport.NetworkExceptionHelper.isCloseConnectionException;
-import static org.elasticsearch.common.transport.NetworkExceptionHelper.isConnectException;
-import static org.elasticsearch.common.util.concurrent.ConcurrentCollections.newConcurrentMap;
+import com.didi.arius.gateway.common.consts.QueryConsts;
+import com.didi.arius.gateway.common.metadata.ActionContext;
+import com.didi.arius.gateway.core.component.QueryConfig;
+import com.didi.arius.gateway.core.es.tcp.ActionController;
+import com.didi.arius.gateway.core.es.tcp.ActionHandler;
+import com.didi.arius.gateway.core.service.RequestStatsService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
 
 /**
  * @author weizijun @date：2016年9月12日
@@ -62,7 +63,6 @@ public class MessageChannelHandler extends SimpleChannelUpstreamHandler {
 	protected RequestStatsService requestStatsService;
 
 	private static final ILog logger = LogFactory.getLog(MessageChannelHandler.class);
-	
 	// node id to actual channel
     protected final ConcurrentMap<DiscoveryNode, NodeChannels> connectedNodes = newConcurrentMap();
     

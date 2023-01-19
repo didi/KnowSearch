@@ -1,14 +1,15 @@
 package com.didi.arius.gateway.rest.init;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.rest.http.NettyHttpServerTransport;
 import com.didi.arius.gateway.rest.tcp.NettyTransport;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 
 @Component("initGateway")
 public class InitGateway {

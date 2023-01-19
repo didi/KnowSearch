@@ -102,11 +102,15 @@ public interface ESClusterRoleHostDAO {
 
     /**
      * 根据主机名和roleId 重置主机状态
+     *
      * @param hostname
      * @param roleId
+     * @param port
+     * @param role
      * @return
      */
-    int restoreByHostNameAndRoleId(@Param("hostname") String hostname, @Param("roleId") Long roleId);
+    int restoreByHostNameAndRoleIdAndRoleAndPort(@Param("hostname") String hostname, @Param("roleId") Long roleId,
+       @Param("port") String port,@Param("role") Integer role);
 
     /**
      * 获取所有节点信息
@@ -145,12 +149,16 @@ public interface ESClusterRoleHostDAO {
 
     /**
      * 根据主机名和roleId 获取已删除的主机信息
+     *
      * @param hostname
      * @param roleId
+     * @param port
+     * @param role
      * @return
      */
-    ESClusterRoleHostPO getDeleteHostByHostNameAnRoleId(@Param("hostname") String hostname,
-                                                        @Param("roleId") Long roleId);
+    ESClusterRoleHostPO getDeleteHostByHostNameAnRoleIdAndRoleAndPort(@Param("hostname") String hostname,
+                                                        @Param("roleId") Long roleId, @Param("port")String port,
+        @Param("role")Integer role);
 
     /**
      * 更新主机状态，并将状态置为有效
@@ -194,5 +202,4 @@ public interface ESClusterRoleHostDAO {
      * @return
      */
     List<ESClusterRoleHostPO> listByClusters(List<String> phyClusterNames);
-    
 }

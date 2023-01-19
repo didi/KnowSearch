@@ -2,6 +2,12 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.valueOf;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord.Builder;
@@ -13,11 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.DiffUtil;
 import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
 import com.github.difflib.text.DiffRow;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

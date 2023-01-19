@@ -1,5 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.getClusterPhyMetricsType;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum.getClusterPhyIndicesMetricsType;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.getClusterPhyNodeMetricsType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.metrics.ClusterPhyMetricsManager;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.handle.BaseClusterMetricsHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -28,18 +41,6 @@ import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.security.service.ProjectService;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.getClusterPhyMetricsType;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum.getClusterPhyIndicesMetricsType;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.getClusterPhyNodeMetricsType;
 
 /**
  * @author Created by linyunan on
@@ -176,58 +177,6 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
                 LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=getMultiClusterMetrics||errMsg={}", e);
             }
         }
-        return Result.buildSucc(MetricsUtils.joinDuplicateTypeVOs(result));
-    }
-
-    @Override
-    public Result<List<VariousLineChartMetricsVO>> getMultiClusterIndicesMetrics(MultiMetricsClusterPhyIndicesDTO param,
-                                                                          Integer projectId, String userName,
-                                                                          ClusterPhyTypeMetricsEnum metricsTypeEnum){
-        MetricsClusterPhyIndicesDTO phyIndicesDTO = ConvertUtil.obj2Obj(param, MetricsClusterPhyIndicesDTO.class);
-        if(AriusObjUtils.isEmptyList(param.getIndexNames())){
-            return getClusterMetricsByMetricsType(phyIndicesDTO, projectId, userName, metricsTypeEnum);
-        }
-
-        List<VariousLineChartMetricsVO> result = new ArrayList<>();
-        for (String indexName : param.getIndexNames()) {
-            try {
-                phyIndicesDTO.setIndexName(indexName);
-                Result<List<VariousLineChartMetricsVO>> indexMetrics = getClusterMetricsByMetricsType(phyIndicesDTO,
-                        projectId, userName, metricsTypeEnum);
-                if(indexMetrics.success()) {
-                    result.addAll(indexMetrics.getData());
-                }
-            } catch (Exception e) {
-                LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=getMultiClusterIndicesMetrics||errMsg={}", e);
-            }
-        }
-
-        return Result.buildSucc(MetricsUtils.joinDuplicateTypeVOs(result));
-    }
-
-    @Override
-    public Result<List<VariousLineChartMetricsVO>> getMultiClusterTemplatesMetrics(MultiMetricsClusterPhyTemplateDTO param,
-                                                                                 Integer projectId, String userName,
-                                                                                 ClusterPhyTypeMetricsEnum metricsTypeEnum){
-        MetricsClusterPhyTemplateDTO phyTemplateDTO = ConvertUtil.obj2Obj(param, MetricsClusterPhyTemplateDTO.class);
-        if(AriusObjUtils.isEmptyList(param.getTemplateIdList())){
-            return getClusterMetricsByMetricsType(phyTemplateDTO, projectId, userName, metricsTypeEnum);
-        }
-
-        List<VariousLineChartMetricsVO> result = new ArrayList<>();
-        for (Integer templateId : param.getTemplateIdList()) {
-            try {
-                phyTemplateDTO.setLogicTemplateId(templateId);
-                Result<List<VariousLineChartMetricsVO>> templateMetrics = getClusterMetricsByMetricsType(phyTemplateDTO,
-                        projectId, userName, metricsTypeEnum);
-                if(templateMetrics.success()) {
-                    result.addAll(templateMetrics.getData());
-                }
-            } catch (Exception e) {
-                LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=getMultiClusterTemplatesMetrics||errMsg={}", e);
-            }
-        }
-
         return Result.buildSucc(MetricsUtils.joinDuplicateTypeVOs(result));
     }
 

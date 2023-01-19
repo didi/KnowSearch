@@ -1,6 +1,13 @@
 package com.didi.arius.gateway.core.service.impl;
 
+import static org.apache.commons.lang.StringUtils.*;
+
 import java.util.*;
+
+import org.apache.http.message.BasicHeader;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.enums.RunModeEnum;
@@ -10,12 +17,6 @@ import com.didi.arius.gateway.core.service.ESRestClientService;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import org.apache.http.message.BasicHeader;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import static org.apache.commons.lang.StringUtils.*;
 
 /**
  * @author fitz

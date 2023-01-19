@@ -1,23 +1,26 @@
 package com.didichuxing.datachannel.arius.admin.rest.web;
 
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
-import com.didiglobal.knowframework.log.common.Constants;
-import com.didiglobal.knowframework.log.common.TraceContext;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.Ordered;
-import org.springframework.web.util.ContentCachingResponseWrapper;
-import org.springframework.web.util.WebUtils;
-
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.Ordered;
+import org.springframework.web.util.ContentCachingRequestWrapper;
+import org.springframework.web.util.ContentCachingResponseWrapper;
+import org.springframework.web.util.WebUtils;
+
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.log.common.Constants;
+import com.didiglobal.knowframework.log.common.TraceContext;
 
 /**
  * @author jinbinbin
@@ -49,8 +52,7 @@ public class WebRequestLogFilter implements Ordered, Filter {
 
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) resp;
-        // spring 的ContentCachingRequestWrapper存在bug，无法读取request body
-        TranslateHttpServletRequestWrapper wrapperRequest = new TranslateHttpServletRequestWrapper(request);
+        ContentCachingRequestWrapper wrapperRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrapperResponse = new ContentCachingResponseWrapper(response);
 
         String requestUrl = request.getRequestURI();
@@ -109,7 +111,7 @@ public class WebRequestLogFilter implements Ordered, Filter {
             responseBody, (System.currentTimeMillis() - begin));
     }
 
-    private void logRequest(TranslateHttpServletRequestWrapper request, String requestUrl) {
+    private void logRequest(ContentCachingRequestWrapper request, String requestUrl) {
         if (ALL_EXCLUDE_URLS.contains(requestUrl)) {
             return;
         }
@@ -175,9 +177,9 @@ public class WebRequestLogFilter implements Ordered, Filter {
      *
      * @param request
      */
-    private String getRequestBody(TranslateHttpServletRequestWrapper request) {
+    private String getRequestBody(ContentCachingRequestWrapper request) {
         try {
-            String body = IOUtils.toString(request.getInputStream(), StandardCharsets.UTF_8);
+            String body = IOUtils.toString(request.getContentAsByteArray(), StandardCharsets.UTF_8.toString());
             return body.replace("\n", "");
         } catch (Exception e) {
             return "";

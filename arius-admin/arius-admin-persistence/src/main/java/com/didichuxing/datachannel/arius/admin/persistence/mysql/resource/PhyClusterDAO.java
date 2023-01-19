@@ -111,5 +111,37 @@ public interface PhyClusterDAO {
      * @return  long count
      */
     long getTotalHitByPackageId(@Param("packageId") Long packageId);
-
+    
+    /**
+     * 它通过集群物理 ID 返回组件 ID。
+     *
+     * @param clusterPhyId 集群的物理标识。
+     * @return 具有给定 clusterPhyId 的组件的 componentId。
+     */
+    Integer getComponentIdById(@Param("clusterPhyId")Integer clusterPhyId);
+    
+    /**
+     * 它通过 componentId 返回一个 ClusterPhyPO 对象。
+     *
+     * @param componentId 集群的组件 ID。
+     * @return 单个 ClusterPhyPO 对象。
+     */
+    ClusterPhyPO getOneByComponentId(@Param("componentId")Integer componentId);
+    
+    /**
+     * 它更新组件的版本。
+     *
+     * @param componentId 要更新的组件的 ID。
+     * @param version 组件的版本
+     * @return 一个布尔值。
+     */
+    boolean updateOneVersionByComponentId(@Param("componentId")Integer componentId,@Param("version") String version);
+    
+    /**
+     * 它返回与 gatewayId 关联的 ClusterPhyPO 对象的列表。
+     *
+     * @param gatewayId 网关 ID
+     * @return ClusterPhyPO 列表
+     */
+    List<ClusterPhyPO> listClusterByGatewayId(@Param("gatewayId")Integer gatewayId);
 }

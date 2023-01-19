@@ -1,8 +1,25 @@
 package com.didi.arius.gateway.rest.controller;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.*;
+import org.elasticsearch.rest.support.RestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.alibaba.fastjson.JSON;
+import com.didi.arius.gateway.common.connectioncontrl.ConnectionLimitResult;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.consts.RestConsts;
+import com.didi.arius.gateway.common.exception.ConnectionLimitException;
 import com.didi.arius.gateway.common.exception.QueryDslLengthException;
 import com.didi.arius.gateway.common.metadata.AppDetail;
 import com.didi.arius.gateway.common.metadata.JoinLogContext;
@@ -12,6 +29,7 @@ import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.es.http.RestActionListenerImpl;
 import com.didi.arius.gateway.core.service.ESRestClientService;
+import com.didi.arius.gateway.core.service.InboundConnectionLimitService;
 import com.didi.arius.gateway.core.service.RateLimitService;
 import com.didi.arius.gateway.core.service.RequestStatsService;
 import com.didi.arius.gateway.core.service.arius.AppService;
@@ -30,6 +48,7 @@ import com.didiglobal.knowframework.log.LogFactory;
 import com.didiglobal.knowframework.log.LogGather;
 import com.didiglobal.knowframework.observability.Observability;
 import com.didiglobal.knowframework.observability.common.constant.Constant;
+
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
@@ -38,19 +57,6 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.context.propagation.TextMapPropagator;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.*;
-import org.elasticsearch.rest.support.RestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
 
 public abstract class BaseHttpRestController implements IRestHandler {
 
@@ -60,10 +66,31 @@ public abstract class BaseHttpRestController implements IRestHandler {
     protected static final ILog auditLogger = LogFactory.getLog(QueryConsts.AUDIT_LOGGER);
     protected static final String AUTHORIZATION = "Authorization";
 
-    private static final TextMapPropagator TEXT_MAP_PROPAGATOR = Observability.getTextMapPropagator();
-    private static final Tracer tracer = Observability.getTracer(BaseHttpRestController.class.getName());
+    private static final TextMapPropagator TEXT_MAP_PROPAGATOR    = Observability.getTextMapPropagator();
+    private static final Tracer            tracer                 = Observability
+        .getTracer(BaseHttpRestController.class.getName());
 
-    private static Set<Integer> validHttpStatusCodeSet = new HashSet<>();
+    private static Set<Integer>            validHttpStatusCodeSet = new HashSet<>();
+    /*
+     * extract the context from http headers
+     */
+    private static final TextMapGetter<RestRequest> getter =
+            new TextMapGetter<RestRequest>() {
+                @Override
+                public Iterable<String> keys(RestRequest carrier) {
+                    List<String> iterable = new ArrayList<>();
+                    Set<String> headers = carrier.getHeaders();
+                    if(CollectionUtils.isNotEmpty(headers)) {
+                        iterable.addAll(headers);
+                    }
+                    return iterable;
+                }
+                @Override
+                public String get(RestRequest carrier, String key) {
+                    String headerValue = carrier.getHeader(key);
+                    return headerValue == null ? StringUtils.EMPTY : headerValue;
+                }
+            };
 
     static {
         validHttpStatusCodeSet.add(HttpStatus.SC_OK);
@@ -95,6 +122,8 @@ public abstract class BaseHttpRestController implements IRestHandler {
 
     @Autowired
     protected RateLimitService rateLimitService;
+    @Autowired
+    protected InboundConnectionLimitService inboundConnectionLimitService;
 
     protected String actionName = this.getClass().getSimpleName();
 
@@ -110,8 +139,13 @@ public abstract class BaseHttpRestController implements IRestHandler {
         try (Scope scope = span.makeCurrent()) {
             // Process the request
             checkToken(queryContext);
+
+            checkConnectionLimitAndBindConnection2App(queryContext);
+
             preRequest(queryContext);
+
             handleRequest(queryContext);
+
             postRequest(queryContext);
             //handle response status code
             RestResponse response = queryContext.getResponse();
@@ -137,65 +171,6 @@ public abstract class BaseHttpRestController implements IRestHandler {
             span.end();
         }
     }
-
-    /**
-     * 根据 http status 设置 span 状态
-     * @param span Span 对象
-     * @param httpStatus http status code
-     */
-    private void setSpanStatus(Span span, int httpStatus) {
-        if(!validHttpStatusCodeSet.contains(httpStatus)) {
-            span.setStatus(
-                    StatusCode.ERROR,
-                    String.format(
-                            "http状态码%d不在合法http状态码集%s内",
-                            httpStatus,
-                            JSON.toJSONString(validHttpStatusCodeSet)
-                    )
-            );
-        } else {
-            span.setStatus(StatusCode.OK);
-        }
-    }
-
-    /**
-     * 根据 request 对象，构建 span 对象，并注入 http 请求头相关信息
-     * @param request RestRequest 对象
-     * @return Span 对象
-     */
-    private Span buildSpan(RestRequest request) {
-        Context context = TEXT_MAP_PROPAGATOR.extract(Context.current(), request, getter);
-        Span span = tracer.spanBuilder(
-                String.format("%s.%s", this.getClass().getName(), "dispatchRequest")
-        ).setParent(context).setSpanKind(SpanKind.SERVER).startSpan();
-        span.setAttribute(Constant.ATTRIBUTE_KEY_COMPONENT, Constant.ATTRIBUTE_VALUE_COMPONENT_HTTP);
-        span.setAttribute(Constant.ATTRIBUTE_KEY_HTTP_METHOD, request.method().name());
-        span.setAttribute(Constant.ATTRIBUTE_KEY_HTTP_SCHEMA, Constant.ATTRIBUTE_VALUE_COMPONENT_HTTP);
-        span.setAttribute(Constant.ATTRIBUTE_KEY_HTTP_HOST, request.getLocalAddress().toString());
-        span.setAttribute(Constant.ATTRIBUTE_KEY_HTTP_TARGET, request.uri());
-        return span;
-    }
-
-    /*
-     * extract the context from http headers
-     */
-    private static final TextMapGetter<RestRequest> getter =
-            new TextMapGetter<RestRequest>() {
-                @Override
-                public Iterable<String> keys(RestRequest carrier) {
-                    List<String> iterable = new ArrayList<>();
-                    Set<String> headers = carrier.getHeaders();
-                    if(CollectionUtils.isNotEmpty(headers)) {
-                        iterable.addAll(headers);
-                    }
-                    return iterable;
-                }
-                @Override
-                public String get(RestRequest carrier, String key) {
-                    String headerValue = carrier.getHeader(key);
-                    return headerValue == null ? StringUtils.EMPTY : headerValue;
-                }
-            };
 
     /************************************************************** abstract method **************************************************************/
     /**
@@ -233,6 +208,31 @@ public abstract class BaseHttpRestController implements IRestHandler {
         appService.checkToken(queryContext);
         String encode = Base64.getEncoder().encodeToString(String.format("%s", "user_" + queryContext.getAppid() + ":" + queryContext.getAppDetail().getVerifyCode()).getBytes(StandardCharsets.UTF_8));
         queryContext.getRequest().putHeader(AUTHORIZATION, "Basic " + encode);
+    }
+
+    protected void checkConnectionLimitAndBindConnection2App(QueryContext queryContext) {
+        // 因为节点连接数上限需要断开连接
+        boolean isIgnoreConnection = inboundConnectionLimitService.isIgnore(queryContext);
+        if (isIgnoreConnection) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("发现要忽略的连接, 触发主动断开, appid {}, remoteAddress {}", queryContext.getAppid(),
+                             queryContext.getRemoteAddr());
+            }
+            throw new ConnectionLimitException("node connection limit err, please try again later and contact us!");
+        }
+        // 因为实例连接数上限需要断开连接
+        ConnectionLimitResult connectionLimit = inboundConnectionLimitService.appLimitResult(queryContext);
+        if (connectionLimit.isOverConnected()) {
+            boolean isNewConnection = inboundConnectionLimitService.isNew(queryContext);
+            if (isNewConnection) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("实例接入连接数达到上限, appid {}, count: {}, limit {}，触发主动断开",
+                                 queryContext.getAppid(), connectionLimit.getCount(), connectionLimit.getLimit());
+                }
+                throw new ConnectionLimitException("app connection limit err, please try again later and contact us!");
+            }
+        }
+        inboundConnectionLimitService.onHandle(queryContext);
     }
 
     protected void preRequest(QueryContext queryContext) {
@@ -455,5 +455,43 @@ public abstract class BaseHttpRestController implements IRestHandler {
                 // pass
             }
         }
+    }
+
+    /**
+     * 根据 http status 设置 span 状态
+     * @param span Span 对象
+     * @param httpStatus http status code
+     */
+    private void setSpanStatus(Span span, int httpStatus) {
+        if(!validHttpStatusCodeSet.contains(httpStatus)) {
+            span.setStatus(
+                    StatusCode.ERROR,
+                    String.format(
+                            "http状态码%d不在合法http状态码集%s内",
+                            httpStatus,
+                            JSON.toJSONString(validHttpStatusCodeSet)
+                    )
+            );
+        } else {
+            span.setStatus(StatusCode.OK);
+        }
+    }
+
+    /**
+     * 根据 request 对象，构建 span 对象，并注入 http 请求头相关信息
+     * @param request RestRequest 对象
+     * @return Span 对象
+     */
+    private Span buildSpan(RestRequest request) {
+        Context context = TEXT_MAP_PROPAGATOR.extract(Context.current(), request, getter);
+        Span span = tracer.spanBuilder(
+                String.format("%s.%s", this.getClass().getName(), "dispatchRequest")
+        ).setParent(context).setSpanKind(SpanKind.SERVER).startSpan();
+        span.setAttribute(Constant.ATTRIBUTE_KEY_COMPONENT, Constant.ATTRIBUTE_VALUE_COMPONENT_HTTP);
+        span.setAttribute(Constant.ATTRIBUTE_KEY_HTTP_METHOD, request.method().name());
+        span.setAttribute(Constant.ATTRIBUTE_KEY_HTTP_SCHEMA, Constant.ATTRIBUTE_VALUE_COMPONENT_HTTP);
+        span.setAttribute(Constant.ATTRIBUTE_KEY_HTTP_HOST, request.getLocalAddress().toString());
+        span.setAttribute(Constant.ATTRIBUTE_KEY_HTTP_TARGET, request.uri());
+        return span;
     }
 }

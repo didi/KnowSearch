@@ -1,7 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import static java.util.regex.Pattern.compile;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.op.manager.IpPort;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -13,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -37,6 +44,8 @@ public class CommonUtils {
     private static final ILog   LOGGER = LogFactory.getLog(CommonUtils.class);
 
     private static final String REGEX  = ",";
+    private static final String ELASTICSEARCH_YML = "elasticsearch.yml";
+    private static final String APPLICATION_PROPERTIES="application.properties";
 
     private CommonUtils() {
     }
@@ -303,7 +312,7 @@ public class CommonUtils {
         return sb.toString();
     }
      public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
-        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
+        Map<Object, Boolean> seen = Maps.newConcurrentMap();
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 
@@ -311,13 +320,108 @@ public class CommonUtils {
      * 避免模糊查询把查询条件中的"% _"当作通配符处理（造成结果是全量查询）
      */
     public static String sqlFuzzyQueryTransfer(String str){
-        if(str.contains("%")){
+        if(!StringUtils.isEmpty(str) && str.contains("%")){
             str = str.replaceAll("%", "\\\\%");
         }
-        if(str.contains("_")){
+        if(!StringUtils.isEmpty(str) && str.contains("_")){
             str = str.replaceAll("_","\\\\_");
         }
         return str;
+    }
+
+    public static List<IpPort> generalGroupConfig2ESIpPortList(GeneralGroupConfig config) {
+        final String elasticsearchYml =
+            JSON.parseObject(config.getFileConfig()).getString(ELASTICSEARCH_YML);
+        //获取ip下最小的端口号
+        final Integer port = getESPortByHttpPort(getESHttpPort(elasticsearchYml));
+        //获取
+        final JSONObject jsonObject = JSON.parseObject(config.getProcessNumConfig());
+        final String     hosts      = config.getHosts();
+        List<IpPort>     ipPorts    = Lists.newArrayList();
+        for (String host : org.apache.commons.lang3.StringUtils.split(hosts, ",")) {
+            final Integer processNum = jsonObject.getInteger(host);
+            final IpPort ipPort = IpPort.builder().minPort(port).maxPort(port + processNum).ip(host)
+                .build();
+            ipPorts.add(ipPort);
+        }
+        return ipPorts;
+
+    }
+
+    /**
+     * 一般分组config2网关知识产权港口列表
+     *
+     * @param config 配置
+     * @return {@link List}<{@link IpPort}>
+     */
+    public static List<IpPort> generalGroupConfig2GatewayIpPortList(GeneralGroupConfig config) {
+        final String applicationProperties =
+            JSON.parseObject(config.getFileConfig()).getString(APPLICATION_PROPERTIES);
+        //获取ip下最小的端口号
+        final Integer port = Integer.parseInt(getGatewayHttpPort(applicationProperties));
+        //获取
+        final JSONObject jsonObject = JSON.parseObject(config.getProcessNumConfig());
+        final String     hosts      = config.getHosts();
+        List<IpPort>     ipPorts    = Lists.newArrayList();
+        for (String host : org.apache.commons.lang3.StringUtils.split(hosts, ",")) {
+            final Integer processNum = jsonObject.getInteger(host);
+            final IpPort ipPort = IpPort.builder().minPort(port).maxPort(port + processNum).ip(host)
+                .build();
+            ipPorts.add(ipPort);
+        }
+        return ipPorts;
+    }
+
+
+
+    		/**
+		 * 它接受一个字符串并返回一个字符串
+		 *
+		 * @param fileConfig 文件的内容。
+		 * @return http 服务器的端口号。
+		 */
+        public static String getESHttpPort(String fileConfig) {
+            Matcher matcher = compile("http.port:\\s+\\d+").matcher(fileConfig);
+            if (matcher.find()) {
+                return matcher.group();
+            }
+            Matcher matcher2 = compile("http:\\\\n\\s*port:\\s*\\d*").matcher(fileConfig);
+            if (matcher2.find()) {
+                return matcher2.group();
+            }
+            return null;
+        }
+    /**
+     * > 它接受一个字符串，并返回它在该字符串中找到的第一个数字
+     *
+     * @param httpPort 应用程序运行的端口。
+     * @return httpPort 字符串的端口号。
+     */
+    public static Integer getESPortByHttpPort(String httpPort) {
+        Matcher matcher = compile("\\d+").matcher(httpPort);
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group());
+        }
+        return null;
+    }
+
+    /**
+     * 获取gateway 端口号
+     *
+     * @param applicationProperties 应用程序属性
+     * @return {@link String}
+     */
+    private static String getGatewayHttpPort(String applicationProperties) {
+        final Matcher matcher = compile("gateway.httpTransport.port=\\d+").matcher(
+            applicationProperties);
+        if (matcher.find()) {
+            final Matcher portMat = compile("\\d+").matcher(
+                matcher.group());
+            if (portMat.find()) {
+                return portMat.group(0);
+            }
+        }
+        return "0";
     }
 
 }

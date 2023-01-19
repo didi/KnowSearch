@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail;
 
-import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 import java.util.Date;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
+import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

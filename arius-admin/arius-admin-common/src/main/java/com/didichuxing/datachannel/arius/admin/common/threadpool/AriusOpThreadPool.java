@@ -1,16 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.common.threadpool;
 
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
-import com.didiglobal.knowframework.observability.Observability;
-import lombok.NoArgsConstructor;
+import java.util.List;
+import java.util.concurrent.*;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.List;
-import java.util.concurrent.*;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.observability.Observability;
+
+import lombok.NoArgsConstructor;
 
 /**
  * 异步操作线程池
@@ -34,7 +37,7 @@ public class AriusOpThreadPool implements Executor {
     public void init() {
         LOG.info("class=AriusOpThreadPool||method=init||AriusOpThreadPool init start..");
         pool = Observability.wrap(new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(), springThreadFactory));
+            new LinkedBlockingQueue<Runnable>(), springThreadFactory));
         Runtime.getRuntime().addShutdownHook(new Thread() {
 
             @Override

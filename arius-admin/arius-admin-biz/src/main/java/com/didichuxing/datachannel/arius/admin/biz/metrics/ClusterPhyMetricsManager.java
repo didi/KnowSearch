@@ -3,7 +3,9 @@ package com.didichuxing.datachannel.arius.admin.biz.metrics;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.UserConfigInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MultiMetricsClusterPhyNodeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterTaskDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyTypeMetricsEnum;
@@ -48,31 +50,6 @@ public interface ClusterPhyMetricsManager {
     Result<List<VariousLineChartMetricsVO>> getMultiClusterMetrics(MultiMetricsClusterPhyNodeDTO param,
                                                                    Integer projectId, String userName,
                                                                    ClusterPhyTypeMetricsEnum metricsTypeEnum);
-
-
-    /**
-     * 获取物理集群多个索引的指标信息
-     * @param param 物理集群索引指标
-     * @param projectId projectId
-     * @param userName 账号
-     * @param metricsTypeEnum 指标处理器类型
-     * @return result
-     */
-    Result<List<VariousLineChartMetricsVO>> getMultiClusterIndicesMetrics(MultiMetricsClusterPhyIndicesDTO param,
-                                                                          Integer projectId, String userName,
-                                                                          ClusterPhyTypeMetricsEnum metricsTypeEnum);
-
-    /**
-     * 获取物理集群多个模版的指标信息
-     * @param param 物理集群模版指标
-     * @param projectId projectId
-     * @param userName 账号
-     * @param metricsTypeEnum 指标处理器类型
-     * @return result
-     */
-    Result<List<VariousLineChartMetricsVO>> getMultiClusterTemplatesMetrics(MultiMetricsClusterPhyTemplateDTO param,
-                                                                            Integer projectId, String userName,
-                                                                            ClusterPhyTypeMetricsEnum metricsTypeEnum);
 
     /**
      * 获取用户配置指标

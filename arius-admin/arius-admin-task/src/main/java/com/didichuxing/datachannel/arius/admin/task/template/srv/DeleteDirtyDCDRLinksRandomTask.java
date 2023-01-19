@@ -1,5 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.task.template.srv;
 
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
@@ -17,12 +22,8 @@ import com.didiglobal.knowframework.job.annotation.Task;
 import com.didiglobal.knowframework.job.common.TaskResult;
 import com.didiglobal.knowframework.job.core.job.Job;
 import com.didiglobal.knowframework.job.core.job.JobContext;
-import java.util.List;
-
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 删除脏dcdrlinks随机任务

@@ -1,0 +1,17 @@
+{
+  "from": %d,
+  "size": %d,
+  "query": {
+    "bool": {
+      "must": %s,
+      "must_not": %s
+    }
+  },
+  "sort": [
+      {
+        "%s": {
+          "order": "%s"
+        }
+      }
+  ]
+}

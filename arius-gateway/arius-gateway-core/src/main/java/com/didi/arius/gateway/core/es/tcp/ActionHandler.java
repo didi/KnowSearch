@@ -1,16 +1,10 @@
 package com.didi.arius.gateway.core.es.tcp;
 
-import com.didi.arius.gateway.common.consts.QueryConsts;
-import com.didi.arius.gateway.common.exception.FlowLimitException;
-import com.didi.arius.gateway.common.exception.ServerBusyException;
-import com.didi.arius.gateway.common.metadata.ActionContext;
-import com.didi.arius.gateway.common.utils.Convert;
-import com.didi.arius.gateway.core.component.QueryConfig;
-import com.didi.arius.gateway.core.es.http.ESBase;
-import com.didi.arius.gateway.core.service.*;
-import com.didiglobal.knowframework.log.ILog;
-import com.didiglobal.knowframework.log.LogFactory;
-import com.didiglobal.knowframework.log.LogGather;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.concurrent.TimeUnit;
+
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.cluster.block.ClusterBlockException;
@@ -24,10 +18,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.concurrent.TimeUnit;
+import com.didi.arius.gateway.common.consts.QueryConsts;
+import com.didi.arius.gateway.common.exception.FlowLimitException;
+import com.didi.arius.gateway.common.exception.ServerBusyException;
+import com.didi.arius.gateway.common.metadata.ActionContext;
+import com.didi.arius.gateway.common.utils.Convert;
+import com.didi.arius.gateway.core.component.QueryConfig;
+import com.didi.arius.gateway.core.es.http.ESBase;
+import com.didi.arius.gateway.core.service.ESTcpClientService;
+import com.didi.arius.gateway.core.service.MetricsService;
+import com.didi.arius.gateway.core.service.RateLimitService;
+import com.didi.arius.gateway.core.service.RequestStatsService;
+import com.didiglobal.knowframework.log.ILog;
+import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.log.LogGather;
 
 /**
 * @author weizijun
@@ -110,8 +114,10 @@ public abstract class ActionHandler extends ESBase {
 	
 	protected void preRequest(ActionContext actionContext) {
 		statLogger.info(QueryConsts.DLFLAG_PREFIX + "query_tcp_request||appid={}||requestId={}||action={}||group={}||clusterId={}||clusterName={}||user={}||remoteAddr={}||requestLen={}",
-				actionContext.getAppid(), actionContext.getRequestId(), actionContext.getActionName(), QueryConsts.GATEWAY_GROUP, actionContext.getClusterId(), actionContext.getCluster(), actionContext.getUser(),
-				actionContext.getRemoteAddr(), actionContext.getRequestLength());
+		                actionContext.getAppid(), actionContext.getRequestId(), actionContext.getActionName(),
+		                queryConfig.getClusterName(), actionContext.getClusterId(), actionContext.getCluster(),
+		                actionContext.getUser(),
+		                actionContext.getRemoteAddr(), actionContext.getRequestLength());
 		actionContext.setRequestTime(System.currentTimeMillis());
 		
 

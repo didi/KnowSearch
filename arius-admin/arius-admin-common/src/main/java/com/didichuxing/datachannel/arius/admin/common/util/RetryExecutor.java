@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import java.util.concurrent.TimeUnit;
+
 import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 
 public class RetryExecutor<T> {
     private static final ILog LOGGER     = LogFactory.getLog(RetryExecutor.class);
