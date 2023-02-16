@@ -39,7 +39,7 @@ DashBoard、集群看板、网关看板、集群管理、索引管理核心产�
 
 # 4.文档资源
 
-- [KnowSearch用户指南](doc/KnowSearch用户指南.md)
+- [KnowSearch用户手册](doc/KnowSearch用户手册.md)
 - [KnowSearch安装部署文档](doc/KnowSearch安装部署文档.md)
 - [KnowSearch设计说明](doc/KnowSearch设计说明.md)
 - [KnowSearch源码编译运行文档](doc/KnowSearch源码编译运行文档.md)
