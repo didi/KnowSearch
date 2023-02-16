@@ -1,23 +1,13 @@
 import React from "react";
-import { Empty, Switch, Tooltip } from "antd";
-import {
-  baseInfo,
-  configInfo,
-  indexExplain,
-  onHandleServerTag,
-} from "./config";
+import { baseInfo, indexExplain } from "./config";
 import Url from "lib/url-parser";
-import {
-  IOpPhysicsClusterDetail,
-  ITemplateSrvData,
-} from "typesPath/cluster/cluster-types";
 import "./index.less";
-import {
-  getPhyClusterAvalibleTemplateSrv,
-  getPhyClusterTemplateSrv,
-} from "api/cluster-api";
 import { BaseDetail } from "component/dantd/base-detail";
-import { isOpenUp, showTag } from 'constants/common';
+import { isOpenUp, showTag } from "constants/common";
+import { Dispatch } from "redux";
+import * as actions from "actions";
+import { connect } from "react-redux";
+
 // 动态配置换成单独的tabs
 // import { EditList } from "./edit-list";
 export interface ITemplateSrv {
@@ -25,16 +15,21 @@ export interface ITemplateSrv {
   serviceId: number;
   serviceName: string;
 }
-export class ClusterInfo extends React.Component<{
-  phyBaseInfo: IOpPhysicsClusterDetail;
-}> {
+
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  setModalId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setModalId(modalId, params, cb)),
+  setDrawerId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setDrawerId(modalId, params)),
+});
+const connects: Function = connect;
+@connects(null, mapDispatchToProps)
+export class ClusterInfo extends React.Component<any> {
   public clusterId: number;
   public physicsCluster: string;
-  public auth: string
+  public auth: string;
   constructor(props: any) {
     super(props);
     const url = Url();
-    this.auth = url.search.auth
+    this.auth = url.search.auth;
     this.clusterId = Number(url.search.clusterId);
     this.physicsCluster = url.search.physicsCluster;
   }
@@ -43,19 +38,6 @@ export class ClusterInfo extends React.Component<{
     clusterTemplateSrvs: [],
     hasCapacityServer: false,
   };
-
-  public componentDidMount() {
-    this.reloadDataIndexServer();
-  }
-
-  public reloadDataIndexServer() {
-    Promise.all([
-      getPhyClusterAvalibleTemplateSrv(this.physicsCluster),
-      getPhyClusterTemplateSrv(this.physicsCluster),
-    ]).then((res) => {
-      this.setPhyClusterTemplateSrvs(res);
-    });
-  }
 
   public componentWillUnmount() {
     this.setState = () => false;
@@ -74,7 +56,7 @@ export class ClusterInfo extends React.Component<{
       if (isOpenUp) {
         // 开源环境部分功能禁用
         if (showTag[item.serviceName] === 3) {
-          disabled = true
+          disabled = true;
         }
         // 在开源环境下，分类为 0 隐藏
         if (showTag[item.serviceName] !== 0) {
@@ -102,7 +84,7 @@ export class ClusterInfo extends React.Component<{
     let tip = "暂无相关信息";
     if (isOpenUp) {
       if (showTag[label] === 3) {
-        return '该功能仅面向商业版客户开放';
+        return "该功能仅面向商业版客户开放";
       }
     }
     indexExplain.forEach((item) => {
@@ -114,51 +96,11 @@ export class ClusterInfo extends React.Component<{
   };
 
   public render() {
-    const { phyBaseInfo } = this.props;
-    const { clusterTemplateSrvs } = this.state;
+    const { phyBaseInfo, setModalId, reloadData } = this.props;
     return (
-      <>
-        <BaseDetail
-          title={"基本信息"}
-          columns={baseInfo}
-          baseDetail={phyBaseInfo}
-        />
-        {/* <BaseDetail
-          title={"配置信息"}
-          columns={configInfo}
-          baseDetail={phyBaseInfo}
-        /> */}
-        <div className="base-info-title">索引模板服务</div>
-        <div className="base-index-box">
-          <div className="base-index-box-tag">
-            {clusterTemplateSrvs.map((row: ITemplateSrvData, index: number) => (
-              <div className="base-index-box-tag-item" key={index}>
-                <Tooltip
-                  placement="top"
-                  title={this.renderTip(row.item.serviceName)}
-                  className="base-index-box-tag-item-title"
-                >
-                  <span style={{ color: row.disabled ? 'rgb(0, 0, 0, 0.3)' : '', cursor: row.disabled ? 'not-allowed' : '' }}>{row.item.serviceName}</span>
-                </Tooltip>
-                <Switch
-                  disabled={row.disabled}
-                  size="small"
-                  checked={row.status ? true : false}
-                  onClick={() =>
-                    onHandleServerTag(
-                      row,
-                      phyBaseInfo.cluster,
-                      this.reloadDataIndexServer.bind(this)
-                    )
-                  }
-                />
-              </div>
-            ))}
-            {clusterTemplateSrvs && clusterTemplateSrvs.length < 1 ? <Empty style={{ width: '100%', margin: '20px 0px' }} description="该集群版本不支持索引模板服务" /> : null}
-          </div>
-        </div>
-        {/* <EditList /> */}
-      </>
+      <div className="base-info">
+        <BaseDetail columns={baseInfo(setModalId, reloadData, phyBaseInfo)} baseDetail={phyBaseInfo} />
+      </div>
     );
   }
 }

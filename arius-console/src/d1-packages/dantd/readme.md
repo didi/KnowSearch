@@ -1,3 +1,7 @@
+## 看不懂？点击 wiki 链接查看应用项目及项目 demo
+
+- wiki: http://wiki.intra.xiaojukeji.com/pages/viewpage.action?pageId=635293796
+
 ## 组件简单介绍
 
 | 组件       | 说明             | 使用                |

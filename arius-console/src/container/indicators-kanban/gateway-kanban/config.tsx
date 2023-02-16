@@ -7,6 +7,7 @@ import { NodeView } from "./node-view";
 import { ClientNodeView } from "./clientnode-view";
 import { ProjectView } from "./project-view";
 import { QueryTemplate } from "./query-template";
+import InfoTooltip from "component/infoTooltip";
 
 export enum TAB_LIST_KEY {
   overview = "overview",
@@ -19,34 +20,34 @@ export enum TAB_LIST_KEY {
 
 export const TAB_LIST = [
   {
-    name: "总览视图",
-    key: TAB_LIST_KEY.overview,
-    content: () => <OverviewView />,
-  },
-  {
-    name: "节点视图",
+    name: "节点",
     key: TAB_LIST_KEY.node,
     content: () => <NodeView />,
   },
   {
-    name: "ClientNode视图",
+    name: "ClientNode",
     key: TAB_LIST_KEY.clientNode,
     content: () => <ClientNodeView />,
   },
   {
-    name: "索引视图",
+    name: "索引",
     key: TAB_LIST_KEY.index,
     content: () => <IndexView />,
   },
   {
-    name: "项目视图",
+    name: "应用",
     key: TAB_LIST_KEY.project,
     content: () => <ProjectView />,
   },
   {
-    name: "查询模版",
+    name: "查询模板",
     key: TAB_LIST_KEY.queryTemplate,
     content: () => <QueryTemplate />,
+  },
+  {
+    name: "总览",
+    key: TAB_LIST_KEY.overview,
+    content: () => <OverviewView />,
   },
 ];
 const menuMap = new Map<string, IMenuItem>();
@@ -56,3 +57,14 @@ TAB_LIST.forEach((d) => {
 });
 
 export const MENU_MAP = menuMap;
+
+export const getRenderToolTip = (item) => {
+  return item?.currentCalLogic || item?.price || item?.threshold ? (
+    <InfoTooltip
+      className="indicators-info"
+      currentCalLogic={item?.currentCalLogic}
+      price={item?.price}
+      threshold={item?.threshold}
+    ></InfoTooltip>
+  ) : null;
+};

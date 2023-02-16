@@ -1,19 +1,15 @@
-import React from 'react';
-import {
-  Input,
-  Button,
-  Table,
-} from 'antd';
-import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
-import './index.less'
+import React from "react";
+import { Input, Button, Table } from "antd";
+import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import "./index.less";
 
-export const DTablerefix = 'd-table';
+export const DTablerefix = "d-table";
 
 export const pagination = {
   // position: 'bottomRight',
   showQuickJumper: true,
   showSizeChanger: true,
-  pageSizeOptions: ['10', '20', '50', '100', '200', '500'],
+  pageSizeOptions: ["10", "20", "50", "100", "200", "500"],
   showTotal: (total: number) => `共 ${total} 条`,
   // hideOnSinglePage: true,
 };
@@ -56,7 +52,6 @@ export interface IDTableProps {
 }
 
 export const DTable = (props: IDTableProps) => {
-
   const renderSearch = () => {
     if (!props?.tableHeaderSearchInput) return;
     const { searchInputRightBtns = [] } = props;
@@ -65,42 +60,61 @@ export const DTable = (props: IDTableProps) => {
       <div className={`${DTablerefix}-box-header-search`}>
         <div className={`${DTablerefix}-box-header-search-custom`}>
           {searchInputRightBtns.map((item, index) => {
-            if (item?.type === 'custom') {
-              return <span style={{ marginLeft: 10 }} className={item.className} key={index}>{item?.customFormItem}</span>;
+            if (item?.type === "custom") {
+              return (
+                <span style={{ marginLeft: 10 }} className={item.className} key={index}>
+                  {item?.customFormItem}
+                </span>
+              );
             }
-            return item.noRefresh ?
-              <Button className={item.className} key={index}>{item.label}</Button> :
-              <Button disabled={item.disabled} loading={item.loading} key={index} className={item.className} onClick={item.clickFunc}> {item.label} </Button>
+            return item.noRefresh ? (
+              <Button className={item.className} key={index}>
+                {item.label}
+              </Button>
+            ) : (
+              <Button disabled={item.disabled} loading={item.loading} key={index} className={item.className} onClick={item.clickFunc}>
+                {" "}
+                {item.label}{" "}
+              </Button>
+            );
           })}
         </div>
         <div>
           <Input
-            placeholder={placeholder || '请输入关键字'}
+            allowClear
+            placeholder={placeholder || "请输入关键字"}
             style={{ width: width || 200 }}
-            onChange={(e) => submit(e.target.value)}
-            suffix={<SearchOutlined style={{ color: '#ccc' }} />}
+            onChange={(e) => {
+              console.log(e, 111);
+              submit(e.target.value);
+            }}
+            suffix={<SearchOutlined style={{ color: "#ccc" }} />}
           />
         </div>
       </div>
     );
-  }
+  };
 
   const renderTableInnerOp = (reloadFunc: any, btns?: ITableBtn[], element?: JSX.Element) => {
-
     return (
       <div className={`${DTablerefix}-box-header-btn`}>
         {reloadFunc && <ReloadOutlined className="reload" onClick={reloadFunc} />}
         {btns?.map((item, index) => {
-          return item.noRefresh ?
-            <Button className={item.className} key={index}>{item.label}</Button> :
-            <Button disabled={item.disabled} loading={item.loading} key={index} className={item.className} onClick={item.clickFunc}> {item.label} </Button>
+          return item.noRefresh ? (
+            <Button className={item.className} key={index}>
+              {item.label}
+            </Button>
+          ) : (
+            <Button disabled={item.disabled} loading={item.loading} key={index} className={item.className} onClick={item.clickFunc}>
+              {" "}
+              {item.label}{" "}
+            </Button>
+          );
         })}
-        {
-          element
-        }
+        {element}
       </div>
     );
-  }
+  };
 
   const {
     rowKey,
@@ -111,8 +125,8 @@ export const DTable = (props: IDTableProps) => {
     noPagination,
     reloadData,
     getOpBtns = () => [],
-    getJsxElement = () => (<></>),
-    attrs
+    getJsxElement = () => <></>,
+    attrs,
   } = props;
 
   return (
@@ -135,4 +149,4 @@ export const DTable = (props: IDTableProps) => {
       </div>
     </>
   );
-}
+};

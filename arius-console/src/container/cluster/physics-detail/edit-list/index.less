@@ -1,21 +1,16 @@
 .detail-edit-list {
-  padding: 20px 0 20px 0;
+  background: #fff;
   .edit-from {
     position: absolute;
-    // display: none;
     width: 0;
     right: 70px;
     top: 18px;
     overflow: hidden;
     transition: width 0.3s;
-    // transform: translateY(-50%);
   }
   .edit-from-transition {
     display: block;
     width: calc(100% - 90px);
-  }
-  .ant-form-item-control {
-    // height: 56px;
   }
   .ant-form-item-control-input,
   .ant-select {
@@ -30,7 +25,7 @@
   }
   .ant-list-bordered {
     border: 1px solid #d9d9d9;
-    border-radius: 5px;
+    border-radius: 4px;
     margin-bottom: 20px;
   }
   .ant-list-header {
@@ -40,10 +35,13 @@
     padding-left: 24px;
     min-height: 40px;
     border-bottom: 1px solid #f0f0f0;
-    background-color: aliceblue;
+    background-color: #f8fafd;
     padding-top: 12px;
     padding-bottom: 12px;
     box-sizing: border-box;
+  }
+  .ant-empty-normal {
+    margin: 10px auto;
   }
   .detail-edit-list-row {
     padding: 0;
@@ -54,22 +52,25 @@
     background: rgb(219, 224, 228);
   }
   .detail-edit-list-row-col {
+    position: relative;
     display: flex;
     align-items: center;
     padding: 0 24px;
     min-height: 40px;
   }
+  .background {
+    background-color: #f8fafd;
+  }
   .detail-edit-content {
     display: flex;
     align-items: center;
+    width: 30%;
   }
   .edit-box {
-    display: flex;
     justify-content: center;
     align-items: center;
     width: 140px;
     padding: 0 10px 0 10px;
-    text-align: center;
     overflow: hidden;
     word-wrap: break-word;
     // line-height: 0px;
@@ -114,13 +115,49 @@
         margin-left: 20px;
       }
     }
-    // .anticon {
-    //   display: none;
-    // }
-    // &-col:hover {
-    //   .anticon {
-    //     display: inline-block;
-    //   }
-    // }
+  }
+  .ant-list-header {
+    font-family: PingFangSC-Semibold;
+    font-size: 14px;
+    color: #303a51;
+    line-height: 20px;
+    height: 40px;
+    font-weight: 600;
+  }
+}
+
+.edit-list-title {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  .ant-btn-link {
+    width: 104px;
+    height: 30px;
+    border: 1px solid #2f81f9;
+    border-radius: 4px;
+  }
+  .ant-input-affix-wrapper {
+    position: relative;
+    width: 270px;
+    height: 32px;
+    border: 1px solid #dbe0e4;
+    border-radius: 4px;
+    .ant-input-prefix {
+      position: absolute;
+      right: 7px;
+      top: 9px;
+      cursor: pointer;
+    }
+    .ant-input {
+      margin-right: 20px;
+    }
+  }
+  .ant-input-affix-wrapper-focused {
+    border-color: #3d91ff;
+  }
+  .hasclear {
+    .ant-input-prefix {
+      right: 27px;
+    }
   }
 }

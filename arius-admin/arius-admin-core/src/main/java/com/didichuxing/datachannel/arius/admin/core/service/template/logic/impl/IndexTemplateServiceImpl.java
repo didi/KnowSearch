@@ -192,6 +192,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     public List<IndexTemplate> pagingGetTemplateSrvByCondition(TemplateQueryDTO param) {
         List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
         String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
+        if(StringUtils.isNotBlank(sortTerm)){
+            sortTerm = sortTerm=="blockRead"?"block_read":"block_write";
+        }
         
         String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
         try {

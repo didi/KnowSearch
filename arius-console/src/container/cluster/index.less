@@ -1,0 +1,85 @@
+.zeus-url {
+  display: flex;
+  align-items: center;
+  &-tag {
+    font-size: 12px;
+    color: #1473ff;
+    background-color: rgba(20, 115, 255, 0.06);
+    border-radius: 4px;
+    border: none;
+    width: 80px;
+    text-align: center;
+    margin-left: 4px;
+    cursor: pointer;
+  }
+}
+
+// .ant-col #d-range-time .d-range-time-input {
+//   width: 360px;
+//   height: 32px !important;
+//   border-radius: 2px;
+// }
+.ant-col {
+  //对全局的改样式生效
+  //max-width:100%;
+  #d-range-time {
+    width: 100%;
+    .d-range-time-input {
+      width: 100% !important;
+      height: 32px !important;
+      border-radius: 2px;
+    }
+  }
+}
+.dashborad-popover {
+  background: #ffffff;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.01), 0 3px 6px 3px rgba(0, 0, 0, 0.01), 0 2px 6px 0 rgba(0, 0, 0, 0.03);
+  border-radius: 4px;
+  padding-top: 4px;
+  .ant-popover-arrow {
+    opacity: 0;
+  }
+  .ant-popover-inner-content {
+    padding: 16px 24px;
+  }
+
+  .ant-picker-range {
+    background: rgba(33, 37, 41, 0.04);
+    border-radius: 8px;
+
+    .ant-picker-input > input {
+      font-family: PingFangSC-Regular;
+      font-size: 13px;
+      color: #74788d;
+    }
+  }
+  .d-range-time-input {
+    height: 32px;
+  }
+  .ant-radio-button-wrapper {
+    border: none !important;
+    height: 18px;
+    line-height: 18px;
+    padding: 0px;
+    font-family: PingFangSC-Medium;
+    font-size: 13px;
+    color: #495057;
+    letter-spacing: 0;
+    transition: none;
+
+    &.ant-radio-button-wrapper-checked {
+      color: #556ee6;
+    }
+  }
+
+  .dd-time-range-module .flx_con .time_title {
+    font-family: PingFangSC-Medium;
+    font-size: 14px;
+    color: #212529;
+    letter-spacing: 0;
+  }
+
+  .dd-time-range-module .flx_con .flx_l {
+    width: 144px;
+  }
+}

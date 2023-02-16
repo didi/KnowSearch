@@ -1,0 +1,34 @@
+@ant-prefix: 'dcloud';
+@checkbox-prefix-cls: ~'@{ant-prefix}-checkbox';
+
+.dcloud-checkbox-table-columns {
+  flex-wrap: wrap-reverse;
+  max-height: 186px;
+  overflow: auto;
+
+  .@{checkbox-prefix-cls}-wrapper {
+    width: 126px;
+    max-width: 50%;
+    padding-bottom: 10px;
+  }
+
+  .@{checkbox-prefix-cls} {
+    border-radius: 4px;
+  }
+}
+
+.dcloud-filter-modal{
+  .@{ant-prefix}-modal-footer{
+    .@{ant-prefix}-btn-sm{
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+  }
+}
+
+// 去除自定义列默认的内填充
+.dcloud-checkbox-table-serch {
+  width: 100%;
+  padding: 16px 0;
+  border-radius: 4px;
+}

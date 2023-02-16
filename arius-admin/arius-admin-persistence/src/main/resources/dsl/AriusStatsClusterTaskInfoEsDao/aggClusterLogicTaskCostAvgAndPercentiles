@@ -3,9 +3,11 @@
 	"query": {
 		"bool": {
 			"must": [
-			       "terms": {
-                     	"node": %s
-                },
+			    {
+			    "terms": {
+                       "node": %s
+                    }
+			    },
 				{
 					"range": {
 						"timestamp": {

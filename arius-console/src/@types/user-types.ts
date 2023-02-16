@@ -1,7 +1,6 @@
 export interface IUser {
   domainAccount?: string;
   chineseName: string;
-  department: string;
   label?: string;
   value?: string;
   role: number;
@@ -13,19 +12,12 @@ export interface IUser {
   email?: string;
   name?: string;
 }
-
-export interface IAppDetail {
-  name: string;
-  department: string;
-  responsible: string;
-  searchType: number;
-  id: number;
-  showVerifyCode: boolean;
-  cluster?: string;
-  departmentId: string;
-  isRoot: number;
-  memo: string;
-  queryThreshold: number;
-  verifyCode: string;
-  dataCenter: string;
+export interface NewIUser {
+  deptId?: number;
+  email?: string;
+  id?: number;
+  phone?: string;
+  realName?: string;
+  roleList?: string[];
+  userName?: string;
 }

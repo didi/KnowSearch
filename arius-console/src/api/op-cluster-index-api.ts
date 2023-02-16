@@ -1,13 +1,13 @@
-import { IPhysicalTemplateParams } from 'typesPath/params-types';
-import fetch, { formFetch } from '../lib/fetch';
-
-export const getPhysicalTemplateList = (params: IPhysicalTemplateParams) => {
-  return fetch(`/v2/op/template/physical/list`, {
-    method: 'POST',
-    body: JSON.stringify(params),
-  });
-};
+import fetch, { formFetch } from "../lib/fetch";
 
 export const getPhyNodeDivideList = (clusterId: number) => {
-  return fetch(`/v3/op/phy/cluster/${clusterId}/regioninfo`); // regioninfo
+  return fetch(`/v3/cluster/phy/node/${clusterId}`); // regioninfo
+};
+
+// 批量下线离线节点
+export const deleteNode = (params) => {
+  return fetch(`/v3/cluster/phy/node`, {
+    method: "DELETE",
+    body: JSON.stringify(params),
+  });
 };

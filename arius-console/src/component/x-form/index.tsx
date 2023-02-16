@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Button, Checkbox, DatePicker, Form, Input, InputNumber, Radio, Select, Switch, Upload, Cascader, Col, Row } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
+import { filterOption } from "lib/utils";
 
 const TextArea = Input.TextArea;
 const { RangePicker } = DatePicker;
@@ -23,7 +24,7 @@ export enum FormItemType {
 
 export interface IFormItem {
   key: string;
-  label: string;
+  label: string | React.ReactNode;
   type: FormItemType;
   value?: string;
   options?: any[];
@@ -41,6 +42,7 @@ export interface IFormItem {
   isCustomStyle?: boolean;
   CustomStyle?: any;
   customFormItem?: any;
+  className?: any;
 }
 
 export interface IFormSelect extends IFormItem {
@@ -65,20 +67,21 @@ interface IXFormProps {
   formLayout?: any;
   layout?: "inline" | "horizontal" | "vertical";
   onHandleValuesChange?: (value: any, allValues: object) => any;
+  className?: string;
 }
 
 export const renderFormItem = (item: IFormItem) => {
   switch (item.type) {
     default:
     case FormItemType.input:
-      return <Input key={item.key} {...item.attrs} />;
+      return <Input allowClear key={item.key} {...item.attrs} />;
     case FormItemType.inputNumber:
       return <InputNumber {...item.attrs} />;
     case FormItemType.textArea:
-      return <TextArea rows={2} {...item.attrs} />;
+      return <TextArea allowClear rows={2} {...item.attrs} />;
     case FormItemType.select:
       return (
-        <Select key={item.key} placeholder={item.attrs?.placeholder || "请选择"} {...item.attrs}>
+        <Select showSearch filterOption={filterOption} key={item.key} placeholder={item.attrs?.placeholder || "请选择"} {...item.attrs}>
           {(item as IFormSelect).options &&
             (item as IFormSelect).options.map((v, index) => (
               <Select.Option key={v.value || v.key || index} value={v.value} disabled={v.disabled}>
@@ -153,7 +156,7 @@ export const handleFormItem = (formItem: any, formData: any) => {
 };
 
 export const XForm: React.FC<IXFormProps> = (props: IXFormProps) => {
-  const { layout, formLayout, formData, formMap, form, wrappedComponentRef, onHandleValuesChange } = props;
+  const { layout, formLayout, formData, formMap, form, wrappedComponentRef, onHandleValuesChange, className } = props;
   const onUploadFileChange = (e: any) => {
     if (Array.isArray(e)) {
       return e;
@@ -189,11 +192,19 @@ export const XForm: React.FC<IXFormProps> = (props: IXFormProps) => {
 
       if (formItem.type === FormItemType.text)
         return (
-          <div key={formItem.key} style={{ display: "flex" }}>
-            <div className="ant-form-item-label">
-              <label>{typeof formItem.label === "string" ? formItem.label + ":" : formItem.label}</label>
+          <div
+            key={formItem.key}
+            className={formItem.className}
+            style={
+              formItem.isCustomStyle
+                ? { display: "flex", marginBottom: 10, ...formItem.CustomStyle }
+                : { display: "flex", marginBottom: 10 }
+            }
+          >
+            <div className="ant-form-item-label" style={{ padding: 0, color: "#697687" }}>
+              <label className="text-label">{typeof formItem.label === "string" ? formItem.label + ":" : formItem.label}</label>
             </div>
-            <div style={{ paddingLeft: 10 }}>{(formItem as IFormCustom).customFormItem}</div>
+            <div className="text-custom-item">{(formItem as IFormCustom).customFormItem}</div>
           </div>
         );
       return (
@@ -205,8 +216,8 @@ export const XForm: React.FC<IXFormProps> = (props: IXFormProps) => {
             rules={formItem.rules || [{ required: false, message: "" }]}
             initialValue={initialValue}
             valuePropName={valuePropName}
-            className={formItem.isCustomStyle ? "ant-form-item-custom" : null} // 兼容负责人选择后表单样式变大
-            style={formItem.isCustomStyle ? { marginBottom: 24, ...formItem.CustomStyle } : null}
+            className={formItem.className ? formItem.className : formItem.isCustomStyle ? "ant-form-item-custom" : null} // 兼容负责人选择后表单样式变大
+            style={formItem.isCustomStyle ? { margin: "16px 0", ...formItem.CustomStyle } : { margin: "16px 0" }}
             getValueFromEvent={formItem.type === FormItemType.upload ? onUploadFileChange : null}
             {...formItem.formAttrs}
           >
@@ -219,7 +230,14 @@ export const XForm: React.FC<IXFormProps> = (props: IXFormProps) => {
 
   return (
     <>
-      <Form ref={wrappedComponentRef} form={form} {...defaultLayout} layout={layout || "horizontal"} onValuesChange={onHandleValuesChange}>
+      <Form
+        className={className}
+        ref={wrappedComponentRef}
+        form={form}
+        {...defaultLayout}
+        layout={layout || "horizontal"}
+        onValuesChange={onHandleValuesChange}
+      >
         {renderFormItemBox(formMap)}
       </Form>
     </>

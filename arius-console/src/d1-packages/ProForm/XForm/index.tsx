@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 import {
   Button,
   Checkbox,
@@ -15,33 +15,33 @@ import {
   Col,
   TimePicker,
   AutoComplete,
-  TreeSelect
-} from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
-import { useMemo } from 'react';
-import Submitter, { SubmitterProps } from '../Submitter';
-import { useState } from 'react';
+  TreeSelect,
+} from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+import { useMemo, useState } from "react";
+import Submitter, { SubmitterProps } from "../Submitter";
+import { filterOption } from "lib/utils";
 
 const TextArea = Input.TextArea;
 const { RangePicker } = DatePicker;
 
 export enum FormItemType {
-  input = 'input',
-  inputNumber = 'input_number',
-  textArea = 'text_area',
-  select = 'select',
-  _switch = '_switch',
-  custom = 'custom',
-  checkBox = 'check_box',
-  datePicker = 'date_picker',
-  rangePicker = 'range_picker',
-  radioGroup = 'radio_group',
-  upload = 'upload',
-  text = 'text',
-  cascader = 'cascader',
-  autoComplete = 'autoComplete',
-  timePicker = 'timePicker',
-  treeSelect = 'treeSelect',
+  input = "input",
+  inputNumber = "input_number",
+  textArea = "text_area",
+  select = "select",
+  _switch = "_switch",
+  custom = "custom",
+  checkBox = "check_box",
+  datePicker = "date_picker",
+  rangePicker = "range_picker",
+  radioGroup = "radio_group",
+  upload = "upload",
+  text = "text",
+  cascader = "cascader",
+  autoComplete = "autoComplete",
+  timePicker = "timePicker",
+  treeSelect = "treeSelect",
 }
 
 export interface IFormItem {
@@ -86,7 +86,7 @@ export interface IXFormProps {
   wrappedComponentRef?: any;
   onFinish?: any;
   formLayout?: any;
-  layout?: 'inline' | 'horizontal' | 'vertical';
+  layout?: "inline" | "horizontal" | "vertical";
   onHandleValuesChange?: (value: any, allValues: object) => any;
   formItemColSpan?: number;
   contentRender?: any;
@@ -97,27 +97,25 @@ export const renderFormItem = (item: IFormItem) => {
   switch (item.type) {
     default:
     case FormItemType.input:
-      return <Input key={item.key} {...item.attrs} />;
+      return <Input allowClear key={item.key} {...item.attrs} />;
     case FormItemType.inputNumber:
       return <InputNumber {...item.attrs} />;
     case FormItemType.textArea:
-      return <TextArea rows={2} {...item.attrs} />;
+      return <TextArea allowClear rows={2} {...item.attrs} />;
     case FormItemType.autoComplete:
       return (
         <AutoComplete
           key={item.key}
           options={item.options}
           allowClear={item.attrs?.allowClear || true}
-          placeholder={item.attrs?.placeholder || '请输入'}
-          filterOption={(inputValue, option) =>
-            option!.value.indexOf(inputValue) !== -1
-          }
+          placeholder={item.attrs?.placeholder || "请输入"}
+          filterOption={(inputValue, option) => option!.value.indexOf(inputValue) !== -1}
           {...item.attrs}
         />
       );
     case FormItemType.select:
       return (
-        <Select key={item.key} placeholder={item.attrs?.placeholder || '请选择'} {...item.attrs}>
+        <Select showSearch filterOption={filterOption} key={item.key} placeholder={item.attrs?.placeholder || "请选择"} {...item.attrs}>
           {(item as IFormSelect).options &&
             (item as IFormSelect).options.map((v, index) => (
               <Select.Option key={v.value || v.key || index} value={v.value} disabled={v.disabled}>
@@ -146,23 +144,13 @@ export const renderFormItem = (item: IFormItem) => {
           allowClear={item.attrs?.allowClear || true}
           placeholder={item.attrs?.placeholder || "请输入"}
           filterOption={
-            item.attrs?.filterOption
-              ? item.attrs?.filterOption
-              : (inputValue: any, option) =>
-                  option!.value.indexOf(inputValue) !== -1
+            item.attrs?.filterOption ? item.attrs?.filterOption : (inputValue: any, option) => option!.value.indexOf(inputValue) !== -1
           }
           {...item.attrs}
         />
       );
     case FormItemType.treeSelect:
-      return (
-        <TreeSelect
-          key={item.key}
-          treeData={item.treeData}
-          placeholder={item.attrs?.placeholder || '请选择'}
-          {...item.attrs}
-        />
-      );
+      return <TreeSelect key={item.key} treeData={item.treeData} placeholder={item.attrs?.placeholder || "请选择"} {...item.attrs} />;
     case FormItemType.radioGroup:
       return (
         <Radio.Group key={item.key} {...item.attrs}>
@@ -198,7 +186,7 @@ export const renderFormItem = (item: IFormItem) => {
 
 export const handleFormItem = (formItem: any, formData: any) => {
   let initialValue = formData[formItem.key] || formItem.defaultValue || undefined;
-  let valuePropName = 'value';
+  let valuePropName = "value";
 
   if (formItem.type === FormItemType.datePicker) {
     initialValue = initialValue || null;
@@ -209,11 +197,11 @@ export const handleFormItem = (formItem: any, formData: any) => {
   }
 
   if (formItem.type === FormItemType._switch) {
-    valuePropName = 'checked';
+    valuePropName = "checked";
   }
 
   if (formItem.type === FormItemType.upload) {
-    valuePropName = 'fileList';
+    valuePropName = "fileList";
   }
   return { initialValue, valuePropName };
 };
@@ -225,22 +213,22 @@ const onUploadFileChange = (e: any) => {
   return e && e.fileList;
 };
 
-export const renderFormContent = ({ formMap, formData, layout, formLayout, formItemColSpan = 24}: any) => {
+export const renderFormContent = ({ formMap, formData, layout, formLayout, formItemColSpan = 24 }: any) => {
   return formMap.map((formItem) => {
     const { initialValue = undefined, valuePropName } = handleFormItem(formItem, formData);
     if (formItem.type === FormItemType.text)
       return (
         !formItem.invisible && (
           <Col key={formItem.key} span={formItem.colSpan || formItemColSpan}>
-            {layout === 'vertical' ? (
+            {layout === "vertical" ? (
               <>
-                <span style={{ padding: '0 0 5px', display: 'block', color: '#919AAC', fontSize: '12px' }}>{formItem.label}</span>
-                <span style={{ fontSize: '14px', padding: '0 0 16px', display: 'block' }}>{(formItem as IFormCustom).customFormItem}</span>
+                <span style={{ padding: "0 0 5px", display: "block", color: "#919AAC", fontSize: "12px" }}>{formItem.label}</span>
+                <span style={{ fontSize: "14px", padding: "0 0 16px", display: "block" }}>{(formItem as IFormCustom).customFormItem}</span>
               </>
             ) : (
-              <Row style={{ padding: '6px 0 10px' }}>
-                <Col span={formLayout?.labelCol.span || 4} style={{ textAlign: 'right' }}>
-                  <span style={{ padding: '0 10px 0 0', display: 'inline-block' }}>{formItem.label}:</span>
+              <Row style={{ padding: "6px 0 10px" }}>
+                <Col span={formLayout?.labelCol.span || 4} style={{ textAlign: "right" }}>
+                  <span style={{ padding: "0 10px 0 0", display: "inline-block" }}>{formItem.label}:</span>
                 </Col>
                 <Col span={formLayout?.wrapperCol.span || 20}>
                   <span>{(formItem as IFormCustom).customFormItem}</span>
@@ -257,10 +245,10 @@ export const renderFormContent = ({ formMap, formData, layout, formLayout, formI
             name={formItem.key}
             key={formItem.key}
             label={formItem.label}
-            rules={formItem.rules || [{ required: false, message: '' }]}
+            rules={formItem.rules || [{ required: false, message: "" }]}
             initialValue={initialValue}
             valuePropName={valuePropName}
-            className={formItem.isCustomStyle ? 'ant-form-item-custom' : null} // 兼容负责人选择后表单样式变大
+            className={formItem.isCustomStyle ? "ant-form-item-custom" : null} // 兼容负责人选择后表单样式变大
             style={formItem.isCustomStyle ? { marginBottom: 24 } : null}
             getValueFromEvent={formItem.type === FormItemType.upload ? onUploadFileChange : null}
             {...formItem.formAttrs}
@@ -274,21 +262,11 @@ export const renderFormContent = ({ formMap, formData, layout, formLayout, formI
 };
 
 export const XForm: React.FC<IXFormProps> = (props: IXFormProps) => {
-  const {
-    layout,
-    formLayout,
-    formData,
-    formMap,
-    form,
-    wrappedComponentRef,
-    onHandleValuesChange,
-    contentRender,
-    submitter,
-    ...rest
-  } = props;
+  const { layout, formLayout, formData, formMap, form, wrappedComponentRef, onHandleValuesChange, contentRender, submitter, ...rest } =
+    props;
 
   const defaultLayout =
-    layout === 'vertical'
+    layout === "vertical"
       ? null
       : formLayout
       ? formLayout
@@ -297,7 +275,7 @@ export const XForm: React.FC<IXFormProps> = (props: IXFormProps) => {
           wrapperCol: { span: 20 },
         };
 
-  const submitterProps: SubmitterProps = useMemo(() => (typeof submitter === 'boolean' || !submitter ? {} : submitter), [submitter]);
+  const submitterProps: SubmitterProps = useMemo(() => (typeof submitter === "boolean" || !submitter ? {} : submitter), [submitter]);
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -329,7 +307,7 @@ export const XForm: React.FC<IXFormProps> = (props: IXFormProps) => {
         ref={wrappedComponentRef}
         form={form}
         {...defaultLayout}
-        layout={layout || 'horizontal'}
+        layout={layout || "horizontal"}
         onValuesChange={onHandleValuesChange}
         onFinish={async () => {
           if (!rest.onFinish) return;
@@ -344,9 +322,7 @@ export const XForm: React.FC<IXFormProps> = (props: IXFormProps) => {
           }
         }}
       >
-        <Row gutter={10}>
-          {content ? content : renderFormContent({ ...props })}
-        </Row>         
+        <Row gutter={10}>{content ? content : renderFormContent({ ...props })}</Row>
       </Form>
     </>
   );

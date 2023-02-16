@@ -36,9 +36,9 @@ public class MonitorMetricsSender {
 
     protected static final ILog LOGGER     = LogFactory.getLog(MonitorMetricsSender.class);
 
-    private static final int    THRESHOLD  = 100;
+    private static final int    THRESHOLD  = 1000;
 
-    private ExecutorService esExecutor = Observability.wrap(new ThreadPoolExecutor(30, 60, 6000,TimeUnit.MILLISECONDS,
+    private ExecutorService esExecutor = Observability.wrap(new ThreadPoolExecutor(100, 100, 6000,TimeUnit.MILLISECONDS,
             new LinkedBlockingDeque<>(4000), new NamedThreadFactory("Arius-Meta-MonitorMetricsSender-ES"),
             (r, e) -> LOGGER
                     .warn("class=MonitorMetricsSender||msg=Arius-Meta-MonitorMetricsSender-ES Deque is blocked, taskCount:{}"

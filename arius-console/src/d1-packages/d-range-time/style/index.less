@@ -2,19 +2,20 @@
 #d-range-time {
   position: relative;
   display: inline-block;
+  width: 100%;
   .input-span {
     cursor: pointer;
   }
   .d-range-time-input {
-    height: 27px;
+    height: 32px;
     background: #fff;
-    border: 1px solid #CED4DA;
+    border: 1px solid #ced4da;
     border-radius: 4px;
     &.relativeTime {
-      width: 160px;
+      width: 100%;
     }
     &.absoluteTime {
-      width: 300px;
+      width: 100%;
     }
     input {
       cursor: pointer;
@@ -24,10 +25,9 @@
     }
     .dcloud-input-suffix {
       font-size: 18px;
-      color: #74788D;
+      color: #74788d;
     }
   }
-  
 }
 .d-range-time-popover {
   border-radius: 12px;
@@ -39,7 +39,6 @@
   &.dcloud-popover-placement-bottomRight {
     padding-top: 0;
   }
-  
 }
 .dd-time-range-module {
   .flx_con {
@@ -58,11 +57,14 @@
         }
       }
       .dcloud-radio-wrapper-checked {
-        color: #556EE6;
+        color: #556ee6;
       }
     }
     .flx_r {
       flex: 1;
+    }
+    .ant-picker-range {
+      min-width: 320px;
     }
   }
   .time-radio-group {
@@ -72,7 +74,7 @@
   }
   .dcloud-picker {
     border: 0;
-    background: rgba(33,37,41,0.04);
+    background: rgba(33, 37, 41, 0.04);
   }
   .dcloud-picker-range {
     width: 300px;

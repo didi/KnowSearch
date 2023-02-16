@@ -1,9 +1,8 @@
 @import "./base.less";
-.rf-base-info-box {
+.base-info-box {
   border: 1px solid #dcdfe6;
   border-radius: 4px;
   background-color: aliceblue;
-  margin: 20px 0 20px 0;
   &-row {
     &-col {
       display: flex;
@@ -12,7 +11,10 @@
         height: 40px;
         line-height: 40px;
         padding-left: 20px;
-        width: 20%;
+        width: 25%;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
       }
       &-content {
         .text-content();
@@ -25,8 +27,40 @@
     background-color: white;
   }
 }
+.base-info {
+  .base-info-box {
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    padding: 12px 0;
+    &-row-col {
+      width: calc((100% - 20px) / 4);
+      padding-left: 20px;
+      flex-direction: column;
+      &-label {
+        .min-title();
+        width: 100%;
+        height: 40px;
+        padding-left: 0;
+        line-height: 40px;
+        font-family: PingFangSC-Regular;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.6);
+      }
+      &-content {
+        .text-content();
+        height: 30px;
+        line-height: 16px;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.87);
+      }
+    }
+  }
+}
 
-.rf-base-info-title {
+.base-info-title {
   .middle-title();
   border-bottom: 1px solid #dbe0e4;
   padding-bottom: 8px;

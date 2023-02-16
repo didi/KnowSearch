@@ -30,6 +30,10 @@
         <lucene.version>5.5.0.0.0.2-SNAPSHOT</lucene.version>
         <es.version>2.3.3</es.version>
         <log4j2.version>2.17.1</log4j2.version>
+        <kf-log.version>2.0.4</kf-log.version>
+        <kf-elasticsearch-sql.version>1.0.1</kf-elasticsearch-sql.version>
+        <kf-dsl-prase.version>1.0.1</kf-dsl-prase.version>
+        <kf-metrices.version>1.0.1</kf-metrices.version>
     </properties>
 
     <dependencies>
@@ -89,7 +93,7 @@
             </exclusions>
         </dependency>
         <dependency>
-            <version>2.0.0</version>
+            <version>${kf-log.version}</version>
             <groupId>io.github.knowstack</groupId>
             <artifactId>kf-log</artifactId>
         </dependency>
@@ -177,7 +181,7 @@
             <dependency>
                 <groupId>io.github.knowstack</groupId>
                 <artifactId>kf-elasticsearch-sql</artifactId>
-                <version>1.0.0</version>
+                <version>${kf-elasticsearch-sql.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.elasticsearch</groupId>
@@ -199,7 +203,7 @@
 
             <!-- 依赖DSL 解析模块 -->
             <dependency>
-                <version>1.0.0</version>
+                <version>${kf-dsl-prase.version}</version>
                 <groupId>io.github.knowstack</groupId>
                 <artifactId>kf-dsl-prase</artifactId>
                 <exclusions>
@@ -225,7 +229,7 @@
             </dependency>
 
             <dependency>
-                <version>1.0.0</version>
+                <version>${kf-metrices.version}</version>
                 <groupId>io.github.knowstack</groupId>
                 <artifactId>kf-metrices</artifactId>
                 <exclusions>

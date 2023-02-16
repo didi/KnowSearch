@@ -68,7 +68,8 @@ export const MoreBtns = (props: IMoreBtnsProps) => {
       placement="bottomLeft"
     >
       <span>
-        <EllipsisOutlined style={{ color: '#1473FF' }} />
+        <a >更多</a>
+        {/* <EllipsisOutlined style={{ color: '#1473FF' }} /> */}
       </span>
     </Dropdown>
   );
@@ -76,19 +77,18 @@ export const MoreBtns = (props: IMoreBtnsProps) => {
 
 
 export const renderTableOpts = (btns: ITableBtn[], record: any) => {
-  const freeBtns = btns.length <= 3 ? btns : ([] as ITableBtn[]).concat(btns).splice(0, 3);
-  const moreBtns = ([] as ITableBtn[]).concat(btns).splice(3);
+  btns = btns.filter(item => !item.invisible)
+  const freeBtns = btns.length <= 3 ? btns : [].concat(btns).splice(0, 2);
+  const moreBtns = [].concat(btns).splice(2);
 
   if (!freeBtns.length) {
-    return <a>{"无"}</a>;
+    return <>-</>;
   }
 
   return (
     <>
       <span className={`table-operation`}>
         {freeBtns.map((item, index) => {
-          if (item.invisible) return null;
-
           const getVerticalLine = () => {
             if (index < 1) return;
             return <></>
@@ -138,6 +138,8 @@ export const renderTableOpts = (btns: ITableBtn[], record: any) => {
             </span>
           );
         })}
+
+
         {btns.length > 3 ? <MoreBtns btns={moreBtns} data={record} /> : null}
       </span>
     </>

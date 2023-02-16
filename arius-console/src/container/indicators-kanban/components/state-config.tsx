@@ -1,6 +1,7 @@
 import React, { memo } from "react";
 import { Tooltip } from "antd";
 import "../style";
+import "./style.less";
 
 const classPrefix = "state-config";
 
@@ -14,6 +15,7 @@ interface ListType {
 interface StateConfigPropsType {
   list: ListType[];
   title: String;
+  className?: string;
 }
 
 const RenderModule = (props) => {
@@ -42,33 +44,27 @@ const RenderModule = (props) => {
     <div className={`${classPrefix}-box-content-module`} key={props.name}>
       <p className={`${classPrefix}-box-config-info`}>{props.name}</p>
       {status ? (
-        <p
-          className={`${classPrefix}-box-config-state ${classPrefix}-box-config-state-${status}`}
-        >
+        <p className={`${classPrefix}-box-config-state ${classPrefix}-box-config-state-${status}`}>
           <span>{status}</span>
         </p>
       ) : (
         <p className={`${classPrefix}-box-config-content`}>
-          {ellipsis(props.count, 6, props.unit)}
-          <span className={`${classPrefix}-box-config-content-sub`}>
-            {props.unit || ""}
-          </span>
+          {ellipsis(props.count, 4, props.unit)}
+          <span className={`${classPrefix}-box-config-content-sub`}>{props.unit || ""}</span>
         </p>
       )}
     </div>
   );
 };
-export const StateConfig: React.FC<StateConfigPropsType> = memo(
-  ({ list, title }) => {
-    return (
-      <div className={`${classPrefix}-box`}>
-        <h4 className={`${classPrefix}-box-title`}>{title}</h4>
-        <div className={`${classPrefix}-box-content`}>
-          {list.map((item, index) => (
-            <RenderModule {...item} key={item.id} />
-          ))}
-        </div>
+export const StateConfig: React.FC<StateConfigPropsType> = memo(({ list, title, className }) => {
+  return (
+    <div className={`${classPrefix}-box ${className ? className : ""}`}>
+      <h4 className={`${classPrefix}-box-title`}>{title}</h4>
+      <div className={`${classPrefix}-box-content`}>
+        {list.map((item, index) => (
+          <RenderModule {...item} key={item.id} />
+        ))}
       </div>
-    );
-  }
-);
+    </div>
+  );
+});

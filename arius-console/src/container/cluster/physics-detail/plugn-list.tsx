@@ -1,6 +1,6 @@
 import * as React from "react";
 import "styles/search-filter.less";
-import { getIndexListColumns, getPlugnListColumns } from "./config";
+import { getPluginListColumns } from "./config";
 import Url from "lib/url-parser";
 import { DTable, ITableBtn } from "component/dantd/dtable";
 import { getOpClusterPlugList } from "api/plug-api";
@@ -11,10 +11,9 @@ import { IPlug } from "typesPath/plug-types";
 import { isOpenUp } from "constants/common";
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  setModalId: (modalId: string, params?: any, cb?: Function) =>
-    dispatch(actions.setModalId(modalId, params, cb)),
+  setModalId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setModalId(modalId, params, cb)),
 });
-const connects: Function = connect
+const connects: Function = connect;
 
 @connects(null, mapDispatchToProps)
 export class PlugnList extends React.Component<any> {
@@ -40,9 +39,7 @@ export class PlugnList extends React.Component<any> {
           let flat = false;
           Object.keys(d).forEach((key) => {
             if (typeof key === "string" || typeof key === "number") {
-              if (
-                (d[key] + "").toLowerCase().includes((searchKey + "") as string)
-              ) {
+              if ((d[key] + "").toLowerCase().includes((searchKey + "") as string)) {
                 flat = true;
                 return;
               }
@@ -102,16 +99,12 @@ export class PlugnList extends React.Component<any> {
           loading={loading}
           rowKey="id"
           dataSource={this.getData(plugnList)}
-          columns={getPlugnListColumns(this.reloadData, this.props.setModalId)}
+          columns={getPluginListColumns(this.reloadData, this.props.setModalId)}
+          tableHeaderSearchInput={{ submit: this.handleSubmit }}
           reloadData={this.reloadData}
           getOpBtns={this.getOpBtns}
-          tableHeaderSearchInput={{ submit: this.handleSubmit }}
         />
       </>
     );
   }
-
-  public defineTableWrapperClassNames = () => {
-    return "no-padding";
-  };
 }

@@ -7,8 +7,6 @@ import { Tooltip, DatePicker, Popconfirm, Modal, message } from "antd";
 import { IColumnsType } from "component/dantd/query-form/QueryForm";
 import { IBaseOrder, IOrderInfo, ITypeEnums } from "typesPath/cluster/order-types";
 import {
-  appTemplateAuthEnum,
-  ClusterAuth,
   orderStatusMap,
   STAUS_TYPE_MAP,
   TASK_STATUS_TYPE_MAP,
@@ -17,84 +15,72 @@ import {
   VERSION_MAINFEST_TYPE,
 } from "constants/status-map";
 import { ILabelValue, IMenuItem, IStringMap } from "interface/common";
-import { DATA_TYPE_LIST, LEVEL_MAP } from "constants/common";
-import { IRoleIpList } from "typesPath/cluster/cluster-types";
+import { LEVEL_MAP } from "constants/common";
 import { INodeTask, ITask } from "typesPath/task-types";
 import { IBaseInfo } from "typesPath/base-types";
 import { BaseInfo } from "./base-info";
 import { PlanSpeed } from "./plan-speed";
-import { timeFormat } from "constants/time";
-import {
-  cancalTask,
-  createTask,
-  pauseTask,
-  restartTask,
-  retryTask,
-  scaleTask,
-  upgradeTask,
-} from "api/task-api";
-import { cancelDcdr } from 'api/dcdr-api';
-
+import { cancalTask, createTask, pauseTask, restartTask, retryTask, scaleTask, upgradeTask } from "api/task-api";
+import { cancelDcdr } from "api/dcdr-api";
+import DRangeTime from "../../d1-packages/d-range-time";
 const { RangePicker } = DatePicker;
 export const authCodeMap = {
-  0: '超管',
-  1: '配置管理',
-  2: '访问',
-  '-1': '无权限',
-}
+  0: "超管",
+  1: "配置管理",
+  2: "访问",
+  "-1": "无权限",
+};
 
-export const getMyApplicationColumns = (
-  typeEnums: IStringMap,
-  type?: string
-) => {
+export const getMyApplicationColumns = (typeEnums: IStringMap, type?: string) => {
   const orderColumns = [
     {
       title: "工单ID",
       dataIndex: "id",
-      key: "id",
+      width: 100,
     },
     {
       title: "工单标题",
       dataIndex: "title",
-      key: "title",
+      width: 200,
       render: (text: string, record: IBaseOrder) => {
-        let href = `/work-order/my-application/detail?orderId=${record.id}`;
+        let href = `/work-order/my-application/detail?title=${text}&orderId=${record.id}`;
         if (type) {
-          href = `/work-order/my-approval/detail?orderId=${record.id}`;
+          href = `/work-order/my-approval/detail?title=${text}&orderId=${record.id}`;
         }
-        return <NavRouterLink needToolTip={true} element={text} href={href} />;
+        return (
+          <div className="two-row-ellipsis pointer">
+            <NavRouterLink needToolTip={true} maxShowLength={50} element={text} href={href} />
+          </div>
+        );
       },
     },
     {
       title: "工单状态",
       dataIndex: "status",
-      key: "status",
+      width: 100,
       render: (t: any) => (
         <>
-          <span className={t === 1 ? "success" : t === 2 ? "fail" : ""}>
-            {orderStatusMap[t] || ""}
-          </span>
+          <span className={t === 1 ? "success" : t === 2 ? "fail" : ""}>{orderStatusMap[t] || ""}</span>
         </>
       ),
     },
     {
       title: "申请时间",
       dataIndex: "createTime",
-      key: "createTime",
-      sorter: (a: IBaseOrder, b: IBaseOrder) =>
-        transTimeStamp(b.createTime) - transTimeStamp(a.createTime),
+      width: 160,
+      // sorter: (a: IBaseOrder, b: IBaseOrder) => transTimeStamp(b.createTime) - transTimeStamp(a.createTime),
       render: (t: string) => transTimeFormat(t),
     },
     {
       title: "工单类型",
       dataIndex: "type",
-      key: "type",
-      render: (t: string, record: IBaseOrder) => <>{typeEnums[t] || ""}</>,
+      width: 120,
+      render: (t: string, record: IBaseOrder) => <>{typeEnums[t] || "-"}</>,
     },
     {
       title: "申请原因",
       dataIndex: "description",
-      key: "description",
+      width: 200,
       onCell: () => ({
         style: {
           maxWidth: 200,
@@ -114,11 +100,25 @@ export const getMyApplicationColumns = (
   return orderColumns;
 };
 
-export const getMyApplicationQueryXForm = (typeList: ITypeEnums[]) => {
+export const getMyApplicationQueryXForm = (typeList: ITypeEnums[], handleTimeChange) => {
+  const customTimeOptions = [
+    {
+      label: "最近 1 天",
+      value: 24 * 60 * 60 * 1000,
+    },
+    {
+      label: "最近 7 天",
+      value: 7 * 24 * 60 * 60 * 1000,
+    },
+    {
+      label: "最近 1 月",
+      value: 30 * 24 * 60 * 60 * 1000,
+    },
+  ];
   const formMap = [
     {
       dataIndex: "status",
-      title: "工单状态",
+      title: "工单状态:",
       type: "select",
       options: Object.keys(orderStatusMap).map((key) => ({
         value: key,
@@ -128,58 +128,59 @@ export const getMyApplicationQueryXForm = (typeList: ITypeEnums[]) => {
     },
     {
       dataIndex: "title",
-      title: "工单标题",
+      title: "工单标题:",
       type: "input",
-      placeholder: "请输入",
+      placeholder: "请输入工单标题",
     },
     {
       dataIndex: "type",
-      title: "工单类型",
+      title: "工单类型:",
       type: "select",
       options: typeList,
       placeholder: "请选择",
     },
     {
       dataIndex: "createTime",
-      title: "申请时间",
+      title: "申请时间:",
       type: "custom",
-      component: (
-        <RangePicker
-          ranges={{
-            近一天: [moment().subtract(1, "day"), moment()],
-            近一周: [moment().subtract(7, "day"), moment()],
-            近一月: [moment().subtract(1, "month"), moment()],
-          }}
-          showTime={{ format: "HH:mm" }}
-          format="YYYY-MM-DD"
-        />
-      ),
+      component: <DRangeTime timeChange={handleTimeChange} popoverClassName="dashborad-popover" customTimeOptions={customTimeOptions} />,
     },
   ] as IColumnsType[];
   return formMap;
 };
 
-export const getTaskQueryXForm = () => {
+export const getTaskQueryXForm = (handleTimeChange) => {
+  const customTimeOptions = [
+    {
+      label: "最近 1 天",
+      value: 24 * 60 * 60 * 1000,
+    },
+    {
+      label: "最近 7 天",
+      value: 7 * 24 * 60 * 60 * 1000,
+    },
+    {
+      label: "最近 1 月",
+      value: 30 * 24 * 60 * 60 * 1000,
+    },
+  ];
   const formMap = [
     {
       dataIndex: "title",
-      title: "任务标题",
+      title: "任务标题:",
       type: "input",
       placeholder: "请输入",
     },
     {
       dataIndex: "createTime",
-      title: "创建时间",
+      title: "创建时间:",
       type: "custom",
       component: (
-        <RangePicker
-          ranges={{
-            近一天: [moment().subtract(1, "day"), moment()],
-            近一周: [moment().subtract(7, "day"), moment()],
-            近一月: [moment().subtract(1, "month"), moment()],
-          }}
-          showTime={{ format: "HH:mm" }}
-          format="YYYY-MM-DD"
+        <DRangeTime
+          timeChange={handleTimeChange}
+          popoverClassName="dashborad-popover"
+          ///resetAllValue={resetAllValue}
+          customTimeOptions={customTimeOptions}
         />
       ),
     },
@@ -200,9 +201,9 @@ export const getTaskColumns = (reloadData: Function) => {
       key: "title",
       render: (text: string, record: ITask) => {
         const str = encodeURI(record.expandData);
-        let href = `/work-order/task/detail?id=${record.businessKey}&taskid=${record.id}&type=${record?.taskType}&status=${record?.status}&dcdr_info=${str}`;
+        let href = `/work-order/task/detail?title=${text}&taskid=${record.id}&id=${record.businessKey}&type=${record?.taskType}&status=${record?.status}&dcdr_info=${str}`;
         if (record.taskType === 10) {
-          href = `/work-order/task/dcdrdetail?taskid=${record.id}&title=${record.title}`;
+          href = `/work-order/task/dcdrdetail?title=${text}&taskid=${record.id}&title=${record.title}`;
         }
         return <NavRouterLink needToolTip={true} element={text} href={href} />;
       },
@@ -236,8 +237,7 @@ export const getTaskColumns = (reloadData: Function) => {
       dataIndex: "createTime",
       key: "createTime",
       width: "10%",
-      sorter: (a: ITask, b: ITask) =>
-        transTimeStamp(b.createTime) - transTimeStamp(a.createTime),
+      sorter: true,
       render: (t: string) => transTimeFormat(t),
     },
     {
@@ -245,13 +245,13 @@ export const getTaskColumns = (reloadData: Function) => {
       dataIndex: "updateTime",
       key: "updateTime",
       width: "10%",
-      sorter: (a: ITask, b: ITask) =>
-        transTimeStamp(b.updateTime) - transTimeStamp(a.updateTime),
+      sorter: true,
       render: (t: string) => transTimeFormat(t),
     },
     {
       title: "操作",
       dataIndex: "operation",
+      filterTitle: true,
       key: "operation",
       render: (text: any, record: ITask) => {
         const btns = getTaskBtns(record, reloadData);
@@ -275,12 +275,12 @@ const confirmFn = (text: string, taskId: number, id: number, fn: Function, reloa
       });
     },
   });
-}
+};
 
 const getTaskBtns = (record: ITask, reloadData: Function) => {
-  let href = `/work-order/task/detail?id=${record.businessKey}&taskid=${record.id}#plan`;
+  let href = `/work-order/task/detail?title=${record.title}&taskid=${record.id}&id=${record.businessKey}#plan`;
   if (record.taskType === 10) {
-    href = `/work-order/task/dcdrdetail?taskid=${record.id}&title=${record.title}`;
+    href = `/work-order/task/dcdrdetail?title=${record.title}&taskid=${record.id}&title=${record.title}`;
   }
   let taskBtns = [
     {
@@ -301,34 +301,16 @@ const getTaskBtns = (record: ITask, reloadData: Function) => {
     ),
   } as any;
   const pauseBtn = {
-    label: (
-      <span
-        onClick={() => TaskApi.pauseTask(record.businessKey, reloadData, record.id)}
-      >
-        暂停
-      </span>
-    ),
+    label: <span onClick={() => TaskApi.pauseTask(record.businessKey, reloadData, record.id)}>暂停</span>,
   } as any;
   const restartBtn = {
-    label: (
-      <span
-        onClick={() => TaskApi.retryTask(record.businessKey, reloadData, record.id)}
-      >
-        重试
-      </span>
-    ),
+    label: <span onClick={() => TaskApi.retryTask(record.businessKey, reloadData, record.id)}>重试</span>,
   } as any;
   const cancalBtn = {
-    label: (
-      <span
-        onClick={() => TaskApi.cancalTask(record.businessKey, reloadData, record.id)}
-      >
-        取消
-      </span>
-    ),
+    label: <span onClick={() => TaskApi.cancalTask(record.businessKey, reloadData, record.id)}>取消</span>,
   } as any;
   if (record.taskType === 10) {
-    if (record.status == 'running') {
+    if (record.status == "running") {
       taskBtns.push({
         isRouterNav: false,
         label: (
@@ -344,7 +326,7 @@ const getTaskBtns = (record: ITask, reloadData: Function) => {
                 onOk() {
                   cancelDcdr(record.id).then(() => {
                     reloadData();
-                    message.success('操作成功')
+                    message.success("操作成功");
                   });
                 },
               });
@@ -353,7 +335,7 @@ const getTaskBtns = (record: ITask, reloadData: Function) => {
             取消
           </span>
         ),
-      })
+      });
     }
     return taskBtns;
   }
@@ -374,12 +356,7 @@ const getTaskBtns = (record: ITask, reloadData: Function) => {
   return taskBtns;
 };
 
-export const carryTask = (
-  id: number,
-  orderType: number,
-  reloadData: Function,
-  taskId?: number
-) => {
+export const carryTask = (id: number, orderType: number, reloadData: Function, taskId?: number) => {
   // 1 集群启动create 2 集群扩容scale 3 集群缩容scale 4 集群重启restart 5 集群升级upgrade
   switch (orderType) {
     case 1:
@@ -400,29 +377,29 @@ export const carryTask = (
 const TaskApi = {
   createTask: (id: number, reloadData: Function, taskId: number) => {
     // return createTask(id).then(() => reloadData()); // this.getTaskList()
-    return confirmFn('执行', taskId, id, createTask, reloadData);
+    return confirmFn("执行", taskId, id, createTask, reloadData);
   },
   scaleTask: (id: number, reloadData: Function, taskId: number) => {
     // return scaleTask(id).then(() => reloadData());
-    return confirmFn('执行', taskId, id, scaleTask, reloadData);
+    return confirmFn("执行", taskId, id, scaleTask, reloadData);
   },
   restartTask: (id: number, reloadData: Function, taskId: number) => {
     // return restartTask(id).then(() => reloadData());
-    return confirmFn('执行', taskId, id, restartTask, reloadData);
+    return confirmFn("执行", taskId, id, restartTask, reloadData);
   },
   retryTask: (id: number, reloadData: Function, taskId: number) => {
     // return retryTask(id).then(() => reloadData());
-    return confirmFn('重试', taskId, id, retryTask, reloadData);
+    return confirmFn("重试", taskId, id, retryTask, reloadData);
   },
   upgradeTask: (id: number, reloadData: Function, taskId: number) => {
     // return upgradeTask(id).then(() => reloadData());
-    return confirmFn('执行', taskId, id, upgradeTask, reloadData);
+    return confirmFn("执行", taskId, id, upgradeTask, reloadData);
   },
   pauseTask: (id: number, reloadData: Function, taskId: number) => {
-    return confirmFn('暂停', taskId, id, pauseTask, reloadData);
+    return confirmFn("暂停", taskId, id, pauseTask, reloadData);
   },
   cancalTask: (id: number, reloadData: Function, taskId: number) => {
-    return confirmFn('取消', taskId, id, cancalTask, reloadData);
+    return confirmFn("取消", taskId, id, cancalTask, reloadData);
   },
 };
 
@@ -432,7 +409,7 @@ export const DESC_LIST = [
     key: "logicTemplateName",
     render: (value: string) => (
       <>
-        <span>{value || '-'}</span>
+        <span>{value || "-"}</span>
       </>
     ),
   },
@@ -441,7 +418,7 @@ export const DESC_LIST = [
     key: "logicClusterName",
     render: (value: string) => (
       <>
-        <span>{value || '-'}</span>
+        <span>{value || "-"}</span>
       </>
     ),
   },
@@ -450,7 +427,7 @@ export const DESC_LIST = [
     key: "masterPhysicalTemplateName",
     render: (value: string) => (
       <>
-        <span>{value || '-'}</span>
+        <span>{value || "-"}</span>
       </>
     ),
   },
@@ -459,7 +436,7 @@ export const DESC_LIST = [
     key: "masterPhysicalClusterName",
     render: (value: string) => (
       <>
-        <span>{value || '-'}</span>
+        <span>{value || "-"}</span>
       </>
     ),
   },
@@ -468,7 +445,7 @@ export const DESC_LIST = [
     key: "vicePhysicalTemplateName",
     render: (value: string) => (
       <>
-        <span>{value || '-'}</span>
+        <span>{value || "-"}</span>
       </>
     ),
   },
@@ -477,7 +454,7 @@ export const DESC_LIST = [
     key: "vicePhysicalClusterName",
     render: (value: string) => (
       <>
-        <span>{value || '-'}</span>
+        <span>{value || "-"}</span>
       </>
     ),
   },
@@ -486,7 +463,7 @@ export const DESC_LIST = [
     key: "createTime",
     render: (value: string) => (
       <>
-        <span>{moment(value).format(timeFormat) || '-'}</span>
+        <span>{transTimeFormat(value)}</span>
       </>
     ),
   },
@@ -526,12 +503,12 @@ export const BASE_INFO: IBaseInfo[] = [
   {
     key: "createTime",
     label: "创建时间",
-    render: (text: string) => <>{transTimeFormat(text)}</>,
+    render: (t: string) => transTimeFormat(t),
   },
   {
     key: "updateTime",
     label: "更新时间",
-    render: (text: string) => <>{transTimeFormat(text)}</>,
+    render: (t: string) => transTimeFormat(t),
   },
   {
     key: "clusterName",
@@ -554,55 +531,13 @@ export const BASE_INFO: IBaseInfo[] = [
     key: "desc",
     label: "集群描述",
     render: (t) => {
-      return t || '-';
+      return t || "-";
     },
   },
-  // {
-  //   key: "nsTree",
-  //   label: "服务节点",
-    // render: (t: string) => {
-    //   return (
-    //   <>
-    //     <Tooltip placement="bottomLeft" title={t}>
-    //       <div style={{...cellStyle, marginBottom: '-4px'}}>{t}</div>
-    //     </Tooltip>
-    //   </>
-    //   );
-    // },
-  // },
-  // {
-  //   key: "idc",
-  //   label: "机房",
-  // },
-  // {
-  //   key: "dept",
-  //   label: "成本部门",
-  // },
   {
     key: "esVersion",
     label: "ES 版本",
   },
-  {
-    key: "type",
-    label: "资源类型",
-    render: (value: string) => (
-      <Tooltip
-        placement="bottomLeft"
-        title={VERSION_MAINFEST_TYPE[Number(value)]}
-      >
-        {VERSION_MAINFEST_TYPE[Number(value)]}
-      </Tooltip>
-    ),
-  },
-  // {
-  //   key: "imageName",
-  //   label: "镜像",
-  //   render: (text: string) => (
-  //     <Tooltip placement="bottomLeft" title={text}>
-  //       {text}
-  //     </Tooltip>
-  //   ),
-  // },
 ];
 
 export const ORDER_INFO = (task) => {
@@ -612,15 +547,14 @@ export const ORDER_INFO = (task) => {
       label: "工单标题",
       render: (text: number) => (
         <>
-          <div style={{ float: 'left' }}>
+          <div style={{ float: "left" }}>
             <span className="text-value">
               {text}（{task.taskBaseInfo?.workOrderId}）
             </span>
           </div>
-          <div style={{ float: 'left' }}>
-            <NavRouterLink element="查看" href={`/work-order/my-approval/detail?orderId=${task.taskBaseInfo?.workOrderId}`} />
+          <div style={{ float: "left" }}>
+            <NavRouterLink element="查看" href={`/work-order/my-approval/detail?title=${text}&orderId=${task.taskBaseInfo?.workOrderId}`} />
           </div>
-          
         </>
       ),
     },
@@ -652,13 +586,13 @@ export const getPlanSpeedColumns = (setModalId: Function) => {
       title: "更新时间",
       dataIndex: "updateTime",
       key: "updateTime",
-      sorter: (a: INodeTask, b: INodeTask) =>
-        transTimeStamp(b.updateTime) - transTimeStamp(a.updateTime),
+      sorter: (a: INodeTask, b: INodeTask) => transTimeStamp(b.updateTime) - transTimeStamp(a.updateTime),
       render: (t: string) => transTimeFormat(t),
     },
     {
       title: "操作",
       dataIndex: "operation",
+      filterTitle: true,
       key: "operation",
       width: "15%",
       render: (text: number, record: INodeTask) => {
@@ -771,525 +705,100 @@ export const DCDR_STEPS = [
   },
 ];
 
-export const getInfoRenderItem = (orderInfo: IOrderInfo, result: boolean) => {
-  const detail = orderInfo?.detailInfo || {};
-  const type = orderInfo.type;
-
-  const expandText = detail.operationType === 2 ? "扩容" : "缩容";
-
-  let workType = "";
-  DATA_TYPE_LIST.forEach((ele) => {
-    if (ele.value === Number(detail.dataType)) {
-      workType = ele.label;
-    }
-  });
-
-  let authCodeText = "";
-  appTemplateAuthEnum.forEach((ele) => {
-    if (ele.value === Number(detail.authCode)) {
-      authCodeText = ele.label;
-    }
-  });
-
-  // let clusterAuthCodeText = "";
-  // ClusterAuth.forEach((ele) => {
-  //   if (ele.value === Number(detail.authCode)) {
-  //     clusterAuthCodeText = ele.label;
-  //   }
-  // });
-
-  const appCreateList: ILabelValue[] = [
-    {
-      label: "租用名",
-      value: detail.name  || '-',
-    },
-    {
-      label: "业务负责人",
-      value: detail.responsible  || '-',
-    },
-    // {
-    //   label: "成本部门ID",
-    //   value: detail.departmentId,
-    // },
-    // {
-    //   label: "成本部门",
-    //   value: detail.department,
-    // },
-  ];
-
-  const templateTransferList: ILabelValue[] = [
-    {
-      label: "模版ID",
-      value: detail.id || '-',
-    },
-    {
-      label: "模版名称",
-      value: detail.name || '-',
-    },
-    {
-      label: "原应用",
-      value: detail.sourceAppId || '-',
-    },
-    {
-      label: "目标应用",
-      value: detail.tgtAppId || '-',
-    },
-    {
-      label: "责任人",
-      value: detail.tgtResponsible || '-',
-    },
-  ];
-
-  const templateCreateList: ILabelValue[] = [
-    {
-      label: "数据中心",
-      value: detail.dataCenter || '-',
-    },
-    {
-      label: "业务类型",
-      value: workType || '-',
-    },
-    {
-      label: "业务等级",
-      value: LEVEL_MAP[Number(detail.level) - 1]?.label || '-',
-    },
-    {
-      label: "分区字段",
-      value: detail.dateField || '-',
-    },
-    {
-      label: "描述",
-      value: detail.desc || '-',
-    },
-    {
-      label: "数据大小(GB)",
-      value: detail.diskQuota || '-',
-    },
-    {
-      label: "保存周期",
-      value: detail.expireTime === -1 ? "永不过期" : detail.expireTime,
-    },
-    {
-      label: "索引模板是否开启RollOver",
-      value: !detail.disableIndexRollover ? '是' : '否',
-    },
-    {
-      label: "热节点保存周期",
-      value: detail.hotTime || '-',
-    },
-    {
-      label: "主键字段",
-      value: detail.idField || '-',
-    },
-    // {
-    //   label: '成本部门ID',
-    //   value: detail.libraDepartmentId,
-    // }, {
-    //   label: '成本部门',
-    //   value: detail.libraDepartment,
-    // },
-    {
-      label: "索引模板名称",
-      value: detail.name || '-',
-    },
-    {
-      label: "所属集群",
-      value: detail.clusterLogicName || '-',
-    },
-    {
-      label: "业务负责人",
-      value: detail.responsible || '-',
-    },
-    {
-      label: "routing字段",
-      value: detail.routingField || '-',
-    },
-  ];
-
-  const templateAuthList: ILabelValue[] = [
-    {
-      label: "模板ID",
-      value: detail.id || '-',
-    },
-    {
-      label: "模板名称",
-      value: detail.name || '-',
-    },
-    {
-      label: "权限类型",
-      value: authCodeText || '-',
-    },
-    {
-      label: "负责人",
-      value: detail.responsible || '-',
-    },
-  ];
-
-  const templateIndecreaseList: ILabelValue[] = [
-    {
-      label: "使用CPU",
-      value: detail.actualCpuCount || '-',
-    },
-    {
-      label: "磁盘使用容量（GB）",
-      value: detail.actualDiskG || '-',
-    },
-    {
-      label: "期望保存周期",
-      value: detail.expectExpireTime || '-',
-    },
-    {
-      label: "期望Quota",
-      value: detail.expectQuota || '-',
-    },
-    {
-      label: "保存周期（天）",
-      value: detail.expireTime || '-',
-    },
-    // {
-    //   label: 'force',
-    //   value: detail.force,
-    // },
-    {
-      label: "模版ID",
-      value: detail.id || '-',
-    },
-    {
-      label: "模版名称",
-      value: detail.name || '-',
-    },
-    {
-      label: "已有配额",
-      value: detail.quota || '-',
-    },
-    {
-      label: "CPU利用率(峰值)",
-      value: detail.quotaCpuCount || '-',
-    },
-    {
-      label: "磁盘配额",
-      value: detail.quotaDiskG || '-',
-    },
-  ];
-
-  const clusterList: ILabelValue[] = [
-    {
-      label: "物理集群ID",
-      value: detail.phyClusterId || '-',
-    },
-    {
-      label: "物理集群名称",
-      value: detail.phyClusterName || '-',
-    },
-  ];
-
-  const clusterOpUpdateList: ILabelValue[] = clusterList;
-
-  const clusterOpRestartList: ILabelValue[] = clusterList;
-
-  const clusterOpOfflineList: ILabelValue[] = [
-    {
-      label: "物理集群ID",
-      value: detail.phyClusterId || '-',
-    },
-    {
-      label: "物理集群名称",
-      value: detail.phyClusterName || '-',
-    },
-  ];
-
-  const masterNode = detail?.roleClusterHosts?.filter(
-    (ele: IRoleIpList) => ele.role === "masternode"
-  );
-  const clientNode = detail?.roleClusterHosts?.filter(
-    (ele: IRoleIpList) => ele.role === "clientnode"
-  );
-  const dataNode = detail?.roleClusterHosts?.filter(
-    (ele: IRoleIpList) => ele.role === "datanode"
-  );
-  const coldNode = detail?.roleClusterHosts?.filter(
-    (ele: IRoleIpList) => ele.beCold
-  );
-
-  const clusterOpNewList: ILabelValue[] = [
-    {
-      label: "集群创建人",
-      value: detail.creator || '-',
-    },
-    // {
-    //   label: '数据中心',
-    //   value: detail.dataCenter,
-    // },
-    {
-      label: "Es版本",
-      value: detail.esVersion || '-',
-    },
-    // {
-    //   label: '机房',
-    //   value: detail.idc,
-    // },
-    // {
-    //   label: '机器节点',
-    //   value: detail.machineSpec,
-    // }, {
-    //   label: '服务节点',
-    //   value: detail.nsTree,
-    // },
-    {
-      label: "物理集群名称",
-      value: detail.phyClusterName || '-',
-    },
-    {
-      label: "单节点实例数",
-      value: detail.pidCount || '-',
-    },
-    // {
-    //   label: '插件列表',
-    //   value: detail.plugs,
-    // },
-    {
-      label: "masterRole",
-      value: (masterNode && masterNode[0]?.role) || '-',
-    },
-    {
-      label: "master主机名称",
-      value: (masterNode && masterNode[0]?.hostname) || '-',
-    },
-    {
-      label: "clientRole",
-      value: (clientNode && clientNode[0]?.role) || '-',
-    },
-    {
-      label: "client主机名称",
-      value: (clientNode && clientNode[0]?.hostname) || '-',
-    },
-    {
-      label: "dataRole",
-      value: (dataNode && dataNode[0]?.role) || '-',
-    },
-    {
-      label: "data主机名称",
-      value: (dataNode && dataNode[0]?.hostname) || '-',
-    },
-    {
-      label: "coldRole",
-      value: (coldNode && coldNode[0]?.role) || '-',
-    },
-    {
-      label: "cold主机名称",
-      value: (coldNode && coldNode[0]?.hostname) || '-',
-    },
-    {
-      label: "备注",
-      value: detail.desc || '-',
-    },
-  ];
-
-  const opPidCount: ILabelValue[] = [
-    {
-      label: "单节点实例数",
-      value: detail.pidCount || '-',
-    },
-  ];
-
-  const clusterOpIndecreaseData: ILabelValue[] = [
-    {
-      label: "物理集群ID",
-      value: detail.phyClusterId || '-',
-    },
-    {
-      label: "物理集群名称",
-      value: detail.phyClusterName || '-',
-    },
-    {
-      label: "集群类型",
-      value: VERSION_MAINFEST_TYPE[Number(detail.type)],
-    },
-    {
-      label: "扩（缩）容",
-      value: expandText || '-',
-    },
-  ];
-
-  const clusterOpIndecreaseList =
-    Number(detail.type) === 4
-      ? clusterOpIndecreaseData.concat(opPidCount)
-      : clusterOpIndecreaseData;
-
-  const logicClusterAuthList: ILabelValue[] = [
-    {
-      label: "逻辑集群名称",
-      value: detail.logicClusterName || '-',
-    },
-    {
-      label: "逻辑集群ID",
-      value: detail.logicClusterId || '-',
-    },
-    {
-      label: "权限类型",
-      value: authCodeMap[detail.authCode] || '-',
-    },
-  ];
-
+export const getInfoRenderItem = (orderInfo: IOrderInfo) => {
+  const { type, detailInfo, description } = orderInfo;
   const logicClusterIndecreaseList: ILabelValue[] = [
     {
-      label: "逻辑集群ID",
-      value: detail.logicClusterId || '-',
+      label: "集群名称",
+      value: detailInfo?.logicClusterName,
     },
     {
-      label: "data节点个数",
-      value: detail.dataNodeNu || '-',
-    },
-    // {
-    //   label: "data节点规格",
-    //   value: detail.dataNodeSpec,
-    // },
-  ];
-
-  const logicClusterPlugOperationList: ILabelValue[] = [
-    {
-      label: "逻辑集群ID",
-      value: detail.logicClusterId || '-',
+      label: "data节点数",
+      value: detailInfo?.oldDataNodeNu,
     },
     {
-      label: "逻辑集群名称",
-      value: detail.logicClusterName || '-',
+      label: "期望节点数",
+      value: detailInfo?.dataNodeNu,
     },
     {
-      label: "扩缩容",
-      value: detail.expandText || '-',
+      label: "节点规格",
+      value: detailInfo?.dataNodeSpec,
     },
     {
-      label: "插件ID",
-      value: detail.plugId || '-',
-    },
-    {
-      label: "插件名称",
-      value: detail.plugName || '-',
-    },
-    {
-      label: "申请说明",
-      value: detail.plugDesc || '-',
+      label: "申请原因",
+      value: description,
     },
   ];
 
   const logicClusterCreateList: ILabelValue[] = [
-    // {
-    //   label: "数据中心",
-    //   value: detail.dataCenter || '-',
-    // },
     {
       label: "集群名称",
-      value: detail.name || '-',
+      value: detailInfo?.name,
     },
     {
       label: "业务等级",
-      value: LEVEL_MAP[Number(detail.level) - 1]?.label || '-',
+      value: LEVEL_MAP[Number(detailInfo?.level) - 1]?.label,
     },
-    // {
-    //   label: "插件ID列表",
-    //   value: detail.plugins || '-',
-    // },
     {
-      label: "data节点个数",
-      value: detail.dataNodeNu || '-',
+      label: "节点规格",
+      value: detailInfo?.dataNodeSpec,
     },
-    // {
-    //   label: "data节点规格",
-    //   value: detail.dataNodeSpec,
-    // },
-    // {
-    //   label: "成本部门ID",
-    //   value: detail.libraDepartmentId,
-    // },
-    // {
-    //   label: "成本部门",
-    //   value: detail.libraDepartment,
-    // },
     {
-      label: "负责人",
-      value: detail.responsible || '-',
+      label: "data节点数",
+      value: detailInfo?.dataNodeNu,
+    },
+    {
+      label: "申请原因",
+      value: description,
     },
   ];
-
-  const logicClusterTransfer: ILabelValue[] = [
-    {
-      label: "原所属项目ID",
-      value: detail.sourceAppId || '-',
-    },
-    {
-      label: "转让目标项目ID",
-      value: detail.targetAppId || '-',
-    },
-  ];
-
-  if (type === "appCreate") {
-    return appCreateList;
-  }
-
-  if (type === "templateTransfer") {
-    return templateTransferList;
-  }
-
-  if (type === "templateCreate") {
-    return templateCreateList;
-  }
-
-  if (type === "templateAuth") {
-    return templateAuthList;
-  }
-
-  if (type === "templateIndecrease") {
-    return templateIndecreaseList;
-  }
-
-  if (type === "clusterOpUpdate") {
-    return clusterOpUpdateList;
-  }
-
-  if (type === "clusterOpRestart") {
-    return clusterOpRestartList;
-  }
-
-  if (type === "clusterOpOffline") {
-    return clusterOpOfflineList;
-  }
-
-  if (type === "clusterOpNew") {
-    return clusterOpNewList;
-  }
-
-  if (type === "clusterOpIndecrease") {
-    return clusterOpIndecreaseList;
-  }
-
-  if (type === "logicClusterAuth") {
-    return logicClusterAuthList;
-  }
 
   if (type === "logicClusterIndecrease") {
     return logicClusterIndecreaseList;
-  }
-
-  if (type === "logicClusterPlugOperation") {
-    return logicClusterPlugOperationList;
-  }
-
-  if (type === "logicClusterCreate") {
+  } else if (type === "logicClusterCreate") {
     return logicClusterCreateList;
+  } else if (type === "dslTemplateStatusChange") {
+    return [
+      {
+        label: "查询模版",
+        value: detailInfo?.dslTemplateMd5,
+      },
+    ];
+  } else if (type === "dslTemplateQueryLimit") {
+    const { dslQueryLimitDTOList } = detailInfo;
+    const dslTemplateQueryLimit: ILabelValue[] = [];
+    for (let item of dslQueryLimitDTOList) {
+      dslTemplateQueryLimit.push(
+        ...[
+          {
+            label: "查询模版",
+            value: item?.dslTemplateMd5,
+          },
+          {
+            label: "原限流值",
+            value: item?.queryLimitBefore,
+          },
+          {
+            label: "修改后限流值",
+            value: item?.queryLimit,
+          },
+        ]
+      );
+    }
+    return dslTemplateQueryLimit;
+  } else if (type === "templateLogicBlockWrite" || type === "templateLogicBlockRead") {
+    return [
+      {
+        label: "索引模版",
+        value: detailInfo?.name,
+      },
+    ];
+  } else {
+    return [] as ILabelValue[];
   }
-
-  if (type === "logicClusterTransfer") {
-    return logicClusterTransfer;
-  }
-
-  return [] as ILabelValue[];
 };
 
-export const getAddConfigInfoColumns = (
-  type: string,
-  setDrawerId: Function
-): any => {
+export const getAddConfigInfoColumns = (type: string, setDrawerId: Function): any => {
   const columns = [
     {
       title: "节点角色",

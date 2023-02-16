@@ -1,94 +1,177 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from "react";
 import { connect } from "react-redux";
-import { Dispatch } from 'redux';
-import * as actions from 'actions';
-import { getTaskQueryXForm, getTaskColumns } from './config';
-import QueryForm from 'component/dantd/query-form';
-import { getTaskList } from 'api/task-api';
-import { ITask } from 'typesPath/task-types';
-import { queryFormText } from 'constants/status-map';
-import { DTable } from 'component/dantd/dtable';
-import moment from 'moment';
+import { Dispatch } from "redux";
+import * as actions from "actions";
+import { getTaskQueryXForm, getTaskColumns } from "./config";
+import QueryForm from "component/dantd/query-form";
+import { getTaskList } from "api/task-api";
+import { ITask } from "typesPath/task-types";
+import moment from "moment";
+import { ProTable } from "knowdesign";
+import { RenderTitle } from "component/render-title";
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   setModalId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setModalId(modalId, params, cb)),
 });
 
-export const TaskList = connect(null, mapDispatchToProps)(() => {
-  const department: string = localStorage.getItem('current-project');
+export const TaskList = connect(
+  null,
+  mapDispatchToProps
+)(() => {
+  const department: string = localStorage.getItem("current-project");
   const [loading, setloading] = useState(false);
-  const [queryFormObject, setqueryFormObject] = useState(null);
   const [data, setData] = useState([] as ITask[]);
+  const [startAndEnd, setStartAndEnd] = useState([]);
+  const [queryFormObject, setqueryFormObject]: any = useState({ current: 1, size: 10 });
+  const [total, setTotal] = useState(0);
+  const buttonTime = useRef(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     reloadData();
-  }, [department]);
-
-
-  const getData = () => { // 查询项的key 要与 数据源的key  对应
-    if (!queryFormObject) return data;
-    const keys = Object.keys(queryFormObject);
-    const filterData = data.filter(
-      (d) => {
-        let b = true;
-        keys.forEach((k: string) => {
-          if (k === 'createTime' && queryFormObject[k]) {
-            const sT = moment(queryFormObject[k][0]).valueOf();
-            const eT = moment(queryFormObject[k][1]).valueOf();
-            const dT = moment(d[k]).valueOf();
-            (dT >= sT && dT <= eT) ? '' : b = false;
-          } else {
-            (d[k] + '')?.includes(queryFormObject[k]) ? '' : b = false;
-          }
-        })
-        return b;
-      }
-    )
-    return filterData;
-  }
+  }, [department, queryFormObject]);
 
   const reloadData = () => {
-    setloading(true)
-    getTaskList().then((res: ITask[]) => {
-      if (res) {
-        res = res.map((ele, index) => {
-          return {
-            ...ele,
-            key: index,
-          };
-        }) || [];
-        setData(res);
-      }
-    }).finally(() => {
-      setloading(false)
-    })
-  }
-  // 移除无意义筛选条件(undefined,null,'')
+    setloading(true);
+    const params = {
+      page: queryFormObject.current,
+      size: queryFormObject.size,
+      startTime: startAndEnd.length ? startAndEnd[0] : undefined,
+      endTime: startAndEnd.length ? startAndEnd[1] : undefined,
+      title: queryFormObject.title,
+      sortTerm: queryFormObject.sortTerm,
+      orderByDesc: queryFormObject.orderByDesc,
+    };
+    getTaskList(params)
+      .then((res) => {
+        if (res) {
+          res.bizData =
+            (res?.bizData || []).map((ele, index) => {
+              return {
+                ...ele,
+                key: index,
+              };
+            }) || [];
+          setData(res?.bizData);
+          setTotal(res?.pagination?.total);
+        }
+      })
+      .finally(() => {
+        setloading(false);
+      });
+  };
+
   const handleSubmit = (result) => {
+    const copyResult = JSON.parse(JSON.stringify(result));
+    // 增加点击刷新按钮先计算时间差 保持用户选择的事件范围
+    // 判断此时是否是自定义时间情况，如果是则不需要实时更新时间戳，反之不需要。
+    const time = startAndEnd[1] - startAndEnd[0];
+    const currentTime = new Date().getTime();
+    const isCustomTime = buttonTime.current ? [currentTime - time, currentTime] : startAndEnd;
+    copyResult.createTime = isCustomTime;
+    for (var key in copyResult) {
+      if (copyResult[key] === "" || copyResult[key] == undefined) {
+        delete copyResult[key];
+      }
+    }
+    setqueryFormObject({ ...copyResult, size: queryFormObject.size, current: 1 });
+  };
+
+  const resetSubmit = (result) => {
+    setStartAndEnd([]);
+    buttonTime.current = false;
     for (var key in result) {
-      if (result[key] === '' || result[key] == undefined) {
-        delete result[key]
+      if (result[key] === "" || result[key] === undefined) {
+        delete result[key];
       }
     }
     setqueryFormObject(result);
   };
+  const handleTimeChange = (times: number[], periodOrPicker: boolean) => {
+    //periodOrPicker为true表示此时时间选择器选的是period，false表示Picker
+    if (times) {
+      setStartAndEnd(times);
+      buttonTime.current = periodOrPicker;
+    }
+  };
+
+  const handleChange = (pagination, filters, sorter) => {
+    const sorterObject: { [key: string]: any } = {};
+    // 排序
+    if (sorter.columnKey && sorter.order) {
+      switch (sorter.columnKey) {
+        case "createTime":
+          sorterObject.sortTerm = "create_time";
+          sorterObject.orderByDesc = sorter.order === "ascend" ? false : true;
+          break;
+        case "updateTime":
+          sorterObject.sortTerm = "update_time";
+          sorterObject.orderByDesc = sorter.order === "ascend" ? false : true;
+          break;
+        default:
+          break;
+      }
+    }
+    setqueryFormObject((state) => {
+      if (!sorter.order) {
+        delete state.sortTerm;
+        delete state.orderByDesc;
+      }
+      return {
+        ...state,
+        ...sorterObject,
+        current: pagination.current,
+        size: pagination.pageSize,
+      };
+    });
+  };
+
+  const renderTitleContent = () => {
+    return {
+      title: "任务中心",
+      content: null,
+    };
+  };
 
   return (
-    <>
-      <div className="table-header">
-        <QueryForm showCollapseButton={false} {...queryFormText} defaultCollapse columns={getTaskQueryXForm()} onChange={() => null} onReset={handleSubmit} onSearch={handleSubmit} initialValues={{}} isResetClearAll />
-      </div>
-      <div>
-        <div className="table-content">
-          <DTable
-            loading={loading}
-            rowKey="id"
-            dataSource={getData()}
-            columns={getTaskColumns(reloadData)}
-            reloadData={reloadData}
-          />
-        </div>
-      </div>
-    </>
-  )
-})
+    <div className="table-layout-style">
+      <ProTable
+        showQueryForm={true}
+        queryFormProps={{
+          defaultCollapse: true,
+          columns: getTaskQueryXForm(handleTimeChange),
+          // onChange={() => null}
+          onReset: resetSubmit,
+          onSearch: handleSubmit,
+          // initialValues={{}}
+          isResetClearAll: true,
+        }}
+        tableProps={{
+          tableId: "work_order_table",
+          isCustomPg: false,
+          loading,
+          rowKey: "id",
+          dataSource: data,
+          columns: getTaskColumns(reloadData),
+          reloadData,
+          isDividerHide: false,
+          customRenderSearch: () => <RenderTitle {...renderTitleContent()} />,
+          paginationProps: {
+            position: "bottomRight",
+            showQuickJumper: true,
+            total: total,
+            showSizeChanger: true,
+            pageSizeOptions: ["10", "20", "50", "100", "200", "500"],
+            showTotal: (total: number) => `共 ${total} 条`,
+            current: queryFormObject.current,
+          },
+          attrs: {
+            onChange: handleChange,
+            scroll: {
+              x: "max-content",
+            },
+          },
+        }}
+      />
+    </div>
+  );
+});

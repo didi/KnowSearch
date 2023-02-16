@@ -1,34 +1,28 @@
 import * as React from "react";
-import { Button, Menu, PageHeader, Spin, Tag } from 'antd';
-import "styles/detail.less";
-import { DESC_LIST, DETAIL_MENU_MAP, TAB_LIST } from "./config";
+import { Menu, Spin, Tag, Divider } from "knowdesign";
+import { DESC_LIST, TAB_LIST, DETAIL_MENU_MAP } from "./config";
 import Url from "lib/url-parser";
-import { InfoItem } from "component/info-item";
 import { Dispatch } from "redux";
 import * as actions from "actions";
 import { getOpLogicClusterInfo } from "api/cluster-api";
 import { IClusterInfo } from "typesPath/cluster/cluster-types";
 import { connect } from "react-redux";
-import { delLogicCluster } from "../config";
-import {
-  StatusMap,
-} from "constants/status-map";
-import { isOpenUp } from "constants/common";
-
+import { StatusMap } from "constants/status-map";
+import "styles/detail.less";
+import "./index.less";
 
 export interface IBaseButton {
   label: string;
-  isOpenUp?: boolean,
+  isOpenUp?: boolean;
   type: "primary" | "dashed";
   clickFunc: () => any;
   attr?: any;
 }
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  setModalId: (modalId: string, params?: any, cb?: Function) =>
-    dispatch(actions.setModalId(modalId, params, cb)),
+  setModalId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setModalId(modalId, params, cb)),
 });
-const connects: Function = connect
+const connects: Function = connect;
 @connects(null, mapDispatchToProps)
 export class LogicClusterDetail extends React.Component<any> {
   public clusterId: number;
@@ -81,116 +75,72 @@ export class LogicClusterDetail extends React.Component<any> {
       });
   };
 
-  public getOpBtns = (): IBaseButton[] => {
-    if (this.state.clusterInfo.permissions !== "配置管理") return [];
-    return [
-      {
-        label: "编辑",
-        type: "primary",
-        clickFunc: () =>
-          this.props.setModalId(
-            "editCluster",
-            this.state.clusterInfo,
-            this.reloadData
-          ),
-      },
-      {
-        label: "扩缩容",
-        type: "primary",
-        isOpenUp,
-        clickFunc: () =>
-          this.props.setModalId(
-            "expandShrink",
-            this.state.clusterInfo,
-            this.reloadData
-          ),
-      },
-      {
-        label: "转让",
-        type: "primary",
-        isOpenUp,
-        clickFunc: () =>
-          this.props.setModalId(
-            "transferCluster",
-            this.state.clusterInfo,
-            this.reloadData
-          ),
-      },
-      {
-        label: "删除",
-        type: "primary",
-        clickFunc: () => {
-          delLogicCluster(this.state.clusterInfo as any, null, this.props.setModalId, () => {this.props?.history?.push('/cluster/logic')});
-        },
-      },
-    ];
-  };
-
   public renderPageHeader() {
     const { clusterInfo } = this.state;
+
     return (
-      <PageHeader
-        className="detail-header"
-        backIcon={false}
-        title={clusterInfo?.name || ""}
-        tags={
-          <Tag color={StatusMap[clusterInfo?.health]}>
-            {StatusMap[clusterInfo?.health]}
-          </Tag>
-        }
-        extra={this.getOpBtns().map((item, index) => (
-          <Button
-            type={item.type}
-            {...item.attr}
-            key={index}
-            disabled={item.isOpenUp}
-            onClick={item.clickFunc}
-          >
-            {item.label}
-          </Button>
-        ))}
-      >
-        {DESC_LIST.map((row, index) => (
-          <InfoItem
-            key={index}
-            label={row.label}
-            value={
-              row.render
-                ? row.render(clusterInfo?.[row.key])
-                : `${clusterInfo?.[row.key] || ""}`
+      <div className="detail-header">
+        <div className="left-content">
+          <span className="icon iconfont iconarrow-left" onClick={() => this.props.history.push("/cluster/logic")}></span>
+          <Divider type="vertical"></Divider>
+          <div className="title">
+            <span className="text">{clusterInfo?.name || ""}</span>
+            <Tag className={`tag ${StatusMap[clusterInfo.health]}`} color={StatusMap[clusterInfo.health]}>
+              {StatusMap[clusterInfo.health]}
+            </Tag>
+          </div>
+        </div>
+        <div className="right-content">
+          {DESC_LIST.map((row, index) => {
+            if (!clusterInfo) return null;
+            if (row.key === "tags" && Number(JSON.parse(clusterInfo[row.key] || "{}")?.createSource) !== 0) {
+              return null;
             }
-            width={200}
-          />
-        ))}
-      </PageHeader >
+            return (
+              <span className="cluster-detail" key={index}>
+                <span className="label">{row.label}：</span>
+                {/* @ts-ignore */}
+                <span className="value">{row.render ? row.render(clusterInfo?.[row.key]) : `${clusterInfo?.[row.key] || "-"}`}</span>
+              </span>
+            );
+          })}
+          <div className="reload-icon" onClick={this.reloadData}>
+            <span className="icon iconfont iconshuaxin2"></span>
+          </div>
+        </div>
+      </div>
     );
   }
-
-  public renderContent = () => {
-    return DETAIL_MENU_MAP.get(this.state.menu)?.content(
-      this.state.clusterInfo
-    );
-  };
 
   public changeMenu = (e) => {
     window.location.hash = e.key;
   };
 
+  public renderContent = () => {
+    return DETAIL_MENU_MAP.get(this.state.menu)?.content({
+      clusterInfo: this.state.clusterInfo,
+      reloadData: this.reloadData,
+      loading: this.state.loading,
+    });
+  };
+
   public render() {
     return (
-      <Spin spinning={this.state.loading}>
-        {this.renderPageHeader()}
-        <Menu
-          selectedKeys={[this.state.menu]}
-          mode="horizontal"
-          onClick={this.changeMenu}
-        >
-          {TAB_LIST.map((d) => (
-            <Menu.Item key={d.key}>{d.name}</Menu.Item>
-          ))}
-        </Menu>
-        <div className="detail-wrapper">{this.renderContent()}</div>
-      </Spin>
+      <div className="detail-container">
+        <Spin spinning={this.state.loading}>
+          {this.renderPageHeader()}
+          <div className="content">
+            <div className="menu-container">
+              <Menu className="menu" selectedKeys={[this.state.menu]} mode="horizontal" onClick={this.changeMenu}>
+                {TAB_LIST.map((d) => (
+                  <Menu.Item key={d.key}>{d.name}</Menu.Item>
+                ))}
+              </Menu>
+            </div>
+            <div className="detail-wrapper">{this.renderContent()}</div>
+          </div>
+        </Spin>
+      </div>
     );
   }
 }

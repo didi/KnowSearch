@@ -7,6 +7,7 @@ import { IndexView } from "./index-view";
 import { NodeView } from "./node-view";
 import { IndexTemplateView } from "./index-template-view";
 import moment from "moment";
+import { isSuperApp } from "lib/utils";
 
 export enum TAB_LIST_KEY {
   overview = "overview",
@@ -15,24 +16,67 @@ export enum TAB_LIST_KEY {
   template = "template",
 }
 
+
+export const CLUSTER_KANBAN_MENU = () => {
+  //普通侧和运维测tab需要更改
+  const superApp = isSuperApp();
+  if (!superApp) {
+    return [
+      {
+        name: "索引",
+        key: TAB_LIST_KEY.index,
+      },
+      {
+        name: "索引模板",
+        key: TAB_LIST_KEY.template,
+      },
+      {
+        name: "总览",
+        key: TAB_LIST_KEY.overview,
+      },
+      {
+        name: "节点",
+        key: TAB_LIST_KEY.node,
+      },
+    ];
+  }
+  return [
+    {
+      name: "总览",
+      key: TAB_LIST_KEY.overview,
+    },
+    {
+      name: "节点",
+      key: TAB_LIST_KEY.node,
+    },
+    {
+      name: "索引",
+      key: TAB_LIST_KEY.index,
+    },
+    {
+      name: "索引模板",
+      key: TAB_LIST_KEY.template,
+    },
+  ];
+};
 export const TAB_LIST = [
   {
-    name: "总览视图",
+    name: "总览",
     key: TAB_LIST_KEY.overview,
     content: () => <OverviewView />,
   },
   {
-    name: "节点视图",
+    name: "节点",
     key: TAB_LIST_KEY.node,
     content: () => <NodeView />,
   },
   {
-    name: "索引视图",
+    name: "索引",
     key: TAB_LIST_KEY.index,
     content: () => <IndexView />,
   },
   {
-    name: "索引模板视图",
+    name: "索引模板",
     key: TAB_LIST_KEY.template,
     content: () => <IndexTemplateView />,
   },

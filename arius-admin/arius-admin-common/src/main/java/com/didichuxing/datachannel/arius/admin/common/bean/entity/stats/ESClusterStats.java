@@ -46,7 +46,7 @@ public class ESClusterStats extends BaseESPO {
 
     @Override
     public String getKey() {
-        return String.format("%s@%s@%s@%d", dataCenter, cluster, percentilesType, monitorTimestamp2min(timestamp));
+        return String.format("%s@%s@%s@%d@%d", dataCenter, cluster, percentilesType, monitorTimestamp2min(timestamp),physicCluster);
     }
 
     @Override

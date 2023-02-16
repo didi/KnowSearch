@@ -1,32 +1,48 @@
+@ant-prefix: ant;
+
 .role-manage-detail {
+  .read-lable {
+    font-family: PingFangSC-Regular;
+    text-align: right;
+    line-height: 20px;
+    display: inline-block;
+    width: 70px;
+    text-align: right;
+  }
+
+  .read-content {
+    font-family: PingFangSC-Regular;
+    line-height: 20px;
+    display: inline-block;
+  }
+
   .role-tpl-form {
     padding: 20px;
-    &-readonlyText {
-      display: flex;
-      margin-top: 12px;
-      .read-lable {
-        flex-shrink: 0;
-      }
-    }
+
     &-formitem {
       margin-top: 20px !important;
       margin-bottom: 0px !important;
     }
+
     &-first-formitem {
       margin-bottom: 0px !important;
     }
   }
+
   .ant-transfer {
     height: 100%;
   }
+
   .ant-transfer-list {
     width: 100%;
     height: 100%;
     border-radius: 4px;
   }
+
   .ant-transfer-list-header-title {
     font-weight: bolder;
   }
+
   .bind-row-item {
     height: 24px;
     margin-right: 7px;
@@ -36,6 +52,7 @@
     border: 1px solid #eaeef5;
     border-radius: 1px;
   }
+
   .bind-role-title {
     margin-top: 26px;
     margin-bottom: 12px;
@@ -43,6 +60,7 @@
     font-weight: bolder;
     color: #303a51;
   }
+
   .bind-role-table {
     width: 100%;
     border: 1px solid #dcdfe6;
@@ -51,8 +69,10 @@
     display: table;
     border-style: hidden;
     box-shadow: 0 0 0 1px #dcdfe6;
+
     .tr {
       display: table-row;
+
       .td {
         display: table-cell;
         line-height: 40px;
@@ -63,31 +83,38 @@
         text-align: left;
       }
     }
+
     .tHead {
       font-weight: bold;
       height: 40px;
       line-height: 40px;
       color: #303a51;
       background: #f5f7fa;
+
       > div:first-child {
         width: 157px;
         border-top-left-radius: 4px;
       }
+
       > div:last-child {
         // width: 482px;
         border-top-right-radius: 4px;
       }
     }
+
     .tBody {
       .col-permission {
         display: flex;
+
         .permission-all {
         }
+
         .permission-content {
           flex: 1;
           display: flex;
           flex-wrap: wrap;
           padding-top: 10px;
+
           .content-item {
             margin-top: -10px;
             padding-left: 16px;
@@ -95,11 +122,13 @@
         }
       }
     }
+
     .empty-item {
       position: relative;
       display: table-row;
       height: 80px;
       line-height: 80px;
+
       span {
         position: absolute;
         top: 50%;
@@ -107,5 +136,105 @@
         transform: translate(-50%, -50%);
       }
     }
+  }
+}
+
+.role-tree-panel {
+  padding-bottom: 24px;
+  .check-item:last-child {
+    margin-bottom: 0px;
+  }
+
+  .check-item {
+    display: flex;
+    background: #ffffff;
+    border: 1px solid #ebedef;
+    border-radius: 4px;
+    margin-bottom: 11px;
+
+    .label {
+      font-family: PingFangSC-Regular;
+      font-size: 12px;
+      color: #374053;
+      line-height: 20px;
+      width: 120px;
+      background: #f9f9fa;
+      border-radius: 4px 0 0 4px;
+      display: flex;
+      align-items: center;
+      padding-left: 16px;
+    }
+
+    .content {
+      padding: 16px 24px 5px;
+      width: calc(100% - 120px);
+
+      .ant-checkbox-group-item {
+        width: 128px;
+        margin-bottom: 11px;
+        height: 20px;
+      }
+    }
+
+    .@{ant-prefix}-checkbox-disabled .@{ant-prefix}-checkbox-inner {
+      background-color: #f4f4f6;
+      border: 0.77px solid #d7dae0;
+      border-radius: 1.53px;
+    }
+
+    .@{ant-prefix}-checkbox-disabled.@{ant-prefix}-checkbox-checked .@{ant-prefix}-checkbox-inner::after {
+      border-color: #a9afbc;
+    }
+
+    .@{ant-prefix}-checkbox-disabled + span {
+      color: #374053;
+    }
+
+    .@{ant-prefix}-checkbox-inner {
+      height: 14px;
+      width: 14px;
+    }
+
+    .@{ant-prefix}-checkbox-indeterminate {
+      .@{ant-prefix}-checkbox-inner::after {
+        width: 8px;
+        height: 8px;
+      }
+    }
+
+    .@{ant-prefix}-checkbox-inner::after {
+      width: 4.9px;
+      height: 6.99px;
+    }
+
+    .@{ant-prefix}-checkbox + span {
+      padding-right: 8px;
+      padding-left: 8px;
+      text-overflow: ellipsis;
+      max-width: 105px;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+  }
+}
+
+.edit-table {
+  margin-top: 20px;
+
+  .@{ant-prefix}-select-selector {
+    width: 320px;
+    text-align: left;
+  }
+}
+
+.bind-admin-tips {
+  height: 32px;
+  background: #eff4ff;
+  border-radius: 4px;
+  padding: 6px;
+  color: #041d66;
+  .icon {
+    font-size: 14px;
+    margin-right: 5px;
   }
 }

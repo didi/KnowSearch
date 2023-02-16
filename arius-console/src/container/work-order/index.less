@@ -33,9 +33,9 @@
 
 .order-detail {
   .detail-top {
-    width: calc(100% - 230px);
+    width: calc(100% - 190px);
     position: fixed;
-    top: 125px;
+    top: 55px;
     z-index: 999;
   }
 
@@ -84,6 +84,7 @@
   font-size: 12px;
   line-height: 30px;
   width: 100%;
+  padding-top: 24px;
 
   .speed-head-left {
     width: 84%;
@@ -179,9 +180,9 @@
   }
 
   .waiting-back {
-    background: rgb(192, 228, 243);
-    color: #0092d1;
-    border: 1px solid #0092d1;
+    background: #e6f4ff;
+    color: #1473ff;
+    border: 1px solid #8fc7ff;
   }
 
   .cancel-back {
@@ -191,10 +192,20 @@
   }
 }
 
-// .txt {
-//   text-decoration: underline;
-// }
-
 .ant-steps-vertical .ant-steps-item-content {
   min-height: 80px;
+}
+.button-styles {
+  height: 30px;
+  font-size: 12px;
+}
+.task-detail-wrapper {
+  height: calc(100% - 118px);
+  overflow-y: auto;
+  padding-top: 20px;
+  margin: 20px 0;
+}
+.menu-container.task-detail {
+  background-color: transparent;
+  padding: 20px 0;
 }

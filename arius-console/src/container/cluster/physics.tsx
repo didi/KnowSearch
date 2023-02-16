@@ -3,20 +3,30 @@ import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import * as actions from "actions";
 import { getPhysicsColumns, getPhyClusterQueryXForm } from "./config";
-import { getNodeList, getOpPhysicsClusterList, IClusterList, getPackageList } from "api/cluster-api";
+import {
+  getOpPhysicsClusterList,
+  getNodeSpecification,
+  IClusterList,
+  getPackageList,
+  getZeusUrl,
+  getSuperPhyClusterList,
+  getSuperLogiClusterList,
+} from "api/cluster-api";
 import { DTable, ITableBtn } from "component/dantd/dtable";
 import { INodeListObjet } from "container/modal/physics-cluster/apply-cluster";
 import { IVersions } from "typesPath/cluster/physics-type";
-import { INode } from "typesPath/cluster/cluster-types";
-import { notification } from "antd";
+import { Button, Tag } from "knowdesign";
 import { RenderTitle } from "component/render-title";
-import { queryFormText } from "constants/status-map";
-import QueryForm from "component/dantd/query-form";
 import { isOpenUp } from "constants/common";
+import "./index.less";
+import { PhyClusterPermissions } from "constants/permission";
+import { hasOpPermission } from "lib/permission";
+import { XNotification } from "component/x-notification";
+import { ProTable } from "knowdesign";
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   setModalId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setModalId(modalId, params, cb)),
-  setDrawerId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setDrawerId(modalId, params)),
+  setDrawerId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setDrawerId(modalId, params, cb)),
 });
 
 const PhysicsClusterBox = (props) => {
@@ -28,6 +38,18 @@ const PhysicsClusterBox = (props) => {
   });
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
+  const [url, setUrl] = useState("");
+  const [packageHostList, setPackageHostList] = useState([]);
+  const [packageDockerList, setPackageDockerList] = useState([]);
+  const [phyClusterList, setPhyClusterList] = useState([]);
+  const [logiClusterList, setLogiClusterList] = useState([]);
+  const [form, setForm] = useState<any>();
+
+  React.useEffect(() => {
+    _getPackageList();
+    getPhyClusterList();
+    getLogiClusterList();
+  }, []);
 
   React.useEffect(() => {
     reloadData();
@@ -48,6 +70,9 @@ const PhysicsClusterBox = (props) => {
       esVersion: queryFormObject.esVersion,
       sortTerm: queryFormObject.sortTerm,
       orderByDesc: queryFormObject.orderByDesc,
+      id: queryFormObject.id !== undefined ? +queryFormObject.id : undefined,
+      desc: queryFormObject.desc,
+      logicClusterName: queryFormObject.logicClusterName,
     };
     getOpPhysicsClusterList(Params)
       .then((res) => {
@@ -68,6 +93,44 @@ const PhysicsClusterBox = (props) => {
       .finally(() => {
         setloading(false);
       });
+    getZeusUrl().then((res) => {
+      setUrl(res);
+    });
+  };
+
+  const _getPackageList = async () => {
+    let data = await getPackageList();
+    const packageList = data.map((ele, index) => {
+      return {
+        ...ele,
+        key: ele.id,
+        value: ele.esVersion,
+        title: ele.esVersion,
+      };
+    });
+    let dockerList = packageList.filter((ele) => ele.manifest === 3);
+    let hostList = packageList.filter((ele) => ele.manifest === 4);
+    setPackageHostList(hostList);
+    setPackageDockerList(dockerList);
+  };
+
+  const getPhyClusterList = () => {
+    getSuperPhyClusterList().then((res = []) => {
+      const list = res.map((item) => ({ title: item, value: item }));
+      setPhyClusterList(list);
+    });
+  };
+
+  const getLogiClusterList = (phyClusterName?: string) => {
+    getSuperLogiClusterList(phyClusterName).then((res = []) => {
+      const list = res.map((item) => ({ title: item, value: item }));
+      setLogiClusterList(list);
+    });
+  };
+
+  const onPhyClusterChange = (val) => {
+    form.setFieldsValue({ logicClusterName: undefined });
+    getLogiClusterList(val);
   };
 
   const renderTitleContent = () => {
@@ -75,6 +138,12 @@ const PhysicsClusterBox = (props) => {
       title: "物理集群",
       content: null,
     };
+  };
+
+  const handleReset = () => {
+    // 重置重新请求逻辑集群接口
+    getLogiClusterList();
+    setqueryFormObject({ size: queryFormObject.size, current: 1 });
   };
 
   const handleSubmit = (result) => {
@@ -88,66 +157,41 @@ const PhysicsClusterBox = (props) => {
 
   const getModalData = () => {
     const nodeList = {} as INodeListObjet;
-    let packageDockerList = [] as IVersions[];
-    let packageHostList = [] as IVersions[];
-    const setNodeList = (data: INode[]) => {
-      const list = data.map((item: INode, index: number) => {
-        return {
-          ...item,
-          key: index,
-          value: item.spec,
-        };
-      });
-      nodeList.masternode = list.filter((ele) => ele.role === "masternode");
-      nodeList.clientnode = list.filter((ele) => ele.role === "clientnode");
-      nodeList.datanode = list.filter((ele) => ele.role === "datanode");
-      nodeList.datanodeceph = list.filter((ele) => ele.role === "datanode-ceph");
-    };
+    let machineList = [] as { value: string }[];
 
-    const setPackageList = (data: IVersions[]) => {
-      const list = data.filter((data, indx, self) => {
-        return self.findIndex((ele) => ele.esVersion === data.esVersion) === indx;
-      });
-      const packageList = list.map((ele, index) => {
-        return {
-          ...ele,
-          key: index,
-          value: ele.esVersion,
-        };
-      });
-      packageDockerList = packageList.filter((ele) => ele.manifest === 3);
-      packageHostList = packageList.filter((ele) => ele.manifest === 4);
-    };
-
-    Promise.all([getNodeList().then(setNodeList), getPackageList().then(setPackageList)])
-      .then((values) => {
-        props.setModalId("applyPhyCluster", { loading: false, nodeList, packageDockerList, packageHostList }, reloadData);
+    getNodeSpecification()
+      .then((data) => {
+        machineList = data.map((item) => {
+          return {
+            value: item,
+          };
+        });
+        props.setModalId(
+          "applyPhyCluster",
+          { loading: false, nodeList, packageDockerList, packageHostList, machineList, history: props.history },
+          reloadData
+        );
       })
       .catch((err) => {
-        notification.error({ message: `网络错误！` });
+        XNotification({ type: "error", message: "网络错误！" });
         props.setModalId("");
       });
   };
 
   const getOpBtns = (): ITableBtn[] => {
     return [
-      {
+      hasOpPermission(PhyClusterPermissions.PAGE, PhyClusterPermissions.ACCESS) && {
         label: "接入集群",
-        className: "ant-btn-primary",
+        type: "default",
         clickFunc: () => props.setModalId("accessCluster", {}, reloadData),
       },
       {
-        className: "ant-btn-primary",
+        type: "primary",
         label: "新建集群",
         isOpenUp: isOpenUp,
         clickFunc: () => getModalData(),
       },
-      {
-        label: "分配集群",
-        className: "ant-btn-primary",
-        clickFunc: () => props.setModalId("newCluster", {}, reloadData),
-      },
-    ];
+    ].filter(Boolean);
   };
   const handleChange = (pagination, filters, sorter) => {
     // 条件过滤请求在这里处理
@@ -181,56 +225,66 @@ const PhysicsClusterBox = (props) => {
     });
   };
 
+  const clientHeight = document.querySelector("#d1-layout-main")?.clientHeight;
   return (
-    <>
-      <div className="table-header">
-        <RenderTitle {...renderTitleContent()} />
-
-        <QueryForm
-          {...queryFormText}
-          defaultCollapse
-          columns={getPhyClusterQueryXForm(data)}
-          onChange={() => null}
-          onReset={handleSubmit}
-          onSearch={handleSubmit}
-          initialValues={{}}
-          isResetClearAll
-        />
-      </div>
-      <div>
-        <div className="table-content">
-          <DTable
-            loading={loading}
-            rowKey="id"
-            dataSource={data}
-            attrs={{
-              onChange: handleChange,
-              scroll: {
-                x: true
-              }
-            }}
-            key={JSON.stringify({
-              authType: queryFormObject.authType,
-              health: queryFormObject.health,
-              cluster: queryFormObject.cluster,
-              esVersion: queryFormObject.esVersion,
-            })}
-            columns={getPhysicsColumns(props.setModalId, props.setDrawerId, reloadData)}
-            reloadData={reloadData}
-            getOpBtns={getOpBtns}
-            paginationProps={{
-              position: "bottomRight",
-              showQuickJumper: true,
-              total: total,
-              showSizeChanger: true,
-              pageSizeOptions: ["10", "20", "50", "100", "200", "500"],
-              showTotal: (total) => `共 ${total} 条`,
-              current: queryFormObject.current
-            }}
-          />
-        </div>
-      </div>
-    </>
+    <div className="table-layout-style">
+      <ProTable
+        showQueryForm={true}
+        queryFormProps={{
+          // layout: "inline", //没有label的查询条件
+          // colMode: "style", //col默认设计样式
+          totalNumber: total, //传入总条数
+          defaultCollapse: true,
+          columns: getPhyClusterQueryXForm(data, packageHostList, phyClusterList, logiClusterList, onPhyClusterChange),
+          // onChange={() => null}
+          onReset: handleReset,
+          onSearch: handleSubmit,
+          initialValues: queryFormObject,
+          isResetClearAll: true,
+          getFormInstance: (form) => setForm(form),
+        }}
+        tableProps={{
+          tableId: "physics_cluster_list", //开启表格自定义列
+          key: JSON.stringify({
+            authType: queryFormObject.authType,
+            health: queryFormObject.health,
+            cluster: queryFormObject.cluster,
+            esVersion: queryFormObject.esVersion,
+          }),
+          isCustomPg: false,
+          loading,
+          rowKey: "id",
+          dataSource: data,
+          columns: getPhysicsColumns(props.setModalId, props.setDrawerId, reloadData, props),
+          reloadData,
+          getOpBtns: getOpBtns,
+          customRenderSearch: () => (
+            <div className="zeus-url">
+              <RenderTitle {...renderTitleContent()} />{" "}
+              {url && (
+                <Tag className="zeus-url-tag" onClick={() => (window.open("about:blank").location.href = url)}>
+                  Zeus管控
+                </Tag>
+              )}
+            </div>
+          ),
+          paginationProps: {
+            position: "bottomRight",
+            showQuickJumper: true,
+            total: total,
+            showSizeChanger: true,
+            pageSizeOptions: ["10", "20", "50", "100", "200", "500"],
+            showTotal: (total) => `共 ${total} 条`,
+            current: queryFormObject.current,
+          },
+          attrs: {
+            onChange: handleChange,
+            scroll: { x: "max-content" },
+          },
+          ...props,
+        }}
+      />
+    </div>
   );
 };
 export const PhysicsCluster = connect(null, mapDispatchToProps)(PhysicsClusterBox);

@@ -1,140 +1,119 @@
+/* eslint-disable react/display-name */
 import * as React from "react";
-import { Drawer, Modal, Button, message, Alert } from "antd";
+import { message } from "antd";
+import { Drawer, Modal, Button, Form } from "knowdesign";
 import { XForm as XFormComponent } from "component/x-form";
 import { IXFormWrapper } from "interface/common";
+import "./index.less";
 
-export class XFormWrapper extends React.Component<IXFormWrapper> {
-  public state = {
-    confirmLoading: false,
-    formMap: this.props.formMap || ([] as any),
-    formData: this.props.formData || {},
+export const XFormWrapper = React.forwardRef((props: IXFormWrapper, ref) => {
+  const [confirmLoading, setConfirmLoading] = React.useState(false);
+  const {
+    type,
+    visible,
+    title,
+    width,
+    formLayout,
+    cancelText,
+    okText,
+    layout,
+    formData = {},
+    formMap,
+    onCancel,
+    onChangeVisible,
+    nofooter,
+    customRenderElement,
+    noform,
+    onHandleValuesChange,
+    needSuccessMessage = true,
+    className,
+  } = props;
+
+  const [form] = Form.useForm();
+
+  React.useEffect(() => {
+    form.setFieldsValue(formData);
+  }, [formData]);
+
+  const resetForm = (resetFields?: any) => {
+    form.resetFields(resetFields || "");
   };
 
-  private $formRef: any = React.createRef();
-
-  public componentWillUnmount() {
-    this.$formRef = null;
-  }
-
-  public updateFormMap$(formMap?: any, formData?: any, isResetForm?: boolean, resetFields?: string[]) {
-    if (isResetForm) {
-      resetFields ? this.resetForm(resetFields) : this.resetForm();
-    }
-
-    this.setState({
-      formMap,
-      formData,
-    });
-  }
-
-  public getFieldValue = (key: string) => {
-    if (this.$formRef) {
-      return this.$formRef.current!.getFieldValue(key);
-    }
-    return "";
+  const closeModalWrapper = () => {
+    onChangeVisible && onChangeVisible(false);
   };
 
-  public setFieldValue = (ob: any) => {
-    if (this.$formRef) {
-      return this.$formRef.current!.setFieldsValue(ob);
-    }
-    return "";
+  const handleCancel = () => {
+    // tslint:disable-next-line:no-unused-expression
+    onCancel && onCancel();
+    resetForm();
+    closeModalWrapper();
   };
 
-  public handleSubmit = () => {
-    this.$formRef
-      .current!.validateFields()
+  const handleSubmit = () => {
+    form
+      .validateFields()
       .then((result) => {
-        const { onSubmit, isWaitting, actionAfterFailedSubmit, actionAfterSubmit } = this.props;
-
+        const { onSubmit, isWaitting, needBtnLoading, actionAfterFailedSubmit, actionAfterSubmit } = props;
         if (typeof onSubmit === "function") {
           if (isWaitting) {
-            this.setState({
-              confirmLoading: true,
-            });
+            setConfirmLoading(true);
             onSubmit(result)
               .then((res: any) => {
-                this.setState({
-                  confirmLoading: false,
-                });
+                setConfirmLoading(false);
+
                 if (typeof actionAfterSubmit === "function") {
                   actionAfterSubmit(res);
                 }
-                message.success("操作成功");
-                this.resetForm();
-                this.closeModalWrapper();
+                needSuccessMessage && message.success("操作成功");
+                resetForm();
+                closeModalWrapper();
               })
               .catch((err) => {
-                this.setState({
-                  confirmLoading: false,
-                  showErrorTip: true,
-                });
                 if (typeof actionAfterFailedSubmit === "function") {
                   actionAfterFailedSubmit();
                 }
+                setConfirmLoading(false);
+              })
+              .finally(() => {
+                setConfirmLoading(false);
               });
+            return;
+          }
+          if (needBtnLoading) {
+            setConfirmLoading(true);
+            onSubmit(result).finally(() => setConfirmLoading(false));
             return;
           }
 
           // tslint:disable-next-line:no-unused-expression
           onSubmit && onSubmit(result);
-
-          // this.resetForm(); //接口报错会情调表单数据
-          this.closeModalWrapper();
+          closeModalWrapper();
         }
       })
-      .catch((errs) => {});
+      .catch((errs) => {
+        //
+      });
   };
 
-  public handleCancel = () => {
-    const { onCancel } = this.props;
-    // tslint:disable-next-line:no-unused-expression
-    onCancel && onCancel();
-    this.resetForm();
-    this.closeModalWrapper();
-  };
-
-  public resetForm = (resetFields?: string[]) => {
-    // tslint:disable-next-line:no-unused-expression
-    this.$formRef && this.$formRef.current!.resetFields(resetFields || "");
-  };
-
-  public closeModalWrapper = () => {
-    const { onChangeVisible } = this.props;
-    // tslint:disable-next-line:no-unused-expression
-    onChangeVisible && onChangeVisible(false);
-  };
-
-  public render() {
-    const { type } = this.props;
-    switch (type) {
-      case "drawer":
-        return this.renderDrawer();
-      default:
-        return this.renderModal();
-    }
-  }
-
-  public renderDrawer() {
-    const { visible, title, width, formLayout, cancelText, okText, customRenderElement, noform, nofooter, onHandleValuesChange } =
-      this.props;
-    const { formMap, formData } = this.state;
-
+  const renderDrawer = () => {
     return (
       <Drawer
         title={title}
         visible={visible}
         width={width}
         closable={true}
-        onClose={this.handleCancel}
+        className={`wrap-contain ${className ? className : ""}`}
+        onClose={handleCancel}
+        maskClosable={false}
         destroyOnClose={true}
         footer={
           !nofooter && (
             <div className="footer-btn">
-              <Button style={{ marginRight: 10 }} type="primary" onClick={this.handleSubmit}>
+              <Button className="confirm-button" loading={confirmLoading} type="primary" onClick={handleSubmit}>
                 {okText || "确定"}
               </Button>
-              <Button onClick={this.handleCancel}>{cancelText || "取消"}</Button>
+              <Button onClick={handleCancel}>{cancelText || "取消"}</Button>
             </div>
           )
         }
@@ -142,8 +121,8 @@ export class XFormWrapper extends React.Component<IXFormWrapper> {
         <>{customRenderElement}</>
         {!noform && (
           <XFormComponent
-            layout="vertical"
-            wrappedComponentRef={this.$formRef}
+            layout={layout || "vertical"}
+            form={form}
             formData={formData}
             formMap={formMap}
             formLayout={formLayout}
@@ -152,32 +131,36 @@ export class XFormWrapper extends React.Component<IXFormWrapper> {
         )}
       </Drawer>
     );
-  }
-
-  public renderModal() {
-    const { visible, title, width, formLayout, cancelText, okText, layout } = this.props;
-    const { formMap, formData } = this.state;
-
+  };
+  const renderModal = () => {
     return (
       <Modal
         width={width || 600}
+        className={`wrap-contain ${className ? className : ""}`}
         title={title}
         visible={visible}
-        confirmLoading={this.state.confirmLoading}
+        confirmLoading={confirmLoading}
         maskClosable={false}
-        onOk={this.handleSubmit}
-        onCancel={this.handleCancel}
+        onOk={handleSubmit}
+        onCancel={handleCancel}
         okText={okText || "确定"}
         cancelText={cancelText || "取消"}
       >
         <XFormComponent
-          wrappedComponentRef={this.$formRef}
+          form={form}
           formData={formData}
           formMap={formMap}
           formLayout={formLayout}
           layout={layout || "vertical"}
+          onHandleValuesChange={onHandleValuesChange}
         />
       </Modal>
     );
-  }
-}
+  };
+
+  React.useImperativeHandle(ref, () => ({
+    form,
+  }));
+
+  return <>{type === "drawer" ? renderDrawer() : renderModal()}</>;
+});

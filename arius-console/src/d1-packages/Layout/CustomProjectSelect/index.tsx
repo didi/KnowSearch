@@ -1,7 +1,6 @@
-import { Dropdown, Input, Select, Tooltip } from 'antd';
-import * as React from 'react';
-import { CaretDownOutlined } from '@ant-design/icons';
-import './index.less';
+import { Dropdown, Input, Tooltip } from "antd";
+import React, { useState } from "react";
+import "./index.less";
 
 export interface IProject {
   id: number;
@@ -12,7 +11,7 @@ export interface IProject {
 interface IProjectDropDown {
   list: IProject[];
   currentProject: IProject;
-  setCurrentProject: (newProject: IProject) => void;
+  onChange: (newProject: IProject) => void;
   setVisible?: (visible: boolean) => void;
 }
 
@@ -21,85 +20,111 @@ export const CustomAppDropDown = (props: {
   projectList: IProject[];
   setCurrentProject: (newProject: IProject) => void;
 }) => {
+  const [visible, setVisible] = useState(false);
+
   const { currentProject, projectList = [], setCurrentProject } = props;
+
+  const handleVisibleChange = (newVisible: boolean) => {
+    setVisible(newVisible);
+  };
 
   return (
     <>
-      {
-        currentProject?.name ?
-          <>
-            <Dropdown
-              key="2"
-              overlayClassName="app-wrapper"
-              overlay={<ProjectSelect setCurrentProject={setCurrentProject} list={projectList} currentProject={currentProject} />}
-              trigger={['hover']}
-              placement="bottomCenter"
-            >
-              <span className="dropdown-content">
-                <a className="dropdown-text">
-                  <span>
-                    {currentProject?.name?.length > 20 ?
-                      <Tooltip title={currentProject?.name}>
-                        {currentProject?.name?.slice(0, 18) + '...'}
-                      </Tooltip>
-                      : currentProject?.name}
-                  </span>
-                  <CaretDownOutlined className="dropdown-icon" />
-                </a>
-              </span>
-            </Dropdown>
-          </>
-          : ''
-      }
+      {currentProject?.name ? (
+        <>
+          <Dropdown
+            visible={visible}
+            key="2"
+            arrow
+            overlayClassName="app-wrapper"
+            onVisibleChange={handleVisibleChange}
+            overlay={
+              <ProjectSelect
+                onChange={(val) => {
+                  setCurrentProject(val);
+                  setVisible(false);
+                }}
+                list={projectList}
+                currentProject={currentProject}
+              />
+            }
+            trigger={["click"]}
+            placement="bottomCenter"
+          >
+            <span className="dropdown-content">
+              <a className="dropdown-text">
+                <span className={`icon iconfont iconyingyong`}></span>
+                <span className="text">
+                  {currentProject?.name?.length > 20 ? (
+                    <Tooltip title={currentProject?.name}>{currentProject?.name?.slice(0, 18) + "..."}</Tooltip>
+                  ) : (
+                    currentProject?.name
+                  )}
+                </span>
+                <div className={`select-icon`}>
+                  <span className={`icon iconfont iconRight`}></span>
+                </div>
+              </a>
+            </span>
+          </Dropdown>
+        </>
+      ) : (
+        ""
+      )}
     </>
   );
-}
+};
 
 class ProjectSelect extends React.Component<IProjectDropDown> {
   public state = {
-    list: this.props.list || [] as IProject[],
+    list: this.props.list || ([] as IProject[]),
     isSearch: false,
   };
 
   public onHandleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { value } = e.target;
     const originList = this.props.list || [];
-    const list = value?.trim() ? originList.filter(item => item.name.includes(value?.trim()) || (item.id + '').includes(value?.trim())) : originList;
+    const list = value?.trim()
+      ? originList.filter((item) => item.name.includes(value?.trim()) || (item.id + "").includes(value?.trim()))
+      : originList;
     this.setState({
       list,
-      isSearch: true,
+      isSearch: value ? true : false,
     });
-  }
+  };
 
-  public switchAppId = (item: IProject) => {
-    this.props.setCurrentProject && this.props.setCurrentProject(item);
-  }
+  public switchProjectId = (item: IProject) => {
+    this.props.onChange && this.props.onChange(item);
+  };
 
   public render() {
     const { list, isSearch } = this.state;
     const { currentProject } = this.props;
     return (
-      <>
-        <>
-          <Input onChange={this.onHandleInputChange} placeholder="请输入项目名称或项目ID" prefix={<svg className="icon svg-icon" aria-hidden="true">
-            <use xlinkHref="#icontubiao-sousuo"></use>
-          </svg>} />
-        </>
-        <ul>
-          {isSearch && !list.length ? <li>无匹配结果</li> : null}
-          {!isSearch && !list.length ? <li>无项目</li> : null}
-          {
-            list.map((item, index) =>
-            (<li key={index}>
-              <a className={currentProject?.id === item.id ? 'active' : ''} onClick={() => this.switchAppId(item)}>
-                <span>{item.name}({item.id})</span>
-                {/* <span className="right-text">{item.id}</span> */}
-              </a>
-            </li>),
-            )
+      <div className="project-select">
+        <Input
+          className={isSearch ? "hasclear" : ""}
+          allowClear
+          onChange={this.onHandleInputChange}
+          placeholder="请输入应用名称或应用ID"
+          prefix={
+            <svg className="icon svg-icon" aria-hidden="true">
+              <use xlinkHref="#icontubiao-sousuo"></use>
+            </svg>
           }
+        />
+        <ul className="project-list">
+          {isSearch && !list.length ? <li>无匹配结果</li> : null}
+          {!isSearch && !list.length ? <li>无应用</li> : null}
+          {list.map((item, index) => (
+            <li key={index} className={currentProject?.id === item.id ? "active" : ""} onClick={() => this.switchProjectId(item)}>
+              <span>
+                {item.name}({item.id})
+              </span>
+            </li>
+          ))}
         </ul>
-      </>
+      </div>
     );
   }
 }

@@ -388,8 +388,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(clusterLogicId, currentProjectId);
         ClusterLogicVO clusterLogicVO = ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class);
 
-        FUTURE_UTIL.runnableTask(() -> buildLogicClusterStatus(clusterLogicVO, clusterLogic))
-            .runnableTask(() -> buildConsoleClusterVersions(clusterLogicVO))
+        FUTURE_UTIL.runnableTask(() -> buildConsoleClusterVersions(clusterLogicVO))
             .runnableTask(() -> buildOpLogicClusterPermission(clusterLogicVO, currentProjectId))
             .runnableTask(
                 () -> Optional.ofNullable(projectService.getProjectBriefByProjectId(clusterLogicVO.getProjectId()))

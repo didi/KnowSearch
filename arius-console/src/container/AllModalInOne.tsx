@@ -1,59 +1,69 @@
 import * as React from "react";
 import { connect } from "react-redux";
-import NewClusterModal from "./modal/logic-cluster/new-cluster";
 import ApplyClusterModal from "./modal/logic-cluster/apply-cluster";
 import EditClusterModal from "./modal/logic-cluster/edit-cluster";
 import ExpandShrinkModal from "./modal/logic-cluster/expand-shrink-cluster";
-import TransferClusterModal from "./modal/logic-cluster/transfer-cluster";
 import ApplyAauthorityModal from "./modal/logic-cluster/apply-authority";
-import AccessCluster from "./modal/physics-cluster/access-authority";
+import AccessCluster from "./modal/physics-cluster/access-cluster";
 import ApplyPhyClusterModal from "./modal/physics-cluster/apply-cluster";
 import { UpgradeCluster } from "./modal/physics-cluster/upgrade-cluster";
 import RestartClusterModal from "./modal/physics-cluster/restart-cluster";
 import DockerExpandShrinkCluster from "./modal/physics-cluster/docker-expand-shrink-cluster";
 import EditPhyCluster from "./modal/physics-cluster/edit-cluster";
-import { ExpandShrinkCluster } from "./modal/physics-cluster/expand-shrink-cluster";
+import ExpandShrinkCluster from "./modal/physics-cluster/expand-shrink-cluster";
+import RegionDivide from "./modal/physics-cluster/region-divide";
+import RegionAdmin from "./modal/physics-cluster/region-admin";
+import EditGatewayUrl from "./modal/physics-cluster/edit-gateway-url";
+import BindGateway from "./modal/physics-cluster/bind-gateway";
 import CustomPlugnModal from "./modal/plugn/custom-plugn";
-import RelationRegionModal from "./modal/logic-cluster/relation-region";
 import AddPackageModal from "./modal/edition-cluster/add-package";
 import { NewConfigModal } from "./modal/physics-cluster/new-config";
-import EditConfigDesc from "./modal/physics-cluster/edit-config-desc";
 import EditConfig from "./modal/physics-cluster/edit-config";
-import { ExpandShrinkIndex } from "./modal/cluster-index/expand-shrink-cluster";
-import TransClusterIndex from "./modal/cluster-index/trans-cluster-index";
-import { ClearClusterIndex } from "./modal/cluster-index/clear-cluster-index";
-import { PhyUpgradeIndex } from "./modal/cluster-index/phy-upgrade-index";
-import { PhyModifyIndex } from "./modal/cluster-index/phy-modify-index";
-import { PhyCopyIndex } from "./modal/cluster-index/phy-copy-index";
-import { LogicApplyAuth } from "./modal/cluster-index/logic-apply-auth";
 import { ClusterConfigModal } from "./modal/system/cluster-config";
-import NewRegionModal from "./modal/physics-cluster/new-region";
-import AddOrEditUserModal from "./modal/user/user/add-new-user";
-import AddOrEditProjectModal from "./modal/user/project/add-project";
-import TransferOfResources from "./modal/user/project/transfer-of-resources";
-import ResourcesAssociated from "./modal/user/project/resources-associated";
-import AddOrEditRole from "./modal/user/role/add-or-edit-role";
-import { ShowApprovalModal } from "./modal/work-order/approval-modal";
+import AddOrEditProjectModal from "./modal/project/add-project";
+import TransferOfResources from "./modal/project/transfer-of-resources";
+import ResourcesAssociated from "./modal/project/resources-associated";
+import AddOrEditRole from "./modal/role/add-or-edit-role";
+import ShowApprovalModal from "./modal/work-order/approval-modal";
 import { BigPicture } from "./modal/indicators/big-picture";
 import { IndexConfig } from "./modal/indicators/index-config";
 import EditPluginDesc from "./modal/physics-cluster/edit-plugin-desc";
-import { DeleteIndex } from './modal/index-admin/delete-index';
-import { ChartModal } from './modal/indicators/chart-modal';
-import { ChartTableModal } from './modal/indicators/chart-tablemodal';
-import { DeleteCluster } from './modal/physics-cluster/deleteCluster';
-import { InstallPlugin } from './modal/physics-cluster/install';
-import { UninstallPlugin } from './modal/physics-cluster/unintallPlugn';
-import { DeleteLogicCluster } from './modal/logic-cluster/deleteLogicCluster';
+import { DeleteIndex } from "./modal/index-admin/delete-index";
+import { SetAlias } from "./modal/index-admin/set-alias";
+import { DeleteAlias } from "./modal/index-admin/delete-alias";
+import { BatchExecute } from "./modal/index-admin/batch-execute";
+import { ChartTableModal } from "./modal/indicators/chart-tablemodal";
+import { DeleteCluster } from "./modal/physics-cluster/deleteCluster";
+import { OfflineCluster } from "./modal/logic-cluster/offlineLogicCluster";
+import { InstallPlugin } from "./modal/physics-cluster/install";
+import { UninstallPlugin } from "./modal/physics-cluster/unintallPlugn";
+import { ClearModal } from "./modal/template/clear";
+import { ExpandShrinkCapacity } from "./modal/template/expand-shrink-capacity";
+import { OpenSeparate } from "./modal/template/open-separate";
+import { CreateDCDR } from "./modal/template/create-DCDR";
+import { BatchUpdate } from "./modal/template/batch-update";
+import { DeleteProject } from "./modal/project/delete-project";
+import { DcdrTimeout } from "./modal/template/dcdr-timeout";
+import { Mapping } from "./modal/sql-query/mapping";
 
 // drawer
 import ConfigDetail from "./drawer/config-detail";
-import RegionTaskList from "./drawer/region-task-list";
 import NodeMonitorDrawer from "./drawer/node-monitor";
-import PhysicsClusterTaskDrawer from "./drawer/physics-cluster-task";
 import { TaskLogModal } from "./modal/work-order/task-log";
 import { ShardList } from "./drawer/shard-list/index";
-import EditSetting from "./drawer/setting";
-import MappingDiff from "./drawer/mapping-diff";
+import MappingSettingDiff from "./drawer/mapping-diff";
+import AccessSetting from "./modal/project/access-setting";
+import { DCDRDetail } from "./modal/template/DCDR-detail";
+import CreateTemplate from "./drawer/template-create";
+import EditTemplate from "./drawer/template-edit";
+import CreateIndex from "./drawer/index-create";
+import { EditIndexMapping } from "./drawer/index-mapping-edit";
+import { EditIndexSetting } from "./drawer/index-setting-edit";
+import { IndexSrvRollover } from "./drawer/index-srv-rollover";
+import { IndexSrvForceMerge } from "./drawer/index-srv-forceMerge";
+import { IndexSrvShrinkSplit } from "./drawer/index-srv-shrinkSplit";
+import PhysicsClusterTask from "./modal/physics-cluster/physicsClusterTask/index";
+import { ShowApprovalDrawer } from "./modal/work-order/approval-drawer";
 const mapStateToProps = (state: any) => ({
   isLoading: state.modal.loading,
   modalId: state.modal.modalId,
@@ -73,63 +83,73 @@ const AllModalInOne = (props: any) => {
 };
 
 const modalMap = {
-  newCluster: <NewClusterModal />,
   applyCluster: <ApplyClusterModal />,
   editCluster: <EditClusterModal />,
   expandShrink: <ExpandShrinkModal />,
-  transferCluster: <TransferClusterModal />,
   applyAauthority: <ApplyAauthorityModal />,
   accessCluster: <AccessCluster />,
   applyPhyCluster: <ApplyPhyClusterModal />,
-  upgradeCluster: <UpgradeCluster />,
-  restartCluster: <RestartClusterModal />,
   expandShrinkCluster: <ExpandShrinkCluster />,
   dockerExpandShrinkCluster: <DockerExpandShrinkCluster />,
   editPhyCluster: <EditPhyCluster />,
   customPlugn: <CustomPlugnModal />,
-  relationRegion: <RelationRegionModal />,
-  newConfigModal: <NewConfigModal />,
-  addPackageModal: <AddPackageModal />,
-  expandShrinkIndex: <ExpandShrinkIndex />,
-  transClusterIndex: <TransClusterIndex />,
-  clearClusterIndex: <ClearClusterIndex />,
-  phyUpgradeIndex: <PhyUpgradeIndex />,
-  phyModifyIndex: <PhyModifyIndex />,
-  phyCopyIndex: <PhyCopyIndex />,
-  logicApplyAuth: <LogicApplyAuth />,
   clusterConfigModal: <ClusterConfigModal />,
-  newRegionModal: <NewRegionModal />,
-  addOrEditUserModal: <AddOrEditUserModal />,
-  addOrEditProjectModal: <AddOrEditProjectModal />,
   transferOfResources: <TransferOfResources />,
   resourcesAssociated: <ResourcesAssociated />,
   addOrEditRole: <AddOrEditRole />,
   showApprovalModal: <ShowApprovalModal />,
   taskLogModal: <TaskLogModal />,
-  editConfigDesc: <EditConfigDesc />,
   editConfig: <EditConfig />,
   bigPicture: <BigPicture />,
   IndexConfig: <IndexConfig />,
   EditPluginDesc: <EditPluginDesc />,
   deleteIndex: <DeleteIndex />,
-  chartModal: <ChartModal />,
+  setAlias: <SetAlias />,
+  deleteAlias: <DeleteAlias />,
+  batchExecute: <BatchExecute />,
   chartTableModal: <ChartTableModal />,
   deleteCluster: <DeleteCluster />,
+  offlineCluster: <OfflineCluster />,
   installplugin: <InstallPlugin />,
   uninstallPlugin: <UninstallPlugin />,
-  deleteLogicCluster: <DeleteLogicCluster />,
-  editSetting: <EditSetting />,
+  expandShrinkCapacity: <ExpandShrinkCapacity />,
+  openSeparate: <OpenSeparate />,
+  createDCDR: <CreateDCDR />,
+  batchUpdate: <BatchUpdate />,
+  regionDivide: <RegionDivide />,
+  regionAdmin: <RegionAdmin />,
+  editGatewayUrl: <EditGatewayUrl />,
+  bindGateway: <BindGateway />,
+  deleteProject: <DeleteProject />,
+  dcdrTimeout: <DcdrTimeout />,
+  mapping: <Mapping />,
 } as {
   [key: string]: JSX.Element;
 };
 
 const drawerMap = {
   configDetail: <ConfigDetail />,
-  regionTaskList: <RegionTaskList />,
   nodeMonitorDrawer: <NodeMonitorDrawer />,
-  physicsClusterTaskDrawer: <PhysicsClusterTaskDrawer />,
   shardList: <ShardList />,
-  mappingDiff: <MappingDiff />,
+  mappingSettingDiff: <MappingSettingDiff />,
+  addOrEditProjectModal: <AddOrEditProjectModal />,
+  AccessSetting: <AccessSetting />,
+  clearModal: <ClearModal />,
+  dcdrDetail: <DCDRDetail />,
+  createTemplate: <CreateTemplate />,
+  editTemplate: <EditTemplate />,
+  createIndex: <CreateIndex />,
+  editIndexMapping: <EditIndexMapping />,
+  editIndexSetting: <EditIndexSetting />,
+  indexSrvRollover: <IndexSrvRollover />,
+  indexSrvForceMerge: <IndexSrvForceMerge />,
+  indexSrvShrinkSplit: <IndexSrvShrinkSplit />,
+  physicsClusterTask: <PhysicsClusterTask />,
+  showApprovalDrawer: <ShowApprovalDrawer />,
+  addPackageModal: <AddPackageModal />,
+  upgradeCluster: <UpgradeCluster />,
+  restartCluster: <RestartClusterModal />,
+  newConfigModal: <NewConfigModal />,
 } as {
   [key: string]: JSX.Element;
 };

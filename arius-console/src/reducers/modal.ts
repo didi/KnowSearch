@@ -1,11 +1,11 @@
 import { IAction } from "interface/common";
 import { ModalState } from "store/type";
-import actionTypes from "../actions/actionTypes"
+import actionTypes from "../actions/actionTypes";
 
 export const initialState: ModalState = {
   loading: false,
-  modalId: '',
-  drawerId: '',
+  modalId: "",
+  drawerId: "",
   params: null,
   cb: null,
 };

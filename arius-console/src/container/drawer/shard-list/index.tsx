@@ -1,18 +1,16 @@
-import { Drawer, } from 'antd'
-import React, { memo, useEffect, useState } from 'react'
-import { useDispatch, useSelector, shallowEqual } from 'react-redux';
-import { formColumns, getColumns, queryFormText } from './config';
-import QueryForm from 'component/dantd/query-form';
-import { DTable } from 'component/dantd/dtable';
-import * as actions from 'actions';
-import { getShardDetail } from 'api/index-admin';
-import './index.less'
-
-export const classPrefix = "rf-monitor";
+import { Drawer } from "antd";
+import React, { memo, useEffect, useState } from "react";
+import { useDispatch, useSelector, shallowEqual } from "react-redux";
+import { formColumns, getColumns, queryFormText } from "./config";
+import QueryForm from "component/dantd/query-form";
+import { DTable } from "component/dantd/dtable";
+import * as actions from "actions";
+import { getShardDetail } from "api/index-admin";
+import "./index.less";
 
 export const ShardList = memo((props) => {
   const dispatch = useDispatch();
-  const { modal } = useSelector(state => ({ modal: (state as any).modal }), shallowEqual);
+  const { modal } = useSelector((state) => ({ modal: (state as any).modal }), shallowEqual);
   const { params = {} } = modal;
   const clusterName = params.cluster || "";
   const indexName = params.index || "";
@@ -48,7 +46,7 @@ export const ShardList = memo((props) => {
       const newItem = {
         // 判断是否是当前页第一次出现，合并相同单元格，否则不展示
         rowSpan: !obj[item.node] ? pageData?.filter((i) => item.node === i.node).length : 0,
-        ...item
+        ...item,
       };
       // 记录已经出现过的单元格
       obj[item.node] = true;
@@ -57,7 +55,7 @@ export const ShardList = memo((props) => {
     });
 
     return newData;
-  }
+  };
 
   const getData = () => {
     // 查询项的key 要与 数据源的key  对应
@@ -67,11 +65,11 @@ export const ShardList = memo((props) => {
 
     const filterData = data.filter((d) => {
       let flag = true;
-      keys.forEach(item => {
+      keys.forEach((item) => {
         if (queryFormObject[item] && d[item] && !d[item].includes(queryFormObject[item])) {
           flag = false;
         }
-      })
+      });
       return flag;
     });
     return mergeCell(filterData);
@@ -95,22 +93,20 @@ export const ShardList = memo((props) => {
             node: temp.node,
             shard: temp.shard,
             docs: temp.docs,
-            storeInByte: temp.storeInByte
-          }
+            storeInByte: temp.storeInByte,
+          },
         ];
         for (let j = i + 1; j < res.length; j++) {
           if (temp.ip === res[j].ip) {
             temp.totalDocs += res[j].docs || 0;
             temp.totalStore += res[j].storeInByte || 0;
             temp.shardCount++;
-            temp.shardCells.push(
-              {
-                node: res[j].node,
-                shard: res[j].shard,
-                docs: res[j].docs,
-                storeInByte: res[j].storeInByte
-              }
-            );
+            temp.shardCells.push({
+              node: res[j].node,
+              shard: res[j].shard,
+              docs: res[j].docs,
+              storeInByte: res[j].storeInByte,
+            });
             res.splice(j, 1);
             j--;
           }
@@ -119,20 +115,19 @@ export const ShardList = memo((props) => {
       const data = [];
       let i = 0;
       res.forEach((item) => {
-        data.push(...item.shardCells.map(cell => ({ ...item, ...cell, key: i++ })));
-      })
+        data.push(...item.shardCells.map((cell) => ({ ...item, ...cell, key: i++ })));
+      });
       setData(data);
     } catch (error) {
       console.log(error);
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   const reloadData = () => {
     getAsyncData();
-  }
-
+  };
 
   const pageChange = (pagination) => {
     if (pagination.pageSize === pageSize) {
@@ -146,7 +141,8 @@ export const ShardList = memo((props) => {
   }, []);
 
   return (
-    <Drawer title="Shard 列表"
+    <Drawer
+      title="Shard 列表"
       placement="right"
       className="index-container"
       width={`calc(100% - 190px)`}
@@ -159,7 +155,7 @@ export const ShardList = memo((props) => {
         <QueryForm
           onReset={handleSubmit}
           onSearch={handleSubmit}
-          onChange={() => { }}
+          onChange={() => {}}
           columns={formColumns}
           initialValues={{}}
           isResetClearAll
@@ -189,5 +185,5 @@ export const ShardList = memo((props) => {
         />
       </div>
     </Drawer>
-  )
+  );
 });

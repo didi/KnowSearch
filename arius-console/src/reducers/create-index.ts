@@ -1,36 +1,27 @@
 import { IUNSpecificInfo } from "typesPath/base-types";
-import { TEMP_FORM_MAP_KEY } from "container/create-index/constant";
 import { IAction, IStringMap } from "interface/common";
-import _ from "lodash";
-import { UserState } from "store/type";
-import actionTypes from "../actions/actionTypes"
+import actionTypes from "../actions/actionTypes";
 
 export const initialState: any = {
   currentStep: 0,
-  myClusterList: [],
   secondChildMap: new Map(),
   thirdChildMap: new Map(),
   temporaryFormMap: new Map(),
   fieldTypeMap: {} as IStringMap,
-  formValueMap: {} as IUNSpecificInfo,
   activeInstance: null,
   loadingMap: {
     list: false,
     zoomInfo: false,
   } as {
-    [key: string]: boolean,
+    [key: string]: boolean;
   },
   cancelCopy: false,
   asyncTranslog: false,
-  customerAnalysis: false,
   customerAnalysisJson: null,
-  customerAnalysisValue: '',
+  customerAnalysisValue: "",
   settingCount: 0,
-  disableHotTimeState: true,
-  dataCenter: 'cn'
+  dataCenter: null,
 };
-
-// const cloneInitState = _.cloneDeep(initialState);
 
 export default (state = initialState, action: IAction) => {
   switch (action.type) {
@@ -60,41 +51,38 @@ export default (state = initialState, action: IAction) => {
     }
     case actionTypes.SET_CURRENT_STEP: {
       const { currentStep } = action.payload;
-      return { ...state, currentStep }
+      return { ...state, currentStep };
     }
     case actionTypes.SET_FIELD_TYPE_MAP: {
       const { fieldTypeMap } = action.payload;
-      return { ...state, fieldTypeMap }
+      return { ...state, fieldTypeMap };
     }
     case actionTypes.SET_EDITOR_INSTANCE: {
       const { activeInstance } = action.payload;
-      return { ...state, activeInstance }
+      return { ...state, activeInstance };
     }
     case actionTypes.SET_CLEAR_CREATE_INDEX: {
       return {
         currentStep: 0,
-        myClusterList: [],
         secondChildMap: new Map(),
         thirdChildMap: new Map(),
         temporaryFormMap: new Map(),
         fieldTypeMap: {} as IStringMap,
-        formValueMap: {} as IUNSpecificInfo,
         activeInstance: null,
         loadingMap: {
           list: false,
           zoomInfo: false,
         } as {
-          [key: string]: boolean,
+          [key: string]: boolean;
         },
         cancelCopy: false,
         asyncTranslog: false,
-        customerAnalysis: false,
         customerAnalysisJson: null,
-        customerAnalysisValue: '',
-      }
+        customerAnalysisValue: "",
+      };
     }
     case actionTypes.SET_CREATE_INDEX: {
-      return { ...state, ...action.payload }
+      return { ...state, ...action.payload };
     }
   }
 

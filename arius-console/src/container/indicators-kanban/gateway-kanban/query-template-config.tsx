@@ -4,20 +4,26 @@ const indexConfigClassifyList: string[] = ["查询模板性能配置"];
 
 export const indexConfigData = {
   queryDslCount: {
-    name: "查询模版访问量",
-    unit: unitMap.countM,
+    name: "查询模板访问量",
+    unit: unitMap.mins,
     title: function () {
-      return this.name + "(个/min)";
+      return this.name + "(次/min)";
     },
     classify: indexConfigClassifyList[0],
+    price: "Gateway视角查询模板级请求速率",
+    currentCalLogic:
+      "[平均值] 聚合查询arius_gateway_join索引获取指定时间相应应用对于dslTemplateMd5字段的指定时间间隔的查询次数/指定时间间隔min",
   },
   queryDslTotalCost: {
-    name: "查询模版访问耗时",
+    name: "查询模板访问耗时",
     unit: unitMap.ms,
     title: function () {
       return this.name + "(ms)";
     },
     classify: indexConfigClassifyList[0],
+    price: "Gateway视角查询模板级请求平均耗时",
+    currentCalLogic:
+      "[平均值] 聚合查询arius_gateway_join索引获取指定时间相应应用对于dslTemplateMd5字段的指定时间间隔的totalCost的总和/指定时间间隔min",
   },
 };
 
@@ -44,11 +50,10 @@ interface defaultIndexConfigItemPropsType {
   plainOptions: { label: string; value: string }[];
 }
 
-export const defaultIndexConfigList: defaultIndexConfigItemPropsType[] =
-  indexConfigClassifyList.map((item) => ({
-    title: item,
-    plainOptions: allCheckedData[item].map((item) => ({
-      label: indexConfigData[item].name,
-      value: item,
-    })),
-  }));
+export const defaultIndexConfigList: defaultIndexConfigItemPropsType[] = indexConfigClassifyList.map((item) => ({
+  title: item,
+  plainOptions: allCheckedData[item].map((item) => ({
+    label: indexConfigData[item].name,
+    value: item,
+  })),
+}));

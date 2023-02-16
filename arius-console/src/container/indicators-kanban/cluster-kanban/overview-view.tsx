@@ -1,32 +1,29 @@
-import { ReloadOutlined } from "@ant-design/icons";
+import { SyncOutlined } from "@ant-design/icons";
 import { Collapse } from "antd";
 import { TOP_MAP } from "constants/status-map";
 import React, { memo, useState, useEffect, useRef } from "react";
 import { IndexConfig, Line } from "../components";
 import { OverviewViewBasic } from "./overview-view-basic";
 import { formatterTimeYMDHMS, objFlat } from "./config";
-import {
-  defaultIndexConfigList,
-  allCheckedData,
-  getCheckedData,
-  indexConfigClassifyList,
-  goldConfig,
-} from "./overview-view-config";
+import { defaultIndexConfigList, allCheckedData, getCheckedData, indexConfigClassifyList } from "./overview-view-config";
 import { LineShard } from "./overview-line-shard";
 import { asyncMicroTasks, resize } from "../../../lib/utils";
-import { getCheckedList, setCheckedList } from "../../../api/cluster-kanban";
+import { getCheckedList, setCheckedList, getDictionary } from "../../../api/cluster-kanban";
 const { Panel } = Collapse;
 import "../style/index";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { setIsUpdate } from "actions/cluster-kanban";
-import { arrayMoveImmutable } from 'array-move';
+import { arrayMoveImmutable } from "array-move";
+import { Divider } from "knowdesign";
 
 const OVERVIEW = "overview";
 
-export const classPrefix = "rf-monitor";
+export const classPrefix = "monitor";
 
 export const OverviewView = memo(() => {
   const [checkedData, setCheckedData] = useState(getCheckedData([]));
+  const [dictionary, setDictionary] = useState({});
+
   const dispatch = useDispatch();
   const { isUpdate, endTime } = useSelector(
     (state) => ({
@@ -36,17 +33,22 @@ export const OverviewView = memo(() => {
     shallowEqual
   );
 
+  useEffect(() => {
+    getAsyncCheckedList();
+    _getDictionary();
+  }, []);
+
   const reloadPage = () => {
     dispatch(setIsUpdate(!isUpdate));
   };
 
   const sortEnd = (item, { oldIndex, newIndex }) => {
-    const listsNew = arrayMoveImmutable(checkedData[item], oldIndex, newIndex)
+    const listsNew = arrayMoveImmutable(checkedData[item], oldIndex, newIndex);
     checkedData[item] = listsNew;
     const checkedList = objFlat(checkedData);
     setCheckedList(OVERVIEW, checkedList);
-    setCheckedData({...checkedData});
-  };  
+    setCheckedData({ ...checkedData });
+  };
 
   const getAsyncCheckedList = async () => {
     try {
@@ -62,15 +64,29 @@ export const OverviewView = memo(() => {
     }
   };
 
+  const _getDictionary = async () => {
+    let params = {
+      model: "OverView",
+    };
+    let res = await getDictionary(params);
+    let data = {} as any;
+    (res || []).forEach((item) => {
+      if (item?.metricType) {
+        data[item?.metricType] = item;
+      }
+      if (item?.metricType === "sendTransSize" || item?.metricType === "recvTransSize") {
+        data["networkFlow"] = item;
+      }
+    });
+    setDictionary(data);
+  };
+
   const setIndexConfigCheckedData = (changeCheckedData) => {
     const checkedList = objFlat(changeCheckedData);
     setCheckedList(OVERVIEW, checkedList);
     setCheckedData(changeCheckedData);
     reloadPage();
   };
-  useEffect(() => {
-    getAsyncCheckedList();
-  }, []);
 
   const renderConfig = () => {
     return (
@@ -79,7 +95,7 @@ export const OverviewView = memo(() => {
         optionList={defaultIndexConfigList}
         checkedData={checkedData}
         setCheckedData={setIndexConfigCheckedData}
-        goldConfig={goldConfig}
+        needShortcut={true}
       />
     );
   };
@@ -88,12 +104,9 @@ export const OverviewView = memo(() => {
     <>
       <div className={`${classPrefix}-overview-search`}>
         <div className={`${classPrefix}-overview-search-reload`}>
-          <ReloadOutlined className="reload" onClick={reloadPage} />
-          <span>上次刷新时间：{formatterTimeYMDHMS(endTime)}</span>
+          <SyncOutlined className="dashboard-config-icon" onClick={reloadPage} />
         </div>
-        <div className={`${classPrefix}-overview-search-filter`}>
-          {renderConfig()}
-        </div>
+        <div className={`${classPrefix}-overview-search-filter`}>{renderConfig()}</div>
       </div>
       <div className={`${classPrefix}-overview-content`}>
         <div className={`${classPrefix}-overview-content-config`}>
@@ -115,12 +128,18 @@ export const OverviewView = memo(() => {
                 key={item + index}
               >
                 <Panel header={item} key={index}>
-                  <div
-                    className={`${classPrefix}-overview-content-line content-margin-top-20`}
-                  >
-                    {
-                      checkedData[item] && checkedData[item].length ? <LineShard sortEnd={sortEnd} item={item} metricsTypes={checkedData[item]} key={`${item}_${index}`} /> : ""
-                    }
+                  <div className={`${classPrefix}-overview-content-line content-margin-top-20`}>
+                    {checkedData[item] && checkedData[item].length ? (
+                      <LineShard
+                        sortEnd={sortEnd}
+                        item={item}
+                        metricsTypes={checkedData[item]}
+                        key={`${item}_${index}`}
+                        dictionary={dictionary}
+                      />
+                    ) : (
+                      ""
+                    )}
                   </div>
                 </Panel>
               </Collapse>

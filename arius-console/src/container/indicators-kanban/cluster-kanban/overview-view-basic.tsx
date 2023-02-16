@@ -38,20 +38,21 @@ interface basicPropsType {
   totalDocNu?: number; //文档总数
   totalIndicesNu?: number; // 索引数目
   totalStoreSize?: number; // 磁盘总容量
-  totalTemplateNu?: number; // 索引模版数目
+  totalTemplateNu?: number; // 索引模板数目
   [key: string]: any;
 }
 
-export const overviewClassPrefix = "rf-monitor";
+export const overviewClassPrefix = "monitor";
 
 export const OverviewViewBasic: React.FC<propsType> = memo(({ reload }) => {
-  const { clusterName, startTime, endTime, isUpdate } = useSelector(
+  const { clusterName, startTime, endTime, isUpdate, timeRadioKey } = useSelector(
     (state) => ({
       clusterName: (state as any).clusterKanban.clusterName,
       startTime: (state as any).clusterKanban.startTime,
       endTime: (state as any).clusterKanban.endTime,
       isMoreDay: (state as any).clusterKanban.isMoreDay,
       isUpdate: (state as any).clusterKanban.isUpdate,
+      timeRadioKey: (state as any).clusterKanban.timeRadioKey,
     }),
     shallowEqual
   );
@@ -85,7 +86,7 @@ export const OverviewViewBasic: React.FC<propsType> = memo(({ reload }) => {
 
   useEffect(() => {
     getOverviewBasicData();
-  }, [clusterName, reload, startTime, endTime, isUpdate]);
+  }, [clusterName, reload, startTime, endTime, timeRadioKey]);
 
   // 总揽视图列表
   const stateConfigurationList = [
@@ -102,21 +103,33 @@ export const OverviewViewBasic: React.FC<propsType> = memo(({ reload }) => {
     },
     {
       id: 3,
-      name: "索引模版数",
-      count: basic.totalTemplateNu || 0,
+      name: "未分配Shard数",
+      count: basic.unassignedShardNum || 0,
       unit: "个",
     },
     {
       id: 4,
+      name: "索引模板数",
+      count: basic.totalTemplateNu || 0,
+      unit: "个",
+    },
+    {
+      id: 5,
       name: "文档总数",
       count: basic.totalDocNu || 0,
       unit: "个",
     },
     {
-      id: 5,
+      id: 6,
       name: "索引数",
       count: basic.totalIndicesNu || 0,
       unit: "个",
+    },
+    {
+      id: 7,
+      name: "集群索引存储量",
+      count: bytesToGB(basic.indicesStoreSize) || 0,
+      unit: "GB",
     },
   ];
 
@@ -177,9 +190,7 @@ export const OverviewViewBasic: React.FC<propsType> = memo(({ reload }) => {
   const invalidNodeNu = basic.invalidNodeNu || 0;
   const nodeNuTotal = toFixedNum(activeNodeNu + invalidNodeNu) || 0;
   const activeNodeNuPercent = decimalToPercent(activeNodeNu / nodeNuTotal) || 0;
-  const invalidNodeNuPercent = invalidNodeNu
-    ? toFixedNum(100 - activeNodeNuPercent) || 0
-    : 0;
+  const invalidNodeNuPercent = invalidNodeNu ? toFixedNum(100 - activeNodeNuPercent) || 0 : 0;
 
   const memLegendVal = {
     堆已用内存: {
@@ -261,51 +272,31 @@ export const OverviewViewBasic: React.FC<propsType> = memo(({ reload }) => {
         </>
       ) : (
         <>
-          <div
-            className={`${overviewClassPrefix}-overview-content-config-box-view`}
-          >
-            <div
-              className={`${overviewClassPrefix}-overview-content-config-box-view-state-config`}
-            >
-              <StateConfig list={stateConfigurationList} title="状态概览" />
+          <div className={`${overviewClassPrefix}-overview-content-config-box-view`}>
+            <div className={`${overviewClassPrefix}-overview-content-config-box-view-state-config`}>
+              <StateConfig className="status-overview" list={stateConfigurationList} title="状态概览" />
             </div>
-            <div
-              className={`${overviewClassPrefix}-overview-content-config-box-view-memory-map`}
-            >
-              <div
-                className={`${overviewClassPrefix}-overview-content-config-box-view-memory-map-view`}
-              >
+            <div className={`${overviewClassPrefix}-overview-content-config-box-view-memory-map`}>
+              <div className={`${overviewClassPrefix}-overview-content-config-box-view-memory-map-view`}>
                 <ContrastFigure
                   id="memory-view"
                   legendVal={memLegendVal}
                   unit="GB"
-                  {...getContrastChartProps(
-                    "堆内存",
-                    memoryContrastEChartsData,
-                    memoryContrastSubtext
-                  )}
+                  {...getContrastChartProps("堆内存", memoryContrastEChartsData, memoryContrastSubtext)}
                 />
               </div>
               <div className="vertical-line"></div>
-              <div
-                className={`${overviewClassPrefix}-overview-content-config-box-view-memory-map-view`}
-              >
+              <div className={`${overviewClassPrefix}-overview-content-config-box-view-memory-map-view`}>
                 <ContrastFigure
                   id="disk-view"
                   legendVal={diskLegendVal}
                   unit="GB"
-                  {...getContrastChartProps(
-                    "磁盘",
-                    diskContrastEChartsData,
-                    diskContrastSubtext
-                  )}
+                  {...getContrastChartProps("磁盘", diskContrastEChartsData, diskContrastSubtext)}
                 />
               </div>
             </div>
           </div>
-          <div
-            className={`${overviewClassPrefix}-overview-content-config-box-node-distribution`}
-          >
+          <div className={`${overviewClassPrefix}-overview-content-config-box-node-distribution`}>
             <StateConfig list={nodeDistributionList} title="节点分配" />
             <div className="cross-line"></div>
             <ContrastFigure
@@ -313,12 +304,7 @@ export const OverviewViewBasic: React.FC<propsType> = memo(({ reload }) => {
               legendVal={nodeLegendVal}
               unit="个"
               tooltipDirection="left"
-              {...getContrastChartProps(
-                "节点",
-                nodeContrastEChartsData,
-                nodeContrastSubtext,
-                ["#1473FF", "#D3DAE7"]
-              )}
+              {...getContrastChartProps("节点", nodeContrastEChartsData, nodeContrastSubtext, ["#1473FF", "#D3DAE7"])}
             />
           </div>
         </>
