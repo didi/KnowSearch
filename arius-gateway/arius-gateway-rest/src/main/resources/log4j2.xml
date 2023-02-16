@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="error" monitorInterval="60">
+<Configuration package="org.apache.logging.log4j.core,com.didiglobal.knowframework.log.log4j2.appender"
+               status="error" monitorInterval="60">
     <!--变量配置-->
     <Properties>
         <property name="gateway.queryConfig.logPath" value="." />
@@ -23,8 +24,19 @@
 
         <ElasticsearchAppender name="esAppender" address="${address}" port="${port}" user="${user}"
                                password="${password}" indexName="${indexName}" typeName="${typeName}" threshold="all"
-                               bufferSize="10000" numberOfShards="5" numberOfReplicas="0" logExpire="7"
+                               bufferSize="10000" numberOfShards="5" numberOfReplicas="0" logExpire="3"
                                extendsMappingClass="" requestTimeoutMillis="3000" discardWhenBufferIsFull="true">
+            <Filters>
+                <!--配置日志表达式，-->
+                <!-- 开启所有日志-->
+                <!--                <RegexFilter regex='.*"logEventType":"(LOG|METRIC|TRACE)".*' onMatch="ACCEPT" onMismatch="DENY"/>-->
+                <!-- 仅开启LOG和METRIC-->
+                <RegexFilter regex='.*"logEventType":"(LOG|METRIC)".*' onMatch="ACCEPT" onMismatch="DENY"/>
+                <!-- 开启LOG和METRIC，TRACE日志仅当traceId不为空时打印-->
+                <!--            <RegexFilter regex='.*"logEventType":"(LOG|METRIC)".*' onMatch="ACCEPT" onMismatch="NEUTRAL"/>-->
+                <!--            <RegexFilter regex='.*"logEventType":"TRACE".*' onMatch="NEUTRAL" onMismatch="DENY"/>-->
+                <!--            <RegexFilter regex='.*"traceId":"[a-z0-9]+".*' onMatch="NEUTRAL" onMismatch="DENY"/>-->
+            </Filters>
         </ElasticsearchAppender>
 
         <RollingFile name="file" fileName="${gateway.queryConfig.logPath}/log/gateway.log" filePattern="${gateway.queryConfig.logPath}/log/gateway.log.%d{yyyy-MM-dd}"
@@ -117,7 +129,7 @@
     </Appenders>
     <Loggers>
         <Root level="info">
-            <AppenderRef ref="console" />
+<!--            <AppenderRef ref="console" />-->
             <AppenderRef ref="file" />
             <appender-ref ref="esAppender" />
         </Root>
@@ -130,29 +142,5 @@
         <AsyncLogger level="info" name="metrics" additivity="false">
             <AppenderRef ref="metrics"/>
         </AsyncLogger>
-        <AsyncLogger level="info" name="traceLog" additivity="false">
-            <AppenderRef ref="traceLog"/>
-        </AsyncLogger>
-        <AsyncLogger level="info" name="auditLog" additivity="false">
-            <AppenderRef ref="auditLog"/>
-        </AsyncLogger>
-        <AsyncLogger level="info" name="thirdReq" additivity="false">
-            <AppenderRef ref="thirdReq"/>
-        </AsyncLogger>
-
-        <logger name="gatherInfoLogger" additivity="false">
-            <level value="INFO"/>
-            <AppenderRef ref="gatherInfoLogger"/>
-        </logger>
-
-        <logger name="gatherWarnLogger" additivity="false">
-            <level value="INFO"/>
-            <AppenderRef ref="gatherWarnLogger"/>
-        </logger>
-
-        <logger name="gatherErrorLogger" additivity="false">
-            <level value="INFO"/>
-            <AppenderRef ref="gatherErrorLogger"/>
-        </logger>
     </Loggers>
 </Configuration>

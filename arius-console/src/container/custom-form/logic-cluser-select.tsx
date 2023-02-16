@@ -1,12 +1,14 @@
 import { getClusterLogicNames } from "api/cluster-api";
-import { Button, Form, Popconfirm, Select, Spin, Table } from 'antd';
+import { Form, Select, Spin } from "antd";
 import { RESOURCE_TYPE_LIST } from "constants/common";
+import { filterOption } from "lib/utils";
 import React from "react";
 import "./index.less";
 
 export const LogicCluserSelect: React.FC<any> = (props: {
   value: any;
   isModifyPage: boolean;
+  $form: any;
   onChange?: (result: any) => any;
 }) => {
   const { value } = props;
@@ -16,43 +18,36 @@ export const LogicCluserSelect: React.FC<any> = (props: {
   const [fetching, setFetching] = React.useState(false);
 
   React.useEffect(() => {
-    setFetching(true);
     if (clusterType) {
-      getClusterLogicNames(clusterType).then((res) => {
-        if (res) {
-          res = res.map((item) => {
-            return {
-              // 删掉括号和id
-              // label: `${item.name}(${item.id})`,
-              label: `${item.name}`,
-              value: item.id,
-              type: item.type,
-              level: item.level,
-              dataCenter: item.dataCenter,
-            };
-          });
-          setLogicClusterList(res);
-        }
-      }).finally(() => {
-        setFetching(false);
-      });
+      setFetching(true);
+      getClusterLogicNames(clusterType)
+        .then((res) => {
+          if (res) {
+            res = res.map((item) => {
+              return {
+                label: item.name,
+                value: item.id,
+                type: item.type,
+                level: item.level,
+                dataCenter: item.dataCenter,
+              };
+            });
+            setLogicClusterList(res);
+          }
+        })
+        .finally(() => {
+          setFetching(false);
+        });
     }
   }, [clusterType]);
-
-  // const getLogicClusterList = () => {
-  //   if (clusterType) {
-  //     return logicClusterList.filter((row) => row.type === clusterType);
-  //   }
-  //   return [];
-  // };
 
   const onSubmit = (valus: any, type: string) => {
     const obj = {
       cluster,
       clusterType,
-      clusterName: '',
+      clusterName: "",
       level: null,
-      dataCenter: 'cn',
+      dataCenter: null,
     };
     if (type === "type") {
       obj.clusterType = valus;
@@ -60,13 +55,15 @@ export const LogicCluserSelect: React.FC<any> = (props: {
       if (cluster) {
         setCluster(null);
         obj.cluster = null;
+        props.$form?.current.setFieldsValue({ clusterName: null });
       }
     }
     if (type === "name") {
+      const clusterInfo = logicClusterList.filter((item) => item.value === valus);
       obj.cluster = valus;
-      obj.clusterName = logicClusterList.filter((item) => item.value === valus)[0]?.label;
-      obj.level = logicClusterList.filter((item) => item.value === valus)[0]?.level;
-      obj.dataCenter = logicClusterList.filter((item) => item.value === valus)[0]?.dataCenter;
+      obj.clusterName = clusterInfo[0]?.label;
+      obj.level = clusterInfo[0]?.level;
+      obj.dataCenter = clusterInfo[0]?.dataCenter;
       setCluster(valus);
     }
     const { onChange } = props;
@@ -79,34 +76,27 @@ export const LogicCluserSelect: React.FC<any> = (props: {
         name="type"
         initialValue={clusterType}
         rules={[{ required: false }]}
-        style={{ paddingRight: 20, marginBottom: 0 }}
+        className="no-margin-bottom"
+        style={{ paddingRight: 20 }}
       >
         <Select
-          style={{ width: 200 }}
+          showSearch
           disabled={props.isModifyPage}
           placeholder="请选择集群类型"
           options={RESOURCE_TYPE_LIST}
           onChange={(e) => onSubmit(e, "type")}
+          filterOption={filterOption}
         />
       </Form.Item>
-      <Form.Item
-        name="clusterName"
-        initialValue={cluster}
-        rules={[{ required: false }]}
-        style={{ marginBottom: 0 }}
-      >
+      <Form.Item name="clusterName" initialValue={cluster} rules={[{ required: false }]} className="no-margin-bottom">
         <Select
           showSearch
           placeholder="请选择集群"
-          style={{ width: 300 }}
           disabled={props.isModifyPage}
-          options={logicClusterList}
+          options={logicClusterList.map((item) => ({ label: item.label, value: item.value }))}
           onChange={(e) => onSubmit(e, "name")}
           notFoundContent={fetching ? <Spin size="small" /> : null}
-          filterOption={(input, option) =>
-            JSON.stringify(option).toLowerCase().indexOf(input.toLowerCase()) >=
-            0
-          }
+          filterOption={filterOption}
         />
       </Form.Item>
     </div>

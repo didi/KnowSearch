@@ -40,6 +40,7 @@ export interface IMenuItem {
   show?: boolean;
   type?: number;
   label?: string;
+  visible?: boolean;
   content?: (data: any) => JSX.Element;
 }
 

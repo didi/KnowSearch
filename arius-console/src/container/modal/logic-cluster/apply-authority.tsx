@@ -70,8 +70,8 @@ const ApplyAauthorityModal = (props: { dispatch: any, cb: Function, app: AppStat
           authCode: 2,
           memo: result.description,
         },
-        submitorAppid: props.app.appInfo()?.id,
-        submitor: props.user.getName('domainAccount'),
+        submitorProjectId: props.app.appInfo()?.id,
+        submitor: props.user.getName('userName'),
         description: result.description,
         type: 'logicClusterAuth',
       };

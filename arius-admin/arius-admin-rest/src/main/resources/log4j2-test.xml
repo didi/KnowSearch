@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration package="org.apache.logging.log4j.core,com.didiglobal.logi.log.log4j2.appender">
+<Configuration package="org.apache.logging.log4j.core,com.didiglobal.knowframework.log.log4j2.appender">
     <Properties>
         <Property name="address" value="${sys:spring.logi-job.elasticsearch-address}"/>
         <Property name="port" value="${sys:spring.logi-job.elasticsearch-port}"/>
@@ -7,21 +7,79 @@
         <Property name="password" value="${sys:spring.logi-job.elasticsearch-password}"/>
         <Property name="indexName" value="${sys:spring.logi-job.elasticsearch-index-name}"/>
         <Property name="typeName" value="${sys:spring.logi-job.elasticsearch-type-name}"/>
+        <!-- 基础日志配置 -->
+        <Property name="PID">????</Property>
+        <Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
+        <Property name="LOG_LEVEL_PATTERN">%5p</Property>
+        <Property name="LOG_DATEFORMAT_PATTERN">yyyy-MM-dd HH:mm:ss.SSS</Property>
+        <Property name="CONSOLE_LOG_PATTERN">%clr{%d{${LOG_DATEFORMAT_PATTERN}}}{faint} %clr{${LOG_LEVEL_PATTERN}} %clr{${sys:PID}}{magenta} %clr{---}{faint} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{cyan} %clr{:}{faint} %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
+        <Property name="log_pattern">%d{${LOG_DATEFORMAT_PATTERN}} ${LOG_LEVEL_PATTERN} ${sys:PID} --- [%t] %-40.40c{1.} : %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
+        <!-- name的值是变量的名称，value的值时变量定义的值。通过定义的值会被插入到logger上下文中。定义后，可以使"${}"来使用变量。 -->
+        <property name="log.path">./logs/</property>
     </Properties>
     <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
-
-        </Console>
+        <Console name="Console" target="SYSTEM_OUT"/>
         <ElasticsearchAppender name="esAppender" address="${address}" port="${port}" user="${user}"
                                password="${password}" indexName="${indexName}" typeName="${typeName}" threshold="all"
-                               bufferSize="10000" numberOfShards="5" numberOfReplicas="0" logExpire="7"
+                               bufferSize="10000" numberOfShards="5" numberOfReplicas="0" logExpire="3"
                                extendsMappingClass="" requestTimeoutMillis="3000" discardWhenBufferIsFull="true">
+            <Filters>
+                <!--配置日志表达式，-->
+                <!-- 开启所有日志-->
+                <!--                <RegexFilter regex='.*"logEventType":"(LOG|METRIC|TRACE)".*' onMatch="ACCEPT" onMismatch="DENY"/>-->
+                <!-- 仅开启LOG和METRIC-->
+                <RegexFilter regex='.*"logEventType":"(LOG|METRIC)".*' onMatch="ACCEPT" onMismatch="DENY"/>
+                <!-- 开启LOG和METRIC，TRACE日志仅当traceId不为空时打印-->
+                <!--            <RegexFilter regex='.*"logEventType":"(LOG|METRIC)".*' onMatch="ACCEPT" onMismatch="NEUTRAL"/>-->
+                <!--            <RegexFilter regex='.*"logEventType":"TRACE".*' onMatch="NEUTRAL" onMismatch="DENY"/>-->
+                <!--            <RegexFilter regex='.*"traceId":"[a-z0-9]+".*' onMatch="NEUTRAL" onMismatch="DENY"/>-->
+            </Filters>
         </ElasticsearchAppender>
+        <RollingFile name="systemLog"
+                     filename="${log.path}/system.log" filePattern="${log.path}/system.log.%d{yyyy-MM-dd}"
+                     append="true">
+            <!--输出日志的格式 -->
+            <PatternLayout pattern="${log_pattern}"/>
+            <Filters>
+                <!-- 只要level及其以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true"
+                                           interval="1"/>
+            </Policies>
+            <DefaultRolloverStrategy max="1">
+                <!-- 配置日志滚动删除策略 IfLastModified 的单位需要配合 filePattern中的规则使用 -->
+                <Delete basePath="${log.path}" maxDepth="1">
+                    <IfFileName glob="*.log.*"/>
+                    <IfLastModified age="3d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="errorLog"
+                     filename="${log.path}/error.log" filePattern="${log.path}/error.log.%d{yyyy-MM-dd}"
+                     append="true">
+            <!--输出日志的格式 -->
+            <PatternLayout pattern="${log_pattern}"/>
+            <Filters>
+                <!-- 只要level及其以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+                <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true"
+                                           interval="1"/>
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
     </Appenders>
     <Loggers>
         <root level="INFO">
-            <appender-ref ref="Console"/>
-            <appender-ref ref="esAppender"/>
+            <!--            <appender-ref ref="Console"/>-->
+            <AppenderRef ref="esAppender"/>
+            <AppenderRef ref="systemLog"/>
+            <AppenderRef ref="errorLog"/>
         </root>
     </Loggers>
 </Configuration>

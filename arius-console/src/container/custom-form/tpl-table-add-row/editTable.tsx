@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Table from "antd/lib/table";
 import "./index.less";
 import { v4 as uuidv4 } from "uuid";
@@ -79,7 +79,7 @@ export const addRoleformMap: IFormItem[] = [
       {
         required: true,
         validator: (rule: any, value: string) => {
-          if ((rule.field.indexOf('datanode') !== -1 || rule.field.indexOf('clientnode') !== -1) && !value) {
+          if ((rule.field.indexOf("datanode") !== -1 || rule.field.indexOf("clientnode") !== -1) && !value) {
             return Promise.resolve();
           }
           if (!value) {
@@ -89,17 +89,17 @@ export const addRoleformMap: IFormItem[] = [
           const ipArr = [];
           const key = rule.field;
           Object.keys(allValues).forEach((item) => {
-            const analysisKey = key.split("&");
+            const analysisKey = key?.split("&");
             if (analysisKey.length !== 3 || item === key) return;
             if (item.indexOf(`${analysisKey[0]}&${analysisKey[1]}`) > -1) {
               ipArr.push(allValues[item]);
             }
           });
-          const isPostArr = value.split(":");
+          const isPostArr = value?.split(":");
           let judgeIp = false;
           ipArr.length &&
             ipArr.forEach((ipPort) => {
-              const ip = ipPort.split(":")[0];
+              const ip = ipPort?.split(":")[0];
               if (ip === isPostArr[0]) {
                 judgeIp = true;
               }
@@ -130,7 +130,7 @@ export const addRoleformMap: IFormItem[] = [
         required: true,
         message: "请选择",
         validator: (rule: any, value: string) => {
-          if ((rule.field.indexOf('datanode') !== -1 || rule.field.indexOf('clientnode') !== -1) && !value) {
+          if ((rule.field.indexOf("datanode") !== -1 || rule.field.indexOf("clientnode") !== -1) && !value) {
             return Promise.resolve();
           }
           if (!value) {
@@ -151,7 +151,7 @@ export const addRoleformMap: IFormItem[] = [
         required: true,
         message: "请选择",
         validator: (rule: any, value: string) => {
-          if ((rule.field.indexOf('datanode') !== -1 || rule.field.indexOf('clientnode') !== -1) && !value) {
+          if ((rule.field.indexOf("datanode") !== -1 || rule.field.indexOf("clientnode") !== -1) && !value) {
             return Promise.resolve();
           }
           if (!value) {
@@ -172,7 +172,7 @@ export const addRoleformMap: IFormItem[] = [
         required: true,
         message: "请选择",
         validator: (rule: any, value: string) => {
-          if ((rule.field.indexOf('datanode') !== -1 || rule.field.indexOf('clientnode') !== -1) && !value) {
+          if ((rule.field.indexOf("datanode") !== -1 || rule.field.indexOf("clientnode") !== -1) && !value) {
             return Promise.resolve();
           }
           if (!value) {
@@ -193,7 +193,7 @@ export const addRoleformMap: IFormItem[] = [
         required: true,
         message: "请选择",
         validator: (rule: any, value: string) => {
-          if ((rule.field.indexOf('datanode') !== -1 || rule.field.indexOf('clientnode') !== -1) && !value) {
+          if ((rule.field.indexOf("datanode") !== -1 || rule.field.indexOf("clientnode") !== -1) && !value) {
             return Promise.resolve();
           }
           if (!value) {
@@ -207,17 +207,96 @@ export const addRoleformMap: IFormItem[] = [
   },
 ];
 
-export const EditTable = () => {
+export const EditTable = (props) => {
   const { state, dispatch } = React.useContext(XFormContext) as { state: IState; dispatch: any };
   const { type } = state;
 
-  const formMap = addRoleformMap;
+  const [machineSpec, setMachineSpec] = useState("");
+
+  const applyFormMap = [
+    {
+      key: "host",
+      label: "IP: 端口号",
+      type: FormItemType.input,
+      rules: [
+        {
+          required: true,
+          validator: (rule: any, value: string) => {
+            if ((rule.field.indexOf("datanode") !== -1 || rule.field.indexOf("clientnode") !== -1) && !value) {
+              return Promise.resolve();
+            }
+            if (!value) {
+              return Promise.reject("请输入IP:端口号，例如：127.1.1.1:8888");
+            }
+            const allValues = (window as any).formData?.allValues || {};
+            const ipArr = [];
+            const key = rule.field;
+            Object.keys(allValues).forEach((item) => {
+              const analysisKey = key?.split("&");
+              if (analysisKey.length !== 3 || item === key) return;
+              if (item.indexOf(`${analysisKey[0]}&${analysisKey[1]}`) > -1) {
+                ipArr.push(allValues[item]);
+              }
+            });
+            const isPostArr = value?.split(":");
+            let judgeIp = false;
+            ipArr.length &&
+              ipArr.forEach((ipPort) => {
+                const ip = ipPort?.split(":")[0];
+                if (ip === isPostArr[0]) {
+                  judgeIp = true;
+                }
+              });
+            if (judgeIp) {
+              return Promise.reject("ip不能相同");
+            }
+            if (!new RegExp(regIp).test(isPostArr[0])) {
+              return Promise.reject("请输入IP:端口号，例如：127.1.1.1:8888");
+            }
+            if (!isPostArr[1] && isPostArr[0]) {
+              return Promise.reject('格式错误":"号后面没有端口');
+            }
+            return Promise.resolve();
+          },
+        },
+      ],
+      attrs: {
+        placeholder: "请输入",
+      },
+    },
+    {
+      key: "machineSpec",
+      label: "机型",
+      type: FormItemType.select,
+      rules: [
+        {
+          required: true,
+          message: "请选择",
+          validator: (rule: any, value: string) => {
+            if ((rule.field.indexOf("datanode") !== -1 || rule.field.indexOf("clientnode") !== -1) && !value) {
+              return Promise.resolve();
+            }
+            if (!value) {
+              return Promise.reject();
+            }
+            setMachineSpec(value);
+            return Promise.resolve();
+          },
+        },
+      ],
+      options: props.machineList,
+    },
+  ];
+
+  const formMap = applyFormMap;
 
   const getColumns = () => {
+    let length = state.dataSource.length;
     return [
       {
         dataIndex: formMap[0].key,
         title: formMap[0].label,
+        width: 350,
         render: (text, record, index) => {
           const formItem = cloneDeep(formMap[0]);
           formItem.key = `${type}&${formItem.key}&${index}`;
@@ -245,6 +324,7 @@ export const EditTable = () => {
       {
         dataIndex: formMap[1].key,
         title: formMap[1].label,
+        width: 300,
         render: (text, record, index) => {
           const formItem = cloneDeep(formMap[1]);
           formItem.key = `${type}&${formItem.key}&${index}`;
@@ -254,87 +334,7 @@ export const EditTable = () => {
                 className={`${basicClass}-table-formitem`}
                 name={formItem.key}
                 key={formItem.key}
-                rules={
-                  formItem.rules || [
-                    {
-                      required: false,
-                      message: "",
-                    },
-                  ]
-                }
-              >
-                {renderFormItem(formItem)}
-              </Form.Item>
-            </div>
-          );
-        },
-      },
-      {
-        dataIndex: formMap[2].key,
-        title: formMap[2].label,
-        render: (text, record, index) => {
-          const formItem = cloneDeep(formMap[2]);
-          formItem.key = `${type}&${formItem.key}&${index}`;
-          return (
-            <div>
-              <Form.Item
-                className={`${basicClass}-table-formitem`}
-                name={formItem.key}
-                key={formItem.key}
-                rules={
-                  formItem.rules || [
-                    {
-                      required: false,
-                      message: "",
-                    },
-                  ]
-                }
-              >
-                {renderFormItem(formItem)}
-              </Form.Item>
-            </div>
-          );
-        },
-      },
-      {
-        dataIndex: formMap[3].key,
-        title: formMap[3].label,
-        render: (text, record, index) => {
-          const formItem = cloneDeep(formMap[3]);
-          formItem.key = `${type}&${formItem.key}&${index}`;
-          return (
-            <div>
-              <Form.Item
-                className={`${basicClass}-table-formitem`}
-                name={formItem.key}
-                key={formItem.key}
-                rules={
-                  formItem.rules || [
-                    {
-                      required: false,
-                      message: "",
-                    },
-                  ]
-                }
-              >
-                {renderFormItem(formItem)}
-              </Form.Item>
-            </div>
-          );
-        },
-      },
-      {
-        dataIndex: formMap[4].key,
-        title: formMap[4].label,
-        render: (text, record, index) => {
-          const formItem = cloneDeep(formMap[4]);
-          formItem.key = `${type}&${formItem.key}&${index}`;
-          return (
-            <div>
-              <Form.Item
-                className={`${basicClass}-table-formitem`}
-                name={formItem.key}
-                key={formItem.key}
+                initialValue={state.dataSource[length - 1]?.machineSpec}
                 rules={
                   formItem.rules || [
                     {
@@ -353,31 +353,30 @@ export const EditTable = () => {
       {
         dataIndex: "option",
         title: "操作",
+        width: 150,
         render: (_, record, index: number) => {
           return (
             <div>
+              <svg
+                onClick={() => {
+                  dispatch({ key: "rowData", data: { machineSpec: machineSpec ? machineSpec : undefined } });
+                }}
+                className="icon svg-icon add-row"
+                aria-hidden="true"
+              >
+                <use xlinkHref="#iconzengjia"></use>
+              </svg>
               {state?.dataSource.length === 1 ? null : (
                 <svg
-                  style={{ fontSize: 30, marginRight: 2 }}
                   onClick={() => {
                     dispatch({ key: "deleteRow", data: { index } });
                   }}
-                  className="icon svg-icon"
+                  className="icon svg-icon delete-row"
                   aria-hidden="true"
                 >
                   <use xlinkHref="#iconjianshao"></use>
                 </svg>
               )}
-              <svg
-                style={{ fontSize: 30 }}
-                onClick={() => {
-                  dispatch({ key: "rowData", data: { index } });
-                }}
-                className="icon svg-icon"
-                aria-hidden="true"
-              >
-                <use xlinkHref="#iconzengjia"></use>
-              </svg>
             </div>
           );
         },

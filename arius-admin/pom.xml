@@ -25,28 +25,27 @@
         <revision>1.0.1-SNAPSHOT</revision>
         <sha1/>
         <changelist/>
-        <arius.admin.client.version>1.0.6-SNAPSHOT</arius.admin.client.version>
         <spring.boot.version>2.2.13.RELEASE</spring.boot.version>
-        <spring.version>5.0.18.RELEASE</spring.version>
         <spring-restdocs.version>2.0.2.RELEASE</spring-restdocs.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <es.client.version>1.2.17-SNAPSHOT</es.client.version>
         <springfox.version>2.9.1</springfox.version>
         <swagger.version>1.5.21</swagger.version>
         <mybatis-plus.version>3.4.2</mybatis-plus.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <flatten-maven-plugin.version>1.2.2</flatten-maven-plugin.version>
-        <logi-security-spring-boot-starter.version>2.10.15</logi-security-spring-boot-starter.version>
-        <logi-elasticsearch-client.version>1.0.25</logi-elasticsearch-client.version>
         <java-diff-utils.version>4.11</java-diff-utils.version>
         <json-patch.version>1.13</json-patch.version>
+        <kf-log.version>2.0.4</kf-log.version>
+        <kf-elasticsearch-client.version>1.0.1</kf-elasticsearch-client.version>
+        <kf-security.version>1.0.2</kf-security.version>
+        <kf-job.version>2.0.2</kf-job.version>
     </properties>
 
     <dependencyManagement>
-    
+
         <!--logicommon-->
         <dependencies>
             <!--diff文本工具-->
@@ -61,7 +60,7 @@
                 <version>${java-diff-utils.version}</version>
             </dependency>
             <dependency>
-                <version>1.0.0</version>
+                <version>${kf-security.version}</version>
                 <groupId>io.github.knowstack</groupId>
                 <artifactId>kf-security-spring-boot-starter</artifactId>
             </dependency>
@@ -657,7 +656,7 @@
             </dependency>
 
             <dependency>
-                <version>2.0.0</version>
+                <version>${kf-log.version}</version>
                 <groupId>io.github.knowstack</groupId>
                 <artifactId>kf-log</artifactId>
             </dependency>
@@ -665,7 +664,7 @@
             <dependency>
                 <groupId>io.github.knowstack</groupId>
                 <artifactId>kf-elasticsearch-client</artifactId>
-                <version>1.0.0</version>
+                <version>${kf-elasticsearch-client.version}</version>
             </dependency>
 
             <dependency>
@@ -693,7 +692,7 @@
             <dependency>
                 <groupId>io.github.knowstack</groupId>
                 <artifactId>kf-job-spring-boot-starter</artifactId>
-                <version>2.0.0</version>
+                <version>${kf-job.version}</version>
             </dependency>
 
             <dependency>

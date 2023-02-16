@@ -1,5 +1,5 @@
-import fetch from '../lib/fetch';
+import fetch from "../lib/fetch";
 
 export const getLogicClusterNodeList = (clusterId: number) => {
-  return fetch(`/v2/op/logic/cluster/nodes?clusterId=${clusterId}`);
+  return fetch(`/v3/cluster/logic/node/${clusterId}`);
 };

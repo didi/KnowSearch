@@ -1,0 +1,57 @@
+.json-editor-wrapper {
+  border-radius: 4px;
+
+  .application {
+    padding: 16px 0;
+    background: #f5f7fa;
+  }
+
+  .application .ace-tm .ace_gutter {
+    border-left: none;
+    background-color: #f5f7fa;
+  }
+
+  .json-content-title {
+    display: flex;
+    justify-content: space-between;
+    height: 36px;
+    background: #fff;
+    font-family: PingFangSC-Regular;
+    font-size: 14px;
+    color: #303a51;
+    .tips-container {
+      height: 28px;
+      padding: 4px 4px 4px 0;
+      background: rgba(116, 120, 141, 0.1);
+      border-radius: 4px;
+    }
+  }
+}
+
+.json-content-title .tip {
+  display: inline-block;
+  height: 24px;
+  padding: 0px 8px;
+  font-size: 12px;
+  border-radius: 2px;
+  color: #5b6675;
+  line-height: 22px;
+  position: relative;
+  top: -3px;
+  left: 2px;
+  cursor: pointer;
+  &:hover {
+    color: @primary-color;
+  }
+  &.link {
+    background: #ffffff;
+    border-radius: 4px;
+    a {
+      color: @primary-color;
+      transition: none;
+      &:hover {
+        color: @primary-color;
+      }
+    }
+  }
+}

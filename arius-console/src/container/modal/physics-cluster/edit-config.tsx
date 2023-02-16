@@ -18,7 +18,7 @@ const mapStateToProps = (state: any) => ({
   user: state.user,
 });
 
-const EditConfig = (props: { dispatch: any, cb: Function, app: AppState, user: UserState, params: IPhyConfig}) => {
+const EditConfig = (props: { dispatch: any, cb: Function, app: AppState, user: UserState, params: IPhyConfig }) => {
   const [clusterRolesList, setClusterRolesList] = React.useState([]);
 
   React.useEffect(() => {
@@ -39,18 +39,18 @@ const EditConfig = (props: { dispatch: any, cb: Function, app: AppState, user: U
   const xFormModalConfig = {
     formMap: [
       {
-          key: 'configData',
-          type: FormItemType.textArea,
-          label: '配置内容',
-          rules: [{
-            required: true,
-            validator: (rule: any, value: string) => {
-              if (props.params?.configData === value) {
-                return Promise.reject('不可与原来一致。');
-              }
-              return Promise.resolve();
-            }, 
-          }]
+        key: 'configData',
+        type: FormItemType.textArea,
+        label: '配置内容',
+        rules: [{
+          required: true,
+          validator: (rule: any, value: string) => {
+            if (props.params?.configData === value) {
+              return Promise.reject('不可与原来一致。');
+            }
+            return Promise.resolve();
+          },
+        }]
       }, {
         key: 'description',
         type: FormItemType.textArea,
@@ -79,7 +79,7 @@ const EditConfig = (props: { dispatch: any, cb: Function, app: AppState, user: U
     },
     onSubmit: (result: any) => {
       const url = Url();
-      const esConfigs = {...props.params};
+      const esConfigs = { ...props.params };
       esConfigs.configData = result.configData;
       const roleOrder = [];
       clusterRolesList.forEach((item) => {
@@ -97,8 +97,8 @@ const EditConfig = (props: { dispatch: any, cb: Function, app: AppState, user: U
           newEsConfigs: [esConfigs],
           originalConfigs: props.params.enginName ? [props.params] : [],
         },
-        submitorAppid: props.app.appInfo()?.id,
-        submitor: props.user.getName('domainAccount'),
+        submitorProjectId: props.app.appInfo()?.id,
+        submitor: props.user.getName('userName'),
         description: result.description || "",
         type: "clusterOpConfigRestart",
       };

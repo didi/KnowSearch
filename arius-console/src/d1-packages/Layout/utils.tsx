@@ -1,6 +1,6 @@
-import React from 'react';
-import _ from 'lodash';
-import { MenuConfItem, TreeNode } from './interface';
+import React from "react";
+import _ from "lodash";
+import { MenuConfItem, TreeNode } from "./interface";
 
 export function isAbsolutePath(url: string) {
   return /^https?:\/\//.test(url);
@@ -20,7 +20,7 @@ export function normalizeMenuConf(children: MenuConfItem[], parentNav?: MenuConf
     if (nav.visible === undefined || nav.visible === true) {
       const navCopy = _.cloneDeep(nav);
 
-      if (isAbsolutePath(nav.path) || _.indexOf(nav.path, '/') === 0) {
+      if (isAbsolutePath(nav.path) || _.indexOf(nav.path, "/") === 0) {
         navCopy.to = nav.path;
       } else if (parentNav) {
         if (parentNav.path) {
@@ -76,17 +76,17 @@ export function normalizeTreeData(data: TreeNode[]) {
       node = _.cloneDeep(node);
       if (node.pid === 0) {
         if (tag === 0) {
-          treeData.splice(_.sortedIndexBy(treeData, node, 'name'), 0, node);
+          treeData.splice(_.sortedIndexBy(treeData, node, "name"), 0, node);
         }
       } else {
         const findedNode = findNode(treeData, node); // find parent node
         if (!findedNode) {
           cache.push(node);
           return;
-        };
+        }
         if (_.isArray(findedNode.children)) {
           if (!_.find(findedNode.children, { id: node.id })) {
-            findedNode.children.splice(_.sortedIndexBy(findedNode.children, node, 'name'), 0, node);
+            findedNode.children.splice(_.sortedIndexBy(findedNode.children, node, "name"), 0, node);
           }
         } else {
           findedNode.children = [node];
@@ -101,6 +101,3 @@ export function normalizeTreeData(data: TreeNode[]) {
   fn();
   return treeData;
 }
-
-
-

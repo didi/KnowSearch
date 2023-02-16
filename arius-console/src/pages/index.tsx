@@ -1,27 +1,26 @@
-import { ClusterAdminPageRoutes } from './cluster-admin';
-import { ClusterIndexPageRoutes } from './cluster-index';
-import { ClusterSystemPageRoutes } from './cluster-system';
-import { IndexAdminPagePageRoutes } from './index-admin';
-import { IndexTplManagementPageRoutes } from './index-tpl-management';
-import { IndicatorsKanbanPageRoutes } from './indicators-kanban';
-import { SchedulingPageRoutes } from './scheduling';
-import { SearchQueryPageRoutes } from './search-query';
-import { UserManagementPageRoutes } from './user-management';
-import { workOrderPageRouter } from './work-order';
-import { DashBoardPageRoutes } from './dashboard';
+import { ClusterAdminPageRoutes } from "./cluster-admin";
+import { ClusterSystemPageRoutes } from "./cluster-system";
+import { IndexAdminPagePageRoutes } from "./index-admin";
+import { IndexTplManagementPageRoutes } from "./index-tpl-management";
+import { IndicatorsKanbanPageRoutes } from "./indicators-kanban";
+import { SchedulingPageRoutes } from "./scheduling";
+import { SearchQueryPageRoutes } from "./search-query";
+import { systemPageRoutes } from "./system-page";
+import { workOrderPageRouter } from "./work-order";
+import { DashBoardPageRoutes } from "./dashboard";
 import "../styles/common.less";
 import "./index.less";
+import { routeItemType } from "../d1-packages/RouterGuard";
 
 export const PageRoutes = [
   ...ClusterAdminPageRoutes,
-  ...ClusterIndexPageRoutes,
   ...ClusterSystemPageRoutes,
   ...IndexAdminPagePageRoutes,
   ...IndexTplManagementPageRoutes,
   ...IndicatorsKanbanPageRoutes,
   ...SchedulingPageRoutes,
   ...SearchQueryPageRoutes,
-  ...UserManagementPageRoutes,
+  ...systemPageRoutes,
   ...workOrderPageRouter,
   ...DashBoardPageRoutes,
-]
+] as routeItemType[];

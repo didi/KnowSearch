@@ -1,53 +1,49 @@
-import { ReloadOutlined } from "@ant-design/icons";
-import { TOP_MAP } from "constants/status-map";
+import { TOP_MAP, TOP_TIME_RANGE, TOP_TYPE } from "constants/status-map";
 import React, { memo, useState, useEffect, useCallback, useRef } from "react";
 import { useSelector, shallowEqual, useDispatch } from "react-redux";
-import { Collapse, Select } from "antd";
 import _ from "lodash";
-import {
-  indexConfigClassifyList,
-  defaultIndexConfigList,
-  allCheckedData,
-  getCheckedData,
-} from "./clientnode-config";
-import { objFlat, getOption, formatterTimeYMDHMS } from "../config";
+import { defaultIndexConfigList, allCheckedData, getCheckedData } from "./clientnode-config";
+import { objFlat, getOption } from "../config";
+import { getRenderToolTip } from "./config";
 import { indexConfigData } from "./clientnode-config";
-import { RenderLine, IndexConfig, SelectRadio, Line } from "../components";
-import {
-  getCheckedList,
-  setCheckedList,
-  getNodeIpList,
-  getClientNodeViewData,
-  getClientNodeList,
-} from "../../../api/gateway-kanban";
+import { IndexConfig, SelectRadio, Line } from "../components";
+import { getCheckedList, setCheckedList, getNodeIpList, getClientNodeViewData, getClientNodeList } from "../../../api/gateway-kanban";
 import "../style/index";
 import { setIsUpdate } from "actions/gateway-kanban";
-import { arrayMoveImmutable } from 'array-move';
-import DragGroup from './../../../packages/drag-group/DragGroup';
-const { Panel } = Collapse;
+import { arrayMoveImmutable } from "array-move";
+import DragGroup from "../../../d1-packages/drag-group/DragGroup";
+import { OperationPanel } from "../components/operation-panel";
+import { copyString } from "lib/utils";
 
-export const classPrefix = "rf-monitor";
+export const classPrefix = "monitor";
 
 const CLINETNODE = "clientNode";
 
 export const ClientNodeView = memo(() => {
-  const { startTime, endTime, isMoreDay, isUpdate } = useSelector(
+  const { startTime, endTime, isMoreDay, isUpdate, timeRadioKey } = useSelector(
     (state) => ({
       startTime: (state as any).gatewayKanban.startTime,
       endTime: (state as any).gatewayKanban.endTime,
       isMoreDay: (state as any).gatewayKanban.isMoreDay,
       isUpdate: (state as any).gatewayKanban.isUpdate,
+      timeRadioKey: (state as any).gatewayKanban.timeRadioKey,
     }),
     shallowEqual
   );
   const dispatch = useDispatch();
 
+  const selectRadioValue = useRef({
+    topNum: TOP_MAP[0].value,
+    topTimeStep: TOP_TIME_RANGE[0].value,
+    topMethod: TOP_TYPE[0].value,
+    content: undefined,
+    secondValue: "",
+  });
+
   const reloadPage = () => {
     dispatch(setIsUpdate(!isUpdate));
   };
 
-  const [topNu, setTopNu] = useState(TOP_MAP[0].value);
-  const [nodeIp, setNodeIp] = useState("");
   const [clientNodeIp, setClientNodeIp] = useState("");
   const [nodeIpList, setNodeIpList] = useState([]);
   const [clientNodeList, setclientNodeList] = useState([]);
@@ -55,13 +51,15 @@ export const ClientNodeView = memo(() => {
   const [metricsTypes, setMetricsTypes] = useState([]);
   const [viewData, setViewData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [clientNodeLoading, setClientNodeLoading] = useState(false);
+
   const isFirst = useRef(true);
   const timeDiff = useRef(0);
-  const prevTopNu = useRef(topNu);
+  const prevTopNu = useRef(TOP_MAP[0].value);
 
   const sortEnd = ({ oldIndex, newIndex }) => {
-    const listsNew = arrayMoveImmutable(checkedData['ClientNode性能指标'], oldIndex, newIndex)
-    checkedData['ClientNode性能指标'] = listsNew;
+    const listsNew = arrayMoveImmutable(checkedData["ClientNode性能指标"], oldIndex, newIndex);
+    checkedData["ClientNode性能指标"] = listsNew;
     const checkedList = objFlat(checkedData);
     setCheckedList(CLINETNODE, checkedList);
     setMetricsTypes([...listsNew]);
@@ -91,11 +89,24 @@ export const ClientNodeView = memo(() => {
   };
 
   const getAsyncClientNodeViewList = async () => {
+    setClientNodeLoading(true);
     try {
-      const clientNodeList = await getClientNodeList(nodeIp, startTime, endTime);
-      setclientNodeList(clientNodeList);
+      const clientNodeList = await getClientNodeList(selectRadioValue.current.content, startTime, endTime);
+      const newClientNodeList = clientNodeList.map((item) => {
+        return {
+          name: `${item.v1}_${item.v2}`,
+          value: item.v2,
+        };
+      });
+
+      selectRadioValue.current.secondValue = newClientNodeList?.[0]?.value || "";
+      selectRadioValue.current.topNum = newClientNodeList.length ? 0 : selectRadioValue.current.topNum;
+
+      setClientNodeLoading(false);
+      setclientNodeList(newClientNodeList);
     } catch (error) {
       console.log(error);
+      setClientNodeLoading(false);
     }
   };
 
@@ -106,30 +117,38 @@ export const ClientNodeView = memo(() => {
     reloadPage();
   };
 
-  const getAsyncViewData = useCallback(
-    async (metricsTypes) => {
-      return await getClientNodeViewData(
-        metricsTypes,
-        startTime,
-        endTime,
-        topNu,
-        nodeIp,
-        clientNodeIp,
-      );
-    },
-    [startTime, endTime, topNu, nodeIp, clientNodeIp, isUpdate]
-  );
+  const getAsyncViewData = async (metricsTypes) => {
+    return await getClientNodeViewData(
+      metricsTypes,
+      startTime,
+      endTime,
+      selectRadioValue.current.topNum,
+      selectRadioValue.current.content,
+      selectRadioValue.current.secondValue,
+      selectRadioValue.current.topMethod,
+      selectRadioValue.current.topTimeStep
+    );
+  };
 
   const getAllAsyncViewData = async (metricsTypes) => {
+    if (clientNodeLoading) return;
     try {
       setIsLoading(true);
       let res = await getAsyncViewData(metricsTypes);
       // 去空
-      res = res.filter(item => {
+      res = res.filter((item) => {
         return item.metricsContents && item.metricsContents.length;
-      })
+      });
       setViewData(
-        res.map((item) => getOption(item, indexConfigData, isMoreDay))
+        res.map((item) =>
+          getOption({
+            metrics: item,
+            configData: indexConfigData,
+            isMoreDay,
+            isShowTooltipModal: true,
+            needShowClusterName: true,
+          })
+        )
       );
     } catch (error) {
       setViewData([]);
@@ -137,6 +156,16 @@ export const ClientNodeView = memo(() => {
       setIsLoading(false);
     }
   };
+
+  const showTooltipModal = (md5, metricsType) => {
+    copyString(md5);
+  };
+
+  useEffect(() => {
+    window["showTooltipModal"] = (md5, metricsType) => {
+      showTooltipModal(md5, metricsType);
+    };
+  }, []);
 
   useEffect(() => {
     getAsyncCheckedList();
@@ -148,70 +177,59 @@ export const ClientNodeView = memo(() => {
 
   useEffect(() => {
     getAsyncClientNodeViewList();
-  }, [nodeIp, startTime, endTime]);
+  }, [startTime, endTime, timeRadioKey]);
 
   useEffect(() => {
-    if (topNu !== 0 && clientNodeIp) {
-      setClientNodeIp('');
+    if (selectRadioValue.current.topNum !== 0 && selectRadioValue.current.secondValue) {
+      setClientNodeIp("");
+      selectRadioValue.current.secondValue = "";
     }
-  }, [topNu]);
+  }, [selectRadioValue.current.topNum]);
 
   useEffect(() => {
     setMetricsTypes(objFlat(checkedData));
   }, [checkedData]);
 
   useEffect(() => {
-    if (
-      isFirst.current ||
-      timeDiff.current !== endTime - startTime ||
-      prevTopNu.current !== topNu
-    ) {
-      setIsLoading(true);
+    if (isFirst.current || timeDiff.current !== endTime - startTime || prevTopNu.current !== selectRadioValue.current.topNum) {
+      // setIsLoading(true);
       timeDiff.current = endTime - startTime;
       isFirst.current = false;
-      prevTopNu.current = topNu;
+      prevTopNu.current = selectRadioValue.current.topNum;
     }
     if (!metricsTypes || metricsTypes.length === 0) {
       return;
     }
     getAllAsyncViewData(metricsTypes);
-  }, [metricsTypes, getAsyncViewData]);
+  }, [metricsTypes, clientNodeLoading, clientNodeIp]);
+
+  const onSecondSelectChange = (value) => {
+    setClientNodeIp(value);
+    selectRadioValue.current.secondValue = value;
+  };
+
+  const onSelectRadioChange = (values, needReload) => {
+    selectRadioValue.current = values;
+    if (needReload) {
+      reloadPage();
+    }
+  };
 
   const renderTopWhat = () => {
     return (
       <SelectRadio
-        topNu={topNu}
-        setTopNu={setTopNu}
-        content={nodeIp}
-        setContent={setNodeIp}
+        onValueChange={onSelectRadioChange}
+        content={selectRadioValue.current.content}
         contentList={nodeIpList}
         placeholder="请选择Gateway节点"
         allowClear={true}
-        type="Gateway"
+        type="secondSelect"
+        topNu={selectRadioValue.current.topNum}
+        secondSelectList={clientNodeList}
+        secondSelectValue={clientNodeIp}
+        secondSelectPlaceholder={"请选择ESClient节点"}
+        onSecondSelectChange={onSecondSelectChange}
       />
-    );
-  };
-
-  const renderClinetNode = () => {
-    return (
-      <Select
-        placeholder="请选择ESClient节点"
-        onChange={(e: string) => {
-          setClientNodeIp(e || '');
-          if (e) {
-            setTopNu(0);
-          } else {
-            setTopNu(TOP_MAP[0].value);
-          }
-        }}
-        value={clientNodeIp || null}
-        showSearch
-        filterOption={(val, option) => { return option.children.includes(val.trim()) }}
-        style={{ marginRight: 8, width: 200 }}
-        allowClear
-      >
-        {clientNodeList.map((item) => <Select.Option value={item} key={item}>{item}</Select.Option>)}
-      </Select>
     );
   };
 
@@ -226,25 +244,24 @@ export const ClientNodeView = memo(() => {
     );
   };
 
+  const renderFilter = () => {
+    return (
+      <>
+        {clientNodeLoading ? null : renderTopWhat()}
+        {renderConfig()}
+      </>
+    );
+  };
+
   return (
     <>
-      <div className={`${classPrefix}-overview-search`}>
-        <div className={`${classPrefix}-overview-search-reload`}>
-          <ReloadOutlined className="reload" onClick={reloadPage} />
-          <span>上次刷新时间：{formatterTimeYMDHMS(endTime)}</span>
-        </div>
-        <div className={`${classPrefix}-overview-search-filter`}>
-          {renderTopWhat()}
-          {renderClinetNode()}
-          {renderConfig()}
-        </div>
-      </div>
+      <OperationPanel classPrefix={classPrefix} reloadPage={reloadPage} endTime={endTime} renderFilter={renderFilter} />
       <div className={`${classPrefix}-overview-content-line`}>
         <DragGroup
           dragContainerProps={{
             onSortEnd: sortEnd,
             axis: "xy",
-            distance: 100
+            distance: 100,
           }}
           containerProps={{
             grid: 12,
@@ -255,6 +272,7 @@ export const ClientNodeView = memo(() => {
             <Line
               key={`${item}`}
               title={indexConfigData[item]?.title()}
+              tooltip={getRenderToolTip(indexConfigData[item])}
               index={`${item}_${index}`}
               option={viewData[index] || {}}
               isLoading={isLoading}

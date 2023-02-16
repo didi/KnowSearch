@@ -1,35 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from "react";
 import { connect } from "react-redux";
-import { Dispatch } from 'redux';
-import * as actions from 'actions';
-import { getMyApplicationQueryXForm, getMyApplicationColumns } from './config';
-import moment from 'moment';
-import QueryForm from 'component/dantd/query-form';
-import { getApplyOrderList, getTypeEnums } from 'api/order-api';
-import { ITypeEnums } from 'typesPath/cluster/order-types';
-import { IStringMap } from 'interface/common';
-import { queryFormText } from 'constants/status-map';
-import { DTable } from 'component/dantd/dtable';
+import { Dispatch } from "redux";
+import * as actions from "actions";
+import { getMyApplicationQueryXForm, getMyApplicationColumns } from "./config";
+import moment from "moment";
+import QueryForm from "component/dantd/query-form";
+import { getApplyOrderList, getTypeEnums } from "api/order-api";
+import { ITypeEnums } from "typesPath/cluster/order-types";
+import { IStringMap } from "interface/common";
+import { queryFormText } from "constants/status-map";
+import { DTable } from "component/dantd/dtable";
+import { ProTable } from "knowdesign";
+import { RenderTitle } from "component/render-title";
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   setModalId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setModalId(modalId, params, cb)),
 });
 
-export const MyApplication = connect(null, mapDispatchToProps)((props) => {
-  const department: string = localStorage.getItem('current-project');
+export const MyApplication = connect(
+  null,
+  mapDispatchToProps
+)((props) => {
+  const department: string = localStorage.getItem("current-project");
   const [loading, setloading] = useState(false);
   const [queryFormObject, setqueryFormObject] = useState(null);
   const [data, setData] = useState([]);
   const [typeList, setTypeList] = useState([] as ITypeEnums[]);
   const [typeEnums, setTypeEnums] = useState({} as IStringMap);
-
+  const [startAndEnd, setStartAndEnd] = useState([]);
+  //const [resetValue, setResetValue] = useState(null);
+  const buttonTime = useRef(null);
   React.useEffect(() => {
     reloadData();
   }, [department]);
 
   React.useEffect(() => {
-    getTypeEnumsFn()
-  }, [])
+    getTypeEnumsFn();
+  }, []);
+  // React.useEffect(() => {
+  //   //setResetValue初始化只会执行一次
+  //   if (resetValue) {
+  //     for (var i in resetValue) {
+  //       resetValue[i](undefined)
+  //     }
+  //   }
+  // }, [resetValue]);
 
   const getTypeEnumsFn = () => {
     getTypeEnums().then((res) => {
@@ -48,71 +63,125 @@ export const MyApplication = connect(null, mapDispatchToProps)((props) => {
       setTypeEnums(obj);
       setTypeList(arr);
     });
-  }
+  };
 
-  const getData = () => { // 查询项的key 要与 数据源的key  对应
+  const getData = () => {
+    // 查询项的key 要与 数据源的key  对应
     if (!queryFormObject) return data;
     const keys = Object.keys(queryFormObject);
-    const filterData = data.filter(
-      (d) => {
-        let b = true;
-        keys.forEach((k: string) => {
-          if (k === 'createTime') {
-            const time = moment(d[k]).unix();
-            if ((queryFormObject[k][0] > time) || (time > queryFormObject[k][1])) {
-              b = false
-            }
-          } else if (k === 'type') {
-            d[k] === queryFormObject[k] ? '' : b = false;
-          } else {
-            (d[k] + '')?.includes(queryFormObject[k]) ? '' : b = false;
+    const filterData = data.filter((d) => {
+      let b = true;
+      keys.forEach((k: string) => {
+        if (k === "createTime") {
+          const time = moment(d[k]).unix() * 1000;
+          if (queryFormObject[k][0] > time || time > queryFormObject[k][1]) {
+            b = false;
           }
-        })
-        return b;
-      }
-    )
+        } else if (k === "type") {
+          d[k] === queryFormObject[k] ? "" : (b = false);
+        } else {
+          (d[k] + "")?.includes(queryFormObject[k]) ? "" : (b = false);
+        }
+      });
+      return b;
+    });
     return filterData;
-  }
+  };
 
   const reloadData = () => {
     setloading(true);
-    getApplyOrderList(1).then((res) => {
-      if (res) {
-        setData(res);
-      }
-    }).finally(() => {
-      setloading(false)
-    })
-  }
+    getApplyOrderList(1)
+      .then((res) => {
+        if (res) {
+          let list = res.sort((a, b) => new Date(b.createTime).getTime() - new Date(a.createTime).getTime());
+          setData(list);
+        }
+      })
+      .finally(() => {
+        setloading(false);
+      });
+  };
 
   const handleSubmit = (result) => {
-    result.createTime = result.createTime?.map(item => {
-      return item.unix()
-    });
+    const copyResult = JSON.parse(JSON.stringify(result));
+    // 增加点击刷新按钮先计算时间差 保持用户选择的事件范围
+    //判断此时是否是自定义时间情况，如果是则不需要实时更新时间戳，反之不需要。
+    const time = startAndEnd[1] - startAndEnd[0];
+    const currentTime = new Date().getTime();
+    const isCustomTime = buttonTime.current ? [currentTime - time, currentTime] : startAndEnd;
+    copyResult.createTime = isCustomTime;
+    for (var key in copyResult) {
+      if (copyResult[key] === "" || copyResult[key] === undefined) {
+        delete copyResult[key];
+      }
+    }
+    setqueryFormObject(copyResult);
+  };
+  const handleTimeChange = (times: number[], periodOrPicker: boolean) => {
+    //periodOrPicker为true表示此时时间选择器选的是period，false表示Picker
+    if (times) {
+      setStartAndEnd(times);
+      buttonTime.current = periodOrPicker;
+    }
+  };
+  // const resetAllValue = (obj = {}) => {
+  //   setResetValue({ ...obj })
+  // }
+  const resetSubmit = (result) => {
+    setStartAndEnd([]);
+    buttonTime.current = false;
+    // if (resetValue) {
+    //   for (var i in resetValue) {
+    //     resetValue[i](undefined)
+    //   }
+    // }
     for (var key in result) {
-      if (result[key] === '' || result[key] === undefined) {
-        delete result[key]
+      if (result[key] === "" || result[key] === undefined) {
+        delete result[key];
       }
     }
     setqueryFormObject(result);
   };
 
+  const clientHeight = document.querySelector("#d1-layout-main")?.clientHeight;
+
+  const renderTitleContent = () => {
+    return {
+      title: "我的申请",
+      content: null,
+    };
+  };
+
   return (
     <>
-      <div className="table-header">
-        <QueryForm {...queryFormText} defaultCollapse columns={getMyApplicationQueryXForm(typeList)} onChange={() => null} onReset={handleSubmit} onSearch={handleSubmit} initialValues={{}} isResetClearAll />
-      </div>
-      <div>
-        <div className="table-content">
-          <DTable
-            loading={loading}
-            rowKey="id"
-            dataSource={getData()}
-            columns={getMyApplicationColumns(typeEnums)}
-            reloadData={reloadData}
-          />
-        </div>
+      <div className="table-layout-style">
+        <ProTable
+          showQueryForm={true}
+          queryFormProps={{
+            defaultCollapse: true,
+            columns: getMyApplicationQueryXForm(typeList, handleTimeChange),
+            onReset: resetSubmit,
+            onSearch: handleSubmit,
+            isResetClearAll: true,
+          }}
+          tableProps={{
+            tableId: "my_application_table",
+            isCustomPg: false,
+            loading,
+            rowKey: "id",
+            dataSource: getData(),
+            columns: getMyApplicationColumns(typeEnums),
+            customRenderSearch: () => <RenderTitle {...renderTitleContent()} />,
+            reloadData,
+            isDividerHide: false,
+            attrs: {
+              scroll: {
+                x: "max-content",
+              },
+            },
+          }}
+        />
       </div>
     </>
-  )
-})
+  );
+});

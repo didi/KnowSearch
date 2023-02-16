@@ -5,34 +5,55 @@
 .dsl-mr-20 {
   margin-right: 20px;
 }
+.dcloud-drawer-title {
+  font-size: 18px;
+}
+.dcloud-drawer-header {
+  border: none;
+}
+.ant-btn {
+  border-radius: 4px;
+}
 
 .dsl-drawer {
   margin-bottom: 20px;
+
   &-title {
     width: 100%;
     height: 40px;
-    background: #F9F9FA;
+    // background: #f9f9fa;
     font-family: PingFangSC-Medium;
-    font-size: 12px;
-    color: #1D2330;
+    font-size: 16px;
+    color: #1d2330;
     text-align: left;
     line-height: 40px;
     margin-bottom: 24px;
     padding-left: 24px;
   }
+
   &-box {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 90%;
     position: relative;
-    padding-right: 20px;
+    padding-left: 20px;
+    font-size: 14px;
+    .ant-descriptions-item-content {
+      font-size: 14px;
+    }
   }
+
   &-icon {
     cursor: pointer;
     position: absolute;
-    right: 0px;
-    top: 4px
+    line-height: 16px;
+    left: 0px;
+    top: 4px;
+  }
+
+  &-icon:hover {
+    position: absolute;
   }
 }
 
@@ -61,14 +82,26 @@
 
 .dsl-query-tpl {
   &-search {
-    padding: 20px;
-    padding-bottom: 0px;
-    &-submit {
+    padding-bottom: 10px;
+    &-reset {
+      margin-right: 10px;
       float: right;
+    }
+    &-submit {
+      margin-right: 10px;
+      float: right;
+    }
+    .table-header-box-title {
+      font-size: 18px;
+      font-weight: 500;
     }
   }
 }
+
 .error-query-container {
+  &-query {
+    margin-bottom: 12px;
+  }
   .error-query-container-table {
     .error-query-container-table-cell {
       width: 12vw;
@@ -77,6 +110,9 @@
 }
 
 .slow-query-container {
+  &-query {
+    margin-bottom: 12px;
+  }
   .slow-query-container-table {
     .slow-query-container-table-cell {
       width: 10vw;
@@ -85,20 +121,43 @@
 }
 
 .iframe-search {
-  min-height: 800px !important
+  min-height: 800px !important;
 }
 
 .hiddenMenuHeader {
+  .select-contain {
+    position: absolute;
+    right: 24px;
+    top: 16px;
+    z-index: 100;
+
+    .cluster-label {
+      font-family: PingFangSC-Medium;
+      font-size: 12px;
+      color: #303a51;
+      font-weight: 500;
+    }
+
+    .select-cluster {
+      width: 242px;
+      height: 30px;
+      border-radius: 2px;
+      background-color: #ffffff;
+      border-color: #dcdfe6;
+    }
+  }
+
   .ant-menu {
     display: none;
   }
+
   background: #fff;
   position: relative;
   overflow: hidden;
+
   .detail-tabs {
-    // width: 177px;
     height: 32px;
-    background: #F4F4F6;
+    background: #f4f4f6;
     border-radius: 4px;
     margin-bottom: 16px;
     margin-top: 16px;
@@ -106,35 +165,381 @@
     display: flex;
     padding: 4px;
     justify-content: space-between;
+
     &-item {
       // width: 72px;
       height: 24px;
       border-radius: 4px;
       font-family: PingFangSC-Medium;
       font-size: 14px;
-      color: #5B6675;
+      color: #5b6675;
       line-height: 20px;
       text-align: center;
       cursor: pointer;
       user-select: text;
       padding: 2px 8px 2px 8px;
     }
-    // &-item-json {
-    //   width: 82px;
-    //   height: 24px;
-    //   border-radius: 4px;
-    //   font-family: PingFangSC-Medium;
-    //   font-size: 14px;
-    //   color: #5B6675;
-    //   line-height: 20px;
-    //   text-align: center;
-    //   cursor: pointer;
-    //   user-select: text;
-    //   padding: 2px 8px 2px 8px;
-    // }
+
     .check {
-      background: #FFFFFF;
+      background: #ffffff;
       color: @primary-color;
+    }
+  }
+}
+
+.search-query-table-content {
+  min-width: 800px;
+  padding: 12px 20px;
+  background: #fff;
+
+  ul {
+    line-height: 28px;
+  }
+
+  .ant-menu-item {
+    margin: 0 40px 0 0 !important;
+  }
+}
+
+.search-query-detail-wrapper {
+  min-width: 800px;
+  background-color: #fff;
+  padding: 18px;
+}
+
+.search-template-table {
+  padding: 0 20px 40px 20px;
+  background: #fff;
+}
+
+.dsl-query-tpl-search {
+  background: #fff;
+  padding: 20px;
+}
+
+.search-template-form {
+  padding-top: 20px;
+
+  .search-template-button {
+    display: flex;
+    align-items: center;
+
+    .ant-btn-primary {
+      margin: 10px;
+    }
+  }
+}
+
+.common-page {
+  background-color: transparent;
+  padding: 16px 20px;
+  border-radius: 4px;
+  position: relative;
+  .devApp__container {
+    background: #fff;
+  }
+
+  .title {
+    font-family: PingFangSC-Medium;
+    font-size: 18px;
+    color: rgba(0, 0, 0, 0.87);
+    line-height: 28px;
+    font-weight: 500;
+  }
+
+  .query-panel {
+    position: absolute;
+    right: 20px;
+    top: 16px;
+
+    &.dsl {
+      top: 18px;
+      z-index: 9;
+    }
+
+    .label {
+      font-family: PingFangSC-Regular;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.6);
+      text-align: right;
+      line-height: 20px;
+      font-weight: 400;
+    }
+
+    .select {
+      width: 300px;
+      height: 32px;
+      background: #ffffff;
+      border-radius: 4px;
+
+      .dcloud-select-selector {
+        border-radius: 4px;
+        border: 1px solid rgba(0, 0, 0, 0.13);
+      }
+    }
+    .dcloud-select.dcloud-select-single .dcloud-select-selector {
+      height: 32px;
+    }
+    .dcloud-select-single .dcloud-select-selector .dcloud-select-selection-item {
+      line-height: 32px;
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  .content {
+    margin-top: 36px;
+    overflow-y: overlay;
+
+    &.kibana {
+      height: calc(100vh - 188px);
+    }
+
+    &.sql {
+      height: calc(100vh - 140px);
+      margin-top: 16px;
+      background: #fff;
+      border-radius: 8px;
+      padding: 0 20px 0 20px;
+    }
+
+    &.dsl {
+      margin-top: 0px;
+      height: calc(100vh - 96px);
+      border-radius: 8px;
+
+      .application {
+        z-index: inherit;
+        .euiTabs {
+          overflow: visible;
+          .euiToolTipAnchor {
+            font-family: PingFangSC-Regular;
+            font-size: 18px;
+            .euiTab__content {
+              font-size: 16px;
+            }
+            .euiTab-isSelected {
+              font-family: PingFangSC-Semibold;
+              color: rgba(0, 0, 0, 0.87);
+            }
+          }
+        }
+        .euiTabs {
+          &::before {
+            background: transparent;
+          }
+        }
+        .euiTextColor--subdued {
+          h1 {
+            margin: 30px 0 2px 0;
+            font-size: 14px;
+          }
+        }
+      }
+    }
+
+    &.kibana {
+      margin-top: 16px;
+    }
+
+    .euiTabs {
+      height: 38px;
+      line-height: 38px;
+      margin-bottom: 16px;
+    }
+
+    .euiTab {
+      padding: 0px 0px 8px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-right: 24px;
+      color: rgba(0, 0, 0, 0.6);
+      font-family: PingfangSC-Semibold;
+    }
+
+    .euiTab.euiTab-isSelected {
+      color: @primary-color;
+    }
+
+    .euiTab.euiTab-isSelected::after {
+      background-color: @primary-color;
+      height: 4px;
+      border-radius: 8px;
+    }
+
+    .euiTabs:not(.euiTabs--condensed)::before {
+      background-color: #dbe0e4;
+    }
+
+    .euiTab:focus {
+      background-color: #fff;
+      text-decoration: none;
+    }
+
+    .euiTab:hover:not(.euiTab-isSelected) {
+      text-decoration: none;
+    }
+
+    .search-profiler-page {
+      .appRoot {
+        height: calc(100vh - 150px);
+      }
+
+      .euiTabs {
+        height: 32px;
+        line-height: 32px;
+      }
+
+      .euiTab {
+        padding: 0px;
+        margin-right: 0px;
+        padding: 6px 9px;
+      }
+
+      .euiTab.euiTab-isSelected {
+        height: 28px;
+      }
+    }
+  }
+}
+
+.search-query-reload {
+  font-size: 20px;
+  color: #74788d;
+  cursor: pointer;
+  position: absolute;
+  right: 24px;
+}
+
+.dsl-tpl-table-content {
+  padding: 16px;
+  .ant-menu-horizontal {
+    border: none;
+    line-height: 38px;
+    .ant-menu-item {
+      font-family: PingFangSC-Regular;
+      font-size: 18px;
+      line-height: 22px;
+      font-weight: 400;
+      padding-bottom: 8px;
+    }
+  }
+}
+
+.dsl-tpl-detail-wrapper {
+  margin: 0 24px 0 24px;
+  padding-top: 16px;
+  background-color: #fff;
+  height: calc(100vh - 138px);
+  border-radius: 8px;
+}
+
+.option-filter-columns {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  &-icon {
+    margin-left: 10px;
+  }
+}
+//补充样式
+.common-page .devApp__container {
+  border-radius: 8px;
+}
+#consoleRoot {
+  background: #fff;
+  border-radius: 8px;
+}
+.euiTab:focus {
+  background-color: #f5f7fa;
+}
+.search-profiler-page .appRoot {
+  height: calc(100vh - 172px);
+}
+.search-profiler-page .euiPage {
+  padding: 20px;
+  padding-top: 16px;
+}
+.euiFormRow__labelWrapper {
+  display: none;
+}
+.application .ace-tm .ace_gutter {
+  background: #f5f7fa;
+}
+.application .ace-tm .ace_gutter-active-line {
+  background: rgba(0, 0, 0, 0.04);
+}
+.common-page .content .search-profiler-page .euiTab.euiTab-isSelected::after {
+  height: 0;
+}
+.search-profiler-page .prfDevTool__main {
+  margin-top: 48px;
+}
+.search-profiler-page .euiTabs {
+  position: absolute;
+  right: 30px;
+}
+.conApp__resizer:focus,
+.conApp__resizer.active {
+  background-color: #fff;
+}
+.euiFlyout {
+  top: 118px;
+  height: 79%;
+}
+.search-profiler-page .prfDevTool__main {
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+}
+.prfDevTool__page__bodyGroup .prfDevTool__sense {
+  margin: 4px 4px 4px 0;
+}
+.search-profiler-page .prfDevTool__main {
+  margin-top: 52px;
+  margin-bottom: 4px;
+  margin-left: -12px;
+}
+.search-profiler-page .prfDevTool__sense .ace_editor {
+  border-radius: 4px 0 0 4px;
+}
+.prfDevTool__sense .ace_editor {
+  outline: none;
+  border: solid 1px #d3dae6;
+  border-right: none;
+}
+.search-profiler-page {
+  .prfDevTool__profileTree__shardDetails {
+    .spacer {
+      width: 4px;
+      height: 12px;
+      margin-right: 8px;
+    }
+    .title {
+      font-size: 16px;
+    }
+  }
+  .prfDevTool__percentBadge__progress--time {
+    background-image: linear-gradient(
+      to left,
+      #1473ff 0%,
+      #1473ff var(--prfDevToolProgressPercentage, auto),
+      #f7f7f9 var(--prfDevToolProgressPercentage, auto),
+      #f7f7f9 100%
+    );
+    border-radius: 4px;
+  }
+  .prfDevTool__profileTree__cell .euiIcon--medium {
+    zoom: 0.4;
+  }
+  .ace_editor.ace-tm {
+    font-size: 14px;
+  }
+}
+.dsl-tpl {
+  .hash-menu {
+    background: transparent;
+    height: calc(100vh - 72px);
+    .dcloud-menu {
+      border-radius: 8px 8px 0 0;
     }
   }
 }

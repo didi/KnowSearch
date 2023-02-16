@@ -1,0 +1,420 @@
+//定制组件库样式
+@primary-color: #1473ff;
+@layout-background-color: #f4f9ff;
+@bg-primary-color: #f8f9fa;
+@import "~knowdesign/lib/query-form/style/index.less";
+//登录页面样式补充
+.login-box {
+  .dcloud-form-item-label > label {
+    font-family: PingFangSC-Regular;
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .dcloud-input-affix-wrapper {
+    height: 44px;
+    background: rgba(33, 37, 41, 0.06);
+    border-radius: 10px;
+    & > input.dcloud-input {
+      background: transparent;
+    }
+  }
+  .dcloud-btn-primary {
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 500;
+  }
+  .dcloud-input {
+    font-size: 14px;
+  }
+}
+.custom-login-style {
+  .dcloud-tooltip-inner {
+    font-size: 12px;
+    color: #303a51;
+    line-height: 20px;
+  }
+}
+//导航菜单样式补充
+.dcloud-layout-sider-children > .dcloud-menu {
+  background: transparent;
+}
+.table-layout-style {
+  padding: 0 20px;
+  background-image: linear-gradient(180deg, #f5f7fa 2%, #f5f7fa 86%);
+  border-radius: 4px;
+  height: calc(100vh - 80px);
+  overflow: auto;
+}
+.dcloud-menu-inline,
+.dcloud-menu-vertical,
+.dcloud-menu-vertical-left {
+  border-right: none;
+}
+.dcloud-menu {
+  font-size: 14px;
+  width: 100%;
+}
+.dcloud-menu-sub.dcloud-menu-inline > .dcloud-menu-item {
+  height: 32px;
+  line-height: 32px;
+  padding-left: 28px !important;
+}
+.dcloud-layout-sider-children > .dcloud-menu:not(.dcloud-menu-vertical) .dcloud-menu-item-selected {
+  background-color: @primary-color;
+  border-radius: 4px;
+}
+.dcloud-menu-sub.dcloud-menu-inline {
+  padding: 0 10px;
+}
+
+.dcloud-menu:not(.dcloud-menu-vertical) {
+  .dcloud-menu-item-selected a,
+  .dcloud-menu-item-selected a:hover {
+    color: #fff;
+  }
+}
+.dcloud-menu-sub.dcloud-menu-vertical {
+  .dcloud-menu-item-selected a,
+  .dcloud-menu-item-selected a:hover {
+    color: @primary-color;
+  }
+}
+
+.dcloud-menu-submenu,
+.dcloud-menu-submenu-inline {
+  transition: none;
+}
+.dcloud-menu-inline .dcloud-menu-item {
+  width: 100%;
+}
+.dcloud-menu-sub.dcloud-menu-inline {
+  background: transparent;
+}
+.dcloud-menu.dcloud-menu-inline-collapsed > .dcloud-menu-item,
+.dcloud-menu.dcloud-menu-inline-collapsed > .dcloud-menu-submenu > .dcloud-menu-submenu-title {
+  margin: 0 calc(50% - 16px / 2);
+  padding: 0;
+}
+.dcloud-spin-container {
+  overflow: auto;
+}
+.dcloud-menu-horizontal:not(.dcloud-menu-dark) > .dcloud-menu-item {
+  padding: 0 16px;
+}
+//列表样式补充
+.pro-table-container,
+.container-table,
+.d-table,
+.d-table-box {
+  height: 100%;
+}
+.dantd-query-form {
+  background-color: @bg-primary-color;
+  border-radius: 4px 4px 0 0;
+}
+.pro-table-container .d-table-box-query {
+  background-color: #fff;
+  border-radius: 8px 8px 0 0;
+}
+.d-table-box {
+  display: flex;
+  flex-direction: column;
+  .ant-table-wrapper {
+    flex: 1;
+    // padding: 0 20px;
+    background: #fff;
+    border-radius: 0 0 8px 8px;
+    overflow: auto;
+  }
+}
+.dcloud-menu-submenu-open.dcloud-menu-submenu-selected {
+  color: inherit;
+  & > .dcloud-menu-submenu-title {
+    font-family: PingFangSC-Medium;
+    color: rgba(0, 0, 0, 0.87);
+  }
+}
+.dcloud-menu:not(.dcloud-menu-vertical) .dcloud-menu-item-selected {
+  .d1-layout-left-menus-icon {
+    fill: #fff;
+  }
+}
+.dcloud-menu:not(.dcloud-menu-horizontal) .dcloud-menu-item-selected {
+  background-color: transparent;
+}
+.dcloud-menu-vertical {
+  .dcloud-menu-submenu-selected,
+  .dcloud-menu-item-selected {
+    .d1-layout-left-menus-icon {
+      fill: @primary-color;
+    }
+  }
+}
+.dcloud-menu-inline-collapsed-tooltip .d1-layout-left-menus-icon {
+  fill: #fff;
+}
+.dcloud-menu-submenu.dcloud-menu-submenu-popup.dcloud-menu.dcloud-menu-light.dcloud-menu-submenu-placement-rightTop {
+  width: 150px;
+}
+
+.dcloud-menu-submenu.dcloud-menu-submenu-inline.dcloud-menu-submenu-selected {
+  & > .dcloud-menu-submenu-title {
+    font-family: PingFangSC-Medium;
+    color: rgba(0, 0, 0, 0.87);
+  }
+}
+.dcloud-table-wrapper {
+  flex: auto;
+  padding: 0 16px;
+  background: #fff;
+  border-radius: 0 0 8px 8px;
+}
+//查询条件样式补充
+
+//table
+.dcloud-pagination-total-text {
+  display: none;
+}
+.ant-table .ant-table-tbody .ant-table-cell {
+  vertical-align: top;
+}
+.d-table-box-query {
+  max-height: 240px !important;
+}
+.dcloud-table .dcloud-table-cell {
+  font-size: 14px;
+}
+.dcloud-table-pagination.dcloud-pagination {
+  margin-right: 2px;
+}
+.dcloud-table-wrapper .dcloud-table-selection-column {
+  width: 1%;
+  padding: 0;
+}
+
+// Drawer 样式补充
+.dcloud-drawer {
+  .dcloud-drawer-header {
+    border-bottom: none;
+    padding: 16px 24px;
+    .dcloud-drawer-title {
+      font-family: PingFangSC-Medium;
+      font-size: 18px;
+      color: rgba(0, 0, 0, 0.84);
+      letter-spacing: 0;
+      line-height: 28px;
+      font-weight: 500;
+    }
+    .dcloud-btn {
+      height: 32px;
+      padding: 4px 16px;
+    }
+    .dcloud-space-horizontal {
+      gap: 12px !important;
+    }
+    .dcloud-divider-vertical {
+      margin-left: 4px;
+      margin-right: 32px;
+      height: 16px;
+      background: rgba(0, 0, 0, 0.12);
+    }
+    .dcloud-drawer-close {
+      margin-right: 24px;
+      font-size: 18px;
+      color: #495057;
+    }
+  }
+
+  .dcloud-drawer-body {
+    padding: 16px 24px;
+    .dcloud-table-wrapper {
+      padding: 0;
+      .dcloud-table-selection-column {
+        padding-right: 0;
+      }
+    }
+    .ant-form-item {
+      margin: 0 0 16px 0 !important;
+    }
+  }
+}
+
+// Modal 样式补充
+.dcloud-modal {
+  top: 180px;
+  .dcloud-modal-header {
+    padding: 16px 24px 8px 24px;
+    border-bottom: none;
+    .dcloud-modal-title {
+      font-size: 18px;
+    }
+  }
+
+  .dcloud-modal-body {
+    padding: 16px 24px;
+    .ant-form-item {
+      margin: 0 0 16px 0 !important;
+    }
+    .dcloud-table-wrapper {
+      padding: 0;
+    }
+    .anticon-close-circle.confirm-delete-icon {
+      margin-right: 10px;
+      font-size: 20px;
+      color: #f5483b;
+    }
+    .anticon-info-circle.confirm-icon {
+      margin-right: 10px;
+      font-size: 20px;
+      color: #0a70f5;
+    }
+  }
+
+  .dcloud-modal-footer {
+    padding: 8px 24px 16px 24px;
+    border-top: none;
+  }
+  .dcloud-btn {
+    height: 32px;
+    padding: 4px 16px;
+  }
+}
+
+// Tag 样式补充
+.dcloud-tag {
+  width: 64px;
+  height: 24px;
+  padding: 0;
+  line-height: 24px;
+  text-align: center;
+  font-size: 14px;
+}
+
+// Step 样式补充
+.dcloud-steps {
+  .dcloud-steps-item-icon {
+    width: 28px;
+    height: 28px;
+    .dcloud-steps-icon {
+      top: -2.5px;
+    }
+  }
+  .dcloud-steps-item-title {
+    height: 28px;
+    line-height: 28px;
+    font-size: 14px;
+  }
+}
+//Select样式补充
+.dantd-query-form .dcloud-select-single:not(.dcloud-select-customize-input) .dcloud-select-selector {
+  padding: 0 12px;
+}
+
+//弹窗样式补
+.dcloud-modal-content {
+  .dcloud-btn {
+    line-height: 1;
+    height: 32px;
+  }
+}
+.dcloud-modal-confirm .dcloud-modal-body {
+  padding: 32px 32px 16px;
+}
+.dcloud-modal-confirm-warning .dcloud-modal-confirm-body > .anticon,
+.dcloud-modal-confirm-confirm .dcloud-modal-confirm-body > .anticon {
+  color: #f5483b;
+  margin-right: 10px;
+}
+.dcloud-modal-confirm-body > .anticon + .dcloud-modal-confirm-title + .dcloud-modal-confirm-content {
+  margin-left: 32px;
+}
+.cluster {
+  .monitor-overview-search {
+    padding-left: 148px;
+    &-filter {
+      padding-left: 8px;
+      flex: 1 1 auto;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .tree-select-node,
+    .overview-select-mode {
+      max-width: 400px;
+      flex: 1 1 auto;
+      padding-right: 8px;
+    }
+  }
+}
+.gateway {
+  padding: 0 20px;
+  .monitor-overview-search-filter {
+    padding-left: 8px;
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .tree-select-node,
+  .overview-select-mode,
+  .second-select {
+    padding-right: 8px;
+    width: 250px;
+  }
+  .monitor-overview-search {
+    margin-left: 145px;
+  }
+  .custom-ranger-picker {
+    position: absolute;
+    top: 17px;
+    right: 18px;
+  }
+}
+//kbn-sense样式补充
+.euiToolTipAnchor {
+  line-height: 16px;
+  vertical-align: top;
+}
+//SQL查询
+.CodeMirror-wrap pre.CodeMirror-line,
+.CodeMirror-wrap pre.CodeMirror-line-like {
+  font-size: 14px;
+}
+.application .ace_editor {
+  font-size: 14px;
+}
+//hash-menu
+.dashboard,
+.gateway {
+  .hash-menu .hash-menu-border {
+    margin-left: -15px;
+  }
+}
+.dcloud-row-start {
+  width: 100%;
+}
+.cluster,
+.index-detail {
+  .dcloud-menu-horizontal > .dcloud-menu-item::after,
+  .dcloud-menu-horizontal > .dcloud-menu-submenu::after {
+    left: 0;
+    right: 0;
+  }
+}
+.index-detail {
+  .hash-detail-wrapper {
+    min-height: calc(100vh - 260px);
+  }
+}
+//message
+.dcloud-message-custom-content {
+  & > .anticon {
+    vertical-align: bottom;
+  }
+}
+
+.anticon.ant-input-clear-icon {
+  color: rgba(0, 0, 0, 0.25);
+}
+
+.ant-descriptions-row > td:not(:last-child) {
+  padding-right: 36px;
+}

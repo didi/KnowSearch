@@ -1,4 +1,4 @@
-import actionTypes from './actionTypes';
+import actionTypes from "./actionTypes";
 
 export const setModalId = (modalId: string, params?: any, cb?: Function) => ({
   type: actionTypes.SET_MODAL_ID,
@@ -6,7 +6,7 @@ export const setModalId = (modalId: string, params?: any, cb?: Function) => ({
     modalId,
     params,
     cb,
-  }
+  },
 });
 
 export const setDrawerId = (drawerId: string, params?: any, cb?: Function) => ({
@@ -14,6 +14,6 @@ export const setDrawerId = (drawerId: string, params?: any, cb?: Function) => ({
   payload: {
     drawerId,
     params,
-    cb
-  }
+    cb,
+  },
 });

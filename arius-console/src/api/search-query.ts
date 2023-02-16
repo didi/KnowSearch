@@ -1,5 +1,5 @@
-import fetch from '../lib/fetch';
-import { objTransUrlParams } from '../lib/utils';
+import fetch from "../lib/fetch";
+import { objTransUrlParams } from "../lib/utils";
 const Prefix = "admin";
 const POST = "POST";
 
@@ -24,8 +24,8 @@ interface IDslList {
   size: number;
   dslTemplateMd5?: string;
   queryIndex?: string;
-  sortInfo?: string,
-  orderByDesc?: boolean,
+  sortInfo?: string;
+  orderByDesc?: boolean;
 }
 
 interface IDetail {
@@ -35,75 +35,82 @@ interface IDetail {
 }
 
 interface IqueryLimit {
-  dslTemplateMd5List: string;
+  dslTemplateMd5: string;
   queryLimit: string;
+  projectId: number;
 }
 
 export const getErrorQueryList = (params: IErrorList) => {
-  return fetch(`/v3/op/dsl/template/error/list`, {
-    method: 'POST',
-    body: params
+  return fetch(`/v3/dsl/template/error/page`, {
+    method: "POST",
+    body: params,
   });
 };
 
 export const getSlowQueryList = (params: ISlowList) => {
-  return fetch(`/v3/op/dsl/template/slow/list`, {
-    method: 'POST',
-    body: params
+  return fetch(`/v3/dsl/template/slow/page`, {
+    method: "POST",
+    body: params,
   });
 };
 
 // 根据查询条件获取查询模板数据
 export const getDslList = (params: IDslList) => {
-  return fetch('/v3/op/dsl/template/page', {
-    method: 'POST',
-    body: params
+  return fetch("/v3/dsl/template/page", {
+    method: "POST",
+    body: params,
   });
 };
 
 // 根据查询条件获取查询模板数据
-export const changeStatus = (dslTemplateMd5: string) => {
-  return fetch(`/v3/op/dsl/template/change/status/${dslTemplateMd5}`, {
-    method: 'PUT',
+export const changeStatus = (dslTemplateMd5: string, projectId) => {
+  return fetch(`/v3/dsl/template/status/${dslTemplateMd5}?projectId=${projectId}`, {
+    method: "PUT",
   });
 };
 
-// 修改查询模版限流值
-export const queryLimit = (params: IqueryLimit) => {
-  return fetch(`/v3/op/dsl/template/update/queryLimit?${objTransUrlParams(params)}`, {
-    method: 'PUT'
+// 修改查询模板限流值
+export const queryLimit = (params: IqueryLimit[]) => {
+  return fetch(`/v3/dsl/template/query-limit`, {
+    method: "PUT",
+    body: params,
   });
 };
 
 // 获取dsl的指标信息
-export const getDslDetail = (dslTemplateMd5: string) => {
-  return fetch(`/v3/op/dsl/template/detail/${dslTemplateMd5}`);
+export const getDslDetail = (dslTemplateMd5: string, projectId) => {
+  return fetch(`/v3/dsl/template/detail/${dslTemplateMd5}?projectId=${projectId}`);
+};
+
+// 获取dsl的语句
+export const getDslByIndex = (indexName: string) => {
+  return fetch(`/v3/dsl/template/${indexName}`);
 };
 
 // 获取账号下已配置的列
-export const getCheckedList = (secondMetricsType: string) => {
-  return fetch("/v3/op/phy/cluster/metrics/configMetrics", {
+export const getCheckedList = () => {
+  return fetch("/v3/dsl/template/dsl-template-config", {
     prefix: Prefix,
-    method: POST,
+    method: "POST",
     body: {
-      domainAccount: "",
-      firstMetricsType: "user_show",
-      secondMetricsType: secondMetricsType,
-      metricsTypes: []
-    }
+      userName: "",
+      firstUserConfigType: "searchQuery",
+      secondUserConfigType: "searchTemplate",
+      userConfigTypes: [],
+    },
   });
-}
+};
 
 // 设置列
-export const setCheckedList = (secondMetricsType: string, metricsTypes: string[]) => {
-  return fetch("/v3/op/phy/cluster/metrics/updateConfigMetrics", {
+export const setCheckedList = (userConfigTypes: string[]) => {
+  return fetch("/v3/dsl/template/dsl-template-config", {
     prefix: Prefix,
-    method: POST,
+    method: "PUT",
     body: {
-      domainAccount: "",
-      firstMetricsType: "user_show",
-      secondMetricsType: secondMetricsType,
-      metricsTypes: metricsTypes
-    }
+      userName: "",
+      firstUserConfigType: "searchQuery",
+      secondUserConfigType: "searchTemplate",
+      userConfigTypes,
+    },
   });
-}
+};

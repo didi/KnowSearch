@@ -4,7 +4,7 @@ import { SPIT_STYLE_MAP, TASK_STATUS_TYPE_MAP } from 'constants/status-map';
 import { tableFilter } from 'lib/utils';
 import Url from 'lib/url-parser';
 import './index.less';
-import  { Table, Button, Progress, Popconfirm, Tooltip, Collapse, Modal } from 'antd';
+import { Table, Button, Progress, Popconfirm, Tooltip, Collapse, Modal } from 'antd';
 import { INodeTask, ITask, ITaskDetail, ITaskNodes } from 'typesPath/task-types';
 import { connect } from "react-redux";
 import * as actions from "actions";
@@ -48,8 +48,8 @@ export class PlanSpeed extends React.Component<{ task: TaskState; setModalId?: F
     searchKey = (searchKey + "").trim().toLowerCase();
     const data = searchKey
       ? origin.filter(
-          (d) => (d.id + "").toLowerCase().includes(searchKey as string) || d.hostname?.toLowerCase().includes(searchKey as string)
-        )
+        (d) => (d.id + "").toLowerCase().includes(searchKey as string) || d.hostname?.toLowerCase().includes(searchKey as string)
+      )
       : origin;
 
     return data;
@@ -81,13 +81,13 @@ export class PlanSpeed extends React.Component<{ task: TaskState; setModalId?: F
   public iTimer = (id: number) => {
     this.timer = setInterval(() => {
       if (this.state.taskDetail && (this.state.taskDetail?.status === 'running' || this.state.taskDetail?.status === 'unknown')) {
-      this.getTaskDetail(id, 'update').then((data: {taskDetail: ITaskDetail, taskNodes: ITaskNodes[]}) => {
-        this.setState({
-          taskDetail: data.taskDetail,
-          taskNodes: data.taskNodes,
-          loading: false
-        });
-      }).catch(() => { clearInterval(this.timer); });
+        this.getTaskDetail(id, 'update').then((data: { taskDetail: ITaskDetail, taskNodes: ITaskNodes[] }) => {
+          this.setState({
+            taskDetail: data.taskDetail,
+            taskNodes: data.taskNodes,
+            loading: false
+          });
+        }).catch(() => { clearInterval(this.timer); });
       } else { clearInterval(this.timer); }
     }, 5 * 1 * 1000);
   }
@@ -232,16 +232,16 @@ export class PlanSpeed extends React.Component<{ task: TaskState; setModalId?: F
           </div>
           <div>
             {taskObj?.status === 'waiting' &&
-                <Button type="primary" className="mr-10" onClick={() => carryTask(this.id, taskObj?.orderType, this.reloadData, this.taskId)}>执行</Button>
+              <Button type="primary" className="mr-10 button-styles" onClick={() => carryTask(this.id, taskObj?.orderType, this.reloadData, this.taskId)}>执行</Button>
             }
             {taskObj?.status === 'running' &&
-                <Button type="primary" className="mr-10" onClick={() => this.confirmFn('暂停', this.taskId, this.id, this.pauseTask)}>暂停</Button>
+              <Button type="primary" className="mr-10 button-styles" onClick={() => this.confirmFn('暂停', this.taskId, this.id, this.pauseTask)}>暂停</Button>
             }
             {taskObj?.status === 'pause' &&
-                <Button type="primary" className="mr-10"  onClick={() => this.confirmFn('继续', this.taskId, this.id, this.continueTask)}>继续</Button>
+              <Button type="primary" className="mr-10 button-styles" onClick={() => this.confirmFn('继续', this.taskId, this.id, this.continueTask)}>继续</Button>
             }
             {(taskObj?.status === 'waiting' || taskObj?.status === 'running' || taskObj?.status === 'pause' || taskObj?.status === 'failed') &&
-                <Button type="primary" className="mr-10" onClick={() => this.confirmFn('取消', this.taskId, this.id, this.cancalTask)}>取消</Button>
+              <Button type="primary" className="mr-10 button-styles" onClick={() => this.confirmFn('取消', this.taskId, this.id, this.cancalTask)}>取消</Button>
             }
           </div>
         </div>

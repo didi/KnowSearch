@@ -3,13 +3,16 @@ import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import * as actions from "actions";
 import { getLogicClusterQueryXForm, getLogicColumns } from "./config";
-import { getOpLogicClusterList, ILogicLike } from "api/cluster-api";
+import { getOpLogicClusterList, ILogicLike, getCount, getMyLogiClusterList } from "api/cluster-api";
 import { DTable, ITableBtn } from "component/dantd/dtable";
 import { RenderTitle } from "component/render-title";
 import QueryForm from "component/dantd/query-form";
 import { queryFormText } from "constants/status-map";
 import { isOpenUp } from "constants/common";
-
+import { MyClusterPermissions } from "constants/permission";
+import { hasOpPermission } from "lib/permission";
+import Url from "lib/url-parser";
+import { ProTable } from "knowdesign";
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   setModalId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setModalId(modalId, params, cb)),
 });
@@ -23,10 +26,31 @@ const LogicClusterBox = (props) => {
   });
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
+  const [logiClusterList, setLogiClusterList] = useState([]);
 
+  const indexTemFun = async (record) => {
+    let indexCount = null;
+    await getCount(record.id).then((res) => {
+      if (res) {
+        indexCount = res;
+      }
+    });
+    return indexCount;
+  };
   React.useEffect(() => {
     reloadData();
-  }, [department, queryFormObject]);
+  }, [department, queryFormObject, Url().search.needApplyCluster]);
+
+  React.useEffect(() => {
+    getLogiClusterList();
+  }, [department]);
+
+  const getLogiClusterList = () => {
+    getMyLogiClusterList().then((res = []) => {
+      const list = res.map((item) => ({ title: item, value: item }));
+      setLogiClusterList(list);
+    });
+  };
 
   // const getData = () => {
   //   // 查询项的key 要与 数据源的key  对应
@@ -60,14 +84,18 @@ const LogicClusterBox = (props) => {
       authType: queryFormObject.authType,
       name: queryFormObject.name,
       health: queryFormObject.health,
-      appId: queryFormObject.appId,
       type: queryFormObject.type,
       sortTerm: queryFormObject.sortTerm,
       orderByDesc: queryFormObject.orderByDesc,
+      id: queryFormObject.id !== undefined ? +queryFormObject.id : undefined,
+      memo: queryFormObject.memo,
     };
     getOpLogicClusterList(Params)
       .then((res) => {
         if (res) {
+          if (Url().search.hasOwnProperty("needApplyCluster") && !res.bizData?.length) {
+            props.setModalId("applyCluster", { history: props.history }, reloadData);
+          }
           res.bizData = res?.bizData?.map((item) => {
             item.esClusterVersions = item.esClusterVersions?.join(",") || "_";
             return item;
@@ -83,7 +111,7 @@ const LogicClusterBox = (props) => {
 
   const renderTitleContent = () => {
     return {
-      title: "逻辑集群",
+      title: "我的集群",
       content: null,
     };
   };
@@ -99,13 +127,13 @@ const LogicClusterBox = (props) => {
 
   const getOpBtns = (): ITableBtn[] => {
     return [
-      {
+      hasOpPermission(MyClusterPermissions.PAGE, MyClusterPermissions.APPLY) && {
         className: "ant-btn-primary",
         label: "申请集群",
         isOpenUp: isOpenUp,
-        clickFunc: () => props.setModalId("applyCluster", {}, reloadData),
+        clickFunc: () => props.setModalId("applyCluster", { history: props.history }, reloadData),
       },
-    ];
+    ].filter(Boolean);
   };
 
   const handleChange = (pagination, filters, sorter) => {
@@ -113,8 +141,24 @@ const LogicClusterBox = (props) => {
     // 排序
     if (sorter.columnKey && sorter.order) {
       switch (sorter.columnKey) {
+        case "type":
+          sorterObject.sortTerm = "type";
+          sorterObject.orderByDesc = sorter.order === "ascend" ? false : true;
+          break;
+        case "esClusterVersion":
+          sorterObject.sortTerm = "es_cluster_version";
+          sorterObject.orderByDesc = sorter.order === "ascend" ? false : true;
+          break;
         case "level":
           sorterObject.sortTerm = "level";
+          sorterObject.orderByDesc = sorter.order === "ascend" ? false : true;
+          break;
+        case "diskInfo":
+          sorterObject.sortTerm = "disk_usage_percent";
+          sorterObject.orderByDesc = sorter.order === "ascend" ? false : true;
+          break;
+        case "dataNodeNum":
+          sorterObject.sortTerm = "data_node_num";
           sorterObject.orderByDesc = sorter.order === "ascend" ? false : true;
           break;
         default:
@@ -136,55 +180,48 @@ const LogicClusterBox = (props) => {
     });
   };
 
+  const clientHeight = document.querySelector("#d1-layout-main")?.clientHeight;
+
   return (
     <>
-      <div className="table-header">
-        <RenderTitle {...renderTitleContent()} />
-
-        <QueryForm
-          {...queryFormText}
-          defaultCollapse
-          columns={getLogicClusterQueryXForm(data)}
-          onChange={() => null}
-          onReset={handleSubmit}
-          onSearch={handleSubmit}
-          initialValues={{}}
-          isResetClearAll
-        />
-      </div>
-      <div>
-        <div className="table-content">
-          <DTable
-            loading={loading}
-            rowKey="id"
-            dataSource={data}
-            attrs={{
-              onChange: handleChange,
-              scroll: {
-                x: true
-              }
-            }}
-            key={JSON.stringify({
-              authType: queryFormObject.authType,
-              name: queryFormObject.name,
-              health: queryFormObject.health,
-              appId: queryFormObject.appId,
-              type: queryFormObject.type,
-            })}
-            columns={getLogicColumns(data, props.setModalId, reloadData)}
-            reloadData={reloadData}
-            getOpBtns={getOpBtns}
-            paginationProps={{
+      <div className="table-layout-style">
+        <ProTable
+          showQueryForm={true}
+          queryFormProps={{
+            defaultCollapse: true,
+            columns: getLogicClusterQueryXForm(data, logiClusterList),
+            onReset: handleSubmit,
+            onSearch: handleSubmit,
+            isResetClearAll: true,
+            showCollapseButton: false,
+          }}
+          tableProps={{
+            tableId: "logic_cluster_list", //开启表格自定义列
+            isCustomPg: false,
+            loading,
+            rowKey: "id",
+            dataSource: data,
+            columns: getLogicColumns(data, props.setModalId, reloadData, props, indexTemFun),
+            reloadData,
+            getOpBtns: getOpBtns,
+            customRenderSearch: () => <RenderTitle {...renderTitleContent()} />,
+            paginationProps: {
               position: "bottomRight",
               showQuickJumper: true,
               total: total,
               showSizeChanger: true,
               pageSizeOptions: ["10", "20", "50", "100", "200", "500"],
               showTotal: (total) => `共 ${total} 条`,
-              current: queryFormObject.current
-            }}
-          />
-        </div>
+              current: queryFormObject.current,
+            },
+            attrs: {
+              onChange: handleChange,
+              scroll: {
+                x: "max-content",
+              },
+            },
+          }}
+        />
       </div>
     </>
   );

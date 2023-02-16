@@ -1,28 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import classNames from 'classnames';
-import { ConfigProviderProps } from 'antd/es/config-provider';
-import useAntdMediaQuery from './use-media-antd-query';
-import { Button, Input, Form, Row, Col, Select, ConfigProvider } from 'antd';
-import { DownOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from "react";
+import classNames from "classnames";
+import { ConfigProviderProps } from "antd/es/config-provider";
+import useAntdMediaQuery from "./use-media-antd-query";
+import { Button, Input, Form, Row, Col, Select, ConfigProvider } from "antd";
+import { DownOutlined } from "@ant-design/icons";
 
-import { useContext } from 'react';
-import IntlContext from './context';
+import { useContext } from "react";
+import IntlContext from "./context";
 
 function useIntl(): any {
   const i18n = useContext(IntlContext);
   return i18n;
 }
 
-declare const ItemSizes: ['large', 'default', 'small', string];
+declare const ItemSizes: ["large", "default", "small", string];
 export declare type ItemSize = typeof ItemSizes[number];
 
-declare const ColumnTypes: ['select', 'input', 'custom', string];
+declare const ColumnTypes: ["select", "input", "custom", string];
 export declare type ColumnType = typeof ColumnTypes[number];
 
-declare const ModeTypes: ['full', 'align', string];
+declare const ModeTypes: ["full", "align", string];
 export declare type ModeType = typeof ModeTypes[number];
 
-declare const ColTypes: ['grid', 'style', string];
+declare const ColTypes: ["grid", "style", string];
 export declare type ColType = typeof ColTypes[number];
 
 const FormItem = Form.Item;
@@ -77,15 +77,15 @@ export interface IQueryFormProps {
   antConfig?: ConfigProviderProps;
   defaultCollapse?: boolean;
   colConfig?:
-  | {
-    lg: number;
-    md: number;
-    xxl: number;
-    xl: number;
-    sm: number;
-    xs: number;
-  }
-  | undefined;
+    | {
+        lg: number;
+        md: number;
+        xxl: number;
+        xl: number;
+        sm: number;
+        xs: number;
+      }
+    | undefined;
 }
 
 const defaultColConfig = {
@@ -121,11 +121,8 @@ const defaultFormItemLayout = {
  * @param span
  * @param size
  */
-const getSpanConfig = (
-  span: number | typeof defaultColConfig,
-  size: keyof typeof defaultColConfig,
-): number => {
-  if (typeof span === 'number') {
+const getSpanConfig = (span: number | typeof defaultColConfig, size: keyof typeof defaultColConfig): number => {
+  if (typeof span === "number") {
     return span;
   }
   const config = {
@@ -157,7 +154,7 @@ const getCollapseHideNum = (size: number) => {
 };
 
 const QueryForm = (props: IQueryFormProps) => {
-  const prefixCls = `${props.prefixCls || 'dantd'}-query-form`;
+  const prefixCls = `${props.prefixCls || "dantd"}-query-form`;
   const { t } = useIntl();
   const {
     className,
@@ -174,11 +171,11 @@ const QueryForm = (props: IQueryFormProps) => {
     onReset,
     getFormInstance,
     columns = [] as IColumnsType[],
-    mode = 'full',
-    colMode = 'grid',
+    mode = "full",
+    colMode = "grid",
     columnStyleHideNumber = 1,
     defaultColStyle = {
-      width: '300px',
+      width: "300px",
     },
     initialValues,
     // valueType = 'object',
@@ -187,7 +184,7 @@ const QueryForm = (props: IQueryFormProps) => {
   const wrapperClassName = classNames(prefixCls, className);
   const formItemCls = classNames({
     [`${prefixCls}-formitem`]: true,
-    [`${prefixCls}-formitem-full`]: mode === 'full',
+    [`${prefixCls}-formitem-full`]: mode === "full",
   });
   const windowSize = useAntdMediaQuery();
   const itemColConfig = colConfig || defaultColConfig;
@@ -210,7 +207,7 @@ const QueryForm = (props: IQueryFormProps) => {
 
   const handleSearch = () => {
     validateFields()
-      .then(values => {
+      .then((values) => {
         if (onSearch) {
           onSearch(values);
         }
@@ -256,10 +253,10 @@ const QueryForm = (props: IQueryFormProps) => {
       isInputPressEnterCallSearch,
       formItemLayout,
       rules,
-      size = 'default',
+      size = "default",
     } = colItem;
 
-    const itemPlaceholder = placeholder ? placeholder : t('form.placeholder.prefix');
+    const itemPlaceholder = placeholder ? placeholder : t("form.placeholder.prefix");
 
     let itemRules: any[] = [];
     if (required) {
@@ -271,11 +268,11 @@ const QueryForm = (props: IQueryFormProps) => {
       ];
     }
 
-    const itemFormItemLayout = formItemLayout || mode === 'align' ? defaultFormItemLayout : {};
+    const itemFormItemLayout = formItemLayout || mode === "align" ? defaultFormItemLayout : {};
     return (
       <FormItem
         shouldUpdate={true}
-        key='input'
+        key="input"
         name={dataIndex as string}
         rules={rules || itemRules}
         label={title}
@@ -286,7 +283,8 @@ const QueryForm = (props: IQueryFormProps) => {
           data-testid="field-input"
           size={size}
           placeholder={itemPlaceholder}
-          onPressEnter={isInputPressEnterCallSearch ? handlePressEnter : () => { }}
+          onPressEnter={isInputPressEnterCallSearch ? handlePressEnter : () => {}}
+          allowClear
           {...componentProps}
         />
       </FormItem>
@@ -299,18 +297,18 @@ const QueryForm = (props: IQueryFormProps) => {
       title,
       required,
       placeholder,
-      selectMode = 'single',
+      selectMode = "single",
       rules,
       formItemLayout,
       options = [],
       componentProps = {},
-      size = 'default',
+      size = "default",
     } = colItem;
     const itemPlaceholder = placeholder ? (
       placeholder
     ) : (
       <>
-        {t('form.selectplaceholder.prefix')}
+        {t("form.selectplaceholder.prefix")}
         &nbsp;
         {title}
       </>
@@ -326,11 +324,11 @@ const QueryForm = (props: IQueryFormProps) => {
       ];
     }
 
-    const itemFormItemLayout = formItemLayout || mode === 'align' ? defaultFormItemLayout : {};
+    const itemFormItemLayout = formItemLayout || mode === "align" ? defaultFormItemLayout : {};
 
     return (
       <FormItem
-        key='select'
+        key="select"
         name={dataIndex as string}
         rules={rules || itemRules}
         label={title}
@@ -345,7 +343,7 @@ const QueryForm = (props: IQueryFormProps) => {
           placeholder={itemPlaceholder}
           showSearch={true}
           optionFilterProp="children"
-          style={{ width: '100%' }}
+          style={{ width: "100%" }}
           {...componentProps}
         >
           {options.map((option: any) => {
@@ -361,22 +359,13 @@ const QueryForm = (props: IQueryFormProps) => {
   };
 
   const renderCustomItem = (colItem: any) => {
-    const {
-      formItemLayout,
-      dataIndex,
-      title,
-      required,
-      placeholder,
-      rules,
-      valuePropName = 'value',
-      component,
-    } = colItem;
+    const { formItemLayout, dataIndex, title, required, placeholder, rules, valuePropName = "value", component } = colItem;
 
     const itemPlaceholder = placeholder ? (
       placeholder
     ) : (
       <>
-        {t('form.placeholder.prefix')}
+        {t("form.placeholder.prefix")}
         &nbsp;
         {title}
       </>
@@ -392,11 +381,11 @@ const QueryForm = (props: IQueryFormProps) => {
       ];
     }
 
-    const itemFormItemLayout = formItemLayout || mode === 'align' ? defaultFormItemLayout : {};
+    const itemFormItemLayout = formItemLayout || mode === "align" ? defaultFormItemLayout : {};
 
     return (
       <FormItem
-        key='custom'
+        key="custom"
         name={dataIndex as string}
         rules={rules || itemRules}
         label={title}
@@ -416,9 +405,9 @@ const QueryForm = (props: IQueryFormProps) => {
         : getOffset(collapseHideNum, colSize)
       : getOffset(columns.length, colSize);
     let optionStyle = {};
-    if (colMode === 'style') {
+    if (colMode === "style") {
       optionStyle = {
-        position: 'absolute',
+        position: "absolute",
         width: 280,
         bottom: 0,
         right: 0,
@@ -437,30 +426,25 @@ const QueryForm = (props: IQueryFormProps) => {
       >
         <Form.Item key="option">
           <span>
-            <Button onClick={handleReset}>{resetText || t('queryform.reset')}</Button>
-            <Button
-              onClick={handleSearch}
-              style={{ marginLeft: 10 }}
-              type="primary"
-              htmlType="submit"
-            >
-              {searchText || t('queryform.search')}
+            <Button onClick={handleReset}>{resetText || t("queryform.reset")}</Button>
+            <Button onClick={handleSearch} style={{ marginLeft: 10 }} type="primary" htmlType="submit">
+              {searchText || t("queryform.search")}
             </Button>
             {showCollapseButton && (
               <a
                 style={{
                   marginLeft: 10,
-                  display: 'inline-block',
+                  display: "inline-block",
                 }}
                 onClick={() => {
                   setCollapse(!collapsed);
                 }}
               >
-                {collapsed ? '展开' : '收起'}
+                {collapsed ? "展开" : "收起"}
                 <DownOutlined
                   style={{
-                    marginLeft: '0.5em',
-                    transition: '0.3s all',
+                    marginLeft: "0.5em",
+                    transition: "0.3s all",
                     transform: `rotate(${collapsed ? 0 : 0.5}turn)`,
                   }}
                 />
@@ -479,7 +463,7 @@ const QueryForm = (props: IQueryFormProps) => {
           {columns.map((colItem, colIndex) => {
             let itemHide = collapsed && collapseHideNum <= colIndex;
             let colItemStyle = {};
-            if (colMode === 'style') {
+            if (colMode === "style") {
               colItemStyle = colItem.colStyle || defaultColStyle;
               if (collapsed && colIndex >= columnStyleHideNumber) {
                 itemHide = true;
@@ -487,14 +471,10 @@ const QueryForm = (props: IQueryFormProps) => {
             }
             colItemStyle = {
               ...colItemStyle,
-              display: itemHide ? 'none' : 'block',
+              display: itemHide ? "none" : "block",
             };
             return (
-              <Col
-                style={colItemStyle}
-                key={`query-form-col-${colItem.dataIndex}-${colIndex}`}
-                {...itemColConfig}
-              >
+              <Col style={colItemStyle} key={`query-form-col-${colItem.dataIndex}-${colIndex}`} {...itemColConfig}>
                 <Form
                   form={form}
                   onFieldsChange={(_changedFields, allFields) => {
@@ -502,9 +482,9 @@ const QueryForm = (props: IQueryFormProps) => {
                   }}
                   initialValues={initialValues}
                 >
-                  {colItem.type === 'input' && renderInputItem(colItem)}
-                  {colItem.type === 'select' && renderSelectItem(colItem)}
-                  {colItem.type === 'custom' && renderCustomItem(colItem)}
+                  {colItem.type === "input" && renderInputItem(colItem)}
+                  {colItem.type === "select" && renderSelectItem(colItem)}
+                  {colItem.type === "custom" && renderCustomItem(colItem)}
                 </Form>
               </Col>
             );

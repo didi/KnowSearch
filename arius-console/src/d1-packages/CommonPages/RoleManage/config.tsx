@@ -1,4 +1,8 @@
-import { formatDate } from "../../Utils/tools";
+import React from "react";
+import { Utils } from "knowdesign";
+const formatDate = Utils.formatDate;
+import { regNonnegativeInteger } from "constants/reg";
+
 export interface ITableBtn {
   clickFunc?: () => void;
   type?: string;
@@ -24,16 +28,30 @@ export const getFormCol = () => {
   return [
     {
       type: "input",
-      title: "角色ID",
-      dataIndex: "roleCode",
+      title: "角色ID:",
+      dataIndex: "id",
       placeholder: "请输入角色ID",
       componentProps: {
         maxLength: 128,
       },
+      rules: [
+        {
+          required: false,
+          validator: (rule: any, value: string) => {
+            if (value && !new RegExp(regNonnegativeInteger).test(value)) {
+              return Promise.reject(new Error("请输入正确格式"));
+            }
+            if (value && value?.length > 16) {
+              return Promise.reject(new Error("请输入正确ID，0-16位字符"));
+            }
+            return Promise.resolve();
+          },
+        },
+      ],
     },
     {
       type: "input",
-      title: "角色名称",
+      title: "角色名称:",
       dataIndex: "roleName",
       placeholder: "请输入角色名称",
       componentProps: {
@@ -42,9 +60,9 @@ export const getFormCol = () => {
     },
     {
       type: "input",
-      title: "描述信息",
+      title: "描述:",
       dataIndex: "description",
-      placeholder: "请输入描述信息",
+      placeholder: "请输入描述",
       componentProps: {
         maxLength: 128,
       },
@@ -52,7 +70,7 @@ export const getFormCol = () => {
   ];
 };
 
-export const getTableCol = (renderIndex, renderRoleCodeCol, renderRoleNameCol: any, renderOptCol: any) => {
+export const getTableCol = (renderIndex, renderRoleDetail, renderUserNum, renderOptCol) => {
   const columns = [
     {
       title: "序号",
@@ -61,36 +79,41 @@ export const getTableCol = (renderIndex, renderRoleCodeCol, renderRoleNameCol: a
     },
     {
       title: "角色ID",
-      dataIndex: "roleCode",
-      key: "roleCode",
-      render: renderRoleCodeCol,
+      dataIndex: "id",
+      key: "id",
+      render: renderRoleDetail,
     },
     {
       title: "角色名称",
       dataIndex: "roleName",
       key: "roleName",
-      render: renderRoleNameCol,
+      render: renderRoleDetail,
     },
     {
       title: "角色描述",
       dataIndex: "description",
       key: "description",
       width: "200px",
+      lineClampTwo: true,
+      needTooltip: true,
+      render: (text: string) => text || "-",
+    },
+    {
+      title: "绑定用户数",
+      dataIndex: "authedUserCnt",
+      key: "authedUserCnt",
+      render: renderUserNum,
     },
     {
       title: "最后修改人",
       dataIndex: "lastReviser",
       key: "lastReviser",
-    },
-    {
-      title: "分配用户数",
-      dataIndex: "authedUserCnt",
-      key: "authedUserCnt",
+      render: (text: string) => text || "-",
     },
     {
       title: "最后更新时间",
-      dataIndex: "createTime",
-      key: "createTime",
+      dataIndex: "updateTime",
+      key: "updateTime",
       render: (_value: string | number): any => {
         return formatDate(_value, "YYYY-MM-DD HH:mm:ss");
       },
@@ -98,6 +121,8 @@ export const getTableCol = (renderIndex, renderRoleCodeCol, renderRoleNameCol: a
     {
       title: "操作",
       dataIndex: "operation",
+      filterTitle: true,
+      width: 180,
       key: "operation",
       render: renderOptCol,
     },

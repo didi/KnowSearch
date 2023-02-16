@@ -21,7 +21,6 @@ export interface IIndex {
   quotaUsage: IQuotaUsage;
   value: number;
   libraDepartment: string;
-  responsible: string;
   hasDCDR: boolean;
   logicId: number;
 }
@@ -29,6 +28,7 @@ export interface IIndex {
 export interface INodeDivide {
   ip: string;
   logicClusterName: string;
+  clusterLogicNames: string;
   rack: string;
   regionId: number | string;
   role: number;

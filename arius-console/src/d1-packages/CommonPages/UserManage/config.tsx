@@ -1,6 +1,7 @@
 import * as React from "react";
-import { formatDate } from "../../Utils/tools";
-import { renderTableLabels } from "../../ProTable/RenderTableLabels";
+import { formatDate } from "knowdesign/lib/utils/tools";
+import { renderAttributes } from "container/custom-component";
+import { Tooltip } from "antd";
 export interface ITableBtn {
   clickFunc?: () => void;
   type?: string;
@@ -21,8 +22,8 @@ export const getFormCol = (deptItem, roleItem) => {
   return [
     {
       type: "input",
-      title: "用户账号",
-      dataIndex: "username",
+      title: "用户账号:",
+      dataIndex: "userName",
       placeholder: "请输入用户账号",
       componentProps: {
         maxLength: 128,
@@ -30,25 +31,12 @@ export const getFormCol = (deptItem, roleItem) => {
     },
     {
       type: "input",
-      title: "用户实名",
+      title: "用户实名:",
       dataIndex: "realName",
       placeholder: "请输入用户实名",
       componentProps: {
         maxLength: 128,
       },
-    },
-    {
-      type: "custom",
-      title: "所属部门",
-      dataIndex: "deptId",
-      ...deptItem,
-    },
-    {
-      type: "select",
-      title: "分配角色",
-      dataIndex: "roleId",
-      placeholder: "请输入角色名",
-      ...roleItem,
     },
   ];
 };
@@ -58,7 +46,7 @@ export const getFormText: { searchText: string; resetText: string } = {
   resetText: "重置",
 };
 
-export const getTableCol = (renderIndex, renderUserNameCol, renderRealNameCol, renderOptCol) => {
+export const getTableCol = (renderIndex, renderUserNameCol, renderOptCol) => {
   const columns = [
     {
       title: "序号",
@@ -68,41 +56,45 @@ export const getTableCol = (renderIndex, renderUserNameCol, renderRealNameCol, r
     },
     {
       title: "用户账号",
-      dataIndex: "username",
-      key: "username",
+      dataIndex: "userName",
+      key: "userName",
       render: renderUserNameCol,
     },
     {
       title: "用户实名",
       dataIndex: "realName",
       key: "realName",
-      render: renderRealNameCol,
+      render: renderUserNameCol,
     },
     {
-      title: "所属部门",
-      dataIndex: "deptList",
-      key: "deptList",
-      render: (list) => list.map((item) => item.deptName).join(">"),
+      title: "所属应用",
+      dataIndex: "projectList",
+      key: "projectList",
+      render: (list) =>
+        renderAttributes({ data: list?.map((item: any) => item && item.projectName) || [], limit: 2, placement: "bottomLeft" }),
     },
     {
       title: "电话",
       dataIndex: "phone",
       key: "phone",
+      render: (text: string) => {
+        return <>{text || "-"}</>;
+      },
     },
     {
       title: "邮箱",
       dataIndex: "email",
       key: "email",
+      render: (text: string) => {
+        return <>{text || "-"}</>;
+      },
     },
     {
       title: "分配角色",
       dataIndex: "roleList",
       key: "roleList",
       render: (value: any) =>
-        renderTableLabels({
-          list: value.map((item: any) => item && item.roleName),
-          limit: 2,
-        }),
+        renderAttributes({ data: value?.map((item: any) => item && item.roleName) || [], limit: 2, placement: "bottomLeft" }),
     },
     {
       title: "最后更新时间",
@@ -115,27 +107,53 @@ export const getTableCol = (renderIndex, renderUserNameCol, renderRealNameCol, r
     {
       title: "操作",
       dataIndex: "operation",
+      filterTitle: true,
       key: "operation",
+      width: 150,
       render: renderOptCol,
     },
   ];
   return columns;
 };
 
+const columnsRender = (item: string, maxWidth) => {
+  return (
+    <Tooltip placement="right" title={item}>
+      <div
+        className="row-ellipsis"
+        style={{
+          maxWidth,
+          display: "inline-block",
+        }}
+      >
+        {item || (typeof item === "number" ? item : "-")}
+      </div>
+    </Tooltip>
+  );
+};
+
 export const readableForm = [
   {
     flag: ["detail", "update"],
-    label: "用户账号/用户实名",
-    prop: ["username", "realName"],
+    label: "已选用户",
+    prop: ["userName", "realName"],
     readText: "",
   },
   {
+    flag: ["detail"],
+    label: "密码",
+    prop: "password",
+    readText: "",
+    render: (text) => text || "-",
+  },
+  {
     flag: ["detail", "update"],
-    label: "部门",
-    prop: "deptList",
+    label: "所属应用",
+    prop: "projectList",
     readText: "",
     render: (list) => {
-      return list && list.map((item) => item.deptName).join(">");
+      return columnsRender(list?.map((item: any) => item && item.projectName)?.join("；") || "-", "180px");
+      // return renderAttributes({ data: list?.map((item: any) => item && item.projectName) || [], limit: 2, placement: "bottomLeft" });
     },
   },
   {
@@ -144,13 +162,8 @@ export const readableForm = [
     prop: "roleList",
     readText: "",
     render: (list) => {
-      return list && list.length > 0
-        ? list.map((item: any) => (
-            <span className="bind-row-item" key={item.id}>
-              {item.roleName}
-            </span>
-          ))
-        : "无";
+      return columnsRender(list?.map((item: any) => item && item.roleName)?.join("；") || "-", "210px");
+      // return renderAttributes({ data: list?.map((item: any) => item && item.roleName) || [], limit: 6, placement: "bottomLeft" });
     },
   },
 ];

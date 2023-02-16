@@ -1383,8 +1383,8 @@ values (1, 'p14000143', 'SuperApp', '超级应用', 0, 1, '2022-05-26 05:49:08.0
 insert into arius_es_user (id, index_exp, data_center, is_root, memo, ip, verify_code, is_active,
                            query_threshold, cluster, responsible, search_type, create_time, update_time,
                            project_id, is_default_display)
-values (1, null, 'cn', 1, '管理员 APP', '', 'azAWiJhxkho33ac', 1, 100, 'logi-elasticsearch-meta',
-        'admin', 0,
+values (1, null, 'cn', 1, '管理员 APP', '', 'azAWiJhxkho33ac', 1, 100, '',
+        'admin', 1,
         '2022-05-26 09:35:38.0', '2022-06-23 00:16:47.0', 1, 1),
        (2, null, 'cn', 0, '元数据模版 APP', '', 'vkDgPEfD3jQJ1YY', 1, 1000, '', 'admin', 1, '2022-07-05 08:16:17.0',
         '2022-08-25 21:48:58.0', 2, 1);
@@ -1509,7 +1509,7 @@ INSERT INTO kf_security_permission (permission_name, parent_id, leaf, level, des
 #3.1 新增kf_security_role_permission
 insert into kf_security_role_permission(role_id, permission_id, is_delete, app_name)
 values (1, 1877, 0, 'know_search'),
-       (1, 1879, 0, 'know_search'),
+       (1, 1879, 1, 'know_search'),
        (1, 1881, 0, 'know_search'),
        (2, 1877, 0, 'know_search'),
        (2, 1879, 1, 'know_search'),
@@ -1907,5 +1907,11 @@ values  (1593, '物理集群', 0, 0, 1, '物理集群', '2022-05-24 18:08:22.0',
 alter table kf_security_oplog
     modify target varchar(225) not null comment '操作对象';
 
-INSERT INTO `kf_security_permission` (`permission_name`, `parent_id`, `leaf`, `level`, `description`, `create_time`, `update_time`, `is_delete`, `app_name`) VALUES ('Grafana', 0, 0, 1, '查看Grafana', '2022-05-24 18:08:26', '2022-12-22 15:16:17', 0, 'know_search');
+INSERT INTO `kf_security_permission` (`permission_name`, `parent_id`, `leaf`, `level`, `description`, `create_time`, `update_time`, `is_delete`, `app_name`) VALUES ('Grafana', 0, 0, 1, 'Grafana', '2022-05-24 18:08:26', '2022-12-22 15:16:17', 0, 'know_search');
 INSERT INTO `kf_security_role_permission` (`role_id`, `permission_id`, `create_time`, `update_time`, `is_delete`, `app_name`) VALUES (1, (select id from kf_security_permission ksp where ksp.permission_name='Grafana' and ksp.app_name='know_search' and ksp.is_delete=0 ), '2022-06-01 21:19:42', '2022-08-25 10:31:42', 0, 'know_search');
+INSERT INTO `kf_security_permission` (`permission_name`, `parent_id`, `leaf`, `level`, `description`, `create_time`, `update_time`, `is_delete`, `app_name`) VALUES ('查看Grafana', (select id from kf_security_permission ksp where ksp.permission_name='Grafana' and ksp.app_name='know_search' and ksp.is_delete=0 ), 1, 2, '查看Grafana', '2022-05-24 18:08:26', '2022-12-22 15:16:17', 0, 'know_search');
+INSERT INTO `kf_security_role_permission` (`role_id`, `permission_id`, `create_time`, `update_time`, `is_delete`, `app_name`) VALUES (1, (select id from kf_security_permission ksp where ksp.permission_name='查看Grafana' and ksp.app_name='know_search' and ksp.is_delete=0 ), '2022-06-01 21:19:42', '2022-08-25 10:31:42', 0, 'know_search');
+
+
+ALTER TABLE es_cluster_phy_info
+    ADD proxy_address VARCHAR(255) DEFAULT '' NULL COMMENT ' 代理地址 ';

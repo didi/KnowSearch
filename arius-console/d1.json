@@ -1,0 +1,19 @@
+{
+  "appConfig": {
+    "appName": "logi-es-manager-fe",
+    "ident": "logi-es-manager-fe",
+    "theme": "./config/theme.js",
+    "port": "8001",
+    "entry": [
+      {
+        "title": "es",
+        "name": "es",
+        "src": "./src/index.tsx"
+      }
+    ]
+  },
+  "preset": "@didi/d1-preset-opensource",
+  "builderType": "@didi/d1-preset-opensource",
+  "generatorType": "@didi/d1-generator-opensource",
+  "mockDir": "mock"
+}

@@ -1,40 +1,41 @@
 import "@babel/polyfill";
 import "whatwg-fetch";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";
 import _ from "lodash";
-import { ConfigProvider } from "antd";
+import { ConfigProvider, Modal, Spin } from "antd";
 import zhCN from "antd/lib/locale/zh_CN";
 import antdZhCN from "antd/lib/locale/zh_CN";
 import antdEnUS from "antd/lib/locale/en_US";
 import { IntlProvider } from "react-intl";
 import intlZhCN, { permissions } from "./locales/zh";
 import intlEnUS from "./locales/en";
-import {LayoutHeaderNav} from "./d1-packages";
+import { LayoutHeaderNav } from "./d1-packages";
 import { Page403, Page404 } from "./d1-packages";
 import { LeftMenu } from "./d1-packages";
-import { formatMessage } from './d1-packages'
-import { leftMenus, systemKey, urlPrefix } from "./constants/menu";
+import { InjectIntlContext } from "knowdesign/lib/hook/use-format-message";
+import { leftMenus, systemKey } from "./constants/menu";
 import { Provider as ReduxProvider } from "react-redux";
-import store, { useGlobalPathStatus } from "./store";
-const { InjectIntlContext } = formatMessage;
+import store, { useGlobalPathStatus, useGlobalLoginStatus } from "./store";
 import "./styles/common.less";
-import { Login } from "./packages/login";
-import { getNoCodeLoginAppList } from "api/app-api";
-import { getCookie, getCurrentProject, setCookie } from "lib/utils";
-import { userLogout } from "api/user-api";
-import { RouterTabs } from './d1-packages'
-import { dealPathname } from "lib/utils";
-import './assets/icon/iconfont.css';
-import './assets/icon/iconfont.js';
-import { UserCenter } from "./container/layout-element/UserCenter"
-import * as actions from 'actions';
-import { RouteGuard } from './packages/route-guard/';
-import { PageRoutes } from './pages/index';
-import { dropByCacheKey } from 'react-router-cache-route';
+import { LoginOrRegister } from "./d1-packages/CommonPages/Login";
+import { getCookie, getCurrentProject, setCookie, dealPathname, isSuperApp, currentLeftIndex, redirectPath } from "lib/utils";
+import { getUser, userLogout } from "api/logi-security";
+import "./assets/icon/iconfont.css";
+import "./assets/icon/iconfont.js";
+import * as actions from "actions";
+import { RouteGuard } from "./d1-packages/RouterGuard";
+import { PageRoutes } from "./pages/index";
+import { dropByCacheKey } from "react-router-cache-route";
 import AllModalInOne from "container/AllModalInOne";
 import FullScreen from "container/full-screen";
-import { cachePage } from './pages/cachePage';
+import { mulityPage } from "./pages/cachePage";
+import { CURRENT_PROJECT_KEY } from "constants/common";
+import { IProject } from "interface/project";
+import { getProjectListByUserId, getNoCodeLoginAppList } from "api/app-api";
+import { getPagePermission } from "lib/permission";
+import { IPermission } from "store/type";
+import { judgeAdminUser } from "api/user-api";
 interface ILocaleMap {
   [index: string]: any;
 }
@@ -57,84 +58,160 @@ const localeMap: ILocaleMap = {
 export const { Provider, Consumer } = React.createContext("zh");
 
 const defaultLanguage = window.localStorage.getItem("language") || "zh"; // navigator.language.substr(0, 2)
-const feConfig = require('../config/feConfig.json')
+const feConfig = require("../config/feConfig.json");
 
 const App = () => {
   const [language, setLanguage] = useState(defaultLanguage);
   const [projectList, setProjectList] = useState([]); // 项目列表
+  const [loading, setLoading] = useState(true);
   const [currentProject, setCurrentProject] = useState(getCurrentProject());
+  const [permissionPoints, setPermissionPoints] = useState<IPermission[]>([]);
+  const [leftIndex, setLeftIndex] = useState(currentLeftIndex(isSuperApp()));
 
   const intlMessages = _.get(localeMap[language], "intlMessages", intlZhCN);
   const title = _.get(localeMap[language], "title");
-
-  const initCollapsed = getCookie('siderMenuCollapsed');
-  const [siderMenuCollapsed, setSiderMenuCollapsed] = React.useState(initCollapsed === 'true');
-
-  React.useEffect(() => {
-    const secret = `${currentProject?.id}:${currentProject?.verifyCode}`;
-    if (currentProject) {
-      setCookie([{ key: "Authorization", value: btoa(secret) }]);
-      localStorage.setItem("current-project", JSON.stringify(currentProject));
-    } else {
-      //解决刷新后所属项目变更
-      setCurrentProject(
-        JSON.parse(localStorage.getItem("current-project") || "null")
-      );
+  const initCollapsed = getCookie("siderMenuCollapsed");
+  const [siderMenuCollapsed, setSiderMenuCollapsed] = React.useState(initCollapsed === "true");
+  const [removePath, setRemovePaths] = useGlobalPathStatus();
+  const [loginStatus] = useGlobalLoginStatus();
+  const setHeaderClick = (key, props: any) => {
+    if (currentLeftIndex(isSuperApp()) !== key) {
+      props.history.push(key ? "/system/project" : isSuperApp() ? "/dashboard" : "/cluster/logic");
     }
-  }, [currentProject]);
+  };
 
-  const changeCurrentProject = (value) => {
-    localStorage.setItem("current-project", JSON.stringify(value));
-    setCurrentProject(value);
-  }
+  const getPermissions = () => {
+    const userId = getCookie("userId");
+    setLoading(true);
+    getUser(+userId)
+      .then((res) => {
+        const _permissionPoints = res.permissionTreeVO?.childList || [];
+        _permissionPoints.push({
+          permissionName: "dashboard",
+          has: getCookie("isAdminUser") === "yes" && isSuperApp(),
+        });
+        setPermissionPoints(_permissionPoints);
+        store.dispatch(actions.setUserPermissionTree(_permissionPoints));
+      })
+      .finally(() => {
+        setLoading(false);
+        store.dispatch(actions.setIsAdminUser(getCookie("isAdminUser") === "yes"));
+      });
+  };
 
-  React.useEffect(() => {
-    if (window.location.pathname.indexOf("login") === -1) {
-      const domainAccount = getCookie("domainAccount");
-      if (!domainAccount) {
-        window.location.href = "/login";
-        return;
-      }
-      getNoCodeLoginAppList(domainAccount).then((data) => {
-        if (
-          !localStorage.getItem("current-project") ||
-          localStorage.getItem("current-project") === "{}" ||
-          localStorage.getItem("current-project") === "null"
-        ) {
-          localStorage.setItem(
-            "current-project",
-            JSON.stringify(data?.[0] || {})
-          );
-          setCurrentProject(data?.[0] || {});
-        } else {
-          //项目是否存在于当前项目列表
-          const app = JSON.parse(localStorage.getItem("current-project"));
-          const arr = data?.filter((item) => item.name === app.name);
-          if (!arr.length) {
-            localStorage.setItem(
-              "current-project",
-              JSON.stringify(data?.[0] || {})
-            );
-          }
-        }
-        // 解决刷新两次
-        (window as any).setProjectList = true;
-        setProjectList(data);
+  const setProjectInfo = (currentProject) => {
+    if (currentProject?.id) {
+      window.localStorage.setItem(CURRENT_PROJECT_KEY, JSON.stringify(currentProject));
+      getNoCodeLoginAppList(currentProject?.id).then((res) => {
+        let filterData = res.filter((item) => item.defaultDisplay);
+        let secret = `${(filterData[0] || res[0])?.id}:${(filterData[0] || res[0])?.verifyCode}`;
+        setCookie([{ key: "Authorization", value: btoa(secret) }]);
       });
     }
-  }, []);
+    getPermissions();
+  };
+
+  const changeCurrentProject = (value, props: any) => {
+    setCurrentProject(value);
+    setProjectInfo(value);
+    setLeftIndex(0);
+    console.log(isSuperApp());
+    props.history.push(isSuperApp() ? "/dashboard" : "/cluster/logic");
+  };
+
+  React.useEffect(() => {
+    const userId = getCookie("userId");
+    if (!userId && !window.location.pathname.includes("/login")) {
+      window.location.href = "/login";
+      return;
+    }
+    if (window.location.pathname.includes("/login")) {
+      return;
+    }
+    setLoading(true);
+    store.dispatch(actions.setGlobalUserInfo({ id: userId }));
+
+    getProjectListByUserId(+userId).then((data: IProject[]) => {
+      data = data.map((item) => ({
+        ...item,
+        name: item.projectName,
+      })) as unknown as IProject[];
+      const app = getCurrentProject();
+      const arr = data?.filter((item) => item.id === app.id);
+      let _currentProject = (arr.length ? arr[0] : data?.[0]) || ({} as IProject);
+
+      setCurrentProject(_currentProject);
+      setProjectInfo(_currentProject);
+      setProjectList(data);
+      store.dispatch(actions.setProjectList(data));
+    });
+    judgeAdminUser().then((res) => {
+      setCookie([{ key: "isAdminUser", value: res.code === 0 ? "yes" : "no" }]);
+    });
+  }, [loginStatus]);
 
   const logout = () => {
     userLogout().then(() => {
-      // window.location.href = '/login';
-      localStorage.setItem("current-project", JSON.stringify({}));
+      window.localStorage.setItem(CURRENT_PROJECT_KEY, JSON.stringify({}));
+      store.dispatch(actions.setGlobalUserInfo({}));
+      store.dispatch(actions.setProjectList([]));
+
+      setCookie([
+        { key: "userName", value: "" },
+        { key: "userId", value: "" },
+        { key: "isAdminUser", value: "" },
+      ]);
     });
   };
-  const [removePath, setRemovePaths] = useGlobalPathStatus();
 
-  const CacheFilter = (path: string) => {
-    return cachePage.includes(path);
-  }
+  // 路由前置守卫
+  const routeBeforeEach = (props: any) => {
+    const { permissionPoint, history, path } = props;
+    if (path.includes("/dashboard") && (getCookie("isAdminUser") === "no" || !isSuperApp())) {
+      return Promise.reject(false);
+    }
+    if (permissionPoint) {
+      const hasPagePermission = getPagePermission(permissionPoint, permissionPoints);
+      if (!hasPagePermission) {
+        return Promise.reject(false);
+      }
+      return Promise.resolve(true);
+    }
+    return Promise.resolve(true);
+  };
+
+  const renderRouteGuard = () => {
+    const routeList = PageRoutes.map((item) => {
+      return item.needCache
+        ? {
+            ...item,
+            cacheKey: `menu.${systemKey}${item.path.split("/").join(".")}`,
+          }
+        : item;
+    });
+    return (
+      <RouteGuard beforeEach={routeBeforeEach} routeList={routeList} attr={{ setRemovePaths: setRemovePaths }} mulityPage={mulityPage} />
+    );
+  };
+
+  const renderNoProjectModal = () => {
+    Modal.warning({
+      title: "抱歉，请先创建应用！",
+      content: "您的账户还不具备应用信息",
+      okText: "创建应用",
+      onOk: () => {
+        store.dispatch(actions.setDrawerId("addOrEditProjectModal", { type: "create", callback: renderNoProjectModal }));
+      },
+    });
+  };
+
+  const renderPageLoading = () => {
+    return <Spin className="spin-name" spinning={loading} />;
+  };
+
+  const RenderContent = useMemo(() => {
+    return loading ? renderPageLoading() : !projectList.length ? renderNoProjectModal() : renderRouteGuard();
+  }, [loading, projectList, permissionPoints]);
 
   return (
     <IntlProvider locale={_.get(localeMap[language], "intl", "zh")} messages={intlMessages}>
@@ -144,57 +221,40 @@ const App = () => {
             <ReduxProvider store={store}>
               <BrowserRouter basename={systemKey}>
                 <Switch>
-                  <Route exact={true} path={"/login"} component={Login} />
-                  <Route exact={true} path="/403" component={Page403} />
-                  <Route exact={true} path="/404" component={Page404} />
+                  <Route
+                    path="/"
+                    exact={true}
+                    component={() => <Redirect to={getCookie("isAdminUser") === "yes" ? "/dashboard" : "/cluster/physics"} />}
+                  />
+                  <Route exact={true} path={"/login"} component={LoginOrRegister} />
+                  <Route exact={true} path={"/register"} component={() => <LoginOrRegister type="register" />} />
                   <LayoutHeaderNav
                     logout={logout}
                     feConf={feConfig}
-                    language={language}
                     projectList={projectList}
-                    onLanguageChange={setLanguage}
                     currentProject={currentProject}
                     setCurrentProject={changeCurrentProject}
-                    onMount={() => {}}
-                    UserCenter={UserCenter}
+                    setLeftIndex={setLeftIndex}
+                    leftIndex={leftIndex}
+                    setHeaderClick={setHeaderClick}
                   >
                     <LeftMenu
                       siderMenuVisible={true}
                       systemName={systemKey}
                       systemNameChn={title}
-                      menus={leftMenus}
+                      menus={leftMenus[leftIndex]}
                       intlMessages={intlMessages}
                       locale={_.get(localeMap[language], "intl", "zh")}
                       onSiderMenuChange={setSiderMenuCollapsed}
+                      permissionPoints={permissionPoints}
+                      redirectPath={redirectPath}
+                      getPermission={getPagePermission}
                     >
-                      <RouterTabs
-                        siderMenuCollapsed={siderMenuCollapsed}
-                        tabList={[]}
-                        intlZhCN={intlZhCN}
-                        systemKey={systemKey}
-                        dealPathname={dealPathname}
-                        removePaths={removePath}
-                        defaultTab={{
-                          key: `menu.${systemKey}.cluster.physics`,
-                          label: "物理集群",
-                          href: "/cluster/physics",
-                          show: true,
-                        }}
-                        permissions={permissions}
-                        currentProject={currentProject}
-                        pageEventList={[
-                          {
-                            key: `menu.${systemKey}.index.create`,
-                            onCloseCallback: () => {
-                              dropByCacheKey('index/create');
-                              store.dispatch(actions.setClearCreateIndex());
-                            },
-                          },
-                        ]}
-                      />
+                      {RenderContent}
+                      <Route exact={true} path="/403" component={Page403} />
+                      <Route exact={true} path="/404" component={Page404} />
                       <AllModalInOne />
                       <FullScreen />
-                      <RouteGuard pathRule={CacheFilter} routeList={PageRoutes} routeType="cache" attr={{ setRemovePaths: setRemovePaths }} />
                     </LeftMenu>
                   </LayoutHeaderNav>
                   <Route render={() => <Redirect to="/404" />} />

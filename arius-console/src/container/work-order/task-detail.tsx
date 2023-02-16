@@ -4,7 +4,8 @@ import { TASK_MENU_MAP, TASK_TAB_LIST, DESC_LIST } from "./config";
 import Url from "lib/url-parser";
 import { DcdrPlanSpeed } from "./dcdr-plan-speed";
 import "./index.less";
-import { Menu, PageHeader, Tag } from 'antd';
+import { PageHeader, Tag } from "antd";
+import { Menu } from "knowdesign";
 import { IDcdrStepDetailInfo } from "typesPath/task-types";
 import { DCDR_TASK_STATUS_TYPE_MAP } from "constants/status-map";
 import { connect } from "react-redux";
@@ -114,11 +115,7 @@ export class TaskDetail extends React.Component<{
           <InfoItem
             key={index}
             label={row.label}
-            value={
-              row.render
-                ? row.render(task.dcdrStepDetail?.[row.key])
-                : `${task.dcdrStepDetail?.[row.key] || ""}`
-            }
+            value={row.render ? row.render(task.dcdrStepDetail?.[row.key]) : `${task.dcdrStepDetail?.[row.key] || ""}`}
             width={250}
           />
         ))}
@@ -131,21 +128,17 @@ export class TaskDetail extends React.Component<{
     return (
       <>
         {this.taskType !== 10 ? (
-          <Menu
-            selectedKeys={[task.menu]}
-            mode="horizontal"
-            onClick={(e: any) => (window.location.hash = e.key)}
-          >
-            {TASK_TAB_LIST.map((d) => (
-              <Menu.Item key={d.key}>{d.name}</Menu.Item>
-            ))}
-          </Menu>
+          <div className="hash-menu-container menu-container task-detail">
+            <Menu selectedKeys={[task.menu]} mode="horizontal" onClick={(e: any) => (window.location.hash = e.key)}>
+              {TASK_TAB_LIST.map((d) => (
+                <Menu.Item key={d.key}>{d.name}</Menu.Item>
+              ))}
+            </Menu>
+          </div>
         ) : (
           this.renderPageHeader()
         )}
-        <div className="detail-wrapper">
-          {this.taskType !== 10 ? this.renderContent() : <DcdrPlanSpeed />}
-        </div>
+        <div className="detail-wrapper task-detail-wrapper">{this.taskType !== 10 ? this.renderContent() : <DcdrPlanSpeed />}</div>
       </>
     );
   }

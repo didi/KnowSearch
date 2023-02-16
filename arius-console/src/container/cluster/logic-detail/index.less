@@ -2,14 +2,16 @@
 .ant-spin-container {
   .detail-header {
     background-color: white;
-    margin-bottom: 20px;
+    margin: 0 20px 20px 20px;
+    border-radius: 8px;
   }
 }
 .base-index-box {
   &-title {
     .middle-title();
-    padding-top: 20px;
+    padding: 20px 0;
     border-bottom: 1px solid #dbe0e4;
+    margin-bottom: 10px;
   }
   &-tag {
     padding-top: 20px;
@@ -28,5 +30,73 @@
         color: #2a8fff;
       }
     }
+  }
+}
+.success {
+  color: #10c038;
+}
+.unline {
+  color: #f4a838;
+}
+.failed {
+  color: #f04134;
+}
+
+.logic-detail {
+  height: 100%;
+  min-width: 1200px;
+  .ant-spin-nested-loading,
+  .ant-spin-container {
+    height: 100%;
+    .detail-wrapper {
+      height: 79%;
+      padding: 20px;
+      min-width: 1000px;
+      .base-info-box {
+        margin-top: 0;
+      }
+    }
+  }
+}
+
+.logic-menu-container {
+  padding: 0 20px;
+  background: #fff;
+  .logic-menu {
+    padding-top: 16px;
+    .ant-menu-item {
+      margin: 0 40px 0 0;
+      line-height: 38px;
+      height: 38px;
+    }
+  }
+}
+
+.index-name {
+  word-wrap: break-word;
+  word-break: break-all;
+  cursor: pointer;
+}
+
+.detail-container {
+  height: 100%;
+  min-width: 1200px;
+  padding: 0 20px 20px 20px;
+  .dcloud-spin-nested-loading,
+  .dcloud-spin-container {
+    height: 100%;
+    .detail-wrapper {
+      padding: 20px;
+      height: 79%;
+      min-width: 1200px;
+    }
+  }
+  .content {
+    background: #fff;
+    border-radius: 8px;
+    height: 92%;
+  }
+  ::-webkit-scrollbar {
+    display: none
   }
 }

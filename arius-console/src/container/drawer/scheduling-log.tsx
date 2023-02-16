@@ -1,6 +1,7 @@
-import React from 'react';
-import { Drawer, Descriptions } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
+import React from "react";
+import { Drawer, Descriptions } from "antd";
+import { ReloadOutlined } from "@ant-design/icons";
+import "./index.less";
 
 const DescriptionsItem = Descriptions.Item;
 
@@ -11,30 +12,23 @@ interface IProps {
 }
 
 const SchDulingLog: React.FC<IProps> = (props: IProps) => {
-
   const getWidth = () => {
-    return document.querySelector('#d1-layout-main')?.clientWidth || 600;
-  }
+    return document.querySelector("#d1-layout-main")?.clientWidth || 600;
+  };
   return (
-    <Drawer
-      title={'执行日志'}
-      visible={props.visible}
-      width={getWidth()}
-      maskClosable={true}
-      onClose={props.onCancel}
-    >
+    <Drawer title={"执行日志"} visible={props.visible} width={getWidth()} maskClosable={true} onClose={props.onCancel}>
       {/* <ReloadOutlined onClick={() => console.log(1)} style={reloadstyle} /> */}
       <div>
-        <Descriptions column={1}>
-          {
-            JSON.parse(props?.error || '{}')?.message?.split('\n')?.map((item, index) => <DescriptionsItem key={index}>{item}</DescriptionsItem>)
-          }
+        <Descriptions column={1} className="scheduling-log">
+          {JSON.parse(props?.error || "{}")
+            ?.message?.split("\n")
+            ?.map((item, index) => (
+              <DescriptionsItem key={index}>{item}</DescriptionsItem>
+            ))}
         </Descriptions>
         [Load Log Finish]
       </div>
     </Drawer>
   );
-}
+};
 export default SchDulingLog;
-
-

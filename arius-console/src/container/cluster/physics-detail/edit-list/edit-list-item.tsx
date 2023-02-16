@@ -1,9 +1,5 @@
 import React, { memo, useState, useRef, Fragment, useEffect } from "react";
-import {
-  EditOutlined,
-  SaveOutlined,
-  QuestionCircleOutlined,
-} from "@ant-design/icons";
+import { EditOutlined, SaveOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import { Popover, Form, Input, Select, message, Popconfirm } from "antd";
 import { useClickOutSide } from "./useClickOutSide";
 import { updateDynamicConfig } from "../../../../api/cluster-api";
@@ -14,6 +10,7 @@ const { Option } = Select;
 
 interface propsType {
   name: string;
+  title: string;
   info: string;
   value: any;
   type: "input" | "select";
@@ -22,33 +19,24 @@ interface propsType {
   selectList?: { value: string; name: string }[];
   mode?: "tags" | "multiple";
   confirmMessage?: string;
+  setBackground?: boolean;
+  reloadData: any;
 }
 type validateStatusType = "" | "success" | "warning" | "error" | "validating";
 
 export const EditListItem: React.FC<propsType> = memo(
-  ({
-    name,
-    info,
-    value,
-    type,
-    check,
-    mode,
-    selectList = [],
-    unit,
-    confirmMessage,
-  }) => {
+  ({ name, title, info, value, type, check, mode, selectList = [], unit, confirmMessage, setBackground, reloadData }) => {
     if (unit && unit == "%" && parseInt(value) != value) {
       value = Number(value).toFixed(2);
     }
-    if (String(value) == 'NaN') {
-      value = '';
+    if (String(value) == "NaN") {
+      value = "";
     }
     const [res, setRes] = useState(value);
     const [isEdit, setIsEdit] = useState(false);
     const [inpVal, setInpVal] = useState(value);
     const [isRight, setIsRight] = useState(true);
-    const [validateStatus, setValidateStatus] =
-      useState<validateStatusType>("validating");
+    const [validateStatus, setValidateStatus] = useState<validateStatusType>("validating");
     const [help, setHelp] = useState("");
     const isOutSide = useRef(true);
     const componentRef = useRef<HTMLDivElement>(null);
@@ -65,17 +53,20 @@ export const EditListItem: React.FC<propsType> = memo(
       return updateDynamicConfig(clusterName, name, val);
     };
 
-
-    useClickOutSide(componentRef, () => {
-      if (!isOutSide.current) {
-        return;
-      }
-      setValidateStatus("validating");
-      setHelp("");
-      setIsRight(true);
-      setInpVal(res);
-      setIsEdit(false);
-    });
+    useClickOutSide(
+      componentRef,
+      () => {
+        if (!isOutSide.current) {
+          return;
+        }
+        setValidateStatus("validating");
+        setHelp("");
+        setIsRight(true);
+        setInpVal(res);
+        setIsEdit(false);
+      },
+      true
+    );
 
     const onInpValChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const help = check && check(e.target.value);
@@ -104,6 +95,7 @@ export const EditListItem: React.FC<propsType> = memo(
             if (res && (res.code === 0 || res.code === 200)) {
               message.success("修改成功");
               setRes(inpVal);
+              reloadData && reloadData(title, name, inpVal);
             } else {
               setInpVal(res);
             }
@@ -128,6 +120,7 @@ export const EditListItem: React.FC<propsType> = memo(
               <Input
                 onChange={onInpValChange}
                 value={inpVal}
+                allowClear
                 onPressEnter={() => {
                   if (!confirmMessage) {
                     onSave();
@@ -139,7 +132,12 @@ export const EditListItem: React.FC<propsType> = memo(
         );
       }
       return (
-        <Select value={inpVal} mode={mode} onChange={onSelectChange}>
+        <Select
+          value={inpVal}
+          mode={mode}
+          onChange={onSelectChange}
+          getPopupContainer={() => document.getElementById(`detail-edit-list-row-col-item-${name}`)}
+        >
           {selectList.map((item, index) => (
             <Option value={item.value} key={item.value + index}>
               {item.name}
@@ -153,68 +151,55 @@ export const EditListItem: React.FC<propsType> = memo(
       if (Array.isArray(res)) {
         return res.join(", ");
       }
-      if (res == null || res == 'null') {
-        return '';
+      if (res == null || res == "null") {
+        return "-";
       }
-      return String(res);
+      return String(res) || "-";
     };
 
     return (
-      <div
-        className="ant-col ant-col-12 detail-edit-list-row-col"
-        ref={componentRef}
-        style={{ position: "relative" }}
-      >
+      <div className={`ant-col ant-col-12 detail-edit-list-row-col ${setBackground ? "background" : ""}`} ref={componentRef}>
         <div className="detail-edit-list-row-col-label">
-          <Popover
-            content={<div className="table-popover-content">{info}</div>}
-          >
-            {name}
-          </Popover>
+          <Popover content={<div className="table-popover-content">{info}</div>}>{name}</Popover>
         </div>
         <div className="detail-edit-content">
-          <div className="detail-edit-list-row-col-item">
+          <div className="detail-edit-list-row-col-item" id={`detail-edit-list-row-col-item-${name}`}>
             {isEdit ? (
               renderEdit()
             ) : (
               <div className="edit-box">
-                {renderRes()}
+                {renderRes() || "-"}
                 {renderRes() ? unit : null}
               </div>
             )}
           </div>
-          <div className="detail-edit-list-btn">
-            {isEdit ? (
-              confirmMessage ? (
-                <Popconfirm
-                  placement="topRight"
-                  title={confirmMessage}
-                  icon={<QuestionCircleOutlined style={{ color: "red" }} />}
-                  onConfirm={() => {
-                    onSave();
-                  }}
-                >
-                  <SaveOutlined />
-                </Popconfirm>
-              ) : (
-                <SaveOutlined
-                  onClick={() => {
-                    onSave();
-                  }}
-                />
-              )
-            ) : (
-              <EditOutlined
-                onClick={() => {
-                  setIsEdit(true);
+          {isEdit && confirmMessage ? (
+            <div className="detail-edit-list-btn" id={`detail-edit-list-btn-${name}`}>
+              <Popconfirm
+                placement="topRight"
+                title={confirmMessage}
+                icon={<QuestionCircleOutlined style={{ color: "red" }} />}
+                getPopupContainer={() => document.getElementById(`detail-edit-list-btn-${name}`)}
+                onConfirm={() => {
+                  onSave();
                 }}
-              />
-            )}
-          </div>
+              >
+                <SaveOutlined />
+              </Popconfirm>{" "}
+            </div>
+          ) : null}
+          {isEdit && !confirmMessage ? (
+            <div className="detail-edit-list-btn" onClick={onSave}>
+              <SaveOutlined />
+            </div>
+          ) : null}
+
+          {!isEdit ? (
+            <div className="detail-edit-list-btn" onClick={() => setIsEdit(true)}>
+              <EditOutlined />
+            </div>
+          ) : null}
         </div>
-        {/* <div className={`edit-from  ${isEdit ? "edit-from-transition" : ""}`}>
-          {renderEdit()}
-        </div> */}
       </div>
     );
   }

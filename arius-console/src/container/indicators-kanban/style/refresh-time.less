@@ -2,22 +2,47 @@
   from {
     transform: translate(0, -50%) rotate(0deg);
   }
+
   to {
     transform: translate(0, -50%) rotate(360deg);
   }
 }
+
+@prefix: dcloud;
+
 .refresh-time-container {
   display: flex;
   align-items: center;
-  .ant-select {
-    width: 126px;
+
+  .@{prefix}-select {
+    width: 140px;
   }
 
-  .ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
-    padding: 0 11px 0 26px;
+  .@{prefix}-select-selection-item {
+    font-family: PingFangSC-Regular;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.60);
+    text-align: left;
+    line-height: 22px;
+    font-weight: 400;
   }
+
+  .refresh-icon-container .@{prefix}-select-single:not(.@{prefix}-select-customize-input) .@{prefix}-select-selector {
+    padding: 0 8px;
+  }
+
   .refresh-select {
     position: relative;
+
+
+    .dcloud-select.dcloud-select-single .dcloud-select-selector {
+      height: 30px;
+    }
+
+    .dcloud-select-single .dcloud-select-selector .dcloud-select-selection-item {
+      line-height: 30px;
+    }
+
     .refresh-icon {
       position: absolute;
       top: 50%;
@@ -25,11 +50,13 @@
       transform: translate(0, -50%);
       z-index: 1;
     }
+
     .refresh-icon-animation {
       animation: rotate 0.8s linear infinite;
       color: @primary-color;
     }
   }
+
   .refresh-time-desc {
     font-family: PingFangSC-Regular;
     font-size: 12px;

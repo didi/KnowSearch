@@ -1,0 +1,62 @@
+.info-tooltip {
+  display: inline-block;
+  .icon {
+    width: 12px;
+    height: 12px;
+    color: #adb5bc;
+    position: absolute;
+    top: 5px;
+    margin-left: 4px;
+    cursor: pointer;
+    z-index: 1;
+    &:hover {
+      color: #495057;
+    }
+  }
+  .threshold {
+    margin-left: 14px;
+  }
+  .price,
+  .currentCalLogic,
+  .threshold {
+    display: flex;
+    .title,
+    .content {
+      font-family: PingFangSC-Regular;
+      font-size: 14px;
+      color: #ffffff;
+      line-height: 22px;
+      font-weight: 400;
+    }
+    .content {
+      width: 375px;
+      display: inline-block;
+    }
+  }
+  .ant-tooltip-placement-topLeft .ant-tooltip-arrow {
+    left: 0px;
+  }
+}
+
+.indicators-info {
+  .icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.info-content {
+  .ant-tooltip-content {
+    width: 470px;
+    .ant-tooltip-arrow {
+      right: 0px;
+      .ant-tooltip-arrow-content {
+        margin: auto;
+      }
+    }
+  }
+  .ant-tooltip-inner {
+    position: relative;
+    left: -90px;
+  }
+}
