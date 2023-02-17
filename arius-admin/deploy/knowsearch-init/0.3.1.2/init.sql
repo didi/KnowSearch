@@ -1339,7 +1339,7 @@ values  (1593, '物理集群', 0, 0, 1, '物理集群', '2022-05-24 18:08:22.0',
         (1849, '编辑平台配置', 1633, 1, 2, '编辑平台配置', '2022-05-24 18:08:25.0', '2022-05-24 18:20:49.0', 0, 'know_search'),
         (1851, '删除平台配置', 1633, 1, 2, '删除平台配置', '2022-05-24 18:08:26.0', '2022-05-24 18:20:49.0', 0, 'know_search'),
         (1853, '查看操作记录列表', 1635, 1, 2, '查看操作记录列表', '2022-05-24 18:08:26.0', '2022-05-24 18:23:34.0', 0, 'know_search'),
-        (1855, 'Kibana', 1609, 1, 2, 'Kibana', '2022-05-24 18:08:26.0', '2022-06-14 16:44:02.0', 0, 'know_search'),
+        (1855, 'Kibana', 1609, 1, 2, 'Kibana', '2022-05-24 18:08:26.0', '2022-06-14 16:44:02.0', 1, 'know_search'),
         (1857, 'SQL查询', 1609, 1, 2, 'SQL查询', '2022-05-24 18:08:26.0', '2022-06-14 16:44:02.0', 0, 'know_search'),
         (1859, '批量修改限流值', 1759, 1, 2, '批量修改限流值', '2022-05-24 18:08:26.0', '2022-08-11 10:37:13.0', 0, 'know_search'),
         (1861, '禁用', 1759, 1, 2, '禁用', '2022-05-24 18:08:26.0', '2022-08-11 10:37:13.0', 0, 'know_search'),
@@ -1489,7 +1489,7 @@ UPDATE kf_security_role_permission SET role_id = 2, permission_id = 1857, create
 # 0.3.1.1变更sql
 # 1.更新level和leaf
 UPDATE kf_security_permission SET permission_name = 'DSL查询', parent_id = 0, leaf = 0, level = 1, description = 'DSL查询', create_time = '2022-05-24 18:08:24.0', update_time = '2022-09-02 19:01:17.0', is_delete = 0, app_name = 'know_search' WHERE id = 1757;
-UPDATE kf_security_permission SET permission_name = 'Kibana', parent_id = 0, leaf = 0, level = 1, description = 'Kibana', create_time = '2022-05-24 18:08:26.0', update_time = '2022-09-02 19:01:17.0', is_delete = 0, app_name = 'know_search' WHERE id = 1855;
+-- UPDATE kf_security_permission SET permission_name = 'Kibana', parent_id = 0, leaf = 0, level = 1, description = 'Kibana', create_time = '2022-05-24 18:08:26.0', update_time = '2022-09-02 19:01:17.0', is_delete = 0, app_name = 'know_search' WHERE id = 1855;
 UPDATE kf_security_permission SET permission_name = 'SQL查询', parent_id = 0, leaf = 0, level = 1, description = 'SQL查询', create_time = '2022-05-24 18:08:26.0', update_time = '2022-09-02 19:01:17.0', is_delete = 0, app_name = 'know_search' WHERE id = 1857;
 #1.1修改kf_security_role_permission
 UPDATE kf_security_role_permission SET role_id = 1, permission_id = 1609, create_time = '2022-06-14 17:41:03.0', update_time = '2022-09-02 19:04:07.0', is_delete = 1, app_name = 'know_search' WHERE id = 2059;
@@ -1501,10 +1501,10 @@ UPDATE kf_security_role_permission SET role_id = 2, permission_id = 1757, create
 UPDATE kf_security_role_permission SET role_id = 2, permission_id = 1855, create_time = '2022-06-14 18:08:56.0', update_time = '2022-08-25 10:33:12.0', is_delete = 1, app_name = 'know_search' WHERE id = 2245;
 UPDATE kf_security_role_permission SET role_id = 2, permission_id = 1857, create_time = '2022-06-14 18:08:56.0', update_time = '2022-08-25 10:31:42.0', is_delete = 0, app_name = 'know_search' WHERE id = 2247;
 #2.更新name
-UPDATE kf_security_permission SET permission_name = 'Kibana查询', parent_id = 0, leaf = 0, level = 1, description = 'Kibana查询', create_time = '2022-05-24 18:08:26.0', update_time = '2022-09-05 14:19:29.0', is_delete = 0, app_name = 'know_search' WHERE id = 1855;
+-- UPDATE kf_security_permission SET permission_name = 'Kibana查询', parent_id = 0, leaf = 0, level = 1, description = 'Kibana查询', create_time = '2022-05-24 18:08:26.0', update_time = '2022-09-05 14:19:29.0', is_delete = 0, app_name = 'know_search' WHERE id = 1855;
 #3.新增3个权限点
 INSERT INTO kf_security_permission (permission_name, parent_id, leaf, level, description, create_time, update_time, is_delete, app_name) VALUES ('DSL', 0, 0, 1, 'DSL', '2022-05-24 18:08:24.0', '2022-09-02 19:01:17.0', 0, 'know_search');
-INSERT INTO kf_security_permission (permission_name, parent_id, leaf, level, description, create_time, update_time, is_delete, app_name) VALUES ('Kibana', 0, 0, 1, 'Kibana', '2022-05-24 18:08:26.0', '2022-09-02 19:01:17.0', 0, 'know_search');
+-- INSERT INTO kf_security_permission (permission_name, parent_id, leaf, level, description, create_time, update_time, is_delete, app_name) VALUES ('Kibana', 0, 0, 1, 'Kibana', '2022-05-24 18:08:26.0', '2022-09-02 19:01:17.0', 0, 'know_search');
 INSERT INTO kf_security_permission (permission_name, parent_id, leaf, level, description, create_time, update_time, is_delete, app_name) VALUES ('SQL', 0, 0, 1, 'SQL', '2022-05-24 18:08:26.0', '2022-09-02 19:01:17.0', 0, 'know_search');
 #3.1 新增kf_security_role_permission
 insert into kf_security_role_permission(role_id, permission_id, is_delete, app_name)
@@ -1517,7 +1517,7 @@ values (1, 1877, 0, 'know_search'),
 
 #4.再次更新level和leaf
 UPDATE kf_security_permission SET permission_name = 'DSL查询', parent_id = 1877, leaf = 1, level = 2, description = 'DSL查询' WHERE id = 1757;
-UPDATE kf_security_permission SET permission_name = 'Kibana查询', parent_id = 1879, leaf = 1, level = 2, description = 'Kibana查询' WHERE id = 1855;
+-- UPDATE kf_security_permission SET permission_name = 'Kibana查询', parent_id = 1879, leaf = 1, level = 2, description = 'Kibana查询' WHERE id = 1855;
 UPDATE kf_security_permission SET permission_name = 'SQL查询', parent_id = 1881, leaf = 1, level = 2, description = 'SQL查询' WHERE id = 1857;
 
 #5.用户和应用配置信息表
@@ -1889,7 +1889,7 @@ values  (1593, '物理集群', 0, 0, 1, '物理集群', '2022-05-24 18:08:22.0',
         (1849, '编辑平台配置', 1633, 1, 2, '编辑平台配置', '2022-05-24 18:08:25.0', '2022-05-24 18:20:49.0', 0, 'know_search'),
         (1851, '删除平台配置', 1633, 1, 2, '删除平台配置', '2022-05-24 18:08:26.0', '2022-05-24 18:20:49.0', 0, 'know_search'),
         (1853, '查看操作记录列表', 1635, 1, 2, '查看操作记录列表', '2022-05-24 18:08:26.0', '2022-05-24 18:23:34.0', 0, 'know_search'),
-        (1855, 'Kibana查询', 1879, 1, 2, 'Kibana查询', '2022-05-24 18:08:26.0', '2022-09-05 14:24:00.0', 0, 'know_search'),
+        (1855, 'Kibana查询', 1879, 1, 2, 'Kibana查询', '2022-05-24 18:08:26.0', '2022-09-05 14:24:00.0', 1, 'know_search'),
         (1857, 'SQL查询', 1881, 1, 2, 'SQL查询', '2022-05-24 18:08:26.0', '2022-09-05 14:24:00.0', 0, 'know_search'),
         (1859, '批量修改限流值', 1759, 1, 2, '批量修改限流值', '2022-05-24 18:08:26.0', '2022-08-11 10:37:13.0', 0, 'know_search'),
         (1861, '禁用', 1759, 1, 2, '禁用', '2022-05-24 18:08:26.0', '2022-08-11 10:37:13.0', 0, 'know_search'),
@@ -1901,7 +1901,7 @@ values  (1593, '物理集群', 0, 0, 1, '物理集群', '2022-05-24 18:08:22.0',
         (1873, '新建索引', 1605, 1, 2, '新建索引', '2022-05-24 18:08:26.0', '2022-05-24 18:23:34.0', 0, 'know_search'),
         (1875, '查看dashboard', 1871, 1, 2, '查看dashboard', '2022-05-24 18:08:24.0', '2022-08-27 17:35:50.0', 0, 'know_search'),
         (1877, 'DSL', 0, 0, 1, 'DSL', '2022-05-24 18:08:24.0', '2022-09-02 19:01:17.0', 0, 'know_search'),
-        (1879, 'Kibana', 0, 0, 1, 'Kibana', '2022-05-24 18:08:26.0', '2022-09-02 19:01:17.0', 0, 'know_search'),
+        (1879, 'Kibana', 0, 0, 1, 'Kibana', '2022-05-24 18:08:26.0', '2022-09-02 19:01:17.0', 1, 'know_search'),
         (1881, 'SQL', 0, 0, 1, 'SQL', '2022-05-24 18:08:26.0', '2022-09-02 19:01:17.0', 0, 'know_search');
 
 alter table kf_security_oplog
