@@ -6,6 +6,7 @@ import { Layout } from "knowdesign";
 import { IProject } from "./ProjectSelect";
 import HeaderConditionComponent from "./HeaderConditionComponent";
 import { withRouter } from "react-router-dom";
+import { isSuperApp } from "lib/utils";
 
 interface Props {
   children: React.ReactNode;
@@ -53,7 +54,7 @@ const index = withRouter((props: any) => {
         <div
           className={`${cPrefixCls}-header-left`}
           onClick={() => {
-            props.history.push(_.get(feConf, "header.logohref") || "/");
+            isSuperApp() ? props.history.push(_.get(feConf, "header.logohref") || "/") : props.history.push('/cluster/logic');
             props.setLeftIndex(0);
           }}
         >
