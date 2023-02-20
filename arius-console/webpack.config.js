@@ -12,10 +12,6 @@ const jsFileName = isProd ? '[name]-[chunkhash].js' : '[name].js';
 let publicPath = '/';
 
 if (isProd) {
-  if (process.env.BUILD_ENV === 'poc') {
-    const gift = require("@dt/fe-gift");
-    publicPath = gift.getBaseUrl("/");
-  }
 
   if (!publicPath.endsWith("/")) {
     publicPath = publicPath + "/";
@@ -57,7 +53,7 @@ module.exports = merge(getWebpackCommonConfig(), {
       "/api/es/admin": {
         // target: "https://api-kylin-xg02.intra.xiaojukeji.com/bigdata_commercial_es_admin_master",
         // target: "http://api-kylin-xg02.intra.xiaojukeji.com/bigdata_commercial_es_admin_zh_0.3",
-        target: "http://10.96.75.13:19253",
+        target: "http://116.85.7.53:8015",
         changeOrigin: true,
         pathRewrite: {
           "^/api/es/admin": "/admin/api",
