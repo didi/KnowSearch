@@ -251,6 +251,10 @@ const AddOrEditProjectModal = (props: { dispatch: any; cb: any; params: any }) =
           {
             required: true,
             message: "请选择责任人",
+            validator: (rule: any, value: any) => {
+             if (!setOwnerIdList.length) return Promise.reject('请选择责任人')
+             return Promise.resolve()
+            },
           },
         ],
       },
