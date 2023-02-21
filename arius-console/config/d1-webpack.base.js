@@ -116,7 +116,7 @@ module.exports = () => {
       DIFF_INSERT: ["diff_match_patch/lib/diff_match_patch", "DIFF_INSERT"],
       DIFF_DELETE: ["diff_match_patch/lib/diff_match_patch", "DIFF_DELETE"],
     }),
-    isProd && !buildPocEnv && new AutoUpload(AutoUploadConfig)
+    // isProd && !buildPocEnv && new AutoUpload(AutoUploadConfig)
   ].filter(Boolean);
 
   return {
