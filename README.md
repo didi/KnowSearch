@@ -16,6 +16,7 @@ KnowSearch是面向Elasticsearch研发与运维人员，围绕集群、索引构
   - 基于集群管理，存量5.X+版本集群全量纳管、高频集群与索引变更批量支持
   - 基于原生ES网关，零侵入、插件化的构建查询/写入限流、权限校验、跨集群访问、DSL查询模板分析与管控能力
 
+体验地址  http://116.85.7.53:8080 ，用户名/密码：admin/admin123
 
 # 2.KnowSearch特性
 
@@ -29,6 +30,7 @@ KnowSearch是面向Elasticsearch研发与运维人员，围绕集群、索引构
 - 索引Mapping/Setting/别名管理、RollOver/Shrink/Split/FroceMerge/读写禁用高频操作GUI批量执行
 
 # 3.KnowSearch产品图
+
 DashBoard、集群看板、网关看板、集群管理、索引管理核心产品功能图如下：
 
 <img src="./doc/file/KnowSearch-Dashboard.png" style="zoom:50%;" />
