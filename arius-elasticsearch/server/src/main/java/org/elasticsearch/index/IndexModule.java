@@ -115,6 +115,7 @@ public final class IndexModule {
     public static final Setting<Boolean> INDEX_QUERY_CACHE_ENABLED_SETTING =
             Setting.boolSetting("index.queries.cache.enabled", true, Property.IndexScope);
 
+    @Deprecated
     public static final Setting<Boolean> INDEX_QUERY_CACHE_TERM_QUERY_SETTING =
         Setting.boolSetting("index.queries.cache.term.query", false, Property.IndexScope, Property.Dynamic);
 

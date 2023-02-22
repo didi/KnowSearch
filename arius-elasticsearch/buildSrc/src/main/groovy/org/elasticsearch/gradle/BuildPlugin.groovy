@@ -375,14 +375,6 @@ class BuildPlugin implements Plugin<Project> {
             repos.mavenLocal()
         }
         repos.maven { MavenArtifactRepository repo ->
-            repo.name = "xiaoju-release"
-            repo.url = "https://artifactory.intra.xiaojukeji.com/artifactory/libs-release"
-        }
-        repos.maven { MavenArtifactRepository repo ->
-            repo.name = "xiaoju-snapshots"
-            repo.url = "https://artifactory.intra.xiaojukeji.com/artifactory/libs-snapshot"
-        }
-        repos.maven { MavenArtifactRepository repo ->
             repo.name = 'aliyun'
             repo.url = 'https://maven.aliyun.com/nexus/content/groups/public/'
         }

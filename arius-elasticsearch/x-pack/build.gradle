@@ -9,8 +9,6 @@ subprojects {
   // artifacts that are located there are not curated/updated by the project
   // see: https://wiki.shibboleth.net/confluence/display/DEV/Use+of+Maven+Central
   repositories {
-    maven { url 'https://artifactory.intra.xiaojukeji.com/artifactory/libs-release/' }
-    maven { url 'https://artifactory.intra.xiaojukeji.com/artifactory/libs-snapshot/' }
     maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
     maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
     mavenCentral()

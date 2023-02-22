@@ -6,8 +6,6 @@ esplugin {
 group 'org.elasticsearch'
 
 repositories {
-  maven { url 'https://artifactory.intra.xiaojukeji.com/artifactory/libs-release/' }
-  maven { url 'https://artifactory.intra.xiaojukeji.com/artifactory/libs-snapshot/' }
   maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
   maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
   mavenCentral()
