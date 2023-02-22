@@ -11,13 +11,4 @@ public class CacheTermQueryCachePolicy extends UsageTrackingQueryCachingPolicy {
     public CacheTermQueryCachePolicy(int ringSize) {
         super(ringSize);
     }
-
-    @Override
-    protected boolean shouldNeverCache(Query query) {
-        if (query instanceof TermQuery) {
-            return false;
-        }
-
-        return super.shouldNeverCache(query);
-    }
 }

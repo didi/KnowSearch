@@ -93,7 +93,7 @@ public class TransportAppendLuceneAction extends TransportAction<AppendLuceneReq
             for (int i = 0; i < appendDirs.size(); i++) {
                 indexes[i] = FSDirectory.open(Paths.get(appendDirs.get(i)));
             }
-            indexWriter.addIndexes(true, indexes);
+            indexWriter.addIndexes(indexes);
             indexWriter.commit();
 
             // update checkpoint

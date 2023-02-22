@@ -93,8 +93,6 @@ javadoc {
  *****************************************************************************/
 
 repositories {
-  maven { url 'https://artifactory.intra.xiaojukeji.com/artifactory/libs-release/' }
-  maven { url 'https://artifactory.intra.xiaojukeji.com/artifactory/libs-snapshot/' }
   maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
   maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
   mavenCentral()
@@ -138,8 +136,6 @@ dependencies {
 // this will only happen when buildSrc is built on its own during build init
 if (project == rootProject) {
   repositories {
-    maven { url 'https://artifactory.intra.xiaojukeji.com/artifactory/libs-release/' }
-    maven { url 'https://artifactory.intra.xiaojukeji.com/artifactory/libs-snapshot/' }
     maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
     maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
     mavenCentral()

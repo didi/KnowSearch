@@ -13,8 +13,6 @@ repositories {
    *   - dummy-io has a class that creates a new java.io.File ( something which third-party-audit-absurd.txt forbids )
    *   - version 0.0.2 has the same class and one extra file just to make the jar different
    */
-  maven { url 'https://artifactory.intra.xiaojukeji.com/artifactory/libs-release/' }
-  maven { url 'https://artifactory.intra.xiaojukeji.com/artifactory/libs-snapshot/' }
   maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
   maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
   mavenCentral()
