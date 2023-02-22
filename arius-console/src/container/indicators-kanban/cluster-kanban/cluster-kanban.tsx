@@ -28,7 +28,7 @@ export const ClusterKanban = (props) => {
 
   const currentTime = new Date().getTime();
   const [startTime, setStartTime] = useState(currentTime - ONE_HOUR);
-  const [endTime, setEndTime] = useState(currentTime);
+  const [endTime, setEndTime] = useState(currentTime - 120000);
   const [clusterName, setClusterName] = useState(clusterKanban.clusterName);
   const [clusterNameList, setClusterNameList] = useState([]);
   const [refreshTime, setRefreshTime] = useState(0);

@@ -32,7 +32,7 @@ export const GatewayKanban = () => {
     dispatch(
       setGatewayForm({
         startTime: currentTime - ONE_HOUR,
-        endTime: currentTime,
+        endTime: currentTime - 120000,
         isMoreDay: false,
         timeRadioKey: "oneHour",
       })
