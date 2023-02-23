@@ -1,0 +1,121 @@
+.user-container {
+  position: relative;
+  .user-title {
+    width: 100%;
+    height: 48px;
+    border-bottom: 1px solid #eceef0;
+    padding: 10px 22px 12px 22px;
+    font-family: PingFangSC-Medium;
+    img {
+      width: 18px;
+      margin-right: 4px;
+      position: relative;
+      top: 3px;
+    }
+    span {
+      font-size: 14px;
+      color: #1d2330;
+      line-height: 24px;
+      font-weight: 500;
+    }
+    .anticon-close {
+      color: #929aac;
+      position: absolute;
+      right: 20px;
+      top: 12px;
+    }
+  }
+  .user-content {
+    height: 320px;
+    overflow: auto;
+    padding: 24px 0 0 20px;
+    .ant-descriptions-item-label {
+      font-weight: 500;
+      font-family: PingFangSC-Medium;
+    }
+    .ant-descriptions-item-content {
+      font-family: PingFangSC-Regular;
+    }
+    .edit-content {
+      width: 100%;
+      position: relative;
+      .anticon-edit {
+        position: absolute;
+        right: 10px;
+      }
+      .edit-input {
+        width: 150px;
+        margin-right: 10px;
+      }
+      .button {
+        display: inline-block;
+        .ant-btn-link {
+          margin-right: 5px;
+          padding: 0;
+        }
+      }
+      .error-input {
+        border-color: #ff4d4f;
+        &:focus {
+          border-color: #ff7875;
+          box-shadow: 0 0 0 2px rgb(255 77 79 / 20%);
+        }
+      }
+      .error {
+        color: #ff4d4f;
+      }
+    }
+    .edit {
+      height: 30px;
+      position: relative;
+      top: -6px;
+    }
+    .password {
+      .ant-descriptions-item-container {
+        display: inline-block;
+        .change_password_form {
+          width: 272px;
+          margin-top: 8px;
+          padding: 12px 10px 0px 12px;
+          background: #f9f9fa;
+          border: 1px solid #f9f9fa;
+          border-radius: 4px;
+          .ant-input-password {
+            width: 249px;
+            height: 26px;
+            background: #ffffff;
+            border-radius: 2px;
+          }
+          .ant-form-item {
+            margin-bottom: 10px;
+          }
+          .ant-btn {
+            height: 24px;
+            line-height: 13px;
+          }
+        }
+      }
+    }
+  }
+
+  .user-logout {
+    width: 100%;
+    height: 56px;
+    border-top: 1px solid #eceef0;
+    position: absolute;
+    bottom: 0;
+    padding: 18px 24px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: PingFangSC-Regular;
+    background: #fff;
+    .icontuichudenglu {
+      position: relative;
+      top: -1px;
+      padding-right: 4px;
+      &:hover {
+        color: #000;
+      }
+    }
+  }
+}

@@ -1,39 +1,30 @@
-import { ReloadOutlined } from "@ant-design/icons";
+import { SyncOutlined } from "@ant-design/icons";
 import { Skeleton } from "antd";
 import React, { memo, useState, useEffect, useCallback, useRef } from "react";
 import { useSelector, shallowEqual, useDispatch } from "react-redux";
 import _ from "lodash";
 import { IndexConfig, Line } from "../components";
-import { formatterTimeYMDHMS, objFlat } from "./config";
-import {
-  defaultIndexConfigList,
-  allCheckedData,
-  getCheckedData,
-  indexConfigData,
-  getOverviewOption,
-} from "./overview-view-config";
-import {
-  getCheckedList,
-  setCheckedList,
-  getOverviewData,
-} from "../../../api/gateway-kanban";
+import { formatterTimeYMDHMS, objFlat, getRenderToolTip } from "./config";
+import { defaultIndexConfigList, allCheckedData, getCheckedData, indexConfigData, getOverviewOption } from "./overview-view-config";
+import { getCheckedList, setCheckedList, getOverviewData } from "../../../api/gateway-kanban";
 
 import "../style/index";
 import { setIsUpdate } from "actions/gateway-kanban";
-import { arrayMoveImmutable } from 'array-move';
-import DragGroup from './../../../packages/drag-group/DragGroup';
+import { arrayMoveImmutable } from "array-move";
+import DragGroup from "../../../d1-packages/DragGroup";
 
 const OVERVIEW = "overview";
 
-export const classPrefix = "rf-monitor";
+export const classPrefix = "monitor";
 
 export const OverviewView = memo(() => {
-  const { startTime, endTime, isMoreDay, isUpdate } = useSelector(
+  const { startTime, endTime, isMoreDay, isUpdate, timeRadioKey } = useSelector(
     (state) => ({
       startTime: (state as any).gatewayKanban.startTime,
       endTime: (state as any).gatewayKanban.endTime,
       isMoreDay: (state as any).gatewayKanban.isMoreDay,
       isUpdate: (state as any).gatewayKanban.isUpdate,
+      timeRadioKey: (state as any).gatewayKanban.timeRadioKey,
     }),
     shallowEqual
   );
@@ -51,8 +42,8 @@ export const OverviewView = memo(() => {
   const timeDiff = useRef(0);
 
   const sortEnd = ({ oldIndex, newIndex }) => {
-    const listsNew = arrayMoveImmutable(checkedData['总览性能指标'], oldIndex, newIndex)
-    checkedData['总览性能指标'] = listsNew;
+    const listsNew = arrayMoveImmutable(checkedData["总览性能指标"], oldIndex, newIndex);
+    checkedData["总览性能指标"] = listsNew;
     const checkedList = objFlat(checkedData);
     setCheckedList(OVERVIEW, checkedList);
     setMetricsTypes([...listsNew]);
@@ -62,7 +53,7 @@ export const OverviewView = memo(() => {
     async (metricsTypes) => {
       return await getOverviewData(metricsTypes, startTime, endTime);
     },
-    [startTime, endTime, isUpdate]
+    [startTime, endTime, timeRadioKey]
   );
 
   const getAsyncCheckedList = async () => {
@@ -90,9 +81,7 @@ export const OverviewView = memo(() => {
     try {
       setIsLoading(true);
       const res = await getAsyncOverviewData(metricsTypes);
-      setViewData(
-        res.map((item) => getOverviewOption(item, indexConfigData, isMoreDay))
-      );
+      setViewData(res.map((item) => getOverviewOption(item, indexConfigData, isMoreDay)));
     } catch (error) {
       setViewData([]);
     } finally {
@@ -130,26 +119,24 @@ export const OverviewView = memo(() => {
       />
     );
   };
+  const el = document.getElementsByClassName("monitor-overview-content-line-container")?.[0];
 
   return (
     <>
       <div className={`${classPrefix}-overview-search`}>
         <div className={`${classPrefix}-overview-search-reload`}>
-          <ReloadOutlined className="reload" onClick={reloadPage} />
-          <span>上次刷新时间：{formatterTimeYMDHMS(endTime)}</span>
+          <SyncOutlined className="dashboard-config-icon" onClick={reloadPage} />
         </div>
-        <div className={`${classPrefix}-overview-search-filter`}>
-          {renderConfig()}
-        </div>
+        <div className={`${classPrefix}-overview-search-filter`}>{renderConfig()}</div>
       </div>
       <div className={`${classPrefix}-overview-content-line`}>
         <DragGroup
-          dragContainerProps={{
-            onSortEnd:  sortEnd,
+          sortableContainerProps={{
+            onSortEnd: sortEnd,
             axis: "xy",
-            distance: 100
+            distance: el ? el.clientWidth - 80 : 150,
           }}
-          containerProps={{
+          gridProps={{
             grid: 12,
             gutter: [10, 10],
           }}
@@ -158,6 +145,7 @@ export const OverviewView = memo(() => {
             <Line
               key={`${item}`}
               title={indexConfigData[item]?.title()}
+              tooltip={getRenderToolTip(indexConfigData[item])}
               index={`${item}_${index}`}
               option={viewData[index] || {}}
               isLoading={isLoading}

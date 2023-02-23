@@ -11,17 +11,18 @@
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="creator" jdbcType="VARCHAR" property="creator"/>
+        <result column="timeout" jdbcType="INTEGER" property="timeout"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-       id, `name`, template_id, content_url, `describe`, create_time, update_time, creator
+       id, `name`, template_id, content_url, `describe`, create_time, update_time, creator, timeout
     </sql>
 
     <insert id="insert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
-        insert into logi_op_script (`name`, template_id, content_url, `describe`, create_time, update_time, creator)
-        values (#{name}, #{templateId}, #{contentUrl}, #{describe}, #{createTime}, #{updateTime}, #{creator})
+        insert into logi_op_script (`name`, template_id, content_url, `describe`, create_time, update_time, creator, timeout)
+        values (#{name}, #{templateId}, #{contentUrl}, #{describe}, #{createTime}, #{updateTime}, #{creator}, #{timeout})
     </insert>
 
     <update id="update" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO">
@@ -32,6 +33,7 @@
             <if test="describe != null">,`describe` = #{describe}</if>
             <if test="updateTime != null">,update_time = #{updateTime}</if>
             <if test="creator != null">,creator = #{creator}</if>
+            <if test="timeout != null">,timeout = #{timeout}</if>
         </trim>
         where id = #{id}
     </update>

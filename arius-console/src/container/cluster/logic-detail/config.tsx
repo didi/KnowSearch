@@ -1,35 +1,21 @@
 import { IMenuItem, IBaseInfo } from "typesPath/base-types";
-import moment from "moment";
-import { IClusterInfo, ITemplateSrvData } from "typesPath/cluster/cluster-types";
 import React from "react";
-import {
-  ConsoleSqlOutlined,
-  DeleteOutlined,
-  QuestionCircleOutlined,
-} from "@ant-design/icons";
-import { Button, Modal, Tooltip, notification, message } from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
+import { Modal, Tooltip } from "antd";
 import { cellStyle } from "constants/table";
-import { ROLE_TYPE, colorTheme, DATA_TYPE_LIST, isOpenUp, LEVEL_MAP } from "constants/common";
-import { ClusterInfo } from "./base-info";
-import { LogicNodeList } from "./logic-node-list";
-import { IndexList } from "./index-list";
-import { renderOperationBtns } from "container/custom-component";
-import { PlugnList } from "./plugn-list";
+import { ROLE_TYPE, isOpenUp, LEVEL_MAP } from "constants/common";
 import { IPlug } from "typesPath/plug-types";
 import { submitWorkOrder } from "api/common-api";
 import { IWorkOrder } from "typesPath/params-types";
 import store from "store";
 import { userDelPlug } from "api/plug-api";
-import { IndexSearch } from "./index-search";
-import { delLogicCluterRegion } from "api/op-cluster-region-api";
-import { clusterTypeMap, INDEX_AUTH_TYPE_MAP } from "constants/status-map";
+import { clusterTypeMap } from "constants/status-map";
 import { opNodeStatusMap } from "../physics-detail/constants";
-import {
-  deleteLogicClusterTemplateSrv,
-  setLogicClusterTemplateSrv
-} from "api/cluster-api";
-import { timeFormat } from "constants/time";
-import Url from "lib/url-parser";
+import { renderDiskRate } from "../../custom-component";
+import { transTimeFormat, getFormatJsonStr, isSuperApp } from "lib/utils";
+import { ClusterInfo } from "./base-info";
+import { LogicNodeList } from "./logic-node-list";
+import "./index.less";
 
 const appInfo = {
   app: store.getState().app.appInfo,
@@ -42,7 +28,7 @@ export enum TAB_LIST_KEY {
   indexTemplate = "indexTemplate",
   search = "search",
   monitor = "monitor",
-  pluggin = "pluggin",
+  plugin = "plugin",
   node = "node",
   region = "region",
   diary = "diary",
@@ -52,16 +38,12 @@ export const TAB_LIST = [
   {
     name: "集群概览",
     key: TAB_LIST_KEY.info,
-    content: (logicBaseInfo: IClusterInfo) => (
-      <ClusterInfo logicBaseInfo={logicBaseInfo} />
-    ),
+    content: (params) => <ClusterInfo logicBaseInfo={params.clusterInfo} />,
   },
   {
-    name: "节点映射",
+    name: "节点列表",
     key: TAB_LIST_KEY.node,
-    content: (logicBaseInfo: IClusterInfo) => (
-      <LogicNodeList logicBaseInfo={logicBaseInfo} />
-    ),
+    content: () => <LogicNodeList />,
   },
 ];
 
@@ -73,43 +55,39 @@ TAB_LIST.forEach((d) => {
 export const DETAIL_MENU_MAP = menuMap;
 
 export const baseInfo: any = [
-  [
-    // {
-    //   label: "ES版本",
-    //   key: "responsible",
-    // },
-    {
-      label: "创建时间",
-      key: "createTime",
-      render: (time: number) => moment(time).format(timeFormat),
-    },
-    {
-      label: "数据节点数",
-      key: "dataNodesNumber",
-    },
-  ],
-  [
-    {
-      label: "集群描述",
-      key: "memo",
-      render: (text: string) => (
-        <>
-          <Tooltip placement="bottomLeft" title={text}>
-            {text ? (text.length > 20 ? text.slice(0, 20) + "..." : text) : "_"}
-          </Tooltip>
-        </>
-      ),
-    },
-    {
-      label: "Gateway地址",
-      key: "gatewayAddress",
-      render: (value: string) => (
-        <>
-          <span>{value || "_"}</span>
-        </>
-      ),
-    },
-  ],
+  {
+    label: "ES版本",
+    key: "esClusterVersion",
+  },
+  {
+    label: "Gateway地址",
+    key: "gatewayAddress",
+    render: (value: string) => <span>{value || "-"}</span>,
+  },
+  {
+    label: "分片数",
+    key: "activeShardNum",
+  },
+  {
+    label: "数据节点数",
+    key: "dataNodeNum",
+  },
+  {
+    label: "创建时间",
+    key: "createTime",
+    render: (time: number) => transTimeFormat(time),
+  },
+  {
+    label: "集群描述",
+    key: "memo",
+    render: (text: string) => (
+      <>
+        <Tooltip placement="bottomLeft" title={text}>
+          {text ? (text.length > 20 ? text.slice(0, 20) + "..." : text) : "_"}
+        </Tooltip>
+      </>
+    ),
+  },
 ];
 interface ICardInfo {
   label: string;
@@ -179,6 +157,11 @@ export const DESC_LIST = [
     ),
   },
   {
+    label: "集群版本",
+    key: "esClusterVersion",
+    render: (val: number) => <span>{val || "-"}</span>,
+  },
+  {
     label: "业务等级",
     key: "level",
     render: (value: number) => (
@@ -187,95 +170,81 @@ export const DESC_LIST = [
       </>
     ),
   },
-  {
-    label: "所属项目",
-    key: "appName",
-    render: (value) => (
-      <>
-        <span>{value || "-"}</span>
-      </>
-    ),
-  },
-  {
-    label: "所属项目ID",
-    key: "appId",
-    render: (value) => (
-      <>
-        <span>{value || "-"}</span>
-      </>
-    ),
-  },
-  {
-    label: "责任人",
-    key: "responsible",
-    render: (value) => (
-      <>
-        <Tooltip placement="bottomLeft" title={value}>
-          {value
-            ? value.length > 20
-              ? value.slice(0, 20) + "..."
-              : value
-            : "_"}
-        </Tooltip>
-      </>
-    ),
-  },
 ];
 
-export const getLogicNodeColumns = (
-  dataList,
-  reloadData: Function,
-  type: string
-) => {
+export const getLogicNodeColumns = (dataList, reloadData: Function, type: string) => {
   const columns = [
     {
-      title: "region ID",
-      dataIndex: "regionId",
-      key: "regionId",
-      render: (value, row, index) => {
-        const dataListIndex = row.index;
-        const obj = {
-          children: value,
-          props: {} as any,
-        };
-        if (index === 0 || value !== dataList[dataListIndex - 1]?.regionId) {
-          obj.props.rowSpan = row.rowSpan;
-        }
-
-        if (index > 0) {
-          if (value === dataList[dataListIndex - 1].regionId && value !== "_") {
-            obj.props.rowSpan = 0;
-          }
-        }
-        return obj;
-      },
-    },
-    {
-      title: "racks",
-      dataIndex: "rack",
-      key: "rack",
-      render: (rack: string, row) => {
-        const ele = <>{rack || "_"}</>;
-        const obj = {
-          children: ele,
-          props: {} as any,
-        };
-        if (row.regionId !== "_") {
-          obj.props.rowSpan = row.racksRowSpan;
-        }
-        return obj;
-      },
-    },
-    {
-      title: "节点ip",
+      title: "节点IP",
       dataIndex: "ip",
       key: "ip",
+      width: 100,
+      render: (val: string) => {
+        return <Tooltip title={val}>{val ? val : "-"}</Tooltip>;
+      },
+    },
+    {
+      title: "主机名称",
+      dataIndex: "hostname",
+      key: "hostname",
+      width: 100,
+      render: (val: string) => {
+        return <Tooltip title={val}>{val ? val : "-"}</Tooltip>;
+      },
+    },
+    {
+      title: "attribute",
+      dataIndex: "attributes",
+      key: "attributes",
+      width: 180,
+      onCell: () => ({
+        style: { ...cellStyle, maxWidth: 180 },
+      }),
+      render: (val: string) => {
+        return (
+          <Tooltip placement="bottomLeft" title={val}>
+            {val ? val : "-"}
+          </Tooltip>
+        );
+      },
+    },
+    {
+      title: "节点名称",
+      dataIndex: "nodeSet",
+      key: "nodeSet",
+      width: 100,
+      render: (val: string) => {
+        return val || "-";
+      },
+    },
+    {
+      title: "磁盘使用率",
+      dataIndex: "diskUsage",
+      key: "diskUsage",
+      width: 120,
+      render: (_, record) => renderDiskRate(record),
+    },
+    {
+      title: "节点规格",
+      dataIndex: "machineSpec",
+      key: "machineSpec",
+      width: 110,
+      onCell: () => ({
+        style: { ...cellStyle, maxWidth: 110 },
+      }),
+      render: (val: string) => {
+        return (
+          <Tooltip placement="bottomLeft" title={val}>
+            {val ? val : "-"}
+          </Tooltip>
+        );
+      },
     },
     {
       title: "节点角色",
       dataIndex: "role",
       key: "role",
-      // render: (t: number) => ROLE_TYPE[t].label,
+      width: 100,
       render: (t: any) => {
         let str;
         if (Array.isArray(t)) {
@@ -294,13 +263,7 @@ export const getLogicNodeColumns = (
       title: "节点状态",
       dataIndex: "status",
       key: "status",
-      // render: (text: number) => {
-      //   return (
-      //     <Tooltip placement="bottomLeft" title={opNodeStatusMap[text]}>
-      //       {opNodeStatusMap[text]}
-      //     </Tooltip>
-      //   );
-      // },
+      width: 100,
       render: (status: number | number[]) => {
         let str;
         if (Array.isArray(status)) {
@@ -312,122 +275,13 @@ export const getLogicNodeColumns = (
         } else {
           str = opNodeStatusMap[status];
         }
-        return str;
-      },
-    },
-    {
-      title: "所属物理集群",
-      dataIndex: "cluster",
-      key: "cluster",
-      render: (name: string, row) => {
-        const ele = (
-          <Tooltip placement="bottomLeft" title={name}>
-            {name || "_"}
-          </Tooltip>
+        return (
+          <span className={status === 1 ? "success" : status === 2 ? "unline" : status === 3 ? "fail" : "unknown"}> {str || "-"}</span>
         );
-        const obj = {
-          children: ele,
-          props: {} as any,
-        };
-        if (row.regionId !== "_") {
-          obj.props.rowSpan = row.clusterRowSpan;
-        }
-        return obj;
-      },
-    },
-    {
-      title: "操作",
-      dataIndex: "operation",
-      key: "operation",
-      render: (value: any, record: any, index: number) => {
-        let btns = [
-          {
-            label: "解绑",
-            clickFunc: () => {
-              Modal.confirm({
-                title: "提示",
-                content: "您确定要执行解绑操作吗？存储在该region上的模版或索引现有的数据不会进行迁移到该逻辑集群关联的其他region上",
-                width: 500,
-                okText: "确认",
-                cancelText: "取消",
-                onOk() {
-                  const urlParams = Url().search;
-                  delLogicCluterRegion(record.regionId, Number(urlParams.clusterId)).then((res) => {
-                    notification.success({ message: "操作成功！" });
-                    reloadData();
-                  });
-                },
-              });
-            },
-          },
-        ];
-        if (record.regionId === "_") {
-          btns = [];
-        }
-        const obj = {
-          children: renderOperationBtns(btns, record),
-          props: {} as any,
-        };
-
-        const dataListIndex = record.index;
-
-        if (
-          index === 0 ||
-          record.regionId !== dataList[dataListIndex - 1]?.regionId
-        ) {
-          obj.props.rowSpan = record.rowSpan;
-        }
-        if (index > 0) {
-          if (
-            record.regionId === dataList[dataListIndex - 1].regionId &&
-            record.regionId !== "_"
-          ) {
-            obj.props.rowSpan = 0;
-          }
-        }
-        return obj;
       },
     },
   ];
-  if (type !== "配置管理") {
-    columns.splice(5, 1);
-  }
   return columns;
-};
-
-export const onHandleServerTag = (
-  data: ITemplateSrvData,
-  loginClusterId: string | number,
-  reloadData: Function
-) => {
-  Modal.confirm({
-    title: data.status
-      ? `是否确认关闭索引${data.item?.serviceName}服务？`
-      : `是否确认打开索引${data.item?.serviceName}服务?`,
-    content: data.status
-      ? `关闭服务后会可能使相应业务受影响，请谨慎操作！`
-      : `打开服务后会可能使相应业务受影响，请谨慎操作！`,
-    icon: <QuestionCircleOutlined style={{ color: colorTheme }} />,
-    okText: "确认",
-    cancelText: "取消",
-    onOk: () => {
-      if (!data.status) {
-        return setLogicClusterTemplateSrv(
-          loginClusterId,
-          data.item.serviceId
-        ).then(() => {
-          message.success("操作成功");
-          reloadData();
-        });
-      }
-      deleteLogicClusterTemplateSrv(loginClusterId, data.item.serviceId).then(
-        () => {
-          message.success("操作成功");
-          reloadData();
-        }
-      );
-    },
-  });
 };
 
 export const indexExplain = [
@@ -441,7 +295,7 @@ export const indexExplain = [
   },
   {
     label: "Pipeline",
-    content: "提供索引分区规则（索引模版到具体的物理索引的映射）和写入限流能力",
+    content: "提供索引分区规则（索引模板到具体的物理索引的映射）和写入限流能力",
   },
   {
     label: "Mapping设置",
@@ -485,68 +339,6 @@ export const indexExplain = [
   },
 ];
 
-export const getIndexListColumns = () => {
-  const columns = [
-    {
-      title: "索引ID",
-      dataIndex: "id",
-      key: "id",
-      sorter: (a, b) => a.id - b.id,
-    },
-    {
-      title: "索引名称",
-      dataIndex: "name",
-      key: "name",
-      width: "10%",
-      onCell: () => ({
-        style: { ...cellStyle, maxWidth: 100 },
-      }),
-      render: (text: string) => {
-        return (
-          <Tooltip placement="bottomLeft" title={text}>
-            {text}
-          </Tooltip>
-        );
-      },
-    },
-    {
-      title: "业务类型",
-      dataIndex: "dataType",
-      key: "dataType",
-      render: (value: number) => (
-        <span>
-          {DATA_TYPE_LIST.filter((item) => item.value === value)?.[0]?.label ||
-            ""}
-        </span>
-      ),
-    },
-    {
-      title: "所属项目",
-      dataIndex: "appName",
-      key: "appName",
-    },
-    {
-      title: "价值分",
-      dataIndex: "value",
-      key: "value",
-    },
-    {
-      title: "权限",
-      dataIndex: "authType",
-      key: "authType",
-      render: (authType: number) => {
-        return <>{INDEX_AUTH_TYPE_MAP[authType] || "-"}</>;
-      },
-    },
-    {
-      title: "描述",
-      dataIndex: "desc",
-      key: "desc",
-    },
-  ];
-  return columns;
-};
-
 const unintallPlugn = (data, reloadDataFn) => {
   Modal.confirm({
     title: `是否确定卸载该${data.name}插件`,
@@ -566,8 +358,8 @@ const unintallPlugn = (data, reloadDataFn) => {
       };
       const params: IWorkOrder = {
         contentObj,
-        submitorAppid: appInfo.app()?.id,
-        submitor: appInfo.user("domainAccount") || "",
+        submitorProjectId: appInfo.app()?.id,
+        submitor: appInfo.user("userName") || "",
         description: "",
         type: "logicClusterPlugOperation",
       };
@@ -597,8 +389,8 @@ const intallPlugn = (data, reloadDataFn) => {
       };
       const params: IWorkOrder = {
         contentObj,
-        submitorAppid: appInfo.app()?.id,
-        submitor: appInfo.user("domainAccount") || "",
+        submitorProjectId: appInfo.app()?.id,
+        submitor: appInfo.user("userName") || "",
         description: "",
         type: "logicClusterPlugOperation",
       };
@@ -671,12 +463,12 @@ export const getPlugnBtnList = (record: IPlug, reloadDataFn: any) => {
 };
 
 export const pDefaultMap = {
-  0: '系统默认',
-  1: 'ES能力',
-  2: '平台能力',
-}
+  0: "系统默认",
+  1: "ES能力",
+  2: "平台能力",
+};
 
-export const getPlugnListColumns = (fn: () => any) => {
+export const getPluginListColumns = (fn: () => any) => {
   const columns = [
     {
       title: "插件名称",
@@ -688,7 +480,7 @@ export const getPlugnListColumns = (fn: () => any) => {
       dataIndex: "pdefault",
       key: "pdefault",
       render: (value: number) => {
-        const text = pDefaultMap[value] || '未知类型';
+        const text = pDefaultMap[value] || "未知类型";
         return text;
       },
     },
@@ -710,39 +502,9 @@ export const getPlugnListColumns = (fn: () => any) => {
       dataIndex: "desc",
       key: "desc",
       render: (value: string) => {
-        return value || '-'
+        return value || "-";
       },
     },
-    // {
-    //   title: "操作",
-    //   dataIndex: "operation",
-    //   key: "operation",
-    //   render: (id: number, record: IPlug) => {
-    //     const btns = getPlugnBtnList(record, fn);
-    //     return renderOperationBtns(btns, record);
-    //   },
-    // },
   ];
   return columns;
 };
-
-export enum leftMenuKeys {
-  kibana = "kibana",
-  DSL = "DSL",
-  SQL = "SQL",
-}
-
-export const SEARCH_PROPERTY_MENU: IMenuItem[] = [
-  {
-    label: "Kibana",
-    key: leftMenuKeys.kibana,
-  },
-  {
-    label: "DSL",
-    key: leftMenuKeys.DSL,
-  },
-  {
-    label: "SQL",
-    key: leftMenuKeys.SQL,
-  },
-];

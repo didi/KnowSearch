@@ -42,4 +42,9 @@ public class ScriptPageVO extends BaseVO {
      */
     @ApiModelProperty("文件地址")
     private String contentUrl;
+    /**
+     * 模板超时时间
+     */
+    @ApiModelProperty("模板超时时间")
+    private Integer timeout;
 }

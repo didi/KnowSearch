@@ -1,5 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
+import java.util.List;
+import java.util.Map;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
@@ -8,8 +11,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Cl
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
-import java.util.List;
-import java.util.Map;
 
 /**
  * ES集群节点 服务类
@@ -237,7 +238,7 @@ public interface ClusterRoleHostService {
      * @return 列表<ClusterRoleHost>
      */
     List<ClusterRoleHost> listById(List<Integer> ids);
-    
+
     boolean deleteByIds(List<Integer> ids);
 
     List<ClusterRoleHost> listNodesByClusters(List<String> phyClusterNames);

@@ -87,7 +87,7 @@ public class DslStatisticsService {
 
         // 添加操作记录
         for (DslQueryLimit dslQueryLimit : dslQueryLimitList) {
-            operateRecordService.saveOperateRecordWithManualTrigger(String.format("queryLimit %f->%f",
+            operateRecordService.saveOperateRecordWithManualTrigger(String.format("修改%s限流值，%f-->%f",dslQueryLimit.getProjectIdDslTemplateMd5(),
                             originalMap.getOrDefault(dslQueryLimit.getProjectIdDslTemplateMd5(), defaultDsl).getQueryLimit(),
                             dslQueryLimit.getQueryLimit()), operator, null, dslQueryLimit.getProjectIdDslTemplateMd5(),
                     OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT, dslQueryLimit.getProjectId());

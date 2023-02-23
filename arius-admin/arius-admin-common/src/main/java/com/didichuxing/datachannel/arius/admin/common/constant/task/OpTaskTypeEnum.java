@@ -55,7 +55,7 @@ public enum OpTaskTypeEnum {
     GATEWAY_PLUG_INSTALL(26, "GATEWAY集群插件安装", "gateway-plug-install"),
     //TODO 0.3.2 不会去实现，需等待gateway具备安装平台插件能力后进行实现
     GATEWAY_PLUG_UNINSTALL(27, "GATEWAY集群插件卸载", "gateway-plug-uninstall"),
-    GATEWAY_CONFIG_EDIT(28, "GATEWAY集群配置新增", "gateway-config-edit"),
+    GATEWAY_CONFIG_EDIT(28, "GATEWAY集群配置变更", "gateway-config-edit"),
     GATEWAY_CONFIG_ROLLBACK(29, "GATEWAY集群配置回滚", "gateway-config-rollback"),
     GATEWAY_ROLLBACK(30, "GATEWAY集群回滚", "gateway-rollback"),
     GATEWAY_OFFLINE(31, "GATEWAY集群回滚", "gateway-rollback"),

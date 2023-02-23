@@ -2,6 +2,16 @@ package com.didichuxing.datachannel.arius.admin.biz.task.handler.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_DOCKER;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterIndecreaseDockerContent;
 import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterIndecreaseHostContent;
@@ -24,16 +34,11 @@ import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.Getter;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
 
 /**
  * 集群扩缩容

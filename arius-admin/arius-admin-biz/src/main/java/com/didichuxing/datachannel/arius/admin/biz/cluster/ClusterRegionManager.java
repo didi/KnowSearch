@@ -1,13 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
+import java.util.List;
+import java.util.Set;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicSpecCondition;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import java.util.List;
-import java.util.Set;
 
 public interface ClusterRegionManager {
 
@@ -24,8 +26,20 @@ public interface ClusterRegionManager {
      * @param phyCluster 物理集群名称
      * @return 筛选后的region列表
      */
+    @Deprecated
     Result<List<ClusterRegionVO>> listPhyClusterRegionsByLogicClusterTypeAndCluster(String phyCluster,
                                                                                     Integer clusterLogicType);
+
+    /**
+     * 逻辑集群绑定同一个物理集群的region的时候需要根据类型进行过滤，之后再根据cold、region节点数量、节点规格进行过滤
+     * @param phyCluster 物理集群名称
+     * @param clusterLogicType 逻辑集群类型
+     * @param condition 用户侧申请的集群规格（节点数量、机器规格）
+     * @return
+     */
+    Result<List<ClusterRegionVO>> listPhyClusterRegionsByCondition(String phyCluster,
+                                                                   Integer clusterLogicType,
+                                                                   ClusterLogicSpecCondition condition);
 
     /**
      * 构建regionVO

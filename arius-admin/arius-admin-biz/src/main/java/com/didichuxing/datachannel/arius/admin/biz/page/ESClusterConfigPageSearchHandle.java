@@ -118,9 +118,6 @@ public class ESClusterConfigPageSearchHandle extends
 						ClusterPhyConfigVO.class);
 				final List<ClusterRoleInfo> allRoleClusterByClusterId = clusterRoleService.getAllRoleClusterByClusterId(
 						condition.getClusterId());
-				final List<ESClusterRoleVO> esClusterRoleVOS = ConvertUtil.list2List(
-						allRoleClusterByClusterId, ESClusterRoleVO.class);
-				
 				for (ClusterPhyConfigVO clusterPhyConfigVO : clusterPhyConfigVOS) {
 						final String              groupName      = clusterPhyConfigVO.getGroupName();
 						final List<ComponentHost> componentHosts = groupName2HostsMaps.get(groupName);
@@ -150,13 +147,12 @@ public class ESClusterConfigPageSearchHandle extends
 						//设置有角色信息的
 						final Map<Long, List<ESClusterRoleHostVO>> roleId2ListMap = ConvertUtil.list2MapOfList(
 								nodesList, ESClusterRoleHostVO::getRoleClusterId, i -> i);
-						esClusterRoleVOS
-								//进行节点填充
-								.forEach(i ->
-										Optional.ofNullable(roleId2ListMap.get(i.getId()))
-												.ifPresent(i::setEsClusterRoleHostVO)
-								);
-						clusterPhyConfigVO.setRoleWithNodes(esClusterRoleVOS);
+						final List<ESClusterRoleVO> roleVOS = ConvertUtil.list2List(
+								allRoleClusterByClusterId, ESClusterRoleVO.class);
+						roleVOS.forEach(i -> Optional
+								.ofNullable(roleId2ListMap.get(i.getId()))
+								.ifPresent(i::setEsClusterRoleHostVO));
+						clusterPhyConfigVO.setRoleWithNodes(roleVOS);
 						
 						if (ids.contains(clusterPhyConfigVO.getId())) {
 								clusterPhyConfigVO.setSupportEditAndRollback(true);

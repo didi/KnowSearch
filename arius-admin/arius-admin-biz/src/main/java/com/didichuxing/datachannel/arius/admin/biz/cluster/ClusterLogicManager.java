@@ -135,7 +135,7 @@ public interface ClusterLogicManager {
      * @return
      */
     PaginationResult<ClusterLogicVO> pageGetClusterLogics(ClusterLogicConditionDTO condition,
-                                                          Integer projectId) throws NotFindSubclassException;
+                                                          Integer projectId) throws NotFindSubclassException, ESOperateException;
 
     /**
      * 更新逻辑集群状态
@@ -160,6 +160,13 @@ public interface ClusterLogicManager {
      * @return
      */
     Result<Long> estimatedDiskSize(Long clusterLogicId, Integer count);
+
+    /**
+     * 获取当前逻辑集群对应region的机器规格
+     * @param clusterLogicId 逻辑集群id
+     * @return
+     */
+    Result<String> getClusterDataNodeSpec(Long clusterLogicId);
 
     /**
      * 根据projectId获取项目下的逻辑集群
@@ -253,4 +260,11 @@ public interface ClusterLogicManager {
     Result<List<ClusterPhyWithLogicClusterVO>> listLogicClusterWithClusterPhyByProjectId(Integer projectId);
 
     Result<List<ClusterLogicVO>> listClusterLogicByPhyName(String phyClusterName);
+
+    /**
+     * 删除从模板及索引数据
+     * @param clusterLogicId
+     * @return
+     */
+    Result<Void> deleteTemplatesIndicesInfo(Long clusterLogicId,Integer projectId,String operator);
 }

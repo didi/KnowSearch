@@ -119,14 +119,10 @@ const checkS = (val) => {
 };
 
 // enable 下拉列表
-const enableSelectList = ["all", "primaries", "new_primaries", "none"].map(
-  (item) => ({ name: item, value: item })
-);
+const enableSelectList = ["all", "primaries", "new_primaries", "none"].map((item) => ({ name: item, value: item }));
 
 // rebalance
-const rebalanceSelectList = ["all", "primaries", "replicas", "none"].map(
-  (item) => ({ name: item, value: item })
-);
+const rebalanceSelectList = ["all", "primaries", "replicas", "none"].map((item) => ({ name: item, value: item }));
 
 // boolean 下拉列表
 const booleanSelectList = ["true", "false"].map((item) => ({
@@ -141,11 +137,7 @@ const allWriteList = ["all", "write"].map((item) => ({
 }));
 
 // rebalanceList
-const allow_rebalanceSelectList = [
-  "always",
-  "indices_primaries_active",
-  "indices_all_active",
-].map((item) => ({ name: item, value: item }));
+const allow_rebalanceSelectList = ["always", "indices_primaries_active", "indices_all_active"].map((item) => ({ name: item, value: item }));
 
 export const clusterSetting = {
   BREAKER: {
@@ -154,8 +146,7 @@ export const clusterSetting = {
       unit: percent,
       type: input,
       check: checkPercent,
-      confirmMessage:
-        "限制值不应该设置过低，有可能对程序处理性能造成影响，建议设置在40%",
+      confirmMessage: "限制值不应该设置过低，有可能对程序处理性能造成影响，建议设置在40%",
     },
     "indices.breaker.fielddata.limit": {
       info: "fielddata熔断器内存限制。",
@@ -167,8 +158,7 @@ export const clusterSetting = {
       info: "fielddata内存限制系数（估算值：系数乘以真实值）。",
       type: input,
       check: checkIntTwoDecimalMax1AndMin100,
-      confirmMessage:
-        "限制值不应设置过低，有可能造成集群熔断，请谨慎操作，建议采用默认值",
+      confirmMessage: "限制值不应设置过低，有可能造成集群熔断，请谨慎操作，建议采用默认值",
     },
     "indices.breaker.request.limit": {
       info: "request熔断器的限制。",
@@ -193,7 +183,7 @@ export const clusterSetting = {
       check: checkIntTwoDecimalMax1AndMin100,
     },
   },
-  ROUTING: {
+  ALLOCATION: {
     "cluster.routing.allocation.enable": {
       info: "为特定类型的分片启用或禁用分配。",
       type: select,
@@ -201,7 +191,7 @@ export const clusterSetting = {
       confirmMessage: "请谨慎修改，否则可能导致索引分片无法分配",
     },
     "cluster.routing.allocation.node_concurrent_incoming_recoveries": {
-      info: "一个节点上允许发生多少并发传入分片恢复。", 
+      info: "一个节点上允许发生多少并发传入分片恢复。",
       type: input,
       check: checkIntMaxEqual0AndMin2147483647,
     },
@@ -282,16 +272,26 @@ export const clusterSetting = {
       info: "控制一个节点上最多可以分配多少个分片。",
       type: input,
       check: checkMax1000,
-      confirmMessage:
-        "当集群索引内容较多时，建议不要减少每个节点上的总分片数目，建议保持在1000以上，-1 表示不限制",
+      confirmMessage: "当集群索引内容较多时，建议不要减少每个节点上的总分片数目，建议保持在1000以上，-1 表示不限制",
     },
     "cluster.routing.allocation.awareness.attributes": {
       info: "机架感知，主副分片不同机架分布。",
       type: select,
       mode: "multiple",
       selectList: [],
-      confirmMessage:
-        "设置之后对于集群主副分片会分配到对应属性下的节点上，请谨慎操作",
+      confirmMessage: "设置之后对于集群主副分片会分配到对应属性下的节点上，请谨慎操作",
+    },
+    "indices.recovery.max_bytes_per_sec": {
+      info: "每个节点分片迁移的带宽限制",
+      type: input,
+      mode: "multiple",
+    },
+    "cluster.routing.allocation.exclude._name": {
+      info: "禁止shard分配在对应的节点上",
+      type: select,
+      mode: "multiple",
+      splitFn: (text) => (typeof text === "string" ? text?.split(",") : text),
+      selectList: [],
     },
   },
   ZEN: {

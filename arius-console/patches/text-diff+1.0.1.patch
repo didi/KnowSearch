@@ -1,0 +1,613 @@
+diff --git a/node_modules/text-diff/diff.js b/node_modules/text-diff/diff.js
+index a5afa51..7108220 100644
+--- a/node_modules/text-diff/diff.js
++++ b/node_modules/text-diff/diff.js
+@@ -78,8 +78,8 @@ diff.Diff;
+  *     instead.
+  * @return {!Array.<!diff.Diff>} Array of diff tuples.
+  */
+-diff.prototype.main = function(text1, text2, opt_checklines,
+-    opt_deadline) {
++diff.prototype.main = function (text1, text2, opt_checklines,
++  opt_deadline) {
+   // Set a deadline by which time the diff must be complete.
+   if (typeof opt_deadline == 'undefined') {
+     if (this.Timeout <= 0) {
+@@ -147,8 +147,8 @@ diff.prototype.main = function(text1, text2, opt_checklines,
+  * @return {!Array.<!diff.Diff>} Array of diff tuples.
+  * @private
+  */
+-diff.prototype.compute_ = function(text1, text2, checklines,
+-    deadline) {
++diff.prototype.compute_ = function (text1, text2, checklines,
++  deadline) {
+   var diffs;
+ 
+   if (!text1) {
+@@ -167,8 +167,8 @@ diff.prototype.compute_ = function(text1, text2, checklines,
+   if (i != -1) {
+     // Shorter text is inside the longer text (speedup).
+     diffs = [[DIFF_INSERT, longtext.substring(0, i)],
+-             [DIFF_EQUAL, shorttext],
+-             [DIFF_INSERT, longtext.substring(i + shorttext.length)]];
++    [DIFF_EQUAL, shorttext],
++    [DIFF_INSERT, longtext.substring(i + shorttext.length)]];
+     // Swap insertions for deletions if diff is reversed.
+     if (text1.length > text2.length) {
+       diffs[0][0] = diffs[2][0] = DIFF_DELETE;
+@@ -216,7 +216,7 @@ diff.prototype.compute_ = function(text1, text2, checklines,
+  * @return {!Array.<!diff.Diff>} Array of diff tuples.
+  * @private
+  */
+-diff.prototype.lineMode_ = function(text1, text2, deadline) {
++diff.prototype.lineMode_ = function (text1, text2, deadline) {
+   // Scan the text on a line-by-line basis first.
+   var a = this.linesToChars_(text1, text2);
+   text1 = a.chars1;
+@@ -253,7 +253,7 @@ diff.prototype.lineMode_ = function(text1, text2, deadline) {
+         if (count_delete >= 1 && count_insert >= 1) {
+           // Delete the offending records and add the merged ones.
+           diffs.splice(pointer - count_delete - count_insert,
+-                       count_delete + count_insert);
++            count_delete + count_insert);
+           pointer = pointer - count_delete - count_insert;
+           var a = this.main(text_delete, text_insert, false, deadline);
+           for (var j = a.length - 1; j >= 0; j--) {
+@@ -285,7 +285,7 @@ diff.prototype.lineMode_ = function(text1, text2, deadline) {
+  * @return {!Array.<!diff.Diff>} Array of diff tuples.
+  * @private
+  */
+-diff.prototype.bisect_ = function(text1, text2, deadline) {
++diff.prototype.bisect_ = function (text1, text2, deadline) {
+   // Cache the text lengths to prevent multiple calls.
+   var text1_length = text1.length;
+   var text2_length = text2.length;
+@@ -329,7 +329,7 @@ diff.prototype.bisect_ = function(text1, text2, deadline) {
+       }
+       var y1 = x1 - k1;
+       while (x1 < text1_length && y1 < text2_length &&
+-             text1.charAt(x1) == text2.charAt(y1)) {
++        text1.charAt(x1) == text2.charAt(y1)) {
+         x1++;
+         y1++;
+       }
+@@ -364,8 +364,8 @@ diff.prototype.bisect_ = function(text1, text2, deadline) {
+       }
+       var y2 = x2 - k2;
+       while (x2 < text1_length && y2 < text2_length &&
+-             text1.charAt(text1_length - x2 - 1) ==
+-             text2.charAt(text2_length - y2 - 1)) {
++        text1.charAt(text1_length - x2 - 1) ==
++        text2.charAt(text2_length - y2 - 1)) {
+         x2++;
+         y2++;
+       }
+@@ -408,8 +408,8 @@ diff.prototype.bisect_ = function(text1, text2, deadline) {
+  * @return {!Array.<!diff.Diff>} Array of diff tuples.
+  * @private
+  */
+-diff.prototype.bisectSplit_ = function(text1, text2, x, y,
+-    deadline) {
++diff.prototype.bisectSplit_ = function (text1, text2, x, y,
++  deadline) {
+   var text1a = text1.substring(0, x);
+   var text2a = text2.substring(0, y);
+   var text1b = text1.substring(x);
+@@ -434,7 +434,7 @@ diff.prototype.bisectSplit_ = function(text1, text2, x, y,
+  *     The zeroth element of the array of unique strings is intentionally blank.
+  * @private
+  */
+-diff.prototype.linesToChars_ = function(text1, text2) {
++diff.prototype.linesToChars_ = function (text1, text2) {
+   var lineArray = [];  // e.g. lineArray[4] == 'Hello\n'
+   var lineHash = {};   // e.g. lineHash['Hello\n'] == 4
+ 
+@@ -468,7 +468,7 @@ diff.prototype.linesToChars_ = function(text1, text2) {
+       lineStart = lineEnd + 1;
+ 
+       if (lineHash.hasOwnProperty ? lineHash.hasOwnProperty(line) :
+-          (lineHash[line] !== undefined)) {
++        (lineHash[line] !== undefined)) {
+         chars += String.fromCharCode(lineHash[line]);
+       } else {
+         chars += String.fromCharCode(lineArrayLength);
+@@ -481,7 +481,7 @@ diff.prototype.linesToChars_ = function(text1, text2) {
+ 
+   var chars1 = diff_linesToCharsMunge_(text1);
+   var chars2 = diff_linesToCharsMunge_(text2);
+-  return {chars1: chars1, chars2: chars2, lineArray: lineArray};
++  return { chars1: chars1, chars2: chars2, lineArray: lineArray };
+ };
+ 
+ 
+@@ -492,7 +492,7 @@ diff.prototype.linesToChars_ = function(text1, text2) {
+  * @param {!Array.<string>} lineArray Array of unique strings.
+  * @private
+  */
+-diff.prototype.charsToLines_ = function(diffs, lineArray) {
++diff.prototype.charsToLines_ = function (diffs, lineArray) {
+   for (var x = 0; x < diffs.length; x++) {
+     var chars = diffs[x][1];
+     var text = [];
+@@ -511,7 +511,7 @@ diff.prototype.charsToLines_ = function(diffs, lineArray) {
+  * @return {number} The number of characters common to the start of each
+  *     string.
+  */
+-diff.prototype.commonPrefix = function(text1, text2) {
++diff.prototype.commonPrefix = function (text1, text2) {
+   // Quick check for common null cases.
+   if (!text1 || !text2 || text1.charAt(0) != text2.charAt(0)) {
+     return 0;
+@@ -524,7 +524,7 @@ diff.prototype.commonPrefix = function(text1, text2) {
+   var pointerstart = 0;
+   while (pointermin < pointermid) {
+     if (text1.substring(pointerstart, pointermid) ==
+-        text2.substring(pointerstart, pointermid)) {
++      text2.substring(pointerstart, pointermid)) {
+       pointermin = pointermid;
+       pointerstart = pointermin;
+     } else {
+@@ -542,10 +542,10 @@ diff.prototype.commonPrefix = function(text1, text2) {
+  * @param {string} text2 Second string.
+  * @return {number} The number of characters common to the end of each string.
+  */
+-diff.prototype.commonSuffix = function(text1, text2) {
++diff.prototype.commonSuffix = function (text1, text2) {
+   // Quick check for common null cases.
+   if (!text1 || !text2 ||
+-      text1.charAt(text1.length - 1) != text2.charAt(text2.length - 1)) {
++    text1.charAt(text1.length - 1) != text2.charAt(text2.length - 1)) {
+     return 0;
+   }
+   // Binary search.
+@@ -556,7 +556,7 @@ diff.prototype.commonSuffix = function(text1, text2) {
+   var pointerend = 0;
+   while (pointermin < pointermid) {
+     if (text1.substring(text1.length - pointermid, text1.length - pointerend) ==
+-        text2.substring(text2.length - pointermid, text2.length - pointerend)) {
++      text2.substring(text2.length - pointermid, text2.length - pointerend)) {
+       pointermin = pointermid;
+       pointerend = pointermin;
+     } else {
+@@ -576,7 +576,7 @@ diff.prototype.commonSuffix = function(text1, text2) {
+  *     string and the start of the second string.
+  * @private
+  */
+-diff.prototype.commonOverlap_ = function(text1, text2) {
++diff.prototype.commonOverlap_ = function (text1, text2) {
+   // Cache the text lengths to prevent multiple calls.
+   var text1_length = text1.length;
+   var text2_length = text2.length;
+@@ -609,7 +609,7 @@ diff.prototype.commonOverlap_ = function(text1, text2) {
+     }
+     length += found;
+     if (found == 0 || text1.substring(text_length - length) ==
+-        text2.substring(0, length)) {
++      text2.substring(0, length)) {
+       best = length;
+       length++;
+     }
+@@ -628,7 +628,7 @@ diff.prototype.commonOverlap_ = function(text1, text2) {
+  *     text2 and the common middle.  Or null if there was no match.
+  * @private
+  */
+-diff.prototype.halfMatch_ = function(text1, text2) {
++diff.prototype.halfMatch_ = function (text1, text2) {
+   if (this.Timeout <= 0) {
+     // Don't risk returning a non-optimal diff if we have unlimited time.
+     return null;
+@@ -660,12 +660,12 @@ diff.prototype.halfMatch_ = function(text1, text2) {
+     var best_longtext_a, best_longtext_b, best_shorttext_a, best_shorttext_b;
+     while ((j = shorttext.indexOf(seed, j + 1)) != -1) {
+       var prefixLength = dmp.commonPrefix(longtext.substring(i),
+-                                          shorttext.substring(j));
++        shorttext.substring(j));
+       var suffixLength = dmp.commonSuffix(longtext.substring(0, i),
+-                                          shorttext.substring(0, j));
++        shorttext.substring(0, j));
+       if (best_common.length < suffixLength + prefixLength) {
+         best_common = shorttext.substring(j - suffixLength, j) +
+-            shorttext.substring(j, j + prefixLength);
++          shorttext.substring(j, j + prefixLength);
+         best_longtext_a = longtext.substring(0, i - suffixLength);
+         best_longtext_b = longtext.substring(i + prefixLength);
+         best_shorttext_a = shorttext.substring(0, j - suffixLength);
+@@ -674,7 +674,7 @@ diff.prototype.halfMatch_ = function(text1, text2) {
+     }
+     if (best_common.length * 2 >= longtext.length) {
+       return [best_longtext_a, best_longtext_b,
+-              best_shorttext_a, best_shorttext_b, best_common];
++        best_shorttext_a, best_shorttext_b, best_common];
+     } else {
+       return null;
+     }
+@@ -682,10 +682,10 @@ diff.prototype.halfMatch_ = function(text1, text2) {
+ 
+   // First check if the second quarter is the seed for a half-match.
+   var hm1 = diff_halfMatchI_(longtext, shorttext,
+-                             Math.ceil(longtext.length / 4));
++    Math.ceil(longtext.length / 4));
+   // Check again based on the third quarter.
+   var hm2 = diff_halfMatchI_(longtext, shorttext,
+-                             Math.ceil(longtext.length / 2));
++    Math.ceil(longtext.length / 2));
+   var hm;
+   if (!hm1 && !hm2) {
+     return null;
+@@ -720,7 +720,7 @@ diff.prototype.halfMatch_ = function(text1, text2) {
+  * Reduce the number of edits by eliminating semantically trivial equalities.
+  * @param {!Array.<!diff.Diff>} diffs Array of diff tuples.
+  */
+-diff.prototype.cleanupSemantic = function(diffs) {
++diff.prototype.cleanupSemantic = function (diffs) {
+   var changes = false;
+   var equalities = [];  // Stack of indices where equalities are found.
+   var equalitiesLength = 0;  // Keeping our own length var is faster in JS.
+@@ -751,12 +751,12 @@ diff.prototype.cleanupSemantic = function(diffs) {
+       // Eliminate an equality that is smaller or equal to the edits on both
+       // sides of it.
+       if (lastequality && (lastequality.length <=
+-          Math.max(length_insertions1, length_deletions1)) &&
+-          (lastequality.length <= Math.max(length_insertions2,
+-                                           length_deletions2))) {
++        Math.max(length_insertions1, length_deletions1)) &&
++        (lastequality.length <= Math.max(length_insertions2,
++          length_deletions2))) {
+         // Duplicate record.
+         diffs.splice(equalities[equalitiesLength - 1], 0,
+-                     [DIFF_DELETE, lastequality]);
++          [DIFF_DELETE, lastequality]);
+         // Change second copy to insert.
+         diffs[equalities[equalitiesLength - 1] + 1][0] = DIFF_INSERT;
+         // Throw away the equality we just deleted.
+@@ -790,35 +790,35 @@ diff.prototype.cleanupSemantic = function(diffs) {
+   pointer = 1;
+   while (pointer < diffs.length) {
+     if (diffs[pointer - 1][0] == DIFF_DELETE &&
+-        diffs[pointer][0] == DIFF_INSERT) {
++      diffs[pointer][0] == DIFF_INSERT) {
+       var deletion = diffs[pointer - 1][1];
+       var insertion = diffs[pointer][1];
+       var overlap_length1 = this.commonOverlap_(deletion, insertion);
+       var overlap_length2 = this.commonOverlap_(insertion, deletion);
+       if (overlap_length1 >= overlap_length2) {
+         if (overlap_length1 >= deletion.length / 2 ||
+-            overlap_length1 >= insertion.length / 2) {
++          overlap_length1 >= insertion.length / 2) {
+           // Overlap found.  Insert an equality and trim the surrounding edits.
+           diffs.splice(pointer, 0,
+-              [DIFF_EQUAL, insertion.substring(0, overlap_length1)]);
++            [DIFF_EQUAL, insertion.substring(0, overlap_length1)]);
+           diffs[pointer - 1][1] =
+-              deletion.substring(0, deletion.length - overlap_length1);
++            deletion.substring(0, deletion.length - overlap_length1);
+           diffs[pointer + 1][1] = insertion.substring(overlap_length1);
+           pointer++;
+         }
+       } else {
+         if (overlap_length2 >= deletion.length / 2 ||
+-            overlap_length2 >= insertion.length / 2) {
++          overlap_length2 >= insertion.length / 2) {
+           // Reverse overlap found.
+           // Insert an equality and swap and trim the surrounding edits.
+           diffs.splice(pointer, 0,
+-              [DIFF_EQUAL, deletion.substring(0, overlap_length2)]);
++            [DIFF_EQUAL, deletion.substring(0, overlap_length2)]);
+           diffs[pointer - 1][0] = DIFF_INSERT;
+           diffs[pointer - 1][1] =
+-              insertion.substring(0, insertion.length - overlap_length2);
++            insertion.substring(0, insertion.length - overlap_length2);
+           diffs[pointer + 1][0] = DIFF_DELETE;
+           diffs[pointer + 1][1] =
+-              deletion.substring(overlap_length2);
++            deletion.substring(overlap_length2);
+           pointer++;
+         }
+       }
+@@ -835,7 +835,7 @@ diff.prototype.cleanupSemantic = function(diffs) {
+  * e.g: The c<ins>at c</ins>ame. -> The <ins>cat </ins>came.
+  * @param {!Array.<!diff.Diff>} diffs Array of diff tuples.
+  */
+-diff.prototype.cleanupSemanticLossless = function(diffs) {
++diff.prototype.cleanupSemanticLossless = function (diffs) {
+   /**
+    * Given two strings, compute a score representing whether the internal
+    * boundary falls on logical boundaries.
+@@ -862,17 +862,17 @@ diff.prototype.cleanupSemanticLossless = function(diffs) {
+     var nonAlphaNumeric1 = char1.match(diff.nonAlphaNumericRegex_);
+     var nonAlphaNumeric2 = char2.match(diff.nonAlphaNumericRegex_);
+     var whitespace1 = nonAlphaNumeric1 &&
+-        char1.match(diff.whitespaceRegex_);
++      char1.match(diff.whitespaceRegex_);
+     var whitespace2 = nonAlphaNumeric2 &&
+-        char2.match(diff.whitespaceRegex_);
++      char2.match(diff.whitespaceRegex_);
+     var lineBreak1 = whitespace1 &&
+-        char1.match(diff.linebreakRegex_);
++      char1.match(diff.linebreakRegex_);
+     var lineBreak2 = whitespace2 &&
+-        char2.match(diff.linebreakRegex_);
++      char2.match(diff.linebreakRegex_);
+     var blankLine1 = lineBreak1 &&
+-        one.match(diff.blanklineEndRegex_);
++      one.match(diff.blanklineEndRegex_);
+     var blankLine2 = lineBreak2 &&
+-        two.match(diff.blanklineStartRegex_);
++      two.match(diff.blanklineStartRegex_);
+ 
+     if (blankLine1 || blankLine2) {
+       // Five points for blank lines.
+@@ -897,7 +897,7 @@ diff.prototype.cleanupSemanticLossless = function(diffs) {
+   // Intentionally ignore the first and last element (don't need checking).
+   while (pointer < diffs.length - 1) {
+     if (diffs[pointer - 1][0] == DIFF_EQUAL &&
+-        diffs[pointer + 1][0] == DIFF_EQUAL) {
++      diffs[pointer + 1][0] == DIFF_EQUAL) {
+       // This is a single edit surrounded by equalities.
+       var equality1 = diffs[pointer - 1][1];
+       var edit = diffs[pointer][1];
+@@ -917,13 +917,13 @@ diff.prototype.cleanupSemanticLossless = function(diffs) {
+       var bestEdit = edit;
+       var bestEquality2 = equality2;
+       var bestScore = diff_cleanupSemanticScore_(equality1, edit) +
+-          diff_cleanupSemanticScore_(edit, equality2);
++        diff_cleanupSemanticScore_(edit, equality2);
+       while (edit.charAt(0) === equality2.charAt(0)) {
+         equality1 += edit.charAt(0);
+         edit = edit.substring(1) + equality2.charAt(0);
+         equality2 = equality2.substring(1);
+         var score = diff_cleanupSemanticScore_(equality1, edit) +
+-            diff_cleanupSemanticScore_(edit, equality2);
++          diff_cleanupSemanticScore_(edit, equality2);
+         // The >= encourages trailing rather than leading whitespace on edits.
+         if (score >= bestScore) {
+           bestScore = score;
+@@ -965,7 +965,7 @@ diff.blanklineStartRegex_ = /^\r?\n\r?\n/;
+  * Reduce the number of edits by eliminating operationally trivial equalities.
+  * @param {!Array.<!diff.Diff>} diffs Array of diff tuples.
+  */
+-diff.prototype.cleanupEfficiency = function(diffs) {
++diff.prototype.cleanupEfficiency = function (diffs) {
+   var changes = false;
+   var equalities = [];  // Stack of indices where equalities are found.
+   var equalitiesLength = 0;  // Keeping our own length var is faster in JS.
+@@ -984,7 +984,7 @@ diff.prototype.cleanupEfficiency = function(diffs) {
+   while (pointer < diffs.length) {
+     if (diffs[pointer][0] == DIFF_EQUAL) {  // Equality found.
+       if (diffs[pointer][1].length < this.EditCost &&
+-          (post_ins || post_del)) {
++        (post_ins || post_del)) {
+         // Candidate found.
+         equalities[equalitiesLength++] = pointer;
+         pre_ins = post_ins;
+@@ -1011,11 +1011,11 @@ diff.prototype.cleanupEfficiency = function(diffs) {
+        * <ins>A</ins><del>B</del>X<del>C</del>
+        */
+       if (lastequality && ((pre_ins && pre_del && post_ins && post_del) ||
+-                           ((lastequality.length < this.EditCost / 2) &&
+-                            (pre_ins + pre_del + post_ins + post_del) == 3))) {
++        ((lastequality.length < this.EditCost / 2) &&
++          (pre_ins + pre_del + post_ins + post_del) == 3))) {
+         // Duplicate record.
+         diffs.splice(equalities[equalitiesLength - 1], 0,
+-                     [DIFF_DELETE, lastequality]);
++          [DIFF_DELETE, lastequality]);
+         // Change second copy to insert.
+         diffs[equalities[equalitiesLength - 1] + 1][0] = DIFF_INSERT;
+         equalitiesLength--;  // Throw away the equality we just deleted;
+@@ -1027,7 +1027,7 @@ diff.prototype.cleanupEfficiency = function(diffs) {
+         } else {
+           equalitiesLength--;  // Throw away the previous equality.
+           pointer = equalitiesLength > 0 ?
+-              equalities[equalitiesLength - 1] : -1;
++            equalities[equalitiesLength - 1] : -1;
+           post_ins = post_del = false;
+         }
+         changes = true;
+@@ -1047,7 +1047,7 @@ diff.prototype.cleanupEfficiency = function(diffs) {
+  * Any edit section can move as long as it doesn't cross an equality.
+  * @param {!Array.<!diff.Diff>} diffs Array of diff tuples.
+  */
+-diff.prototype.cleanupMerge = function(diffs) {
++diff.prototype.cleanupMerge = function (diffs) {
+   diffs.push([DIFF_EQUAL, '']);  // Add a dummy entry at the end.
+   var pointer = 0;
+   var count_delete = 0;
+@@ -1075,13 +1075,13 @@ diff.prototype.cleanupMerge = function(diffs) {
+             commonlength = this.commonPrefix(text_insert, text_delete);
+             if (commonlength !== 0) {
+               if ((pointer - count_delete - count_insert) > 0 &&
+-                  diffs[pointer - count_delete - count_insert - 1][0] ==
+-                  DIFF_EQUAL) {
++                diffs[pointer - count_delete - count_insert - 1][0] ==
++                DIFF_EQUAL) {
+                 diffs[pointer - count_delete - count_insert - 1][1] +=
+-                    text_insert.substring(0, commonlength);
++                  text_insert.substring(0, commonlength);
+               } else {
+                 diffs.splice(0, 0, [DIFF_EQUAL,
+-                                    text_insert.substring(0, commonlength)]);
++                  text_insert.substring(0, commonlength)]);
+                 pointer++;
+               }
+               text_insert = text_insert.substring(commonlength);
+@@ -1091,27 +1091,27 @@ diff.prototype.cleanupMerge = function(diffs) {
+             commonlength = this.commonSuffix(text_insert, text_delete);
+             if (commonlength !== 0) {
+               diffs[pointer][1] = text_insert.substring(text_insert.length -
+-                  commonlength) + diffs[pointer][1];
++                commonlength) + diffs[pointer][1];
+               text_insert = text_insert.substring(0, text_insert.length -
+-                  commonlength);
++                commonlength);
+               text_delete = text_delete.substring(0, text_delete.length -
+-                  commonlength);
++                commonlength);
+             }
+           }
+           // Delete the offending records and add the merged ones.
+           if (count_delete === 0) {
+             diffs.splice(pointer - count_insert,
+-                count_delete + count_insert, [DIFF_INSERT, text_insert]);
++              count_delete + count_insert, [DIFF_INSERT, text_insert]);
+           } else if (count_insert === 0) {
+             diffs.splice(pointer - count_delete,
+-                count_delete + count_insert, [DIFF_DELETE, text_delete]);
++              count_delete + count_insert, [DIFF_DELETE, text_delete]);
+           } else {
+             diffs.splice(pointer - count_delete - count_insert,
+-                count_delete + count_insert, [DIFF_DELETE, text_delete],
+-                [DIFF_INSERT, text_insert]);
++              count_delete + count_insert, [DIFF_DELETE, text_delete],
++              [DIFF_INSERT, text_insert]);
+           }
+           pointer = pointer - count_delete - count_insert +
+-                    (count_delete ? 1 : 0) + (count_insert ? 1 : 0) + 1;
++            (count_delete ? 1 : 0) + (count_insert ? 1 : 0) + 1;
+         } else if (pointer !== 0 && diffs[pointer - 1][0] == DIFF_EQUAL) {
+           // Merge this equality with the previous one.
+           diffs[pointer - 1][1] += diffs[pointer][1];
+@@ -1138,24 +1138,24 @@ diff.prototype.cleanupMerge = function(diffs) {
+   // Intentionally ignore the first and last element (don't need checking).
+   while (pointer < diffs.length - 1) {
+     if (diffs[pointer - 1][0] == DIFF_EQUAL &&
+-        diffs[pointer + 1][0] == DIFF_EQUAL) {
++      diffs[pointer + 1][0] == DIFF_EQUAL) {
+       // This is a single edit surrounded by equalities.
+       if (diffs[pointer][1].substring(diffs[pointer][1].length -
+-          diffs[pointer - 1][1].length) == diffs[pointer - 1][1]) {
++        diffs[pointer - 1][1].length) == diffs[pointer - 1][1]) {
+         // Shift the edit over the previous equality.
+         diffs[pointer][1] = diffs[pointer - 1][1] +
+-            diffs[pointer][1].substring(0, diffs[pointer][1].length -
+-                                        diffs[pointer - 1][1].length);
++          diffs[pointer][1].substring(0, diffs[pointer][1].length -
++            diffs[pointer - 1][1].length);
+         diffs[pointer + 1][1] = diffs[pointer - 1][1] + diffs[pointer + 1][1];
+         diffs.splice(pointer - 1, 1);
+         changes = true;
+       } else if (diffs[pointer][1].substring(0, diffs[pointer + 1][1].length) ==
+-          diffs[pointer + 1][1]) {
++        diffs[pointer + 1][1]) {
+         // Shift the edit over the next equality.
+         diffs[pointer - 1][1] += diffs[pointer + 1][1];
+         diffs[pointer][1] =
+-            diffs[pointer][1].substring(diffs[pointer + 1][1].length) +
+-            diffs[pointer + 1][1];
++          diffs[pointer][1].substring(diffs[pointer + 1][1].length) +
++          diffs[pointer + 1][1];
+         diffs.splice(pointer + 1, 1);
+         changes = true;
+       }
+@@ -1177,7 +1177,7 @@ diff.prototype.cleanupMerge = function(diffs) {
+  * @param {number} loc Location within text1.
+  * @return {number} Location within text2.
+  */
+-diff.prototype.xIndex = function(diffs, loc) {
++diff.prototype.xIndex = function (diffs, loc) {
+   var chars1 = 0;
+   var chars2 = 0;
+   var last_chars1 = 0;
+@@ -1210,7 +1210,7 @@ diff.prototype.xIndex = function(diffs, loc) {
+  * @param {!Array.<!diff.Diff>} diffs Array of diff tuples.
+  * @return {string} HTML representation.
+  */
+-diff.prototype.prettyHtml = function(diffs) {
++diff.prototype.prettyHtml = function (diffs) {
+   var html = [];
+   var pattern_amp = /&/g;
+   var pattern_lt = /</g;
+@@ -1220,7 +1220,7 @@ diff.prototype.prettyHtml = function(diffs) {
+     var op = diffs[x][0];    // Operation (insert, delete, equal)
+     var data = diffs[x][1];  // Text of change.
+     var text = data.replace(pattern_amp, '&amp;').replace(pattern_lt, '&lt;')
+-        .replace(pattern_gt, '&gt;').replace(pattern_br, '<br/>');
++      .replace(pattern_gt, '&gt;').replace(pattern_br, '<br/>');
+     switch (op) {
+       case DIFF_INSERT:
+         html[x] = '<ins>' + text + '</ins>';
+@@ -1242,7 +1242,7 @@ diff.prototype.prettyHtml = function(diffs) {
+  * @param {!Array.<!diff.Diff>} diffs Array of diff tuples.
+  * @return {string} Source text.
+  */
+-diff.prototype.text1 = function(diffs) {
++diff.prototype.text1 = function (diffs) {
+   var text = [];
+   for (var x = 0; x < diffs.length; x++) {
+     if (diffs[x][0] !== DIFF_INSERT) {
+@@ -1258,7 +1258,7 @@ diff.prototype.text1 = function(diffs) {
+  * @param {!Array.<!diff.Diff>} diffs Array of diff tuples.
+  * @return {string} Destination text.
+  */
+-diff.prototype.text2 = function(diffs) {
++diff.prototype.text2 = function (diffs) {
+   var text = [];
+   for (var x = 0; x < diffs.length; x++) {
+     if (diffs[x][0] !== DIFF_DELETE) {
+@@ -1275,7 +1275,7 @@ diff.prototype.text2 = function(diffs) {
+  * @param {!Array.<!diff.Diff>} diffs Array of diff tuples.
+  * @return {number} Number of changes.
+  */
+-diff.prototype.levenshtein = function(diffs) {
++diff.prototype.levenshtein = function (diffs) {
+   var levenshtein = 0;
+   var insertions = 0;
+   var deletions = 0;
+@@ -1310,7 +1310,7 @@ diff.prototype.levenshtein = function(diffs) {
+  * @param {!Array.<!diff.Diff>} diffs Array of diff tuples.
+  * @return {string} Delta text.
+  */
+-diff.prototype.toDelta = function(diffs) {
++diff.prototype.toDelta = function (diffs) {
+   var text = [];
+   for (var x = 0; x < diffs.length; x++) {
+     switch (diffs[x][0]) {
+@@ -1337,7 +1337,7 @@ diff.prototype.toDelta = function(diffs) {
+  * @return {!Array.<!diff.Diff>} Array of diff tuples.
+  * @throws {!Error} If invalid input.
+  */
+-diff.prototype.fromDelta = function(text1, delta) {
++diff.prototype.fromDelta = function (text1, delta) {
+   var diffs = [];
+   var diffsLength = 0;  // Keeping our own length var is faster in JS.
+   var pointer = 0;  // Cursor in text1
+@@ -1356,7 +1356,7 @@ diff.prototype.fromDelta = function(text1, delta) {
+         }
+         break;
+       case '-':
+-        // Fall through.
++      // Fall through.
+       case '=':
+         var n = parseInt(param, 10);
+         if (isNaN(n) || n < 0) {
+@@ -1374,13 +1374,13 @@ diff.prototype.fromDelta = function(text1, delta) {
+         // Anything else is an error.
+         if (tokens[x]) {
+           throw new Error('Invalid diff operation in diff_fromDelta: ' +
+-                          tokens[x]);
++            tokens[x]);
+         }
+     }
+   }
+   if (pointer != text1.length) {
+     throw new Error('Delta length (' + pointer +
+-        ') does not equal source text length (' + text1.length + ').');
++      ') does not equal source text length (' + text1.length + ').');
+   }
+   return diffs;
+ };
+@@ -1390,9 +1390,10 @@ diff.prototype.fromDelta = function(text1, delta) {
+ // In a browser, 'this' will be 'window'.
+ // Users of node.js should 'require' the uncompressed version since Google's
+ // JS compiler may break the following exports for non-browser environments.
+-this['diff'] = diff;
+-this['DIFF_DELETE'] = DIFF_DELETE;
+-this['DIFF_INSERT'] = DIFF_INSERT;
+-this['DIFF_EQUAL'] = DIFF_EQUAL;
++var _this = this || window || {};
++_this['diff'] = diff;
++_this['DIFF_DELETE'] = DIFF_DELETE;
++_this['DIFF_INSERT'] = DIFF_INSERT;
++_this['DIFF_EQUAL'] = DIFF_EQUAL;
+ 
+ module.exports = diff;

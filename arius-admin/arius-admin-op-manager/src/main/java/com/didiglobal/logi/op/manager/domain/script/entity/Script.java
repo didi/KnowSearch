@@ -57,6 +57,10 @@ public class Script {
      * 创建者
      */
     private String creator;
+    /**
+     * 模板超时时间
+     */
+    private Integer timeout;
 
     public Script create() {
         this.createTime = new Timestamp(System.currentTimeMillis());

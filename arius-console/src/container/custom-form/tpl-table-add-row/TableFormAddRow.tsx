@@ -10,6 +10,7 @@ interface ITableFormAddRowProps {
   type: string;
   onChange?: (result: string[]) => any;
   value?: any;
+  machineList?: [];
 }
 
 export interface IState {
@@ -25,7 +26,7 @@ export const TableFormAddRow = (props: ITableFormAddRowProps) => {
     const { dataSource } = state;
     switch (action.key) {
       case "rowData": // 给表格添加一行数据
-        dataSource.push({});
+        dataSource.push(action.data || {});
         break;
       case "deleteRow": // 删除一行数据
         dataSource?.splice(action.data.index, 1);
@@ -51,7 +52,7 @@ export const TableFormAddRow = (props: ITableFormAddRowProps) => {
       <div className={basicClass}>
         <Row>
           <Col span={24}>
-            <EditTable />
+            <EditTable machineList={props.machineList} />
           </Col>
         </Row>
       </div>

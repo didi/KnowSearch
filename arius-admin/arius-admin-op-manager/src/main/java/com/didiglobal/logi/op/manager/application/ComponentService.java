@@ -236,7 +236,6 @@ public class ComponentService {
         }
         return res;
     }
-    @Transactional(rollbackFor = Exception.class)
     public Result<Boolean> deleteComponents(List<Integer> componentIds) {
         if (CollectionUtils.isEmpty(componentIds)) {
             return Result.build(Boolean.TRUE);

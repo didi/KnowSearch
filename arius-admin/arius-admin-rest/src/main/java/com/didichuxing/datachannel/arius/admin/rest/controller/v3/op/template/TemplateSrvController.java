@@ -62,4 +62,21 @@ public class TemplateSrvController {
             HttpRequestUtil.getProjectId(request));
     }
 
+    @PutMapping("/{templateId}/block-write")
+    @ResponseBody
+    @ApiOperation(value = "写变更")
+    public Result<Void> write(HttpServletRequest request, @PathVariable Integer templateId,
+                              @RequestParam("status") Boolean status)  {
+        return templateSrvManager.blockWrite(templateId, status, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
+    }
+
+    @PutMapping("/{templateId}/block-read")
+    @ResponseBody
+    @ApiOperation(value = "读变更")
+    public Result<Void> read(HttpServletRequest request, @PathVariable Integer templateId,
+                             @RequestParam("status") Boolean status) {
+        return templateSrvManager.blockRead(templateId, status, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
+    }
 }

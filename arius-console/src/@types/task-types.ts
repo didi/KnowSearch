@@ -40,17 +40,12 @@ export interface ITaskBaseInfo {
 
 export interface ITaskDetail {
   cancel: number;
-  creating: number;
-  roleNameTaskDetailMap: ITaskNodeMap;
   failed: number;
-  ignore: number;
-  orderType: number;
-  percent: number;
-  status: string;
   success: number;
   sum: number;
   waiting: number;
-  key?: number;
+  running: number;
+  ignore: number;
 }
 
 export interface IDcdrStepDetail {
@@ -86,7 +81,7 @@ export interface ITaskNodeMap {
 
 export interface INodeTask {
   grp: number;
-  hostname: string;
+  host?: string;
   id: number;
   idx: number;
   role: string;
@@ -95,6 +90,7 @@ export interface INodeTask {
   workOrderTaskId: number;
   updateTime: string;
   key?: number;
+  groupName?: string;
 }
 
 export interface ITaskLog {

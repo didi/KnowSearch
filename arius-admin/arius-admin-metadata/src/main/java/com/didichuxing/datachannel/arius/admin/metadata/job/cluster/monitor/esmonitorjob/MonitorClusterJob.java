@@ -27,7 +27,6 @@ import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonit
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorNodeEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpHostUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;

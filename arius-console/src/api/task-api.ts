@@ -1,76 +1,78 @@
-import fetch, { formFetch } from '../lib/fetch';
+import fetch, { formFetch } from "../lib/fetch";
 
-export const getTaskList = () => {
-  return fetch(`/v3/op/worktask/tasks`);
-};
-
-export const getTaskBaseInfo = (id: number) => {
-  return fetch(`/v3/op/ecm/work-order/task/${id}/basic-info`);
-};
-
-export const getTaskDetail = (id: number) => {
-  return fetch(`/v3/op/ecm/work-order/task/${id}/task-details`);
-};
-
-export const getTaskLog = (id: number) => {
-  return fetch(`/v3/op/ecm/work-order/task/${id}/task-detail/log`);
-};
-
-export const redofailedTask = (id: number, hostname: string) => { // 重试
-  return fetch(`/v3/op/ecm/work-order/task/${id}/redo-failed?hostname=${hostname}`, {
-    method: 'POST',
+export const getTaskList = (params) => {
+  return fetch(`/v3/op-task/page`, {
+    method: "POST",
+    body: params,
   });
 };
 
-export const skipfailedTask = (id: number, hostname: string) => { // 跳过
-  return fetch(`/v3/op/ecm/work-order/task/${id}/skip-failed?hostname=${hostname}`, {
-    method: 'POST',
+// 任务详情
+export const getTaskBaseInfo = (taskId: number) => {
+  return fetch(`/v3/op-task/${taskId}`);
+};
+
+// 获取任务类型
+export const getTaskType = () => {
+  return fetch(`/v3/op-task/type-enums`);
+};
+
+// 执行进度接口
+export const getTaskDetail = (taskId: number) => {
+  return fetch(`/v3/ecm/op-task/detail-info?taskId=${taskId}`);
+};
+
+// 对主任务进行相应的操作
+// action: start、pause、kill、cancel、un_know
+export const actionTask = (action: string, taskId: number) => {
+  return fetch(`/v3/ecm/op-task/${action}/${taskId}`, {
+    method: "POST",
   });
 };
 
-export const pauseTask = (id: number) => { // 暂停
-  return fetch(`/v3/op/ecm/work-order/task/${id}/pause`, {
-    method: 'POST',
+// 对任务子节点进行相应的操作
+// action: ignore redo kill
+export const actionHostTask = (params) => {
+  return fetch(`/v3/ecm/op-task/${params.action}/${params.taskId}/${params.host}?groupName=${params?.groupName}`, {
+    method: "POST",
   });
 };
 
-export const continueTask = (id: number) => {  // 继续
-  return fetch(`/v3/op/ecm/work-order/task/${id}/continue`, {
-    method: 'POST',
+// 执行任务
+export const executeTask = (taskId: number) => {
+  return fetch(`/v3/ecm/op-task/execute/${taskId}`, {
+    method: "POST",
   });
 };
 
-export const cancalTask = (id: number) => { // 取消
-  return fetch(`/v3/op/ecm/work-order/task/${id}/cancel`, {
-    method: 'POST',
+// 重试任务
+export const retryTask = (taskId: number) => {
+  return fetch(`/v3/ecm/op-task/retry/${taskId}`, {
+    method: "POST",
   });
 };
 
-export const createTask = (id: number) => { // 启动
-  return fetch(`/v3/op/ecm/work-order/task/${id}/create`, {
-    method: 'POST',
+// 回滚
+export const rollbackTask = (id: number) => {
+  return fetch(`/v3/op/ecm/work-order/task/${id}/rollback`, {
+    method: "POST",
   });
 };
 
-export const scaleTask = (id: number) => { // 扩缩容
-  return fetch(`/v3/op/ecm/work-order/task/${id}/scale`, {
-    method: 'POST',
-  });
+// zeus 查看任务执行完成后的错误输出
+export const getStderrLog = (taskId: number, hostname: string, groupName: string) => {
+  return fetch(`/v3/ecm/op-task/log/stderr?taskId=${taskId}&hostname=${hostname}&groupName=${groupName}`);
 };
 
-export const restartTask = (id: number) => { // 重启
-  return fetch(`/v3/op/ecm/work-order/task/${id}/restart`, {
-    method: 'POST',
-  });
-};
-export const retryTask = (id: number) => { // 重试
-  return fetch(`/v3/op/ecm/work-order/task/${id}/retry`, {
-    method: 'POST',
-  });
+// zeus 查看任务执行完成后的标准输出
+export const getStdoutLog = (taskId: number, hostname: string, groupName: string) => {
+  return fetch(`/v3/ecm/op-task/log/stdout?taskId=${taskId}&hostname=${hostname}&groupName=${groupName}`);
 };
 
-export const upgradeTask = (id: number) => { // 升级
-  return fetch(`/v3/op/ecm/work-order/task/${id}/upgrade`, {
-    method: 'POST',
+// 集群配置回滚
+export const rollbackClusterConfig = (params) => {
+  return fetch(`/v3/op-task/es-cluster-config-rollback`, {
+    method: "POST",
+    body: params,
   });
 };

@@ -84,7 +84,7 @@ public class ESClusterConfigRollbackTaskHandler extends AbstractESTaskHandler {
 								content.getComponentId())
 						.getData();
 				return new OperateRecord.Builder()
-						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_PLUGIN_ROLLBACK)
+						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_CONF_CHANGE_ROLLBACK)
 						.content(
 								String.format("%s 配置回滚：回滚任务 ID：【%s】", component.getName(),
 										content.getTaskId()))

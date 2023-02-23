@@ -104,6 +104,15 @@ public class ClusterPhyMetricsController {
             HttpRequestUtil.getOperator(request), ClusterPhyTypeMetricsEnum.INDICES);
     }
 
+    @PostMapping("/indices")
+    @ResponseBody
+    @ApiOperation(value = "获取物理集群多个索引指标信息")
+    public Result<List<VariousLineChartMetricsVO>> getMultiClusterPhyIndicesMetrics(@RequestBody MultiMetricsClusterPhyIndicesDTO param,
+                                                                               HttpServletRequest request) {
+        return clusterPhyMetricsManager.getMultiClusterIndicesMetrics(param, HttpRequestUtil.getProjectId(request),
+                HttpRequestUtil.getOperator(request), ClusterPhyTypeMetricsEnum.INDICES);
+    }
+
     @PostMapping("/template")
     @ResponseBody
     @ApiOperation(value = "获取物理集群索引模板指标信息")
@@ -111,6 +120,15 @@ public class ClusterPhyMetricsController {
                                                                                 HttpServletRequest request) {
         return clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, HttpRequestUtil.getProjectId(request),
             HttpRequestUtil.getOperator(request), ClusterPhyTypeMetricsEnum.TEMPLATES);
+    }
+
+    @PostMapping("/templates")
+    @ResponseBody
+    @ApiOperation(value = "获取物理集群多个索引模板指标信息")
+    public Result<List<VariousLineChartMetricsVO>> getMultiClusterPhyTemplateMetrics(@RequestBody MultiMetricsClusterPhyTemplateDTO param,
+                                                                                HttpServletRequest request) {
+        return clusterPhyMetricsManager.getMultiClusterTemplatesMetrics(param, HttpRequestUtil.getProjectId(request),
+                HttpRequestUtil.getOperator(request), ClusterPhyTypeMetricsEnum.TEMPLATES);
     }
 
     @GetMapping("{clusterPhyName}/{node}/task")

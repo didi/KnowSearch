@@ -109,7 +109,7 @@ public class GatewayUpgradeTaskHandler extends AbstractGatewayTaskHandler {
 						packageService.getPackageById(content.getPackageId().longValue()).getData()
 								.getVersion();
 				return new OperateRecord.Builder()
-						.operationTypeEnum(OperateTypeEnum.GATEWAY_RESTART)
+						.operationTypeEnum(OperateTypeEnum.GATEWAY_UPGRADE)
 						.content(String.format("集群：【%s】，升级：【%s->%s】", component.getName(), beforeVersion,
 								afterVersion))
 						.project(briefVO)

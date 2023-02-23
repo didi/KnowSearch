@@ -19,11 +19,20 @@ module.exports = {
   port: pkgJson.port,
   extraBabelPlugins: [
     [
-      "babel-plugin-import",
+      "import",
       {
         libraryName: "antd",
         style: true,
       },
+      "antd"
+    ],
+    [
+      "import",
+      {
+        libraryName: "knowdesign",
+        style: true,
+      },
+      "knowdesign"
     ],
     "@babel/plugin-transform-object-assign",
     "@babel/plugin-transform-modules-commonjs",
@@ -32,23 +41,22 @@ module.exports = {
   ],
   devServer: {
     inline: true,
-    // 后端服务代理地址配置
-    // proxy: {
-    //   "/api/es/admin": {
-    //     target: "xxx", // 后端服务地址
-    //     changeOrigin: true,
-    //     pathRewrite: {
-    //       "^/api/es/admin": "/admin/api",
-    //     },
-    //   },
-    //   "/_sql": {
-    //     target: "xxx",
-    //     changeOrigin: true,
-    //   },
-    //   "/console/arius/kibana7": {
-    //     target: "xxx",
-    //   }
-    // },
+    proxy: {
+      "/api/es/admin": {
+        target: "https://api-kylin-xg02.intra.xiaojukeji.com/bigdata_commercial_es_admin_master",
+        changeOrigin: true,
+        pathRewrite: {
+          "^/api/es/admin": "/admin/api",
+        },
+      },
+      "/console/arius/kibana7": {
+        target: "http://10.96.64.32:8061",
+        changeOrigin: true,
+        headers: {
+          'Authorization': "Basic MTphekFXaUpoeGtobzMzYWM="
+        }
+      },
+    },
     historyApiFallback: true,
     headers: {
       "Access-Control-Allow-Origin": "*",

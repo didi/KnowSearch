@@ -1,229 +1,122 @@
-import { Modal } from 'antd';
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { Drawer, Button } from "antd";
 import { connect } from "react-redux";
 import * as actions from "../../../actions";
-import { Dispatch } from "redux";
-import {
-  FormItemType,
-  IFormItem,
-  XForm as XFormComponent,
-} from "component/x-form";
-import { OrderNode } from "container/custom-form";
+import { FormItemType, IFormItem, XForm as XFormComponent } from "component/x-form";
+import { getPackageTypeDescVersion } from "api/cluster-api";
+import { clusterUpgrade } from "api/cluster-api";
+import { showSubmitTaskSuccessModal } from "container/custom-component";
+import { RenderText } from "container/custom-form";
 import "./index.less";
-import { VERSION_MAINFEST_TYPE } from "constants/status-map";
-import { IVersions } from "typesPath/cluster/physics-type";
-import { getPackageList } from "api/cluster-api";
-import { IWorkOrder } from "typesPath/params-types";
-import { submitWorkOrder } from "api/common-api";
 
-const labelList = [
-  {
-    label: "集群名称：",
-    key: "cluster",
-    content: "",
-  },
-  {
-    label: "申请人：",
-    key: "user",
-    content: "",
-  },
-  {
-    label: "集群类型：",
-    key: "type",
-    content: "",
-  },
-  {
-    label: "现有ES版本：",
-    key: "esVersion",
-    content: "",
-  },
-];
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  setModalId: (modalId: string, params?: any, cb?: Function) =>
-    dispatch(actions.setModalId(modalId, params, cb)),
-});
-
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   params: state.modal.params,
   user: state.user,
   app: state.app,
 });
 
-const connects: Function = connect;
+export const UpgradeCluster = connect(mapStateToProps)((props: { dispatch: any; params: any; cb: any; setDrawerId: any }) => {
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [options, setOptions] = useState([]);
 
-@connects(mapStateToProps, mapDispatchToProps)
-export class UpgradeCluster extends React.Component<any> {
-  state = {
-    formMapItem: [
-      {
-        key: "esVersion",
-        label: "升级至ES版本",
-        type: FormItemType.select,
-        options: [],
-        rules: [
-          {
-            required: true,
-          },
-        ],
-        attrs: {
-          style: { width: "50%" },
-        },
-      },
-      {
-        key: "roleOrder",
-        label: "重启节点顺序",
-        type: FormItemType.custom,
-        customFormItem: <OrderNode id={this.props.params?.id} />,
-      },
-      {
-        key: "description",
-        type: FormItemType.textArea,
-        label: "申请原因",
-        rules: [
-          {
-            required: true,
-            whitespace: true,
-            validator: async (rule: any, value: string) => {
-              if (value?.trim().length > 0 && value?.trim().length < 100) {
-                return Promise.resolve();
-              } else {
-                return Promise.reject("请输入1-100字申请原因");
-              }
-            },
-          },
-        ],
-        attrs: {
-          placeholder: "请输入1-100字申请原因",
-        },
-      },
-    ] as IFormItem[],
-  };
-  formRef: any = React.createRef();
+  const formRef = useRef(null);
 
-  public componentDidMount() {
-    const { params } = this.props;
-    let packageDockerList = [] as IVersions[];
-    let packageHostList = [] as IVersions[];
-    getPackageList().then((data: IVersions[]) => {
-      const list = data.filter((data, indx, self) => {
-        return (
-          self.findIndex((ele) => ele.esVersion === data.esVersion) === indx
-        );
-      });
-      const packageList = list.map((ele, index) => {
-        return {
-          ...ele,
-          key: index,
-          value: ele.esVersion,
-        };
-      });
-      packageDockerList = packageList.filter((ele) => ele.manifest === 3);
-      packageHostList = packageList.filter((ele) => ele.manifest === 4);
-      const formMapItem = this.state.formMapItem;
-      if (params.type === 3) {
-        formMapItem[0].options = packageDockerList;
-        this.setState({
-          formMapItem,
-        });
-      } else {
-        formMapItem[0].options = packageHostList;
-        this.setState({
-          formMapItem,
-        });
-      }
+  useEffect(() => {
+    getOptions();
+  }, []);
+
+  const getOptions = async () => {
+    let data = await getPackageTypeDescVersion("es-install-package");
+    const list = data.filter((data, indx, self) => {
+      return self.findIndex((ele) => ele.esVersion === data.esVersion) !== indx;
     });
-  }
+    const options = list.map((ele) => {
+      return { label: ele.version, value: ele.id };
+    });
+    setOptions(options);
+  };
 
-  public handleOk = () => {
-    this.formRef.current!.validateFields().then((result) => {
-      result.roleOrder = result.roleOrder.map((item) => item.roleClusterName);
-      let roleClusterHosts = [];
-      if (this.props.params && this.props.params.esRoleClusterVOS) {
-        this.props.params.esRoleClusterVOS?.forEach(item => {
-          item?.esRoleClusterHostVO?.forEach((obj) => {
-            const param: any = { role: item.role, hostname: obj.hostname};
-            if (obj.rack == 'cold') {
-              param.beCold = true;
-            } else {
-              param.beCold = false;
-            }
-            roleClusterHosts.push(param)
-          })
-        });
-      }
-      const params: IWorkOrder = {
-        contentObj: {
-          phyClusterId: this.props.params.id,
-          phyClusterName: this.props.params.cluster,
-          esVersion: result.esVersion,
-          roleOrder: result.roleOrder,
-          roleClusterHosts,
-        },
-        submitorAppid: this.props.app.appInfo()?.id,
-        submitor: this.props.user.getName('domainAccount'),
-        description: result.description || "",
-        type: "clusterOpUpdate",
+  const handleOk = () => {
+    setConfirmLoading(true);
+    formRef.current!.validateFields().then(async (result) => {
+      let params = {
+        componentId: props.params.componentId,
+        packageId: result.packageId,
       };
-      return submitWorkOrder(params);
+      let expandData = JSON.stringify(params);
+      try {
+        let ret = await clusterUpgrade({ expandData });
+        props.dispatch(actions.setDrawerId(""));
+        showSubmitTaskSuccessModal(ret, props.params?.history);
+      } finally {
+        setConfirmLoading(false);
+      }
     });
   };
 
-  public handleCancel = () => {
-    this.props.setModalId("");
-  };
+  const formMapItem = [
+    {
+      key: "tips",
+      label: "",
+      type: FormItemType.custom,
+      customFormItem: (
+        <div className="warning-container" style={{ margin: -24 }}>
+          <span className="icon iconfont iconbiaogejieshi"></span>
+          <span>请确保版本间通讯协议及存储协议相同</span>
+        </div>
+      ),
+    },
+    {
+      key: "cluster",
+      label: "集群名称",
+      type: FormItemType.text,
+      className: "cluster-name",
+      customFormItem: <RenderText text={props.params.cluster} />,
+    },
+    {
+      key: "esVersion",
+      label: "现有ES版本",
+      type: FormItemType.text,
+      className: "cluster-version",
+      customFormItem: <RenderText text={props.params.esVersion} />,
+    },
+    {
+      key: "packageId",
+      label: "升级至ES版本",
+      type: FormItemType.select,
+      options,
+      rules: [
+        {
+          required: true,
+        },
+      ],
+      attrs: {
+        style: { width: "50%" },
+      },
+    },
+  ] as IFormItem[];
 
-  public getLabelList = () => {
-    const { params, user } = this.props;
-    return labelList.map((item) => {
-      item.content = params[item.key];
-      if (item.key === "user") {
-        item.content = user.getName('domainAccount');
+  return (
+    <Drawer
+      destroyOnClose={true}
+      onClose={() => props.dispatch(actions.setDrawerId(""))}
+      maskClosable={false}
+      closable={true}
+      visible={true}
+      title="集群升级"
+      width={660}
+      footer={
+        <div className="footer-btn">
+          <Button style={{ marginRight: 10 }} loading={confirmLoading} type="primary" onClick={handleOk}>
+            确定
+          </Button>
+          <Button onClick={() => props.dispatch(actions.setDrawerId(""))}>取消</Button>
+        </div>
       }
-      if (item.key === "type") {
-        item.content = VERSION_MAINFEST_TYPE[params[item.key]];
-      }
-      if (item.key === "user") {
-        item.content = this.props.user.getName('domainAccount');
-      }
-      return item;
-    });
-  };
-
-  render() {
-    return (
-      <div>
-        <Modal
-          visible={true}
-          title="集群升级"
-          width={660}
-          onOk={this.handleOk}
-          onCancel={this.handleCancel}
-          maskClosable={false}
-          okText={'确定'}
-          cancelText={'取消'}
-        >
-          <div className="upgrade-cluster-box">
-            {this.getLabelList().map((item, index) => (
-              <div
-                key={item.label + index}
-                className="upgrade-cluster-box-item"
-              >
-                <label htmlFor={item.label}>{item.label}</label>
-                <span>{item.content}</span>
-              </div>
-            ))}
-          </div>
-          <div>
-            <XFormComponent
-              formData={{}}
-              formMap={this.state.formMapItem}
-              wrappedComponentRef={this.formRef}
-              layout={"vertical"}
-            />
-          </div>
-        </Modal>
+    >
+      <div className="upgrade-cluster-form">
+        <XFormComponent formData={{}} formMap={formMapItem} wrappedComponentRef={formRef} layout={"vertical"} />
       </div>
-    );
-  }
-}
+    </Drawer>
+  );
+});

@@ -318,7 +318,7 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
                 new OperateRecord.Builder().userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
                     .bizId(id).project(projectService.getProjectBriefByProjectId(projectId))
                         .operateProject(projectService.getProjectBriefByProjectId(templateId2OperateProjectId.get(id)))
-                    .content("deltaHotDays:" + days).buildDefaultManualTrigger());
+                    .content("冷节点保存天数:" + days).buildDefaultManualTrigger());
         }
 
         return Result.buildSucc(count);

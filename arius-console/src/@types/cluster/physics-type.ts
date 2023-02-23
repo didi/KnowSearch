@@ -1,6 +1,6 @@
 /*
-*@运维管理 => 操作记录
-*/
+ *@运维管理 => 操作记录
+ */
 export interface IOpRecord {
   bizId: string;
   content?: string;
@@ -14,8 +14,8 @@ export interface IOpRecord {
 }
 
 /*
-*@运维管理 => 版本管理
-*/
+ *@运维管理 => 版本管理
+ */
 export interface IVersions {
   id: number;
   name: string;
@@ -33,8 +33,8 @@ export interface IVersions {
 }
 
 /*
-*@运维管理 => 配置管理
-*/
+ *@运维管理 => 配置管理
+ */
 export interface IDeploy {
   createTime: string;
   dimension?: number | string;
@@ -53,7 +53,7 @@ export interface IDeploySwitch {
 }
 
 export interface ITemplateLogic {
-  appId: number;
+  projectId: number;
   createTime: string;
   authType: number;
   dataCenter: string;
@@ -71,7 +71,6 @@ export interface ITemplateLogic {
   libraDepartmentId: string;
   name: string;
   quota: number;
-  responsible: string;
   routingField?: string;
   updateTime: string;
   [key: string]: any;
@@ -99,8 +98,8 @@ export interface IOpPhysicsCluster {
 }
 
 /*
-*@运维管理 => 集群管理 => 物理集群 => 配置信息
-*/
+ *@运维管理 => 集群管理 => 物理集群 => 配置信息
+ */
 
 export interface IPhyConfig {
   clusterId: number;
@@ -113,7 +112,6 @@ export interface IPhyConfig {
   selected?: any;
   id: number;
 }
-
 
 export interface INewRegionRacks {
   cluster: string;

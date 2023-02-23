@@ -1,62 +1,61 @@
 import React, { memo, useState, useEffect, useCallback, useRef } from "react";
 import { useSelector, shallowEqual, useDispatch } from "react-redux";
-import { ReloadOutlined } from "@ant-design/icons";
 import _ from "lodash";
 import { IndexConfig, Line, SelectRadio } from "../components";
-import {
-  defaultIndexConfigList,
-  allCheckedData,
-  getCheckedData,
-  indexConfigData,
-} from "./project-view-config";
-import { formatterTimeYMDHMS, getOption, objFlat } from "../config";
-import { TOP_MAP } from "constants/status-map";
-import {
-  getCheckedList,
-  setCheckedList,
-  getProjectViewData,
-  getAppIdList,
-} from "../../../api/gateway-kanban";
+import { defaultIndexConfigList, allCheckedData, getCheckedData, indexConfigData } from "./project-view-config";
+import { getOption, objFlat } from "../config";
+import { getRenderToolTip } from "./config";
+import { TOP_MAP, TOP_TIME_RANGE, TOP_TYPE } from "constants/status-map";
+import { getCheckedList, setCheckedList, getProjectViewData, getProjectIdList } from "../../../api/gateway-kanban";
 import { setIsUpdate } from "actions/gateway-kanban";
-import { arrayMoveImmutable } from 'array-move';
-import DragGroup from './../../../packages/drag-group/DragGroup';
-export const classPrefix = "rf-monitor";
+import { arrayMoveImmutable } from "array-move";
+import DragGroup from "../../../d1-packages/DragGroup";
+import { OperationPanel } from "../components/operation-panel";
+import { copyString } from "lib/utils";
 
-const secondMetricsType = "app";
+export const classPrefix = "monitor";
+
+const secondUserConfigType = "app";
 
 export const ProjectView = memo(() => {
-  const [topNu, setTopNu] = useState(TOP_MAP[0].value);
-  const [appId, setAppId] = useState("");
-  const [appIdList, setAppIdList] = useState([]);
+  const [projectIdList, setProjectIdList] = useState([]);
   const [checkedData, setCheckedData] = useState(getCheckedData([]));
   const [metricsTypes, setMetricsTypes] = useState([]);
-  const [appIdMap, setAppIdMap] = useState({});
+  const [projectIdMap, setProjectIdMap] = useState({});
   const [viewData, setViewData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isGetAppIdEnd, setIsGetAppIdEnd] = useState(false);
+  const [isGetProjectIdEnd, setIsGetProjectIdEnd] = useState(false);
 
   const sortEnd = ({ oldIndex, newIndex }) => {
-    const listsNew = arrayMoveImmutable(checkedData['项目性能指标'], oldIndex, newIndex)
-    checkedData['项目性能指标'] = listsNew;
+    const listsNew = arrayMoveImmutable(checkedData["应用性能指标"], oldIndex, newIndex);
+    checkedData["应用性能指标"] = listsNew;
     const checkedList = objFlat(checkedData);
-    setCheckedList(secondMetricsType, checkedList);
+    setCheckedList(secondUserConfigType, checkedList);
     setMetricsTypes([...listsNew]);
   };
 
   const dispatch = useDispatch();
-  const { startTime, endTime, isMoreDay, isUpdate } = useSelector(
+  const { startTime, endTime, isMoreDay, isUpdate, timeRadioKey } = useSelector(
     (state) => ({
       startTime: (state as any).gatewayKanban.startTime,
       endTime: (state as any).gatewayKanban.endTime,
       isMoreDay: (state as any).gatewayKanban.isMoreDay,
       isUpdate: (state as any).gatewayKanban.isUpdate,
+      timeRadioKey: (state as any).gatewayKanban.timeRadioKey,
     }),
     shallowEqual
   );
 
+  const selectRadioValue = useRef({
+    topNum: TOP_MAP[0].value,
+    topTimeStep: TOP_TIME_RANGE[0].value,
+    topMethod: TOP_TYPE[0].value,
+    content: undefined,
+  });
+
   const isFirst = useRef(true);
   const timeDiff = useRef(0);
-  const prevTopNu = useRef(topNu);
+  const prevTopNu = useRef(TOP_MAP[0].value);
 
   const reloadPage = () => {
     dispatch(setIsUpdate(!isUpdate));
@@ -64,7 +63,7 @@ export const ProjectView = memo(() => {
 
   const getAsyncCheckedList = async () => {
     try {
-      const checkedList = await getCheckedList(secondMetricsType);
+      const checkedList = await getCheckedList(secondUserConfigType);
       if (!checkedList || checkedList.length === 0) {
         setCheckedData(allCheckedData);
       } else {
@@ -77,48 +76,54 @@ export const ProjectView = memo(() => {
   };
   const setIndexConfigCheckedData = (changeCheckedData) => {
     const checkedList = objFlat(changeCheckedData);
-    setCheckedList(secondMetricsType, checkedList);
+    setCheckedList(secondUserConfigType, checkedList);
     setCheckedData(changeCheckedData);
     reloadPage();
   };
 
   const getAsyncIndexNameList = async () => {
     try {
-      const appIdList = await getAppIdList();
-      const appIdMap = {};
-      const newAppIdList = appIdList.map((item) => {
-        appIdMap[item.id] = item.name;
-        return { value: item.id, name: item.name };
+      const projectIdList = await getProjectIdList();
+      const projectIdMap = {};
+      const newProjectIdList = projectIdList.map((item) => {
+        projectIdMap[item.id] = item.projectName;
+        return { value: item.id, name: item.projectName };
       });
-      setAppIdList(newAppIdList);
-      setAppIdMap(appIdMap);
+      // if (newProjectIdList.length) {
+      //   selectRadioValue.current.content = newProjectIdList[0].value;
+      //   selectRadioValue.current.topNum = 0;
+      // }
+      setProjectIdList(newProjectIdList);
+      setProjectIdMap(projectIdMap);
     } catch (error) {
       console.log(error);
     } finally {
-      setIsGetAppIdEnd(true);
+      setIsGetProjectIdEnd(true);
     }
   };
 
   const getAsyncViewData = useCallback(
     async (metricsTypes) => {
-      if (isGetAppIdEnd) {
+      if (isGetProjectIdEnd) {
         const projectViewData = await getProjectViewData(
           metricsTypes,
           startTime,
           endTime,
-          topNu,
-          appId
+          selectRadioValue.current.topNum,
+          selectRadioValue.current.content,
+          selectRadioValue.current.topMethod,
+          selectRadioValue.current.topTimeStep
         );
         return projectViewData.map((item) => ({
           type: item.type,
           metricsContents: item.metricsContents.map((cell) => ({
-            name: appIdMap[cell.name] || cell.name,
+            name: projectIdMap[cell.name] || cell.name,
             metricsContentCells: cell.metricsContentCells,
           })),
         }));
       }
     },
-    [startTime, endTime, topNu, appId, isGetAppIdEnd, isUpdate]
+    [isGetProjectIdEnd, startTime, endTime, timeRadioKey]
   );
 
   const getAllAsyncViewData = async (metricsTypes) => {
@@ -126,7 +131,14 @@ export const ProjectView = memo(() => {
       setIsLoading(true);
       const res = await getAsyncViewData(metricsTypes);
       setViewData(
-        res.map((item) => getOption(item, indexConfigData, isMoreDay))
+        res.map((item) =>
+          getOption({
+            metrics: item,
+            configData: indexConfigData,
+            isMoreDay,
+            isShowTooltipModal: true,
+          })
+        )
       );
     } catch (error) {
       setViewData([]);
@@ -134,6 +146,16 @@ export const ProjectView = memo(() => {
       setIsLoading(false);
     }
   };
+
+  const showTooltipModal = (md5, metricsType) => {
+    copyString(md5);
+  };
+
+  useEffect(() => {
+    window["showTooltipModal"] = (md5, metricsType) => {
+      showTooltipModal(md5, metricsType);
+    };
+  }, []);
 
   useEffect(() => {
     setMetricsTypes(objFlat(checkedData));
@@ -145,31 +167,33 @@ export const ProjectView = memo(() => {
   }, []);
 
   useEffect(() => {
-    if (
-      isFirst.current ||
-      timeDiff.current !== endTime - startTime ||
-      prevTopNu.current !== topNu
-    ) {
+    if (isFirst.current || timeDiff.current !== endTime - startTime || prevTopNu.current !== selectRadioValue.current.topNum) {
       setIsLoading(true);
       timeDiff.current = endTime - startTime;
       isFirst.current = false;
-      prevTopNu.current = topNu;
+      prevTopNu.current = selectRadioValue.current.topNum;
     }
-    if (!isGetAppIdEnd || !metricsTypes || metricsTypes.length === 0) {
+    if (!isGetProjectIdEnd || !metricsTypes || metricsTypes.length === 0) {
       return;
     }
     getAllAsyncViewData(metricsTypes);
-  }, [metricsTypes, getAsyncViewData, isGetAppIdEnd]);
+  }, [metricsTypes, getAsyncViewData, isGetProjectIdEnd]);
+
+  const onSelectRadioChange = (values, needReload) => {
+    selectRadioValue.current = values;
+    if (needReload) {
+      reloadPage();
+    }
+  };
 
   const renderTopWhat = () => {
     return (
       <SelectRadio
-        topNu={topNu}
-        setTopNu={setTopNu}
-        content={appId}
-        setContent={setAppId}
-        contentList={appIdList}
-        placeholder="请选择appId"
+        onValueChange={onSelectRadioChange}
+        topNu={selectRadioValue.current.topNum}
+        content={selectRadioValue.current.content}
+        contentList={projectIdList}
+        placeholder="请选择应用"
       />
     );
   };
@@ -177,7 +201,7 @@ export const ProjectView = memo(() => {
   const renderConfig = () => {
     return (
       <IndexConfig
-        title="项目指标配置"
+        title="应用指标配置"
         optionList={defaultIndexConfigList}
         checkedData={checkedData}
         setCheckedData={setIndexConfigCheckedData}
@@ -185,26 +209,27 @@ export const ProjectView = memo(() => {
     );
   };
 
+  const renderFilter = () => {
+    return (
+      <>
+        {isGetProjectIdEnd ? renderTopWhat() : null}
+        {renderConfig()}
+      </>
+    );
+  };
+  const el = document.getElementsByClassName("monitor-overview-content-line-container")?.[0];
+
   return (
     <>
-      <div className={`${classPrefix}-overview-search`}>
-        <div className={`${classPrefix}-overview-search-reload`}>
-          <ReloadOutlined className="reload" onClick={reloadPage} />
-          <span>上次刷新时间：{formatterTimeYMDHMS(endTime)}</span>
-        </div>
-        <div className={`${classPrefix}-overview-search-filter`}>
-          {renderTopWhat()}
-          {renderConfig()}
-        </div>
-      </div>
+      <OperationPanel classPrefix={classPrefix} reloadPage={reloadPage} endTime={endTime} renderFilter={renderFilter} />
       <div className={`${classPrefix}-overview-content-line`}>
         <DragGroup
-          dragContainerProps={{
+          sortableContainerProps={{
             onSortEnd: sortEnd,
             axis: "xy",
-            distance: 100
+            distance: el ? el.clientWidth - 80 : 150,
           }}
-          containerProps={{
+          gridProps={{
             grid: 12,
             gutter: [10, 10],
           }}
@@ -213,6 +238,7 @@ export const ProjectView = memo(() => {
             <Line
               key={`${item}_${index}`}
               title={indexConfigData[item]?.title()}
+              tooltip={getRenderToolTip(indexConfigData[item])}
               index={`${item}_${index}`}
               option={viewData[index] || {}}
               isLoading={isLoading}

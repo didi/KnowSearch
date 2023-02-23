@@ -1,50 +1,61 @@
-import React, { useState } from 'react';
-import { getTaskListQueryXForm, mockData, getTaskListColumns } from './config';
-import QueryForm from 'component/dantd/query-form';
-import { getTaskList } from 'api/Scheduling';
-// todo 接口好后增加类型判断
-// import { ITask } from '@types/task-types';
-import { queryFormText } from 'constants/status-map';
-import { DTable } from 'component/dantd/dtable';
-import { RenderTitle } from 'component/render-title';
-import TaskListDetail from './../drawer/tasklist-detail'
-import { cloneDeep } from 'lodash'
+import React, { useState, useEffect } from "react";
+import { getTaskListQueryXForm, getTaskListColumns } from "./config";
+import { getTaskList } from "api/Scheduling";
+import { getSuperPhyClusterList } from "api/cluster-api";
+import { RenderTitle } from "component/render-title";
+import TaskListDetail from "./../drawer/tasklist-detail";
+import { ProTable } from "knowdesign";
+import { cloneDeep } from "lodash";
+import { Dispatch } from "redux";
+import * as actions from "actions";
+import { connect } from "react-redux";
 
-export const TaskList = () => {
-  const department: string = localStorage.getItem('current-project');
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  setModalId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setModalId(modalId, params, cb)),
+  setDrawerId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setDrawerId(modalId, params, cb)),
+});
+
+const TaskListBox = (props) => {
+  const department: string = localStorage.getItem("current-project");
   const [loading, setloading] = useState(false);
   const [queryFormObject, setqueryFormObject]: any = useState({
     page: 1,
     size: 10,
-    current: 1
+    current: 1,
   });
   const [data, setData] = useState([] as any[]);
   // 控制抽屉的状态
   const [visible, setVisible] = useState(false);
   const [detailData, setDetailData] = useState({});
-  const [total, setTotal] = useState(0)
-  React.useEffect(() => {
+  const [total, setTotal] = useState(0);
+  const [clusterList, setClusterList] = useState([]);
+
+  useEffect(() => {
     reloadData();
   }, [department, queryFormObject]);
 
-  const reloadData = () => {
+  const reloadData = async () => {
     setloading(true);
-    const params = cloneDeep(queryFormObject)
-    delete params.current
-    getTaskList(params).then((res: any) => {
-      if (res) {
-        setData(res.bizData);
-        setTotal(res.pagination.total)
-      }
-    }).finally(() => {
-      setloading(false)
-    })
-  }
+    const params = cloneDeep(queryFormObject);
+    delete params.current;
+    let clusterList = await getSuperPhyClusterList();
+    setClusterList(clusterList);
+    await getTaskList(params)
+      .then((res: any) => {
+        if (res) {
+          setData(res.bizData);
+          setTotal(res.pagination.total);
+        }
+      })
+      .finally(() => {
+        setloading(false);
+      });
+  };
 
   const handleSubmit = (result) => {
     for (var key in result) {
-      if (result[key] === '' || result[key] === undefined) {
-        delete result[key]
+      if (result[key] === "" || result[key] === undefined) {
+        delete result[key];
       }
     }
     setqueryFormObject({ ...result, page: 1, size: queryFormObject.size, current: 1 });
@@ -52,59 +63,69 @@ export const TaskList = () => {
 
   const renderTitleContent = () => {
     return {
-      title: '任务列表',
-      content: null
-    }
-  }
+      title: "任务列表",
+      content: null,
+    };
+  };
 
   const showDetail = (record) => {
     setVisible(true);
     setDetailData(record);
-  }
+  };
 
   const onCancel = () => {
-    setVisible(false)
-  }
+    setVisible(false);
+  };
 
   const handleChange = (pagination) => {
     setqueryFormObject({
       ...queryFormObject,
       size: pagination.pageSize,
       page: pagination.current,
-      current: pagination.current
-    })
-  }
+      current: pagination.current,
+    });
+  };
+
   return (
     <>
-      <div className="table-header">
-        <RenderTitle {...renderTitleContent()} />
-        <TaskListDetail visible={visible} onCancel={onCancel} detailData={detailData} />
-        <QueryForm {...queryFormText} defaultCollapse columns={getTaskListQueryXForm()} onChange={() => null} onReset={handleSubmit} onSearch={handleSubmit} initialValues={{}} isResetClearAll />
-      </div>
-      <div>
-        <div className="table-content">
-          <DTable
-            loading={loading}
-            rowKey="id"
-            dataSource={data}
-            paginationProps={{
-              position: 'bottomRight',
-              showQuickJumper: true,
-              total: total,
-              showSizeChanger: true,
-              pageSizeOptions: ['10', '20', '50', '100', '200', '500'],
+      <div className="table-layout-style">
+        <ProTable
+          showQueryForm={true}
+          queryFormProps={{
+            defaultCollapse: true,
+            columns: getTaskListQueryXForm(),
+            // onChange={() => null}
+            onReset: handleSubmit,
+            onSearch: handleSubmit,
+            // initialValues={{}}
+            isResetClearAll: true,
+          }}
+          tableProps={{
+            tableId: "scheduling_task_table",
+            isCustomPg: false,
+            loading,
+            rowKey: "id",
+            dataSource: data,
+            columns: getTaskListColumns({ reloadData, showDetail, setModalId: props.setModalId, history: props.history, clusterList }),
+            reloadData,
+            isDividerHide: false,
+            customRenderSearch: () => <RenderTitle {...renderTitleContent()} />,
+            paginationProps: {
+              total,
+              pageSizeOptions: ["10", "20", "50", "100", "200", "500"],
               showTotal: (total) => `共 ${total} 条`,
-              current: queryFormObject.current
-            }}
-            attrs={{
+              current: queryFormObject.current,
+              pageSize: queryFormObject.size,
+            },
+            attrs: {
               onChange: handleChange,
-              scroll: { x: 1170 }
-            }}
-            columns={getTaskListColumns(reloadData, showDetail)}
-            reloadData={reloadData}
-          />
-        </div>
+            },
+          }}
+        />
+        <TaskListDetail visible={visible} onCancel={onCancel} detailData={detailData} />
       </div>
     </>
-  )
-}
+  );
+};
+
+export const TaskList = connect(null, mapDispatchToProps)(TaskListBox);

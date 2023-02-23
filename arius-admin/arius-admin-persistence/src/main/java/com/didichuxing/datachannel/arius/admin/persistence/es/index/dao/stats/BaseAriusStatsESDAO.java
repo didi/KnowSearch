@@ -251,7 +251,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
                                                                             IllegalAccessException,
                                                                             InvocationTargetException {
         for (Field field : Objects.requireNonNull(obj).getClass().getDeclaredFields()) {
-            PropertyDescriptor pd = new PropertyDescriptor(field.getName(), obj.getClass());
+            PropertyDescriptor pd = new PropertyDescriptor(( String )field.getName(), obj.getClass());
             //1. get method of setter
             Method writeMethod = pd.getWriteMethod();
             Class<?>[] parameterTypes = writeMethod.getParameterTypes();

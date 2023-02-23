@@ -142,4 +142,12 @@ public class OpTaskFastIndexController {
         List<ClusterPhyVO> fastDump = fastIndexManager.ESClustersInstalledFastDump();
         return Result.buildSucc(fastDump);
     }
+
+    @GetMapping("/es-clusters/task-submit-address")
+    @ResponseBody
+    @ApiOperation(value = "任务提交地址")
+    public Result<String> TaskSubmitAddress(HttpServletRequest request, String sourceClusterName) {
+        String taskSubmitAddress = fastIndexManager.TaskSubmitAddress(sourceClusterName);
+        return Result.buildSucc(taskSubmitAddress);
+    }
 }

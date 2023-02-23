@@ -76,7 +76,7 @@ CREATE TABLE logi_op_component
         PRIMARY KEY,
     status                     INT          NOT NULL COMMENT '状态(0 green,1 yellow,2 red,3 unKnow)',
     contain_component_ids      VARCHAR(200) NULL COMMENT '包含组件id列表',
-    name                       VARCHAR(100) NULL COMMENT '组件名',
+    name                       VARCHAR(500) NULL COMMENT '组件名',
     package_id                 INT          NULL COMMENT '关联安装包id',
     depend_config_component_id INT          NULL COMMENT '配置依赖组件',
     username                   VARCHAR(50)  NULL COMMENT '用户名',
@@ -85,8 +85,7 @@ CREATE TABLE logi_op_component
     create_time                TIMESTAMP    NULL COMMENT '创建时间',
     update_time                TIMESTAMP    NULL COMMENT '更新时间',
     is_deleted                 INT          NULL COMMENT '0未删除1删除'
-)
-    ;
+)CHARSET = utf8mb4;
 -- auto-generated definition
 CREATE TABLE logi_op_component_group_config
 (
@@ -104,7 +103,7 @@ CREATE TABLE logi_op_component_group_config
     create_time              TIMESTAMP     NULL COMMENT '创建时间',
     update_time              TIMESTAMP     NULL COMMENT '更新时间',
     machine_spec             VARCHAR(500)  NULL COMMENT '机器规格'
-);
+)CHARSET = utf8mb4;
 -- auto-generated definition
 -- auto-generated definition
 CREATE TABLE logi_op_component_host
@@ -120,7 +119,7 @@ CREATE TABLE logi_op_component_host
     machine_spec VARCHAR(255) DEFAULT '' NULL COMMENT '机器规格',
     CONSTRAINT logi_op_component_host_pk
         UNIQUE (host, component_id, group_name)
-);
+)CHARSET = utf8mb4;
 
 -- auto-generated definition
 CREATE TABLE logi_op_package
@@ -137,20 +136,20 @@ CREATE TABLE logi_op_package
     update_time  TIMESTAMP    NULL COMMENT '更新时间',
     creator      VARCHAR(255) NULL COMMENT '创建者',
     package_type TINYINT      NULL COMMENT '软件包类型,1-es安装包、2-gateway安装包、3-es引擎插件、4-gateway引擎插件、5-es平台插件、6-gateway平台插件'
-);
+)CHARSET = utf8mb4;
 -- auto-generated definition
 CREATE TABLE logi_op_package_group_config
 (
     id             INT(11) UNSIGNED AUTO_INCREMENT COMMENT '配置组id'
         PRIMARY KEY,
-    group_name     VARCHAR(50) DEFAULT '' NOT NULL COMMENT '配置组名称',
+    group_name     VARCHAR(5000) DEFAULT '' NOT NULL COMMENT '配置组名称',
     system_config  VARCHAR(5000)            NULL COMMENT '系统配置',
     running_config VARCHAR(5000)            NULL COMMENT '运行配置',
     file_config    VARCHAR(5000)             NULL COMMENT '文件配置',
     package_id     INT                   NULL COMMENT '软件包id',
     create_time    TIMESTAMP                NULL COMMENT '创建时间',
     update_time    TIMESTAMP                NULL COMMENT '更新时间'
-);
+)CHARSET = utf8mb4;
 -- auto-generated definition
 CREATE TABLE logi_op_script
 (
@@ -162,8 +161,9 @@ CREATE TABLE logi_op_script
     `describe`  VARCHAR(255) NULL COMMENT '描述',
     create_time TIMESTAMP    NULL COMMENT '创建时间',
     update_time TIMESTAMP    NULL COMMENT '更新时间',
-    creator     VARCHAR(255) NULL COMMENT '创建者'
-);
+    creator     VARCHAR(255) NULL COMMENT '创建者',
+    timeout     INT NULL COMMENT '模板超时时间(s)'
+)CHARSET = utf8mb4;
 -- auto-generated definition
 CREATE TABLE logi_op_task
 (
@@ -176,7 +176,7 @@ CREATE TABLE logi_op_task
     content     VARCHAR(5000) NULL COMMENT '任务内容',
     create_time TIMESTAMP     NULL COMMENT '创建时间',
     update_time TIMESTAMP     NULL COMMENT '更新时间'
-);
+)CHARSET = utf8mb4;
 -- auto-generated definition
 CREATE TABLE logi_op_task_detail
 (
@@ -188,7 +188,7 @@ CREATE TABLE logi_op_task_detail
     process_num     INT              NULL COMMENT '进程数',
     create_time     TIMESTAMP        NULL COMMENT '创建时间',
     update_time     TIMESTAMP        NULL COMMENT '更新时间'
-);
+)CHARSET = utf8mb4;
 
 #arius_config_info修改业务类型对应的配置值
 UPDATE arius_config_info SET `value`  = '[{"code":0,"desc":"系统日志","label":"system"},{"code":1,"desc":"日志数据","label":"log"},{"code":2,"desc":"用户上报数据","label":"olap"},{"code":3,"desc":"RDS数据","label":"binlog"},{"code":4,"desc":"离线导入数据","label":"offline"}]'  WHERE id = 1671;
@@ -201,7 +201,7 @@ INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `l
 INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `create_time`, `update_time`, `is_delete`, `app_name`) VALUES (1889,'批量操作', 1593, 1, 2, '批量操作', '2022-12-21 15:08:22', '2022-12-21 15:10:32', 0, 'know_search');
 INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `create_time`, `update_time`, `is_delete`, `app_name`) VALUES (1891,'数据迁移', 1593, 1, 2, '数据迁移', '2022-12-21 15:08:22', '2022-12-21 15:10:32', 0, 'know_search');
 
-INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `create_time`, `update_time`, `is_delete`, `app_name`) VALUES (1893,'新建gateway', 1599, 1, 2, '新建gateway', '2022-12-21 15:08:22', '2022-12-21 15:10:32', 0, 'know_search');
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `create_time`, `update_time`, `is_delete`, `app_name`) VALUES (1893,'新建Gateway', 1599, 1, 2, '新建Gateway', '2022-12-21 15:08:22', '2022-12-21 15:10:32', 0, 'know_search');
 INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `create_time`, `update_time`, `is_delete`, `app_name`) VALUES (1895,'升级', 1599, 1, 2, '升级', '2022-12-21 15:08:22', '2022-12-21 15:10:32', 0, 'know_search');
 INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `create_time`, `update_time`, `is_delete`, `app_name`) VALUES (1897,'重启', 1599, 1, 2, '重启', '2022-12-21 15:08:22', '2022-12-21 15:10:32', 0, 'know_search');
 INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `create_time`, `update_time`, `is_delete`, `app_name`) VALUES (1899,'扩缩容', 1599, 1, 2, '扩缩容', '2022-12-21 15:08:22', '2022-12-21 15:10:32', 0, 'know_search');
@@ -324,7 +324,7 @@ create table fast_index_task_info
     last_response             text                                  null,
     task_cost_time            decimal                               null
 )
-    comment 'fastDump任务状态';
+    comment 'fastDump任务状态' CHARSET = utf8mb4;
 
 create index idx_
     on fast_index_task_info (task_status);
@@ -334,49 +334,6 @@ create index idx_scheduled_task_start_time
 
 create index idx_task_id
     on fast_index_task_info (task_id);
-
-# 权限点新增
-INSERT INTO logi_security_permission ( id, permission_name, parent_id, leaf, level, description
-                                     , is_delete, app_name)
-VALUES (1882, '插件安装', 1593, 1, 2, '插件安装', 0, 'know_search');
-INSERT INTO logi_security_permission (id, permission_name, parent_id, leaf, level, description,
-                                      is_delete, app_name)
-VALUES (1883, '数据迁移', 1593, 1, 2, '数据迁移', 0, 'know_search');
-INSERT INTO logi_security_role_permission (role_id, permission_id, is_delete, app_name)
-VALUES (1, 1882, 0, 'know_search');
-INSERT INTO logi_security_role_permission (role_id, permission_id, is_delete, app_name)
-VALUES (1, 1883, 0, 'know_search');
-###gatea权限点新增
-SELECT id
-INTO @parent_id
-FROM logi_security_permission
-WHERE permission_name = 'Gateway管理';
-INSERT INTO logi_security_permission (permission_name, parent_id, leaf, level,
-                                      description, is_delete,
-                                      app_name)
-    VALUE ('新建Gateway', @parent_id, 1, 2, '新建Gateway', 0, 'know_search');
-
-INSERT INTO logi_security_permission (permission_name, parent_id, leaf, level,
-                                      description, is_delete,
-                                      app_name)
-    VALUE ('升级', @parent_id, 1, 2, '升级', 0, 'know_search');
-INSERT INTO logi_security_permission (permission_name, parent_id, leaf, level,
-                                      description, is_delete,
-                                      app_name)
-    VALUE ('重启', @parent_id, 1, 2, '重启', 0, 'know_search');
-INSERT INTO logi_security_permission (permission_name, parent_id, leaf, level,
-                                      description, is_delete,
-                                      app_name)
-    VALUE ('扩缩容', @parent_id, 1, 2, '扩缩容', 0, 'know_search');
-INSERT INTO logi_security_permission (permission_name, parent_id, leaf, level,
-                                      description, is_delete,
-                                      app_name)
-    VALUE ('回滚', @parent_id, 1, 2, '回滚', 0, 'know_search');
-INSERT INTO logi_security_role_permission (role_id, permission_id, is_delete, app_name)
-SELECT 1, id, 0, 'know_search'
-FROM logi_security_permission
-WHERE parent_id = @parent_id
-  AND permission_name IN ('新建Gateway', '升级', '重启', '扩缩容', '回滚');
 
 rename table logi_security_config to kf_security_config;
 rename table logi_security_dept to kf_security_dept;
@@ -420,3 +377,5 @@ ALTER TABLE arius_op_task
 ALTER TABLE gateway_cluster_node_info
     ADD CONSTRAINT uniq_ip_port
         UNIQUE (host_name, port, cluster_name);
+-- 设置supperapp为索引模式
+update `arius_es_user` set cluster='' , search_type=1  where id=1;

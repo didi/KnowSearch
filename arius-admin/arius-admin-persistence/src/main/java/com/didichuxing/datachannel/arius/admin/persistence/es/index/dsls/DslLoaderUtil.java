@@ -19,7 +19,6 @@ import com.alibaba.fastjson.parser.DefaultJSONParser;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 import com.google.common.collect.Lists;

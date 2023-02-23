@@ -1,5 +1,6 @@
-import React from 'react';
-import { Drawer, Descriptions } from 'antd';
+import React from "react";
+import { Drawer, Descriptions } from "antd";
+import "./index.less";
 
 const DescriptionsItem = Descriptions.Item;
 
@@ -13,54 +14,67 @@ const SchDulingLog: React.FC<IProps> = (props: IProps) => {
   const { detailData } = props;
   const typeMap = [
     {
-      type: '任务描述',
-      value: detailData?.taskDesc || '',
+      type: "任务名称",
+      value: detailData?.taskDesc || "-",
     },
     {
-      type: '路由策略',
-      value: detailData?.routing || '',
+      type: "路由策略",
+      value: detailData?.routing || "-",
     },
     {
-      type: 'Cron',
-      value: detailData?.cron || '',
+      type: "Cron",
+      value: detailData?.cron || "-",
     },
     {
-      type: '运行模式',
-      value: detailData?.runningType || '',
+      type: "执行器地址",
+      render: () => {
+        let text = (detailData?.workerIps || [])?.join("，");
+        return text;
+      },
     },
     {
-      type: 'JobHandler',
-      value: detailData?.className || '',
-    },
-    // {
-    //   type: '任务参数',
-    //   value: detailData?.params || '',
-    // },
-    {
-      type: '阻塞处理策略',
-      value: detailData?.blockPolicy || '',
+      type: "目标集群",
+      render: () => {
+        let text = "";
+        if (detailData?.params) {
+          text = JSON.parse(detailData?.params)?.esClusterNames?.join("，");
+        }
+        return text || "-";
+      },
     },
     {
-      type: '负责人',
-      value: detailData?.owner || '',
+      type: "运行模式",
+      value: detailData?.runningType || "-",
     },
-  ]
+    {
+      type: "JobHandler",
+      value: detailData?.className || "-",
+    },
+    {
+      type: "运行参数",
+      value: detailData?.params || "-",
+    },
+    {
+      type: "阻塞处理策略",
+      value: detailData?.blockPolicy || "-",
+    },
+    {
+      type: "责任人",
+      value: detailData?.owner || "-",
+    },
+  ];
   return (
-    <Drawer
-      title={'任务详情'}
-      visible={props.visible}
-      width={600}
-      maskClosable={true}
-      onClose={props.onCancel}
-    >
+    <Drawer title={"任务详情"} visible={props.visible} width={600} maskClosable={true} onClose={props.onCancel}>
       <div>
-        <Descriptions column={1} labelStyle={{justifyContent: 'flex-end',minWidth:100}}>
-          {typeMap.map((item, index) => (<DescriptionsItem key={index} label={item.type}>{item.value}</DescriptionsItem>))}
+        <Descriptions className="tasklist-detail" column={1} labelStyle={{ justifyContent: "flex-end", minWidth: 100 }}>
+          {typeMap.map((item, index) => (
+            <DescriptionsItem key={index} label={item.type}>
+              {item?.value || item?.render()}
+            </DescriptionsItem>
+          ))}
         </Descriptions>
       </div>
     </Drawer>
   );
-}
+};
 export default SchDulingLog;
-
-

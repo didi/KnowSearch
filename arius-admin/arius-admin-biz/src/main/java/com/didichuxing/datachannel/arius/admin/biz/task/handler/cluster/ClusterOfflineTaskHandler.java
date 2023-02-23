@@ -47,7 +47,7 @@ public class ClusterOfflineTaskHandler extends AbstractClusterTaskHandler {
         ecmTaskDTO.setOrderType(OpTaskTypeEnum.CLUSTER_OFFLINE.getType());
         //下线记录操作内容
         operateRecordService.saveOperateRecordWithManualTrigger(
-                String.format("下线物理集群：【%s】", content.getPhyClusterName()), creator, AuthConstant.SUPER_PROJECT_ID,
+                content.getPhyClusterName(), creator, AuthConstant.SUPER_PROJECT_ID,
                 content.getPhyClusterId(), OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE);
         return Result.buildSucc();
     }

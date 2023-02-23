@@ -1,12 +1,16 @@
 import React from "react";
-import { transTimeFormat, transTimeStamp } from "lib/utils";
-import { Link } from "react-router-dom";
+import { transTimeFormat } from "lib/utils";
 import { IColumnsType } from "component/dantd/query-form/QueryForm";
-import { Modal, DatePicker, message } from "antd";
+import { Modal, message } from "antd";
 import { IStatusMap } from "typesPath/base-types";
 import { renderOperationBtns } from "container/custom-component";
-import { taskStatus, taskDo, jobStop } from "api/Scheduling";
-import moment from "moment";
+import { taskStatus, taskDo, jobStop, deleteTask } from "api/Scheduling";
+import DRangeTime from "../../d1-packages/d-range-time";
+import { regNonnegativeInteger } from "constants/reg";
+import { XModal } from "component/x-modal";
+import { hasOpPermission } from "lib/permission";
+import { ShceduleLogPermissions } from "constants/permission";
+
 const { confirm } = Modal;
 
 export const StatusMap = {
@@ -43,19 +47,19 @@ export const mockData = [
 export const getSchedulingLogColumns = (reloadData: Function, showDetail: Function, showLog: Function) => {
   const getCongigBtnList = (reloadData: any, showDetail: Function, showLog: Function, record) => {
     return [
-      {
+      hasOpPermission(ShceduleLogPermissions.PAGE, ShceduleLogPermissions.DETAIL) && {
         label: "调度详情",
         clickFunc: () => {
           showDetail(record);
         },
       },
-      {
+      hasOpPermission(ShceduleLogPermissions.PAGE, ShceduleLogPermissions.LOG) && {
         label: "执行日志",
         clickFunc: (record: any) => {
           showLog(record);
         },
       },
-      {
+      hasOpPermission(ShceduleLogPermissions.PAGE, ShceduleLogPermissions.END_MISSION) && {
         label: `${record.status === 2 && record.result.indexOf("0") !== -1 ? "终止任务" : ""}`,
         clickFunc: () => {
           showStop(record, reloadData);
@@ -67,25 +71,39 @@ export const getSchedulingLogColumns = (reloadData: Function, showDetail: Functi
     {
       title: "任务ID",
       dataIndex: "taskId",
+      key: "taskId",
       width: 70,
     },
     {
-      title: "任务描述",
+      title: "任务名称",
       dataIndex: "taskDesc",
+      key: "taskDesc",
+      width: 130,
+      lineClampTwo: true,
+      needTooltip: true,
     },
     {
       title: "调度地址",
       dataIndex: "workerIp",
+      key: "workerIp",
+      width: 120,
+      lineClampOne: true,
+      needTooltip: true,
     },
     {
       title: "调度时间",
       dataIndex: "createTime",
+      key: "createTime",
+      sorter: true,
+      width: 150,
       render: (t: string) => transTimeFormat(t),
     },
     {
       title: "调度结果",
       dataIndex: "status",
-      width: 100,
+      key: "status",
+      width: 90,
+      sorter: true,
       render: (text) => {
         return logStatusMap[text];
       },
@@ -93,17 +111,25 @@ export const getSchedulingLogColumns = (reloadData: Function, showDetail: Functi
     {
       title: "执行开始时间",
       dataIndex: "startTime",
-      render: (t: string) => (t ? transTimeFormat(t) : "-"),
+      key: "startTime",
+      width: 150,
+      sorter: true,
+      render: (t: string) => transTimeFormat(t),
     },
     {
       title: "执行结束时间",
       dataIndex: "endTime",
-      render: (t: string) => (t ? transTimeFormat(t) : "-"),
+      key: "endTime",
+      width: 150,
+      sorter: true,
+      render: (t: string) => transTimeFormat(t),
     },
     {
       title: "执行结果",
       dataIndex: "result",
-      width: 125,
+      key: "result",
+      width: 90,
+      sorter: true,
       render: (text) => {
         if (text) {
           const obj = JSON.parse(text);
@@ -115,7 +141,9 @@ export const getSchedulingLogColumns = (reloadData: Function, showDetail: Functi
     {
       title: "操作",
       dataIndex: "operation",
-      width: 200,
+      filterTitle: true,
+      fixed: "right",
+      width: 220,
       render: (text: any, record: any) => {
         const btns: any = getCongigBtnList(reloadData, showDetail, showLog, record);
         return renderOperationBtns(btns, record);
@@ -125,20 +153,48 @@ export const getSchedulingLogColumns = (reloadData: Function, showDetail: Functi
   return orderColumns;
 };
 
-export const getSchedulingLogQueryXForm = (isDetail) => {
+export const getSchedulingLogQueryXForm = (isDetail, handleTimeChange) => {
+  const customTimeOptions = [
+    {
+      label: "最近 1 天",
+      value: 24 * 60 * 60 * 1000,
+    },
+    {
+      label: "最近 7 天",
+      value: 7 * 24 * 60 * 60 * 1000,
+    },
+    {
+      label: "最近 1 月",
+      value: 30 * 24 * 60 * 60 * 1000,
+    },
+  ];
   const log = [
     {
       dataIndex: "taskId",
       title: "任务ID",
       type: "input",
       placeholder: "请输入任务ID",
+      rules: [
+        {
+          required: false,
+          validator: (rule: any, value: string) => {
+            if (value && !new RegExp(regNonnegativeInteger).test(value)) {
+              return Promise.reject(new Error("请输入正确格式"));
+            }
+            if (value?.length > 16) {
+              return Promise.reject(new Error("请输入正确ID，0-16位字符"));
+            }
+            return Promise.resolve();
+          },
+        },
+      ],
     },
     {
       // todo： 字段确认
       dataIndex: "taskDesc",
-      title: "任务描述",
+      title: "任务名称",
       type: "input",
-      placeholder: "请输入任务描述",
+      placeholder: "请输入任务名称",
     },
   ] as IColumnsType[];
   let formMap = [
@@ -156,18 +212,7 @@ export const getSchedulingLogQueryXForm = (isDetail) => {
       dataIndex: "createTime",
       title: "调度时间",
       type: "custom",
-      component: (
-        <DatePicker.RangePicker
-          style={{ width: "100%" }}
-          ranges={{
-            近一天: [moment().subtract(1, "day"), moment()],
-            近一周: [moment().subtract(7, "day"), moment()],
-            近一月: [moment().subtract(1, "month"), moment()],
-          }}
-          showTime={{ format: "HH:mm" }}
-          format="YYYY-MM-DD"
-        />
-      ),
+      component: <DRangeTime timeChange={handleTimeChange} popoverClassName="dashborad-popover" customTimeOptions={customTimeOptions} />,
     },
   ] as IColumnsType[];
   if (!isDetail) {
@@ -183,12 +228,26 @@ export const getTaskListQueryXForm = () => {
       title: "任务ID",
       type: "input",
       placeholder: "请输入任务ID",
+      rules: [
+        {
+          required: false,
+          validator: (rule: any, value: string) => {
+            if (value && !new RegExp(regNonnegativeInteger).test(value)) {
+              return Promise.reject(new Error("请输入正确格式"));
+            }
+            if (value?.length > 16) {
+              return Promise.reject(new Error("请输入正确ID，0-16位字符"));
+            }
+            return Promise.resolve();
+          },
+        },
+      ],
     },
     {
       dataIndex: "taskDesc",
-      title: "任务描述",
+      title: "任务名称",
       type: "input",
-      placeholder: "请输入任务描述",
+      placeholder: "请输入任务名称",
     },
     {
       dataIndex: "className",
@@ -214,7 +273,7 @@ export const getTaskListQueryXForm = () => {
 export const showTaskStatus = (record, reloadData: Function) => {
   confirm({
     title: "提示",
-    content: `确定${record.status ? "暂停" : "恢复"}调度任务${record.id}？`,
+    content: `确定${record.status ? "暂停" : "恢复"}${record.taskDesc}【${record.id}】？`,
     onOk() {
       taskStatus(record.taskCode, record.status ? 0 : 1).then((res) => {
         if (res) {
@@ -232,14 +291,10 @@ export const showTaskStatus = (record, reloadData: Function) => {
 export const showTaskDo = (record, reloadData: Function) => {
   confirm({
     title: "提示",
-    content: `确定执行调度任务${record.id}？`,
+    content: `确定执行${record.taskDesc}【${record.id}】？`,
     onOk() {
       taskDo(record.taskCode).then((res) => {
-        if (res) {
-          message.success("操作成功");
-        } else {
-          message.warning("操作失败");
-        }
+        message.success("操作成功");
         reloadData();
       });
     },
@@ -264,9 +319,9 @@ export const showStop = (record, reloadData: Function) => {
   });
 };
 
-export const getTaskListColumns = (reloadData: Function, showDetail: Function) => {
+export const getTaskListColumns = ({ reloadData, showDetail, setModalId, history, clusterList }) => {
   const getCongigBtnList = (reloadData: Function, record: any) => {
-    return [
+    let btnsList = [
       {
         label: "执行",
         clickFunc: () => {
@@ -279,13 +334,53 @@ export const getTaskListColumns = (reloadData: Function, showDetail: Function) =
           showTaskStatus(record, reloadData);
         },
       },
+      {
+        label: "复制",
+        clickFunc: () => {
+          let params = { ...record };
+          params.taskDesc = params.taskDesc + "-1";
+          setModalId("copyTask", params, reloadData);
+        },
+      },
+      {
+        label: "编辑",
+        clickFunc: () => {
+          let params = { ...record, clusterList };
+          setModalId("editTask", params, reloadData);
+        },
+      },
+      {
+        label: "查看日志",
+        clickFunc: () => {
+          history.push(`/scheduling/log/detail?taskId=${record.id}`);
+        },
+      },
     ];
+    let deletebtn = {
+      label: "删除",
+      clickFunc: () => {
+        XModal({
+          type: "delete",
+          title: `确定删除调度任务${record?.taskDesc || ""}？`,
+          onOk: async () => {
+            await deleteTask(record.taskCode);
+            message.success("删除成功");
+            reloadData();
+          },
+        });
+      },
+    };
+    if (record.del) {
+      btnsList.push(deletebtn);
+    }
+    return btnsList;
   };
+
   const orderColumns = [
     {
       title: "任务ID",
       dataIndex: "id",
-      width: 90,
+      width: 80,
       render: (text: any, record: any) => {
         const btns: any = [
           {
@@ -299,44 +394,66 @@ export const getTaskListColumns = (reloadData: Function, showDetail: Function) =
       },
     },
     {
-      title: "任务描述",
+      title: "任务名称",
       dataIndex: "taskDesc",
-      width: "20vw",
+      width: 120,
+      lineClampTwo: true,
+      needTooltip: true,
       render: (text) => <div style={{ wordWrap: "break-word", wordBreak: "break-word" }}>{text}</div>,
     },
     {
       title: "JobHandler",
       dataIndex: "className",
-      width: "20vw",
+      width: 130,
+      lineClampTwo: true,
+      needTooltip: true,
       render: (text) => <div style={{ wordWrap: "break-word", wordBreak: "break-word" }}>{text}</div>,
     },
     {
       title: "Corn",
       dataIndex: "cron",
+      width: 130,
     },
     {
-      title: "负责人",
+      title: "责任人",
       dataIndex: "owner",
+      width: 120,
+    },
+    {
+      title: "执行器",
+      dataIndex: "workerIps",
+      width: 130,
+      lineClampTwo: true,
+      needTooltip: true,
+      render: (ips) => {
+        return ips?.join("，") || "-";
+      },
+    },
+    {
+      title: "目标集群",
+      dataIndex: "params",
+      width: 120,
+      lineClampTwo: true,
+      needTooltip: true,
+      render: (cluster) => {
+        if (!cluster) return "-";
+        let esClusterNamesList = JSON.parse(cluster)?.esClusterNames;
+        let filterCluster = esClusterNamesList.filter((item) => !clusterList.includes(item));
+        if (!filterCluster?.length && esClusterNamesList.length === clusterList.length) {
+          return "ALL";
+        }
+        return esClusterNamesList?.join("，") || "-";
+      },
     },
     {
       title: "状态",
       dataIndex: "status",
-      width: 90,
+      width: 120,
       render: (t: number) => {
-        if (StatusMap[t] === "Normal") {
-          return (
-            <div>
-              <svg className="icon" aria-hidden="true" style={{ marginRight: 5 }}>
-                <use xlinkHref="#iconwancheng"></use>
-              </svg>
-              {StatusMap[t]}
-            </div>
-          );
-        }
         return (
           <div>
             <svg className="icon" aria-hidden="true" style={{ marginRight: 5 }}>
-              <use xlinkHref="#iconzanting"></use>
+              <use xlinkHref={`${StatusMap[t] === "Normal" ? "#iconwancheng" : "#iconzanting"}`}></use>
             </svg>
             {StatusMap[t]}
           </div>
@@ -346,17 +463,11 @@ export const getTaskListColumns = (reloadData: Function, showDetail: Function) =
     {
       title: "操作",
       dataIndex: "operation",
-      width: 160,
+      filterTitle: true,
+      width: 190,
       render: (text: any, record: any) => {
         const btns: any = getCongigBtnList(reloadData, record);
-        return (
-          <div>
-            {renderOperationBtns(btns, record)}
-            <Link to={`/scheduling/log/detail?taskId=${record.id}`} style={{ marginLeft: 10 }}>
-              查看日志
-            </Link>
-          </div>
-        );
+        return <div>{renderOperationBtns(btns, record)}</div>;
       },
     },
   ];

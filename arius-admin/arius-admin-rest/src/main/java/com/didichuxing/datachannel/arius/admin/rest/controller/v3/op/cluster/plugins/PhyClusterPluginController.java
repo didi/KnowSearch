@@ -36,7 +36,7 @@ public class PhyClusterPluginController {
 
     @Autowired
     private ClusterPhyManager    clusterPhyManager;
-    
+
     @Autowired
     private ClusterPluginManager clusterPluginManager;
     @Autowired
@@ -82,7 +82,7 @@ public class PhyClusterPluginController {
                                                @RequestParam("clusterPhyId") Integer clusterPhyId) {
         return pluginManager.listESPluginByClusterId(clusterPhyId);
     }
-    
+
     @GetMapping("{pluginId}/configs")
     @ResponseBody
     @ApiOperation(value = "获取ES集群插件列表")
@@ -90,14 +90,14 @@ public class PhyClusterPluginController {
         "pluginId") Long pluginId) {
         return pluginManager.getConfigsByPluginId(pluginId);
     }
-    
+
     @GetMapping("plugin-health")
     @ResponseBody
     @ApiOperation(value = "获取插件健康", tags = "")
     public Result<List<TupleTwo<Integer, PluginHealthEnum>>> getPluginHealth(HttpServletRequest request) {
         return Result.buildSucc(PluginHealthEnum.getAll());
     }
-    
+
     @GetMapping("plugin-type")
     @ResponseBody
     @ApiOperation(value = "获取插件类型", tags = "")

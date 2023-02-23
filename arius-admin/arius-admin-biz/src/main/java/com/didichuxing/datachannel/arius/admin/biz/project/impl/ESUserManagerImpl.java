@@ -28,6 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ESUserVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
@@ -216,6 +217,9 @@ public class ESUserManagerImpl implements ESUserManager {
         //获取更新之前的po
         final ESUser oldESUser = esUserService.getEsUserById(esUserDTO.getId());
         //校验当前esUserDTO中的projectId是否存在于esUser
+        if (esUserDTO.getId()==1){
+            esUserDTO.setIsRoot(AdminConstant.YES);
+        }
         //更新之后的结果获取
         final TupleTwo<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> resultESUserTuple = esUserService
                 .editUser(esUserDTO);
@@ -407,7 +411,7 @@ public class ESUserManagerImpl implements ESUserManager {
         }
         return resultESUserTuple.v1();
     }
-
+    
     /**
      *  检查集群并设置集群
      *

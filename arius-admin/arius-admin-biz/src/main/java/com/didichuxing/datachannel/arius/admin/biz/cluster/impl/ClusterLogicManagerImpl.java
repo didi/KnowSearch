@@ -6,6 +6,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.util.SizeUtil.getUnitSize;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
@@ -74,6 +77,8 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeServ
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
+import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
@@ -148,7 +153,16 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private ClusterPhyManager    clusterPhyManager;
     @Autowired
     private ClusterNodeManager clusterNodeManager;
-    
+
+    @Autowired
+    private GatewayClusterService gatewayClusterService;
+
+    @Autowired
+    private GatewayNodeService gatewayNodeService;
+
+
+
+
     private static final FutureUtil<Void>         FUTURE_UTIL        = FutureUtil.init("ClusterLogicManager", 10, 10,
             100);
 
@@ -187,7 +201,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             .runnableTask(() -> buildLogicRole(clusterLogicVO, clusterLogic))
             .runnableTask(() -> buildConsoleClusterVersions(clusterLogicVO));
 
-        buildClusterNodeInfo(clusterLogicVO);
+        buildClusterGatewayInfo(clusterLogicVO);
         Optional.ofNullable(projectService.getProjectBriefByProjectId(clusterLogic.getProjectId()))
             .map(ProjectBriefVO::getProjectName).ifPresent(clusterLogicVO::setProjectName);
 
@@ -372,13 +386,12 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(clusterLogicId, currentProjectId);
         ClusterLogicVO clusterLogicVO = ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class);
 
-        FUTURE_UTIL.runnableTask(() -> buildLogicClusterStatus(clusterLogicVO, clusterLogic))
-            .runnableTask(() -> buildConsoleClusterVersions(clusterLogicVO))
+        FUTURE_UTIL.runnableTask(() -> buildConsoleClusterVersions(clusterLogicVO))
             .runnableTask(() -> buildOpLogicClusterPermission(clusterLogicVO, currentProjectId))
             .runnableTask(
                 () -> Optional.ofNullable(projectService.getProjectBriefByProjectId(clusterLogicVO.getProjectId()))
                     .map(ProjectBriefVO::getProjectName).ifPresent(clusterLogicVO::setProjectName))
-            .runnableTask(() -> buildClusterNodeInfo(clusterLogicVO)).waitExecute();
+            .runnableTask(() -> buildClusterGatewayInfo(clusterLogicVO)).waitExecute();
 
         return clusterLogicVO;
     }
@@ -510,7 +523,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     
     @Override
     public PaginationResult<ClusterLogicVO> pageGetClusterLogics(ClusterLogicConditionDTO condition,
-                                                                 Integer projectId) throws NotFindSubclassException {
+                                                                 Integer projectId) throws NotFindSubclassException, ESOperateException {
         BaseHandle baseHandle = handleFactory.getByHandlerNamePer(CLUSTER_LOGIC.getPageSearchType());
         if (baseHandle instanceof ClusterLogicPageSearchHandle) {
             ClusterLogicPageSearchHandle pageSearchHandle = (ClusterLogicPageSearchHandle) baseHandle;
@@ -573,6 +586,14 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             return Result.buildSucc(getUnitSize(nodeSpec.split("-")[2]) * count);
         }
         return Result.buildSucc(UNKNOWN_SIZE);
+    }
+
+    @Override
+    public Result<String> getClusterDataNodeSpec(Long clusterLogicId){
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
+        Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(clusterRegion.getId().intValue());
+        ClusterRoleHost clusterRoleHost = result.getData().stream().findFirst().orElse(null);
+        return Result.buildSucc(clusterRoleHost.getMachineSpec());
     }
 
     @Override
@@ -1051,17 +1072,54 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     /**
-     * 构建节点信息:
-     * 1. 是否关联物理集群
-     * 2. 获取关联物理集群列表
-     * 3. 逻辑集群拥有的数据节点数
-     * 4. 防止没有关联物理集群, 或者取消关联region, 逻辑集群状态为red
-     * 5. 获取gateway地址
+     * 获取gateway地址
+     */
+    private void buildClusterGatewayInfo(ClusterLogicVO clusterLogicVO) {
+        //获取物理集群
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicVO.getId());
+        if (clusterRegion != null) {
+            ClusterPhy clusterPhy =  clusterPhyService.getClusterByName(clusterRegion.getPhyClusterName());
+            clusterLogicVO.setGatewayAddress(esGatewayClient.getGatewayAddress());
+            Set<String> gatewayUrlLis = Sets.newHashSet();
+            if (StringUtils.isNotBlank(clusterPhy.getGatewayIds())){
+                String[] gatewayIds = clusterPhy.getGatewayIds().split(",");
+                for (int i = 0; i < gatewayIds.length; i++) {
+                    if (StringUtils.isNumeric(gatewayIds[i])) {
+                        GatewayClusterPO gatewayClusterPO = gatewayClusterService.getOneById(
+                                Integer.valueOf(gatewayIds[i]));
+                        if (StringUtils.isNotBlank(gatewayClusterPO.getProxyAddress())) {
+                            gatewayUrlLis.add(gatewayClusterPO.getProxyAddress());
+                        } else {
+                            List<GatewayClusterNodePO> gatewayClusterNodePOS = gatewayNodeService.listByClusterName(
+                                    gatewayClusterPO.getClusterName());
+                            for (GatewayClusterNodePO node : gatewayClusterNodePOS) {
+                                gatewayUrlLis.add(node.getHostName() + ":" + node.getPort());
+                            }
+                        }
+                    }
+                }
+            }
+            clusterLogicVO.setGatewayAddress(String.join(",",gatewayUrlLis));
+        }
+    }
+    /**
+     * 获取gateway地址
      */
     private void buildClusterNodeInfo(ClusterLogicVO clusterLogicVO) {
-
         //获取gateway地址
-        clusterLogicVO.setGatewayAddress(esGatewayClient.getGatewayAddress());
+        buildClusterGatewayInfo(clusterLogicVO);
+        //获取活跃分片数
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicVO.getId());
+        AtomicReference<Long> activeShardNum = new AtomicReference<>(0L);
+        if (Objects.nonNull(clusterRegion)){
+            Map<String/*node*/, Long /*shardNum*/>  nodeShardsNum = eSClusterNodeService.syncGetNode2ShardNumMap(clusterRegion.getPhyClusterName());
+            Result<List<ESClusterRoleHostVO>>  ESClusterRoleHostVORes =clusterNodeManager.listClusterLogicNode(Math.toIntExact(clusterLogicVO.getId()));
+            ESClusterRoleHostVORes.getData().stream().forEach(node->{
+                activeShardNum.updateAndGet(v -> v + nodeShardsNum.get(node.getNodeSet()));
+            });
+        }
+
+        clusterLogicVO.setActiveShardNum(activeShardNum.get());
     }
 
     private TupleTwo<Result<Void>, /*projectId*/Integer> checkIndices(List<String> delIndices, Integer logicId) {
@@ -1190,6 +1248,33 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             .collect(Collectors.toSet());
         clusterLogicStatis.setStatus(getClusterLogicStatus(statusSet));
         return clusterLogicStatis;
+    }
+
+    @Override
+    public Result<Void> deleteTemplatesIndicesInfo(Long clusterLogicId,Integer projectId,String operator) {
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(clusterLogicId,projectId);
+        if (Objects.isNull(clusterRegion)){
+            return Result.buildFail("该逻辑集群未绑定region!");
+        }
+        //获取物理模板
+        Result<List<IndexTemplatePhy>> indexTemplatePhys = indexTemplatePhyService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        //获取逻辑模板
+        Result<List<IndexTemplate>> indexTemplates = indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        List<String> indices = esIndexCatService.syncGetIndexListByProjectId(projectId,clusterLogic.getName());
+        if (indexTemplatePhys.getData().size() == 0&&indexTemplates.getData().size() == 0&&indices.size()==0){
+            return Result.buildFail("该逻辑集群下无数据!");
+        }
+        //删除数据
+        for (IndexTemplate indexTemplate:indexTemplates.getData()) {
+            try {
+                indexTemplateService.delTemplate(indexTemplate.getId(),operator);
+                indexTemplatePhyService.delTemplateByLogicId(indexTemplate.getId(),operator);
+            } catch (AdminOperateException e) {
+                return Result.buildFail("数据删除错误!");
+            }
+        }
+        return Result.buildSucc();
     }
 
     /**

@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.dsl.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.DSL_TEMPLATE;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -51,9 +52,15 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
     public Result<Boolean> updateDslTemplateQueryLimit(Integer projectId,String operator,List<DslQueryLimitDTO> dslTemplateList) {
         Boolean succeed =  dslTemplateService.updateDslTemplateQueryLimit(dslTemplateList);
         if (Boolean.TRUE.equals(succeed)) {
+            //获取原限流值
+            Map<String, DslTemplatePO> originalMap = dslTemplateService.getDslTemplateByKeys(dslTemplateList);
+            DslTemplatePO defaultDsl = new DslTemplatePO();
+            defaultDsl.setQueryLimit(0D);
             for (DslQueryLimitDTO entry : dslTemplateList) {
                 operateRecordService.saveOperateRecordWithManualTrigger(
-                        String.format("queryLimit %s->%s", entry.getDslTemplateMd5(), entry.getQueryLimit()), operator,
+                        String.format("修改%s限流值，%f-->%f", entry.getDslTemplateMd5(),
+                                originalMap.getOrDefault(entry.getProjectIdDslTemplateMd5(), defaultDsl).getQueryLimit()
+                                ,entry.getQueryLimit()), operator,
                         projectId, entry.getProjectIdDslTemplateMd5(),
                         OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT, entry.getProjectId());
             }
@@ -69,7 +76,7 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
         }
        Boolean succeed = dslTemplateService.updateDslTemplateStatus(projectId, dslTemplateMd5);
         if (Boolean.TRUE.equals(succeed)) {
-            operateRecordService.saveOperateRecordWithManualTrigger("变更状态:" + dslTemplateMd5, operator, projectId,
+            operateRecordService.saveOperateRecordWithManualTrigger(dslTemplateMd5, operator, projectId,
                     dslTemplateMd5, OperateTypeEnum.QUERY_TEMPLATE_DISABLE, projectId);
         }
         return Result.build(succeed);

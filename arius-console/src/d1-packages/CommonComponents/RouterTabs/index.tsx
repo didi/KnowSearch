@@ -1,86 +1,151 @@
-import * as React from 'react';
-import { Badge, Popconfirm, Tabs, Modal } from 'antd';
-import { CloseOutlined, CloseCircleOutlined, LeftOutlined, RightOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { withRouter, Link, RouteComponentProps } from 'react-router-dom';
-import './index.less';
-import { getCookie } from '../../Utils/tools';
-import _ from 'lodash';
-import { asyncMicroTasks, resize } from 'lib/utils';
-
+import * as React from "react";
+import { Badge, Popconfirm, Tabs, Modal } from "antd";
+import { CloseOutlined, CloseCircleOutlined, LeftOutlined, RightOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import { withRouter, Link, RouteComponentProps } from "react-router-dom";
+import "./index.less";
+import { getCookie } from "../../Utils/tools";
+import _ from "lodash";
+import { asyncMicroTasks, isSuperApp, resize } from "lib/utils";
 interface ITab {
   label: string;
   href: string;
   key: string;
   show: boolean;
+  leftIndex?: number;
 }
 
 interface Props {
-  tabList: ITab[],
+  tabList: ITab[];
   dealPathname?: (pathname: string) => string;
   siderMenuCollapsed?: boolean;
   intlZhCN?: any;
   systemKey?: any;
+  mulityPage?: { [key: string]: (path: string) => string };
   removePaths?: any[];
   defaultTab?: any;
   pageEventList?: any[];
   permissions?: { [key: string]: string };
   currentProject?: any;
+  leftIndex?: number;
+  setLeftIndex?: (index: number) => void;
+  headerClick?: boolean;
+  setHeaderClick?: (bool: boolean) => void;
+  permissionPoints?: any[];
+  dropByCacheKey: any;
+  redirectPath?: (permissionPoints: any, history?: any, leftIndex?: number, changeProject?: boolean) => string;
 }
 
 const RouterTabs = (props: Props & RouteComponentProps) => {
-  const { dealPathname, tabList: tabs, history, siderMenuCollapsed, removePaths, defaultTab, pageEventList, permissions, currentProject } = props;
-  const currentPathname = typeof dealPathname === 'function' ? dealPathname(window.location.pathname) : window.location.pathname;
-  const [currentKey, setCurrentKey] = React.useState(`menu${currentPathname.split('/')?.join('.')}`);
+  const {
+    dealPathname,
+    tabList: tabs,
+    history,
+    siderMenuCollapsed,
+    removePaths,
+    defaultTab,
+    pageEventList,
+    permissions,
+    currentProject,
+    leftIndex,
+    setLeftIndex,
+    headerClick,
+    setHeaderClick,
+    permissionPoints,
+    redirectPath,
+    systemKey,
+    dropByCacheKey,
+    mulityPage,
+  } = props;
+  const currentPathname = typeof dealPathname === "function" ? dealPathname(window.location.pathname) : window.location.pathname;
+  const [currentKey, setCurrentKey] = React.useState(`menu${currentPathname.split("/")?.join(".")}`);
   const [tabList, setTabList] = React.useState(tabs || []);
-  const initCollapsed = getCookie('siderMenuCollapsed');
-  const [collapsed, setCollapsed] = React.useState(siderMenuCollapsed || initCollapsed === 'true');
+  const initCollapsed = getCookie("siderMenuCollapsed");
+  const [collapsed, setCollapsed] = React.useState(siderMenuCollapsed || initCollapsed === "true");
   const [isShowIcon, setIsShowIcon] = React.useState(false);
   const [isShowLeft, setIsShowLeft] = React.useState(false);
   const [isShowRight, setIsShowRight] = React.useState(false);
 
-  const isFirstRender = React.useRef(true);
+  const lastProject = React.useRef({} as any);
 
   React.useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
+    if (headerClick) {
+      redirectPath(permissionPoints, history, leftIndex);
     }
-    // 过滤掉现有 tab 中的详情页
-    const newTabList = tabList.filter(item => !permissions[item.key]);
+  }, [leftIndex]);
 
-    setTabList(newTabList);
-
-    // 判断当前页面被选中页面是否是详情页
-    const currentHref = permissions[currentKey];
-
-    if (currentHref) {
-      // 当前页面是详情页，跳转到相应的列表页
-      history.push(currentHref);
+  React.useEffect(() => {
+    if (permissionPoints?.length) {
+      let targetPath: string;
+      if (lastProject?.current.id && lastProject?.current.id !== currentProject?.id) {
+        targetPath = redirectPath(permissionPoints, history, 0, true);
+      } else {
+        targetPath = redirectPath(permissionPoints, history);
+      }
+      lastProject.current = currentProject;
+      let key = `menu.${props.systemKey}${targetPath?.split("/")?.join(".")}`;
+      const search = window.location.search;
+      const hash = window.location.hash;
+      let label: string;
+      const mulityPageName = Object.keys(mulityPage).find((path) => path == targetPath);
+      if (mulityPageName) {
+        label = mulityPage[mulityPageName].call(null, props.intlZhCN[key]);
+        key += search;
+      }
+      const newTabList = [
+        {
+          key,
+          label: label || props.intlZhCN[key],
+          href: `${currentPathname}` === `/${systemKey}${targetPath}` ? `${targetPath}${search ?? ""}${hash ?? ""}` : targetPath,
+          show: true,
+          leftIndex,
+        },
+      ];
+      setTabList(newTabList);
     }
-  }, [currentProject]);
+  }, [permissionPoints]);
 
   const onChange = (key: string) => {
     setCurrentKey(key);
   };
 
+  const onClosePage = ({ key, onCloseCallback }) => {
+    Modal.confirm({
+      title: "确定取消？",
+      content: "取消后当前填写内容将失效，请谨慎操作",
+      okText: "确定",
+      cancelText: "取消",
+      icon: <QuestionCircleOutlined className="question-icon" />,
+      onOk: () => {
+        if (onCloseCallback) {
+          onCloseCallback();
+        }
+        onRemoveOneIcon(key);
+      },
+    });
+  };
+
   // 为了支持点击关闭时对特定页面做提示拆分关闭方法
   const onRemoveOneIcon = (key: string) => {
+    const index = tabList.findIndex((item) => item.key === key);
     const changeTabList = tabList.filter((item) => item.key !== key);
     setTabList(changeTabList);
 
     if (key === currentKey) {
-      setCurrentKey(changeTabList[0].key);
-      (props as any).history.push(changeTabList[0].href);
+      const currentIndex = index > 0 ? index - 1 : 0;
+      setCurrentKey(changeTabList[currentIndex].key);
+      (props as any).history.push(changeTabList[currentIndex].href);
     }
-  }
+  };
 
   const onClickOneRemoveIcon = (e, key: string) => {
     e.stopPropagation();
-    if (pageEventList && pageEventList.find(item => item.key === key)) {
-      const pageEventItem = pageEventList.find(item => item.key === key);
-      onClosePage(pageEventItem)
+    dropByCacheKey && dropByCacheKey(key);
+
+    if (pageEventList && pageEventList.find((item) => item.key === key)) {
+      const pageEventItem = pageEventList.find((item) => item.key === key);
+      onClosePage(pageEventItem);
     } else {
-      onRemoveOneIcon(key)
+      onRemoveOneIcon(key);
     }
   };
 
@@ -90,30 +155,17 @@ const RouterTabs = (props: Props & RouteComponentProps) => {
     setTabList(changeTabList);
   };
 
-  const onClickArrow = _.throttle((type = '') => {
-    const navWrap = document.querySelector(
-      "#tabs-list .ant-tabs-nav-wrap"
-    ) as HTMLElement;
-    const navList = document.querySelector(
-      "#tabs-list .ant-tabs-nav-list"
-    ) as HTMLElement;
-    const navTab = document.querySelector(
-      "#tabs-list .ant-tabs-tab"
-    ) as HTMLElement;
+  const onClickArrow = _.throttle((type = "") => {
+    const navWrap = document.querySelector("#tabs-list .ant-tabs-nav-wrap") as HTMLElement;
+    const navList = document.querySelector("#tabs-list .ant-tabs-nav-list") as HTMLElement;
+    const navTab = document.querySelector("#tabs-list .ant-tabs-tab") as HTMLElement;
 
     const navWrapWidth = Number(navWrap.offsetWidth);
     const navListWidth = Number(navList.offsetWidth);
     const tagWidth = navTab ? Number(navTab.offsetWidth) + 12 : 96 + 12;
-    const translateLen = Number(
-      (navList as any).style.transform
-        .split("(")[1]
-        .split(",")[0]
-        .replace("px", "")
-    );
+    const translateLen = Number((navList as any).style.transform.split("(")[1].split(",")[0].replace("px", ""));
     const navListScrollLeft = Number(translateLen * -1);
-    const navListScrollRight = Number(
-      navListWidth - navWrapWidth - navListScrollLeft
-    );
+    const navListScrollRight = Number(navListWidth - navWrapWidth - navListScrollLeft);
 
     const tag3 = tagWidth * 3;
 
@@ -125,11 +177,10 @@ const RouterTabs = (props: Props & RouteComponentProps) => {
         if (navListScrollRight >= tag3) {
           navList.style.transform = `translate(${translateLen - tag3}px, 0)`;
         } else {
-          navList.style.transform = `translate(${navWrapWidth - navListWidth
-            }px, 0)`;
-          navWrap.classList.remove('ant-tabs-nav-wrap-ping-right');
+          navList.style.transform = `translate(${navWrapWidth - navListWidth}px, 0)`;
+          navWrap.classList.remove("ant-tabs-nav-wrap-ping-right");
         }
-        navWrap.classList.add('ant-tabs-nav-wrap-ping-left');
+        navWrap.classList.add("ant-tabs-nav-wrap-ping-left");
       } else if (type === "right") {
         if (navListScrollLeft <= 0) {
           return;
@@ -138,9 +189,9 @@ const RouterTabs = (props: Props & RouteComponentProps) => {
           navList.style.transform = `translate(${translateLen + tag3}px, 0)`;
         } else {
           navList.style.transform = `translate(0, 0)`;
-          navWrap.classList.remove('ant-tabs-nav-wrap-ping-left');
+          navWrap.classList.remove("ant-tabs-nav-wrap-ping-left");
         }
-        navWrap.classList.add('ant-tabs-nav-wrap-ping-right');
+        navWrap.classList.add("ant-tabs-nav-wrap-ping-right");
       }
       onClickArrow();
     } else {
@@ -151,18 +202,24 @@ const RouterTabs = (props: Props & RouteComponentProps) => {
 
   React.useEffect(() => {
     // redirect情况 通过dealpathname来手动关联处理
-    const key = `menu${currentPathname.split('/')?.join('.')}`;
+    let key = `menu${currentPathname.split("/")?.join(".")}`;
+    let label;
 
     // 翻译不存在表示非左侧菜单栏页面
     if (!props.intlZhCN[key]) {
       return;
     }
-
-    const hasTab = tabList.filter((item) => item.key === key).length;
     const search = window.location.search;
     const hash = window.location.hash;
-    const href = currentPathname.replace(`/${props.systemKey}`, '') + search + hash;
+    const pathname = currentPathname.replace(`/${props.systemKey}`, "");
+    const href = pathname + search + hash;
+    const mulityPageName = Object.keys(mulityPage).find((path) => path == pathname);
+    if (mulityPageName) {
+      label = mulityPage[mulityPageName].call(null, props.intlZhCN[key]);
+      key += search;
+    }
 
+    const hasTab = tabList.filter((item) => item.key === key).length;
     let newTabs = tabList.map((row) => {
       row.show = row.key === key;
       if (row.key === key) {
@@ -171,15 +228,18 @@ const RouterTabs = (props: Props & RouteComponentProps) => {
       return row;
     });
 
-    if (!hasTab) {
+    if (!hasTab && permissionPoints.length) {
       newTabs.push({
         key,
-        label: props.intlZhCN[key],
+        label: label || props.intlZhCN[key],
         href,
         show: true,
+        leftIndex,
       });
     }
+
     setTabList(newTabs);
+    asyncMicroTasks(resize);
 
     // 判断当前过滤后的tabs有没有
     const hasTabKey = newTabs.filter((item) => item.key === key).length;
@@ -200,12 +260,8 @@ const RouterTabs = (props: Props & RouteComponentProps) => {
   }, [siderMenuCollapsed]);
 
   React.useEffect(() => {
-    const navWrap = document.querySelector(
-      "#tabs-list .ant-tabs-nav-wrap"
-    ) as HTMLElement;
-    const navList = document.querySelector(
-      "#tabs-list .ant-tabs-nav-list"
-    ) as HTMLElement;
+    const navWrap = document.querySelector("#tabs-list .ant-tabs-nav-wrap") as HTMLElement;
+    const navList = document.querySelector("#tabs-list .ant-tabs-nav-list") as HTMLElement;
     const navWrapWidth = Number(navWrap.offsetWidth);
     const navListWidth = Number(navList.offsetWidth);
     if (navListWidth >= navWrapWidth) {
@@ -217,54 +273,38 @@ const RouterTabs = (props: Props & RouteComponentProps) => {
     onClickArrow();
   }, [tabList]);
 
-  const onClosePage = ({ key, onCloseCallback }) => {
-    Modal.confirm({
-      title: "确定取消？",
-      content: "取消后当前填写内容将失效，请谨慎操作",
-      okText: "确定",
-      cancelText: "取消",
-      icon: <QuestionCircleOutlined className="question-icon" />,
-      onOk: () => {
-        if (onCloseCallback) {
-          onCloseCallback();
-        }
-        onRemoveOneIcon(key);
-      },
-    });
-  };
-
   // 关闭页面逻辑
   React.useEffect(() => {
     try {
       // 做判断防止是空值
       if (!Array.isArray(removePaths) || !removePaths.length || !removePaths[0]) return;
       let newTabs = Array.from(tabList);
-      for (const path of removePaths) {
-        // 去空逻辑 
-        newTabs = newTabs.filter((tab: any) => tab.key !== `menu${path.split("/")?.join(".")}`);
+      for (let path of removePaths) {
+        if (Array.isArray(path)) {
+          path = path[0];
+        }
+        // 去空逻辑
+        newTabs = newTabs.filter((tab: any) => tab.key !== `menu${path?.split("/")?.join(".")}`);
       }
       // 如果没有页面了返回首页
       if (newTabs && !newTabs.length) {
-        newTabs = [
-          defaultTab
-        ]
+        newTabs = [defaultTab];
       }
       setTabList(newTabs);
-      removePaths.indexOf(window.location.pathname) > -1 ? (props as any)?.history?.push(defaultTab.href) : null;
       // 恢复值
-      window.localStorage.setItem('removePath', '');
+      window.localStorage.setItem("removePath", "");
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
   }, [removePaths]);
-  
+
   const onLinkClick = () => {
     asyncMicroTasks(resize);
   };
 
   return (
     <>
-      <div className={collapsed ? 'router-tabs collapsed' : 'router-tabs'}>
+      <div className={collapsed ? "router-tabs collapsed" : "router-tabs"}>
         <Tabs
           activeKey={currentKey}
           onChange={onChange}
@@ -276,24 +316,27 @@ const RouterTabs = (props: Props & RouteComponentProps) => {
             (props as any).history.push(tabList[index].href);
           }}
         >
-          {
-            tabList.map(tab => (
-              <Tabs.TabPane
-                tab={(
-                  <>
-                    <Link onClick={onLinkClick} to={tab.href}>
-                      <Badge status={currentKey === tab.key ? 'processing' : 'default'} />
-                      {tab.label}
-                    </Link>
-                    {tabList.length > 1 ?
-                      <CloseOutlined className="ml-10" onClick={(e: any) => onClickOneRemoveIcon(e, tab.key)} /> : null
-                    }
-                  </>
-                )}
-                key={tab.key}
-              />
-            ))
-          }
+          {tabList.map((tab) => (
+            <Tabs.TabPane
+              tab={
+                <>
+                  <Link
+                    onClick={() => {
+                      onLinkClick();
+                      setLeftIndex(tab?.leftIndex);
+                      setHeaderClick(false);
+                    }}
+                    to={tab.href}
+                  >
+                    <Badge status={currentKey === tab.key ? "processing" : "default"} />
+                    {tab.label}
+                  </Link>
+                  {tabList.length > 1 ? <CloseOutlined className="ml-10" onClick={(e: any) => onClickOneRemoveIcon(e, tab.key)} /> : null}
+                </>
+              }
+              key={tab.key}
+            />
+          ))}
         </Tabs>
         {isShowIcon ? (
           <>
@@ -302,7 +345,7 @@ const RouterTabs = (props: Props & RouteComponentProps) => {
               onClick={() => {
                 onClickArrow("left");
               }}
-              style={{ color: isShowLeft ? '#000' : 'rgba(0,0,0,.25)' }}
+              style={{ color: isShowLeft ? "#000" : "rgba(0,0,0,.25)" }}
             >
               <LeftOutlined />
             </div>
@@ -311,7 +354,7 @@ const RouterTabs = (props: Props & RouteComponentProps) => {
               onClick={() => {
                 onClickArrow("right");
               }}
-              style={{ color: isShowRight ? '#000' : 'rgba(0,0,0,.25)' }}
+              style={{ color: isShowRight ? "#000" : "rgba(0,0,0,.25)" }}
             >
               <RightOutlined />
             </div>
@@ -320,21 +363,21 @@ const RouterTabs = (props: Props & RouteComponentProps) => {
           ""
         )}
       </div>
-      {
-        tabList && tabList.length > 1 ?
-          <div className="remove-all-icon">
-            <Popconfirm
-              placement="bottomRight"
-              title={"确定要关闭所有标签吗？"}
-              onConfirm={onClickRemoveIcon}
-              okText="确定"
-              cancelText="取消"
-            >
-              <CloseCircleOutlined />
-            </Popconfirm>
-          </div>
-          : ""
-      }
+      {tabList && tabList.length > 1 ? (
+        <div className="remove-all-icon">
+          <Popconfirm
+            placement="bottomRight"
+            title={"确定要关闭所有标签吗？"}
+            onConfirm={onClickRemoveIcon}
+            okText="确定"
+            cancelText="取消"
+          >
+            <CloseCircleOutlined />
+          </Popconfirm>
+        </div>
+      ) : (
+        ""
+      )}
     </>
   );
 };

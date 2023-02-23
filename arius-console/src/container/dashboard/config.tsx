@@ -1,13 +1,15 @@
+import React from "react";
 import Cluster from "./cluster";
 import Node from "./node";
 import IndexView from "./index-view";
 import { IMenuItem } from "typesPath/base-types";
-import React from "react";
 import { unitMap, addChartTitle, colorList } from "../indicators-kanban/config";
 import moment from "moment";
-import { toFixedNum } from "lib/utils";
+import { toFixedNum, bytesUnitFormatter, formatTime, formatDecimalPoint } from "lib/utils";
 import { ECOption } from "../indicators-kanban/components/line";
 import { NavRouterLink } from "container/custom-component";
+import { Tooltip } from "antd";
+
 export enum TAB_LIST_KEY {
   Operation = "operation",
   operate = "operate",
@@ -26,6 +28,7 @@ interface seriesType {
 export interface metricsContentsType {
   metricsContentCells: { timeStamp: number; value: number }[];
   name: string;
+  cluster?: string;
 }
 
 export interface metricsType {
@@ -49,7 +52,7 @@ export const operationTabs = [
     key: OPERATION_TAB_LIST_KEY.index,
     content: () => <IndexView />,
   },
-]
+];
 
 const menuMap = new Map<string, IMenuItem>();
 
@@ -60,22 +63,24 @@ operationTabs.forEach((d) => {
 export const OPERATION_MENU_MAP = menuMap;
 
 interface lineOptionType {
-  title: string,
-  xAxisData: number[],
-  series: seriesType[],
-  unitMap?: { [key: string]: any },
-  isMoreDay?: boolean,
-  isMarkLine?: boolean,
-  color?: string[],
+  title: string;
+  xAxisData: number[];
+  series: seriesType[];
+  unitMap?: { [key: string]: any };
+  isMoreDay?: boolean;
+  isMarkLine?: boolean;
+  color?: string[];
   // isShowTooltipModal?: boolean,
   // isShowTaskTooltipModal?: boolean,
-  isClusterLink?: boolean,
-  isGatewayLink?: boolean,
-  metricsType?: string,
-  showLegend?: boolean,
-  clusterPhyName?: string[],
-  tooltip?: string,
-  linkWithSeriesName?: boolean
+  isClusterLink?: boolean;
+  isNodeLink?: boolean;
+  isGatewayLink?: boolean;
+  metricsType?: string;
+  showLegend?: boolean;
+  clusterPhyName?: string[];
+  tooltip?: string;
+  linkWithSeriesName?: boolean;
+  cluster?: string;
 }
 
 interface OptionType {
@@ -87,7 +92,9 @@ interface OptionType {
   showLegend?: boolean;
   isGatewayLink?: boolean;
   clusterPhyName?: string[];
-  linkWithSeriesName?: boolean
+  linkWithSeriesName?: boolean;
+  isNodeLink?: boolean;
+  needTitle?: boolean;
 }
 
 // 判断 ms 是否需要转换成 s，只判断峰值
@@ -100,9 +107,9 @@ const isConversion = (series) => {
         }
       }
       return item > 1000;
-    })
+    });
   });
-}
+};
 
 // 图表 tooltip 展示位置
 const tooltipPosition = (pos, params, dom, rect, size, showLegend) => {
@@ -119,46 +126,48 @@ const tooltipPosition = (pos, params, dom, rect, size, showLegend) => {
 
   const obj = { top: y - domHeight - 10 };
 
-  // showLegend 是否展示左侧 legend 
-  const chartPosition = showLegend ? width / 2 - 100 : width / 2 - 20;
-
+  // showLegend 是否展示左侧 legend
+  const chartPosition = showLegend ? width - 40 : width / 2 - 20;
   if (x > chartPosition) {
     // 在鼠标左侧展示
     obj["left"] = x - domWidth - 10;
+  } else if (x + domWidth > width) {
+    // 右侧超出，设置固定位置
+    obj["right"] = -50;
   } else {
     // 在鼠标右侧展示
     obj["left"] = x + 10;
   }
-
   return obj;
 };
 
 // 图表 tooltip 展示的样式
-const tooltipFormatter = (date, arr, unit, isClusterLink, metricsType, isGatewayLink, clusterPhyName, linkWithSeriesName) => {
+const tooltipFormatter = (params) => {
+  let { date, arr, unit, isClusterLink, metricsType, isGatewayLink, clusterPhyName, linkWithSeriesName, isNodeLink, cluster } = params;
   // 新增从大到小排序
   arr = arr.sort((a, b) => b.value - a.value);
   const str = arr
-    .map(
-      (item, idx) => `<div style="margin: 3px 0;line-height:1;">
-          <div style="margin: 0px 0 0;line-height:1;">
-          ${item.marker}
-          <span style="font-size:14px;color:#666;pointer-events: auto;font-weight:400;margin-left:2px;${isClusterLink || isGatewayLink ? 'cursor: pointer' : ''}" 
-            ${isClusterLink ? `onclick="window.clusterlink('${linkWithSeriesName ? item.seriesName : ''}','${clusterPhyName[idx]}')"` : ""}
-            ${isGatewayLink ? `onclick="window.gatewaylink('${linkWithSeriesName ? item.seriesName : ''}')"}` : ""}>
-              ${item.seriesName}
-            </span>
-            <span style="float:right;margin-left:20px;font-size:14px;color:#666;font-weight:900">
-              ${item.value > 10000
-          ? toFixedNum(item.value / 10000, 2) + "W"
-          : item.value
-        } ${unit || ""}
-            </span>
-            <div style="clear:both"></div>
-          </div>
+    .map((item: any, idx: number) => {
+      return `<div style="margin: 3px 0;line-height:1;">
+        <div style="margin: 0px 0 0;line-height:1;">
+        ${item.marker}
+        <span style="font-size:14px;color:#666;pointer-events: auto;font-weight:400;margin-left:2px;${
+          isClusterLink || isGatewayLink || isNodeLink ? "cursor: pointer" : ""
+        }" 
+          ${isClusterLink ? `onclick="window.clusterlink('${linkWithSeriesName ? item.seriesName : ""}','${item?.data?.cluster}')"` : ""}
+          ${isNodeLink ? `onclick="window.nodelink('${linkWithSeriesName ? item.seriesName : ""}','${cluster}')"` : ""}
+          ${isGatewayLink ? `onclick="window.gatewaylink('${linkWithSeriesName ? item.seriesName : ""}')"}` : ""}>
+          <span title=所属集群：${item?.data?.cluster}>${item.seriesName}</span>
+          </span>
+          <span style="float:right;margin-left:20px;font-size:14px;color:#666;font-weight:900">
+            ${item.value > 10000 ? toFixedNum(item.value / 10000, 2) + "W" : item.value} ${unit || ""}
+          </span>
           <div style="clear:both"></div>
         </div>
-      <div style="clear:both"></div>`
-    )
+        <div style="clear:both"></div>
+      </div>
+    <div style="clear:both"></div>`;
+    })
     .join("");
 
   return `<div style="margin: 0px 0 0;line-height:1; position: relative; z-index: 99;">
@@ -187,6 +196,8 @@ export const getLineOption = ({
   color = colorList,
   // 是否跳转到集群看板
   isClusterLink = false,
+  // 是否跳转到节点视图
+  isNodeLink = false,
   // 是否跳转到网关看板
   isGatewayLink = false,
   // 后端图表指标名称，帮助弹窗获取数据
@@ -195,21 +206,22 @@ export const getLineOption = ({
   showLegend = true,
   clusterPhyName = [],
   // 跳转是否需要精确到具体维度，比如节点/索引
-  linkWithSeriesName
+  linkWithSeriesName,
+  cluster,
 }: lineOptionType) => {
   let seriesData;
-  let unitFormatter = unitMap.formatter;
-  let unitName = unitMap.name;
+  let unitFormatter = unitMap?.formatter;
+  let unitName = unitMap?.name;
 
   if (unitFormatter) {
     // 根据数值大小判断单位是否需要进行转换
-    if (unitName === 'ms' && isConversion(series)) {
+    if (unitName === "ms" && isConversion(series)) {
       unitFormatter = (num) => {
         let val = Number(num);
         return toFixedNum(val / 1000, 3);
-      }
-      unitName = 's';
-      title = title.replace('ms', 's');
+      };
+      unitName = "s";
+      title = title.replace("ms", "s");
     }
     seriesData = series.map((item: any) => ({
       name: item?.name || "",
@@ -218,6 +230,7 @@ export const getLineOption = ({
           return {
             timestamp: el.timestamp,
             value: unitFormatter(el.value),
+            cluster: el?.cluster || "",
           };
         }
         return unitFormatter(el);
@@ -242,63 +255,73 @@ export const getLineOption = ({
     },
     tooltip: {
       trigger: "axis",
-      position: (pos, params, dom, rect, size,) => {
-        return tooltipPosition(pos, params, dom, rect, size, showLegend)
+      enterable: true,
+      position: (pos, params, dom, rect, size) => {
+        return tooltipPosition(pos, params, dom, rect, size, showLegend);
       },
+      extraCssText: "z-index: 101",
       formatter: (params: any) => {
         let res = "";
         if (params != null && params.length > 0) {
-          res += tooltipFormatter(
-            moment(Number(params[0].name)).format("YYYY-MM-DD HH:mm"),
-            params,
-            unitName,
+          let formatterParams = {
+            date: moment(Number(params[0].name)).format("YYYY-MM-DD HH:mm"),
+            arr: params,
+            unit: unitName,
             isClusterLink,
             metricsType,
             isGatewayLink,
             clusterPhyName,
-            linkWithSeriesName
-          );
+            linkWithSeriesName,
+            isNodeLink,
+            cluster,
+          };
+          res += tooltipFormatter(formatterParams);
         }
         return res;
       },
     },
-    legend: showLegend ? {
-      type: "scroll",
-      left: "45",
-      bottom: "5",
-      icon: "rect",
-      itemHeight: 2,
-      itemWidth: 14,
-      textStyle: {
-        width: 85,
-        overflow: "truncate",
-        ellipsis: "...",
-        fontSize: 11,
-        color: '#74788D',
-      },
-      padding: [
-        8,  // 上
-        20, // 右
-        6,  // 下
-        5, // 左
-      ],
-      pageIcons: {
-        horizontal: ['path://M474.496 512l151.616 151.616a9.6 9.6 0 0 1 0 13.568l-31.68 31.68a9.6 9.6 0 0 1-13.568 0l-190.08-190.08a9.6 9.6 0 0 1 0-13.568l190.08-190.08a9.6 9.6 0 0 1 13.568 0l31.68 31.68a9.6 9.6 0 0 1 0 13.568L474.496 512z', 'path://M549.504 512L397.888 360.384a9.6 9.6 0 0 1 0-13.568l31.68-31.68a9.6 9.6 0 0 1 13.568 0l190.08 190.08a9.6 9.6 0 0 1 0 13.568l-190.08 190.08a9.6 9.6 0 0 1-13.568 0l-31.68-31.68a9.6 9.6 0 0 1 0-13.568L549.504 512z'],
-        pageIconColor: '#495057',
-        pageIconInactiveColor: '#ADB5BC',
-      },
-      pageTextStyle: {
-        width: 8,
-        color: "#495057",
-        fontSize: 11
-      },
-      pageIconSize: [4, 7],
-      pageButtonItemGap: 10,
-      pageFormatter: '{current} / {total}',
-      tooltip: {
-        show: true,
-      },
-    } : null,
+    legend: showLegend
+      ? {
+          type: "scroll",
+          left: "45",
+          bottom: "5",
+          icon: "rect",
+          itemHeight: 2,
+          itemWidth: 14,
+          textStyle: {
+            width: 85,
+            overflow: "truncate",
+            ellipsis: "...",
+            fontSize: 11,
+            color: "#74788D",
+          },
+          padding: [
+            8, // 上
+            20, // 右
+            6, // 下
+            5, // 左
+          ],
+          pageIcons: {
+            horizontal: [
+              "path://M474.496 512l151.616 151.616a9.6 9.6 0 0 1 0 13.568l-31.68 31.68a9.6 9.6 0 0 1-13.568 0l-190.08-190.08a9.6 9.6 0 0 1 0-13.568l190.08-190.08a9.6 9.6 0 0 1 13.568 0l31.68 31.68a9.6 9.6 0 0 1 0 13.568L474.496 512z",
+              "path://M549.504 512L397.888 360.384a9.6 9.6 0 0 1 0-13.568l31.68-31.68a9.6 9.6 0 0 1 13.568 0l190.08 190.08a9.6 9.6 0 0 1 0 13.568l-190.08 190.08a9.6 9.6 0 0 1-13.568 0l-31.68-31.68a9.6 9.6 0 0 1 0-13.568L549.504 512z",
+            ],
+            pageIconColor: "#495057",
+            pageIconInactiveColor: "#ADB5BC",
+          },
+          pageTextStyle: {
+            width: 8,
+            color: "#495057",
+            fontSize: 11,
+          },
+          pageIconSize: [4, 7],
+          pageButtonItemGap: 10,
+          pageFormatter: "{current} / {total}",
+          tooltip: {
+            show: true,
+          },
+        }
+      : null,
     grid: {
       left: 16,
       right: 16,
@@ -312,31 +335,30 @@ export const getLineOption = ({
       axisTick: {
         alignWithLabel: true,
         lineStyle: {
-          color: '#e9e9ea'
-        }
+          color: "#e9e9ea",
+        },
       },
       axisLine: {
         lineStyle: {
-          color: '#e9e9ea'
-        }
+          color: "#e9e9ea",
+        },
       },
-      fontFamily: 'HelveticaNeue',
+      fontFamily: "HelveticaNeue",
       axisLabel: {
         color: "#495057",
         formatter: (value: number) => {
           value = Number(value);
-          return '{a|' + moment(value).format("MM-DD") + '}\n'
-            + '{b|' + moment(value).format("HH:mm") + '}';
+          return "{a|" + moment(value).format("MM-DD") + "}\n" + "{b|" + moment(value).format("HH:mm") + "}";
         },
         rich: {
           a: {
             lineHeight: 16,
-            color: '#495057',
+            color: "#495057",
           },
           b: {
-            color: '#ADB5BC',
-          }
-        }
+            color: "#ADB5BC",
+          },
+        },
       },
     },
     yAxis: {
@@ -344,10 +366,11 @@ export const getLineOption = ({
       splitLine: {
         lineStyle: {
           type: "dashed",
-          color: "#e9e9ea"
+          color: "#e9e9ea",
         },
       },
       axisLabel: {
+        showMaxLabel: true,
         formatter: function (value) {
           if (value < 10000) {
             return value;
@@ -370,35 +393,37 @@ export const getOption = ({
   showLegend = true,
   isGatewayLink = false,
   clusterPhyName = [],
-  linkWithSeriesName = true
+  linkWithSeriesName = true,
+  isNodeLink = false,
+  needTitle = false,
 }: OptionType) => {
   if (!metrics || !metrics.type) {
     return {};
   }
 
-  const title =
-    (configData[metrics.type] && configData[metrics.type].title()) ||
-    metrics.type;
+  const title = (configData[metrics.type] && configData[metrics.type].title()) || metrics.type;
 
   const xAxisData = [];
-
-  const series = metrics.metricsContents.map((item, index) => ({
-    name: item.name,
-    data: item.metricsContentCells.sort((a, b) => a.timeStamp - b.timeStamp).map((item) => {
-      if (index === 0) {
-        xAxisData.push(item.timeStamp);
-      }
-      return {
-        value: item.value,
-        timestamp: item.timeStamp,
-      };
-    }),
+  const series = metrics.metricsContents.map((content, index) => ({
+    name: content.name,
+    data: content.metricsContentCells
+      .sort((a, b) => a.timeStamp - b.timeStamp)
+      .map((item) => {
+        if (index === 0) {
+          xAxisData.push(item.timeStamp);
+        }
+        return {
+          value: item.value,
+          timestamp: item.timeStamp,
+          cluster: content?.cluster || "",
+        };
+      }),
   }));
   return getLineOption({
-    title,
+    title: needTitle ? title : null,
     xAxisData,
     series,
-    unitMap: configData[metrics.type].unit,
+    unitMap: configData[metrics.type]?.unit,
     isMoreDay,
     isMarkLine,
     isClusterLink,
@@ -406,7 +431,9 @@ export const getOption = ({
     showLegend,
     clusterPhyName,
     isGatewayLink,
-    linkWithSeriesName
+    linkWithSeriesName,
+    isNodeLink,
+    cluster: metrics?.metricsContents[0]?.cluster,
   });
 };
 
@@ -414,394 +441,534 @@ export const clusterMetrics = {
   health: {
     name: "集群健康状态",
     unit: unitMap.none,
-    type: 'pie',
+    type: "pie",
     fixed: true,
-  },
-  indexingLatency: {
-    name: "写入耗时",
-    unit: unitMap.ms,
-  },
-  indexReqNum: {
-    name: "写入文档数",
-    unit: unitMap.count,
   },
   searchLatency: {
     name: "查询耗时",
     unit: unitMap.ms,
   },
-  gatewaySucPer: {
-    name: "网关成功率",
-    unit: unitMap.percent,
+  indexingLatency: {
+    name: "写入耗时",
+    unit: unitMap.ms,
   },
-  gatewayFailedPer: {
-    name: "网关失败率",
-    unit: unitMap.percent,
+  shardNum: {
+    name: "shard个数大于10000集群列表",
+    width: "33%",
+    columns: [
+      {
+        title: "集群名称",
+        dataIndex: "clusterPhyName",
+        render: (text, record) => {
+          return (
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                height: 26,
+                lineHeight: "26px",
+                width: "90%",
+              }}
+            >
+              <NavRouterLink
+                needToolTip
+                style={{
+                  fontFamily: "PingFangSC-Regular",
+                  fontSize: 12,
+                  color: "#495057",
+                  letterSpacing: 0,
+                  textAlign: "justify",
+                  lineHeight: "20px",
+                }}
+                element={text}
+                href={`/indicators/cluster?cluster=${record.clusterPhyName}&overview=${text}&#overview`}
+              />
+            </div>
+          );
+        },
+      },
+      {
+        title: "shard个数",
+        dataIndex: "value",
+        width: "33%",
+        render: (val: number) => val || "-",
+      },
+      {
+        title: "索引个数",
+        dataIndex: "indexCount",
+        width: "33%",
+        render: (val: number) => val || "-",
+      },
+    ],
   },
   pendingTaskNum: {
     name: "集群pending task数",
     unit: unitMap.count,
   },
-  httpNum: {
-    name: "集群http连接数",
-    unit: unitMap.count,
+  gatewayFailedPer: {
+    name: "网关失败率",
+    unit: unitMap.percent,
   },
-  docUprushNum: {
-    name: "查询请求数突增集群",
+  nodeElapsedTime: {
+    name: "nodes_stats 接口平均采集耗时",
+    unit: unitMap.s,
+  },
+  clusterElapsedTimeGte5Min: {
+    name: "指标采集延时大于5分钟集群列表",
     unit: unitMap.none,
-    tooltip: '每秒查询请求数加倍为突增',
+    columns: [
+      {
+        title: "集群名称",
+        dataIndex: "clusterPhyName",
+        width: "50%",
+        render: (text, record) => {
+          return (
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                height: 26,
+                lineHeight: "26px",
+                width: "90%",
+              }}
+            >
+              <NavRouterLink
+                needToolTip
+                style={{
+                  fontFamily: "PingFangSC-Regular",
+                  fontSize: 12,
+                  color: "#495057",
+                  letterSpacing: 0,
+                  textAlign: "justify",
+                  lineHeight: "20px",
+                }}
+                element={text}
+                href={`/indicators/cluster?cluster=${record.clusterPhyName}&overview=${text}&#overview`}
+              />
+            </div>
+          );
+        },
+      },
+      {
+        title: "采集延时",
+        dataIndex: "value",
+        width: "50%",
+        render: (val: number) => formatTime(val) || "-",
+      },
+    ],
   },
-  reqUprushNum: {
-    name: "写入文档数突增集群",
-    unit: unitMap.none,
-    tooltip: '每秒写入文档数加倍为突增',
-  },
-  shardNum: {
-    name: "集群shard个数",
-    unit: unitMap.count,
-  },
-}
+};
 
 addChartTitle(clusterMetrics);
 
 const typeMap = {
-  index: '索引',
-  node: '节点',
-  template: '索引模板'
-}
-export const columns = (width, type: string = 'index', disabled: boolean = false) => [
+  index: "索引",
+  node: "节点",
+  template: "索引模板",
+};
+export const columns = (width, type: string = "index", disabled: boolean = false) => [
   {
     title: `${typeMap[type]}名称`,
-    dataIndex: 'name',
-    key: 'clusterPhynameName',
-    width: width,
+    dataIndex: "name",
+    key: "clusterPhynameName",
+    ellipsis: true,
+    width,
     render: (text, record) => {
-      return <div style={{
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        height: 26,
-        lineHeight: '26px',
-        width: width - 10,
-      }}>
-        {
-          disabled ? text : <NavRouterLink
-            // maxShowLength={20}
-            needToolTip
-            style={{
-              fontFamily: 'PingFangSC-Regular',
-              fontSize: 12,
-              color: '#495057',
-              letterSpacing: 0,
-              textAlign: 'justify',
-              lineHeight: '20px',
-            }}
-            element={text}
-            href={`/indicators/cluster?cluster=${record.clusterPhyName}&${type}=${text}&#${type}`} />
-        }
-      </div>
+      return (
+        <div
+          style={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            height: 26,
+            lineHeight: "26px",
+            width: "90%",
+          }}
+        >
+          {disabled ? (
+            text
+          ) : (
+            <NavRouterLink
+              // maxShowLength={20}
+              needToolTip
+              style={{
+                fontFamily: "PingFangSC-Regular",
+                fontSize: 12,
+                color: "#495057",
+                letterSpacing: 0,
+                textAlign: "justify",
+                lineHeight: "20px",
+              }}
+              element={text}
+              href={`/indicators/cluster?cluster=${record.clusterPhyName}&${type}=${text}&#${type}`}
+            />
+          )}
+        </div>
+      );
     },
   },
   {
-    title: '所属集群',
-    dataIndex: 'clusterPhyName',
-    key: 'clusterPhyName',
-    width: width,
+    title: "所属集群",
+    dataIndex: "clusterPhyName",
+    key: "clusterPhyName",
+    ellipsis: true,
+    width,
     render: (text, record) => {
-      return <div style={{
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        height: 26,
-        lineHeight: '26px',
-        width: width - 10,
-      }}>
-        {typeof text == 'number' ? text.toFixed(2) : text}
-      </div>
+      return (
+        <div
+          style={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            height: 26,
+            lineHeight: "26px",
+            width: "90%",
+          }}
+        >
+          <Tooltip title={typeof text == "number" ? text.toFixed(2) : text} placement="bottomLeft">
+            {typeof text == "number" ? text.toFixed(2) : text}
+          </Tooltip>
+        </div>
+      );
     },
   },
-]
+];
 
 export const indexViewMetrics = {
-  reqUprushNum: {
-    name: "查询请求数突增索引",
-    unit: unitMap.count,
-    tooltip: '每秒查询请求数加倍为突增',
-  },
-  docUprushNum: {
-    name: "写入文档数突增索引",
-    unit: unitMap.count,
-    tooltip: '每秒写入文档数加倍为突增',
-  },
-  red: {
-    name: "RED索引列表",
-    unit: unitMap.none,
-    columns: columns(180),
-  },
-  singReplicate: {
-    name: "单副本索引列表",
+  segmentNum: {
+    name: "索引Segments个数",
+    //tooltip: "索引Segments个数超过阀值100才显示",
     unit: unitMap.ms,
-    columns: columns(180),
+    columns: [
+      ...columns("33%"),
+      {
+        title: "Segments个数",
+        dataIndex: "value",
+        width: "33%",
+        render: (text, record) => {
+          return (
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                height: 26,
+                lineHeight: "26px",
+                width: "90%",
+              }}
+            >
+              {text}
+            </div>
+          );
+        },
+      },
+    ],
+  },
+  tplSegmentMemSize: {
+    name: "索引模板Segments内存大小（MB）",
+    //tooltip: "索引模版Segments内存大小超过阀值才显示",
+    unit: unitMap.ms,
+    as: "segmentMemSize",
+    columns: [
+      ...columns("33%", "template"),
+      {
+        title: "内存大小",
+        dataIndex: "value",
+        width: "33%",
+        render: (text, record) => {
+          return (
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                height: 26,
+                lineHeight: "26px",
+                width: "90%",
+              }}
+            >
+              {bytesUnitFormatter(text) || ""}
+            </div>
+          );
+        },
+      },
+    ],
   },
   unassignedShard: {
     name: "未分配shard索引列表",
     unit: unitMap.ms,
-    columns: columns(180),
+    columns: columns("50%"),
   },
-  bigShard: {
-    name: "大shard索引列表",
+  tplSegmentNum: {
+    name: "索引模板Segments个数",
+    //tooltip: "索引模版Segments个数超过阀值1000才显示",
     unit: unitMap.ms,
-    tooltip: '大于50G为大shard',
-    columns: columns(180),
-  },
-  smallShard: {
-    name: "小shard索引列表",
-    unit: unitMap.ms,
-    tooltip: '小于1G为小shard',
-    columns: columns(180),
+    as: "segmentNum",
+    columns: [
+      ...columns("33%", "template"),
+      {
+        title: "Segments个数",
+        dataIndex: "value",
+        width: "33%",
+        render: (text, record) => {
+          return (
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                height: 26,
+                lineHeight: "26px",
+                width: "90%",
+              }}
+            >
+              {text}
+            </div>
+          );
+        },
+      },
+    ],
   },
   mappingNum: {
     name: "索引Mapping字段个数",
+    //tooltip: "索引Mapping个数超过100再显示",
     unit: unitMap.ms,
-    columns: [...columns(120), {
-      title: 'Mapping字段个数',
-      dataIndex: 'value',
-      width: 120,
-      render: (text, record) => {
-        return <div style={{
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          height: 26,
-          lineHeight: '26px',
-          width: 110,
-        }}>
-          {text}
-        </div>
+    columns: [
+      ...columns("33%"),
+      {
+        title: "Mapping字段个数",
+        dataIndex: "value",
+        width: "33%",
+        render: (text, record) => {
+          return (
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                height: 26,
+                lineHeight: "26px",
+                width: "90%",
+              }}
+            >
+              {text}
+            </div>
+          );
+        },
       },
-    }],
+    ],
   },
-  segmentNum: {
-    name: "索引Segements个数",
+  bigShard: {
+    name: "单个shard大于50G索引列表",
     unit: unitMap.ms,
-    columns: [...columns(120), {
-      title: 'Segements个数',
-      dataIndex: 'value',
-      width: 120,
-      render: (text, record) => {
-        return <div style={{
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          height: 26,
-          lineHeight: '26px',
-          width: 110,
-        }}>
-          {text}
-        </div>
+    //tooltip: "大于50G为大shard",
+    columns: [
+      ...columns("33%"),
+      {
+        title: "索引存储大小",
+        dataIndex: "value",
+        key: "value",
+        width: "33%",
+        render: (val) => {
+          return bytesUnitFormatter(val);
+        },
       },
-    }],
+    ],
   },
-  tplSegmentNum: {
-    name: "索引模板Segements个数",
+  smallShard: {
+    name: "单个shard小于500MB索引列表",
+    //name: "小shard索引列表",
     unit: unitMap.ms,
-    as: 'segmentNum',
-    columns: [...columns(120, 'template'), {
-      title: 'Segements个数',
-      dataIndex: 'value',
-      width: 120,
-      render: (text, record) => {
-        return <div style={{
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          height: 26,
-          lineHeight: '26px',
-          width: 110,
-        }}>
-          {text}
-        </div>
+    // tooltip: "小shard索引列表，shard个数大于1才显示",
+    columns: [
+      ...columns("33%"),
+      {
+        title: "索引存储大小",
+        dataIndex: "value",
+        width: "33%",
+        render: (val) => {
+          return bytesUnitFormatter(val);
+        },
       },
-    }],
+    ],
   },
   segmentMemSize: {
-    name: "索引Segements内存大小（MB）",
+    name: "索引Segments内存大小（MB）",
+    // tooltip: "索引Segments内存大小超过阀值才显示",
     unit: unitMap.ms,
-    columns: [...columns(120), {
-      title: '内存大小',
-      dataIndex: 'value',
-      width: 120,
-      render: (text, record) => {
-        return <div style={{
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          height: 26,
-          lineHeight: '26px',
-          width: 110,
-        }}>
-          {text}
-        </div>
+    columns: [
+      ...columns("33%"),
+      {
+        title: "内存大小",
+        dataIndex: "value",
+        width: "33%",
+        render: (text, record) => {
+          return (
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                height: 26,
+                lineHeight: "26px",
+                width: "90%",
+              }}
+            >
+              {bytesUnitFormatter(text)}
+            </div>
+          );
+        },
       },
-    }],
+    ],
   },
-  tplSegmentMemSize: {
-    name: "索引模板Segements内存大小（MB）",
+  singReplicate: {
+    name: "无副本索引列表",
     unit: unitMap.ms,
-    as: 'segmentMemSize',
-    columns: [...columns(120, 'template'), {
-      title: '内存大小',
-      dataIndex: 'value',
-      width: 120,
-      render: (text, record) => {
-        return <div style={{
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          height: 26,
-          lineHeight: '26px',
-          width: 110,
-        }}>
-          {text}
-        </div>
-      },
-    }],
+    columns: columns("50%"),
   },
-}
+  red: {
+    name: "RED索引列表",
+    unit: unitMap.none,
+    columns: columns("50%"),
+  },
+};
 
 addChartTitle(indexViewMetrics);
 
 export const nodeMetrics = {
-  dead: {
-    name: "Dead节点列表",
+  taskConsuming: {
+    name: "节点执行任务耗时",
+    unit: unitMap.s,
+    as: "taskConsuming",
+  },
+  shardNum: {
+    name: "节点分片个数列表",
+    //tooltip: "节点分片个数>500才显示",
     unit: unitMap.ms,
-    columns: columns(180, 'node', true),
+    columns: [
+      ...columns("33%", "node"),
+      {
+        title: "分片个数",
+        dataIndex: "value",
+        width: "33%",
+        render: (text, record) => {
+          return (
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                height: 26,
+                lineHeight: "26px",
+                width: "90%",
+              }}
+            >
+              {text}
+            </div>
+          );
+        },
+      },
+    ],
   },
   largeDiskUsage: {
     name: "磁盘利用率超红线节点列表",
     unit: unitMap.ms,
-    tooltip: '磁盘利用率超85%为超红线',
-    columns: [...columns(120, 'node'), {
-      title: '磁盘利用率',
-      dataIndex: 'value',
-      width: 120,
-      render: (text, record) => {
-        return <div style={{
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          height: 26,
-          lineHeight: '26px',
-          width: 110,
-        }}>
-          {text}
-        </div>
+    tooltip: "磁盘利用率超85%为超红线",
+    columns: [
+      ...columns("33%", "node"),
+      {
+        title: "磁盘利用率",
+        dataIndex: "value",
+        width: "33%",
+        render: (text, record) => {
+          return (
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                height: 26,
+                lineHeight: "26px",
+                width: "90%",
+              }}
+            >
+              {formatDecimalPoint(text)}%
+            </div>
+          );
+        },
       },
-    }],
+    ],
   },
   largeHead: {
     name: "堆内存利用率超红线节点列表",
     unit: unitMap.ms,
-    tooltip: '堆内存利用率超80%且持续5min为超红线',
-    columns: [...columns(120, 'node'), {
-      title: '堆内存利用率',
-      dataIndex: 'value',
-      width: 120,
-      render: (text, record) => {
-        return <div style={{
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          height: 26,
-          lineHeight: '26px',
-          width: 110,
-        }}>
-          {text}
-        </div>
+    tooltip: "堆内存利用率超80%且持续5min为超红线",
+    columns: [
+      ...columns("33%", "node"),
+      {
+        title: "堆内存利用率",
+        dataIndex: "value",
+        width: "33%",
+        render: (text, record) => {
+          return (
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                height: 26,
+                lineHeight: "26px",
+                width: "90%",
+              }}
+            >
+              {formatDecimalPoint(text)}%
+            </div>
+          );
+        },
       },
-    }],
-  },
-  largeCpuUsage: {
-    name: "CPU利用率超红线节点列表",
-    unit: unitMap.ms,
-    tooltip: 'CPU利用率超80%且持续30min为超红线',
-    columns: [...columns(120, 'node'), {
-      title: 'CPU利用率',
-      dataIndex: 'value',
-      width: 120,
-      render: (text, record) => {
-        return <div style={{
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          height: 26,
-          lineHeight: '26px',
-          width: 110,
-        }}>
-          {text}
-        </div>
-      },
-    }],
+    ],
   },
   writeRejectedNum: {
     name: "WriteRejected节点列表",
     unit: unitMap.ms,
-    columns: columns(180, 'node'),
+    columns: columns("50%", "node"),
   },
   searchRejectedNum: {
     name: "SearchRejected节点列表",
     unit: unitMap.ms,
-    columns: columns(180, 'node'),
+    columns: columns("50%", "node"),
   },
-  shardNum: {
-    name: "节点分片个数列表",
+  largeCpuUsage: {
+    name: "CPU利用率超红线节点列表",
     unit: unitMap.ms,
-    columns: [...columns(120, 'node'), {
-      title: '分片个数',
-      dataIndex: 'value',
-      width: 120,
-      render: (text, record) => {
-        return <div style={{
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          height: 26,
-          lineHeight: '26px',
-          width: 110,
-        }}>
-          {text}
-        </div>
+    tooltip: "CPU利用率超80%且持续30min为超红线",
+    columns: [
+      ...columns("33%", "node"),
+      {
+        title: "CPU利用率",
+        dataIndex: "value",
+        width: "33%",
+        render: (text, record) => {
+          return (
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                height: 26,
+                lineHeight: "26px",
+                width: "90%",
+              }}
+            >
+              {formatDecimalPoint(text)}%
+            </div>
+          );
+        },
       },
-    }],
+    ],
   },
-  taskConsuming: {
-    name: "节点执行任务耗时",
-    unit: unitMap.ms,
-    as: 'taskConsuming',
-  },
-  refresh: {
-    name: "刷新线程池queue数",
-    unit: unitMap.count,
-  },
-  flush: {
-    name: "落盘刷新线程池queue数",
-    unit: unitMap.count,
-  },
-  merge: {
-    name: "合并线程池queue数",
-    unit: unitMap.count,
-  },
-  search: {
-    name: "查询线程池queue数",
-    unit: unitMap.count,
-  },
-  write: {
-    name: "写入线程池queue数",
-    unit: unitMap.count,
-  },
-  management: {
-    name: "集群管理线程池queue数",
-    unit: unitMap.count,
-  },
-}
+};
 
-addChartTitle(nodeMetrics)
+addChartTitle(nodeMetrics);

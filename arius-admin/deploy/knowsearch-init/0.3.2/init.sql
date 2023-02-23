@@ -319,7 +319,7 @@ CREATE TABLE `arius_meta_job_cluster_distribute`
 CREATE TABLE `arius_op_task`
 (
     `id`           bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id 主键自增',
-    `title`        varchar(1000)        NOT NULL DEFAULT '' COMMENT ' 标题 ',
+    `title`        varchar(10100)        NOT NULL DEFAULT '' COMMENT ' 标题 ',
     `business_key` varchar(1000)       NOT NULL DEFAULT '0' COMMENT '业务数据主键',
     `status`       varchar(20)         NOT NULL DEFAULT 'waiting' COMMENT '任务状态：success: 成功 failed: 失败 running: 执行中 waiting: 等待 cancel: 取消 pause: 暂停',
     `creator`      varchar(100)        NOT NULL DEFAULT '' COMMENT ' 创建人 ',
@@ -398,6 +398,12 @@ CREATE TABLE `es_cluster_phy_info`
     `platform_type`           varchar(100)        NOT NULL DEFAULT '' COMMENT 'IaaS 平台类型 ',
     `resource_type`           tinyint(4)          NOT NULL DEFAULT '-1' COMMENT '集群资源类型，1- 共享资源，2- 独立资源，3- 独享资源',
     `gateway_url`             varchar(200)        NOT NULL DEFAULT '' COMMENT ' 集群 gateway 地址 ',
+    `kibana_address`          varchar(200)                 DEFAULT '' COMMENT 'kibana外链地址',
+    `cerebro_address`         varchar(200)                 DEFAULT '' COMMENT 'cerebro外链地址',
+    `proxy_address`         varchar(255)                 DEFAULT '' COMMENT '代理地址',
+    `ecm_access` tinyint(2) DEFAULT '0' COMMENT '是否接入 gateway',
+    `component_id` int(11) DEFAULT '-1' COMMENT 'ecm 关联组建 id',
+    `gateway_ids` varchar(1024) DEFAULT '' COMMENT ' gateway ids,逗号分割 ',
     PRIMARY KEY (`id`),
     KEY `idx_cluster` (`cluster`)
 ) ENGINE = InnoDB
@@ -445,6 +451,7 @@ CREATE TABLE `es_cluster_role_host_info`
     `machine_spec`    varchar(100)                 DEFAULT '',
     `region_id`       bigint(20)          NOT NULL DEFAULT '-1' COMMENT '节点所属 regionId',
     `attributes`      text COMMENT 'es 节点 attributes 信息 , 逗号分隔',
+    `component_host_id` BIGINT DEFAULT -1 NULL COMMENT '关联组建id',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uniq_elastic_cluster_id_role_node_set` (`role_cluster_id`, `ip`, `port`, `node_set`),
     KEY `idx_cluster` (`cluster`),
@@ -619,6 +626,9 @@ create table gateway_cluster_info
     memo         varchar(255)                          null comment '备注',
     component_id int         default -1                null comment 'ecm关联组建id',
     version      varchar(30) default ''                null comment 'gateway版本号',
+    `health` int(11) DEFAULT '-1' COMMENT '集群健康',
+    `proxy_address` varchar(255) DEFAULT '' COMMENT '代理地址',
+    `data_center` varchar(255) DEFAULT '' COMMENT ' 数据中心 ',
     constraint uniq_cluster_name
         unique (cluster_name)
 )
@@ -1025,12 +1035,12 @@ CREATE TABLE `project_template_info`
 -- Table structure for user_metrics_config_info
 -- ----------------------------
 CREATE TABLE `user_metrics_config_info` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `user_name` varchar(255) NOT NULL COMMENT '用户账号',
-  `metric_info` text COMMENT '指标看板的配置',
-  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+                                            `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                                            `user_name` varchar(255) NOT NULL COMMENT '用户账号',
+                                            `metric_info` text COMMENT '指标看板的配置',
+                                            `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+                                            `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+                                            PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1602 DEFAULT CHARSET=utf8 COMMENT='用户关联到指标的配置信息表';
 
 
@@ -1056,7 +1066,7 @@ values (1597, 1, 0, '2022-06-01 21:19:42.0', '2022-08-25 10:31:42.0', 0, 'know_s
        (1967, 1, 1675, '2022-06-14 17:41:03.0', '2022-08-25 10:31:42.0', 0, 'know_search'),
        (1969, 1, 1677, '2022-06-14 17:41:03.0', '2022-08-25 10:31:42.0', 0, 'know_search'),
        (1971, 1, 1679, '2022-06-14 17:41:03.0', '2022-08-25 10:31:42.0', 0, 'know_search'),
-       (1973, 1, 1599, '2022-06-14 17:41:03.0', '2022-08-25 10:36:08.0', 1, 'know_search'),
+       (1973, 1, 1599, '2022-06-14 17:41:03.0', '2022-08-25 10:36:08.0', 0, 'know_search'),
        (1975, 1, 1681, '2022-06-14 17:41:03.0', '2022-08-25 10:31:42.0', 0, 'know_search'),
        (1977, 1, 1683, '2022-06-14 17:41:03.0', '2022-08-25 10:31:42.0', 0, 'know_search'),
        (1979, 1, 1685, '2022-06-14 17:41:03.0', '2022-08-25 10:31:42.0', 0, 'know_search'),
@@ -1391,7 +1401,7 @@ insert into project_arius_config (project_id, analyze_response_enable, is_source
 values (1, 1, 0, 1, 1, 1000, 1, '超级应用', '2022-06-14 18:52:08.0', '2022-08-27 23:13:14.0'),
        (2, 1, 0, 1, 1, 1000, 1, '元数据模版应用 不可以被删除', '2022-08-25 11:18:45.0', '2022-08-25 11:18:45.0');
 insert into kf_security_project (id, project_code, project_name, description, dept_id, running, create_time,
-                                   update_time, is_delete, app_name)
+                                 update_time, is_delete, app_name)
 values (1, 'p14000143', 'SuperApp', '超级应用', 0, 1, '2022-05-26 05:49:08.0', '2022-08-24 11:09:49.0', 0,
         'know_search'),
        (2, 'p18461793', '元数据模版应用 _ 误删', '元数据模版应用 不可以被删除', 0, 1, '2022-08-25 11:06:04.0',
@@ -1399,8 +1409,8 @@ values (1, 'p14000143', 'SuperApp', '超级应用', 0, 1, '2022-05-26 05:49:08.0
 insert into arius_es_user (id, index_exp, data_center, is_root, memo, ip, verify_code, is_active,
                            query_threshold, cluster, responsible, search_type, create_time, update_time,
                            project_id, is_default_display)
-values (1, null, 'cn', 1, '管理员 APP', '', 'azAWiJhxkho33ac', 1, 100, 'logi-elasticsearch-meta',
-        'admin', 0,
+values (1, null, 'cn', 1, '管理员 APP', '', 'azAWiJhxkho33ac', 1, 100, '',
+        'admin', 1,
         '2022-05-26 09:35:38.0', '2022-06-23 00:16:47.0', 1, 1),
        (2, null, 'cn', 0, '元数据模版 APP', '', 'vkDgPEfD3jQJ1YY', 1, 1000, '', null, 1, '2022-07-05 08:16:17.0',
         '2022-08-25 21:48:58.0', 2, 1);
@@ -1985,7 +1995,7 @@ CREATE TABLE logi_op_component
         PRIMARY KEY,
     status                     INT          NOT NULL COMMENT '状态(0 green,1 yellow,2 red,3 unKnow)',
     contain_component_ids      VARCHAR(200) NULL COMMENT '包含组件id列表',
-    name                       VARCHAR(100) NULL COMMENT '组件名',
+    name                       VARCHAR(500) NULL COMMENT '组件名',
     package_id                 INT          NULL COMMENT '关联安装包id',
     depend_config_component_id INT          NULL COMMENT '配置依赖组件',
     username                   VARCHAR(50)  NULL COMMENT '用户名',
@@ -2073,7 +2083,8 @@ CREATE TABLE logi_op_script
     `describe`  VARCHAR(255) NULL COMMENT '描述',
     create_time TIMESTAMP    NULL COMMENT '创建时间',
     update_time TIMESTAMP    NULL COMMENT '更新时间',
-    creator     VARCHAR(255) NULL COMMENT '创建者'
+    creator     VARCHAR(255) NULL COMMENT '创建者',
+    timeout     INT NULL COMMENT '模板超时时间(s)'
 )CHARSET = utf8mb4;
 -- auto-generated definition
 CREATE TABLE logi_op_task
@@ -2228,7 +2239,7 @@ create table fast_index_task_info
     last_response             text                                  null,
     task_cost_time            decimal                               null
 )
-    comment 'fastDump任务状态';
+    comment 'fastDump任务状态' CHARSET = utf8mb4;
 
 create index idx_
     on fast_index_task_info (task_status);
@@ -2249,11 +2260,11 @@ ALTER TABLE operate_record_info
     ADD operate_project_name VARCHAR(255) DEFAULT '' NULL COMMENT '用户操作的应用，即资源所属应用';
 -- 新增普通用户侧的操作记录
 INSERT INTO `logi_security_role_permission`
-(`id`, `role_id`, `permission_id`, `create_time`, `update_time`, `is_delete`, `app_name`)
-VALUES ('5661', '2', '1635', '2022-12-21 15:08:22', '2022-12-21 15:10:32', '0', 'know_search');
+(`role_id`, `permission_id`, `create_time`, `update_time`, `is_delete`, `app_name`)
+VALUES ('2', '1635', '2022-12-21 15:08:22', '2022-12-21 15:10:32', '0', 'know_search');
 INSERT INTO `logi_security_role_permission`
-(`id`, `role_id`, `permission_id`, `create_time`, `update_time`, `is_delete`, `app_name`)
-VALUES ('5663', '2', '1853', '2022-12-21 15:08:22', '2022-12-21 15:10:32', '0', 'know_search');
+(`role_id`, `permission_id`, `create_time`, `update_time`, `is_delete`, `app_name`)
+VALUES ('2', '1853', '2022-12-21 15:08:22', '2022-12-21 15:10:32', '0', 'know_search');
 
 
 #创建集群插件信息

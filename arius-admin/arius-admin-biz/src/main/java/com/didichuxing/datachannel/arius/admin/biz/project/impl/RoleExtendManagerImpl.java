@@ -80,7 +80,7 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
             }
             roleService.deleteRoleByRoleId(id, request);
             saveOperateRecord(HttpRequestUtil.getOperator(request),
-                    String.format("删除角色:[%s]", roleBriefByRoleId.getRoleName()),
+                    roleBriefByRoleId.getRoleName(),
                     OperateTypeEnum.ROLE_MANAGER_DELETE);
             return Result.buildSucc();
         } catch (KfSecurityException e) {
@@ -124,7 +124,7 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
     public Result<Void> createRole(RoleSaveDTO saveDTO, HttpServletRequest request) {
         try {
             roleService.createRole(saveDTO, request);
-            saveOperateRecord(HttpRequestUtil.getOperator(request), String.format("新增角色:[%s]", saveDTO.getRoleName()),
+            saveOperateRecord(HttpRequestUtil.getOperator(request), saveDTO.getRoleName(),
                     OperateTypeEnum.ROLE_MANAGER_CREATE);
             return Result.buildSucc();
         } catch (KfSecurityException e) {

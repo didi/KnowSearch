@@ -130,7 +130,7 @@ public class ClusterCreateTaskHandler extends AbstractClusterTaskHandler {
         final OperateRecord operateRecord = new Builder().userOperation(creator)
                 .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
                 .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_NEW)
-                .content(String.format("新建物理集群：【%s】", clusterOpNewHostContent.getPhyClusterName()))
+                .content(clusterOpNewHostContent.getPhyClusterName())
                 .bizId(ecmTaskDTO.getId()).buildDefaultManualTrigger();
         operateRecordService.save(operateRecord);
 

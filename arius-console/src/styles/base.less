@@ -1,3 +1,9 @@
+@table-prefix-cls: ~'ant-table';
+@table-background-color: #ffffff;
+@table-color: #333333;
+@table-line-fill-color: #fcfdfd;
+@table-thead-cell-bgcolor: #f7f7f7;
+
 .max-title {
   font-family: PingFangSC-Medium;
   font-size: 16px;
@@ -43,8 +49,275 @@
 }
 
 .process-box {
+  top: -7px;
+  position: relative;
+  // padding-right: 20px;
+  &-foot{
+    position: absolute;
+    font-size: 12px;
+    margin-top: -2px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    &-byte{
+      transform: scale(0.83);
+      margin-left: -4px;
+    }
+    &-per{
+      transform: scale(0.83);
+      margin-right: -4px;
+    }
+  }
   .ant-progress-show-info .ant-progress-outer {
     margin-right: calc(-3em - 8px);
     padding-right: calc(3em + 8px);
+  }
+
+}
+.pro-table-container {
+  .d-table {
+    &-box {
+      &-header {
+        display: block;
+        overflow: visible;
+        padding: 16px 0 !important;
+        &-btn {
+          float: right;
+          .ant-btn {
+            padding-top: 0;
+            padding-bottom: 0;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-left: 12px;
+          }
+          .ant-divider {
+            margin: 0 0 0 10px;
+          }
+        }
+        .table-header-box {
+          float: left;
+          height: 32px;
+          line-height: 32px;
+          display: flex;
+          align-items: center;
+          padding: 0;
+          &-title {
+            font-family: PingFangSC-Medium;
+            font-size: 18px;
+            color: #101724;
+            line-height: 24px;
+          }
+          &-content {
+            font-family: PingFangSC-Regular;
+            font-size: 14px;
+            color: #505568;
+            line-height: 22px;
+          }
+          .ant-btn {
+            margin-left: 0 !important;
+            margin-right: 8px;
+          }
+        }
+      }
+      &-query {
+        background: #f7f7f7;
+        border-radius: 4px;
+        overflow: unset;
+      }
+      .ant-table {
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+// HashMenu 控制最小高度为一屏
+.hash-menu {
+  min-height: calc(100vh - 116px);
+}
+
+.ant-pagination {
+  // display: flow-root; // 对float进行修正
+  // text-align: right;
+  // vertical-align: middle;
+  font-size: 14px;
+
+  .ant-pagination-prev .ant-pagination-item-link,
+  .ant-pagination-next .ant-pagination-item-link {
+    line-height: normal;
+  }
+  .ant-pagination-prev .ant-pagination-item-link,
+  .ant-pagination-next .ant-pagination-item-link,
+  .ant-pagination-item {
+    border-radius: 4px;
+  }
+  .ant-pagination-total-text {
+    line-height: 32px;
+  }
+  .ant-pagination-options {
+    margin-left: 8px;
+    .ant-select {
+      font-size: 14px;
+      .ant-select-selector {
+        border-radius: 4px;
+      }
+    }
+    .ant-pagination-options-quick-jumper {
+      line-height: normal;
+      input {
+        border-radius: 4px;
+      }
+    }
+  }
+}
+
+
+
+.@{table-prefix-cls},
+.@{table-prefix-cls}-small {
+
+  
+  .@{table-prefix-cls}-thead > tr > th:not(:last-child):not(.@{table-prefix-cls}-selection-column):not(.@{table-prefix-cls}-row-expand-icon-cell):not([colspan])::before{
+    content:'' !important;
+    width: 0 !important;
+  }
+
+  .@{table-prefix-cls}-content{
+    border-radius: 4px 4px 0 0;
+  }
+
+  .@{table-prefix-cls}-cell {
+    line-height: 20px;
+    padding: 11px 16px 11px;
+    font-size: 14px;
+
+    .@{table-prefix-cls}-column-sorters {
+      display: flex;
+      flex: auto;
+      align-items: center;
+      justify-content: flex-start;
+
+      .@{table-prefix-cls}-column-title{
+        flex: initial;
+      }
+    }
+
+    .@{table-prefix-cls}-column-sorter{
+      color: #74788D;
+    }
+  }
+
+  .line_clamp_two {
+    cursor: pointer;
+
+    &>* {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      display: -moz-box;
+      -moz-line-clamp: 2;
+      -moz-box-orient: vertical;
+      word-wrap: break-word;
+      word-break: break-all;
+      white-space: normal;
+    }
+  }
+
+  .line_clamp_one {
+    cursor: pointer;
+
+    &>* {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .@{table-prefix-cls}-thead {
+    // &>tr:nth-child(1){
+    //   .@{table-prefix-cls}-cell:nth-child(1) {
+    //     padding-left: 24px;
+    //   }
+    // }
+
+    // .@{table-prefix-cls}-cell:nth-last-child(1) {
+    //   padding-right: 24px;
+    // }
+
+    .@{table-prefix-cls}-cell {
+      background-color:@table-thead-cell-bgcolor;
+      border-bottom: 1px solid #DCDFE6;
+      font-weight: 500;
+    }
+  }
+
+  .@{table-prefix-cls}-tbody {
+    // .@{table-prefix-cls}-cell:nth-child(1) {
+    //   padding-left: 24px;
+    // }
+
+    // .@{table-prefix-cls}-cell:nth-last-child(1) {
+    //   padding-right: 24px;
+    // }
+    
+    .@{table-prefix-cls}-cell {
+      // line-height: 20px;
+      background-color: @table-background-color;
+      color: @table-color;
+    }
+  }
+
+  // 设置默认行背景色-(隔行变色)
+  // .line-fill-color {
+  //   .@{table-prefix-cls}-cell {
+  //     background-color: @table-line-fill-color;
+  //   }
+  // }
+
+  // .@{table-prefix-cls}-cell::before {
+  //   width: 0 !important;
+  //   background-color: transparent;
+  // }
+
+  .table-small-bgcolor{
+    .@{table-prefix-cls}-cell {
+      background-color: @table-thead-cell-bgcolor !important;
+      border-bottom: 1px solid #EFF2F7;
+    }
+  }
+}
+
+.@{table-prefix-cls}-small {
+  .@{table-prefix-cls}-cell {
+    padding: 0 8px !important;
+    height: 30px !important;
+    line-height: 30px;
+    font-size: 13px !important;
+  }
+}
+
+// 鼠标滑过行背景色设置
+.@{table-prefix-cls}-cell-row-hover {
+  background-color: #F8F9FA;
+}
+
+// 纯无边框Table
+.frameless-table {
+  .@{table-prefix-cls}-cell {
+    border: none !important;
+  }
+
+  .@{table-prefix-cls}-container {
+    border: none !important;
+  }
+
+  .@{table-prefix-cls}-content {
+    &>table {
+      border: none !important;
+    }
   }
 }

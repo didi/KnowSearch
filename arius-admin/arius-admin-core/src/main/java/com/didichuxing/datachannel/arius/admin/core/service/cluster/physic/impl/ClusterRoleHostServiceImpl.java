@@ -1,15 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.CLIENT_NODE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.UNKNOWN;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.valueOf;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum.OFFLINE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum.ONLINE;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_CLIENT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_DATA;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -29,12 +35,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.Getter;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
@@ -51,25 +52,6 @@ import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainSe
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * ES集群表对应各角色主机列表 服务实现类
@@ -89,7 +71,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
 
     @Autowired
     private ESClusterNodeService esClusterNodeService;
-    
+
     @Autowired
     private ESClusterService       esClusterService;
     @Autowired
@@ -184,13 +166,13 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
             .orElse(null);
         return collectClusterNodeSettings(cluster,componentId);
     }
-    
+
     @Override
     public boolean collectClusterNodeSettings(String cluster, Integer componentId)
         throws AdminTaskException {
         // get node information from ES engine
         List<ESClusterRoleHostPO> nodesFromEs = null;
-        
+
         try {
             nodesFromEs = getClusterHostFromEsAndCreateRoleClusterIfNotExist(cluster);
         } catch (ESOperateException e) {
@@ -199,7 +181,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
                 cluster);
             return false;
         }
-        
+
         if (CollectionUtils.isEmpty(nodesFromEs)) {
             clusterRoleHostDAO.offlineByCluster(cluster);
             LOGGER.warn(
@@ -207,13 +189,13 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
                 cluster);
             return false;
         }
-        
+
         // get node info from db
         Map<String/*roleClusterId@esNodeName*/, ESClusterRoleHostPO> nodePOFromDbMap = getNodeInfoFromDbMap(
             cluster);
         List<ESClusterRoleHostPO>                                    shouldAdd       = Lists.newArrayList();
         List<ESClusterRoleHostPO>                                    shouldEdit      = Lists.newArrayList();
-        
+
         for (ESClusterRoleHostPO nodePO : nodesFromEs) {
             if (nodePOFromDbMap.containsKey(nodePO.getKey())) {
                 nodePO.setId(nodePOFromDbMap.get(nodePO.getKey()).getId());
@@ -251,7 +233,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         }
         return addAndEditNodes(cluster, shouldAdd, shouldEdit);
     }
-    
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean saveClusterNodeSettings(ClusterJoinDTO param) throws AdminTaskException {
@@ -398,7 +380,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         return Result.buildFail();
     }
 
-  
+
 
     @Override
     public ClusterRoleHost getByHostName(String hostName) {

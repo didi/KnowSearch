@@ -665,7 +665,7 @@ public class CustomDataSource {
             "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName", "nsTree", 0, "machineSpec",
             "password", "creator", Collections.singletonList(getClusterRoleInfo()),
             Collections.singletonList(getClusterRoleHost()), 0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0,
-            "gatewayUrl",null,null,null,null);
+            "gatewayUrl",null,null,null,null,"","");
     }
 
     public static IndexTemplateWithPhyTemplates getIndexTemplateWithPhyTemplates() {

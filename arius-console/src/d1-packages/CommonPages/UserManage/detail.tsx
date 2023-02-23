@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { CheckCircleFilled } from "@ant-design/icons";
-import { Button, message, Drawer, Col, Transfer } from "antd";
+import { Button, message, Drawer, Col, Transfer, Descriptions, Alert } from "antd";
 import { readableForm } from "./config";
 import { queryUserDetail, queryAssignedRoleByUser, assignRoleToUser } from "./service";
 
 import "./detail.less";
-const basicClass = "user-tpl-form";
+import PermissionTree from "../RoleManage/PermissionTree";
 enum Eflag {
   detail = "用户详情",
   update = "分配角色",
 }
 export default function Detail(props: any) {
-  const { detailVisible, flag, closeDetail, submitCb, userId } = props;
+  const { detailVisible, flag, setDetailVisible, submitCb, userId } = props;
+  const [curretFlag, setCurretFlag] = useState(flag);
+
   const [visible, setVisible] = useState(detailVisible);
   const [roleList, setRoleList] = useState([]);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -20,10 +21,15 @@ export default function Detail(props: any) {
   const [targetKeys, setTargetKeys] = useState(initialTargetKeys);
   const [selectedKeys, setSelectedKeys] = useState([]);
   const [permissionVo, setPermissionVo] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [formModel, setFormModel] = useState({
     deptList: [],
     roleList: [],
   });
+
+  useEffect(() => {
+    setCurretFlag(curretFlag);
+  }, [flag]);
 
   const onSubmit = () => {
     const params = {
@@ -43,21 +49,26 @@ export default function Detail(props: any) {
   };
 
   const onClose = () => {
-    submitCb();
+    setDetailVisible(false);
   };
 
   const fetchDetail = async (userId) => {
-    const data = await queryUserDetail(userId);
-    const { permissionTreeVO } = data;
-    const permissionVoData = permissionTreeVO.childList.map((item) => {
-      return {
-        ...item,
-        isCheckAll: item.childList.every((subItem) => subItem.has),
-      };
-    });
-    setPermissionVo(permissionVoData);
-    console.log(data, "data");
-    setFormModel(data);
+    setLoading(true);
+    try {
+      const data = await queryUserDetail(userId);
+      const { permissionTreeVO } = data;
+      const permissionVoData = permissionTreeVO.childList.map((item) => {
+        return {
+          ...item,
+          isCheckAll: item.childList.every((subItem) => subItem.has),
+        };
+      });
+      setPermissionVo(permissionVoData);
+      setFormModel(data);
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+    }
   };
 
   const fetchRoleList = async (name?: string) => {
@@ -71,77 +82,56 @@ export default function Detail(props: any) {
     const data = {
       ...formModel,
     };
-    const formCol = readableForm.filter((item) => item.flag.includes(flag));
-    return formCol.map((item, i) => {
-      return (
-        <Col key={i} span={24} className={i && `${basicClass}-readonlyText`}>
-          <span className="read-lable">{item.label}：</span>
-          <span className="read-content">
-            {Array.isArray(item.prop)
-              ? item.prop.length > 0 && item.prop.map((k) => data[k]).join("/")
-              : item.render
-              ? item.render(data && data[item.prop])
-              : data[item.prop]}
-          </span>
-        </Col>
-      );
-    });
+    const formCol = readableForm.filter((item) => item.flag.includes(curretFlag));
+    const hasAlert = curretFlag === "detail" && !loading && permissionVo.every((item) => !item.has);
+    return (
+      <Descriptions className={`custom-desc ${hasAlert ? "" : "no-alert"}`} title="" column={2}>
+        {formCol.map((row, index) => (
+          <Descriptions.Item className="read-lable" label={row.label} key={index}>
+            <span className="read-content">
+              {Array.isArray(row.prop)
+                ? row.prop.length > 0 && row.prop.map((k) => data[k]).join("/")
+                : row.render
+                ? row.render(data?.[row.prop])
+                : data[row.prop]}
+            </span>
+          </Descriptions.Item>
+        ))}
+      </Descriptions>
+    );
   };
 
-  const renderCheckItem = (item: any, isAll = false) => {
-    const isChecked = isAll ? item.isCheckAll : item.has;
-    return (
+  const renderAlert = () => {
+    return curretFlag === "detail" && !loading && permissionVo.every((item) => !item.has) ? (
       <>
-        <CheckCircleFilled style={{ color: isChecked ? "#46D677" : "#ddd", cursor: "not-allowed", marginRight: "4px" }} />
-        <span>{isAll ? "全部操作" : item.permissionName}</span>
+        <Alert
+          className="detail-alert"
+          showIcon
+          message={
+            <span>
+              当前用户未分配角色，无任何权限，如需分配，请点击：{" "}
+              <a type="javascript;" onClick={() => setCurretFlag("update")}>
+                分配角色
+              </a>
+            </span>
+          }
+          type="info"
+        />
+        <div style={{ height: 40 }}></div>
       </>
-    );
-  };
-
-  const renderEmpty = () => {
-    return (
-      <div className="empty-item">
-        <span>空</span>
-      </div>
-    );
+    ) : null;
   };
 
   const renderContent = () => {
-    return permissionVo
-      .filter((item) => item.has)
-      .map((item) => {
-        return (
-          <div className="tr tBody" key={item.id}>
-            <div className="td col-menu">{renderCheckItem(item)}</div>
-            <div className="td">
-              <div className="col-permission">
-                <div className="permission-all">{renderCheckItem(item, true)}</div>
-                <div className="permission-content">
-                  {item.childList.length > 0 &&
-                    item.childList.map((subItem) => (
-                      <div key={subItem.id} className="content-item">
-                        {renderCheckItem(subItem)}
-                      </div>
-                    ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      });
+    const permissionData = permissionVo.filter((item) => item.has);
+    return <PermissionTree isEdit={false} permissionData={permissionData} />;
   };
 
   const renderPermission = () => {
     return (
       <>
-        <h4 className="bind-role-title">角色绑定权限项</h4>
-        <div className="bind-role-table">
-          <div className="tr tHead">
-            <div className="td">菜单</div>
-            <div className="td">权限项</div>
-          </div>
-          {permissionVo.every((item) => !item.has) ? renderEmpty() : renderContent()}
-        </div>
+        {curretFlag === "detail" ? <h4 className="bind-role-title"></h4> : null}
+        {curretFlag === "detail" && permissionVo.every((item) => !item.has) ? null : renderContent()}
       </>
     );
   };
@@ -153,7 +143,7 @@ export default function Detail(props: any) {
           textAlign: "left",
         }}
       >
-        {flag === "detail" ? (
+        {curretFlag === "detail" ? (
           <Button onClick={onClose} type="primary">
             关闭
           </Button>
@@ -219,14 +209,14 @@ export default function Detail(props: any) {
     <Drawer
       className="user-manage-detail"
       width="640"
-      title={Eflag[flag] || ""}
+      title={Eflag[curretFlag] || ""}
       onClose={onClose}
       visible={visible}
-      bodyStyle={{ paddingBottom: 80 }}
       footer={renderFooter()}
     >
+      {renderAlert()}
       {renderReadCol()}
-      {flag === "detail" ? renderPermission() : renderTransfer()}
+      {curretFlag === "detail" ? renderPermission() : renderTransfer()}
     </Drawer>
   );
 }

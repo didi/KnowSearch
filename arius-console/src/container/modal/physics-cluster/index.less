@@ -1,7 +1,4 @@
 @import "../../../styles/base.less";
-.steps-content {
-  padding-top: 21px;
-}
 .create-region-box {
   width: 688px;
   background: #ffffff;
@@ -14,6 +11,7 @@
     width: 40%;
   }
 }
+
 .create-region-table-box {
   margin-top: 10px;
   width: 688px;
@@ -21,6 +19,7 @@
   box-shadow: 0 0 12px 0 rgba(31, 50, 82, 0.18);
   margin-top: 20px;
 }
+
 .relation-region-box {
   width: 688px;
   height: 99px;
@@ -38,26 +37,404 @@
   }
 }
 
-.upgrade-cluster-box {
-  display: flex;
-  flex-wrap: wrap;
-  &-item {
-    width: 50%;
-    padding-bottom: 20px;
-    > label {
-      .min-title();
-    }
-  }
-}
-
-.new-config-content {
-  background: #ffffff;
-  box-shadow: 0 0 12px 0 rgba(31, 50, 82, 0.12);
-  padding: 20px 20px 0 20px;
-}
-
 .config-dividing-line {
   height: 1px;
   border: 1px solid #dcdfe6;
   margin-top: 20px;
+}
+
+.nodelist {
+  margin-bottom: 32px;
+}
+
+.defined {
+  margin-top: 32px;
+}
+
+.region-title {
+  font-family: PingFangSC-Medium;
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.87);
+  line-height: 24px;
+  font-weight: 500;
+  margin: 16px 0;
+}
+
+.define-region {
+  margin: 0 0 16px 0;
+  display: flex;
+  .cold-region {
+    flex: 1;
+    min-width: 270px;
+    &-title {
+      font-family: PingFangSC-Medium;
+      font-size: 12px;
+      color: #303a51;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+  }
+
+  .region-input {
+    width: 580px;
+    .region-name-title {
+      font-family: PingFangSC-Medium;
+      font-size: 12px;
+      color: #303a51;
+      font-weight: 500;
+      width: 70px;
+      margin-bottom: 8px;
+    }
+    .region-name-input {
+      width: 350px;
+      height: 30px;
+      margin-right: 10px;
+    }
+    .region-name-input-error:focus {
+      border-color: #ff4d4f;
+      box-shadow: 0 0 0 2px rgb(255 20 51 / 20%);
+    }
+    .region-name-add {
+      height: 30px;
+      margin-right: 10px;
+    }
+    .region-name-error {
+      color: red;
+      position: relative;
+    }
+  }
+}
+
+.cold-region-tag {
+  height: 26px;
+  line-height: 26px;
+  .tag-bule {
+    margin: 0 0 0 5px;
+    padding: 0;
+    width: 54px;
+    background: rgba(20, 115, 255, 0.1);
+    border-radius: 4px;
+    border: none;
+    line-height: 24px;
+    text-align: center;
+    color: #1473ff;
+    cursor: default;
+    &:hover {
+      border: 1px solid #1473ff;
+    }
+  }
+}
+
+.access-cluster-senior {
+  .ant-form-horizontal .ant-form-item-control {
+    flex: auto;
+  }
+  .down {
+    transform: rotate(90deg);
+    margin-left: 5px;
+  }
+  .up {
+    transform: rotate(-90deg);
+  }
+  .ant-btn > .anticon + span,
+  .ant-btn > span + .anticon {
+    margin-left: 5px;
+  }
+  .cluster-label,
+  .proxy-address {
+    width: 100px;
+    height: 18px;
+  }
+  .ant-col {
+    max-width: 100%;
+  }
+  .ant-col-12 {
+    max-width: 50%;
+  }
+  .iconinfo {
+    font-size: 14px;
+    margin-left: 5px;
+    color: rgb(140, 140, 140);
+    position: relative;
+    bottom: 2px;
+  }
+  button {
+    padding: 0;
+    line-height: 18px;
+    height: 18px;
+    margin-bottom: 16px;
+  }
+  .ant-form-item {
+    margin-bottom: 16px;
+  }
+}
+
+.expand-shrink {
+  .ant-drawer-header {
+    border-bottom: none;
+    margin-bottom: 16px;
+    .ant-drawer-title {
+      font-size: 18px;
+      color: rgba(0, 0, 0, 0.84);
+      line-height: 28px;
+      font-weight: 500;
+    }
+    .ant-drawer-close {
+      margin-top: 10px;
+    }
+  }
+  .expand-shrink-container {
+    .text-label,
+    .ant-form-item-required,
+    .node-title,
+    label {
+      font-family: PingFangSC-Regular;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.6);
+      line-height: 20px;
+      font-weight: 400;
+    }
+    .cluster-name,
+    .cluster-version {
+      margin-bottom: 0 !important;
+      .text-custom-item {
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.87);
+        line-height: 20px;
+        margin-left: 5px;
+      }
+    }
+    .expand-shrink-type {
+      .ant-select {
+        width: 360px;
+        .ant-select-selector {
+          height: 32px;
+          background: #ffffff;
+          border-radius: 4px;
+        }
+      }
+    }
+    .plugin-item {
+      display: inline-block;
+      height: 26px;
+      background: rgba(20, 115, 255, 0.04);
+      border: 1px solid #1473ff;
+      border-radius: 4px;
+      font-family: PingFangSC-Regular;
+      font-size: 14px;
+      color: #1473ff;
+      line-height: 22px;
+      padding: 0 8px;
+      margin-right: 10px;
+    }
+    .footer-content {
+      position: absolute;
+      top: 14px;
+      right: 50px;
+      .ant-btn {
+        width: 80px;
+        border-radius: 4px;
+        margin-right: 10px;
+        font-size: 14px;
+      }
+      .divide {
+        display: inline-block;
+        margin: 0 5px;
+        width: 1px;
+        height: 16px;
+        background: rgba(0, 0, 0, 0.13);
+        position: relative;
+        top: 2px;
+      }
+    }
+  }
+}
+
+.upgrade-cluster-form {
+  .ant-form-item-label {
+    label {
+      font-family: PingFangSC-Regular;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.6);
+      line-height: 20px;
+      font-weight: 400;
+    }
+  }
+}
+.region-container {
+  .warning-container {
+    width: 1080px;
+    position: relative;
+    left: -24px;
+    margin-bottom: 16px;
+  }
+  .ant-table-thead {
+    .ant-table-cell {
+      font-family: PingFangSC-Regular;
+      font-size: 14px !important;
+      color: rgba(0, 0, 0, 0.6);
+      letter-spacing: 0;
+      line-height: 20px;
+      font-weight: 400 !important;
+    }
+  }
+  .ant-table-tbody {
+    .ant-table-cell {
+      font-family: PingFangSC-Regular;
+      font-size: 14px !important;
+      color: rgba(0, 0, 0, 0.87);
+      line-height: 20px;
+      font-weight: 400;
+    }
+  }
+  .d-table-box {
+    display: inherit;
+  }
+}
+
+.new-config-content {
+  margin-top: 16px;
+  .ant-form-item {
+    margin-bottom: 16px;
+    .ant-input {
+      margin-bottom: 0;
+    }
+  }
+  .ant-form-item-label {
+    label {
+      font-family: PingFangSC-Regular;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.6);
+      line-height: 20px;
+      font-weight: 400;
+    }
+  }
+}
+
+.base-info-form {
+  .ant-form-item-label {
+    label {
+      font-family: PingFangSC-Regular;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.6);
+      line-height: 20px;
+      font-weight: 400;
+    }
+  }
+}
+
+.add-new-config {
+  width: 122px;
+  height: 30px;
+  margin: 4px 0 16px 0;
+}
+
+.import-rule {
+  .ant-form-item-control-input {
+    min-height: 20px;
+  }
+  .ant-radio-inner {
+    width: 12px;
+    height: 12px;
+    &::after {
+      top: 1.5px;
+      left: 1.5px;
+      width: 7px;
+      height: 7px;
+    }
+  }
+}
+
+.access-senior,
+.apply-senior {
+  margin-top: -4px !important;
+  .ant-form-item-control-input {
+    min-height: 18px;
+  }
+}
+
+.senior-form {
+  margin-top: -4px;
+}
+
+.access-add-role {
+  .ant-form-item-explain {
+    min-height: 0;
+  }
+}
+
+.ant-form-item-has-error .ant-input,
+.ant-form-item-has-error .ant-input-affix-wrapper,
+.ant-form-item-has-error .ant-input:hover,
+.ant-form-item-has-error .ant-input-affix-wrapper:hover {
+  border-color: #ff4d4f !important;
+}
+
+.divide-type-container {
+  .divide-type,
+  .divide-attribute {
+    display: inline-block;
+    width: 493px;
+    .title {
+      font-family: PingFangSC-Medium;
+      color: #303a51;
+      margin-bottom: 8px;
+    }
+    .ant-select {
+      width: 493px;
+    }
+  }
+  .divide-type {
+    margin-right: 38px;
+  }
+}
+
+.node-status-box {
+  display: flex;
+  .spot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin: 7px 5px;
+  }
+  .online {
+    background: #46d677;
+  }
+  .offline {
+    background: #dcdfe6;
+  }
+}
+
+.offline-text {
+  color: red;
+}
+
+.restart-cluster-node {
+  margin-bottom: 8px;
+  .name {
+    font-family: PingFangSC-Regular;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.87);
+    letter-spacing: 0;
+    line-height: 22px;
+    font-weight: 400;
+  }
+  .node {
+    font-family: PingFangSC-Regular;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.87);
+    line-height: 22px;
+    font-weight: 400;
+  }
+  .fail {
+    color: #ef645c;
+  }
+  .ant-checkbox-group {
+    margin: 4px 0;
+  }
+}
+
+.project-manage {
+  color: #1473ff;
+  cursor: pointer;
 }

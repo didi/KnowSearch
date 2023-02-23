@@ -27,4 +27,9 @@ public class ScriptUpdateDTO {
      */
     @ApiModelProperty("传输文件")
     private MultipartFile uploadFile;
+    /**
+     * 模板超时时间
+     */
+    @ApiModelProperty("模板超时时间")
+    private Integer timeout;
 }

@@ -1,24 +1,191 @@
 @font-face {
   font-family: "iconfont"; /* Project id 2457502 */
-  src: url('iconfont.woff2?t=1648717886349') format('woff2'),
-       url('iconfont.woff?t=1648717886349') format('woff'),
-       url('iconfont.ttf?t=1648717886349') format('truetype');
+  src: url("iconfont.woff2?t=1672993974559") format("woff2"), url("iconfont.woff?t=1672993974559") format("woff"),
+    url("iconfont.ttf?t=1672993974559") format("truetype");
 }
 
 .iconfont {
   font-family: "iconfont" !important;
-  font-size: 16px;
+  font-size: 14px;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-.iconleft:before {
-  content: "\e723";
+.icontuozhuai:before {
+  content: "\e783";
+}
+
+.iconchuangkoufangda:before {
+  content: "\e784";
+}
+
+.iconchuangkousuoxiao:before {
+  content: "\e785";
+}
+
+.iconDashboard:before {
+  content: "\e62d";
+}
+
+.iconzuhuguanli1:before {
+  content: "\e62e";
+}
+
+.iconrenwuzhongxin1:before {
+  content: "\e655";
+}
+
+.iconsuoyinguanli1:before {
+  content: "\e656";
+}
+
+.iconpingtaipeizhi:before {
+  content: "\e657";
+}
+
+.iconmobanguanli1:before {
+  content: "\e658";
+}
+
+.iconjiansuochaxun2:before {
+  content: "\e659";
+}
+
+.iconjiqunguanli2:before {
+  content: "\e65a";
+}
+
+.icontiaodurenwu1:before {
+  content: "\e65b";
+}
+
+.iconcaozuojilu1:before {
+  content: "\e65c";
+}
+
+.icongongdanrenwu2:before {
+  content: "\e65d";
+}
+
+.iconzhibiaokanban2:before {
+  content: "\e65e";
+}
+
+.iconbianji:before {
+  content: "\e77f";
+}
+
+.iconxiangqing:before {
+  content: "\e780";
+}
+
+.iconarrow-left:before {
+  content: "\e781";
+}
+
+.icontop:before {
+  content: "\e77c";
+}
+
+.iconriqi1:before {
+  content: "\e77b";
+}
+
+.iconyingyong:before {
+  content: "\e776";
+}
+
+.iconwarning-circle:before {
+  content: "\e772";
+}
+
+.iconinfo-circle:before {
+  content: "\e773";
+}
+
+.iconerror-circle:before {
+  content: "\e774";
+}
+
+.iconsuccess-circle:before {
+  content: "\e775";
+}
+
+.icona-knowsearch:before {
+  content: "\e771";
+}
+
+.icontouxiang:before {
+  content: "\e76c";
+}
+
+.icontuichudenglu:before {
+  content: "\e76d";
+}
+
+.icontuichuquanju:before {
+  content: "\e76e";
+}
+
+.iconxitongguanli:before {
+  content: "\e76f";
+}
+
+.iconduojiqunguanli:before {
+  content: "\e770";
+}
+
+.iconquanju:before {
+  content: "\e76b";
+}
+
+.iconruanjianguanli:before {
+  content: "\e61c";
+}
+
+.iconpingtaiguanli:before {
+  content: "\e61d";
+}
+
+.iconrenwuzhongxin:before {
+  content: "\e61b";
+}
+
+.iconzuhuguanli:before {
+  content: "\e61a";
+}
+
+.iconxitongguanli2:before {
+  content: "\e617";
+}
+
+.iconcaozuojilu:before {
+  content: "\e618";
+}
+
+.iconzhibiaokanban1:before {
+  content: "\e619";
+}
+
+.iconhong:before {
+  content: "\e763";
+}
+
+.iconhuang:before {
+  content: "\e764";
+}
+
+.iconlv:before {
+  content: "\e765";
 }
 
 .iconRight:before {
-  content: "\e722";
+  content: "\e72f";
+}
+
+.iconleft:before {
+  content: "\e730";
 }
 
 .iconweizhi:before {
@@ -51,10 +218,6 @@
 
 .iconmobanguanli:before {
   content: "\e70b";
-}
-
-.iconxitongguanli:before {
-  content: "\e70c";
 }
 
 .icongongdanrenwu:before {
@@ -328,4 +491,3 @@
 .iconeslogo:before {
   content: "\e654";
 }
-

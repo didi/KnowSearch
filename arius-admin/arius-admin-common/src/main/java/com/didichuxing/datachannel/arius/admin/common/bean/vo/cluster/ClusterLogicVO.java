@@ -1,15 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * 集群基本类
@@ -102,6 +103,9 @@ public class ClusterLogicVO extends BaseVO implements Comparable<ClusterLogicVO>
 
     @ApiModelProperty("磁盘使用量")
     private Long                         diskUsage;
+
+    @ApiModelProperty("分片数")
+    private Long                         activeShardNum;
 
     @Override
     public int compareTo(ClusterLogicVO o) {

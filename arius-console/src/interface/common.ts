@@ -43,12 +43,12 @@ export interface IRes extends Response {
   status: number;
   message: string;
   data: any;
-  pagination?: IPagination
+  pagination?: IPagination;
 }
 
 export interface IFileType {
   value: number;
-  parser?: 'Presto' | 'Hive' | 'Spark';
+  parser?: "Presto" | "Hive" | "Spark";
   title: string;
   language?: string;
   decomment?: boolean;
@@ -85,6 +85,7 @@ export interface ILabelValue {
 }
 
 export interface IXFormWrapper {
+  className?: string;
   type?: string;
   title: string;
   onSubmit: (result: any) => any;
@@ -101,12 +102,17 @@ export interface IXFormWrapper {
   noform?: boolean;
   nofooter?: boolean;
   isWaitting?: boolean;
+  needBtnLoading?: boolean;
+  needSuccessMessage?: boolean;
   layout?: "inline" | "horizontal" | "vertical";
   actionAfterFailedSubmit?: () => any;
   actionAfterSubmit?: (res: any) => any;
   onHandleValuesChange?: (value: any, allValues: object) => any;
+  formRef?: any;
 }
-
+/*
+ *@needSuccessMessage:控制成功之后的提示信息
+ */
 export interface IAction {
   type: string;
   payload: any;
@@ -121,27 +127,28 @@ export interface IPagination {
 export interface IClusterKanBanAction {
   type: string;
   clusterForm: {
-    clusterName?: string,
-    startTime?: number,
-    endTime?: number,
-    isMoreDay?: boolean,
-    isUpdate?: boolean,
-  }
+    clusterName?: string;
+    startTime?: number;
+    endTime?: number;
+    isMoreDay?: boolean;
+    isUpdate?: boolean;
+    bigShardThreshold?: number;
+  };
 }
 export interface IGatewayKanbanAction {
   type: string;
   gatewayForm: {
-    startTime: number,
-    endTime: number,
-    isMoreDay: boolean
-  }
+    startTime: number;
+    endTime: number;
+    isMoreDay: boolean;
+  };
 }
 
 export interface IDashBoardAction {
   type: string;
   payload: {
-    startTime: number,
-    endTime: number,
-    isOperation: boolean
-  }
+    startTime: number;
+    endTime: number;
+    isOperation: boolean;
+  };
 }

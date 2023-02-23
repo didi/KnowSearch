@@ -1,27 +1,36 @@
 import React, { memo, useEffect, useState } from "react";
-import { useSelector, shallowEqual, useDispatch } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import { setGatewayForm } from "../../../actions/gateway-kanban";
 import { oneDayMillims } from "../../../constants/common";
 import { TAB_LIST, MENU_MAP } from "./config";
-
+import { HashMenu } from "knowdesign";
+import { isSuperApp } from "lib/utils";
+import { RefreshTime } from "../components";
+import { CustomPickTime } from "../components/custom-time-picker";
+import { AppState } from "store/type";
+import { RenderEmpty } from "component/LogClusterEmpty";
 import "../style";
 
-import { SelectTime, HashMenu, RefreshTime } from "../components";
+const mapStateToProps = (state) => ({
+  app: state.app,
+});
 
-export const classPrefix = "rf-monitor";
-
-export const GatewayKanban = () => {
+export const GatewayKanban = connect(mapStateToProps)((props: { app: AppState }) => {
   const department: string = localStorage.getItem("current-project");
   const dispatch = useDispatch();
   const [refreshTime, setRefreshTime] = useState(0);
+  const [toTopVisible, setToTopVisible] = useState(false);
 
-  const onTimeStampChange = (startTime: number, endTime: number) => {
+  const container = document.querySelector(".d1-layout-main");
+
+  const onTimeStampChange = (startTime: number, endTime: number, timeRadioKey?: string) => {
     const timeMinus = endTime - startTime;
     dispatch(
       setGatewayForm({
-        startTime: startTime,
-        endTime: endTime,
+        startTime,
+        endTime,
         isMoreDay: timeMinus > oneDayMillims,
+        timeRadioKey,
       })
     );
   };
@@ -32,42 +41,72 @@ export const GatewayKanban = () => {
     dispatch(
       setGatewayForm({
         startTime: currentTime - ONE_HOUR,
-        endTime: currentTime,
+        endTime: currentTime-120000,
         isMoreDay: false,
+        timeRadioKey: "oneHour",
       })
     );
+    container.addEventListener("scroll", handleScroll);
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+    };
   }, [department]);
+
+  useEffect(() => {
+    handleScroll();
+  }, [toTopVisible]);
+
+  const handleScroll = () => {
+    if (container.scrollTop > 500) {
+      setToTopVisible(true);
+    } else {
+      setToTopVisible(false);
+    }
+  };
+
+  if (props.app.gatewayStatus === false && !isSuperApp()) {
+    // if (isSuperApp()) {
+    //   return (
+    //     <RenderEmpty
+    //       {...props}
+    //       title="未部署Gateway集群"
+    //       desc="请前往集群管理 ———— 「Gateway集群」，进行Gateway部署"
+    //       href="/cluster/gateway"
+    //       btnText="接入Gateway"
+    //     />
+    //   );
+    // }
+    return <RenderEmpty {...props} title="未部署Gateway集群，请联系管理员进行Gateway部署" desc="" href="" btnText="" />;
+  }
 
   return (
     <>
-      <div className="table-header">
-        <div className="gateway-kanban-header-box">
-          <h3>网关看板</h3>
-          <div className="gateway-kanban-header-box-select">
-            <div style={{ paddingTop: 10 }}>
-              <SelectTime
-                onTimeStampChange={onTimeStampChange}
-                refreshTime={refreshTime}
-              />
-            </div>
-            {/* <span className="gateway-kanban-header-box-content">
-              Kibana查看
-            </span> */}
-          </div>
-        </div>
-      </div>
-      <div className="hash-menu-container">
+      <div className="hash-menu-container gateway">
         <HashMenu
+          prefix="gateway-kanban-content"
           TAB_LIST={TAB_LIST}
           MENU_MAP={MENU_MAP}
-          defaultHash="overview"
+          defaultHash="node"
           // 监听页面权限的变化
           key={department}
         />
-        <div className="refresh-time">
+        <CustomPickTime onTimeStampChange={onTimeStampChange} refreshTime={refreshTime} />
+        <div className="refresh-time gateway-refresh">
           <RefreshTime changeRefreshTime={setRefreshTime} />
         </div>
       </div>
+      {toTopVisible && (
+        <div
+          className="to-top"
+          onClick={() => {
+            container.scrollTop = 0;
+          }}
+        >
+          <svg className="icon svg-icon svg-style" aria-hidden="true">
+            <use xlinkHref="#icontop"></use>
+          </svg>
+        </div>
+      )}
     </>
   );
-};
+});

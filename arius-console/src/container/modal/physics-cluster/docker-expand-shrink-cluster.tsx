@@ -25,15 +25,9 @@ const DockerExpandShrinkCluster = (props: {
   user: UserState;
   params: IOpPhysicsClusterDetail;
 }) => {
-  const dataData = props.params?.esRoleClusterVOS?.filter(
-    (ele) => ele.role === "datanode"
-  );
-  const masternode = props.params?.esRoleClusterVOS?.filter(
-    (ele) => ele.role === "masternode"
-  );
-  const clientnode = props.params?.esRoleClusterVOS?.filter(
-    (ele) => ele.role === "clientnode"
-  );
+  const dataData = props.params?.esRoleClusterVOS?.filter((ele) => ele.role === "datanode");
+  const masternode = props.params?.esRoleClusterVOS?.filter((ele) => ele.role === "masternode");
+  const clientnode = props.params?.esRoleClusterVOS?.filter((ele) => ele.role === "clientnode");
   const dataObj = dataData[0];
 
   const xFormModalConfig = {
@@ -46,7 +40,7 @@ const DockerExpandShrinkCluster = (props: {
       },
       {
         key: "project",
-        label: "所属项目",
+        label: "所属应用",
         type: FormItemType.text,
         customFormItem: <RenderText text={"es"} />,
       },
@@ -54,9 +48,7 @@ const DockerExpandShrinkCluster = (props: {
         key: "type",
         label: "集群类型",
         type: FormItemType.text,
-        customFormItem: (
-          <RenderText text={VERSION_MAINFEST_TYPE[props.params.type]} />
-        ),
+        customFormItem: <RenderText text={VERSION_MAINFEST_TYPE[props.params.type]} />,
       },
       {
         key: "esVersion",
@@ -80,12 +72,7 @@ const DockerExpandShrinkCluster = (props: {
         key: "podNumber",
         label: "期望Datanode节点数",
         type: FormItemType.custom,
-        customFormItem: (
-          <DockerExpectDataNodeNu
-            podNumber={dataObj.podNumber}
-            style={{ width: "60%" }}
-          />
-        ),
+        customFormItem: <DockerExpectDataNodeNu podNumber={dataObj.podNumber} style={{ width: "60%" }} />,
         rules: [
           {
             required: true,
@@ -166,13 +153,13 @@ const DockerExpandShrinkCluster = (props: {
       };
       const params: IWorkOrder = {
         contentObj,
-        submitorAppid: props.app.appInfo()?.id,
-        submitor: props.user.getName('domainAccount'),
+        submitorProjectId: props.app.appInfo()?.id,
+        submitor: props.user.getName("userName"),
         description: result.description || "",
         type: "clusterOpIndecrease",
       };
 
-      submitWorkOrder(params, () => {
+      return submitWorkOrder(params, props.params?.history, () => {
         props.dispatch(actions.setModalId(""));
       });
     },

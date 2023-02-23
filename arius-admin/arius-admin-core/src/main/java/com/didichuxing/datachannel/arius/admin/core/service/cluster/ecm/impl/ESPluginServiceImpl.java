@@ -224,7 +224,7 @@ public class ESPluginServiceImpl implements ESPluginService {
         boolean succ = (1 == esPluginDAO.delete(id));
         if (succ) {
             operateRecordService.save(new OperateRecord.Builder().bizId(pluginDTO.getId()).userOperation(operator)
-                .operationTypeEnum(OperateTypeEnum.ES_CLUSTER_PLUGINS_DELETE)
+                .operationTypeEnum(OperateTypeEnum.ES_CLUSTER_PLUGINS_DELETE).content(pluginPO.getName())
                 .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build());
         }
 

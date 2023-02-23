@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.BindGatewayClusterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.BindGatewayClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
@@ -206,7 +206,7 @@ public class ESPhyClusterController {
         return clusterPhyManager.addCluster(param, HttpRequestUtil.getOperator(request),
             HttpRequestUtil.getProjectId(request));
     }
- 
+
     @PostMapping("/bind-gateway")
     @ResponseBody
     @ApiOperation(value = "物理集群绑定 gateway",tags = "")
@@ -215,21 +215,21 @@ public class ESPhyClusterController {
         return clusterPhyManager.bindGatewayCluster(bindGatewayClusterDTO.getClusterPhyId(),bindGatewayClusterDTO.getGatewayClusterIds(), HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
-   
-    
+
+
     @GetMapping("health")
     @ResponseBody
     @ApiOperation(value = "获取集群健康枚举类",tags = "")
     public Result<List<TupleTwo<Integer,ClusterHealthEnum>>> getHealthEnum(HttpServletRequest request) {
         return Result.buildSucc(ClusterHealthEnum.getAll());
     }
-    
-    
+
+
     @GetMapping("cluster-resource")
     @ResponseBody
     @ApiOperation(value = "获取集群资源类型",tags = "")
     public Result<List<TupleTwo<Integer, ClusterResourceTypeEnum>>> getClusterResourceType(HttpServletRequest request) {
         return Result.buildSucc(ClusterResourceTypeEnum.getAll());
     }
-    
+
 }

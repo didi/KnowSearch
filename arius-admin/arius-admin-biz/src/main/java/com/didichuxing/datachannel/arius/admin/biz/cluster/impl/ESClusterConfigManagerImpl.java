@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.op.manager.IpPort;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.ConfigConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
@@ -84,9 +85,10 @@ public class ESClusterConfigManagerImpl implements ESClusterConfigManager {
         final ESConfig oldEsConfig = esClusterConfigService.getEsClusterConfigById(param.getId());
         final Result<Void> result = esClusterConfigService.editConfigDesc(param);
         if (result.success()) {
+            ClusterPhy clusterById = clusterPhyService.getClusterById(Math.toIntExact(param.getClusterId()));
             operateRecordService.saveOperateRecordWithManualTrigger(
-                    String.format("描述变更：【%s】->【%s】", oldEsConfig.getDesc(), param.getDesc()), operator, projectId,
-                    param.getId(), OperateTypeEnum.PHYSICAL_CLUSTER_CONF_FILE_CHANGE);
+                    String.format("%s描述变更：%s-->%s", Optional.ofNullable(clusterById.getCluster()).orElse(""), oldEsConfig.getDesc(), param.getDesc()), operator, projectId,
+                    param.getId(), OperateTypeEnum.PHYSICAL_CLUSTER_INFO_MODIFY);
         }
         return result;
     }
@@ -210,9 +212,9 @@ public class ESClusterConfigManagerImpl implements ESClusterConfigManager {
             clusterRoleHosts, ESClusterRoleHostVO.class);
         final Map<String, List<ESClusterRoleHostVO>> ip2VOSMap = ConvertUtil.list2MapOfList(
             esClusterRoleHostVOS, ESClusterRoleHostVO::getIp, i -> i);
-        final List<ClusterRoleInfo> allRoleClusterByClusterId = clusterRoleService.getAllRoleClusterByClusterId(clusterPhyId);
-				final List<ESClusterRoleVO> esClusterRoleVOS = ConvertUtil.list2List(
-						allRoleClusterByClusterId, ESClusterRoleVO.class);
+        final List<ClusterRoleInfo> allRoleClusterByClusterId = clusterRoleService.getAllRoleClusterByClusterId(
+            clusterPhyId);
+        
         
         for (ComponentGroupConfigWithHostVO hostVO : hostVOS) {
             		//获取IP维度的最小端口号和最大端口号
@@ -244,13 +246,11 @@ public class ESClusterConfigManagerImpl implements ESClusterConfigManager {
             //设置有角色信息的
             final Map<Long, List<ESClusterRoleHostVO>> roleId2ListMap = ConvertUtil.list2MapOfList(
                 clusterRoleHostVOS, ESClusterRoleHostVO::getRoleClusterId, i -> i);
-            esClusterRoleVOS
-                //进行节点填充
-                .forEach(i ->
-                    Optional.ofNullable(roleId2ListMap.get(i.getId()))
-                        .ifPresent(i::setEsClusterRoleHostVO)
-                );
-            hostVO.setRoleWithNodes(esClusterRoleVOS);
+            final List<ESClusterRoleVO> roleVOS = ConvertUtil.list2List(
+                allRoleClusterByClusterId, ESClusterRoleVO.class);
+            roleVOS.forEach(i->Optional
+                .ofNullable(roleId2ListMap.get(i.getId())).ifPresent(i::setEsClusterRoleHostVO));
+            hostVO.setRoleWithNodes(roleVOS);
         }
 				return Result.buildSucc(hostVOS);
     }

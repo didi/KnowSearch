@@ -549,6 +549,16 @@ public class FastIndexManagerImpl implements FastIndexManager {
     }
 
     @Override
+    public String TaskSubmitAddress(String sourceClusterName) {
+        //返回任意一个fastdump地址
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(sourceClusterName);
+        List<String> ipList = Arrays.stream(StringUtils.split(clusterPhy.getHttpAddress(), ","))
+                .map(httpAddress -> split2Tuple(httpAddress).getV1()+ ":" + fastDumpPort).collect(Collectors.toList());
+        String taskSubmitAddress = ipList.stream().findAny().orElse(null);
+        return taskSubmitAddress;
+    }
+
+    @Override
     public List<ClusterPhyVO> ESClustersInstalledFastDump() {
         List<ClusterPhy> supportESVersionList;
         List<ClusterPhy> clusterPhyList = clusterPhyService.listClustersByCondt(new ClusterPhyDTO());

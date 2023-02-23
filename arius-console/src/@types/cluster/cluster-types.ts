@@ -1,5 +1,5 @@
 export interface ICluster {
-  appId: string;
+  projectId: string;
   appName: string;
   dataNodesNumber: number;
   authId: number;
@@ -19,13 +19,11 @@ export interface ICluster {
   memo: string;
   name: string;
   quota: number;
-  responsible: string;
   type: number;
   permissions: string;
   status?: string;
   authCode?: number;
 }
-
 
 export interface IClusterInfo extends ICluster {
   [key: string]: any;
@@ -58,8 +56,8 @@ export interface INode {
 }
 
 /*
-*@集群管理 => 操作记录
-*/
+ *@集群管理 => 操作记录
+ */
 export interface IOperaRecordt {
   bizId: string;
   content?: string;
@@ -73,8 +71,8 @@ export interface IOperaRecordt {
 }
 
 /*
-*@集群管理 => 物理集群
-*/
+ *@集群管理 => 物理集群
+ */
 export interface IOpClusterCreate {
   cluster: string;
   dataCenter: string;
@@ -88,7 +86,7 @@ export interface IOpClusterCreate {
 }
 
 export interface IOpLogicCluster {
-  appId: number;
+  projectId: number;
   name: string;
   authId: number;
   clusterConfigTemplate?: string;
@@ -111,12 +109,11 @@ export interface IOpLogicCluster {
   clusterStatus: IClusterStatus;
   status: string;
   permissions: string;
-  responsible: string;
   esRoleClusterVOS: IEsRoleCluster[];
 }
 
 export interface IOpLogicClusterDetail {
-  appId: number;
+  projectId: number;
   clusterConfigTemplate?: string;
   configJson: string;
   dataCenter: string;
@@ -128,10 +125,10 @@ export interface IOpLogicClusterDetail {
   memo: string;
   name: string;
   quota: number;
-  responsible: any;
 }
 
 export interface IOpPhysicsCluster {
+  usename?: string;
   cluster: string;
   clusterConfigTemplate?: string;
   dataCenter: string;
@@ -151,6 +148,11 @@ export interface IOpPhysicsCluster {
   name?: string;
   clusterStatus: string;
   currentAppAuth: number;
+  logicClusterAndRegionList?: any;
+  ecmAccess?: boolean;
+  usename?: string;
+  componentId?: number;
+  gatewayIds?: string;
 }
 
 export interface IOpPhysicsClusterDetail {
@@ -260,7 +262,7 @@ export interface ICreatePhyCluster {
   machineSpec?: string;
   level?: string;
   roleClusterHosts?: IRoleClusterHots[];
-  tags?: string
+  tags?: string;
 }
 
 export interface IRoleCluster {
@@ -287,12 +289,12 @@ export interface IOpExpandValues {
 }
 
 export interface IRegion {
-  region: string,
-  racks: string,
-  key: string
+  region: string;
+  racks: string;
+  key: string;
 }
 
 export interface IAccessClusterRegion {
-  value: number,
-  regionList: IRegion[]
+  value: number;
+  regionList: IRegion[];
 }

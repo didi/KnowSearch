@@ -1,4 +1,4 @@
-export type HttpMethod = 'POST' | 'PUT' | 'GET' | 'DELETE';
+export type HttpMethod = "POST" | "PUT" | "GET" | "DELETE";
 
 export interface IFilter {
   text: string;
@@ -40,6 +40,7 @@ export interface IMenuItem {
   show?: boolean;
   type?: number;
   label?: string;
+  visible?: boolean;
   content?: (data: any) => JSX.Element;
 }
 
@@ -48,7 +49,7 @@ export interface IBaseInfo {
   label: string;
   unit?: string;
   invisible?: boolean;
-  render?: (text: any) => any;
+  render?: (params: any) => any;
 }
 
 export interface IUNSpecificInfo {

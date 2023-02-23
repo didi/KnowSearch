@@ -323,8 +323,6 @@ public class PluginManagerImpl implements PluginManager {
 						esClusterRoleHostVOS, ESClusterRoleHostVO::getIp, i -> i);
 				final List<ClusterRoleInfo> allRoleClusterByClusterId = clusterRoleService.getAllRoleClusterByClusterId(
 						clusterId);
-				final List<ESClusterRoleVO> esClusterRoleVOS = ConvertUtil.list2List(
-						allRoleClusterByClusterId, ESClusterRoleVO.class);
 				for (ComponentGroupConfigWithHostVO hostVO : hostVOS) {
 						final String              groupName      = hostVO.getGroupName();
 								//获取IP维度的最小端口号和最大端口号
@@ -366,13 +364,12 @@ public class PluginManagerImpl implements PluginManager {
 								//设置有角色信息的
 								final Map<Long, List<ESClusterRoleHostVO>> roleId2ListMap = ConvertUtil.list2MapOfList(
 										clusterRoleHostVOS, ESClusterRoleHostVO::getRoleClusterId, i -> i);
-								esClusterRoleVOS
-										//进行节点填充
-										.forEach(i ->
-												Optional.ofNullable(roleId2ListMap.get(i.getId()))
-														.ifPresent(i::setEsClusterRoleHostVO)
-										);
-								hostVO.setRoleWithNodes(esClusterRoleVOS);
+								final List<ESClusterRoleVO> roleVOS = ConvertUtil.list2List(
+										allRoleClusterByClusterId, ESClusterRoleVO.class);
+								roleVOS.forEach(i -> Optional
+										.ofNullable(roleId2ListMap.get(i.getId()))
+										.ifPresent(i::setEsClusterRoleHostVO));
+								hostVO.setRoleWithNodes(roleVOS);
 						}
 				}
 				return Result.buildSucc(hostVOS);

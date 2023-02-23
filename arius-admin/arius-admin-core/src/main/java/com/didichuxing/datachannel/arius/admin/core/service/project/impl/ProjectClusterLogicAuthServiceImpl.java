@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.project.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +25,6 @@ import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectLogicClu
 import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectLogicClusterAuthEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -194,8 +194,10 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         if (succeed) {
             SpringTool.publish(new ProjectLogicClusterAuthDeleteEvent(this,
                 ConvertUtil.obj2Obj(oldAuthPO, ProjectClusterLogicAuth.class)));
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(oldAuthPO.getLogicClusterId(), oldAuthPO.getProjectId());
             operateRecordService.save(new OperateRecord.Builder().bizId(oldAuthPO.getId())
                 .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE).userOperation(operator)
+                    .content(Optional.ofNullable(clusterLogic.getName()).orElse(""))
                     .operateProject(projectService.getProjectBriefByProjectId(oldAuthPO.getProjectId())).build());
         }
 
@@ -365,9 +367,10 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
             // 发送消息
             SpringTool.publish(
                 new ProjectLogicClusterAuthAddEvent(this, ConvertUtil.obj2Obj(authPO, ProjectClusterLogicAuth.class)));
-
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(authPO.getLogicClusterId(), authPO.getProjectId());
             // 记录操作
-            operateRecordService.save(new OperateRecord.Builder().content(JSON.toJSONString(authPO))
+            operateRecordService.save(new OperateRecord.Builder().content(String.format("%s 增加权限：%s", Optional.ofNullable(clusterLogic.getName()).orElse(""),
+                            ProjectClusterLogicAuthEnum.valueOf(authPO.getType()).getDesc()))
                 .userOperation(operator).operationTypeEnum(OperateTypeEnum.MY_CLUSTER_INFO_MODIFY)
                 .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId())).bizId(authPO.getId())
                 .operateProject(projectService.getProjectBriefByProjectId(authDTO.getProjectId()))
@@ -542,7 +545,11 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
             SpringTool.publish(new ProjectLogicClusterAuthEditEvent(this,
                 ConvertUtil.obj2Obj(oldAuthPO, ProjectClusterLogicAuth.class),
                 ConvertUtil.obj2Obj(logicClusterAuthDAO.getById(authDTO.getId()), ProjectClusterLogicAuth.class)));
-            operateRecordService.saveOperateRecordWithManualTrigger(JSON.toJSONString(newAuthPO), operator,
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(newAuthPO.getLogicClusterId(), newAuthPO.getProjectId());
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    String.format("%s 修改权限：%s-->%s", Optional.ofNullable(clusterLogic.getName()).orElse(""),
+                            ProjectClusterLogicAuthEnum.valueOf(oldAuthPO.getType()).getDesc(),
+                            ProjectClusterLogicAuthEnum.valueOf(newAuthPO.getType()).getDesc()), operator,
                     authDTO.getProjectId(), oldAuthPO.getId(), OperateTypeEnum.MY_CLUSTER_INFO_MODIFY, authDTO.getProjectId());
         }
 

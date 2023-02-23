@@ -1,10 +1,10 @@
 .dashboard {
   position: relative;
-  background: #fff;
-  padding: 16px 20px;
+  background-image: linear-gradient(180deg, #f5f7fa 2%, #f5f7fa 86%);
+  padding: 16px 10px 16px 20px;
   border-radius: 8px;
+  min-width: 1210px;
 
-  // min-width: 1440px;
   &-changepage {
     position: absolute;
     top: 24px;
@@ -33,30 +33,31 @@
   .ant-spin-blur {
     opacity: 1;
   }
+  .hash-menu {
+    background: transparent;
+  }
 }
 
 .dashboard-config {
   height: 27px;
-  position: relative;
+  position: absolute;
   margin-bottom: 12px;
-
+  top: -45px;
+  right: 0px;
+  width: 420px;
   &-icon {
     width: 17px;
     height: 17px;
     font-size: 17px;
     color: #74788d;
-    margin: 2px 18px 6px 2px;
+    margin-right: 9px;
   }
 
   &-line {
     width: 1px;
     height: 20px;
     border: 1px solid #ced4da;
-    display: inline-block;
-    position: absolute;
-    /* margin-top: -16px; */
-    top: 3px;
-    left: 26px;
+    margin-right: 7px;
   }
 
   &-setting {
@@ -84,13 +85,14 @@
     color: #212529;
     background: none;
     line-height: 36px;
-    font-size: 14px;
-    font-family: PingFangSC-Medium;
+    border-bottom: none;
+    margin-bottom: 8px;
 
     .ant-menu-item {
+      font-size: 18px !important;
       margin: -1px 24px 0px 0px !important;
       font-family: PingFangSC-Regular;
-      color: #303A51;
+      color: #303a51;
 
       &.ant-menu-item-selected {
         font-family: PingFangSC-Medium;
@@ -101,7 +103,10 @@
 
 .dashboard-detail-wrapper {
   background: none;
-  padding: 8px 0px 0px 0px !important;
+  padding: 8px 0px 20px 0px !important;
+  .d1-col-8 {
+    height: 262px;
+  }
 }
 
 .dashboard-overview-content {
@@ -117,7 +122,6 @@
       background: #ffffff;
       // box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.01), 0 3px 6px 3px rgba(0, 0, 0, 0.01), 0 2px 6px 0 rgba(0, 0, 0, 0.03);
       border-radius: 8px;
-      background: #F8F9FA;
     }
 
     &-item {
@@ -187,6 +191,7 @@
 
 // 索引
 .dashboard-index-view {
+  position: relative;
   .index-content-item {
     padding: 12px 16px;
     height: 282px;
@@ -204,7 +209,6 @@
     width: 60px;
     height: 40px;
     margin-bottom: 8px;
-
   }
 
   span {
@@ -218,7 +222,7 @@
 }
 
 .dashborad-popover {
-  background: #FFFFFF;
+  background: #ffffff;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.01), 0 3px 6px 3px rgba(0, 0, 0, 0.01), 0 2px 6px 0 rgba(0, 0, 0, 0.03);
   border-radius: 4px;
   padding-top: 4px;
@@ -238,7 +242,7 @@
     .ant-picker-input>input {
       font-family: PingFangSC-Regular;
       font-size: 13px;
-      color: #74788D;
+      color: #74788d;
     }
   }
 
@@ -254,7 +258,7 @@
     transition: none;
 
     &.ant-radio-button-wrapper-checked {
-      color: #556EE6;
+      color: #556ee6;
     }
   }
 
@@ -268,4 +272,17 @@
   .dd-time-range-module .flx_con .flx_l {
     width: 144px;
   }
+}
+
+.drag-title {
+  position: absolute;
+  top: 10px;
+  z-index: 100;
+  left: 21px;
+  font-family: HelveticaNeue-Medium;
+  letter-spacing: 0.5px;
+  font-size: 14px;
+  color: #212529;
+  height: 22px;
+  line-height: 22px;
 }

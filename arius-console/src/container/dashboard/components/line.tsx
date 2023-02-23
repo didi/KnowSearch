@@ -26,11 +26,12 @@ import {
 } from "echarts/components";
 import { CanvasRenderer } from "echarts/renderers";
 import * as actions from "actions";
-import { useMouseoutOutSide } from '../../indicators-kanban//hooks/useMouseoutOutSide';
+import { useMouseoutOutSide } from "../../indicators-kanban//hooks/useMouseoutOutSide";
 import "../index";
 import { DownOutlined } from "@ant-design/icons";
+import InfoTooltip from "component/infoTooltip";
 
-const imgSrc = require('./../../../assets/empty.png');
+const imgSrc = require("./../../../assets/empty.png");
 
 // 通过 ComposeOption 来组合出一个只有必须组件和图表的 Option 类型
 export type ECOption = echarts.ComposeOption<
@@ -44,23 +45,13 @@ export type ECOption = echarts.ComposeOption<
 >;
 
 // 注册必须的组件
-echarts.use([
-  TitleComponent,
-  LegendComponent,
-  TooltipComponent,
-  GridComponent,
-  BarChart,
-  LineChart,
-  CanvasRenderer,
-  MarkLineComponent,
-]);
+echarts.use([TitleComponent, LegendComponent, TooltipComponent, GridComponent, BarChart, LineChart, CanvasRenderer, MarkLineComponent]);
 
 /*
  *@ 教程 https://echarts.apache.org/zh/index.html
  *@ 配置按需引入
  */
 
-// export const overviewClassPrefix = "rf-monitor";
 export const overviewClassPrefix = "dashboard";
 
 export interface ILine {
@@ -71,49 +62,48 @@ export interface ILine {
   width?: number | string;
   height?: number | string;
   isLoading?: boolean;
-  title?: string;
+  title?: string | any;
   tipSync?: boolean;
   cb?: Function;
   tooltip?: string;
   topN?: any;
+  dictionary?: any;
 }
 
-export const DrawLine = ({ index, option, setModalId, bigPicture, width, height, tipSync, cb, title, tooltip, topN }: ILine) => {
+export const DrawLine = ({ index, option, setModalId, bigPicture, width, height, tipSync, cb, title, topN, dictionary }: ILine) => {
   const chartBox = useRef(null);
   const myChart = useRef(null);
   const flag = useRef(true);
-  const [isShowLegend, setIsShowLegend] = useState(false)
+  const [isShowLegend, setIsShowLegend] = useState(false);
   const topNMap = {
-    5: 'top 5',
-    10: 'top 10',
-    20: 'top 20',
-    50: 'top 50',
-  }
+    5: "top 5",
+    10: "top 10",
+    20: "top 20",
+    50: "top 50",
+  };
   const handleMenuClick = (result) => {
     topN.current[index] = result.key;
     cb(result.key, [index]);
-  }
+  };
   const getMenu = () => (
-    <Menu onClick={handleMenuClick} selectedKeys={[topN.current[index] || '5']}>
-      {Object.keys(topNMap).map(item => (
-        <Menu.Item key={item}>
-          {topNMap[item]}
-        </Menu.Item>
+    <Menu onClick={handleMenuClick} selectedKeys={[topN.current[index] || "5"]}>
+      {Object.keys(topNMap).map((item) => (
+        <Menu.Item key={item}>{topNMap[item]}</Menu.Item>
       ))}
     </Menu>
   );
 
   const renderCheckTop = (topN) => {
     return (
-      <div
-        className={`dashboard-overview-content-line-enlarge`}
-      >
-        <Dropdown overlay={getMenu()} trigger={['click']}>
-          <div>{topNMap[(topN.current && topN.current[index])] || topNMap[5]} <DownOutlined style={{ color: '#74788D', marginLeft: 6 }} /></div>
+      <div className={`dashboard-overview-content-line-enlarge`}>
+        <Dropdown overlay={getMenu()} trigger={["click"]}>
+          <div>
+            {topNMap[topN.current && topN.current[index]] || topNMap[5]} <DownOutlined style={{ color: "#74788D", marginLeft: 6 }} />
+          </div>
         </Dropdown>
       </div>
-    )
-  }
+    );
+  };
 
   const showTip = (params) => {
     const { offsetX: x, offsetY: y } = params;
@@ -127,48 +117,51 @@ export const DrawLine = ({ index, option, setModalId, bigPicture, width, height,
         (window as any).lineY = y;
       }
       myChart.current.dispatchAction({
-        type: 'showTip',
+        type: "showTip",
         x: x === -999 ? (window as any).lineX : x,
         y: y === -999 ? (window as any).lineY : y,
       });
     } else {
       myChart.current.dispatchAction({
-        type: 'showTip',
+        type: "showTip",
         x: x,
         y: y,
       });
     }
-  }
+    myChart.current.dispatchAction({
+      type: "takeGlobalCursor",
+      key: "dataZoomSelect",
+      dataZoomSelectActive: true,
+    });
+  };
 
   const hideTip = () => {
     // 设置无效的 x, y 隐藏点击显示的 toolTip 和 线
-    showTip({ offsetX: -999, offsetY: -999 })
+    showTip({ offsetX: -999, offsetY: -999 });
 
     // 重新监听鼠标移动显示 toolTip
     chartMousemove();
 
     flag.current = true;
-  }
+  };
 
   const chartMousemove = () => {
-    myChart.current.getZr().on('mousemove', showTip);
-  }
+    myChart.current.getZr().on("mousemove", showTip);
+  };
 
-  useMouseoutOutSide('mousemove', chartBox, hideTip);
+  useMouseoutOutSide("mousemove", chartBox, hideTip);
 
   useEffect(() => {
     if (myChart.current) {
       myChart.current?.dispose();
     }
 
-    myChart.current = echarts.init(
-      document.getElementById(index) as HTMLElement
-    );
+    myChart.current = echarts.init(document.getElementById(index) as HTMLElement);
 
     // 监听点击事件
-    myChart.current.getZr().on('click', function (params) {
+    myChart.current.getZr().on("click", function (params) {
       if (flag.current) {
-        myChart.current.getZr().off('mousemove');
+        myChart.current.getZr().off("mousemove");
 
         flag.current = false;
       } else {
@@ -196,11 +189,25 @@ export const DrawLine = ({ index, option, setModalId, bigPicture, width, height,
   }, []);
 
   useEffect(() => {
+    option = {
+      ...option,
+      toolbox: {
+        feature: {
+          dataZoom: {
+            show: true,
+            iconStyle: {
+              opacity: 0,
+            },
+            yAxisIndex: "none",
+          },
+        },
+      },
+    };
     // 增加true不合并数据
     if (isShowLegend) {
       const copyOption = cloneDeep(option);
       (copyOption.legend as any) = null;
-      (copyOption.grid as any).right = '20';
+      (copyOption.grid as any).right = "20";
       copyOption && myChart.current?.setOption(copyOption, true);
     } else {
       option && myChart.current?.setOption(option, true);
@@ -209,15 +216,9 @@ export const DrawLine = ({ index, option, setModalId, bigPicture, width, height,
 
   return (
     <>
-      <div
-        ref={chartBox}
-        style={{ position: "relative" }}
-        className={`${overviewClassPrefix}-overview-content-line-container`
-        }
-      >
+      <div ref={chartBox} style={{ position: "relative" }} className={`${overviewClassPrefix}-overview-content-line-container`}>
         <div
-          className={`${overviewClassPrefix}-overview-content-line-item`
-          }
+          className={`${overviewClassPrefix}-overview-content-line-item`}
           id={index}
           key={index}
           style={{
@@ -225,19 +226,34 @@ export const DrawLine = ({ index, option, setModalId, bigPicture, width, height,
             height: height ? height : "none",
           }}
         ></div>
-        <div className="center-center-empty-box-title" style={{
-          position: 'absolute', top: 13, left: 16, height: 22, lineHeight: '22px', fontSize: '14px', color: '#212529', fontFamily: 'HelveticaNeue-Medium',
-          letterSpacing: '0.5px'
-        }}>{title} {
-            tooltip ? <Tooltip title={tooltip}><svg className="icon" aria-hidden="true" style={{ width: 12, height: 12, color: '#ADB5BC', position: 'absolute', top: 5, marginLeft: 4, cursor: 'default', zIndex: 999 }}>
-              <use xlinkHref="#iconinfo"></use>
-            </svg></Tooltip> : null
-          }</div>
+        <div
+          className="center-center-empty-box-title"
+          style={{
+            position: "absolute",
+            top: 13,
+            left: 16,
+            height: 22,
+            lineHeight: "22px",
+            fontSize: "14px",
+            color: "#212529",
+            fontFamily: "HelveticaNeue-Medium",
+            letterSpacing: "0.5px",
+          }}
+        >
+          {title}
+          {(dictionary?.price || dictionary?.currentCalLogic || dictionary?.threshold) && (
+            <InfoTooltip
+              price={dictionary?.price}
+              currentCalLogic={dictionary?.currentCalLogic}
+              threshold={dictionary?.threshold}
+            ></InfoTooltip>
+          )}
+        </div>
         {renderCheckTop(topN)}
       </div>
     </>
   );
-}
+};
 
 export const Line: React.FC<ILine> = ({
   index,
@@ -250,13 +266,13 @@ export const Line: React.FC<ILine> = ({
   cb,
   tooltip,
   topN,
+  dictionary,
 }) => {
-
   const renderLoading = () => {
     return (
       <div
         className={`common-loading-container indicators-kanban-loading-container ${overviewClassPrefix}-overview-content-line-container`}
-        style={{ border: 'none' }}
+        style={{ border: "none" }}
       >
         <div className="center-center-loading">
           <Spin />
@@ -265,24 +281,37 @@ export const Line: React.FC<ILine> = ({
     );
   };
   const renderEmpty = () => {
+    const { price, currentCalLogic, threshold } = dictionary || {};
     return (
       <div
         className={`common-loading-container indicators-kanban-loading-container ${overviewClassPrefix}-overview-content-line-container`}
-        style={{ border: 'none' }}
+        style={{ border: "none" }}
       >
         {title ? (
-          <div className="center-center-empty-box-title" style={{
-            position: 'relative', top: 13, left: 16, height: 22, lineHeight: '22px', fontSize: '14px', color: '#212529', fontFamily: 'HelveticaNeue-Medium',
-            letterSpacing: '0.5px', marginBottom: 100
-          }}>{title} {
-              tooltip ? <Tooltip title={tooltip}><svg className="icon" aria-hidden="true" style={{ width: 12, height: 12, color: '#ADB5BC', position: 'absolute', top: 5, marginLeft: 4, cursor: 'default', zIndex: 999 }}>
-                <use xlinkHref="#iconinfo"></use>
-              </svg></Tooltip> : null
-            }</div>
+          <div
+            className="center-center-empty-box-title"
+            style={{
+              position: "relative",
+              top: 13,
+              left: 16,
+              height: 22,
+              lineHeight: "22px",
+              fontSize: "14px",
+              color: "#212529",
+              fontFamily: "HelveticaNeue-Medium",
+              letterSpacing: "0.5px",
+              marginBottom: 100,
+            }}
+          >
+            {title}
+            {(price || currentCalLogic || threshold) && (
+              <InfoTooltip price={price} currentCalLogic={currentCalLogic} threshold={threshold}></InfoTooltip>
+            )}
+          </div>
         ) : (
           ""
         )}
-        <div className={'dashboard-line-container-empty'}>
+        <div className={"dashboard-line-container-empty"}>
           <div>
             <img src={imgSrc} />
           </div>
@@ -295,16 +324,19 @@ export const Line: React.FC<ILine> = ({
   };
   const renderLine = () => {
     return (
-      <DrawLine width={width} height={height} option={option} index={index} tipSync={tipSync} cb={cb} title={title} tooltip={tooltip} topN={topN} />
+      <DrawLine
+        width={width}
+        height={height}
+        option={option}
+        index={index}
+        tipSync={tipSync}
+        cb={cb}
+        title={title}
+        tooltip={tooltip}
+        topN={topN}
+        dictionary={dictionary}
+      />
     );
   };
-  return (
-    <>
-      {isLoading
-        ? renderLoading()
-        : !option || Object.keys(option).length == 0
-          ? renderEmpty()
-          : renderLine()}
-    </>
-  );
+  return <>{isLoading ? renderLoading() : !option || Object.keys(option).length == 0 ? renderEmpty() : renderLine()}</>;
 };

@@ -112,9 +112,6 @@
                 "indexing-index_time_per_doc": {
                     "type": "double"
                 },
-                "cost-flush-total_time_in_millis": {
-                    "type": "double"
-                },
                 "cost_index_time_in_millis": {
                     "type": "double"
                 },
@@ -212,9 +209,6 @@
                     "type": "double"
                 },
                 "segments-count": {
-                    "type": "double"
-                },
-                "request_cache-memory_size_in_bytes": {
                     "type": "double"
                 },
                 "indices-search-query_avg_time": {

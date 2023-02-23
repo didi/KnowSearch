@@ -1,265 +1,109 @@
-import * as React from 'react';
-import { carryTask, getPlanSpeedColumns } from './config';
-import { SPIT_STYLE_MAP, TASK_STATUS_TYPE_MAP } from 'constants/status-map';
-import { tableFilter } from 'lib/utils';
-import Url from 'lib/url-parser';
-import './index.less';
-import  { Table, Button, Progress, Popconfirm, Tooltip, Collapse, Modal } from 'antd';
-import { INodeTask, ITask, ITaskDetail, ITaskNodes } from 'typesPath/task-types';
+import React, { useState, useEffect } from "react";
+import { TaskApi, getPlanSpeedColumns } from "./config";
+import { SPIT_STYLE_MAP, TASK_STATUS_TYPE_MAP, TASK_STATUS_NUMBER_MAP } from "constants/status-map";
+import { Table, Button, Progress, Tooltip, Collapse, Modal } from "antd";
+import { INodeTask, ITaskDetail } from "typesPath/task-types";
+import { getTaskDetail, actionTask, getTaskBaseInfo } from "api/task-api";
 import { connect } from "react-redux";
 import * as actions from "actions";
-import { TaskState } from "store/type";
-import { cancalTask, continueTask, getTaskDetail, pauseTask } from "api/task-api";
 import { Dispatch } from "redux";
+import Url from "lib/url-parser";
+import "./index.less";
 
 const { Panel } = Collapse;
-
-const mapStateToProps = (state) => ({
-  task: state.task,
-});
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   setModalId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setModalId(modalId, params, cb)),
 });
 
-const connects: Function = connect;
-@connects(mapStateToProps, mapDispatchToProps)
-export class PlanSpeed extends React.Component<{ task: TaskState; setModalId?: Function }> {
-  public timer = null as any;
+export const PlanSpeed = connect(
+  null,
+  mapDispatchToProps
+)((props: any) => {
+  const [loading, setLoading] = useState(false);
+  const [taskNodes, setTaskNodes] = useState([]);
+  const [taskDetail, setTaskDetail] = useState({} as ITaskDetail);
+  const [status, setStatus] = useState(Url().search.status);
 
-  public state = {
-    searchKey: "",
-    taskDetail: null as ITaskDetail,
-    loading: false,
-    taskNodes: [] as ITaskNodes[],
-  };
-  public id: number = null;
-  public taskId: number = null;
+  const taskId = Number(Url().search.taskid);
 
-  constructor(props: any) {
-    super(props);
-    const url = Url();
-    this.id = Number(url.search.id);
-    this.taskId = Number(url.search.taskid);
-  }
+  let timer = null;
 
-  public getData = (origin?: any[]) => {
-    let { searchKey } = this.state;
-    searchKey = (searchKey + "").trim().toLowerCase();
-    const data = searchKey
-      ? origin.filter(
-          (d) => (d.id + "").toLowerCase().includes(searchKey as string) || d.hostname?.toLowerCase().includes(searchKey as string)
-        )
-      : origin;
+  useEffect(() => {
+    reloadData();
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
 
-    return data;
-  };
-
-  public componentDidMount() {
-    this.reloadData();
-  }
-
-  public reloadData = () => {
-    this.refreshData(this.id);
-  };
-
-  public refreshData(id: number) {
-    this.getTaskDetail(id)
-      .then((data: { taskDetail: ITaskDetail; taskNodes: ITaskNodes[] }) => {
-        this.setState({
-          taskDetail: data.taskDetail,
-          taskNodes: data.taskNodes,
-          loading: false,
-        });
-      })
-      .catch(() => {
-        clearInterval(this.timer);
-      });
-    setTimeout(() => this.iTimer(id), 0);
-  }
-
-  public iTimer = (id: number) => {
-    this.timer = setInterval(() => {
-      if (this.state.taskDetail && (this.state.taskDetail?.status === 'running' || this.state.taskDetail?.status === 'unknown')) {
-      this.getTaskDetail(id, 'update').then((data: {taskDetail: ITaskDetail, taskNodes: ITaskNodes[]}) => {
-        this.setState({
-          taskDetail: data.taskDetail,
-          taskNodes: data.taskNodes,
-          loading: false
-        });
-      }).catch(() => { clearInterval(this.timer); });
-      } else { clearInterval(this.timer); }
-    }, 5 * 1 * 1000);
-  }
-
-  public getTaskDetail = (id: number, text?: string) => {
-    if (text) {
-      this.setState({ loading: false });
-    } else {
-      this.setState({ loading: true });
-    }
-    return getTaskDetail(id).then(this.setTaskDetail);
-  };
-
-  public setTaskDetail(data: ITaskDetail) {
-    const obj = data.roleNameTaskDetailMap;
-    const nodes = Object.keys(obj)
-      .sort()
-      .map((key) => key);
-    const arr = nodes.map((ele) => {
-      if (ele === "masternode") {
-        return {
-          header: "master-node",
-          data: obj?.masternode || [],
-          key: "master",
-        };
-      } else if (ele === "clientnode") {
-        return {
-          header: "client-node",
-          data: obj?.clientnode || [],
-          key: "client",
-        };
-      } else if (ele === "datanode") {
-        return {
-          header: "data-node",
-          data: obj?.datanode || [],
-          key: "data",
-        };
-      } else if (ele === "coldnode") {
-        return {
-          header: "cold-node",
-          data: obj?.coldnode || [],
-          key: "cold",
-        };
+  const reloadData = async () => {
+    setLoading(true);
+    let detail = await getTaskBaseInfo(taskId);
+    let res = await getTaskDetail(taskId);
+    let taskNodes = [];
+    let taskDetail = { sum: res?.length || 0, success: 0, failed: 0, running: 0, waiting: 0, cancel: 0, ignore: 0 };
+    (res || []).forEach((item) => {
+      let node = { header: item?.groupName, data: [{ ...item }], key: item?.groupName };
+      let status = TASK_STATUS_NUMBER_MAP[item?.status];
+      taskDetail[status] += 1;
+      let index = -1;
+      for (let i = 0; i < taskNodes.length; i++) {
+        if (taskNodes[i]?.header === item?.groupName) {
+          index = i;
+          break;
+        }
+      }
+      if (index === -1) {
+        taskNodes.push(node);
+      } else {
+        taskNodes[index].data.push(item);
       }
     });
-    return {
-      taskDetail: data,
-      taskNodes: arr,
-      key: "data",
-    };
-  }
-
-  public getOpBtns = () => {
-    return null;
+    setStatus(detail?.status);
+    setTaskNodes(taskNodes);
+    setTaskDetail(taskDetail);
+    setLoading(false);
+    if (detail?.status === "running") {
+      timer = setTimeout(() => reloadData(), 5000);
+    } else {
+      clearInterval(timer);
+    }
   };
 
-  // 组件清除时清除定时器
-  public componentWillUnmount() {
-    clearInterval(this.timer);
-  }
-
-  public confirmFn = (text: string, taskId: number, id: number, fn: Function) => {
+  const confirmFn = (text: string, taskId: number, fn: Function) => {
+    let title = decodeURI(Url()?.search?.title);
     Modal.confirm({
-      title: `确定${text}任务${taskId}?`,
-      // icon: <DeleteOutlined style={{ color: "red" }} />,
+      title: `确定${text}任务${title}?`,
       width: 500,
       okText: "确定",
       cancelText: "取消",
       onOk() {
-        fn(id)
+        fn(taskId);
       },
     });
-  }
-
-  public pauseTask = (id: number) => {
-    pauseTask(id).then(() => this.refreshData(id));
   };
 
-  public continueTask = (id: number) => {
-    continueTask(id).then(() => this.refreshData(id));
+  const pauseTask = (id: number) => {
+    actionTask("pause", id).then(() => reloadData());
   };
 
-  public cancalTask = (id: number) => {
-    cancalTask(id).then(() => this.refreshData(id));
+  const continueTask = (id: number) => {
+    actionTask("start", id).then(() => reloadData());
   };
 
-  public renderInnerOperation = (): JSX.Element => {
-    return <></>;
+  const cancalTask = (id: number) => {
+    actionTask("cancel", id).then(() => reloadData());
   };
 
-  public renderOperationPanel = (): JSX.Element => {
-    const taskObj = this.state.taskDetail;
-    let pattern = null as any;
-    SPIT_STYLE_MAP.forEach((ele, index) => {
-      if (ele.type === taskObj?.status) {
-        pattern = ele;
-      }
-    });
-    return (
-      <>
-        <div className="plan-speed-head">
-          <div className="speed-head-left">
-            <span className="head-left-top">
-              <Progress percent={taskObj?.percent / 100} strokeColor={pattern?.color} className="left-top-pro" />
-              <i className={`left-top-text ${pattern?.back}`}>{pattern?.text}</i>
-            </span>
-            <ul className="head-left-ul">
-              <li>
-                <span>
-                  <div className="spot running" />
-                  总数：{taskObj?.sum}
-                </span>
-                <span>
-                  <div className="spot success" />
-                  成功：{taskObj?.success}
-                </span>
-                <span>
-                  <div className="spot failed" />
-                  失败：{taskObj?.failed}
-                </span>
-                <span>
-                  <div className="spot creating" />
-                  执行中：{taskObj?.creating}
-                </span>
-                {taskObj?.status === "cancel" ? (
-                  <span>
-                    <div className="spot waiting" />
-                    已取消：{taskObj?.cancel}
-                  </span>
-                ) : (
-                  <span>
-                    <div className="spot waiting" />
-                    待执行：{taskObj?.waiting}
-                  </span>
-                )}
-                <span>
-                  <div className="spot ignore" />
-                  已忽略：{taskObj?.ignore}
-                </span>
-              </li>
-            </ul>
-          </div>
-          <div>
-            {taskObj?.status === 'waiting' &&
-                <Button type="primary" className="mr-10" onClick={() => carryTask(this.id, taskObj?.orderType, this.reloadData, this.taskId)}>执行</Button>
-            }
-            {taskObj?.status === 'running' &&
-                <Button type="primary" className="mr-10" onClick={() => this.confirmFn('暂停', this.taskId, this.id, this.pauseTask)}>暂停</Button>
-            }
-            {taskObj?.status === 'pause' &&
-                <Button type="primary" className="mr-10"  onClick={() => this.confirmFn('继续', this.taskId, this.id, this.continueTask)}>继续</Button>
-            }
-            {(taskObj?.status === 'waiting' || taskObj?.status === 'running' || taskObj?.status === 'pause' || taskObj?.status === 'failed') &&
-                <Button type="primary" className="mr-10" onClick={() => this.confirmFn('取消', this.taskId, this.id, this.cancalTask)}>取消</Button>
-            }
-          </div>
-        </div>
-      </>
-    );
-  };
-
-  public getColumns(data: INodeTask[], type: string) {
-    const columns = getPlanSpeedColumns(this.props.setModalId);
-
+  const getColumns = () => {
+    const columns = getPlanSpeedColumns(props.setModalId, reloadData);
     const statusType = Object.assign({
       title: "节点状态",
       dataIndex: "status",
       key: "status",
-      width: "10%",
-      onFilter: (value: string, record: ITask) => record.status === value,
-      filters: tableFilter<INodeTask>(data, "status", TASK_STATUS_TYPE_MAP),
-      render: (text: any) => {
+      width: 100,
+      render: (val: any) => {
+        let text = TASK_STATUS_NUMBER_MAP[val];
         return (
           <Tooltip placement="bottomLeft" title={TASK_STATUS_TYPE_MAP[text]}>
             {TASK_STATUS_TYPE_MAP[text]}
@@ -267,27 +111,22 @@ export class PlanSpeed extends React.Component<{ task: TaskState; setModalId?: F
         );
       },
     });
-
-    columns.splice(3, 0, statusType);
+    columns.splice(2, 0, statusType);
     return columns;
-  }
-
-  public renderNodeTable = (data: INodeTask[], type: string) => {
-    return (
-      <>
-        <Table rowKey="id" loading={this.state.loading} dataSource={this.getData(data)} columns={this.getColumns(data, type)} />
-      </>
-    );
   };
 
-  public renderTable = () => {
+  const renderNodeTable = (data: INodeTask[], type: string) => {
+    return <Table rowKey="host" loading={loading} dataSource={data} columns={getColumns()} />;
+  };
+
+  const renderTable = () => {
     return (
       <>
-        <Collapse bordered={false} defaultActiveKey={this.state.taskNodes?.map((row) => row.key)}>
-          {this.state.taskNodes?.map((item) => {
+        <Collapse bordered={false} defaultActiveKey={taskNodes?.map((row) => row.key)}>
+          {taskNodes?.map((item) => {
             return (
               <Panel header={item.header} key={item.key}>
-                {this.renderNodeTable(item.data, item.key)}
+                {renderNodeTable(item.data, item.key)}
               </Panel>
             );
           })}
@@ -296,12 +135,97 @@ export class PlanSpeed extends React.Component<{ task: TaskState; setModalId?: F
     );
   };
 
-  public render() {
+  const renderOperationPanel = (): JSX.Element => {
+    let pattern = null as any;
+    SPIT_STYLE_MAP.forEach((ele) => {
+      if (ele.type === status) {
+        pattern = ele;
+      }
+    });
     return (
       <>
-        {this.renderOperationPanel()}
-        <div className="table-wrapper no-padding">{this.state.taskNodes?.length ? this.renderTable() : ""}</div>
+        <div className="plan-speed-head">
+          <div className="speed-head-left">
+            <span className="head-left-top">
+              <Progress
+                percent={
+                  status === "running"
+                    ? Math.floor(((taskDetail?.success + taskDetail?.failed) / taskDetail?.sum) * 10000) / 100
+                    : status === "success"
+                    ? 100
+                    : 0
+                }
+                strokeColor={pattern?.color}
+                className="left-top-pro"
+              />
+              <i className={`left-top-text ${pattern?.back}`}>{pattern?.text}</i>
+            </span>
+            <ul className="head-left-ul">
+              <li>
+                <span>
+                  <div className="spot running" />
+                  总数：{taskDetail?.sum || 0}
+                </span>
+                <span>
+                  <div className="spot success" />
+                  成功：{taskDetail?.success || 0}
+                </span>
+                <span>
+                  <div className="spot failed" />
+                  失败：{taskDetail?.failed || 0}
+                </span>
+                <span>
+                  <div className="spot creating" />
+                  执行中：{taskDetail?.running || 0}
+                </span>
+                {status === "cancel" ? (
+                  <span>
+                    <div className="spot waiting" />
+                    已取消：{taskDetail?.cancel || 0}
+                  </span>
+                ) : (
+                  <span>
+                    <div className="spot waiting" />
+                    待执行：{taskDetail?.waiting || 0}
+                  </span>
+                )}
+              </li>
+            </ul>
+          </div>
+          <div>
+            {status === "waiting" && (
+              <Button
+                type="primary"
+                className="mr-10 button-styles"
+                onClick={() => TaskApi.executeTask(reloadData, taskId, decodeURI(Url()?.search?.title))}
+              >
+                执行
+              </Button>
+            )}
+            {status === "running" && (
+              <Button type="primary" className="mr-10 button-styles" onClick={() => confirmFn("暂停", taskId, pauseTask)}>
+                暂停
+              </Button>
+            )}
+            {status === "pause" && (
+              <Button type="primary" className="mr-10 button-styles" onClick={() => confirmFn("继续", taskId, continueTask)}>
+                继续
+              </Button>
+            )}
+            {(status === "waiting" || status === "running" || status === "pause" || status === "failed") && (
+              <Button type="primary" className="mr-10 button-styles" onClick={() => confirmFn("取消", taskId, cancalTask)}>
+                取消
+              </Button>
+            )}
+          </div>
+        </div>
       </>
     );
-  }
-}
+  };
+  return (
+    <>
+      {renderOperationPanel()}
+      <div className="table-wrapper no-padding">{taskNodes?.length ? renderTable() : ""}</div>
+    </>
+  );
+});

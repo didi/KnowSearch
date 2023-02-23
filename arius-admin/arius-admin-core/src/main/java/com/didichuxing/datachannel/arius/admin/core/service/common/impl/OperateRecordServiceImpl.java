@@ -3,6 +3,8 @@ package com.didichuxing.datachannel.arius.admin.core.service.common.impl;
 import java.util.*;
 import java.util.function.Consumer;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,11 +20,11 @@ import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusTaskThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordDAO;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
@@ -46,13 +48,18 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     private static final String  USER_OPERATION = "user_operation";
     private static final String  ID = "id";
 
+    private AriusTaskThreadPool ariusTaskThreadPool;
+
     @Autowired
     private OperateRecordDAO  operateRecordDAO;
     @Autowired
     private ProjectDao projectDao;
-    @Autowired
-    private IndexTemplateService indexTemplateService;
 
+    @PostConstruct
+    public void init() {
+        ariusTaskThreadPool = new AriusTaskThreadPool();
+        ariusTaskThreadPool.init(3, "OperateRecordServiceImpl", 100);
+    }
     
     @Override
     public void deleteExprieData(Date saveTime) {
@@ -63,8 +70,17 @@ public class OperateRecordServiceImpl implements OperateRecordService {
 
     @Override
     public Result<Void> save(OperateRecord operateRecord) {
-        final OperateRecordInfoPO operateRecordInfoPO = ConvertUtil.obj2Obj(operateRecord, OperateRecordInfoPO.class);
-        return Result.build(operateRecordDAO.insert(operateRecordInfoPO) == 1);
+        ariusTaskThreadPool.run(() -> {
+            try {
+                OperateRecordInfoPO operateRecordInfoPO = ConvertUtil.obj2Obj(operateRecord, OperateRecordInfoPO.class);
+                operateRecordDAO.insert(operateRecordInfoPO);
+            } catch (Exception e) {
+                LOGGER.error(
+                        "class=OperateRecordServiceImply||method=save||errMsg={}||operateId={}",
+                        e.getMessage(), operateRecord.getOperateId(), e);
+            }
+        });
+        return Result.buildSucc();
 
     }
 

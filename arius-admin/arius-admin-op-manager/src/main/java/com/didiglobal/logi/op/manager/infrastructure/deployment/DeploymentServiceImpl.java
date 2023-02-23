@@ -40,6 +40,7 @@ public class DeploymentServiceImpl implements DeploymentService {
             ZeusTemplate zeusTemplate = new ZeusTemplate();
             zeusTemplate.setKeywords(script.getName());
             zeusTemplate.setScript(new String(script.getUploadFile().getBytes()));
+            zeusTemplate.setTimeOut(script.getTimeout());
             return Result.buildSuccess(zeusService.createTemplate(zeusTemplate));
         } catch (IOException e) {
             LOGGER.error("class=DeploymentServiceImpl||method=deployScript||errMsg={}||msg=file to string failed", e.getMessage());
@@ -58,6 +59,7 @@ public class DeploymentServiceImpl implements DeploymentService {
             zeusTemplate.setId(Integer.parseInt(script.getTemplateId()));
             zeusTemplate.setKeywords(script.getName());
             zeusTemplate.setScript(new String(script.getUploadFile().getBytes()));
+            zeusTemplate.setTimeOut(script.getTimeout());
             zeusService.editTemplate(zeusTemplate);
             return Result.success();
         } catch (IOException e) {

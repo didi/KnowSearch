@@ -1,10 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterConnectionStatusWithTemplateVO;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -56,6 +58,19 @@ public class TemplateWithSrvVO extends BaseVO {
 
     @ApiModelProperty("模版恢复优先级，10：高优，5：一般，0：低优")
     private Integer priorityLevel;
+
+    /**
+     * 是否禁读
+     */
+    @ApiModelProperty("是否禁读")
+    private Boolean blockRead;
+
+    /**
+     * 是否禁写
+     */
+    @ApiModelProperty("是否禁写")
+    private Boolean blockWrite;
+
     /**
      * 指示主集群的联通状态
      */

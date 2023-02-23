@@ -1,0 +1,139 @@
+@header-text-color: rgba(0, 0, 0, 0.87);
+@primary-color: #1473ff;
+
+.cluster-admin,
+.system-admin {
+  display: inline-block;
+  color: @header-text-color;
+  cursor: pointer;
+  margin-right: 15px;
+  position: relative;
+  top: 1px;
+  height: 24px;
+  text-align: center;
+  div {
+    line-height: 24px;
+  }
+  .iconfont {
+    margin-right: 2px;
+  }
+}
+
+.admin-container {
+  display: inline-block;
+  cursor: pointer;
+  margin-right: 20px;
+  color: @header-text-color;
+  font-size: 14px;
+  .icon {
+    margin-right: 5px;
+    font-size: 20px;
+  }
+}
+
+.icon-tuichuquanju,
+.icon-quanju1 {
+  color: #fff;
+  margin-right: 15px;
+  font-size: 20px !important;
+}
+
+.knowsearch-icon {
+  margin: 9px 4px 0px 0px;
+  width: 170px;
+  height: 32px;
+  color: #333;
+}
+
+.select-icon {
+  display: inline-block;
+  transform: rotate(90deg);
+  margin-left: 5px;
+  position: relative;
+  top: 3px;
+  .iconfont {
+    font-size: 20px;
+  }
+}
+
+.admin-wrapper {
+  top: 30px !important;
+  .ant-dropdown-arrow {
+    top: 8px !important;
+  }
+  .admin-select {
+    width: 140px;
+    height: 80px;
+    background: #fff;
+    padding: 8px 0;
+    border-radius: 5px;
+    box-shadow: 0 -2px 4px 0 rgb(0 0 0 / 2%), 0 2px 6px 6px rgb(0 0 0 / 2%), 0 2px 6px 0 rgb(0 0 0 / 6%);
+    li {
+      height: 32px;
+      padding-left: 16px;
+      cursor: pointer;
+      .icon {
+        margin-right: 5px;
+      }
+      &:hover {
+        background: rgba(0, 0, 0, 0.04);
+      }
+    }
+    .active {
+      background: #f1f7ff !important;
+      color: #1473ff;
+    }
+  }
+}
+
+.user-trigger {
+  font-size: 14px;
+}
+
+.user-icon {
+  display: inline-block;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  text-align: center;
+  background: @primary-color;
+  line-height: 50px;
+  top: 12px;
+  position: relative;
+  margin: 0 10px 0 8px;
+  span {
+    position: relative;
+    top: -12px;
+    &:hover {
+      color: @primary-color;
+    }
+  }
+  .icon.iconfont.icontouxiang {
+    color: #fff;
+    font-size: 20px;
+  }
+}
+
+.user-wrapper {
+  top: 33px !important;
+  width: 320px;
+  height: 433px;
+  z-index: 1000;
+  .ant-dropdown-arrow {
+    top: 8px !important;
+    right: 25px;
+  }
+  .user-container {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 -2px 4px 0 rgb(0 0 0 / 2%), 0 2px 6px 6px rgb(0 0 0 / 2%), 0 2px 6px 0 rgb(0 0 0 / 6%);
+  }
+}
+
+.admin-container,
+.dropdown-content,
+.d1-layout-username {
+  font-family: PingFangSC-Regular;
+}

@@ -1,8 +1,9 @@
-import { Select } from 'antd';
-import * as React from 'react';
-import { getAllUser } from 'api/common-api';
-import { IUser } from 'typesPath/user-types';
-import { isArray } from 'lodash';
+import { Select } from "antd";
+import * as React from "react";
+import { getAllUserList } from "api/common-api";
+import { IUser, NewIUser } from "typesPath/user-types";
+import { isArray } from "lodash";
+import { filterOption } from "lib/utils";
 
 const Option = Select.Option;
 
@@ -11,15 +12,13 @@ interface IUserSelectProps {
   value?: string[];
   disabled?: boolean;
   placeholder?: string;
-  style?: any; 
+  style?: any;
 }
 
 export class StaffSelect extends React.Component<IUserSelectProps> {
-
   public state = {
     staffList: [] as IUser[],
   };
-
 
   constructor(props: IUserSelectProps) {
     super(props);
@@ -30,49 +29,50 @@ export class StaffSelect extends React.Component<IUserSelectProps> {
   }
 
   public getStaffList = () => {
-    getAllUser().then((res) => {
-      const list = (res || []).map(item => ({
+    getAllUserList().then((res) => {
+      const list = (res || []).map((item) => ({
         ...item,
-        label: item.domainAccount,
-        value: item.domainAccount,
+        label: item.userName,
+        value: item.userName,
       }));
       this.setState({
         staffList: list,
       });
-    })
-  }
+    });
+  };
 
   public render() {
     const { disabled, placeholder, style } = this.props;
     let { value } = this.props;
-    if (value && typeof (value) === 'string') { value = (value as string)?.split(','); }
+    if (value && typeof value === "string") {
+      value = (value as string)?.split(",");
+    }
     // 打印出value为空时 值为 [''],导致编辑时出现空标签
     if (value && isArray(value)) {
-      value = value?.filter(item => {
-        return item !== '';
-      })
+      value = value?.filter((item) => {
+        return item !== "";
+      });
     }
     return (
       <Select
         mode="multiple"
         showSearch={true}
         optionFilterProp="children"
-        placeholder={placeholder ? placeholder : '请输入负责人查询'}
+        placeholder={placeholder ? placeholder : "请输入负责人查询"}
         defaultValue={value || []}
         value={value || []}
         onChange={(e: string[]) => this.handleChange(e)}
         disabled={disabled}
-        tokenSeparators={[',']}
+        tokenSeparators={[","]}
         style={style}
         className="ant-form-item-custom"
-        filterOption={(input, option) =>
-          JSON.stringify(option).toLowerCase().indexOf(input.toLowerCase()) >=
-          0
-        }
+        filterOption={filterOption}
       >
-        {this.state.staffList.map((d: IUser) => <Option value={d.domainAccount} key={d.domainAccount}>
-          {d.domainAccount}
-        </Option>)}
+        {this.state.staffList.map((d: NewIUser) => (
+          <Option value={d.userName} key={d.userName}>
+            {d.userName}
+          </Option>
+        ))}
       </Select>
     );
   }
@@ -82,5 +82,4 @@ export class StaffSelect extends React.Component<IUserSelectProps> {
     // tslint:disable-next-line:no-unused-expression
     onChange && onChange(params);
   }
-
 }

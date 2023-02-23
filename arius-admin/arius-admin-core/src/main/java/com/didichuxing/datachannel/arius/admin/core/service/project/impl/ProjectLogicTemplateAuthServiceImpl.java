@@ -26,7 +26,6 @@ import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectTemplate
 import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectTemplateAuthEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
@@ -325,7 +324,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 
         return ConvertUtil.list2MulMap(authTemplates, ProjectTemplateAuth::getProjectId).asMap();
     }
-    
+
     @Override
     public Map<Integer, Collection<ProjectTemplateAuth>> getAllProjectTemplateAuthsWithCache() {
         try {
@@ -334,7 +333,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
             return getAllProjectTemplateAuths();
         }
     }
-    
+
     @Override
     public ProjectTemplateAuthEnum getAuthEnumByProjectIdAndLogicId(Integer projectId, Integer logicId) {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {

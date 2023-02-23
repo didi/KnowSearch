@@ -1,14 +1,14 @@
-import * as React from 'react';
-import { Empty, List, Spin, Tabs } from 'antd';
-import WindowScroller, { WindowScrollerChildProps } from 'react-virtualized/dist/commonjs/WindowScroller';
-import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
-import VList, { ListProps } from 'react-virtualized/dist/commonjs/List';
-import InfiniteLoader from 'react-virtualized/dist/commonjs/InfiniteLoader';
-import './index.less';
+import * as React from "react";
+import { Empty, List, Spin, Tabs } from "antd";
+import WindowScroller, { WindowScrollerChildProps } from "react-virtualized/dist/commonjs/WindowScroller";
+import AutoSizer from "react-virtualized/dist/commonjs/AutoSizer";
+import VList, { ListProps } from "react-virtualized/dist/commonjs/List";
+import InfiniteLoader from "react-virtualized/dist/commonjs/InfiniteLoader";
+import "./index.less";
 
-import utils from '../../Utils/index';
+import utils from "knowdesign/lib/utils";
 
-const emptyImg = require('./assets/empty.png');
+const emptyImg = require("./assets/empty.png");
 
 interface IMsg {
   title: string;
@@ -21,7 +21,7 @@ const { TabPane } = Tabs;
 export const MsgPanel: React.FC = () => {
   const [data, setData] = React.useState<IMsg[]>([]);
   const [msgCount, setMsgCount] = React.useState(0);
-  const [status, setStatus] = React.useState('unread');
+  const [status, setStatus] = React.useState("unread");
   const [loading, setLoading] = React.useState(false);
   const loadedRowsMap = {} as {
     [key: number]: number;

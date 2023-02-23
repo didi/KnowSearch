@@ -17,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLo
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 
@@ -77,7 +78,7 @@ public class ESLogicClusterOpV3Controller {
     @ResponseBody
     @ApiOperation(value = "条件获取逻辑集群列表")
     public PaginationResult<ClusterLogicVO> pageGetClusterLogics(HttpServletRequest request,
-                                                                 @RequestBody ClusterLogicConditionDTO condition) throws NotFindSubclassException {
+                                                                 @RequestBody ClusterLogicConditionDTO condition) throws NotFindSubclassException, ESOperateException {
         return clusterLogicManager.pageGetClusterLogics(condition, HttpRequestUtil.getProjectId(request));
     }
 
@@ -131,6 +132,13 @@ public class ESLogicClusterOpV3Controller {
         return clusterLogicManager.estimatedDiskSize(clusterLogicId, count);
     }
 
+    @GetMapping("/dataNodeSpec/{clusterLogicId}")
+    @ResponseBody
+    @ApiOperation(value = "获取逻辑集群对应region的机器规格")
+    public Result<String> getClusterDataNodeSpec(@PathVariable Long clusterLogicId) {
+        return clusterLogicManager.getClusterDataNodeSpec(clusterLogicId);
+    }
+
     //超级应展示全部物理集群、普通应用展示普通应用有权限的逻辑集群
     @GetMapping("/cluster-phy-relation")
     @ResponseBody
@@ -175,5 +183,12 @@ public class ESLogicClusterOpV3Controller {
     @ApiOperation(value = "获取物理集群所对应的逻辑集群名")
     public Result<List<ClusterLogicVO>> listClusterLogicByPhyName(@RequestParam(value = "phyClusterName", required = false) String phyClusterName) {
         return clusterLogicManager.listClusterLogicByPhyName(phyClusterName);
+    }
+
+    @DeleteMapping("/templates-indices-info/{clusterLogicId}")
+    @ResponseBody
+    @ApiOperation(value = "删除从模板及索引数据")
+    public Result<Void> templatesIndicesInfo(@PathVariable Long clusterLogicId,HttpServletRequest request) {
+        return clusterLogicManager.deleteTemplatesIndicesInfo(clusterLogicId,HttpRequestUtil.getProjectId(request),HttpRequestUtil.getOperator(request));
     }
 }

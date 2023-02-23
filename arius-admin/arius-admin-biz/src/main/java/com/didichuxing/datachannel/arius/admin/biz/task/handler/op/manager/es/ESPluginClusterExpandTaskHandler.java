@@ -95,7 +95,7 @@ public class ESPluginClusterExpandTaskHandler extends AbstractESTaskHandler {
 						.distinct()
 						.collect(Collectors.joining(","));
 				return new OperateRecord.Builder()
-						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_CAPACITY)
+						.operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_PLUGIN_EXPAND)
 				.content(String.format("集群：【%s】，插件扩容：【%s】，扩容节点：【%s】", dependComponentName,name, hosts))
 						.project(briefVO)
 						.userOperation(opTask.getCreator())
