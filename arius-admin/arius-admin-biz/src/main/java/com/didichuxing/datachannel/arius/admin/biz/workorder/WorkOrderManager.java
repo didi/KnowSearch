@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
@@ -10,9 +12,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
-import java.util.List;
 
 /**
  * @author d06679
@@ -122,7 +124,7 @@ public interface WorkOrderManager {
      @param orderPO 订单订单
       * @return {@link OrderInfoDetail}
      */
-    OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) throws NotFindSubclassException;
+    OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) throws NotFindSubclassException, ESOperateException;
 
     /**获取订单批准列表通过状态
      * 根据状态获取工单列表

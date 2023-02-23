@@ -1,13 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.cluster;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
-import io.swagger.annotations.ApiModelProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author d06679
@@ -179,6 +180,16 @@ public class ClusterPhyPO extends BasePO {
      * gateway ids, 逗号分割
      */
     private String gatewayIds;
+
+    /**
+     * kibana外链地址
+     */
+    private String                    kibanaAddress;
+
+    /**
+     * cerebro外链地址
+     */
+    private String                    cerebroAddress;
 
     @Override
     public boolean equals(Object obj) {

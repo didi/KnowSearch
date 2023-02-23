@@ -30,11 +30,11 @@ export const getPhysicsRegionTaskItemColumns = () => {
       key: 'id',
       sorter: (a: IRegionTaskItem, b: IRegionTaskItem) => a.id - b.id,
     }, {
-      title: '物理模版ID',
+      title: '物理模板ID',
       dataIndex: 'physicalId',
       key: 'physicalId',
     }, {
-      title: '模版名字',
+      title: '模板名字',
       dataIndex: 'templateName',
       key: 'templateName',
     }, {

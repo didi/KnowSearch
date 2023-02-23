@@ -1,25 +1,44 @@
-import { ILabelValue } from "typesPath/base-types"
-import { IVersions } from "typesPath/cluster/physics-type"
-import { INode } from "typesPath/index-types"
-import { IDcdrStepDetailInfo, ITaskBaseInfo } from "typesPath/task-types"
-import { IAppDetail } from "typesPath/user-types"
+import { IProject } from "interface/project";
+import { ILabelValue } from "typesPath/base-types";
+import { IVersions } from "typesPath/cluster/physics-type";
+import { INode } from "typesPath/index-types";
+import { IDcdrStepDetailInfo, ITaskBaseInfo } from "typesPath/task-types";
+
+export interface IPermission {
+  has: boolean;
+  id: number;
+  leaf: boolean;
+  parentId: number;
+  permissionName: string;
+  childList: IPermission[];
+}
+
+export interface IUser {
+  userName: string;
+  id: number;
+  email: string;
+  phone: string;
+}
 
 type UserState = {
-  getName: Function;
-}
+  getName: (params: string) => any;
+  isAdminUser: boolean;
+  permissionTree: IPermission[];
+  userInfo: IUser;
+};
 
 export interface ModalState {
   loading: boolean;
   modalId: string;
   drawerId: string;
   params: any;
-  cb?: Function;
+  cb?: any;
 }
 
 export interface ClustrtData {
-  cost: number | string,
-  nodeList: INodeListObjet,
-  packageList: { docker: IVersions[], host: IVersions[] },
+  cost: number | string;
+  nodeList: INodeListObjet;
+  packageList: { docker: IVersions[]; host: IVersions[] };
 }
 
 export interface INodeListObjet {
@@ -30,9 +49,10 @@ export interface INodeListObjet {
 }
 
 type AppState = {
-  appInfo: () => IAppDetail,
-  appList: any[];
-}
+  appInfo: () => IProject;
+  projectList: any[];
+  gatewayStatus: boolean;
+};
 
 export interface RegionState {
   phyClusterList: ILabelValue[];
@@ -43,12 +63,11 @@ export interface RegionState {
   tableData?: any[];
 }
 
-
 export interface TaskState {
   dcdrStepDetail: IDcdrStepDetailInfo;
   taskBaseInfo: ITaskBaseInfo;
-  menu: string,
-  loading: boolean,
+  menu: string;
+  loading: boolean;
 }
 
 // 集群看板
@@ -57,6 +76,8 @@ export interface ClusterState {
   startTime: number;
   endTime: number;
   isMoreDay: boolean;
+  timeRadioKey?: string;
+  isUpdate?: boolean;
 }
 // gateway 看板
 export interface GatewayState {
@@ -64,10 +85,12 @@ export interface GatewayState {
   endTime?: number;
   isMoreDay?: boolean;
   isUpdate?: boolean;
+  timeRadioKey?: string;
 }
 // dashboard
 export interface DashboardState {
   startTime: number;
   endTime: number;
   tabs: string;
+  dymanicConfigMetrics: any[];
 }

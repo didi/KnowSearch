@@ -38,6 +38,7 @@ import com.google.common.collect.Lists;
  */
 @Repository
 public class ESShardDAO extends BaseESDAO {
+
     @Value("${es.update.cluster.name}")
     private String              metadataClusterName;
 

@@ -47,7 +47,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 /**
  * @author didi
@@ -451,6 +450,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     public Result<Boolean> checkComponent(Integer componentId) {
         return Result.buildSuccess(Objects.nonNull( componentRepository.getComponentById(componentId)));
     }
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Result<Boolean> deleteComponentIds(List<Integer> deleteComponentIds) {
         //删除配置表
@@ -471,12 +471,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
         final boolean deleteConfigByComponentIds =
             componentGroupConfigRepository.deleteByComponentIds(
                 deleteComponentIds);
-        if (!deleteHostByComponentIds || !deleteConfigByComponentIds || !deleteCom) {
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return Result.fail("清理组建失败");
-        }
-        
-        return Result.success();
+        return Result.build(deleteHostByComponentIds && deleteConfigByComponentIds && deleteCom);
     }
     
     @Override

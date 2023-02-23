@@ -1,105 +1,110 @@
-import * as React from 'react';
-import { XFormWrapper } from 'component/x-form-wrapper';
+import * as React from "react";
+import { XFormWrapper } from "component/x-form-wrapper";
 import { connect } from "react-redux";
-import * as actions from 'actions';
-import { FormItemType, IFormItem } from 'component/x-form';
-import { notification }  from 'antd';
-import { IDeploy } from 'typesPath/cluster/physics-type';
-import { newDeploy, updateDeploy } from 'api/cluster-api';
+import * as actions from "actions";
+import { FormItemType, IFormItem } from "component/x-form";
+import { XNotification } from "component/x-notification";
+import { IDeploy } from "typesPath/cluster/physics-type";
+import { newDeploy, updateDeploy } from "api/cluster-api";
+import "./index.less";
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   params: state.modal.params,
   cb: state.modal.cb,
 });
 
-export const ClusterConfigModal = connect(mapStateToProps)((props: { dispatch: any, params: IDeploy, cb: any }) => {
+export const ClusterConfigModal = connect(mapStateToProps)((props: { dispatch: any; params: IDeploy; cb: any }) => {
+  const isEdit = props.params?.id ? true : false;
+  const title = isEdit ? "编辑" : "新增";
   const xFormModalConfig = {
     formMap: [
       {
-        key: 'valueGroup',
-        label: '配置组 ',
+        key: "valueGroup",
+        label: "配置组 ",
         attrs: {
-          placeholder: '请填写配置组名称',
+          placeholder: "请填写配置组名称",
         },
         rules: [
-          { 
+          {
             required: true,
             validator: (rule: any, value: string) => {
-              let flat_1_50 = (value && value.length > 0 && value.length <= 50);
+              let flat_1_128 = value && value.length > 0 && value.length <= 128;
               if (!value) {
-                return Promise.reject('配置组不能为空');
+                return Promise.reject("配置组不能为空");
               }
-              if(flat_1_50) {
+              if (flat_1_128) {
                 return Promise.resolve();
               } else {
-                return Promise.reject('请输入1-50字符');
+                return Promise.reject("请输入1-128字符");
               }
-            }, 
-          },
-        ],
-      }, 
-      {
-        key: 'valueName',
-        label: '名称',
-        attrs: {
-          placeholder: '请填写名称',
-        },
-        rules: [
-          { 
-            required: true,
-            validator: (rule: any, value: string) => {
-              let flat_1_50 = (value && value.length > 0 && value.length <= 100);
-              if (!value) {
-                return Promise.reject('名称不能为空');
-              }
-              if(flat_1_50) {
-                return Promise.resolve();
-              } else {
-                return Promise.reject('请输入1-100字符');
-              }
-            }, 
+            },
           },
         ],
       },
       {
-        key: 'value',
-        label: '值',
+        key: "valueName",
+        label: "名称",
+        attrs: {
+          placeholder: "请填写名称",
+        },
+        rules: [
+          {
+            required: true,
+            validator: (rule: any, value: string) => {
+              let flat_1_50 = value && value.length > 0 && value.length <= 100;
+              if (!value) {
+                return Promise.reject("名称不能为空");
+              }
+              if (flat_1_50) {
+                return Promise.resolve();
+              } else {
+                return Promise.reject("请输入1-100字符");
+              }
+            },
+          },
+        ],
+      },
+      {
+        key: "value",
+        label: "值",
         type: FormItemType.textArea,
-        rules: [{ 
-          required: false,
-          validator: (rule: any, value: string) => {
-            if (!value) {
-              return Promise.resolve();
-            }
-            let flat_0_100 = (value.length >= 0 && value.length <= 1000);
-            if(flat_0_100) {
-              return Promise.resolve();
-            } else {
-              return Promise.reject('请输入0-1000个字符');
-            }
-          }
-        }],
+        rules: [
+          {
+            required: false,
+            validator: (rule: any, value: string) => {
+              if (!value) {
+                return Promise.resolve();
+              }
+              let flat_0_100 = value.length >= 0 && value.length <= 1000;
+              if (flat_0_100) {
+                return Promise.resolve();
+              } else {
+                return Promise.reject("请输入0-1000个字符");
+              }
+            },
+          },
+        ],
         attrs: {
           placeholder: `请填写值`,
           rows: 4,
         },
       },
       {
-        key: 'memo',
-        label: '描述',
+        key: "memo",
+        label: "描述",
         type: FormItemType.textArea,
         rules: [
-          { 
+          {
             required: false,
             validator: (rule: any, value: string) => {
               if (!value) {
                 return Promise.resolve();
               } else if (value?.trim().length > 100) {
-                return Promise.reject('请输入0-100个字符');
+                return Promise.reject("请输入0-100个字符");
               }
               return Promise.resolve();
             },
-          }
+          },
         ],
         attrs: {
           placeholder: `请输入描述信息`,
@@ -108,40 +113,33 @@ export const ClusterConfigModal = connect(mapStateToProps)((props: { dispatch: a
       },
     ] as IFormItem[],
     visible: true,
-    title: `${ props.params?.id ? '编辑' : '新增' }配置`,
+    title: `${title}配置`,
     formData: props.params || {},
-    isWaitting: true,
+    needBtnLoading: true,
     width: 660,
+    className: "cluster-config",
     onCancel: () => {
-      props.dispatch(actions.setModalId(''));
+      props.dispatch(actions.setModalId(""));
     },
     onSubmit: (result: any) => {
-      if (props.params?.id) {
+      if (isEdit) {
         result.id = props.params?.id;
-        return updateDeploy(result).then(() => {
-          notification.success({ message: '编辑配置成功' });
-          props.dispatch(actions.setModalId(''));
-        }).finally(() => {
-          props.cb && props.cb();
-        });
+        result.status = props.params?.status;
       } else {
         result.status = 1;
-        props.dispatch(actions.setModalId(''));
-        return newDeploy(result).then(() => {
-          notification.success({ message: '新建配置成功' });
-        }).finally(() => {
-          props.cb && props.cb();
-        });
       }
+      const submitFn = isEdit ? updateDeploy : newDeploy;
+      return submitFn(result).then(() => {
+        XNotification({ type: "success", message: `${title}配置成功` });
+        props.dispatch(actions.setModalId(""));
+        props.cb && props.cb();
+      });
     },
   };
 
   return (
     <>
-      <XFormWrapper
-        visible={true}
-        {...xFormModalConfig}
-      />
+      <XFormWrapper visible={true} {...xFormModalConfig} />
     </>
-  )
+  );
 });

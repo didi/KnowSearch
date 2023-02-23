@@ -1,26 +1,11 @@
-import { INode, IOpClusterRoles } from "typesPath/cluster/cluster-types";
-import {
-  ArrowDownOutlined,
-  ArrowUpOutlined,
-  MinusCircleOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
-import {
-  Button,
-  Form,
-  InputNumber,
-  Select,
-  Space,
-  Table,
-  Tooltip,
-  Input,
-} from "antd";
-import { getNodeList, getPhysicClusterRoles } from "api/cluster-api";
-import { NODE_NUMBER_MAP } from "constants/status-map";
-import React, { forwardRef } from "react";
-import "./index.less";
+import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { Button, Form, InputNumber, Select, Space, Table, Tooltip, Input } from "antd";
+import { getAccessClusterNodeSpecification, getNodeCount } from "api/cluster-api";
+import React, { forwardRef, useState, useEffect } from "react";
 import { INodeListObjet } from "container/modal/physics-cluster/apply-cluster";
-import { regNonnegativeNumber, regOddNumber } from "constants/reg";
+import { regNonnegativeNumber, regOddNumber, regIp } from "constants/reg";
+import { filterOption, uuid } from "lib/utils";
+import "./index.less";
 
 const { TextArea } = Input;
 
@@ -31,7 +16,7 @@ interface Props {
   id?: any;
   host?: string;
   nodeList?: INodeListObjet;
-  isHidden?: boolean
+  isHidden?: boolean;
 }
 
 export const Demo: React.FC<Props> = (props) => {
@@ -43,32 +28,32 @@ export const Demo: React.FC<Props> = (props) => {
 };
 
 // 只渲染
-export const RenderText = forwardRef((props: any, ref) => {
-  return <span>{props.value || props.text}</span>;
-});
+export const RenderText = (props: any, ref) => {
+  return <span>{props.value || props.text || "-"}</span>;
+};
 
 // Datanode 选择
 export const DataNode: React.FC<Props> = forwardRef((props, ref) => {
   const [dataNode, setDataNode] = React.useState([]);
   const [dataNodeSpec, setDataNodeSpec] = React.useState("");
   const [dataNodeNu, setDataNodeNu] = React.useState(2);
+  const [nodeCount, setNodeCount] = useState([]);
 
-  React.useEffect(() => {
-    getNodeList().then((res) => {
-      setDataNodeList(res);
-    });
+  useEffect(() => {
+    _getNodeSpecification();
   }, []);
 
-  const setDataNodeList = (data: INode[]) => {
-    const list = data.map((item: INode, index: number) => {
-      return {
-        ...item,
-        key: index,
-        value: item.spec,
-      };
+  const _getNodeSpecification = async () => {
+    let res = await getAccessClusterNodeSpecification();
+    let list = (res || []).map((item) => {
+      return { value: item };
     });
-    const dataNode = list.filter((ele) => ele.role === "datanode");
-    setDataNode(dataNode);
+    let count = await getNodeCount();
+    let nodeCount = (count || []).map((item) => {
+      return { value: item };
+    });
+    setDataNode(list);
+    setNodeCount(nodeCount);
   };
 
   const handleChangeSpecification = (value) => {
@@ -78,18 +63,20 @@ export const DataNode: React.FC<Props> = forwardRef((props, ref) => {
   };
 
   const handleChangeNuber = (value) => {
-    const _value = value.length ? +value[value.length - 1] : null as any;
+    const _value = value.length ? +value[value.length - 1] : (null as any);
     setDataNodeNu(_value);
     const { onChange } = props;
     onChange && onChange({ dataNodeSpec, dataNodeNu: _value });
   };
 
   return (
-    <>
+    <div className="datanode-select">
       <Select
+        showSearch
         placeholder="请输入节点规格"
         onChange={handleChangeSpecification}
-        style={{ width: 250, marginRight: 22 }}
+        filterOption={filterOption}
+        style={{ width: 218, marginRight: 16 }}
       >
         {dataNode.map((v) => (
           <Select.Option value={v.value} key={v.value}>
@@ -107,11 +94,11 @@ export const DataNode: React.FC<Props> = forwardRef((props, ref) => {
         placeholder="请输入节点个数"
         onChange={handleChangeNuber}
         mode="tags"
-        value={props.value?.dataNodeNu || []}
+        value={(props.value?.dataNodeNu && props.value?.dataNodeNu + "") || []}
         maxTagCount={1}
-        style={{ width: 250 }}
+        style={{ width: 218 }}
       >
-        {NODE_NUMBER_MAP.map((v) => (
+        {nodeCount.map((v) => (
           <Select.Option value={v.value} key={v.value}>
             {(v.value + "")?.length > 35 ? (
               <Tooltip placement="bottomLeft" title={v.value}>
@@ -123,7 +110,7 @@ export const DataNode: React.FC<Props> = forwardRef((props, ref) => {
           </Select.Option>
         ))}
       </Select>
-    </>
+    </div>
   );
 });
 
@@ -186,12 +173,7 @@ export const Masternode: React.FC<Props> = forwardRef((props, ref) => {
 
   return (
     <>
-      <Form
-        layout="inline"
-        form={form}
-        name="control-hooks3"
-        onValuesChange={onValuesChange}
-      >
+      <Form layout="inline" form={form} name="control-hooks3" onValuesChange={onValuesChange}>
         {/* <Form.Item
           key="masterSpec"
           name="masterSpec"
@@ -225,10 +207,7 @@ export const Masternode: React.FC<Props> = forwardRef((props, ref) => {
             },
           ]}
         >
-          <InputNumber
-            style={{ width: 250, marginTop: 10 }}
-            placeholder="请输入节点个数"
-          ></InputNumber>
+          <InputNumber style={{ width: 250, marginTop: 10 }} placeholder="请输入节点个数"></InputNumber>
         </Form.Item>
         <Form.List name="nodeList">
           {(fields, { add, remove }) => (
@@ -245,10 +224,7 @@ export const Masternode: React.FC<Props> = forwardRef((props, ref) => {
                 >
                   <Form.Item
                     noStyle
-                    shouldUpdate={(prevValues, curValues) =>
-                      prevValues.area !== curValues.area ||
-                      prevValues.sights !== curValues.sights
-                    }
+                    shouldUpdate={(prevValues, curValues) => prevValues.area !== curValues.area || prevValues.sights !== curValues.sights}
                   >
                     <Form.Item
                       {...field}
@@ -262,16 +238,9 @@ export const Masternode: React.FC<Props> = forwardRef((props, ref) => {
                         },
                       ]}
                     >
-                      <Select
-                        style={{ width: 138 }}
-                        placeholder="请选择节点类型"
-                      >
+                      <Select showSearch filterOption={filterOption} style={{ width: 138 }} placeholder="请选择节点类型">
                         {specificationsNode.map((v) => (
-                          <Select.Option
-                            value={v.value}
-                            key={v.value}
-                            disabled={field.name === 1 && type === v.value}
-                          >
+                          <Select.Option value={v.value} key={v.value} disabled={field.name === 1 && type === v.value}>
                             {(v.value + "")?.length > 35 ? (
                               <Tooltip placement="bottomLeft" title={v.value}>
                                 {v.value}
@@ -318,10 +287,7 @@ export const Masternode: React.FC<Props> = forwardRef((props, ref) => {
                       },
                     ]}
                   >
-                    <InputNumber
-                      style={{ width: 250 }}
-                      placeholder="请输入节点个数"
-                    ></InputNumber>
+                    <InputNumber style={{ width: 250 }} placeholder="请输入节点个数"></InputNumber>
                   </Form.Item>
 
                   <MinusCircleOutlined onClick={() => remove(field.name)} />
@@ -347,109 +313,6 @@ export const Masternode: React.FC<Props> = forwardRef((props, ref) => {
   );
 });
 
-// 升序、降序
-export const OrderNode = (props: Props) => {
-  const [dataSource, setDataSource] = React.useState([] as IOpClusterRoles[]);
-
-  const handleOrder = (index1, index2) => {
-    setDataSource(swapArr(index1, index2));
-    props?.onChange(swapArr(index1, index2));
-  };
-
-  React.useEffect(() => {
-    if (!props.id) return;
-    getPhysicClusterRoles(props.id).then((data: IOpClusterRoles[]) => {
-      data =
-        data.map((ele, index) => {
-          return {
-            ...ele,
-            label: ele.roleClusterName,
-            value: ele.roleClusterName,
-            key: index,
-          };
-        }) || [];
-      setDataSource(data);
-      props?.onChange(data);
-    });
-  }, []);
-
-  const swapArr = (index1, index2) => {
-    /*数组两个元素位置互换*/
-    const array = [...dataSource];
-    array.splice(index2, 1, ...array.splice(index1, 1, array[index2]));
-    return array;
-  };
-
-  const columns = [
-    {
-      title: "排序",
-      dataIndex: "id",
-      key: "id",
-      width: "20%",
-    },
-    {
-      title: "节点名称",
-      dataIndex: "roleClusterName",
-      key: "roleClusterName",
-      width: "60%",
-    },
-    {
-      title: "操作",
-      dataIndex: "operation",
-      key: "operation",
-      render: (id: number, record, index) => {
-        const ascendingOrder = (
-          <a onClick={() => handleOrder(index, index - 1)}>
-            <ArrowUpOutlined />
-            升序
-          </a>
-        );
-        const descendingOrder = (
-          <a onClick={() => handleOrder(index, index + 1)}>
-            <ArrowDownOutlined />
-            降序
-          </a>
-        );
-        const allOrder = (
-          <div className="operation-box">
-            <a onClick={() => handleOrder(index, index - 1)}>
-              <ArrowUpOutlined />
-              升序
-            </a>{" "}
-            <span className="line-between"></span>{" "}
-            <a onClick={() => handleOrder(index, index + 1)}>
-              <ArrowDownOutlined />
-              降序
-            </a>
-          </div>
-        );
-        let operation: any = "-";
-        if (dataSource?.length <= 1) {
-          return <>{operation}</>;
-        }
-        if (index === 0) {
-          operation = descendingOrder;
-        } else if (index === dataSource.length - 1) {
-          operation = ascendingOrder;
-        } else {
-          operation = allOrder;
-        }
-        return <>{operation}</>;
-      },
-    },
-  ];
-
-  return (
-    <Table
-      dataSource={dataSource}
-      columns={columns}
-      rowKey={"id"}
-      pagination={false}
-      scroll={{ y: 150 }}
-    />
-  );
-};
-
 // 扩缩容节点列表
 export const ExpandShrinkNodeList = (props: Props) => {
   const onChange = (e) => {
@@ -459,21 +322,15 @@ export const ExpandShrinkNodeList = (props: Props) => {
   const hostList = props.host?.split("\n") || [];
   return (
     <>
-      {hostList.map((item) => (
-        <>
-          <span>{item}</span>
-          <br />
-        </>
-      ))}
-      {
-        !props.isHidden ? 
-          <TextArea
-            rows={4}
-            onChange={onChange}
-            placeholder={"请输入主机列表，多个主机换行"}
-          />
-          : ""
-      }
+      {hostList.map((item) => {
+        return item ? (
+          <>
+            <span>{item}</span>
+            <br />
+          </>
+        ) : null;
+      })}
+      {!props.isHidden ? <TextArea allowClear rows={4} onChange={onChange} placeholder={"请输入主机列表，多个主机换行"} /> : ""}
     </>
   );
 };
@@ -498,11 +355,160 @@ export const DockerExpectDataNodeNu = (props) => {
   return (
     <>
       <InputNumber style={style} value={InputValue} onChange={onChange} />
-      <span style={{ paddingLeft: 10 }}>{`${
-        isExpect ? "增加" : "减少"
-      } ${Math.abs(props.podNumber - InputValue)}节点，${
+      <span style={{ paddingLeft: 10 }}>{`${isExpect ? "增加" : "减少"} ${Math.abs(props.podNumber - InputValue)}节点，${
         isExpect ? "扩容" : "缩容"
       }至 ${InputValue}`}</span>
+    </>
+  );
+};
+
+// 扩缩容节点列表
+export const ExpandShrinkList = (props: any) => {
+  const { data, type, isExpand, options, onShrink, onExpand, form } = props;
+  const [dataSource, setDataSource] = useState([]);
+  const [shrinkNode, setShrinkNode] = useState([]);
+  const [expandNode, setExpandNode] = useState({});
+  const [orginData, setOrginData] = useState([]);
+
+  useEffect(() => {
+    getDataSource();
+    setShrinkNode([]);
+  }, [isExpand]);
+
+  useEffect(() => {
+    shrinkNode.length && onShrink(shrinkNode);
+  }, [shrinkNode]);
+
+  useEffect(() => {
+    typeof onExpand === "function" && onExpand(expandNode);
+  }, [expandNode]);
+
+  const getDataSource = () => {
+    let list = (data || []).filter((item) => item?.role === type);
+    let esClusterRoleHostVO = list[0]?.esClusterRoleHostVO;
+    if (isExpand && type !== "masternode") {
+      esClusterRoleHostVO = [...(esClusterRoleHostVO || []), addData()];
+    }
+    setOrginData(esClusterRoleHostVO);
+    setDataSource(esClusterRoleHostVO);
+  };
+
+  const addData = () => {
+    let id = uuid();
+    let node = { id, role: type, hostname: "", machineSpec: "" };
+    setExpandNode(node);
+    return {
+      ip: (
+        <Form.Item
+          className="expand-shrink-ip"
+          name={`ip&${type}&${id}`}
+          key={`ip&${type}&${id}`}
+          rules={[
+            {
+              validator: (rule: any, value: string) => {
+                if (!value) return Promise.resolve();
+                if (!new RegExp(regIp).test(value)) {
+                  return Promise.reject("请正确输入IP，例如：127.1.1.1");
+                }
+                for (let i = 0; i < dataSource?.length; i++) {
+                  if (dataSource[i]?.ip === value) {
+                    return Promise.reject("IP不能重复");
+                  }
+                }
+                return Promise.resolve();
+              },
+            },
+          ]}
+        >
+          <Input placeholder="请输入"></Input>
+        </Form.Item>
+      ),
+      machineSpec: (
+        <Form.Item
+          className="expand-shrink-machine"
+          name={`machineSpec&${type}&${id}`}
+          key={`machineSpec&${type}&${id}`}
+          rules={[
+            {
+              validator: (rule: any, value: string) => {
+                return Promise.resolve();
+              },
+            },
+          ]}
+        >
+          <Select placeholder="请选择" options={options}></Select>
+        </Form.Item>
+      ),
+      type: "expand",
+      id,
+    };
+  };
+
+  const columns = [
+    {
+      title: "IP",
+      dataIndex: "ip",
+      key: "ip",
+      width: 300,
+    },
+    {
+      title: "机型",
+      dataIndex: "machineSpec",
+      key: "machineSpec",
+      width: 200,
+    },
+    {
+      title: "操作",
+      key: "action",
+      width: 100,
+      render: (_, record) => {
+        if (type === "masternode") return;
+        if (!isExpand)
+          return (
+            <svg
+              onClick={() => {
+                let data = dataSource.filter((item) => item?.id !== record?.id);
+                setDataSource(data);
+                setShrinkNode([...shrinkNode, record]);
+              }}
+              className="icon svg-icon delete-row"
+              aria-hidden="true"
+            >
+              <use xlinkHref="#iconjianshao"></use>
+            </svg>
+          );
+        return record?.type === "expand" ? (
+          <div>
+            <svg
+              onClick={() => {
+                let data = [...dataSource, addData()];
+                setDataSource(data);
+              }}
+              className="icon svg-icon add-row"
+              aria-hidden="true"
+            >
+              <use xlinkHref="#iconzengjia"></use>
+            </svg>
+            {dataSource.length === orginData.length ? null : (
+              <svg
+                onClick={() => {
+                  let data = dataSource.filter((item) => item?.id !== record?.id);
+                  setDataSource(data);
+                }}
+                className="icon svg-icon delete-row"
+                aria-hidden="true"
+              >
+                <use xlinkHref="#iconjianshao"></use>
+              </svg>
+            )}
+          </div>
+        ) : null;
+      },
+    },
+  ];
+  return (
+    <>
+      <Table columns={columns} dataSource={dataSource} rowKey="id" pagination={false}></Table>
     </>
   );
 };

@@ -2,12 +2,13 @@ import React from "react";
 import "styles/custom-component.less";
 import "styles/table-filter.less";
 import { QuestionCircleOutlined } from "@ant-design/icons";
-import { Tooltip, Modal, Button, Popconfirm, Dropdown, Spin, Menu } from "antd";
+import { Tooltip, Modal, Button, Popconfirm, Dropdown, Spin, Menu, Tag, Popover, Progress } from "antd";
 import { withRouter, Link } from "react-router-dom";
-import { urlPrefix } from "constants/menu";
 import { ITableBtn } from "component/dantd/dtable";
 import { openSourceTip } from "constants/status-map";
-import { refreshByCacheKey } from 'react-router-cache-route';
+import { refreshByCacheKey } from "react-router-cache-route";
+import { bytesUnitFormatter } from "../lib/utils";
+import { TooltipPlacement } from "antd/es/tooltip";
 
 interface INavRouterLinkProps {
   element: JSX.Element | string;
@@ -15,78 +16,74 @@ interface INavRouterLinkProps {
   needToolTip?: boolean;
   onClick?: any;
   removeCacheKey?: any;
-  maxShowLength?: number
+  maxShowLength?: number;
   style?: any;
 }
 
 const hiddenTooltipElement = (className: string) => {
   const navLinkTooltips = document.getElementsByClassName(className);
   for (let i = 0; i < navLinkTooltips.length; i++) {
-    (navLinkTooltips[i] as any).style = 'top: -1000px; left: -1000px';
+    (navLinkTooltips[i] as any).style = "top: -1000px; left: -1000px";
   }
 };
 
-export const NavRouterLink = withRouter<any, any>(
-  (props: INavRouterLinkProps) => {
-    const overlayClassName = 'nav-link-tooltip';
-    // 限制展示固定字符
-    const renderElement = () => {
-      if (props.maxShowLength && typeof props.element === 'string') {
-        if (props.element.length <= props.maxShowLength) {
-          return props.element
-        }
-        return props.element.slice(0, props.maxShowLength) + '...'
-      } else {
-        return props.element
+export const NavRouterLink = withRouter<any, any>((props: INavRouterLinkProps) => {
+  const overlayClassName = "nav-link-tooltip";
+  // 限制展示固定字符
+  const renderElement = () => {
+    if (props.maxShowLength && typeof props.element === "string") {
+      if (props.element.length <= props.maxShowLength) {
+        return props.element;
       }
+      return props.element.slice(0, props.maxShowLength) + "...";
+    } else {
+      return props.element;
     }
-    return (
-      <Link
-        onClick={() => {
-          props.onClick && props.onClick();
-          props.needToolTip && hiddenTooltipElement(overlayClassName);
-          props.removeCacheKey && refreshByCacheKey(props.removeCacheKey);
-        }}
-        to={props.href}
-        style={props?.style}
-      >
-        {props.needToolTip ? (
-          <Tooltip overlayClassName={overlayClassName} placement="bottomLeft" title={props.element}>
-            {renderElement()}
-          </Tooltip>
-        ) : renderElement()}
-      </Link>
-    );
-  }
-);
+  };
+  return (
+    <Link
+      onClick={() => {
+        props.onClick && props.onClick();
+        props.needToolTip && hiddenTooltipElement(overlayClassName);
+        props.removeCacheKey && refreshByCacheKey(props.removeCacheKey);
+      }}
+      to={props.href}
+      style={props?.style}
+    >
+      {props.needToolTip ? (
+        <Tooltip overlayClassName={overlayClassName} placement="bottomLeft" title={props.element}>
+          {renderElement()}
+        </Tooltip>
+      ) : (
+        renderElement()
+      )}
+    </Link>
+  );
+});
 
-export const showSubmitOrderSuccessModal = (params: {
-  title: string;
-  id: number;
-  onOk?: any;
-}) => {
+export const showSubmitOrderSuccessModal = (params: { title: string; id: number; onOk?: any; width?: number }, history?: any) => {
   Modal.success({
-    onOk: params.onOk
-      ? params.onOk
-      : () => {
-        // history.pushState(null, '', window.location.pathname);
-        // goToTargetPage(window.location.pathname);
-        window.location.reload();
-      },
+    onOk: params.onOk && params.onOk,
     okText: "确定",
     title: "提交成功！",
+    width: params.width,
     content: (
       <>
         <div className="order-success">
-          <span>
-            {params.title}已提交！可至“工单任务” &gt; “我的申请”中查看工单详情
-          </span>
+          <span>{params.title}已提交！可至“工单任务” &gt; “我的申请”中查看工单详情</span>
           <br />
           <span>
             工单标题（ID）：
-            <a href={`/work-order/my-approval/detail?orderId=${params.id}`}>
+            <Button
+              type="link"
+              style={{ padding: 0 }}
+              onClick={() => {
+                Modal.destroyAll();
+                history.push(`/work-order/my-application/detail?orderId=${params.id}`);
+              }}
+            >
               {params.title}（{params.id}）
-            </a>
+            </Button>
           </span>
         </div>
       </>
@@ -94,40 +91,84 @@ export const showSubmitOrderSuccessModal = (params: {
   });
 };
 
-export const showSubmitTaskSuccessModal = (params: {
-  title: string;
-  id: number;
-  onOk?: any;
-}) => {
-  Modal.success({
-    onOk: params.onOk
-      ? params.onOk
-      : () => {
-        window.location.reload();
-      },
-    okText: "确定",
-    title: "提交成功！",
-    content: (
+export const showSubmitTaskSuccessModal = (
+  params:
+    | {
+        title: string;
+        id: number;
+        onOk?: any;
+        businessKey: string;
+        taskType: number;
+        status: string;
+        expandData: string;
+      }
+    | any,
+  history?: any
+) => {
+  let content: any = (
+    <>
+      <div className="order-success">
+        <span>{params.title}已提交！可至“任务中心”查看任务详情</span>
+        <br />
+        <span>
+          任务标题（ID）：
+          <div
+            className="to-taskdetail-button"
+            style={{ padding: 0 }}
+            onClick={() => {
+              Modal.destroyAll();
+              if (params.taskType === 14) {
+                let dataType = JSON.parse(params?.expandData)?.dataType;
+                history.push(
+                  `/work-order/task/fastindex-detail?taskid=${params.id}&type=${params.taskType}&title=${params.title}&datatype=${dataType}`
+                );
+              } else {
+                history.push(
+                  `/work-order/task/detail?taskid=${params.id}&type=${params?.taskType}&title=${params?.title}&status=${params?.status}`
+                );
+              }
+            }}
+          >
+            {params.title}（{params.id}）
+          </div>
+        </span>
+      </div>
+    </>
+  );
+  if (Array.isArray(params)) {
+    let list = params.map((item: any, index) => (
       <>
         <div className="order-success">
-          <span>
-            xxxx逻辑索引主从切换(任务ID：1001)创建成功！可至“工单任务” &gt;
-            “任务列表”模块查看详情。
-          </span>
-          <br />
-          <span>
-            任务（ID）：
-            <a href={`${urlPrefix}/user/task/detail?id=359`}>
-              {params.title}（{params.id}）
-            </a>
-          </span>
+          {index === 0 && (
+            <>
+              <span>{item.title}已提交！可至“任务中心”查看任务详情</span>
+              <br />
+              <span>任务标题（ID）：</span>
+            </>
+          )}
+          <div
+            className="to-taskdetail-button"
+            onClick={() => {
+              Modal.destroyAll();
+              history.push(`/work-order/task/detail?taskid=${item.id}&type=${item?.taskType}&title=${item?.title}&status=${item?.status}`);
+            }}
+          >
+            {item.title}（{item.id}）
+          </div>
         </div>
       </>
-    ),
+    ));
+    content = list;
+  }
+  Modal.success({
+    onOk: params.onOk && params.onOk,
+    okText: "确定",
+    title: "提交成功！",
+    content,
   });
 };
 
-export const CancelActionModal = (props: { routeHref: string, history?: any, cb?: Function }) => {
+export const CancelActionModal = (props: { routeHref: string; history?: any; cb?: Function }) => {
   const onHandleCancel = (routeHref: string, history?: any, cb?: Function) => {
     Modal.confirm({
       title: "确定取消？",
@@ -136,17 +177,17 @@ export const CancelActionModal = (props: { routeHref: string, history?: any, cb?
       cancelText: "取消",
       icon: <QuestionCircleOutlined className="question-icon" />,
       onOk: () => {
-        const url = window?.location?.pathname
+        const url = window?.location?.pathname;
         setTimeout(() => {
           if (history) {
-            history.push(routeHref.replace('/es', ''));
+            history.push(routeHref.replace("/es", ""));
           } else {
             window.location.href = routeHref;
           }
           if (cb) {
             cb(url);
           }
-        }, 500)
+        }, 500);
       },
     });
   };
@@ -154,26 +195,24 @@ export const CancelActionModal = (props: { routeHref: string, history?: any, cb?
   return <Button onClick={() => onHandleCancel(props.routeHref, props.history, props.cb)}>取消</Button>;
 };
 
-export const renderOperationBtns = (btns: ITableBtn[], record: any) => {
-  const freeBtns = btns.length <= 3 ? btns : [].concat(btns).splice(0, 2);
+export const renderOperationBtns = (btns: ITableBtn[], record: any, limit = 4) => {
+  btns = btns.filter((item) => !item.invisible);
+  const freeBtns = btns.length < limit ? btns : [].concat(btns).splice(0, 2);
   const leftBtns = [].concat(btns).splice(2);
 
   if (!freeBtns.length) {
-    return <a>{"无"}</a>;
+    return <>-</>;
   }
 
   return (
     <>
       <span className="table-operation">
         {freeBtns.map((item, index) => {
-          if (item.invisible) return null;
-
           if (item.isOpenUp)
             return (
               <Tooltip key={index} title={item.tip || openSourceTip}>
                 <a key={index} style={{ color: "#bfbfbf" }}>
-                  {" "}
-                  {item.label}{" "}
+                  {item.label}
                 </a>
               </Tooltip>
             );
@@ -198,11 +237,7 @@ export const renderOperationBtns = (btns: ITableBtn[], record: any) => {
 
           if (item.clickFunc) {
             return (
-              <a
-                type="javascript;"
-                key={index}
-                onClick={() => item.clickFunc(record)}
-              >
+              <a type="javascript;" key={index} onClick={() => item.clickFunc(record)}>
                 {item.label}
               </a>
             );
@@ -213,7 +248,7 @@ export const renderOperationBtns = (btns: ITableBtn[], record: any) => {
             </span>
           );
         })}
-        {btns.length > 3 ? <MoreBtns btns={leftBtns} data={record} /> : null}
+        {btns.length >= limit ? <MoreBtns btns={leftBtns} data={record} /> : null}
       </span>
     </>
   );
@@ -231,12 +266,7 @@ export const renderMoreBtns = (btns: ITableBtn[], record: any) => {
           if (item.isOpenUp)
             return (
               <Tooltip key={index} title={openSourceTip}>
-                <Button
-                  type={item.type || "primary"}
-                  key={index}
-                  disabled={true}
-                  onClick={item.clickFunc}
-                >
+                <Button type={item.type || "primary"} key={index} disabled={true} onClick={item.clickFunc}>
                   {item.label}
                 </Button>
               </Tooltip>
@@ -252,19 +282,13 @@ export const renderMoreBtns = (btns: ITableBtn[], record: any) => {
 
           if (item.clickFunc) {
             return (
-              <Button
-                type={item.type || "primary"}
-                key={index}
-                onClick={item.clickFunc}
-              >
+              <Button type={item.type || "primary"} key={index} onClick={item.clickFunc}>
                 {item.label}
               </Button>
             );
           }
         })}
-        {btns.length > 3 ? (
-          <DetailMoreBtns btns={leftBtns} data={record} />
-        ) : null}
+        {btns.length > 3 ? <DetailMoreBtns btns={leftBtns} data={record} /> : null}
       </span>
     </>
   );
@@ -279,7 +303,7 @@ export const MoreBtns = (props: IMoreBtnsProps) => {
   const { btns, data } = props;
 
   // 当下拉框中选项都禁用时，将 更多 文字置灰
-  const flag = btns.length === btns.filter(item => item.isOpenUp).length;
+  const flag = btns.length === btns.filter((item) => item.isOpenUp).length;
 
   const btnsMenu = (
     <ul className="dropdown-menu">
@@ -289,7 +313,7 @@ export const MoreBtns = (props: IMoreBtnsProps) => {
         if (v.isOpenUp)
           return (
             <li key={index} className="es-open-theme">
-              <Tooltip title={openSourceTip}>
+              <Tooltip title={v.tip || openSourceTip}>
                 <a style={{ color: "#bfbfbf" }}> {v.label} </a>
               </Tooltip>
             </li>
@@ -304,11 +328,7 @@ export const MoreBtns = (props: IMoreBtnsProps) => {
         }
         if (v.clickFunc) {
           return (
-            <li
-              key={index}
-              onClick={() => v.clickFunc(data)}
-              className="es-open-theme"
-            >
+            <li key={index} onClick={() => v.clickFunc(data)} className="es-open-theme">
               <a>{v.label}</a>
             </li>
           );
@@ -322,12 +342,7 @@ export const MoreBtns = (props: IMoreBtnsProps) => {
     </ul>
   );
   return (
-    <Dropdown
-      key="2"
-      overlay={btnsMenu}
-      trigger={["hover"]}
-      placement="bottomLeft"
-    >
+    <Dropdown key="2" overlay={btnsMenu} trigger={["hover"]} placement="bottomLeft">
       <span className="es-open-theme ml-10">
         <a style={{ color: flag ? "#bfbfbf" : "none" }}>更多</a>
       </span>
@@ -339,7 +354,7 @@ export const DetailMoreBtns = (props: IMoreBtnsProps) => {
   const { btns, data } = props;
 
   // 当下拉框中选项都禁用时，将 更多 文字置灰
-  const flag = btns.length === btns.filter(item => item.isOpenUp).length;
+  const flag = btns.length === btns.filter((item) => item.isOpenUp).length;
 
   const btnsMenu = (
     <Menu>
@@ -374,23 +389,80 @@ export const DetailMoreBtns = (props: IMoreBtnsProps) => {
     </Menu>
   );
   return (
-    <Dropdown
-      key="2"
-      overlay={btnsMenu}
-      trigger={["click", "hover"]}
-      placement="bottomLeft"
-    >
+    <Dropdown key="2" overlay={btnsMenu} trigger={["click", "hover"]} placement="bottomLeft">
       <Button className={flag ? "disabled-button" : ""}>更多</Button>
     </Dropdown>
   );
 };
 
 export const LoadingBlock = (props: { loading: boolean; height?: number }) => {
+  return <Spin style={{ height: props.height, lineHeight: props.height }} spinning={props.loading} className="loading-content" />;
+};
+
+export const renderAttributes = (params: {
+  data: any;
+  type?: string;
+  limit?: number;
+  splitType?: string;
+  placement?: TooltipPlacement;
+}) => {
+  const { data, type = ",", limit = 2, splitType = "；", placement } = params;
+  let attrArray = data;
+  if (!Array.isArray(data) && data) {
+    attrArray = data.split(type);
+  }
+  const showItems = attrArray.slice(0, limit) || [];
+  const hideItems = attrArray.slice(limit, attrArray.length) || [];
+  let content = hideItems.map((item, index) => (
+    <Tag key={index} className="tag-blue">
+      {item}
+    </Tag>
+  ));
+
   return (
-    <Spin
-      style={{ height: props.height, lineHeight: props.height }}
-      spinning={props.loading}
-      className="loading-content"
-    />
+    <div className="attribute-content">
+      {showItems.length > 0 ? showItems.join(splitType) : "-"}
+      {hideItems.length > 0 && (
+        <Popover placement={placement || "bottomRight"} content={content} overlayClassName="attribute-tag">
+          <Tag className="tag-blue tag-num">共{attrArray.length}个</Tag>
+        </Popover>
+      )}
+    </div>
   );
+};
+
+export const renderDiskRate = (diskInfo: { diskUsagePercent: number; diskUsage: number; diskTotal: number }, type?: string) => {
+  const num = Number((diskInfo.diskUsagePercent * 100).toFixed(2));
+  let strokeColor: string;
+  let yellow = "#F4A838";
+  let red = "#df6d62";
+  if (num > 90) {
+    strokeColor = red;
+  } else if (num > 70) {
+    strokeColor = yellow;
+  } else {
+    strokeColor = "#1473FF";
+  }
+
+  return (
+    <div style={{ position: "relative" }} className="process-box">
+      <Progress className="process-box-" percent={num} size="small" strokeColor={strokeColor} style={{ width: "100%" }} showInfo={false} />
+      <div className="process-box-foot">
+        <span className="process-box-foot-byte">
+          {type === "CPU"
+            ? `${diskInfo.diskUsage || 0}/${diskInfo.diskTotal || 0}`
+            : `${bytesUnitFormatter(diskInfo.diskUsage || 0)}/${bytesUnitFormatter(diskInfo.diskTotal || 0)}`}
+        </span>
+        <span className="process-box-foot-per">{num + "%"}</span>
+      </div>
+    </div>
+  );
+};
+
+export const renderMoreText = (text, maxShowLength) => {
+  if (text?.length <= maxShowLength) {
+    return text || "-";
+  } else {
+    return <Tooltip title={text}>{text?.slice(0, maxShowLength) + "..."}</Tooltip>;
+  }
 };

@@ -1,13 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.google.common.collect.Lists;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -120,13 +122,19 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
     //TODO 0.3.2新增
     @ApiModelProperty("代理地址")
     private String proxyAddress;
-  ;
+
     @ApiModelProperty("绑定gateway")
     private String gatewayIds;
     @ApiModelProperty("是否为ecm接入")
     private Boolean ecmAccess;
     @ApiModelProperty("componentId")
     private Integer componentId;
+
+    @ApiModelProperty("kibana外链地址")
+    private String                    kibanaAddress;
+
+    @ApiModelProperty("cerebro外链地址")
+    private String                    cerebroAddress;
 
     /**
      * 添加逻辑集群

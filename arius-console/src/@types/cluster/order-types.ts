@@ -1,6 +1,6 @@
 
 interface IBase {
-  appId: string;
+  projectId: string;
   appName: string;
   appPrincipals: string;
   clusterId: number;
@@ -45,7 +45,6 @@ export interface IBaseOrder extends IBase {
   type: string;
   createTime?: string;
   title?: string;
-  approverAppId: string;
 }
 export interface IOrderInfo {
   id: number;
@@ -64,7 +63,6 @@ export interface IOrderInfo {
   currentStep?: 0 | 1 | 2;
   createTime: string;
   finishTime: string;
-  applicantAppId: number;
   appDeptName: string;
   outcome: string;
   applicantAppName: string;

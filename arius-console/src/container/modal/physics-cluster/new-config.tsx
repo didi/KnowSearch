@@ -1,25 +1,16 @@
 import * as React from "react";
-import { Modal, Form, Row, Col, notification, Button, Select, Tooltip } from 'antd';
+import { Modal, Form, Row, Col, Button, Select, Tooltip, Drawer } from "antd";
 import "./index.less";
-import {
-  IFormItem,
-  FormItemType,
-  renderFormItem,
-  handleFormItem,
-} from "component/x-form";
+import { IFormItem, FormItemType, renderFormItem, handleFormItem } from "component/x-form";
 import Url from "lib/url-parser";
 import { connect } from "react-redux";
-import {
-  updateCongig,
-  getClusterTemplateCentent,
-  getConfigRole,
-} from "api/op-cluster-config-api";
+import { getClusterTemplateCentent } from "api/op-cluster-config-api";
 import * as actions from "actions";
 import { StepSelect } from "container/custom-form/step-select";
 import { PlusOutlined } from "@ant-design/icons";
 import { getPhysicClusterRoles } from "api/cluster-api";
-import { submitWorkOrder } from "api/common-api";
-import { IWorkOrder } from "typesPath/params-types";
+import { clusterConfigAdd } from "api/cluster-api";
+import { showSubmitTaskSuccessModal } from "container/custom-component";
 
 const mapStateToProps = (state) => ({
   phyClusterConfig: state.configInfo,
@@ -28,7 +19,7 @@ const mapStateToProps = (state) => ({
   params: state.modal.params,
   cb: state.modal.cb,
 });
-const connects: Function = connect
+const connects: Function = connect;
 @connects(mapStateToProps)
 export class NewConfigModal extends React.Component<any> {
   public state = {
@@ -36,6 +27,7 @@ export class NewConfigModal extends React.Component<any> {
     roleList: [] as string[],
     configRoleList: [],
     clusterOpRolesList: [],
+    confirmLoading: false,
   };
 
   public physicsClusterId: number;
@@ -47,9 +39,9 @@ export class NewConfigModal extends React.Component<any> {
 
   public componentDidMount() {
     const url = Url();
-    this.physicsClusterId = Number(url.search.physicsClusterId);
+    this.physicsClusterId = Number(this.props.params.id);
     this.type = Number(url.search.type);
-    this.physicsCluster = url.search.physicsCluster;
+    this.physicsCluster = url.search.physicsCluster || this.props.params.cluster;
     if (this.physicsClusterId) {
       // 原节点角色列表接口，缺少判断字段，与下面接口数据冲突
       // getConfigRole(this.physicsClusterId).then((res) => {
@@ -73,17 +65,29 @@ export class NewConfigModal extends React.Component<any> {
               key: index,
             };
           }) || [];
-      
-        const configRoleList = 
-          res?.map((ele, index) => ({
-              ...ele,
-              label: ele.role,
-              value: ele.role,
-            })).filter(item => item.podNumber);
+        const configRoleList = res
+          ?.map((ele, index) => ({
+            ...ele,
+            label: ele.role,
+            value: ele.role,
+          }))
+          .filter((item) => item.podNumber);
+        // 排序master>client>data
+        let sortConfigRoleList = [];
+        if (configRoleList.filter((item) => item.role === "masternode").length) {
+          sortConfigRoleList.push(...configRoleList.filter((item) => item.role === "masternode"));
+        }
+        if (configRoleList.filter((item) => item.role === "clientnode").length) {
+          sortConfigRoleList.push(...configRoleList.filter((item) => item.role === "clientnode"));
+        }
+        if (configRoleList.filter((item) => item.role === "datanode").length) {
+          sortConfigRoleList.push(...configRoleList.filter((item) => item.role === "datanode"));
+        }
         this.props.dispatch(actions.setPhyClusterConfigRoles(res));
         this.setState({
           clusterOpRolesList: res,
-          configRoleList: configRoleList,
+          configRoleList: sortConfigRoleList,
+          //configRoleList: configRoleList,
         });
       });
     }
@@ -94,11 +98,12 @@ export class NewConfigModal extends React.Component<any> {
   };
 
   public handleSubmit = () => {
+    this.setState({ confirmLoading: true });
     const esConfigs = [] as any[];
     this.$formRef.map((item) => {
       item
         .validateFields()
-        .then((result) => {
+        .then(async (result) => {
           const esConfigItem = {
             clusterId: this.physicsClusterId,
             enginName: result.enginName,
@@ -107,17 +112,19 @@ export class NewConfigModal extends React.Component<any> {
             desc: result.desc,
           };
           esConfigs.push(esConfigItem);
-          this.twoFormRefHandleSubmit(esConfigs);
+          await this.twoFormRefHandleSubmit(esConfigs);
+          this.setState({ confirmLoading: false });
         })
         .catch((errs) => {
+          this.setState({ confirmLoading: false });
           return;
         });
     });
   };
 
-  public twoFormRefHandleSubmit = (esConfigs?: any) => {
+  public twoFormRefHandleSubmit = async (esConfigs?: any) => {
     if (esConfigs) {
-      this.$TwoFormRef.validateFields().then((resultR) => {
+      await this.$TwoFormRef.validateFields().then(async (resultR) => {
         const roleOrder = [] as string[];
         const { phyClusterConfig, params } = this.props;
         phyClusterConfig?.clusterRolesList.forEach((item) => {
@@ -125,45 +132,22 @@ export class NewConfigModal extends React.Component<any> {
             roleOrder.push(item.roleClusterName);
           }
         });
-        const workOrderParams: IWorkOrder = {
-          contentObj: {
-            phyClusterId: this.physicsClusterId,
-            phyClusterName: this.physicsCluster,
-            roleOrder: params?.enginName ? roleOrder : resultR.roleOrder,
-            type: this.type,
-            actionType: params?.enginName ? 2 : 1,
-            newEsConfigs: esConfigs,
-            originalConfigs: params?.enginName ? [params] : [],
-          },
-          submitorAppid: this.props.app.appInfo()?.id,
-          submitor: this.props.user.getName('domainAccount'),
-          description: resultR.description || "",
-          type: "clusterOpConfigRestart",
-        };
-        if (
-          params?.enginName &&
-          params.configData === esConfigs[0]?.configData
-        ) {
-          const req = {
-            clusterId: this.physicsClusterId,
-            desc: esConfigs[0]?.desc,
-            enginName: esConfigs[0]?.enginName,
-            typeName: esConfigs[0]?.typeName,
-            id: params.id,
-          };
-          updateCongig(req).then(() => {
-            notification.success({ message: "编辑描述成功！" });
-            this.props.dispatch(actions.setModalId(""));
-            this.props.cb();
-          });
-          return;
-        }
-        submitWorkOrder(workOrderParams).finally(() => {
-          this.props.dispatch(actions.setModalId(""));
-        });
+        let expandData = {
+          phyClusterId: this.physicsClusterId,
+          phyClusterName: this.physicsCluster,
+          roleOrder: params?.enginName ? roleOrder : resultR.roleOrder,
+          type: this.type,
+          actionType: params?.enginName ? 2 : 1,
+          newEsConfigs: esConfigs,
+          originalConfigs: params?.enginName ? [params] : [],
+        } as any;
+        expandData = JSON.stringify(expandData);
+        let ret = await clusterConfigAdd({ expandData });
+        this.props.dispatch(actions.setDrawerId(""));
+        showSubmitTaskSuccessModal(ret, this.props.params?.history);
       });
     } else {
-      this.$TwoFormRef.validateFields().then((resultR) => {
+      await this.$TwoFormRef.validateFields().then(async (resultR) => {
         const roleOrder = [] as string[];
         const { phyClusterConfig, params } = this.props;
         phyClusterConfig?.clusterRolesList.forEach((item) => {
@@ -171,24 +155,19 @@ export class NewConfigModal extends React.Component<any> {
             roleOrder.push(item.roleClusterName);
           }
         });
-        const workOrderParams: IWorkOrder = {
-          contentObj: {
-            phyClusterId: this.physicsClusterId,
-            phyClusterName: this.physicsCluster,
-            roleOrder,
-            type: this.type,
-            actionType: 3,
-            newEsConfigs: [params],
-            originalConfigs: [params],
-          },
-          submitorAppid: this.props.app.appInfo()?.id,
-          submitor: this.props.user.getName('domainAccount'),
-          description: resultR.description || "",
-          type: "clusterOpConfigRestart",
-        };
-        submitWorkOrder(workOrderParams).finally(() => {
-          this.props.dispatch(actions.setModalId(""));
-        });
+        let expandData = {
+          phyClusterId: this.physicsClusterId,
+          phyClusterName: this.physicsCluster,
+          roleOrder,
+          type: this.type,
+          actionType: 3,
+          newEsConfigs: [params],
+          originalConfigs: [params],
+        } as any;
+        expandData = JSON.stringify(expandData);
+        let ret = await clusterConfigAdd({ expandData });
+        this.props.dispatch(actions.setDrawerId(""));
+        showSubmitTaskSuccessModal(ret, this.props.params?.history);
       });
     }
   };
@@ -197,7 +176,7 @@ export class NewConfigModal extends React.Component<any> {
     this.$formRef.map((item) => {
       item.resetFields(resetFields || "");
     });
-    this.props.dispatch(actions.setModalId(""));
+    this.props.dispatch(actions.setDrawerId(""));
   };
 
   public bindForm = (formRef: any, index: number) => {
@@ -350,12 +329,12 @@ export class NewConfigModal extends React.Component<any> {
           options: this.state.configRoleList,
           attrs: {
             disabled: this.props.params?.enginName ? true : false,
-            placeholder: "请选择",
+            placeholder: "请选择节点角色",
           },
           rules: [
             {
               required: true,
-              message: "请选择",
+              message: "请选择节点角色",
               validator: (rule: any, value: string) => {
                 this.computeTypeNameList(value, index);
                 this.bindNodeRole();
@@ -372,16 +351,11 @@ export class NewConfigModal extends React.Component<any> {
           key: "typeName",
           label: "配置类别",
           type: FormItemType.custom,
-          customFormItem: (
-            <ConfigNameSelect
-              index={index}
-              disabled={this.props.params?.enginName ? true : false}
-            />
-          ),
+          customFormItem: <ConfigNameSelect index={index} disabled={this.props.params?.enginName ? true : false} />,
           rules: [
             {
               required: true,
-              message: "请选择",
+              message: "请选择配置类别",
               validator: async (rule: any, value: string) => {
                 this.setOptionConfigData(value, index);
                 if (value) {
@@ -403,8 +377,8 @@ export class NewConfigModal extends React.Component<any> {
             {
               required: false,
               validator: async (rule: any, value: string) => {
-                if (value && value.length > 100) {
-                  return Promise.reject('请输入0-100字符');
+                if (value && value.length > 50) {
+                  return Promise.reject("请输入0-50字符");
                 }
                 return Promise.resolve();
               },
@@ -444,11 +418,7 @@ export class NewConfigModal extends React.Component<any> {
           key: "roleOrder",
           label: "重启节点顺序",
           type: FormItemType.custom,
-          customFormItem: (
-            <StepSelect
-              disabled={this.props.params?.enginName ? true : false}
-            />
-          ),
+          customFormItem: <StepSelect disabled={this.props.params?.enginName ? true : false} />,
           rules: [
             {
               required: true,
@@ -462,30 +432,6 @@ export class NewConfigModal extends React.Component<any> {
               },
             },
           ],
-        },
-      ],
-      [
-        {
-          key: "description",
-          label: "申请原因",
-          type: FormItemType.textArea,
-          attrs: {
-            placeholder: '请输入1-100字申请原因',
-          },
-          rules: [
-            {
-              required: true,
-              validator: (rule: any, value: string) => {
-                if (!value) {
-                  return Promise.reject('请输入1-100字申请原因')
-                }
-                if (value?.trim().length > 0 && value?.trim().length <= 100) {
-                  return Promise.resolve();
-                }
-                return Promise.reject('请输入1-100字申请原因');
-              },
-            },
-          ]
         },
       ],
     ];
@@ -525,64 +471,53 @@ export class NewConfigModal extends React.Component<any> {
     const formDataRole = {
       roleOrder: this.props.params?.enginName,
     };
-
     return (
       <>
-        <Modal
+        <Drawer
           visible={true}
-          title={this.props.params?.enginName ?  "编辑配置" : "新增配置"}
+          closable={true}
+          onClose={this.handleCancel}
+          title={this.props.params?.enginName ? "编辑配置" : "新增配置"}
           maskClosable={false}
-          onCancel={this.handleCancel}
-          onOk={this.handleSubmit}
-          okText="确定"
-          cancelText="取消"
+          destroyOnClose={true}
           width={728}
+          footer={
+            <div className="footer-btn">
+              <Button style={{ marginRight: 10 }} loading={this.state.confirmLoading} type="primary" onClick={this.handleSubmit}>
+                确定
+              </Button>
+              <Button onClick={this.handleCancel}>取消</Button>
+            </div>
+          }
         >
           {this.state.addFormArr.map((item, index) => {
-              return (
-                <div
+            return (
+              <div key={item} style={index > 0 ? { marginTop: 10 } : null} className="new-config-content">
+                {item > 0 ? (
+                  <div className="new-config-content-del">
+                    <a>{null}</a>
+                    <a onClick={() => this.onDel(index)}>删除</a>
+                  </div>
+                ) : null}
+                <XFormComponent
                   key={item}
-                  style={index > 0 ? { marginTop: 10 } : null}
-                  className="new-config-content"
-                >
-                  {item > 0 ? (
-                    <div className="new-config-content-del">
-                      <a>{null}</a>
-                      <a onClick={() => this.onDel(index)}>删除</a>
-                    </div>
-                  ) : null}
-                  <XFormComponent
-                    key={item}
-                    wrappedComponentRef={(form: any) => {
-                      this.bindForm(form, index);
-                    }}
-                    formData={this.props.params || {}}
-                    formMapList={this.getFormMap(index)}
-                  />
-                </div>
-              );
-            })}
+                  wrappedComponentRef={(form: any) => {
+                    this.bindForm(form, index);
+                  }}
+                  formData={this.props.params || {}}
+                  formMapList={this.getFormMap(index)}
+                />
+              </div>
+            );
+          })}
 
           {this.props.params?.enginName ? null : (
-            <Button
-              style={{ width: 122, height: 30, marginTop: 8 }}
-              type="primary"
-              onClick={this.addConfigItem}
-              block
-              icon={<PlusOutlined />}
-            >
+            <Button className="add-new-config" type="primary" onClick={this.addConfigItem} block icon={<PlusOutlined />}>
               添加新配置
             </Button>
           )}
-          <div className="config-dividing-line"></div>
-          <div style={{ paddingTop: 10 }}>
-            <XFormComponent
-              wrappedComponentRef={this.resetBindForm}
-              formData={formDataRole}
-              formMapList={this.getRolMap()}
-            />
-          </div>
-        </Modal>
+          <XFormComponent wrappedComponentRef={this.resetBindForm} formData={formDataRole} formMapList={this.getRolMap()} />
+        </Drawer>
       </>
     );
   }
@@ -614,22 +549,12 @@ const XFormComponent = (props: IFormProps) => {
 
   const { formData, formMapList, wrappedComponentRef } = props;
   return (
-    <Form
-      ref={wrappedComponentRef}
-      form={form}
-      onValuesChange={onValuesChange}
-      layout={"vertical"}
-      className="base-info-form"
-    >
+    <Form ref={wrappedComponentRef} form={form} onValuesChange={onValuesChange} layout={"vertical"} className="base-info-form">
       {formMapList.map((row: IFormItem[], index: number) => {
         return (
           <Row key={index}>
             {row[0] && (
-              <Col
-                span={row.length === 1 ? 24 : 10}
-                key={"col-1" + index}
-                style={{ paddingRight: 20 }}
-              >
+              <Col span={row.length === 1 ? 24 : 10} key={"col-1" + index} style={{ paddingRight: 20 }}>
                 {!row[0].invisible ? (
                   <Form.Item
                     key={row[0].key}
@@ -637,9 +562,7 @@ const XFormComponent = (props: IFormProps) => {
                     name={row[0].key}
                     rules={row[0].rules || [{ required: false, message: "" }]}
                     initialValue={handleFormItem(row[0], formData).initialValue}
-                    valuePropName={
-                      handleFormItem(row[0], formData).valuePropName
-                    }
+                    valuePropName={handleFormItem(row[0], formData).valuePropName}
                     className="from-confing-item"
                   >
                     {renderFormItem(row[0])}
@@ -658,9 +581,7 @@ const XFormComponent = (props: IFormProps) => {
                     name={row[1].key}
                     rules={row[1].rules || [{ required: false, message: "" }]}
                     initialValue={handleFormItem(row[1], formData).initialValue}
-                    valuePropName={
-                      handleFormItem(row[1], formData).valuePropName
-                    }
+                    valuePropName={handleFormItem(row[1], formData).valuePropName}
                     className="from-confing-item"
                   >
                     {renderFormItem(row[1])}
@@ -686,28 +607,28 @@ const ConfigNameSelect = connect(mapStateToProps)((props: any) => {
     onChange && onChange(params);
   };
 
+  const content = (val) => {
+    if (val.disabled) {
+      return (
+        <Tooltip placement="right" title={"该配置已存在，不可重复添加"}>
+          {val.label || val.value}
+        </Tooltip>
+      );
+    }
+    return val.label?.length > 35 || (val.value + "")?.length > 35 ? (
+      <Tooltip placement="bottomLeft" title={val.label || val.value}>
+        {val.label || val.value}
+      </Tooltip>
+    ) : (
+      val.label || val.value
+    );
+  };
   return (
     <>
-      <Select
-        placeholder="请选择"
-        showSearch={true}
-        disabled={disabled}
-        value={value}
-        onChange={(e: any) => handleChange(e)}
-      >
+      <Select placeholder="请选择配置类别" showSearch={true} disabled={disabled} value={value} onChange={(e: any) => handleChange(e)}>
         {opList.map((v) => (
-          <Select.Option
-            key={v.value || v.label}
-            value={v.value}
-            disabled={v.disabled ? true : false}
-          >
-            {v.label?.length > 35 || (v.value + "")?.length > 35 ? (
-              <Tooltip placement="bottomLeft" title={v.label || v.value}>
-                {v.label || v.value}
-              </Tooltip>
-            ) : (
-              v.label || v.value
-            )}
+          <Select.Option key={v.value || v.label} value={v.value} disabled={v.disabled ? true : false}>
+            {content(v)}
           </Select.Option>
         ))}
       </Select>

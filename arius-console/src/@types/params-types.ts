@@ -2,7 +2,7 @@ export interface IWorkOrder {
   contentObj: object;
   dataCenter?: string;
   submitor?: string;
-  submitorAppid: number;
+  submitorProjectId?: number;
   description?: string;
   type?: string;
 }
@@ -11,6 +11,14 @@ export interface IOperatRecord {
   bizId?: string | number;
   operator?: string;
   moduleId?: number | string;
+  beginTime?: string;
+  content?: string;
+  endTime?: string;
+  page: number;
+  projectName?: string;
+  size: number;
+  triggerWayId?: number;
+  userOperation?: string;
 }
 
 export interface IOpPackageParams {

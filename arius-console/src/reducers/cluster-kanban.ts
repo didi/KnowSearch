@@ -10,6 +10,8 @@ export const initialState: ClusterState = {
   startTime: currentTime - ONE_HOUR,
   endTime: currentTime,
   isMoreDay: false,
+  timeRadioKey: 'oneHour',
+  isUpdate: true,
 };
 
 export default (state = initialState, action: IClusterKanBanAction) => {
@@ -18,6 +20,9 @@ export default (state = initialState, action: IClusterKanBanAction) => {
       return { ...state, ...action.clusterForm };
     }
     case actionTypes.SET_CLUSTER_IS_UPDATE: {
+      return { ...state, ...action.clusterForm };
+    }
+    case actionTypes.SET_KAN_BAN: {
       return { ...state, ...action.clusterForm };
     }
   }

@@ -175,7 +175,10 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     public List<IndexTemplate> pagingGetTemplateSrvByCondition(TemplateQueryDTO param) {
         List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
         String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
-        
+        if(StringUtils.isNotBlank(sortTerm)){
+            sortTerm = sortTerm=="blockRead"?"block_read":"block_write";
+        }
+
         String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
         try {
             indexTemplatePOS = indexTemplateDAO.pagingByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class),
@@ -495,7 +498,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return listAllLogicTemplates().stream()
             .collect(Collectors.toMap(IndexTemplate::getId, indexTemplateLogic -> indexTemplateLogic));
     }
-    
+
     @Override
     public Map<Integer, IndexTemplate> getAllLogicTemplatesMapWithCache() {
         try {
@@ -505,7 +508,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             return getAllLogicTemplatesMap();
         }
     }
-    
+
     @Override
     public List<IndexTemplate> listLogicTemplatesByIds(List<Integer> logicTemplateIds) {
         if (CollectionUtils.isEmpty(logicTemplateIds)) {

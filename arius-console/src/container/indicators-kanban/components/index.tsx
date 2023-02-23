@@ -1,4 +1,3 @@
-export * from "../../../component/hash-menu";
 export * from "./kanban-form";
 export * from "./select-time";
 export * from "./state-config";

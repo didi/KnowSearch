@@ -91,7 +91,7 @@ public class ClusterRestartTaskHandler extends AbstractClusterTaskHandler {
                 //ecm的操作都是属于超级项目下的，所以这里直接采用内部机制
                     .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
                 .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_RESTART)
-                    .content(String.format("重启:【%s】",content.getPhyClusterName()))
+                    .content(content.getPhyClusterName())
                 
                 .bizId(content.getPhyClusterId()).buildDefaultManualTrigger();
                 operateRecordService.save(operateRecord);

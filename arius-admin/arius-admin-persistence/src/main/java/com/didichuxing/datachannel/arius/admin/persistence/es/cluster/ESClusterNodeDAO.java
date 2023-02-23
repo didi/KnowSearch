@@ -127,7 +127,7 @@ public class ESClusterNodeDAO extends BaseESDAO {
                 .map(JSONObject.class::cast)
                 .map(this::buildNodeNamePlugins)
                 .collect(Collectors.toList());
-                
+
     }
     /**
      * 获取集群中节点的插件信息
@@ -148,7 +148,7 @@ public class ESClusterNodeDAO extends BaseESDAO {
             .stream().map(JSONObject.class::cast).map(this::jsonConvertESResponsePluginInfos)
             .flatMap(Collection::stream).distinct().collect(Collectors.toList());
     }
-    
+
     public List<ClusterNodeStats> syncGetNodesStatsWithIndices(String clusterName) {
         ESClient esClient = esOpClient.getESClient(clusterName);
         if (esClient == null) {
@@ -161,7 +161,7 @@ public class ESClusterNodeDAO extends BaseESDAO {
         }
         return Lists.newArrayList();
     }
-    
+
     /**
      * 它将 JSON 对象转换为 ESResponsePluginInfo 对象列表。
      *

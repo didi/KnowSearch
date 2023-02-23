@@ -2,6 +2,16 @@ package com.didichuxing.datachannel.arius.admin.biz.task.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TASK;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.page.TaskPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskHandler;
@@ -31,22 +41,14 @@ import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.task.OpTaskService;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
+import com.didiglobal.knowframework.security.service.UserService;
 import com.didiglobal.logi.op.manager.application.TaskService;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.entity.value.TaskDetail;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
 import com.didiglobal.logi.op.manager.interfaces.assembler.TaskDetailAssembler;
 import com.didiglobal.logi.op.manager.interfaces.vo.TaskDetailVO;
-import com.didiglobal.knowframework.security.service.UserService;
 import com.google.common.collect.Lists;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -58,10 +60,10 @@ public class OpTaskManagerImpl implements OpTaskManager {
     private static final String SUCCESS="success";
     @Autowired
     private OpTaskService opTaskService;
-    
+
     @Autowired
     private HandleFactory handleFactory;
-    
+
     @Autowired
     private UserService userService;
     @Autowired
@@ -141,13 +143,13 @@ public class OpTaskManagerImpl implements OpTaskManager {
       
         return Result.buildSucc(tasks);
     }
-    
+
     @Override
     public Result<List<OpTask>> getPendingTaskByTypes(List<Integer> taskTypes) {
         return Result.buildSucc(
             ConvertUtil.list2List(opTaskService.getPendingTaskByTypes(taskTypes), OpTask.class));
     }
-    
+
     @Override
     public Result<Void> processTask(OpTaskProcessDTO processDTO) throws NotFindSubclassException {
         if (AriusObjUtils.isNull(processDTO.getTaskId())) {
@@ -186,7 +188,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
     public List<OpTask> getSuccessTaskByType(Integer taskType) {
        return opTaskService.getSuccessTaskByType(taskType);
     }
-    
+
     @Override
     public Result<Void> execute(Integer id) {
         final OpTask opTask = opTaskService.getById(id);
@@ -202,9 +204,9 @@ public class OpTaskManagerImpl implements OpTaskManager {
         }
         return  Result.buildFromWithData(execute);
     }
-    
-    
-    
+
+
+
     @Override
     public Result<Void> operateTask(Integer id, String action) {
         final OpTask opTask = opTaskService.getById(id);
@@ -224,7 +226,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
         }
         return Result.buildFromWithData(voidResult);
     }
-    
+
     @Override
     public Result<Void> retryTask(Integer id) {
         final OpTask opTask = opTaskService.getById(id);
@@ -239,9 +241,9 @@ public class OpTaskManagerImpl implements OpTaskManager {
         }
         return Result.buildFromWithData(voidResult);
     }
-    
-   
-    
+
+
+
     @Override
     public Result<Void> operateHost(Integer id, String action, String host, String groupName) {
         final OpTask opTask = opTaskService.getById(id);
@@ -261,7 +263,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
         }
         return Result.buildFromWithData(voidResult);
     }
-    
+
     @Override
     public Result<String> getTaskLog(Integer id, String hostname, String groupName, int type) {
         final OpTask opTask = opTaskService.getById(id);
@@ -272,7 +274,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
         final Integer taskId = Integer.valueOf(opTask.getBusinessKey());
         return Result.buildFromWithData(taskService.getTaskLog(taskId, hostname, type,groupName));
     }
-    
+
     @Override
     public Result<List<TaskDetailVO>> getTaskDetail(Integer id) {
         final OpTask opTask = opTaskService.getById(id);
@@ -289,7 +291,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
         }
         return Result.buildSucc(TaskDetailAssembler.toVOList((List<TaskDetail>) res.getData()));
     }
-    
+
     @Override
     public Result<List<WorkTaskVO>> addTaskESExpand(ESClusterExpandWithPluginDTO data, String operator,
         Integer projectId) throws NotFindSubclassException {
@@ -304,7 +306,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
                         opTaskDTO.setExpandData(content);
                         return opTaskDTO;
                     }).collect(Collectors.toList());
-        
+
         final OpTaskDTO            opTaskDTO  = new OpTaskDTO();
         final ClusterExpandContent content    = ConvertUtil.obj2Obj(data,
             ClusterExpandContent.class);
@@ -332,7 +334,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
 
         return Result.buildSucc(workTaskVOS);
     }
-    
+
     @Override
     public Result<List<WorkTaskVO>> addTaskESShrink(ESClusterShrinkWithPluginDTO data, String operator,
         Integer projectId) throws NotFindSubclassException {
@@ -347,7 +349,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
                     opTaskDTO.setExpandData(content);
                     return opTaskDTO;
                 }).collect(Collectors.toList());
-    
+
         final OpTaskDTO            opTaskDTO  = new OpTaskDTO();
         final ClusterExpandContent content    = ConvertUtil.obj2Obj(data, ClusterExpandContent.class);
         String                     dataCenter = opTaskDTO.getDataCenter();
@@ -374,7 +376,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
 
         return Result.buildSucc(workTaskVOS);
     }
-    
+
     /**
       * > 检查任务是否为 ECM 任务，任务 id 是否正确
       *
@@ -391,10 +393,10 @@ public class OpTaskManagerImpl implements OpTaskManager {
         if (!StringUtils.isNumeric(opTask.getBusinessKey())) {
             return Result.buildNotExist("当前任务id不正确");
         }
-        
+
         return Result.buildSucc();
     }
-    
+
     /**
      * > 检查任务是否正确且未成功执行
      *
@@ -411,7 +413,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
         }
         return Result.buildSucc();
     }
-    
+
     /**
      * > 函数`refreshOpTask`用于更新操作任务的状态
      *

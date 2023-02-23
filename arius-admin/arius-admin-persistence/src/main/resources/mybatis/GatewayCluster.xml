@@ -24,9 +24,9 @@
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert ignore into gateway_cluster_info
-        (cluster_name,component_id,ecm_access,health,proxy_address,memo,data_center)
+        (cluster_name,component_id,ecm_access,health,proxy_address,memo,data_center,version)
         values
-        (#{clusterName},#{componentId},#{ecmAccess},#{health},#{proxyAddress},#{memo},#{dataCenter})
+        (#{clusterName},#{componentId},#{ecmAccess},#{health},#{proxyAddress},#{memo},#{dataCenter},#{version})
     </insert>
 
    

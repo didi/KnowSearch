@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -48,6 +49,16 @@ public class DslTemplateService {
             }
         }
         return dslTemplateESDAO.updateQueryLimitByProjectIdDslTemplate(dslQueryLimitList);
+    }
+
+    /**
+     * 获取查询模板信息
+     * @param dslQueryLimitList
+     * @return
+     */
+    public Map<String, DslTemplatePO> getDslTemplateByKeys(List<DslQueryLimitDTO> dslQueryLimitList) {
+        List<DslQueryLimit> dslQueryLimits = ConvertUtil.list2List(dslQueryLimitList, DslQueryLimit.class);
+        return dslTemplateESDAO.getDslTemplateByKeys(dslQueryLimits);
     }
 
     public Boolean updateDslTemplateStatus(Integer projectId,String dslTemplateMd5) {

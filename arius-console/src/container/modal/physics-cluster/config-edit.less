@@ -1,0 +1,79 @@
+.config-type-box,.config-system-box,.config-running-box {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  .config-vertical-line {
+    width: 2px;
+    height: 10px;
+    margin-right: 4px;
+    background: #2f81f9;
+    border-radius: 1px;
+  }
+}
+
+.config-group-editor-container {
+  position: relative;
+  .config-group-editor {
+    height: 200px;
+  }
+}
+
+.edit-config-group-box {
+  .file-tab {
+    .ant-tabs-nav-add {
+      background-color: #fff;
+    }
+  }
+  .file-tab {
+    .ant-tabs-nav {
+      &::before {
+        border-bottom: none;
+      }
+      .ant-tabs-nav-list {
+        .ant-tabs-tab {
+          border: 0.5px solid rgba(0, 0, 0, 0.36);
+          border-radius: 4px;
+          .file-name-text {
+            font-size: 14px;
+            line-height: 17px;
+          }
+          .file-name-input {
+            border: none;
+            padding: 0;
+            box-shadow: none;
+            &:focus {
+              box-shadow: none;
+            }
+            .ant-input-clear-icon {
+              margin-right: 0;
+            }
+          }
+        }
+        .ant-tabs-tab-active {
+          border: 0.5px solid #1473ff;
+        }
+        .ant-tabs-nav-add {
+          border: none;
+          .add-file {
+            font-size: 14px;
+            color: #1473ff;
+            line-height: 20px;
+            .add {
+              font-size: 16px;
+            }
+          }
+        }
+      }
+    }
+    .ant-tabs-content {
+      display: block;
+    }
+  }
+  .ant-tabs-card.ant-tabs-small > .ant-tabs-nav .ant-tabs-tab {
+    padding: 3px 10px;
+  }
+}
+
+.config-system-box,.config-running-box {
+  margin-top: 16px;
+}

@@ -481,20 +481,20 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                                                                            long startTime, long endTime) {
         List<String> metricsLimit = new ArrayList<>();
         metrics.forEach(metric -> {
-            if (metric.contains(BREAKERS)) {
+            if (metric.contains(BREAKERS)&&metric.contains(LIMIT_SIZE_IN_BYTES)) {
                 metricsLimit.add(metric.replaceAll(LIMIT_SIZE_IN_BYTES, ESTIMATED_SIZE_IN_BYTES));
             }
         });
-        metrics.addAll(metricsLimit);
+        metricsLimit.addAll(metrics);
         String interval = MetricsUtils.getInterval(endTime - startTime);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_CLUSTER_PHY_SINGLE_NODE_NODE,
-            clusterPhyName, nodeName, startTime, endTime, interval, buildAggsDSL(metrics, aggType));
+            clusterPhyName, nodeName, startTime, endTime, interval, buildAggsDSL(metricsLimit, aggType));
 
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
 
         return gatewayClient.performRequestWithRouting(metadataClusterName, nodeName, realIndexName, TYPE, dsl,
-            s -> fetchSingleAggMetrics(s, metrics, nodeName), 3);
+            s -> fetchSingleAggMetrics(s, metricsLimit, nodeName), 3);
     }
 
     /**

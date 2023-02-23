@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,6 +41,7 @@ import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didiglobal.knowframework.elasticsearch.client.utils.JsonUtils;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
 
 /**
  * 索引setting服务实现

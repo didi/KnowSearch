@@ -1,0 +1,169 @@
+@antd-prefix: ant;
+
+.top-popover {
+  min-width: 260px;
+
+  .top-radio {
+    display: flex;
+
+    .title {
+      font-family: PingFangSC-Medium;
+      font-size: 14px;
+      color: #212529;
+      letter-spacing: 0;
+      margin-bottom: 16px;
+    }
+
+    .range {
+      margin-right: 30px;
+    }
+
+    .@{antd-prefix}-radio-button-wrapper {
+      border: none;
+      padding: 0;
+      height: 18px;
+      line-height: 18px;
+    }
+
+    .@{antd-prefix}-radio-button-wrapper-checked:not(.@{antd-prefix}-radio-button-wrapper-disabled):focus-within {
+      box-shadow: none;
+    }
+  }
+
+  .btns {
+    text-align: right;
+    margin-top: 16px;
+
+    Button {
+      border-radius: 4px;
+    }
+
+    Button+Button {
+      margin-left: 8px;
+    }
+  }
+}
+
+.setting-btn {
+  line-height: 17px;
+}
+
+.top-n-tips.ant-tooltip {
+  max-width: 300px;
+}
+
+.status-overview {
+  .state-config-box-content {
+    .state-config-box-content-module {
+      flex: none;
+      width: 12%;
+    }
+
+    .state-config-box-content-module:nth-child(3) {
+      width: 16%;
+    }
+
+    .state-config-box-content-module:nth-child(4) {
+      width: 20%;
+    }
+    
+    .state-config-box-content-module:nth-child(7) {
+      width: 15%;
+    }
+  }
+}
+
+.monitor-overview-content-line-item-header {
+  position: relative;
+}
+
+.line-title,
+.title-content {
+  position: absolute;
+  top: 14.5px;
+  left: 20px;
+  font-family: PingFangSC-Medium;
+  font-size: 16px;
+  color: #303a51;
+  line-height: 24px;
+}
+
+.shard-container {
+  min-width: 518px;
+  padding: 20px;
+  position: relative;
+  border: 1px solid #dcdfe6;
+  border-radius: 2px;
+  margin: 0 0 20px;
+  height: 305px;
+
+  .title-time {
+    position: absolute;
+    right: 20px;
+    top: 14.5px;
+  }
+
+  .shard-table {
+    margin-top: 30px;
+
+    .ant-table-cell {
+      padding: 5px 0px 5px 6px;
+      height: 33px;
+    }
+
+    .ant-table-empty {
+      .ant-empty-normal {
+        margin: 65px 0;
+      }
+    }
+  }
+}
+
+.ant-select-item-option-content .node-select-item {
+  position: relative;
+
+  .ant-tag {
+    position: absolute;
+    right: 0;
+  }
+}
+
+.ant-select-selection-item-content .node-select-item {
+  .ant-tag {
+    display: none;
+  }
+}
+
+.tree-select-node {
+  display: inline-block;
+
+  .ant-select-tree .ant-select-tree-node-content-wrapper {
+    padding: 0 1px;
+  }
+
+  .ant-tree-select-dropdown .ant-select-tree-list-holder-inner .ant-select-tree-treenode {
+    padding-bottom: 12px;
+  }
+
+  .ant-select-tree-checkbox-indeterminate .ant-select-tree-checkbox-inner::after {
+    background-color: #fff;
+    height: 2px;
+  }
+
+  .ant-select-tree-checkbox-indeterminate .ant-select-tree-checkbox-inner {
+    background-color: @primary-color;
+  }
+
+  .ant-select-tree-checkbox-checked .ant-select-tree-checkbox-inner::after {
+    transition: none;
+  }
+
+  .ant-select-tree-title {
+    font-family: PingFangSC-Regular;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.87);
+    letter-spacing: 0;
+    line-height: 22px;
+    font-weight: 400;
+  }
+}

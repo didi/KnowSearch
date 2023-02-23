@@ -1,13 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
-import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.CollectMetrics;
-import com.google.common.collect.Lists;
+import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsComputeType.*;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsComputeType.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
+import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.CollectMetrics;
+import com.google.common.collect.Lists;
 
 public class MonitorCollectMetrics {
 
@@ -559,12 +559,6 @@ public class MonitorCollectMetrics {
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.in_flight_requests.estimated_size_in_bytes")
                 .valueRoute("breakers.in_flight_requests.estimated_size_in_bytes").computeType(NONE).build());
-
-        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.in_flight_http_requests.limit_size_in_bytes")
-                .valueRoute("breakers.in_flight_http_requests.limit_size_in_bytes").computeType(NONE).build());
-
-        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.in_flight_http_requests.estimated_size_in_bytes")
-                .valueRoute("breakers.in_flight_http_requests.estimated_size_in_bytes").computeType(NONE).build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.accounting.limit_size_in_bytes")
                 .valueRoute("breakers.accounting.limit_size_in_bytes").computeType(NONE).build());

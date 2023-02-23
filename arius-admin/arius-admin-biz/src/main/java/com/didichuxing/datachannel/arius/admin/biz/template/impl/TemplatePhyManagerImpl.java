@@ -342,7 +342,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         // 记录操作记录
         Integer projectIdByTemplateLogicId = indexTemplateService.getProjectIdByTemplateLogicId(logicId);
         operateRecordService.saveOperateRecordWithManualTrigger(
-                String.format("复制【%s】物理模板至【%s】", indexTemplatePhy.getCluster(), param.getCluster()), operator,
+                String.format("复制【%s】物理模板【%s】至【%s】", indexTemplatePhy.getCluster(), indexTemplatePhy.getName(), param.getCluster()), operator,
                 AuthConstant.SUPER_PROJECT_ID, indexTemplatePhy.getLogicId(), OperateTypeEnum.TEMPLATE_SERVICE, projectIdByTemplateLogicId);
 
         if (esTemplateService.syncCopyMappingAndAlias(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(),
@@ -376,7 +376,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             if (StringUtils.isNotBlank(editContent)) {
                 Integer projectIdByTemplateLogicId = indexTemplateService.getProjectIdByTemplateLogicId(oldIndexTemplatePhy.getLogicId());
                 operateRecordService.saveOperateRecordWithManualTrigger(
-                        String.format("%s 变更:【%s】", TemplateOperateRecordEnum.CONFIG.getDesc(), editContent),
+                        String.format("%s：%s变更:【%s】", oldIndexTemplatePhy.getName(), TemplateOperateRecordEnum.CONFIG.getDesc(), editContent),
                         operator, AuthConstant.SUPER_PROJECT_ID, oldIndexTemplatePhy.getLogicId(),
                         OperateTypeEnum.TEMPLATE_SERVICE, projectIdByTemplateLogicId);
 

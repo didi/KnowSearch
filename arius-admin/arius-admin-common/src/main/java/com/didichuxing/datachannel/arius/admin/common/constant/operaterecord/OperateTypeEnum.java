@@ -1,11 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.operaterecord;
 
-import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 
 /**
  * 操作类型枚举
@@ -124,6 +125,11 @@ public enum OperateTypeEnum {
      TEMPLATE_MANAGEMENT_EDIT_MAPPING(ModuleEnum.TEMPLATE_MANAGEMENT, "编辑MAPPING", 60),
     TEMPLATE_MANAGEMENT_EDIT_SETTING(ModuleEnum.TEMPLATE_MANAGEMENT, "编辑SETTING", 59),
     /**
+     * 模板管理:读/写状态变更
+     */
+    TEMPLATE_MANAGEMENT_BLOCK_WRITE(ModuleEnum.TEMPLATE_MANAGEMENT, "模板管理写状态变更", 68),
+    TEMPLATE_MANAGEMENT_BLOCK_READ(ModuleEnum.TEMPLATE_MANAGEMENT, "模板管理读状态变更", 99),
+    /**
      * 索引模板管理:索引模板信息修改
      */
     TEMPLATE_MANAGEMENT_INFO_MODIFY(ModuleEnum.TEMPLATE_MANAGEMENT, "索引模板信息修改", 27),
@@ -192,6 +198,10 @@ public enum OperateTypeEnum {
      */
     QUERY_TEMPLATE_DISABLE(ModuleEnum.QUERY_TEMPLATE, "DSL查询模板禁用", 41),
     /**
+     * 查询模板:查询模板状态变更
+     */
+    QUERY_TEMPLATE_STATUS_CHANGE(ModuleEnum.QUERY_TEMPLATE, "查询模板状态变更", 67),
+    /**
      * DSL查询:查询记录
      */
     DSL_QUERY_RECORD(ModuleEnum.DSL_QUERY, "DSL查询记录", 66),
@@ -254,7 +264,11 @@ public enum OperateTypeEnum {
 
     SOFTWARE_ADD(ModuleEnum.SOFTWARE_CENTER, "新建软件", 96),
     SOFTWARE_EDIT(ModuleEnum.SOFTWARE_CENTER, "编辑软件", 97),
-    SOFTWARE_DELETE(ModuleEnum.SOFTWARE_CENTER, "删除软件", 98);
+    SOFTWARE_DELETE(ModuleEnum.SOFTWARE_CENTER, "删除软件", 98),
+    /**
+     * 租户：删除租户
+     */
+    TENANT_DELETE(ModuleEnum.TENANT, "删除租户", 65);
 
     /**
      * 模块

@@ -240,7 +240,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 throw new AdminOperateException(String.format(CREATE_TEMPLATE_FAILED, saveTemplateConfigResult.getMessage()));
             }
     
-            operateRecordService.saveOperateRecordWithManualTrigger(String.format("模版创建：%s", param.getName()),
+            operateRecordService.saveOperateRecordWithManualTrigger(param.getName(),
                     operator, projectId, indexTemplateDTO.getId(), OperateTypeEnum.TEMPLATE_MANAGEMENT_CREATE, projectId);
             //发布创建pipeline的事件
             SpringTool.publish(new LogicTemplateCreatePipelineEvent(this,indexTemplateDTO.getId()));
@@ -449,7 +449,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 String descAfter=param.getDesc();
     
                 operateRecordService.saveOperateRecordWithManualTrigger(
-                        String.format("数据类型变更：【%s】->【%s】; 描述变更:【%s】->【%s】", dataTypeBefore, dataTypeAfter,
+                        String.format("%s数据类型变更：【%s】->【%s】; 描述变更:【%s】->【%s】", oldIndexTemplate.getName(), dataTypeBefore, dataTypeAfter,
                                 descBefore, descAfter), operator, projectId, param.getId(),
                         OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY, projectId);
             }
@@ -478,7 +478,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         String beforeDeleteName = indexTemplateService.getNameByTemplateLogicId(logicTemplateId);
         Result<Void> result = indexTemplateService.delTemplate(logicTemplateId, operator);
         if (result.success()) {
-            operateRecordService.saveOperateRecordWithManualTrigger(String.format("模板【%s】下线", beforeDeleteName),
+            operateRecordService.saveOperateRecordWithManualTrigger(beforeDeleteName,
                     operator, projectId, logicTemplateId, OperateTypeEnum.TEMPLATE_MANAGEMENT_OFFLINE, belongToProjectId);
             //一并下线模板关联的索引
             /**
@@ -597,10 +597,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             Result<Void> updateStatusResult = indexTemplateService.updateTemplateConfig(indexTemplateConfigDTO,
                 operator);
             if (updateStatusResult.success()) {
+                String templateName = indexTemplateService.getNameByTemplateLogicId(templateLogicId);
                 // rollover状态修改记录(兼容开启或者关闭)
                 operateRecordService.saveOperateRecordWithManualTrigger(
-                        String.format("%s:rollover 状态修改为:【%s】", TemplateOperateRecordEnum.ROLLOVER.getDesc(),
-                                (newDisable ? "关闭" : "开启")), operator, projectId, templateLogicId,
+                        String.format("%s:【%s】%s", templateName, (newDisable ? "关闭" : "开启"),
+                                TemplateOperateRecordEnum.ROLLOVER.getDesc()), operator, projectId, templateLogicId,
                         OperateTypeEnum.TEMPLATE_SERVICE, projectIdByTemplateLogicId);
             }
         }
@@ -776,7 +777,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return result;
         }
         List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
+        Map<Long, IndexTemplatePhy> templatePhyMap = ConvertUtil.list2Map(templatePhyList, IndexTemplatePhy::getId, v -> v);
         IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
+        IndexTemplatePhy defaultTemplatePhy = new IndexTemplatePhy();
         for (IndexTemplatePhy templatePhy : templatePhyList) {
             if (templatePhy.getShard().equals(shardNum)) {
                 throw new AdminOperateException("该模板已经是" + shardNum + "分片", FAIL);
@@ -792,8 +795,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                     throw new AdminOperateException(updateDBResult.getMessage(), FAIL);
                 }
                 operateRecordService.saveOperateRecordWithManualTrigger(
-                        String.format("同步修改 es 集群 [%s] 中模板[%s]shard 数[%d]", templatePhy.getCluster(),
-                                templatePhy.getName(), shardNum), operator, projectId, logicTemplateId,
+                        String.format("同步修改 es 集群 [%s] 中模板[%s]shard 数[%d]-->[%d]", templatePhy.getCluster(),
+                                templatePhy.getName(), templatePhyMap.getOrDefault(templatePhy.getId(),defaultTemplatePhy).getShard(), shardNum),
+                        operator, projectId, logicTemplateId,
                         OperateTypeEnum.TEMPLATE_SERVICE_CAPACITY,projectId);
             }
         }
@@ -1078,34 +1082,24 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return true;
         
         }
-        try {
-            String cluster = indexTemplateWithPhyTemplates.getMasterPhyTemplate().getCluster();
-            String expression = indexTemplateWithPhyTemplates.getMasterPhyTemplate().getExpression();
-            if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
-                    TemplateHealthEnum.RED)) {
-                templatePO.setHealth(TemplateHealthEnum.RED.getCode());
-                indexTemplateService.update(templatePO);
-                return true;
-            }
-             if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
-                    TemplateHealthEnum.YELLOW)) {
-                templatePO.setHealth(TemplateHealthEnum.YELLOW.getCode());
-                indexTemplateService.update(templatePO);
-                return true;
-            }
-            
-            if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
-                    TemplateHealthEnum.GREEN)) {
-                templatePO.setHealth(TemplateHealthEnum.GREEN.getCode());
-                indexTemplateService.update(templatePO);
-                return true;
-            }
 
-            return true;
-        } catch (Exception e) {
-            LOGGER.error("class=TemplateLogicManagerImpl||method=updateTemplateHealthByLogicId||logicId={}", logicId, e);
+        // 通配符value
+        String wildcard = indexTemplateWithPhyTemplates.getMasterPhyTemplate().getName() + "*";
+        // 从 arius_stats_index_info 元数据索引中获取模版所有索引的health状态，根据index health确定模版health。
+        try {
+            Integer templateHealthCode = esTemplateService.getTemplateHealthCode(masterCluster, wildcard);
+            templatePO.setHealth(templateHealthCode);
+            boolean updateResult = indexTemplateService.update(templatePO);
+            if(!updateResult) {
+                LOGGER.error("class=TemplateLogicManagerImpl||method=updateTemplateHealthByLogicId||logicId={}, update DB failed!", logicId);
+                return false;
+            }
+        }catch (Exception e) {
+            LOGGER.error("class=TemplateLogicManagerImpl||method=updateTemplateHealthByLogicId||logicId={}, update template health failed", logicId);
             return false;
         }
+
+        return true;
     }
     
     /**
@@ -1134,8 +1128,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             Result<Void> updateTemplateWriteRateLimit = indexTemplateService
                 .updateTemplateWriteRateLimit(consoleTemplateRateLimitDTO);
             if (updateTemplateWriteRateLimit.success()) {
+                String templateName = indexTemplateService.getNameByTemplateLogicId(consoleTemplateRateLimitDTO.getLogicId());
                 operateRecordService.saveOperateRecordWithManualTrigger(
-                        String.format("数据库写入限流值修改 %s->%s", consoleTemplateRateLimitDTO.getCurRateLimit(),
+                        String.format("修改模板%s限流值 %s-->%s", templateName, consoleTemplateRateLimitDTO.getCurRateLimit(),
                                 consoleTemplateRateLimitDTO.getAdjustRateLimit()), operator, projectId,
                         consoleTemplateRateLimitDTO.getLogicId(),
                         OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT, projectId);
@@ -1173,7 +1168,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (result.success()) {
             // 是否禁写，0：否，1：是
             operateRecordService.saveOperateRecordWithManualTrigger(
-                    Objects.equals(status, Boolean.TRUE) ? "禁写" : "开启写", operator, projectId, templateId,
+                    String.format("%s：%s", logicTemplate.getName(), Objects.equals(status, Boolean.TRUE) ? "禁写" : "开启写"),
+                    operator, projectId, templateId,
                     OperateTypeEnum.TEMPLATE_MANAGEMENT_CREATE, projectId);
         }
     
@@ -1206,7 +1202,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (result.success()) {
             // 是否禁写，0：否，1：是
             operateRecordService.saveOperateRecordWithManualTrigger(
-                    Objects.equals(status, Boolean.TRUE) ? "禁读" : "开启读", operator, projectId, templateId,
+                    String.format("%s：%s", logicTemplate.getName(), Objects.equals(status, Boolean.TRUE) ? "禁读" : "开启读"),
+                    operator, projectId, templateId,
                     OperateTypeEnum.TEMPLATE_MANAGEMENT_CREATE, projectId);
         }
     

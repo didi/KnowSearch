@@ -555,7 +555,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
             
             if (esSuccess) {
                 operateRecordService.saveOperateRecordWithSchedulingTasks(
-                        String.format("rateLimit:%s->%s", rateLimitOld, rateLimitNew), SYSTEM.getDesc(),
+                        String.format("%s修改限流值:%s-->%s", templatePhysical.getName(), rateLimitOld, rateLimitNew), SYSTEM.getDesc(),
                         AuthConstant.SUPER_PROJECT_ID, templatePhysical.getId(),
                         OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY, templateLogicWithPhysical.getProjectId());
             }

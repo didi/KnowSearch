@@ -22,7 +22,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfi
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.config.AriusConfigInfoDAO;
@@ -86,7 +85,7 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
         boolean succ = (1 == configInfoDAO.insert(param));
         if (succ) {
             operateRecordService.save(buildOperateRecord(configInfoDTO.getId(),operator,OperateTypeEnum.SETTING_ADD,
-                    String.format("新增平台配置, 配置组:%s, 配置名称%s",
+                    String.format("配置组:%s, 配置名称%s",
                     configInfoDTO.getValueGroup(), configInfoDTO.getValueName())));
         }
         return Result.build(succ, param.getId());
@@ -109,7 +108,7 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
         boolean succ = (1 == configInfoDAO.updateByIdAndStatus(configId, AriusConfigStatusEnum.DELETED.getCode()));
         if (succ) {
             operateRecordService.save(buildOperateRecord(configId,operator,OperateTypeEnum.SETTING_DELETE,
-                    String.format("删除平台配置, 配置组:%s, 配置名称%s", configInfoPO.getValueGroup(), configInfoPO.getValueName())));
+                    String.format("配置组:%s, 配置名称%s", configInfoPO.getValueGroup(), configInfoPO.getValueName())));
         }
 
         return Result.build(succ);
@@ -137,7 +136,7 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
 
         if (succ) {
             operateRecordService.save(buildOperateRecord(configInfoPO.getId(),operator,OperateTypeEnum.SETTING_MODIFY
-                    ,String.format("编辑平台配置，配置组：%s，配置名称%s，配置值：【%s】->【%s】", configInfoPO.getValueGroup(),
+                    ,String.format("配置组：%s，配置名称%s，配置值：【%s】->【%s】", configInfoPO.getValueGroup(),
                             configInfoPO.getValueName(),configInfoPO.getValue(),configInfoDTO.getValue())));
 
         }

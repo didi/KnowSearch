@@ -1,11 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
-import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -199,6 +201,16 @@ public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy> {
      * gateway ids, 逗号分割
      */
     private String gatewayIds;
+
+    /**
+     * kibana外链地址
+     */
+    private String                    kibanaAddress;
+
+    /**
+     * cerebro外链地址
+     */
+    private String                    cerebroAddress;
 
     @Override
     public int compareTo(ClusterPhy o) {

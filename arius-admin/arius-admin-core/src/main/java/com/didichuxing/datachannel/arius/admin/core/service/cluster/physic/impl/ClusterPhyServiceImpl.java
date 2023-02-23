@@ -521,6 +521,10 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
             param.setHttpWriteAddress("");
         }
 
+        if (param.getHttpAddress() == null) {
+            param.setHttpAddress("");
+        }
+
         if (param.getPassword() == null) {
             param.setPassword("");
         }
@@ -579,6 +583,15 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         }
         if (null == param.getGatewayUrl()) {
             param.setGatewayUrl("");
+        }
+        if (null == param.getKibanaAddress()) {
+            param.setKibanaAddress("");
+        }
+        if (null == param.getCerebroAddress()) {
+            param.setCerebroAddress("");
+        }
+        if (null == param.getProxyAddress()) {
+            param.setProxyAddress("");
         }
     }
 

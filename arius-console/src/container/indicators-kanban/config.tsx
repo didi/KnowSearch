@@ -4,7 +4,7 @@ import { Tooltip } from "antd";
 import moment from "moment";
 import { toFixedNum } from "lib/utils";
 
- // 图表单位映射
+// 图表单位映射
 export const unitMap = {
   none: {
     // 图表单位名称
@@ -20,6 +20,12 @@ export const unitMap = {
     name: "个",
     formatter: toFixedNum,
   },
+  TB: {
+    name: "TB",
+    formatter: (num) => {
+      return toFixedNum(num / 1024 / 1024 / 1024 / 1024, 3);
+    },
+  },
   GB: {
     name: "GB",
     formatter: (num) => {
@@ -33,37 +39,39 @@ export const unitMap = {
     },
   },
   ms: {
-    name: "ms",
+    name: "MS",
     formatter: toFixedNum,
   },
   countS: {
-    name: "个/s",
+    name: "个/S",
     formatter: (num) => {
       return toFixedNum(num, 1);
     },
   },
   mbS: {
-    name: "MB/s",
+    name: "MB/S",
     formatter: (num) => {
       return toFixedNum(num / 1024 / 1024, 3);
     },
   },
   s: {
-    name: "s",
-    formatter: toFixedNum,
+    name: "S",
+    formatter: (num) => {
+      return toFixedNum(num / 1000, 3);
+    },
   },
   numS: {
     name: "次",
     formatter: toFixedNum,
   },
   ss: {
-    name: "次/s",
+    name: "次/S",
     formatter: (num) => {
       return toFixedNum(num, 3);
     },
   },
   mins: {
-    name: "次/min",
+    name: "次/MIN",
     formatter: toFixedNum,
   },
   item: {
@@ -71,7 +79,7 @@ export const unitMap = {
     formatter: toFixedNum,
   },
   itemMin: {
-    name: "条/min",
+    name: "条/MIN",
     formatter: toFixedNum,
   },
   byte: {
@@ -79,11 +87,11 @@ export const unitMap = {
     formatter: toFixedNum,
   },
   countM: {
-    name: "个/min",
+    name: "个/MIN",
     formatter: toFixedNum,
   },
   characterMin: {
-    name: "字符/min",
+    name: "字符/MIN",
     formatter: toFixedNum,
   },
 };
@@ -92,14 +100,14 @@ export const unitMap = {
 const title = function () {
   const unit = this.unit?.name ? `(${this.unit?.name})` : "";
   return this.name + unit;
-}
+};
 
 // 给图标的指标项添加标题
-export const addChartTitle = (data: {[key: string]: any}) => {
-  for(let key in data) {
+export const addChartTitle = (data: { [key: string]: any }) => {
+  for (let key in data) {
     data[key].title = title;
   }
-}
+};
 
 export const colorList = [
   "#5B73F0",
@@ -136,6 +144,7 @@ export const colorList = [
 export interface metricsContentsType {
   metricsContentCells: { timeStamp: number; value: number }[];
   name: string;
+  cluster: string;
 }
 export interface metricsType {
   metricsContents: metricsContentsType[];
@@ -174,6 +183,24 @@ const markLine = (val1 = 50000, val2 = 100000) => ({
   ],
 });
 
+const markLimitLine = (val: number, unitMap) => {
+  return {
+    data: [
+      {
+        name: `阈值${unitMap.formatter(val)}${unitMap.name}`,
+        yAxis: unitMap.formatter(val),
+        label: {
+          formatter: "{b}",
+          position: "insideStartTop",
+        },
+        lineStyle: {
+          color: "#F11919",
+        },
+      },
+    ],
+  };
+};
+
 // 图表 tooltip 展示的样式
 const tooltipFormatter = (date, arr, unit, isShowTooltipModal, metricsType, isShowTaskTooltipModal, clusterPhyName) => {
   // 新增从大到小排序
@@ -183,16 +210,20 @@ const tooltipFormatter = (date, arr, unit, isShowTooltipModal, metricsType, isSh
       (item) => `<div style="margin: 3px 0;line-height:1;">
           <div style="margin: 0px 0 0;line-height:1;">
           ${item.marker}
-          <span style="font-size:14px;color:#666;pointer-events: auto;font-weight:400;margin-left:2px;${isShowTooltipModal ? 'cursor: pointer' : ''}" 
+          <span style="font-size:14px;color:#666;pointer-events: auto;font-weight:400;margin-left:2px;${
+            isShowTooltipModal ? "cursor: pointer" : ""
+          }" 
+          ${
+            isShowTaskTooltipModal
+              ? `onclick="window.showTaskTooltipModal('${clusterPhyName}', '${item.seriesName}', '${item.name}')"}`
+              : ""
+          }
             ${isShowTooltipModal ? `onclick="window.showTooltipModal('${item.seriesName}', '${metricsType}')"}` : ""}
-            ${isShowTaskTooltipModal ? `onclick="window.showTaskTooltipModal('${clusterPhyName}', '${item.seriesName}', '${item.name}')"}` : ""}>
+           >
               ${item.seriesName}
             </span>
             <span style="float:right;margin-left:20px;font-size:14px;color:#666;font-weight:900">
-              ${item.value > 10000
-              ? toFixedNum(item.value / 10000, 2) + "W"
-              : item.value
-            } ${unit || ""}
+              ${item.value > 10000 ? toFixedNum(item.value / 10000, 2) + "W" : item.value} ${unit || ""}
             </span>
             <div style="clear:both"></div>
           </div>
@@ -221,26 +252,26 @@ const tooltipPosition = (pos, params, dom, rect, size, showLegend) => {
   const [width, height] = size.viewSize;
 
   let domHeight = (dom as any).offsetHeight;
-  
-  if(domHeight > 350) {
+
+  if (domHeight > 350) {
     domHeight = 250;
   }
-  
+
   const domWidth = (dom as any).offsetWidth || 390;
-  
   const obj = { top: y - domHeight - 10 };
 
-  // showLegend 是否展示左侧 legend 
-  const chartPosition =  showLegend ?  width / 2 - 100 : width / 2 - 20;
-
-  if(x > chartPosition) {
+  // showLegend 是否展示左侧 legend
+  const chartPosition = showLegend ? width - 40 : width / 2 - 20;
+  if (x > chartPosition) {
     // 在鼠标左侧展示
     obj["left"] = x - domWidth - 10;
+  } else if (x + domWidth > width) {
+    // 右侧超出，设置固定位置
+    obj["right"] = -50;
   } else {
     // 在鼠标右侧展示
     obj["left"] = x + 10;
   }
- 
   return obj;
 };
 
@@ -254,22 +285,23 @@ const isConversion = (series) => {
         }
       }
       return item > 1000;
-    })
+    });
   });
-}
+};
 interface lineOptionType {
-  title: string,
-  xAxisData: number[],
-  series: seriesType[],
-  unitMap?: { [key: string]: any },
-  isMoreDay?: boolean,
-  isMarkLine?: boolean,
-  color?: string[],
-  isShowTooltipModal?: boolean,
-  isShowTaskTooltipModal?: boolean,
-  metricsType?: string,
-  showLegend?: boolean,
-  clusterPhyName?: string,
+  title: string;
+  xAxisData: number[];
+  series: seriesType[];
+  unitMap?: { [key: string]: any };
+  isMoreDay?: boolean;
+  isMarkLine?: boolean;
+  color?: string[];
+  isShowTooltipModal?: boolean;
+  isShowTaskTooltipModal?: boolean;
+  metricsType?: string;
+  showLegend?: boolean;
+  clusterPhyName?: string;
+  limit?: number;
 }
 
 export const getLineOption = ({
@@ -283,7 +315,7 @@ export const getLineOption = ({
   // 是否展示警戒线
   isMarkLine = false,
   color = colorList,
-  // 是否展示可以点击 Tooltip 并展示弹窗 
+  // 是否展示可以点击 Tooltip 并展示弹窗
   isShowTooltipModal = false,
   // 是否展示可以点击 Tooltip 并展示task弹窗
   isShowTaskTooltipModal = false,
@@ -291,22 +323,23 @@ export const getLineOption = ({
   metricsType,
   // 是否显示左侧 legend
   showLegend = true,
-  clusterPhyName = ''
+  clusterPhyName = "",
+  // 阈值线阈值
+  limit,
 }: lineOptionType) => {
   let seriesData;
-  let unitFormatter = unitMap.formatter;
-  let unitName = unitMap.name;
-
+  let unitFormatter = unitMap?.formatter;
+  let unitName = unitMap?.name;
   if (unitFormatter) {
     // 根据数值大小判断单位是否需要进行转换
-    if (unitName === 'ms' && isConversion(series)) {
+    if (unitName === "ms" && isConversion(series)) {
       unitFormatter = (num) => {
         let val = Number(num);
         return toFixedNum(val / 1000, 3);
-      }
-      unitName = 's';
-      title = title.replace('ms', 's');
-    } 
+      };
+      unitName = "s";
+      title = title.replace("ms", "s");
+    }
     seriesData = series.map((item: any) => ({
       name: item?.name || "",
       data: item?.data.map((el) => {
@@ -319,30 +352,42 @@ export const getLineOption = ({
         return unitFormatter(el);
       }),
       type: "line",
-      markLine: isMarkLine ? markLine() : {},
+      markLine: isMarkLine ? markLine() : limit || limit === 0 ? markLimitLine(limit, unitMap) : {},
       showSymbol: false,
     }));
   } else {
     seriesData = series.map((item) => ({
       ...item,
       type: "line",
-      markLine: isMarkLine ? markLine() : {},
+      markLine: isMarkLine ? markLine() : limit || limit === 0 ? markLimitLine(limit, unitMap) : {},
       showSymbol: false,
     }));
   }
 
   return {
     color: color,
+    toolbox: {
+      feature: {
+        dataZoom: {
+          show: true,
+          iconStyle: {
+            opacity: 0,
+          },
+          yAxisIndex: "none",
+        },
+      },
+    },
     title: {
-      text: title,
+      // text: title,
       top: showLegend ? "20" : 0,
       left: showLegend ? "20" : 0,
     },
     tooltip: {
       trigger: "axis",
-      position: (pos, params, dom, rect, size,) => {
-        return tooltipPosition(pos, params, dom, rect, size, showLegend)
+      position: (pos, params, dom, rect, size) => {
+        return tooltipPosition(pos, params, dom, rect, size, showLegend);
       },
+      extraCssText: "z-index: 101",
       formatter: (params: any) => {
         let res = "";
         if (params != null && params.length > 0) {
@@ -353,33 +398,35 @@ export const getLineOption = ({
             isShowTooltipModal,
             metricsType,
             isShowTaskTooltipModal,
-            clusterPhyName,
+            clusterPhyName
           );
         }
         return res;
       },
     },
-    legend: showLegend ? {
-      type: "scroll",
-      orient: "vertical",
-      right: "10",
-      top: "16%",
-      bottom: "20%",
-      icon: "rect",
-      itemHeight: 2,
-      itemWidth: 14,
-      textStyle: {
-        width: 135,
-        overflow: "truncate",
-        ellipsis: "...",
-      },
-      tooltip: {
-        show: true,
-      },
-    } : null,
+    legend: showLegend
+      ? {
+          type: "scroll",
+          orient: "vertical",
+          right: "10",
+          top: "16%",
+          bottom: "20%",
+          icon: "rect",
+          itemHeight: 2,
+          itemWidth: 14,
+          textStyle: {
+            width: 135,
+            overflow: "truncate",
+            ellipsis: "...",
+          },
+          tooltip: {
+            show: true,
+          },
+        }
+      : null,
     grid: {
       left: showLegend ? "20" : 0,
-      right: showLegend ? "165" : 20,
+      right: showLegend ? "200" : 20,
       bottom: showLegend ? "3%" : 0,
       containLabel: true,
     },
@@ -393,18 +440,22 @@ export const getLineOption = ({
           if (!isMoreDay) {
             return moment(value).format("HH:mm");
           } else {
-            return (
-              moment(value).format("HH:mm") +
-              "\n" +
-              moment(value).format("MM/DD")
-            );
+            return moment(value).format("HH:mm") + "\n" + moment(value).format("MM/DD");
           }
         },
       },
     },
     yAxis: {
       type: "value",
+      max: (value) => {
+        let max;
+        if (limit && unitMap.formatter(limit) > value.max) {
+          max = unitMap.formatter(limit);
+        }
+        return max;
+      },
       axisLabel: {
+        showMaxLabel: true,
         formatter: function (value) {
           if (value < 10000) {
             return value;
@@ -418,44 +469,44 @@ export const getLineOption = ({
   } as ECOption;
 };
 
-export const getOption = (
-  metrics: metricsType,
+export const getOption = ({
+  metrics,
   configData,
-  isMoreDay: boolean = false,
-  isMarkLine: boolean = false,
-  isShowTooltipModal: boolean = false,
-  showLegend: boolean = true,
-  isShowTaskTooltipModal: boolean = false,
-  clusterPhyName: string = '',
-) => {
+  isMoreDay = false,
+  isMarkLine = false,
+  isShowTooltipModal = false,
+  showLegend = true,
+  isShowTaskTooltipModal = false,
+  clusterPhyName = "",
+  needShowClusterName = false,
+  limit,
+}) => {
   if (!metrics || !metrics.type) {
     return {};
   }
 
-  const title =
-    (configData[metrics.type] && configData[metrics.type].title()) ||
-    metrics.type;
-
+  const title = (configData[metrics.type] && configData[metrics.type].title()) || metrics.type;
   const xAxisData = [];
-
   const series = metrics.metricsContents.map((item, index) => ({
-    name: item.name,
-    data: item.metricsContentCells.sort((a, b) => a.timeStamp - b.timeStamp).map((item) => {
-      if (index === 0) {
-        xAxisData.push(item.timeStamp);
-      }
-      return {
-        value: item.value,
-        timestamp: item.timeStamp,
-      };
-    }),
+    name: needShowClusterName ? `${item.cluster || ""}_${item.name}` : item.name,
+    data: item.metricsContentCells
+      .sort((a, b) => a.timeStamp - b.timeStamp)
+      .map((item) => {
+        if (index === 0) {
+          xAxisData.push(item.timeStamp);
+        }
+        return {
+          value: item.value,
+          timestamp: item.timeStamp,
+        };
+      }),
   }));
 
   return getLineOption({
     title,
     xAxisData,
     series,
-    unitMap: configData[metrics.type].unit,
+    unitMap: configData[metrics.type]?.unit,
     isMoreDay,
     isMarkLine,
     isShowTooltipModal,
@@ -463,6 +514,7 @@ export const getOption = (
     showLegend,
     clusterPhyName,
     isShowTaskTooltipModal,
+    limit,
   });
 };
 
@@ -476,11 +528,7 @@ export const objFlat = (data: { [key: string]: any[] }) => {
   return arr;
 };
 
-export const ellipsis = (
-  str: string | number,
-  num: number,
-  unit: string = ""
-) => {
+export const ellipsis = (str: string | number, num: number, unit: string = "") => {
   return String(str).length > num ? (
     <Tooltip placement="top" title={`${str}${unit || ""}`}>
       {String(str).substring(0, num) + "..."}

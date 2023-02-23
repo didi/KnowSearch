@@ -1,20 +1,14 @@
-import * as React from "react";
+import React, { useState } from "react";
 import { XFormWrapper } from "component/x-form-wrapper";
 import { useSelector, shallowEqual, useDispatch } from "react-redux";
 import * as actions from "actions";
-import { notification } from "antd";
+import { XNotification } from "component/x-notification";
 import { FormItemType, IFormItem } from "component/x-form";
 import { editPlug } from "api/plug-api";
 
 const EditPluginDesc = () => {
-  const desc = "";
   const dispatch = useDispatch();
-
-  const { params, cb } = useSelector(
-    (state) => ({ params: (state as any).modal.params, cb: (state as any).modal.cb }),
-    shallowEqual
-  );
-
+  const { params, cb } = useSelector((state) => ({ params: (state as any).modal.params, cb: (state as any).modal.cb }), shallowEqual);
   const { record } = params;
 
   const xFormModalConfig = {
@@ -23,6 +17,12 @@ const EditPluginDesc = () => {
         key: "desc",
         type: FormItemType.textArea,
         label: "插件描述",
+        formAttrs: {
+          style: { margin: 0 },
+        },
+        attrs: {
+          placeholder: "请输入插件描述，0-100字",
+        },
         rules: [
           {
             validator: (rule: any, value: string) => {
@@ -37,9 +37,6 @@ const EditPluginDesc = () => {
             },
           },
         ],
-        attrs: {
-          placeholder: "请输入该项目描述，0-100字",
-        },
       },
     ] as IFormItem[],
     visible: true,
@@ -50,6 +47,7 @@ const EditPluginDesc = () => {
       } || {},
     isWaitting: true,
     width: 660,
+    needSuccessMessage: false,
     onCancel: () => {
       dispatch(actions.setModalId(""));
     },
@@ -57,7 +55,7 @@ const EditPluginDesc = () => {
       const { desc } = result;
       return editPlug(record.id, desc)
         .then(() => {
-          notification.success({ message: `编辑成功` });
+          XNotification({ type: "success", message: "编辑成功" });
         })
         .finally(() => {
           cb && cb();

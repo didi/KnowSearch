@@ -32,4 +32,9 @@ public class ScriptQueryVO extends BaseVO {
      */
     @ApiModelProperty("描述")
     private String describe;
+    /**
+     * 模板超时时间
+     */
+    @ApiModelProperty("模板超时时间")
+    private Integer timeout;
 }

@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esm
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeToIndexTempBean;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didiglobal.knowframework.log.ILog;
 import com.didiglobal.knowframework.log.LogFactory;
 

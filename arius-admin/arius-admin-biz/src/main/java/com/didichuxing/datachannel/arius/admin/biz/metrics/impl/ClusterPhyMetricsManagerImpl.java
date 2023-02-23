@@ -181,6 +181,58 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
     }
 
     @Override
+    public Result<List<VariousLineChartMetricsVO>> getMultiClusterIndicesMetrics(MultiMetricsClusterPhyIndicesDTO param,
+                                                                          Integer projectId, String userName,
+                                                                          ClusterPhyTypeMetricsEnum metricsTypeEnum){
+        MetricsClusterPhyIndicesDTO phyIndicesDTO = ConvertUtil.obj2Obj(param, MetricsClusterPhyIndicesDTO.class);
+        if(AriusObjUtils.isEmptyList(param.getIndexNames())){
+            return getClusterMetricsByMetricsType(phyIndicesDTO, projectId, userName, metricsTypeEnum);
+        }
+
+        List<VariousLineChartMetricsVO> result = new ArrayList<>();
+        for (String indexName : param.getIndexNames()) {
+            try {
+                phyIndicesDTO.setIndexName(indexName);
+                Result<List<VariousLineChartMetricsVO>> indexMetrics = getClusterMetricsByMetricsType(phyIndicesDTO,
+                        projectId, userName, metricsTypeEnum);
+                if(indexMetrics.success()) {
+                    result.addAll(indexMetrics.getData());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=getMultiClusterIndicesMetrics||errMsg={}", e);
+            }
+        }
+
+        return Result.buildSucc(MetricsUtils.joinDuplicateTypeVOs(result));
+    }
+
+    @Override
+    public Result<List<VariousLineChartMetricsVO>> getMultiClusterTemplatesMetrics(MultiMetricsClusterPhyTemplateDTO param,
+                                                                                 Integer projectId, String userName,
+                                                                                 ClusterPhyTypeMetricsEnum metricsTypeEnum){
+        MetricsClusterPhyTemplateDTO phyTemplateDTO = ConvertUtil.obj2Obj(param, MetricsClusterPhyTemplateDTO.class);
+        if(AriusObjUtils.isEmptyList(param.getTemplateIdList())){
+            return getClusterMetricsByMetricsType(phyTemplateDTO, projectId, userName, metricsTypeEnum);
+        }
+
+        List<VariousLineChartMetricsVO> result = new ArrayList<>();
+        for (Integer templateId : param.getTemplateIdList()) {
+            try {
+                phyTemplateDTO.setLogicTemplateId(templateId);
+                Result<List<VariousLineChartMetricsVO>> templateMetrics = getClusterMetricsByMetricsType(phyTemplateDTO,
+                        projectId, userName, metricsTypeEnum);
+                if(templateMetrics.success()) {
+                    result.addAll(templateMetrics.getData());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=getMultiClusterTemplatesMetrics||errMsg={}", e);
+            }
+        }
+
+        return Result.buildSucc(MetricsUtils.joinDuplicateTypeVOs(result));
+    }
+
+    @Override
     public List<String> listConfigMetricsByCondition(UserConfigInfoDTO userConfigInfoDTO, String userName, Integer projectId) {
         userConfigInfoDTO.setUserName(userName);
         userConfigInfoDTO.setProjectId(projectId);

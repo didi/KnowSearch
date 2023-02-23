@@ -37,13 +37,15 @@
         <result column="component_id" jdbcType="BIGINT" property="componentId"/>
         <result column="proxy_address" jdbcType="VARCHAR" property="proxyAddress"/>
         <result column="gateway_ids" jdbcType="VARCHAR" property="gatewayIds"/>
+        <result column="kibana_address"                jdbcType="VARCHAR" property="kibanaAddress"/>
+        <result column="cerebro_address"                jdbcType="VARCHAR" property="cerebroAddress"/>
     </resultMap>
 
     <sql id="Base_Column_List">
        id, cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,image_name, idc,
         es_version, `level`, `password`, cfg_id, package_id, plug_ids, creator,ns_tree,  create_time, update_time,
            run_mode, write_action, health, active_shard_num, disk_total, disk_usage, disk_usage_percent, tags,platform_type,resource_type,gateway_url
-        ,ecm_access, component_id, proxy_address, gateway_ids
+        ,ecm_access, component_id, proxy_address, gateway_ids, kibana_address, cerebro_address
     </sql>
 
     <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO"
@@ -52,12 +54,12 @@
         (cluster, read_address, write_address, http_address, http_write_address, `desc`, `type`, data_center,
          image_name, idc, es_version, `level`, package_id, plug_ids, creator, ns_tree, run_mode,
          write_action, health, `password`, active_shard_num, disk_total, disk_usage, disk_usage_percent, `tags`,
-         platform_type, resource_type, gateway_url,ecm_access, component_id, proxy_address, gateway_ids)
+         platform_type, resource_type, gateway_url,ecm_access, component_id, kibana_address, cerebro_address,proxy_address, gateway_ids)
         values (#{cluster}, #{readAddress}, #{writeAddress}, #{httpAddress}, #{httpWriteAddress}, #{desc}, #{type},
                 #{dataCenter}, #{imageName}, #{idc}, #{esVersion}, #{level}, #{packageId}, #{plugIds}, #{creator},
                 #{nsTree}, #{runMode}, #{writeAction}, #{health}, #{password}, #{activeShardNum},
                 #{diskTotal}, #{diskUsage}, #{diskUsagePercent}, #{tags}, #{platformType}, #{resourceType},
-                #{gatewayUrl},#{ecmAccess}, #{componentId}, #{proxyAddress}, #{gatewayIds})
+                #{gatewayUrl},#{ecmAccess}, #{componentId}, #{kibanaAddress},#{cerebroAddress},#{proxyAddress}, #{gatewayIds})
     </insert>
 
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO">
@@ -102,7 +104,9 @@
         <if test="gatewayIds != null">
             , gateway_ids = #{gatewayIds}
         </if>
-    </trim>
+            <if test="kibanaAddress != null">, kibana_address = #{kibanaAddress}</if>
+            <if test="cerebroAddress != null">, cerebro_address = #{cerebroAddress}</if>
+        </trim>
         where id = #{id} and is_active = 1;
     </update>
 
@@ -283,26 +287,26 @@
         where is_active = 1
         and package_id = #{packageId}
     </select>
-    
+
     <select id="getComponentIdById" resultType="java.lang.Integer">
         SELECT component_id
         FROM es_cluster_phy_info
         WHERE is_active = 1 AND id = #{clusterPhyId}
     </select>
-    
+
     <select id="getOneByComponentId" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>
         FROM es_cluster_phy_info
         WHERE is_active = 1 AND  component_id = #{componentId}
     </select>
-    
+
     <update id="updateOneVersionByComponentId">
         UPDATE es_cluster_phy_info
         SET es_version = #{version}
         where is_active = 1 AND component_id = #{componentId}
     </update>
-    
+
     <select id="listClusterByGatewayId" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>

@@ -1,34 +1,35 @@
-import React, { Component } from 'react';
-import {
-  Link, matchPath, withRouter, RouteComponentProps,
-} from 'react-router-dom';
-import { FormattedMessage, injectIntl, WrappedComponentProps } from 'react-intl';
-import queryString from 'query-string';
-import { Menu } from 'antd';
-import _ from 'lodash';
-import * as utils from './utils';
-import { prefixCls } from './config';
-import { MenuConfItem } from './interface';
+import React, { Component } from "react";
+import { Link, matchPath, withRouter, RouteComponentProps } from "react-router-dom";
+import { FormattedMessage, injectIntl, WrappedComponentProps } from "react-intl";
+import queryString from "query-string";
+import { Menu } from "knowdesign";
+import _ from "lodash";
+import * as utils from "./utils";
+import { prefixCls } from "./config";
+import { MenuConfItem } from "./interface";
+import { isSuperApp } from "lib/utils";
 
 interface Props {
-  systemName: string,
-  systemNameChn: string,
-  isroot?: boolean,
-  className?: string,
-  menuMode?: 'vertical' | 'vertical-left' | 'vertical-right' | 'horizontal' | 'inline' | undefined,
-  menuTheme?: 'dark' | 'light' | undefined,
-  menuStyle?: React.CSSProperties | any,
-  menuConf?: MenuConfItem[],
-  collapsed: boolean,
-  permissionPoints: any,
+  systemName: string;
+  systemNameChn: string;
+  isroot?: boolean;
+  className?: string;
+  menuMode?: "vertical" | "vertical-left" | "vertical-right" | "horizontal" | "inline" | undefined;
+  menuTheme?: "dark" | "light" | undefined;
+  menuStyle?: React.CSSProperties | any;
+  menuConf?: MenuConfItem[];
+  collapsed: boolean;
+  permissionPoints: any;
+  getPermission: any;
+  redirectPath?: (permissionPoints: any, history: any) => string;
 }
 
 const { Item: MenuItem, Divider: MenuDivider, SubMenu, ItemGroup } = Menu;
 
 class LayoutMenu extends Component<Props & RouteComponentProps & WrappedComponentProps> {
   static defaultProps: any = {
-    menuMode: 'inline',
-    menuTheme: 'light',
+    menuMode: "inline",
+    menuTheme: "light",
     menuStyle: undefined,
     menuConf: [], // TODO
   };
@@ -42,28 +43,39 @@ class LayoutMenu extends Component<Props & RouteComponentProps & WrappedComponen
   }
 
   getNavMenuItems(navs: MenuConfItem[], prefix: string) {
-    const { location, collapsed, permissionPoints } = this.props;
+    const { location, collapsed, permissionPoints, getPermission } = this.props;
     const permissionedNavs = _.filter(navs, (nav) => {
+      if (nav.visible !== undefined && nav.visible === false) {
+        return false;
+      }
       if (!this.props.isroot && nav.rootVisible) {
         return false;
+      }
+
+      if (nav.permissionPoint && typeof getPermission === "function") {
+        return !!getPermission(nav.permissionPoint, permissionPoints);
       }
       if (nav.permissionPoint && !permissionPoints[nav.permissionPoint]) {
         return false;
       }
       return true;
     });
-
+    if (location?.pathname === "/") {
+      const { redirectPath, permissionPoints, history } = this.props;
+      redirectPath(permissionPoints, history);
+    }
     return _.map(permissionedNavs, (nav, index) => {
       if (nav.divider) {
         return <MenuDivider key={index} />;
       }
 
-      const icon = nav.icon ?
+      const icon = nav.icon ? (
         <svg className={`${prefixCls}-layout-left-menus-icon`} aria-hidden="true">
           <use xlinkHref={nav.icon}></use>
-        </svg> : null;
+        </svg>
+      ) : null;
 
-      const linkProps = {} as { target: string, href: string, to: { pathname?: string, search?: string } };
+      const linkProps = {} as { target: string; href: string; to: { pathname?: string; search?: string } };
       let link;
 
       if (_.isArray(nav.children) && utils.hasRealChildren(nav.children)) {
@@ -72,30 +84,29 @@ class LayoutMenu extends Component<Props & RouteComponentProps & WrappedComponen
           this.defaultOpenKeys = _.union(this.defaultOpenKeys, [menuKey]) as any;
         }
 
-        if (nav.type === 'group') {
+        if (nav.type === "group") {
           return (
-            <ItemGroup
-              key={menuKey as any}
-              title={
-                collapsed ? '/' : this.props.intl.formatMessage({ id: `${prefix}.${nav.name}` })
-              }
-            >
+            <ItemGroup key={menuKey as any} title={collapsed ? "/" : this.props.intl.formatMessage({ id: `${prefix}.${nav.name}` })}>
               {this.getNavMenuItems(nav.children, `${prefix}.${nav.name}`)}
             </ItemGroup>
           );
         }
 
+        const childList = this.getNavMenuItems(nav.children, `${prefix}.${nav.name}`);
+
+        if (!childList.length) return null;
+
         return (
           <SubMenu
             key={menuKey as any}
-            title={(
+            title={
               <>
                 {icon}
                 <span className="menu-name">{<FormattedMessage id={`${prefix}.${nav.name}`} />}</span>
               </>
-            )}
+            }
           >
-            {this.getNavMenuItems(nav.children, `${prefix}.${nav.name}`)}
+            {childList}
           </SubMenu>
         );
       }
@@ -104,13 +115,7 @@ class LayoutMenu extends Component<Props & RouteComponentProps & WrappedComponen
         linkProps.target = nav.target;
       }
 
-      if (
-        nav.to
-        && (
-          utils.isAbsolutePath(nav.to)
-          || nav.isAbsolutePath
-        )
-      ) {
+      if (nav.to && (utils.isAbsolutePath(nav.to) || nav.isAbsolutePath)) {
         linkProps.href = nav.to;
         link = (
           <a {...linkProps}>
@@ -137,14 +142,7 @@ class LayoutMenu extends Component<Props & RouteComponentProps & WrappedComponen
           </Link>
         );
       }
-
-      return (
-        <MenuItem
-          key={nav.to}
-        >
-          {link}
-        </MenuItem>
-      );
+      return <MenuItem key={nav.to}>{link}</MenuItem>;
     });
   }
 
@@ -154,12 +152,7 @@ class LayoutMenu extends Component<Props & RouteComponentProps & WrappedComponen
   }
 
   render() {
-    const {
-      menuMode,
-      menuTheme,
-      menuStyle,
-      location,
-    } = this.props;
+    const { menuMode, menuTheme, menuStyle, location } = this.props;
     const { menuConf, className, systemName, collapsed } = this.props;
     const realMenuConf = _.isFunction(menuConf) ? menuConf(location) : menuConf;
     const normalizedMenuConf = utils.normalizeMenuConf(realMenuConf);

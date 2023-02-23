@@ -22,27 +22,10 @@ export const AddRoleTable = (props) => {
     return (
       <div key={item}>
         <div className="add-role-table-header">
-          <div style={{ paddingBottom: 5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div className="role-table-text">
             <span>{item}</span>
-            {item === nodeTypeList[2] ? (
-              <span style={{ marginLeft: 60, display: "inline-block" }}>
-                <Checkbox
-                  checked={isCold}
-                  onChange={() => {
-                    setIsCold((b) => !b);
-                  }}
-                >
-                  配置Cold节点
-                </Checkbox>
-                <Tooltip title={"如需开启冷热分离服务，需要将部分data节点的rack属性值设为Cold。注：cold节点不能划分region，请谨慎设置"}>
-                  <svg className="icon svg-icon" aria-hidden="true">
-                    <use xlinkHref="#iconinfo"></use>
-                  </svg>
-                </Tooltip>
-              </span>
-            ) : null}
           </div>
-          <TableFormAddRow type={item} onChange={handleChange} />
+          <TableFormAddRow type={item} onChange={handleChange} machineList={props.machineList} />
         </div>
       </div>
     );
@@ -50,28 +33,31 @@ export const AddRoleTable = (props) => {
 
   return (
     <>
-      <TableFormAddRow type={nodeTypeList[0]} onChange={handleChange} />
-      <div style={{ marginTop: 10 }}>
+      <TableFormAddRow type={nodeTypeList[0]} onChange={handleChange} machineList={props.machineList} />
+      <div className="add-role-button">
         {isShow ? (
           <Button
-            type="primary"
+            className="add-node"
+            type="link"
             size="small"
             onClick={() => {
               setIsShow((b) => !b);
             }}
           >
-            <PlusOutlined /> 添加节点类型
+            <PlusOutlined />
+            添加节点类型
           </Button>
         ) : (
           <Button
-            type="primary"
+            className="delete-node"
+            type="link"
             size="small"
             onClick={() => {
               setIsShow((b) => !b);
             }}
-            style={{ marginBottom: 10 }}
           >
-            <MinusOutlined /> 删除节点类型
+            <MinusOutlined />
+            删除节点类型
           </Button>
         )}
       </div>

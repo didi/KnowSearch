@@ -2,14 +2,28 @@
   "header": {
     "mode": "complicated",
     "logo": "../../assets/nav-logo.png",
+    "logohref": "/dashboard",
     "userIconSrc": "../../assets/avatars.png",
     "subTitle": "KnowSearch",
     "theme": "light",
     "rightEle": [
       {
         "type": "dropdown",
-        "scene": "doc",
-        "options": []
+        "scene": "admin",
+        "children": [
+          {
+            "label": "多集群管理",
+            "icon": "icon-duojiqunguanli",
+            "href": "/es/dasboard",
+            "key": 0
+          },
+          {
+            "label": "系统管理",
+            "icon": "icon-xitongguanli",
+            "href": "/es/system",
+            "key": 1
+          }
+        ]
       },
       {
         "type": "dropdown",
@@ -17,6 +31,10 @@
       },
       {
         "type": "divider"
+      },
+      {
+        "type": "icon",
+        "scene": "fullscreen"
       },
       {
         "type": "dropdown",

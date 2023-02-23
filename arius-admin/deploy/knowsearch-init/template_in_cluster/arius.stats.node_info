@@ -427,12 +427,6 @@
                 },
                 "jvm-gc-old-collection_count_rate": {
                     "type": "double"
-                },
-                "breakers-in_flight_http_requests-limit_size_in_bytes": {
-                    "type": "double"
-                },
-                "breakers-in_flight_http_requests-estimated_size_in_bytes": {
-                    "type": "double"
                 }
             }
         },

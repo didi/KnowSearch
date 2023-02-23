@@ -7,14 +7,11 @@ import { AlertTwoTone } from "@ant-design/icons";
 const { RangePicker } = DatePicker;
 
 interface SelectTimePropsType {
-  onTimeStampChange?: (startTime, endTime) => void;
+  onTimeStampChange?: (startTime, endTime, radioCheckedKey) => void;
   refreshTime?: number;
 }
 
-export const SelectTime: React.FC<SelectTimePropsType> = ({
-  onTimeStampChange,
-  refreshTime = 0,
-}) => {
+export const SelectTime: React.FC<SelectTimePropsType> = ({ onTimeStampChange, refreshTime = 0 }) => {
   const { isClusterKanbanUpdate } = useSelector(
     (state) => ({
       isClusterKanbanUpdate: (state as any).clusterKanban.isUpdate,
@@ -30,25 +27,29 @@ export const SelectTime: React.FC<SelectTimePropsType> = ({
   const [time, setTime] = useState("oneHour");
   const [hackValue, setHackValue] = useState(null);
   const [dates, setDates] = useState([undefined, undefined]);
-  const [calendarDates,setCalendarDates] = useState([])
+  const [calendarDates, setCalendarDates] = useState([]);
   const didMount = useRef(false);
   const timer = useRef(null);
+  const currentRadioKey = useRef("");
 
   const disabledDate = (current) => {
     if (!calendarDates || calendarDates.length === 0) {
-      return current > moment().endOf('day');
+      return current > moment().endOf("day");
     }
-    const tooLate = (calendarDates[0] && current.diff(calendarDates[0], "days") > 6) || current > moment().endOf('day');
-    const tooEarly = calendarDates[1] && calendarDates[1].diff(current, "days") > 6;
-    return tooLate || tooEarly
+    const tooLate = (calendarDates[0] && current.diff(calendarDates[0], "days") > 13) || current > moment().endOf("day");
+    const tooEarly = calendarDates[1] && calendarDates[1].diff(current, "days") > 13;
+    return tooLate || tooEarly;
   };
 
-  const updateTimeStamp = (key: string) => {
+  const updateTimeStamp = (key: string, isUpdate = false) => {
     const _dates = PERIOD_RADIO_MAP.get(key)?.dateRange || dates;
     if (!_dates) return;
     setDates(_dates);
-    onTimeStampChange &&
-      onTimeStampChange(_dates[0].valueOf(), _dates[1].valueOf());
+    // 记录时间差用于判断刷新是否生效
+    if (isUpdate) {
+      currentRadioKey.current = `${new Date().getTime()}-${_dates[1].valueOf() - _dates[0].valueOf()}`;
+    }
+    onTimeStampChange && onTimeStampChange(_dates[0].valueOf(), _dates[1].valueOf(), isUpdate ? currentRadioKey.current : undefined);
   };
 
   const onRadioChange = (e) => {
@@ -60,11 +61,10 @@ export const SelectTime: React.FC<SelectTimePropsType> = ({
   const onRangeChange = (dates) => {
     setTime && setTime("");
     setDates(dates);
-    onTimeStampChange &&
-      onTimeStampChange(dates[0].valueOf(), dates[1].valueOf());
+    onTimeStampChange && onTimeStampChange(dates[0].valueOf(), dates[1].valueOf(), currentRadioKey.current);
   };
 
-  const onOpenChange = open => {
+  const onOpenChange = (open) => {
     if (open) {
       setHackValue([]);
       setCalendarDates([]);
@@ -95,7 +95,7 @@ export const SelectTime: React.FC<SelectTimePropsType> = ({
       didMount.current = true;
       return;
     }
-    updateTimeStamp(time);
+    updateTimeStamp(time, true);
     setTimer();
   }, [isClusterKanbanUpdate, isGatewayKanbanUpdate]);
 
@@ -106,11 +106,7 @@ export const SelectTime: React.FC<SelectTimePropsType> = ({
 
   return (
     <div>
-      <Radio.Group
-        style={{ margin: "0 15px 10px 0" }}
-        value={time}
-        onChange={onRadioChange}
-      >
+      <Radio.Group style={{ margin: "0 15px 10px 0" }} value={time} onChange={onRadioChange}>
         {PERIOD_RADIO.map((p) => (
           <Radio.Button key={p.key} value={p.key}>
             {p.label}
@@ -122,10 +118,10 @@ export const SelectTime: React.FC<SelectTimePropsType> = ({
         onCalendarChange={(val) => setCalendarDates(val)}
         format="YYYY-MM-DD HH:mm"
         allowClear={false}
-        value={ (hackValue || dates) as [moment.Moment, moment.Moment]}
+        value={(hackValue || dates) as [moment.Moment, moment.Moment]}
         onChange={onRangeChange}
         onOpenChange={onOpenChange}
-        showTime={{format:'HH:mm',defaultValue:[moment('00:00:00','HH:mm'),moment('23:59:59','HH:mm')]}}
+        showTime={{ format: "HH:mm", defaultValue: [moment("00:00:00", "HH:mm"), moment("23:59:59", "HH:mm")] }}
       />
     </div>
   );

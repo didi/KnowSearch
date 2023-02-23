@@ -1,0 +1,282 @@
+#consoleRoot {
+
+  .conApp__editorContent {
+    border-bottom: 1px solid #ebedef;
+    border-right: 1px solid #ebedef;
+    border-top: 1px solid #ebedef;
+    border-radius: 4px 0px 0px 4px;
+  }
+
+  .conApp__output {
+    border-bottom: 1px solid #ebedef;
+    border-right: 1px solid #ebedef;
+    border-top: 1px solid #ebedef;
+    border-radius: 0px 4px 4px 0px;
+  }
+
+  .conApp__resizer {
+    border-bottom: 1px solid #ebedef;
+    border-top: 1px solid #ebedef;
+  }
+}
+
+.search-profiler-page {
+  .appRoot {
+    height: calc(100vh - 360px);
+    overflow-y: scroll;
+    min-height: 130px;
+  }
+
+  .euiFormRow {
+    max-width: 100%;
+  }
+
+  .euiTabs {
+    height: 32px;
+    line-height: 32px;
+    width: 204px;
+    background: rgba(116, 120, 141, 0.1);
+    border-radius: 4px;
+
+    .euiTab {
+      padding: 0px;
+      margin-right: 0px;
+      padding: 6px 9px;
+    }
+  }
+
+  .euiTab.euiTab-isSelected::after {
+    height: 0px;
+  }
+
+  .euiTab.euiTab-isSelected {
+    background: #ffffff;
+    border-radius: 4px;
+    height: 26px;
+    margin: 2px;
+    line-height: 16px;
+  }
+
+  .euiTabs:not(.euiTabs--condensed)::before {
+    height: 0px;
+  }
+
+  .prfDevTool__sense .ace_editor {
+    border-radius: 4px;
+    margin-bottom: 0px;
+    min-height: 0px;
+  }
+
+  .prfDevTool__main {
+    box-shadow: none;
+    padding: 26px 22px 0px;
+  }
+
+  .prfDevTool__profileTree__shardDetails {
+    .title {
+      font-family: PingFangSC-Medium;
+      font-size: 12px;
+      color: #303a51;
+      line-height: 22px;
+      font-weight: 500;
+    }
+
+    .spacer {
+      width: 2px;
+      height: 10px;
+      background: @primary-color;
+      display: inline-block;
+      margin-right: 3px;
+    }
+  }
+
+  .prfDevTool__profileTree__shardDetails--dim small {
+    font-family: PingFangSC-Medium;
+    font-size: 12px;
+    color: #303a51;
+    line-height: 22px;
+    font-weight: 500;
+  }
+
+  .prfDevTool__profileTree__shardDetails--dim {
+    font-family: PingFangSC-Regular;
+    font-size: 14px;
+    color: #374053;
+    line-height: 20px;
+    font-weight: 400;
+  }
+
+  .prfDevTool__detail {
+    font-family: PingFangSC-Regular;
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  .prfDevTool__details {
+    z-index: 99;
+
+    .euiBadge--iconLeft {
+      border-radius: 4px;
+      color: #374053 !important;
+    }
+
+    .column-time {
+      background: rgba(7, 13, 56, 0.03) !important;
+    }
+  }
+
+  .prfDevTool__percentBadge__progress--time {
+    background-image: linear-gradient(
+      to left,
+      #fa8787 0%,
+      #fa8787 var(--prfDevToolProgressPercentage, auto),
+      #f7f7f9 var(--prfDevToolProgressPercentage, auto),
+      #f7f7f9 100%
+    );
+    border-radius: 4px;
+    color: #374053 !important;
+
+    &.percent-100 {
+      color: #fff !important;
+    }
+  }
+
+  .prfDevTool__percentBadge__progress--percent {
+    background-image: linear-gradient(
+      270deg,
+      #1473ff 0,
+      #1473ff var(--prfDevToolProgressPercentage, auto),
+      #f7f7f9 var(--prfDevToolProgressPercentage, auto),
+      #f7f7f9
+    );
+    border-radius: 4px;
+    color: #374053 !important;
+
+    &.percent-100 {
+      color: #1473ff !important;
+      background-color: #fff !important;
+      border: 1px solid #1473ff;
+      background-image: none;
+    }
+  }
+
+  .prfDevTool__profileTree__badge {
+    background-color: #fff !important;
+    border-radius: 4px;
+    color: rgba(0, 0, 0, 0.84) !important;
+    border: 1px solid rgba(0, 0, 0, 0.13);
+    border-radius: 4px;
+  }
+
+  .prfDevTool__profileTree__panel {
+    border-bottom: none;
+  }
+
+  .euiText--small {
+    font-family: PingFangSC-Regular;
+    font-size: 12px;
+    color: #495057;
+    line-height: 22px;
+    font-weight: 400;
+    padding: 0 4px;
+  }
+
+  .euiIcon--medium {
+    zoom: 1;
+    margin-right: 6px;
+  }
+
+  .euiPage {
+    padding: 0;
+    background: #fff;
+  }
+
+  .euiFormRow__fieldWrapper {
+    .ant-select {
+      width: calc(100% - 96px);
+    }
+  }
+
+  .euiPanel {
+    box-shadow: none;
+    border: none;
+    border-radius: 0px;
+  }
+
+  .euiPanel--paddingLarge {
+    padding: 0px;
+  }
+
+  .euiFormControlLayout {
+    height: 32px;
+    width: calc(100% - 96px);
+    display: inline-block;
+
+    .euiFieldText {
+      height: 32px;
+    }
+  }
+
+  .euiButton--primary.euiButton--fill {
+    background-color: @primary-color;
+    height: 32px;
+    line-height: 32px;
+    min-width: 80px;
+    float: right;
+
+    .euiText {
+      font-family: PingFangSC-Regular;
+      font-size: 14px;
+      color: #ffffff;
+      letter-spacing: 0;
+      line-height: 22px;
+      font-weight: 400;
+    }
+  }
+
+  .euiButton:hover:not(:disabled),
+  .euiButton:focus {
+    text-decoration: none;
+  }
+
+  .euiButton--primary:enabled:hover,
+  .euiButton--primary:enabled:focus {
+    box-shadow: none;
+    background-color: @primary-color !important;
+    border-color: @primary-color !important;
+  }
+
+  .euiFlexGroup {
+    .profile-query-editor {
+      flex-grow: 1.2;
+    }
+  }
+
+  .euiFormLabel {
+    font-family: PingFangSC-Regular;
+    font-size: 14px;
+    color: #303a51;
+    line-height: 20px;
+    font-weight: 400;
+  }
+}
+
+.euiLink.euiLink--primary {
+  color: @primary-color !important;
+}
+
+.euiLink:hover {
+  text-decoration: none !important;
+}
+
+.euiLink:focus {
+  text-decoration: none !important;
+  background: none !important;
+}
+
+.euiLink.euiLink--primary:focus {
+  outline: none !important;
+}
+.prfDevTool__page__pageBodyContentBody {
+  font-size: 14px;
+}

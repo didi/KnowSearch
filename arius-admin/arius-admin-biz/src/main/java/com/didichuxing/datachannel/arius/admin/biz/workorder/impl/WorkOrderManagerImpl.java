@@ -29,6 +29,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OrderStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -86,6 +87,14 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
             WorkOrderTypeEnum.LOGIC_CLUSTER_INDECREASE.getMessage()));
         orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.LOGIC_CLUSTER_JOIN.getName(),
             WorkOrderTypeEnum.LOGIC_CLUSTER_JOIN.getMessage()));
+        orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.DSL_TEMPLATE_STATUS_CHANGE.getName(),
+                WorkOrderTypeEnum.DSL_TEMPLATE_STATUS_CHANGE.getMessage()));
+        orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.DSL_TEMPLATE_QUERY_LIMIT.getName(),
+                WorkOrderTypeEnum.DSL_TEMPLATE_QUERY_LIMIT.getMessage()));
+        orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.TEMPLATE_LOGIC_BLOCK_READ.getName(),
+                WorkOrderTypeEnum.TEMPLATE_LOGIC_BLOCK_READ.getMessage()));
+        orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.TEMPLATE_LOGIC_BLOCK_WRITE.getName(),
+                WorkOrderTypeEnum.TEMPLATE_LOGIC_BLOCK_WRITE.getMessage()));
         return Result.buildSucc(orderTypeVOList);
     }
     
@@ -355,7 +364,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     @Override
-    public OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) throws NotFindSubclassException {
+    public OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) throws NotFindSubclassException, ESOperateException {
         if (AriusObjUtils.isNull(orderPO)) {
             return null;
         }

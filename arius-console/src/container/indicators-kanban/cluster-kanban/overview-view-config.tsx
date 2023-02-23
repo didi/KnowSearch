@@ -1,124 +1,104 @@
 import React from "react";
 import { Tag, Popover, Button, Tooltip } from "antd";
 import { getLineOption, unitMap } from "./config";
+import { formatDecimalPoint } from "lib/utils";
 import _ from "lodash";
 
 // 指标配置 start
-export const indexConfigClassifyList: string[] = [
-  "系统指标",
-  "性能指标",
-  "状态指标",
-];
-
-//黄金配置
-export const goldConfig = {
-  "系统指标": [
-    'cpuUsage',
-    'nodesForDiskUsageGte75Percent',
-  ],
-  "性能指标": [
-    'readTps',
-    'writeTps',
-    'searchLatency',
-    'indexingLatency',
-  ],
-  "状态指标": [
-    'shardNu',
-    'bigShards',
-  ],
-}
+export const indexConfigClassifyList: string[] = ["系统指标", "性能指标", "状态指标"];
 
 export const indexConfigData = {
   cpuUsage: {
     name: "CPU使用率",
     classify: indexConfigClassifyList[0],
+    indicatorType: [1, 2, 3],
   },
   cpuLoad1M: {
     name: "CPU 1分钟负载",
     classify: indexConfigClassifyList[0],
-  },
-  cpuLoad5M: {
-    name: "CPU 5分钟负载",
-    classify: indexConfigClassifyList[0],
-  },
-  cpuLoad15M: {
-    name: "CPU 15分钟负载",
-    classify: indexConfigClassifyList[0],
+    indicatorType: [2, 3],
   },
   diskUsage: {
     name: "磁盘使用率",
     classify: indexConfigClassifyList[0],
+    indicatorType: [1, 4],
   },
   diskInfo: {
     name: "磁盘使用情况",
     classify: indexConfigClassifyList[0],
-  },
-  nodesForDiskUsageGte75Percent: {
-    name: "磁盘利用率大于75%节点列表",
-    classify: indexConfigClassifyList[0],
+    indicatorType: [],
   },
   // 特殊的指标前端做合并
   networkFlow: {
     name: "网络流量",
-    types: ['recvTransSize', 'sendTransSize'],
+    types: ["recvTransSize", "sendTransSize"],
     classify: indexConfigClassifyList[0],
+    indicatorType: [],
   },
   // recvTransSize: {
   //   name: "网络入口流量",
   //   classify: indexConfigClassifyList[0],
+  //   indicatorType: [],
   // },
   // sendTransSize: {
   //   name: "网络出口流量",
   //   classify: indexConfigClassifyList[0],
+  //   indicatorType: [],
   // },
   readTps: {
     name: "查询QPS",
     classify: indexConfigClassifyList[1],
+    indicatorType: [1],
   },
   writeTps: {
     name: "写入TPS",
     classify: indexConfigClassifyList[1],
+    indicatorType: [1],
   },
   searchLatency: {
     name: "查询耗时",
     classify: indexConfigClassifyList[1],
+    indicatorType: [1, 2],
   },
   indexingLatency: {
     name: "写入耗时",
     classify: indexConfigClassifyList[1],
+    indicatorType: [1, 2],
   },
   taskCost: {
     name: "执行任务耗时",
     classify: indexConfigClassifyList[1],
+    indicatorType: [1, 2, 3, 4],
   },
   taskCount: {
     name: "执行任务数量",
     classify: indexConfigClassifyList[1],
-  },
-  shardNu: {
-    name: "shard数量",
-    classify: indexConfigClassifyList[2],
+    indicatorType: [1, 2, 3, 4],
   },
   movingShards: {
     name: "迁移中shard列表",
     classify: indexConfigClassifyList[2],
+    indicatorType: [1, 2, 3, 4],
   },
-  bigShards: {
-    name: "大小超过50GB的shard列表",
+  unAssignShards: {
+    name: "未分配Shard列表",
     classify: indexConfigClassifyList[2],
-  },
-  bigIndices: {
-    name: "大于10亿文档数索引列表",
-    classify: indexConfigClassifyList[2],
+    indicatorType: [1, 2, 3, 4],
   },
   invalidNodes: {
     name: "Dead节点列表",
     classify: indexConfigClassifyList[2],
+    indicatorType: [1, 2, 3, 4],
   },
   pendingTasks: {
     name: "PendingTask列表",
     classify: indexConfigClassifyList[2],
+    indicatorType: [1, 2, 3, 4],
   },
+  // elapsedTime: {
+  //   name: "_cluster_stats 接口平均采集耗时",
+  //   classify: indexConfigClassifyList[1],
+  // }
 };
 
 export const getCheckedData = (checkedList) => {
@@ -141,14 +121,14 @@ interface defaultIndexConfigItemPropsType {
   plainOptions: { label: string; value: string }[];
 }
 
-export const defaultIndexConfigList: defaultIndexConfigItemPropsType[] =
-  indexConfigClassifyList.map((item) => ({
-    title: item,
-    plainOptions: allCheckedData[item].map((item) => ({
-      label: indexConfigData[item].name,
-      value: item,
-    })),
-  }));
+export const defaultIndexConfigList: defaultIndexConfigItemPropsType[] = indexConfigClassifyList.map((item) => ({
+  title: item,
+  plainOptions: allCheckedData[item].map((item) => ({
+    label: indexConfigData[item].name,
+    value: item,
+    indicatorType: indexConfigData[item].indicatorType,
+  })),
+}));
 // 指标配置 end
 
 // 折线图
@@ -169,7 +149,7 @@ export const getOverviewOption = (
   lineSeriesKeys: string[],
   unitMap: {},
   isMoreDay: boolean = false,
-  isMarkLine: boolean = true
+  isMarkLine: boolean = false
 ) => {
   data.sort((a, b) => a.timeStamp - b.timeStamp);
 
@@ -182,12 +162,11 @@ export const getOverviewOption = (
   });
 
   const xAxisData = [...new Set(lineData.timeStamp.data)];
-  
+
   const series = lineSeriesKeys.map((item) => lineData[item]);
 
-  return getLineOption({title, xAxisData, series, unitMap, isMoreDay, isMarkLine});
+  return getLineOption({ title, xAxisData, series, unitMap, isMoreDay, isMarkLine });
 };
-
 
 const legendInfo = {
   aggType: {
@@ -217,8 +196,8 @@ const legendInfo = {
 };
 
 const getObjKeys = (obj) => {
-  return Object.keys(obj).filter(item => item !== 'timeStamp');
-}
+  return Object.keys(obj).filter((item) => item !== "timeStamp");
+};
 
 // cpu 使用率
 export const cpuUsageData: lineDataType = _.cloneDeep(legendInfo);
@@ -241,29 +220,6 @@ const cpuLoad1MObj = {
   data: cpuLoad1MData,
   list: cpuLoad1MList,
 };
-
-// cpu 5分钟负载
-const cpuLoad5MData = _.cloneDeep(legendInfo);
-
-const cpuLoad5MList = getObjKeys(cpuLoad5MData);
-
-const cpuLoad5MObj = {
-  title: "CPU 5分钟负载",
-  data: cpuLoad5MData,
-  list: cpuLoad5MList,
-};
-
-// cpu 15分钟负载
-const cpuLoad15MData = _.cloneDeep(legendInfo);
-
-const cpuLoad15MList = getObjKeys(cpuLoad15MData);
-
-const cpuLoad15MObj = {
-  title: "CPU 15分钟负载",
-  data: cpuLoad15MData,
-  list: cpuLoad15MList,
-};
-
 
 // 磁盘使用率
 export const diskUsageData: lineDataType = _.cloneDeep(legendInfo);
@@ -304,30 +260,6 @@ export const diskInfoObj = {
   list: diskInfoList,
 };
 
-// 集群shard数
-export const shardNuData: lineDataType = {
-  shardNu: {
-    name: "Shard总数",
-    data: [],
-  },
-  unAssignedShards: {
-    name: "未分配Shard总数",
-    data: [],
-  },
-  timeStamp: {
-    name: "时间戳",
-    data: [],
-  },
-};
-
-export const shardNuList = getObjKeys(shardNuData);
-
-export const shardNuObj = {
-  title: "shard数量(个)",
-  data: shardNuData,
-  list: shardNuList,
-};
-
 // 写入TPS
 export const writeTpsData: lineDataType = {
   writeTps: {
@@ -343,7 +275,7 @@ export const writeTpsData: lineDataType = {
 export const writeTpsList = getObjKeys(writeTpsData);
 
 export const writeTpsObj = {
-  title: "写入TPS(个/s)",
+  title: "写入TPS(个/S)",
   data: writeTpsData,
   list: writeTpsList,
 };
@@ -367,11 +299,10 @@ export const networkFlowData = {
 export const networkFlowList = getObjKeys(networkFlowData);
 
 export const networkFlowObj = {
-  title: "网络流量(MB/s)",
+  title: "网络流量(MB/S)",
   data: networkFlowData,
   list: networkFlowList,
 };
-
 
 // // 网络入口流量
 // export const recvTransSizeData = {
@@ -399,7 +330,7 @@ export const searchLatencyData = _.cloneDeep(legendInfo);
 export const searchLatencyList = getObjKeys(searchLatencyData);
 
 export const searchLatencyObj = {
-  title: "查询耗时(ms)",
+  title: "查询耗时(MS)",
   data: searchLatencyData,
   list: searchLatencyList,
 };
@@ -410,7 +341,7 @@ export const taskCostData = _.cloneDeep(legendInfo);
 export const taskCostList = getObjKeys(taskCostData);
 
 export const taskCostObj = {
-  title: "执行任务耗时(ms)",
+  title: "执行任务耗时(S)",
   data: taskCostData,
   list: taskCostList,
 };
@@ -430,7 +361,7 @@ export const readTpsData = {
 export const readTpsList = getObjKeys(readTpsData);
 
 export const readTpsObj = {
-  title: "查询QPS(个/s)",
+  title: "查询QPS(次/S)",
   data: readTpsData,
   list: readTpsList,
 };
@@ -450,10 +381,29 @@ export const taskCountData = {
 export const taskCountList = getObjKeys(taskCountData);
 
 export const taskCountObj = {
-  title: "执行任务数量(个/s)",
+  title: "执行任务数量(个/S)",
   data: taskCountData,
   list: taskCountList,
 };
+
+// export const elapsedTimeData: lineDataType = {
+//   elapsedTime: {
+//     name: "采集耗时",
+//     data: [],
+//   },
+//   timeStamp: {
+//     name: "时间戳",
+//     data: [],
+//   },
+// };
+
+// export const elapsedTimeList = getObjKeys(elapsedTimeData);
+
+// export const elapsedTimeObj = {
+//   title: "_cluster_stats 接口平均采集耗时(ms)",
+//   data: elapsedTimeData,
+//   list: elapsedTimeList,
+// };
 
 // 写入耗时
 export const indexingLatencyData = _.cloneDeep(legendInfo);
@@ -461,18 +411,13 @@ export const indexingLatencyData = _.cloneDeep(legendInfo);
 export const indexingLatencyList = getObjKeys(indexingLatencyData);
 
 export const indexingLatencyObj = {
-  title: "写入耗时(ms)",
+  title: "写入耗时(MS)",
   data: indexingLatencyData,
   list: indexingLatencyList,
 };
 
 // shard
 export const movingShardColumns = [
-  {
-    title: "Shard序号",
-    dataIndex: "s",
-    key: "s",
-  },
   {
     title: "承载索引",
     dataIndex: "i",
@@ -489,14 +434,42 @@ export const movingShardColumns = [
     key: "thost",
   },
   {
-    title: "状态",
-    dataIndex: "st",
-    key: "st",
+    title: "恢复的字节数",
+    dataIndex: "br",
+    key: "br",
   },
   {
-    title: "耗时",
-    dataIndex: "t",
-    key: "t",
+    title: "字节数占比",
+    dataIndex: "bp",
+    key: "bp",
+  },
+  {
+    title: "转换日志操作占比",
+    dataIndex: "top",
+    key: "top",
+  },
+];
+
+export const unassignShardColumns = [
+  {
+    title: "归属索引",
+    dataIndex: "index",
+    key: "index",
+  },
+  {
+    title: "shard标识",
+    dataIndex: "shard",
+    key: "shard",
+  },
+  {
+    title: "主/备",
+    dataIndex: "prirep",
+    key: "prirep",
+  },
+  {
+    title: "状态",
+    dataIndex: "state",
+    key: "state",
   },
 ];
 
@@ -530,71 +503,34 @@ export const bigShardColumns = [
     title: "容量",
     dataIndex: "store",
     key: "store",
-  },
-];
-
-const columnTagShow = (nums) => {
-  if (!nums || !Array.isArray(nums)) {
-    return "---";
-  }
-  return (
-    <>
-      {nums.slice(0, 3).map((item) => (
-        <Tag key={item.node}>{item.node}</Tag>
-      ))}
-      <Popover
-        placement="bottom"
-        content={
-          <div className={"table-popover-content"}>
-            {nums.map((item, index) => (
-              <Tag key={index}>{item.node}</Tag>
-            ))}
-          </div>
-        }
-        trigger="hover"
-      >
-        <Button size="small" type="dashed">
-          共{nums.length}个
-        </Button>
-      </Popover>
-    </>
-  );
-};
-
-export const bigIndicesColumns = [
-  {
-    title: "索引名",
-    dataIndex: "indexName",
-    key: "indexName",
-  },
-  {
-    title: "分布的节点",
-    dataIndex: "belongNodeIp",
-    key: "belongNodeIp",
-    render: function (item) {
-      return columnTagShow(item);
-    },
+    render: (text) => formatDecimalPoint(text),
   },
 ];
 
 export const invalidNodesColumns = [
   {
-    title: "Dead的节点",
-    dataIndex: "deadNode",
-    key: "deadNode",
-  },
-];
-
-export const nodesForDiskUsageGte75PercentColumns = [
-  {
-    title: "节点名称",
-    dataIndex: "nodeName",
-    key: "nodeName",
-  },
-  {
     title: "节点IP",
-    dataIndex: "nodeIp",
-    key: "nodeIp",
+    dataIndex: "ip",
+    key: "ip",
+    render: (_, record) => {
+      return record?.deadNode?.ip || "-";
+    },
+  },
+  {
+    title: "主机名",
+    dataIndex: "hostname",
+    key: "hostname",
+    render: (_, record) => {
+      return record?.deadNode?.hostname || "-";
+    },
+  },
+  {
+    title: "实例名",
+    dataIndex: "cluster",
+    key: "cluster",
+    render: (_, record) => {
+      return record?.deadNode?.cluster || "-";
+    },
   },
 ];
 
@@ -664,16 +600,6 @@ export const metricsDataType: metricsDataType = {
     info: cpuLoad1MObj,
     unit: unitMap.none,
   },
-  cpuLoad5M: {
-    type: LINE,
-    info: cpuLoad5MObj,
-    unit: unitMap.none,
-  },
-  cpuLoad15M: {
-    type: LINE,
-    info: cpuLoad15MObj,
-    unit: unitMap.none,
-  },
   diskUsage: {
     type: LINE,
     info: diskUsageObj,
@@ -683,11 +609,6 @@ export const metricsDataType: metricsDataType = {
     type: LINE,
     info: diskInfoObj,
     unit: unitMap.GB,
-  },
-  shardNu: {
-    type: LINE,
-    info: shardNuObj,
-    unit: unitMap.count,
   },
   writeTps: {
     type: LINE,
@@ -707,8 +628,13 @@ export const metricsDataType: metricsDataType = {
   taskCost: {
     type: LINE,
     info: taskCostObj,
-    unit: unitMap.ms,
+    unit: unitMap.s,
   },
+  // elapsedTime: {
+  //   type: LINE,
+  //   info: elapsedTimeObj,
+  //   unit: unitMap.ms,
+  // },
   networkFlow: {
     type: LINE,
     info: networkFlowObj,
@@ -739,43 +665,33 @@ export const metricsDataType: metricsDataType = {
     title: "迁移中shard列表",
     shardColumn: movingShardColumns,
     mapFn: (item, index) =>
-      shardColumnEllipsis({
-        key: index + "" + item.shardNu + item.belongIndex + item.sourceNodeIp,
-        s: item.s,
-        i: item.i,
-        shost: item.shost,
-        thost: item.thost,
-        st: item.st,
-        t: item.t,
-      }),
+      shardColumnEllipsis(
+        {
+          key: index + "" + item.i + item.shost + item.thost,
+          i: item.i,
+          shost: item.shost,
+          thost: item.thost,
+          br: item.br,
+          bp: item.bp,
+          top: item.top,
+        },
+        6
+      ),
   },
-  bigShards: {
+  unAssignShards: {
     type: SHARD,
-    title: "大小超过50GB的shard列表",
-    shardColumn: bigShardColumns,
-    mapFn: (item, index) =>
-      shardColumnEllipsis({
-        key: index + "" + item.shardNu + item.belongIndex,
-        shard: item.shard,
-        index: item.index,
-        prirep: item.prirep,
-        node: item.node,
-        ip: item.ip,
-        store: item.store,
-      }),
-  },
-  bigIndices: {
-    type: SHARD,
-    title: "大于10亿文档数索引列表",
-    shardColumn: bigIndicesColumns,
+    title: "未分配Shard列表",
+    shardColumn: unassignShardColumns,
     mapFn: (item, index) =>
       shardColumnEllipsis(
         {
-          key: index,
-          indexName: item.indexName,
-          belongNodeIp: item.belongNodeInfo,
+          key: index + "" + item.shard + item.prirep + item.state,
+          index: item.index,
+          prirep: item.prirep,
+          shard: item.shard,
+          state: item.state,
         },
-        45
+        20
       ),
   },
   invalidNodes: {
@@ -789,20 +705,6 @@ export const metricsDataType: metricsDataType = {
           deadNode: item,
         },
         97
-      ),
-  },
-  nodesForDiskUsageGte75Percent: {
-    type: SHARD,
-    title: "磁盘利用率大于75%节点列表",
-    shardColumn: nodesForDiskUsageGte75PercentColumns,
-    mapFn: (item, index) =>
-      shardColumnEllipsis(
-        {
-          key: index,
-          nodeIp: item.nodeIp,
-          nodeName: item.nodeName,
-        },
-        45
       ),
   },
   pendingTasks: {

@@ -10,14 +10,11 @@ import { getPhyClusterConfigList } from "api/op-cluster-config-api";
 import { isOpenUp } from "constants/common";
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  setModalId: (modalId: string, params?: any, cb?: Function) =>
-    dispatch(actions.setModalId(modalId, params, cb)),
-  setDrawerId: (modalId: string, params?: any, cb?: Function) =>
-    dispatch(actions.setDrawerId(modalId, params)),
-  setPhyClusterConfigList: (configList: any) =>
-    dispatch(actions.setPhyClusterConfigList(configList)),
+  setModalId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setModalId(modalId, params, cb)),
+  setDrawerId: (modalId: string, params?: any, cb?: Function) => dispatch(actions.setDrawerId(modalId, params)),
+  setPhyClusterConfigList: (configList: any) => dispatch(actions.setPhyClusterConfigList(configList)),
 });
-const connects: Function = connect
+const connects: Function = connect;
 
 @connects(null, mapDispatchToProps)
 export class PhysicsConfigInfo extends React.Component<any> {
@@ -45,9 +42,7 @@ export class PhysicsConfigInfo extends React.Component<any> {
           let flat = false;
           Object.keys(d).forEach((key) => {
             if (typeof key === "string" || typeof key === "number") {
-              if (
-                (d[key] + "").toLowerCase().includes((searchKey + "") as string)
-              ) {
+              if ((d[key] + "").toLowerCase().includes((searchKey + "") as string)) {
                 flat = true;
                 return;
               }
@@ -103,21 +98,16 @@ export class PhysicsConfigInfo extends React.Component<any> {
   public render() {
     const { configList, loading } = this.state;
     return (
-      <>
+      <div>
         <DTable
           loading={loading}
           rowKey="id"
           dataSource={this.getData(configList)}
-          columns={getConfigInfoColumns(
-            this.props.setModalId,
-            this.reloadData,
-            this.props.setDrawerId
-          )}
+          columns={getConfigInfoColumns(this.props.setDrawerId)}
+          tableHeaderSearchInput={{ submit: this.handleSubmit, placeholder: "请输入配置类别" }}
           reloadData={this.reloadData}
-          getOpBtns={this.getOpBtns}
-          tableHeaderSearchInput={{ submit: this.handleSubmit }}
         />
-      </>
+      </div>
     );
   }
 

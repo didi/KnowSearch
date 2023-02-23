@@ -57,9 +57,10 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
 
         Result<Void> voidResult = projectLogicTemplateAuthService.addTemplateAuth(authDTO);
         if (voidResult.success()) {
+            String templateName = indexTemplateService.getNameByTemplateLogicId(authDTO.getTemplateId());
             final ProjectTemplateAuthEnum projectTemplateAuthEnum = ProjectTemplateAuthEnum.valueOf(authDTO.getType());
             operateRecordService.saveOperateRecordWithManualTrigger(
-                    String.format("权限变更：%s", projectTemplateAuthEnum.getDesc()), operator, projectId,
+                    String.format("%s新增权限：%s", templateName, projectTemplateAuthEnum.getDesc()), operator, projectId,
                     authDTO.getId(), OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY, authDTO.getProjectId());
 
         }
@@ -106,7 +107,6 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
         }
         Result<Void> result = projectLogicTemplateAuthService.deleteTemplateAuth(authId);
         if (result.success()) {
-    
             operateRecordService.saveOperateRecordWithManualTrigger(String.format("删除模板，模板 id：%s", authId),
                     operator, projectId, authId, OperateTypeEnum.TEMPLATE_MANAGEMENT_OFFLINE, belongToProject);
         }
@@ -142,15 +142,15 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
         if (authDTO.getType().equals(projectTemplateAuth.getType())) {
             return Result.buildSucc();
         }
-
+        String orignalAuthTypeDesc = ProjectTemplateAuthEnum.valueOf(projectTemplateAuth.getType()).getDesc();
         projectTemplateAuth.setType(authDTO.getType());
         final Result<Void> result = projectLogicTemplateAuthService.updateTemplateAuth(
                 ConvertUtil.obj2Obj(projectTemplateAuth, ProjectTemplateAuthDTO.class));
         if (result.success()) {
             final ProjectTemplateAuthEnum projectTemplateAuthEnum = ProjectTemplateAuthEnum.valueOf(authDTO.getType());
-    
+            String templateName = indexTemplateService.getNameByTemplateLogicId(projectTemplateAuth.getTemplateId());
             operateRecordService.saveOperateRecordWithManualTrigger(
-                    String.format("权限变更：【%s】", projectTemplateAuthEnum.getDesc()), operator, authDTO.getProjectId(),
+                    String.format("%s权限变更：%s-->%s", templateName, orignalAuthTypeDesc, projectTemplateAuthEnum.getDesc()), operator, authDTO.getProjectId(),
                     authDTO.getId(), OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY, authDTO.getProjectId());
         }
         return result;

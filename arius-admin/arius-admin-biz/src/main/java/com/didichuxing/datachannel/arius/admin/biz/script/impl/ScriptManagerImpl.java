@@ -179,6 +179,9 @@ public class ScriptManagerImpl implements ScriptManager {
         if (operation.equals(UNKNOWN)) {
             return Result.buildParamIllegal("操作类型未知");
         }
+        if (AriusObjUtils.isNull(script.getTimeout())) {
+            return Result.buildParamIllegal("必须设置模板超时时间");
+        }
         if (operation.getCode() == ADD.getCode()) {
             com.didiglobal.logi.op.manager.infrastructure.common.Result<Void> checkCreateParam = script.checkCreateParam();
             if (checkCreateParam.failed()) {

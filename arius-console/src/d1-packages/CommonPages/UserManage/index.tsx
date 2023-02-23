@@ -1,15 +1,17 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { getTableCol, getFormCol, getFormText } from "./config";
-import { DTable, ITableBtn } from "../../dantd/DTable";
+import { DTable } from "../../dantd/DTable";
 import { RenderTitle } from "../RenderTitle";
 import QueryForm from "../../ProForm/QueryForm";
-import { queryUserList, queryDeptTreeData, queryRoleListByName } from "./service";
-import { TreeSelect } from "antd";
+import { queryUserList, queryDeptTreeData, queryRoleListByName, deleteUser } from "./service";
+import { Modal, TreeSelect, message } from "antd";
 import { renderTableOpts } from "../../ProTable/RenderTableOpts";
 import Detail from "./detail";
-import { debounce } from "lodash";
 const { TreeNode } = TreeSelect;
-import Progress from '../../CommonComponents/ProgressBar'
+import Progress from "../../CommonComponents/ProgressBar";
+import { hasOpPermission } from "lib/permission";
+import { UserPermissions } from "constants/permission";
+import { ProTable } from "knowdesign";
 
 export const UserManage = () => {
   const [flag, setFlag] = useState("");
@@ -34,9 +36,44 @@ export const UserManage = () => {
   const getOperationList = (row: any) => {
     return [
       {
+        invisible: !hasOpPermission(UserPermissions.PAGE, UserPermissions.ASSGIN),
         label: "分配角色",
         clickFunc: () => {
           handleAssignRole(row);
+        },
+      },
+      {
+        invisible: !hasOpPermission(UserPermissions.PAGE, UserPermissions.ASSGIN),
+        label: "删除",
+        clickFunc: () => {
+          if (row.singleOwnerOfProjects?.length) {
+            return Modal.info({
+              title: "提示",
+              content: (
+                <>
+                  <div>此用户是以下应用的唯一责任人，删除用户前需下线应用：</div>
+                  <div>{row.singleOwnerOfProjects.join("、")}</div>
+                </>
+              ),
+            });
+          }
+          Modal.confirm({
+            title: "提示",
+            content: row.ownProjects?.length ? (
+              <>
+                <div>用户是以下应用的责任人，是否确定删除？</div>
+                <div>{row.ownProjects.join("、")}</div>
+              </>
+            ) : (
+              `确认删除${row.userName || ""}`
+            ),
+            onOk: () => {
+              deleteUser(row.id).then(() => {
+                message.success("删除成功");
+                fetchUserList();
+              });
+            },
+          });
         },
       },
     ];
@@ -47,6 +84,7 @@ export const UserManage = () => {
   };
 
   const renderUserNameCol = (value, row) => {
+    if (!value) return "-";
     return (
       <a
         type="javascript;"
@@ -54,20 +92,7 @@ export const UserManage = () => {
           handleDetail(row);
         }}
       >
-        {row.username}
-      </a>
-    );
-  };
-
-  const renderRealNameCol = (value, row) => {
-    return (
-      <a
-        type="javascript;"
-        onClick={() => {
-          handleDetail(row);
-        }}
-      >
-        {row.realName}
+        {value}
       </a>
     );
   };
@@ -83,14 +108,13 @@ export const UserManage = () => {
     setUserId(row.id);
   };
 
-  const fetchUserList = () => {
+  const fetchUserList = (customPagination: any = {}) => {
     const { current, pageSize } = pagination;
     const params = {
       ...formData,
-      page: current,
-      size: pageSize,
+      page: customPagination.current ?? current,
+      size: customPagination.pageSize ?? pageSize,
     };
-    console.log(params, "params");
     Progress.start();
     setloading(true);
     queryUserList(params)
@@ -101,6 +125,8 @@ export const UserManage = () => {
           setPagination((origin) => {
             return {
               ...origin,
+              current: res.pagination.pageNo,
+              pageSize: res.pagination.pageSize,
               total: res.pagination.total,
             };
           });
@@ -163,11 +189,6 @@ export const UserManage = () => {
   };
 
   useEffect(() => {
-    fetchDeptList();
-    fetchRoleList();
-  }, []);
-
-  useEffect(() => {
     renderRoleItem();
   }, [roleList]);
 
@@ -198,19 +219,18 @@ export const UserManage = () => {
     };
     for (const key in formData) {
       if (!formData[key]) {
-        formData[key] = "";
+        formData[key] = undefined;
+      } else {
+        formData[key] = formData[key].trim();
       }
     }
     setFormData(formData);
   };
 
   const onChangePagination = (current: any, pageSize: any) => {
-    setPagination((value) => {
-      return {
-        ...value,
-        current,
-        pageSize,
-      };
+    fetchUserList({
+      current,
+      pageSize,
     });
   };
 
@@ -220,36 +240,43 @@ export const UserManage = () => {
   };
 
   React.useEffect(() => {
-    fetchUserList();
-  }, [formData, pagination.current, pagination.pageSize]);
+    fetchUserList({ current: 1, pageSize: pagination.pageSize });
+  }, [formData]);
 
   return (
-    <div className="user-manage">
-      <div className="table-header">
-        <RenderTitle {...renderTitleContent()} />
-        <QueryForm
-          {...getFormText}
-          defaultCollapse
-          columns={getFormCol(renderDeptItem(), renderRoleItem())}
-          onChange={() => null}
-          onReset={handleSubmit}
-          onSearch={handleSubmit}
-          initialValues={formData}
-          isResetClearAll
+    <div className="table-layout-style">
+      <ProTable
+        showQueryForm={true}
+        queryFormProps={{
+          defaultCollapse: true,
+          columns: getFormCol(renderDeptItem(), renderRoleItem()),
+          // onChange={() => null}
+          onReset: handleSubmit,
+          onSearch: handleSubmit,
+          isResetClearAll: true,
+          initialValues: formData,
+        }}
+        tableProps={{
+          tableId: "user_manager_table",
+          isCustomPg: false,
+          loading,
+          rowKey: "id",
+          dataSource: data,
+          columns: getTableCol(renderIndex, renderUserNameCol, renderOptCol),
+          paginationProps: { ...pagination, onChange: onChangePagination },
+          customRenderSearch: () => <RenderTitle {...renderTitleContent()} />,
+        }}
+      />
+      {detailVisible ? (
+        <Detail
+          flag={flag}
+          detailVisible={detailVisible}
+          closeDetail={closeDetail}
+          setDetailVisible={setDetailVisible}
+          userId={userId}
+          submitCb={submitCb}
         />
-      </div>
-      <div className="table-content">
-        <DTable
-          loading={loading}
-          rowKey="id"
-          dataSource={data}
-          columns={getTableCol(renderIndex, renderUserNameCol, renderRealNameCol, renderOptCol)}
-          paginationProps={{ ...pagination, onChange: onChangePagination }}
-        />
-        {detailVisible ? (
-          <Detail flag={flag} detailVisible={detailVisible} closeDetail={closeDetail} userId={userId} submitCb={submitCb} />
-        ) : null}
-      </div>
+      ) : null}
     </div>
   );
 };

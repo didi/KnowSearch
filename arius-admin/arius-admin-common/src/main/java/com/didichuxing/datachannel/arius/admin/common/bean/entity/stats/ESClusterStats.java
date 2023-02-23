@@ -3,7 +3,6 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.stats;
 import static com.didichuxing.datachannel.arius.admin.common.util.CommonUtils.monitorTimestamp2min;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -44,7 +43,7 @@ public class ESClusterStats extends BaseESPO {
 
     @Override
     public String getKey() {
-        return String.format("%s@%s@%s@%d", dataCenter, cluster, percentilesType, monitorTimestamp2min(timestamp));
+        return String.format("%s@%s@%s@%d@%d", dataCenter, cluster, percentilesType, monitorTimestamp2min(timestamp),physicCluster);
     }
 
     @Override

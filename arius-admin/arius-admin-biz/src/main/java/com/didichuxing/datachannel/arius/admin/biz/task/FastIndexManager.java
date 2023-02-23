@@ -88,4 +88,11 @@ public interface FastIndexManager {
      * @return
      */
     List<ClusterPhyVO> ESClustersInstalledFastDump();
+
+    /**
+     * 任务提交地址
+     * @return
+     * @param sourceClusterName
+     */
+    String TaskSubmitAddress(String sourceClusterName);
 }

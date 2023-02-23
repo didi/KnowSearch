@@ -32,6 +32,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayNodeS
 import com.didiglobal.logi.op.manager.application.ComponentService;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +40,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -335,44 +337,34 @@ public class GatewayClusterManagerImpl implements GatewayClusterManager {
 			}
 			
 			if (Objects.nonNull(gatewayCluster.getComponentId()) && gatewayCluster.getComponentId() > 0) {
+					 // 下线对应的插件
+					Set<Integer> deleteComponentIds = Sets.newHashSet();
 					// 下线 op
-				    final com.didiglobal.logi.op.manager.domain.component.entity.Component component = componentService.queryComponentById(
-            gatewayCluster.getComponentId()).getData();
-        if (Objects.nonNull(component)) {
-		        if (StringUtils.isNotBlank(component.getContainComponentIds())) {
-				        for (String componentId : StringUtils.split(component.getContainComponentIds(),
-						        ",")) {
-						        if (StringUtils.isNumeric(componentId)) {
-								        // 如果这个组建 ID 是存在的
-								        if (Boolean.TRUE.equals(
-										        componentService.checkComponent(Integer.parseInt(componentId))
-												        .getData())) {
-										        final com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> integerResult = componentService.offLineComponent(
-												        Integer.parseInt(componentId));
-										        if (integerResult.failed()) {
-												        // 这里显示回滚处理特殊异常场景
-												        TransactionAspectSupport.currentTransactionStatus()
-														        .setRollbackOnly();
-												        return Result.buildFail(
-														        String.format("关联组建下线失败，%s",
-																        integerResult.getMessage()));
-										        }
-										
-								        }
-						        }
-				        }
-				
-		        }
-            com.didiglobal.logi.op.manager.infrastructure.common.Result<Integer> offLineComponentRes = componentService.offLineComponent(
-                gatewayCluster.getComponentId());
-            //下线最终集群
-		        if (offLineComponentRes.failed()) {
-				        // 这里显示回滚处理特殊异常场景
-				        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-				        return Result.buildFail(
-						        String.format("下线失败，%s", offLineComponentRes.getMessage()));
-		        }
-        }
+					final com.didiglobal.logi.op.manager.domain.component.entity.Component component = componentService.queryComponentById(
+							gatewayCluster.getComponentId()).getData();
+					if (Objects.nonNull(component)) {
+							if (StringUtils.isNotBlank(component.getContainComponentIds())) {
+									for (String componentId : StringUtils.split(component.getContainComponentIds(),
+											",")) {
+											if (StringUtils.isNumeric(componentId)) {
+													// 添加
+													deleteComponentIds.add(Integer.parseInt(componentId));
+											}
+									}
+									
+							}
+							deleteComponentIds.add(gatewayCluster.getComponentId());
+							
+							com.didiglobal.logi.op.manager.infrastructure.common.Result<Boolean> offLineComponentRes =
+									componentService.deleteComponents(
+											Lists.newArrayList(deleteComponentIds));
+							//下线最终集群
+							if (Objects.equals(offLineComponentRes.getData(), Boolean.FALSE)) {
+									// 这里显示回滚处理特殊异常场景
+									TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+									return Result.buildFail("下线失败，请联系管理员");
+							}
+					}
 			}
 			// 先下线 node
 			boolean deleteByClusterName = gatewayNodeService.deleteByClusterName(gatewayCluster.getClusterName());

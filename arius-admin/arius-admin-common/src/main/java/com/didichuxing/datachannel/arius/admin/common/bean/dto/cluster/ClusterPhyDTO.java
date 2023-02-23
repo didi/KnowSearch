@@ -1,11 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -95,7 +97,6 @@ public class ClusterPhyDTO extends PageDTO {
 
     @ApiModelProperty("集群创建人")
     private String                     creator;
-    
 
     @ApiModelProperty("集群密码")
     private String                     password;
@@ -155,4 +156,10 @@ public class ClusterPhyDTO extends PageDTO {
      */
     @ApiModelProperty("gateway ids, 逗号分割")
     private String gatewayIds;
+
+    @ApiModelProperty("kibana外链地址")
+    private String                    kibanaAddress;
+
+    @ApiModelProperty("cerebro外链地址")
+    private String                    cerebroAddress;
 }

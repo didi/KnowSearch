@@ -1,93 +1,81 @@
-import React from 'react';
-import { Modal, Form, Input, message } from 'antd';
+import React from "react";
+//import { Modal, Form, Input, message } from 'antd';
+import { Modal, message } from "knowdesign";
+const { confirm } = Modal;
 import { connect } from "react-redux";
-import * as actions from 'actions';
-import { InfoCircleOutlined } from "@ant-design/icons";
-import { submitWorkOrder } from "api/common-api";
+import * as actions from "actions";
+import { IconFont } from "@knowdesign/icons";
+//import { submitWorkOrder } from "api/common-api";
+import { clusterDelete } from "api/cluster-api";
 import store from "store";
-import './deleteStyle.less';
+import "./deleteStyle.less";
 
 const loginInfo = {
   userName: store.getState().user?.getName,
   app: store.getState().app,
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   params: state.modal.params,
   cb: state.modal.cb,
 });
 
-export const DeleteCluster = connect(mapStateToProps)((props: { dispatch: any, params: any, cb: any }) => {
+export const DeleteCluster = connect(mapStateToProps)((props: { dispatch: any; params: any; cb: any }) => {
   const { params, dispatch, cb } = props;
-  const [form] = Form.useForm();
+  confirm({
+    title: `确定要删除物理集群${params.cluster}？`,
+    icon: <IconFont type="icon-shibai" />,
+    content: `集群删除后，集群所有相关数据也将被删除，请谨慎操作！`,
+    okText: "确定",
+    cancelText: "取消",
+    onOk: async () => {
+      const param: any = {
+        regionId: params.id,
+      };
+      clusterDelete(param).then(() => {
+        message.success("下线成功");
+        cb();
+        dispatch(actions.setModalId(""));
+      });
+    },
+    onCancel: () => {
+      dispatch(actions.setModalId(""));
+    },
+  });
   return (
     <>
-      <Modal
+      {/* <Modal
         visible={true}
-        title={'集群删除'}
+        title={"集群下线"}
+        centered
+        maskClosable={false}
         width={480}
         onCancel={() => {
-          dispatch(actions.setModalId(''))
+          dispatch(actions.setModalId(""));
         }}
         onOk={async () => {
-          const values = await form.validateFields();
-          if (values && values?.desc) {
-            const param: any = {
-              contentObj: {
-                id: params.id,
-                phyClusterName: params.cluster,
-              },
-              submitorAppid: loginInfo.app.appInfo()?.id,
-              submitor: loginInfo.userName("domainAccount"),
-              description: values?.desc,
-              type: "clusterDelete",
-            };
-            submitWorkOrder(param, () => {
-              message.success("提交工单成功");
-              cb();
-              dispatch(actions.setModalId(''))
-            });
-          }
+          const param: any = {
+            regionId: params.id,
+          };
+          clusterDelete(param).then(() => {
+            message.success("下线成功");
+            cb();
+            dispatch(actions.setModalId(""));
+          });
         }}
       >
         <div>
           <div className="delete-modal-content">
             <div className="delete-modal-content-left">
-              <InfoCircleOutlined  className="delete-modal-content-left-icon"/>
+              <InfoCircleOutlined className="delete-modal-content-left-icon" />
             </div>
             <div className="delete-modal-content-right">
               <p className="delete-modal-content-right-p1">是否确定删除物理集群{params.cluster}？</p>
               <p className="delete-modal-content-right-p2">集群删除后，集群所有相关数据也将被删除，请谨慎操作！</p>
             </div>
           </div>
-            
-          <div style={{ marginTop: 10 }}>
-            <Form 
-              form={form}
-              layout="vertical"
-            >
-              <Form.Item 
-                label="申请理由"
-                style={{ marginBottom: 0 }}
-                rules={[
-                  {
-                    required: true,
-                    validator: (rule: any, value: string) => {
-                      if (!value || value?.trim().length > 100) {
-                        return Promise.reject("请输入1-100字申请原因");
-                      } else {
-                        return Promise.resolve();
-                      }
-                    },
-                  },
-                ]}
-                name={'desc'} >
-                <Input.TextArea rows={4} placeholder="请输入申请原因1-100个字符"/>
-              </Form.Item>
-            </Form>
-          </div>
         </div>
-      </Modal>
+      </Modal> */}
     </>
-  )
-})
+  );
+});

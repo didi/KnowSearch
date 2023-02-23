@@ -1,66 +1,79 @@
-import { indexConfigData } from 'container/indicators-kanban/cluster-kanban/node-view-config';
-import fetch from '../lib/fetch';
+import { indexConfigData } from "container/indicators-kanban/cluster-kanban/node-view-config";
+import fetch from "../lib/fetch";
+import { isSuperApp } from "lib/utils";
 const Prefix = "admin";
+const v3Prefix = "/v3";
 const POST = "POST";
 
-// 获取项目下的物理集群名称列表
-export const getClusterNameList = () => {
-  return fetch("/v3/op/phy/cluster/names", {
-    prefix: Prefix
+export const getLogicClusterNames = () => {
+  return fetch(`${v3Prefix}/cluster/logic/names`, {
+    errorNoTips: true,
   });
-}
+};
 
-type secondMetricsType = 'overview' | "node" | "index" | "template";
+type secondUserConfigType = "overview" | "node" | "index" | "template";
 type aggType = "max" | "avg";
 
 // 获取账号下已配置指标列表
-export const getCheckedList = (secondMetricsType: secondMetricsType) => {
-  return fetch("/v3/op/phy/cluster/metrics/configMetrics", {
-    prefix: Prefix,
-    method: POST,
+export const getCheckedList = (secondUserConfigType: secondUserConfigType) => {
+  return fetch(`${v3Prefix}/metrics/cluster/config-metrics`, {
+    method: "POST",
     body: {
-      domainAccount: "",
-      firstMetricsType: "cluster",
-      secondMetricsType: secondMetricsType,
-      metricsTypes: []
-    }
+      userName: "",
+      firstUserConfigType: "cluster",
+      secondUserConfigType,
+      userConfigTypes: [],
+    },
   });
-}
+};
 
 // 设置账号下已配置指标列表
-export const setCheckedList = (secondMetricsType: secondMetricsType, metricsTypes: string[]) => {
-  return fetch("/v3/op/phy/cluster/metrics/updateConfigMetrics", {
-    prefix: Prefix,
-    method: POST,
+export const setCheckedList = (secondUserConfigType: secondUserConfigType, userConfigTypes: string[]) => {
+  return fetch(`${v3Prefix}/metrics/cluster/config-metrics`, {
+    method: "PUT",
     body: {
-      domainAccount: "",
-      firstMetricsType: "cluster",
-      secondMetricsType: secondMetricsType,
-      metricsTypes: metricsTypes
-    }
+      userName: "",
+      firstUserConfigType: "cluster",
+      secondUserConfigType,
+      userConfigTypes,
+    },
   });
-}
+};
 
-// 获取总览视图数据
+// 获取总览视图数据 /v3/metrics/cluster/overview
 export const getOverviewData = (metricsTypes: string[], clusterPhyName: string, startTime: number, endTime: number) => {
   if (!clusterPhyName) {
     return;
   }
-  return fetch("/v3/op/phy/cluster/metrics/overview", {
-    prefix: Prefix,
+  let body = {
+    aggType: "max",
+    metricsTypes,
+    clusterPhyName,
+    startTime,
+    endTime,
+  } as any;
+  const superApp = isSuperApp();
+  if (!superApp) {
+    delete body.clusterPhyName;
+    body.clusterLogicName = clusterPhyName;
+  }
+  return fetch(`${v3Prefix}/metrics/cluster/overview`, {
     method: POST,
-    body: {
-      "aggType": "max",
-      metricsTypes,
-      clusterPhyName,
-      startTime,
-      endTime,
-    }
+    body,
   });
-}
+};
 
-// 获取节点视图数据
-export const getNodeViewData = async (metricsTypes: string[], clusterPhyName: string, startTime: number, endTime: number, topNu: number, nodeIp: string[]) => {
+// 获取节点视图数据 /v3/metrics/cluster/nodes
+export const getNodeViewData = async (
+  metricsTypes: string[],
+  clusterPhyName: string,
+  startTime: number,
+  endTime: number,
+  topNu: number,
+  nodeIp: string[],
+  topMethod: string,
+  topTimeStep: number
+) => {
   if (!clusterPhyName) {
     return;
   }
@@ -69,7 +82,8 @@ export const getNodeViewData = async (metricsTypes: string[], clusterPhyName: st
   const aggTypes = [];
   let taskData = [];
   let data = [];
-  metricsTypes = metricsTypes.filter(item => {
+  const superApp = isSuperApp();
+  metricsTypes = metricsTypes.filter((item) => {
     if (indexConfigData[item] && indexConfigData[item].newquota) {
       taskList.push(item);
       aggTypes.push(indexConfigData[item].newquota);
@@ -77,97 +91,166 @@ export const getNodeViewData = async (metricsTypes: string[], clusterPhyName: st
     } else {
       return true;
     }
-  })
+  });
   if (taskList && taskList.length) {
-    taskData = await fetch("/v3/op/phy/cluster/metrics/node/task", {
-      prefix: Prefix,
+    let body = {
+      aggTypes: aggTypes,
+      metricsTypes: taskList,
+      clusterPhyName,
+      startTime,
+      endTime,
+      topNu,
+      nodeNames: nodeIp,
+      topMethod,
+      topTimeStep,
+    } as any;
+    if (!superApp) {
+      delete body.clusterPhyName;
+      body.clusterLogicName = clusterPhyName;
+    }
+    taskData = await fetch(`${v3Prefix}/metrics/cluster/node/task`, {
       method: POST,
-      body: {
-        aggTypes: aggTypes,
-        metricsTypes: taskList,
-        clusterPhyName,
-        startTime,
-        endTime,
-        topNu,
-        nodeNames: nodeIp
-      }
+      body,
     });
   }
   if (metricsTypes && metricsTypes.length) {
-    data = await fetch("/v3/op/phy/cluster/metrics/nodes", {
-      prefix: Prefix,
+    let body = {
+      aggType: "avg",
+      metricsTypes,
+      clusterPhyName,
+      startTime,
+      endTime,
+      topNu,
+      nodeNames: nodeIp,
+      topMethod,
+      topTimeStep,
+    } as any;
+    if (!superApp) {
+      delete body.clusterPhyName;
+      body.clusterLogicName = clusterPhyName;
+    }
+    data = await fetch(`${v3Prefix}/metrics/cluster/nodes`, {
       method: POST,
-      body: {
-        "aggType": "avg",
-        metricsTypes,
-        clusterPhyName,
-        startTime,
-        endTime,
-        topNu,
-        nodeNames: nodeIp
-      }
+      body,
     });
   }
   return [...data, ...taskData];
-}
+};
 
 // 获取节点视图数据 Ip 名称列表
 export const getNodeIpList = (clusterPhyName: string) => {
-  return fetch(`/v3/op/phy/cluster/${clusterPhyName}/nodes`, { prefix: Prefix });
-}
+  const superApp = isSuperApp();
+  return fetch(`${v3Prefix}/cluster/${superApp ? "phy" : "logic"}/node/${clusterPhyName}/names`, { prefix: Prefix });
+};
 
+// 获取节点视图数据 Ip 名称列表
+export const getNodeInfoList = (clusterPhyName: string) => {
+  const superApp = isSuperApp();
+  return fetch(`${v3Prefix}/cluster/${superApp ? "phy" : "logic"}/node/${clusterPhyName}/infos`);
+};
 
 // 获取index视图数据
-export const getIndexViewData = (metricsTypes: string[], clusterPhyName: string, startTime: number, endTime: number, topNu: number, indexName: string) => {
+export const getIndexViewData = (
+  metricsTypes: string[],
+  clusterPhyName: string,
+  startTime: number,
+  endTime: number,
+  topNu: number,
+  indexNames: string[],
+  topMethod: string,
+  topTimeStep: number
+) => {
   if (!clusterPhyName) {
     return;
   }
-  return fetch("/v3/op/phy/cluster/metrics/index", {
-    prefix: Prefix,
+  const superApp = isSuperApp();
+  let body = {
+    aggType: "avg",
+    metricsTypes,
+    clusterPhyName,
+    startTime,
+    endTime,
+    topNu,
+    indexNames,
+    topMethod,
+    topTimeStep,
+  } as any;
+  if (!superApp) {
+    delete body.clusterPhyName;
+    body.clusterLogicName = clusterPhyName;
+  }
+  return fetch(`${v3Prefix}/metrics/cluster/indices`, {
     method: POST,
-    body: {
-      "aggType": "avg",
-      metricsTypes,
-      clusterPhyName,
-      startTime,
-      endTime,
-      topNu,
-      indexName
-    }
+    body,
   });
-}
+};
 
-// 获取index视图数据
-export const getTemplateViewData = (metricsTypes: string[], clusterPhyName: string, startTime: number, endTime: number, topNu: number, logicTemplateId: string, aggType) => {
+// 获取索引模板视图数据 /v3/metrics/cluster/template
+export const getTemplateViewData = (
+  metricsTypes: string[],
+  clusterPhyName: string,
+  startTime: number,
+  endTime: number,
+  topNu: number,
+  templateIdList: string[],
+  aggType,
+  topMethod: string,
+  topTimeStep: number
+) => {
   if (!clusterPhyName) {
     return;
   }
-  return fetch("/v3/op/phy/cluster/metrics/template", {
-    prefix: Prefix,
+  const superApp = isSuperApp();
+  let body = {
+    aggType,
+    metricsTypes,
+    clusterPhyName,
+    startTime,
+    endTime,
+    topNu,
+    templateIdList,
+    topMethod,
+    topTimeStep,
+  } as any;
+  if (!superApp) {
+    delete body.clusterPhyName;
+    body.clusterLogicName = clusterPhyName;
+  }
+  return fetch(`${v3Prefix}/metrics/cluster/templates`, {
     method: POST,
-    body: {
-      aggType,
-      metricsTypes,
-      clusterPhyName,
-      startTime,
-      endTime,
-      topNu,
-      logicTemplateId
-    }
+    body,
   });
-}
+};
 
 // 获取index视图 index 列表数据
-export const getIndexNameList = (clusterPhyName) => {
-  return fetch(`/v3/op/phy/cluster/metrics/${clusterPhyName}/indices`, { prefix: Prefix });
-}
+export const getPhyIndexNameList = (clusterPhyName) => {
+  return fetch(`${v3Prefix}/indices/${clusterPhyName}/phy/indices`);
+};
+
+export const getLogicIndexNameList = (logicClusterName) => {
+  return fetch(`${v3Prefix}/indices/${logicClusterName}/logic/indices`);
+};
 
 // 获取索引模板 索引模板 列表数据
-export const getListTemplates = (clusterPhyName) => {
-  return fetch(`/v3/op/template/logic/listTemplates?cluster=${clusterPhyName}`, { prefix: Prefix });
-}
+export const getPhyListTemplates = (clusterPhyName) => {
+  return fetch(`${v3Prefix}/template/logic/${clusterPhyName}/phy/templates`);
+};
+
+export const getLogicListTemplates = (logicClusterName) => {
+  return fetch(`${v3Prefix}/template/logic/${logicClusterName}/logic/templates`);
+};
 
 // 获取chartTable
 export const getChartTableList = (clusterPhyName, node, time) => {
-  return fetch(`/v3/op/phy/cluster/metrics/${clusterPhyName}/${node}/task?startTime=${time[0]}&endTime=${time[1]}`, { prefix: Prefix });
-}
+  return fetch(`${v3Prefix}/metrics/cluster/${clusterPhyName}/${node}/task?startTime=${time[0]}&endTime=${time[1]}`, {
+    prefix: Prefix,
+  });
+};
+
+// 通过model筛选获取指标字典信息
+export const getDictionary = (params) => {
+  return fetch(`${v3Prefix}/metrics/dictionary`, {
+    method: "POST",
+    body: params,
+  });
+};

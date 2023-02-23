@@ -1,15 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 public interface ESIndexCatService {
 
@@ -99,7 +99,7 @@ public interface ESIndexCatService {
      * @return List<String>
      */
     List<String> syncGetIndexListByProjectIdAndFuzzyIndexAndClusterLogic(Integer projectId, String clusterLogicName, String index);
-    
+
     /**
      * 通过项目id、集群物理名、模糊索引获取索引列表
      *

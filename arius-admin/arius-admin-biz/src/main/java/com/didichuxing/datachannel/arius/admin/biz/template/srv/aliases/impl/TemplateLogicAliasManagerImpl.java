@@ -235,9 +235,9 @@ public class TemplateLogicAliasManagerImpl extends BaseTemplateSrvImpl implement
 
         Result<Void> operationResult = createTemplateAliases(aliases.getLogicId(), aliases.getAliases());
         if (operationResult.success()) {
-            Integer projectIdByTemplateLogicId = indexTemplateService.getProjectIdByTemplateLogicId(aliases.getLogicId());
-            operateRecordService.saveOperateRecordWithManualTrigger("别名创建", operator, AuthConstant.SUPER_PROJECT_ID,
-                    aliases.getLogicId(), OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY, projectIdByTemplateLogicId);
+            IndexTemplate logicTemplateById = indexTemplateService.getLogicTemplateById(aliases.getLogicId());
+            operateRecordService.saveOperateRecordWithManualTrigger(String.format("index:【%s】创建别名：【%s】", Optional.ofNullable(logicTemplateById.getName()).orElse(""), aliases.getAliases()), operator, AuthConstant.SUPER_PROJECT_ID,
+                    aliases.getLogicId(), OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY, logicTemplateById.getProjectId());
         }
 
         return operationResult;
@@ -256,11 +256,11 @@ public class TemplateLogicAliasManagerImpl extends BaseTemplateSrvImpl implement
 
         Result<Void> operationResult = modifyTemplateAliases(aliases.getLogicId(), aliases.getAliases());
         if (operationResult.success()) {
-            Integer projectIdByTemplateLogicId = indexTemplateService.getProjectIdByTemplateLogicId(aliases.getLogicId());
+            IndexTemplate logicTemplateById = indexTemplateService.getLogicTemplateById(aliases.getLogicId());
             operateRecordService
                 .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY)
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(aliases.getLogicId()).content("别名修改")
-                    .userOperation(operator).operateProject(projectService.getProjectBriefByProjectId(projectIdByTemplateLogicId)).build());
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(aliases.getLogicId()).content(String.format("index:【%s】设置别名：【%s】", Optional.ofNullable(logicTemplateById.getName()).orElse(""), aliases.getAliases()))
+                    .userOperation(operator).operateProject(projectService.getProjectBriefByProjectId(logicTemplateById.getProjectId())).build());
         }
 
         return operationResult;

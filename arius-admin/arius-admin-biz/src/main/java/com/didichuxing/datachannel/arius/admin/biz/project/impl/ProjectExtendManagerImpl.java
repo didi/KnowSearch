@@ -2,6 +2,21 @@ package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 
 import static com.didichuxing.datachannel.arius.admin.core.service.project.impl.ESUserServiceImpl.VERIFY_CODE_LENGTH;
 
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.didichuxing.datachannel.arius.admin.biz.project.ProjectExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
@@ -62,23 +77,6 @@ import com.didiglobal.knowframework.security.service.UserService;
 import com.didiglobal.knowframework.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * logi 项目的扩展能力 将logi中整体能力全部移动到这里
@@ -174,7 +172,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 i.getGatewayIds()));
         return Result.buildSucc(projectExistenceGatewayCluster);
     }
-    
+
     @Override
     public Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator, Integer operatorId) {
         try {
@@ -439,7 +437,6 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      *
      * @param saveDTO  项目信息
      * @param operator 请求信息
-     * @throws KfSecurityException 项目相关的错误信息
      */
     @Override
     public Result<Void> updateProject(ProjectExtendSaveDTO saveDTO, String operator) {

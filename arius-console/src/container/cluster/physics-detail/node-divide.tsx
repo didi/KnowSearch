@@ -1,60 +1,50 @@
-import * as React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "styles/search-filter.less";
 import { getNodeDivideColumns } from "./config";
 import Url from "lib/url-parser";
-import { INodeDivide } from "typesPath/index-types";
-import { DTable, ITableBtn } from "component/dantd/dtable";
-import { getPhyNodeDivideList } from "api/op-cluster-index-api";
-import { connect } from "react-redux";
-import { Dispatch } from "redux";
-import * as actions from "actions";
-import { IOpPhysicsClusterDetail } from "typesPath/cluster/cluster-types";
+import { DTable } from "component/dantd/dtable";
+import { getPhyNodeDivideList, deleteNode } from "api/op-cluster-index-api";
+import { Modal, message, Button } from "antd";
+import { QuestionCircleOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import _ from "lodash";
+import "./index.less";
 
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  setModalId: (modalId: string, params?: any, cb?: Function) =>
-    dispatch(actions.setModalId(modalId, params, cb)),
-  setDrawerId: (modalId: string, params?: any, cb?: Function) =>
-    dispatch(actions.setDrawerId(modalId, params)),
-});
+export const NodeDivide = (props) => {
+  const [searchKey, setSearchKey] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState([]);
+  const [clusterId, setClusterId] = useState(null);
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
 
-const connects: any = connect;
+  useEffect(() => {
+    const url = Url();
+    setClusterId(Number(url.search.physicsClusterId));
+  }, []);
 
-@connects(null, mapDispatchToProps)
-export class NodeDivide extends React.Component<{
-  setModalId?: any;
-  setDrawerId?: any;
-}> {
-  public state = {
-    searchKey: "",
-    nodeDivideList: [] as INodeDivide[],
-    loading: false,
-    sort: "",
-    pageSize: 10,
-    data: [],
+  useEffect(() => {
+    clusterId && reloadData();
+  }, [clusterId]);
+
+  const reloadData = () => {
+    setLoading(true);
+    getPhyNodeDivideList(clusterId)
+      .then((res) => {
+        setData(res);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
-  public cluster: string;
-  public clusterId: number;
-
-  constructor(props: any) {
-    super(props);
-    const url = Url();
-    this.cluster = url.search.physicsCluster;
-    this.clusterId = Number(url.search.physicsClusterId);
-  }
-
-  public getData = (origin?: any[]) => {
-    let { searchKey } = this.state;
-    searchKey = (searchKey + "").trim().toLowerCase();
-    const data = searchKey
+  const getData = (origin?: any[]) => {
+    let key = (searchKey + "").trim().toLowerCase();
+    let data = key
       ? origin.filter((d) => {
           let flat = false;
-          Object.keys(d).forEach((key) => {
-            if (typeof key === "string" || typeof key === "number") {
-              if (
-                (d[key] + "").toLowerCase().includes((searchKey + "") as string)
-              ) {
+          Object.keys(d).forEach((objectKey) => {
+            if (typeof objectKey === "string" || typeof objectKey === "number") {
+              if ((d[objectKey] + "").toLowerCase().includes((key + "") as string)) {
                 flat = true;
                 return;
               }
@@ -63,205 +53,95 @@ export class NodeDivide extends React.Component<{
           return flat;
         })
       : origin;
+    data = data.sort((a, b) => b.role - a.role);
     return data;
   };
 
-  public componentDidMount() {
-    this.reloadData();
-  }
+  const handleSubmit = (value) => {
+    setSearchKey(value);
+  };
 
-  public tableChange = (pagination, __, sort) => {
-    const { pageSize } = pagination;
-    const res = this.state.data;
-    if (pageSize !== this.state.pageSize) {
-      this.setState(
-        {
-          pageSize,
-        },
-        () => {
-          this.setNodeDivideList(res);
-        }
-      );
+  const getOpBtns = useCallback(() => {
+    let content: string | React.ReactNode;
+    let icon: React.ReactNode;
+    let hasRegionList = selectedRows?.filter((item) => item?.regionId !== -1);
+    if (hasRegionList.length) {
+      let text = hasRegionList?.map((item) => item?.nodeSet);
+      content = `节点${text?.join("，")}已被划分Region，请解绑后再下线。`;
+      icon = <ExclamationCircleOutlined />;
     } else {
-      if (sort.order === "descend") {
-        this.setNodeDivideList(res, sort.order);
-      } else if (sort.order === "ascend") {
-        this.setNodeDivideList(res, sort.order);
-      }
-    }
-  };
-
-  public setNodeDivideList = (res: INodeDivide[], sortOrder = "ascend") => {
-    res = _.cloneDeep(res);
-    let regionIdArr = res
-      ?.filter((item) => item.regionId)
-      .sort((a: any, b: any) => {
-        if (sortOrder === "descend") {
-          return b.regionId - a.regionId;
-        } else {
-          return a.regionId - b.regionId;
-        }
-      });
-
-    let noRegionIdArr = res?.filter((item) => !item.regionId);
-
-    // 根据 pageSize 大小判断合并单元格数，避免出现，分页多合并单元格的情况
-    const pageSize = this.state.pageSize;
-    let start = 0;
-    let end = 0;
-    regionIdArr = regionIdArr.map((item, index) => {
-      if (index % pageSize === 0) {
-        start = end;
-        end += pageSize;
-      }
-      const pageArr = regionIdArr.slice(start, end);
-      return {
-        rowSpan: pageArr?.filter((i) => item.regionId === i.regionId).length,
-        clusterRowSpan: this.getClusterRowSpan(pageArr, item),
-        racksRowSpan: this.getRackRowSpan(pageArr, item),
-        sortId: item.regionId,
-        ...item,
-      };
-    });
-
-    const maxSortId = Math.pow(2, 60);
-    noRegionIdArr = noRegionIdArr.map((item, index) => {
-      item.regionId = "_";
-      return {
-        ...item,
-        sortId: maxSortId,
-      };
-    });
-    const dataList = [].concat(regionIdArr).concat(noRegionIdArr);
-
-    for (let i = 0; i < dataList.length; i++) {
-      let temp = dataList[i];
-      for (let j = i + 1; j < dataList.length; j++) {
-        if (temp.ip === dataList[j].ip) {
-          if (Array.isArray(temp.role)) {
-            temp.role.push(dataList[j].role);
-            temp.status.push(dataList[j].status);
-          } else {
-            temp.role = [temp.role, dataList[j].role];
-            temp.status = [temp.status, dataList[j].status];
-          }
-          dataList.splice(j, 1);
-          j--;
-        }
-      }
-    }
-
-    this.setState({
-      nodeDivideList: dataList.map((item, index) => ({
-        ...item,
-        logicDepart: item.cluster,
-        index,
-      })),
-    });
-  };
-
-  public reloadData = () => {
-    this.setState({
-      loading: true,
-    });
-    getPhyNodeDivideList(this.clusterId)
-      .then((res) => {
-        this.setState(
-          {
-            data: res,
-          },
-          () => {
-            const res = this.state.data;
-            this.setNodeDivideList(res);
-          }
+      content =
+        selectedRows?.length === 1 ? (
+          `确定下线节点${selectedRows[0]?.nodeSet}吗？`
+        ) : (
+          <div className="delete-batch-node">
+            <div className="delete-title">确定批量下线节点？</div>
+            <div className="delete-content">
+              <div className="delete-label">操作对象</div>
+              <div className="delete-labels-box">
+                {selectedRows?.map((item) => (
+                  <div className="delete-node">{item.nodeSet}</div>
+                ))}
+              </div>
+            </div>
+          </div>
         );
-      })
-      .finally(() => {
-        this.setState({
-          loading: false,
-        });
-      });
-  };
-
-  public getClusterRowSpan = (dataList: INodeDivide[], item: INodeDivide) => {
-    const rowSpanArr = dataList.filter((i) => item.regionId === i.regionId);
-    const clusterNameRowSpanArr = rowSpanArr.filter(
-      (i) => item.logicClusterName === i.logicClusterName
-    );
-    let spanArr = 0;
-    if (clusterNameRowSpanArr[0]?.ip === item.ip) {
-      spanArr = clusterNameRowSpanArr.length;
+      icon = <QuestionCircleOutlined />;
     }
-    return spanArr;
-  };
-
-  public getRackRowSpan = (dataList: INodeDivide[], item: INodeDivide) => {
-    const rowSpanArr = dataList.filter((i) => item.regionId === i.regionId);
-    const clusterNameRowSpanArr = rowSpanArr?.filter(
-      (i) => item.logicClusterName === i.logicClusterName
-    );
-    const rackRowSpanArr = clusterNameRowSpanArr?.filter(
-      (i) => item.rack === i.rack
-    );
-    let spanArr = 0;
-    if (rackRowSpanArr[0]?.ip === item.ip) {
-      spanArr = rackRowSpanArr.length;
-    }
-    return spanArr;
-  };
-
-  public handleSubmit = (value) => {
-    this.setState({
-      searchKey: value,
-    });
-  };
-
-  public getOpBtns = (): ITableBtn[] => {
-    return [
-      {
-        label: "新增region",
-        className: "ant-btn-primary",
-        clickFunc: () =>
-          this.props.setModalId(
-            "newRegionModal",
-            {
-              clusterName: this.cluster,
-              nodeDivideList: this.state.nodeDivideList,
+    return selectedRows && selectedRows.length > 0 ? (
+      <Button
+        onClick={() => {
+          Modal.confirm({
+            icon,
+            content,
+            okText: "确认",
+            cancelText: "取消",
+            onOk: async () => {
+              if (hasRegionList.length) return;
+              await deleteNode(selectedRowKeys);
+              message.success("下线成功");
+              reloadData();
             },
-            this.reloadData
-          ),
-      },
-    ];
-  };
-
-  public render() {
-    const { nodeDivideList, loading } = this.state;
-    return (
-      <>
-        <DTable
-          loading={loading}
-          rowKey="id"
-          dataSource={this.getData(nodeDivideList)}
-          columns={getNodeDivideColumns(
-            nodeDivideList,
-            this.props.setModalId,
-            this.props.setDrawerId,
-            this.reloadData,
-            this.cluster
-          )}
-          reloadData={this.reloadData}
-          tableHeaderSearchInput={{ submit: this.handleSubmit }}
-          getOpBtns={this.getOpBtns}
-          attrs={{
-            bordered: true,
-            onChange: this.tableChange,
-          }}
-        />
-      </>
+          });
+        }}
+        style={{ marginRight: 0 }}
+        type={"primary"}
+        disabled={selectedRows && selectedRows.length ? false : true}
+      >
+        批量下线
+      </Button>
+    ) : (
+      <></>
     );
-  }
+  }, [selectedRows]);
 
-  public defineTableWrapperClassNames = () => {
-    return "no-padding";
-  };
-}
+  return (
+    <div className="node-divide-content">
+      <DTable
+        loading={loading}
+        rowKey="id"
+        dataSource={getData(data)}
+        columns={getNodeDivideColumns()}
+        reloadData={reloadData}
+        tableHeaderSearchInput={{ submit: handleSubmit }}
+        attrs={{
+          bordered: true,
+          scroll: { x: "max-content" },
+          rowSelection: {
+            selectedRowKeys,
+            onChange: (selectedRowKeys, selectedRows) => {
+              setSelectedRowKeys(selectedRowKeys);
+              setSelectedRows(selectedRows);
+            },
+            getCheckboxProps: (record) => {
+              return {
+                disabled: record.status !== 2,
+              };
+            },
+          },
+        }}
+        renderInnerOperation={getOpBtns}
+      />
+    </div>
+  );
+};

@@ -1,15 +1,26 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_IDC;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.JOIN_MASTER_NODE_MIN_NUMBER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_PHY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.EXCLUSIVE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.PRIVATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.PUBLIC;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.CLIENT_NODE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.*;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.ElasticsearchTimeoutException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
@@ -21,13 +32,7 @@ import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterCreateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.MultiClusterSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -43,26 +48,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhy
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.plugin.PluginInfoPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVOWithProjects;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.RunModeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatusWithTemplateEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginClusterTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterCreateSourceEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterImportRuleEnum;
@@ -78,14 +71,7 @@ import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleTh
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
@@ -120,29 +106,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.ElasticsearchTimeoutException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 /**
  *
@@ -581,7 +544,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     
                 postProcessingForClusterJoin(param);
                 SpringTool.publish(new ClusterPhyEvent(param.getCluster(), operator));
-                 operateRecordService.saveOperateRecordWithManualTrigger(String.format("集群接入：%s", saveClusterResult.getData().getCluster()), operator,
+                 operateRecordService.saveOperateRecordWithManualTrigger(saveClusterResult.getData().getCluster(), operator,
                         AuthConstant.SUPER_PROJECT_ID, saveClusterResult.getData().getId(),
                         OperateTypeEnum.PHYSICAL_CLUSTER_JOIN);
             }
@@ -627,8 +590,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Result.buildFail(e.getMessage());
         }
-         operateRecordService.saveOperateRecordWithManualTrigger(String.format("删除接入集群：%s", clusterPhy.getCluster()), operator, projectId, clusterId,
-                OperateTypeEnum.PHYSICAL_CLUSTER_JOIN);
+         operateRecordService.saveOperateRecordWithManualTrigger(clusterPhy.getCluster(), operator, projectId, clusterId,
+                OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE);
     
         return Result.buildSucc();
     }
@@ -889,10 +852,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         if (deleteClusterResult.failed()) {
             return Result.buildFrom(deleteClusterResult);
         }
-       
+
 
         SpringTool.publish(new ClusterPhyEvent(clusterPhy.getCluster(), operator));
-         operateRecordService.saveOperateRecordWithManualTrigger(String.format("删除集群：%s", clusterPhy.getCluster()), operator,
+         operateRecordService.saveOperateRecordWithManualTrigger(clusterPhy.getCluster(), operator,
                 AuthConstant.SUPER_PROJECT_ID, clusterPhyId, OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE);
         return Result.buildSucc(true);
     }
@@ -903,7 +866,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         if (result.success()) {
             SpringTool.publish(new ClusterPhyEvent(param.getCluster(), operator));
-             operateRecordService.saveOperateRecordWithManualTrigger(String.format("新建集群：%s", param.getCluster()), operator, projectId, param.getId(),
+             operateRecordService.saveOperateRecordWithManualTrigger(param.getCluster(), operator, projectId, param.getId(),
                     OperateTypeEnum.PHYSICAL_CLUSTER_NEW);
         }
         return result;
@@ -1256,13 +1219,13 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         return Result.buildSucc();
     }
-    
+
     @Override
     public Result<Boolean> verifyNameUniqueness(String clusterName) {
         	return Result.build(clusterPhyService.isClusterExists(clusterName) ||
 					componentService.queryComponentByName(clusterName).isSuccess());
     }
-    
+
     @Override
     public Result<Void> updateVersionWithECM(Integer componentId, String version) {
         if (!clusterPhyService.hasClusterRelationComponentId(componentId)){
@@ -1271,7 +1234,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         // 无需写入到操作记录，工单操作中生成操作记录即可
         return Result.build(clusterPhyService.updateVersion(componentId,version));
     }
-    
+
     @Override
     public Result<String> getNameByComponentId(Integer componentId) {
         ClusterPhyPO clusterPhy = clusterPhyService.getOneByComponentId(componentId);
@@ -1280,7 +1243,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         return Result.buildSucc(clusterPhy.getCluster());
     }
-    
+
     @Override
     public Result<ClusterPhyVO> getOneByComponentId(Integer componentId) {
         ClusterPhyPO clusterPhy = clusterPhyService.getOneByComponentId(componentId);
@@ -1289,7 +1252,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         return Result.buildSucc(ConvertUtil.obj2Obj(clusterPhy,ClusterPhyVO.class));
     }
-    
+
     @Override
     public Result<Void> checkShrinkNodesWhetherToReadWrite(List<ESClusterRoleHostDTO> nodes,
         String clusterName) {
@@ -1411,14 +1374,14 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         return Result.buildSucc();
     }
-    
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> createWithECM(ClusterCreateDTO createDTO, String operator) {
         List<ESClusterRoleHostDTO> roleClusterHosts = createDTO.getRoleClusterHosts();
         // 这里其实是需要一个内置 trim 用来保证传输进行的 roleClusterHosts 是正确的
         roleClusterHosts.forEach(roleClusterHostsTrimHostnameAndPort);
-    
+
         // 保存全量节点信息到 DB
         try {
             // 保存集群信息
@@ -1444,7 +1407,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         return Result.buildSucc();
     }
-    
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> shrinkNodesWithEcm(List<ESClusterRoleHostDTO> nodes, String clusterName) {
@@ -1488,7 +1451,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         return Result.buildFail("缩容失败");
     }
-    
+
     @Override
     public Result<Void> expandNodesWithECM(List<ESClusterRoleHostDTO> nodes, String clusterName) {
         //扩容后触发采集任务进行节点采集刷新
@@ -1501,7 +1464,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildFail(e.getMessage());
         }
     }
-    
+
     @Override
     public Result<Integer> getIdByComponentId(Integer dependComponentId) {
         ClusterPhyPO clusterPhyPO = clusterPhyService.getOneByComponentId(dependComponentId);
@@ -1510,7 +1473,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         return Result.buildSucc(clusterPhyPO.getId());
     }
-    
+
     @Override
     public Result<Void> checkCompleteUnbindResources(ClusterPhy clusterPhy) {
         // 1. set region
@@ -1524,7 +1487,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         return Result.buildSucc();
     }
-    
+
     @Override
     public Result<Void> offlineWithECM(Integer id, String creator, Integer projectId) {
         // 再次确认当前信息未被中途绑定
@@ -1559,7 +1522,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
 
-   
+
     /**************************************** private method ***************************************************/
 
     private Result<Boolean> checkClusterExistAndConfigType(MultiClusterSettingDTO param) {
@@ -1583,7 +1546,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return Result.buildSucc();
     }
 
-    private Result<Boolean> deleteClusterInner(Integer clusterPhyId, Integer projectId) {
+    public Result<Boolean> deleteClusterInner(Integer clusterPhyId, Integer projectId) {
         ClusterPhy clusterPhy = clusterPhyService.getClusterById(clusterPhyId);
         if (null == clusterPhy) {
             return Result.buildFail(String.format("物理集群Id[%s]不存在", clusterPhyId));
@@ -1631,14 +1594,14 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         return Result.buildSucc(true);
     }
-    
+
     /**
      * 下线集群
      *
      * @param clusterPhy 集群
      * @throws AdminOperateException 管理操作Exception
      */
-    private void offlineCluster(ClusterPhy clusterPhy)
+    public void offlineCluster(ClusterPhy clusterPhy)
         throws AdminOperateException {
         // 下线对应的插件
         Set<Integer> deleteComponentIds=Sets.newHashSet();
@@ -1677,9 +1640,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 throw new AdminOperateException(
                     String.format("删除集群 [%s] 信息失败", offLineComponentRes.getMessage()));
             }
-      
+
     }
-    
+
     /**
      * 更新物理模板setting single_type为true
      * @param cluster  集群
@@ -1769,19 +1732,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     /**
      * 构建物理集群详情
-     * @param phyClusters 物理集群元数据信息
-     */
-    private List<ClusterPhyVO> buildPhyClusters(List<ClusterPhyVO> phyClusters) {
-
-        phyClusters.parallelStream().forEach(this::buildPhyCluster);
-
-        Collections.sort(phyClusters);
-
-        return phyClusters;
-    }
-
-    /**
-     * 构建物理集群详情
      * @param clusterPhyVO 物理集群元数据信息
      * @return
      */
@@ -1854,12 +1804,17 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         clusterDTO.setComponentId(-1);
         return clusterDTO;
     }
-    
+
     private ClusterPhyDTO buildPhyClusters(ClusterCreateDTO param, String operator) {
         ClusterPhyDTO clusterDTO = ConvertUtil.obj2Obj(param, ClusterPhyDTO.class);
-        
-        String clientAddress = clusterRoleHostService.buildESClientHttpAddressesStr(param.getRoleClusterHosts());
-        
+
+        String clientAddress = "";
+        if (StringUtils.isNotBlank(param.getProxyAddress())){
+            clientAddress = param.getProxyAddress();
+        }else {
+            clientAddress = clusterRoleHostService.buildESClientHttpAddressesStr(param.getRoleClusterHosts());
+        }
+
         clusterDTO.setDesc(param.getPhyClusterDesc());
         if (StringUtils.isBlank(clusterDTO.getDataCenter())) {
             clusterDTO.setDataCenter(DataCenterEnum.CN.getCode());
@@ -2139,7 +2094,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 throw new AdminOperateException(String.format("删除逻辑集群(%s)失败", clusterLogicId));
             } else {
                 //删除逻辑集群
-                 operateRecordService.saveOperateRecordWithManualTrigger(String.format("删除逻辑集群：%s", clusterLogic.getName()), operator, projectId,
+                 operateRecordService.saveOperateRecordWithManualTrigger(clusterLogic.getName(), operator, projectId,
                         clusterPhy.getId(), OperateTypeEnum.MY_CLUSTER_OFFLINE);
             }
         }
@@ -2149,7 +2104,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             throw new AdminOperateException(String.format("删除物理集群(%s)失败", clusterPhy.getCluster()));
         } else {
             //删除物理集群
-             operateRecordService.saveOperateRecordWithManualTrigger(String.format("删除物理集群:[%s] ", clusterPhy.getCluster()), operator, projectId,
+             operateRecordService.saveOperateRecordWithManualTrigger(clusterPhy.getCluster(), operator, projectId,
                     clusterPhy.getId(), OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE);
         }
 
@@ -2162,7 +2117,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
               operateRecordService.saveOperateRecordWithManualTrigger(String.format("cluster:[%s]删除物理集群角色;[%d]", clusterPhy.getCluster(), clusterPhy.getId()), operator,
                     projectId, clusterPhy.getId(), OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE);
         }
-       
+
         Result<Void> deleteRoleClusterHostResult = clusterRoleHostService.deleteByCluster(clusterPhy.getCluster(),
             projectId);
         if (deleteRoleClusterHostResult.failed()) {

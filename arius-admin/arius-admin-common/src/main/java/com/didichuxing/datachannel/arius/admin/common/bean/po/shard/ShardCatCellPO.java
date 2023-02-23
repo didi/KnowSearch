@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.po.shard;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
+
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,62 +1,49 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import * as actions from "actions";
-import { Modal, Spin, Tabs } from "antd";
-import { getTaskLog } from "api/task-api";
-import { ITaskLog } from "typesPath/task-types";
-
-const { TabPane } = Tabs;
+import { Drawer, Spin, Tabs } from "antd";
+import { getStderrLog, getStdoutLog } from "api/task-api";
+import Url from "lib/url-parser";
+import "./index.less";
 
 const mapStateToProps = (state) => ({
   params: state.modal.params,
   cb: state.modal.cb,
 });
 
-export const TaskLogModal = connect(mapStateToProps)(
-  (props: { dispatch: any; params: any }) => {
-    const [loading, setLoading] = React.useState(false);
-    const [taskLog, setTaskLog] = React.useState({} as ITaskLog);
+export const TaskLogModal = connect(mapStateToProps)((props: { dispatch: any; params: any }) => {
+  const [loading, setLoading] = useState(false);
+  const [taskLog, setTaskLog] = useState("");
 
-    React.useEffect(() => {
-      reloadData();
-    }, []);
+  useEffect(() => {
+    reloadData();
+  }, []);
 
-    const reloadData = () => {
-      setLoading(true);
-      getTaskLog(props.params)
-        .then((res) => {
-          setTaskLog(res);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    };
+  const reloadData = async () => {
+    setLoading(true);
+    let { host, groupName } = props.params;
+    let id = Number(Url().search.taskid);
+    try {
+      if (props.params.status === 2) {
+        // status为2时任务为失败状态，调失败接口
+        let res = await getStderrLog(id, host, groupName);
+        setTaskLog(res);
+      } else {
+        let res = await getStdoutLog(id, host, groupName);
+        setTaskLog(res);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-      <>
-        <Modal
-          visible={true}
-          title="日志详情"
-          width={700}
-          onOk={() => props.dispatch(actions.setModalId(""))}
-          onCancel={() => props.dispatch(actions.setModalId(""))}
-          okText={"确定"}
-          cancelText={"取消"}
-        >
-          <Spin spinning={loading}>
-            <div>
-              <Tabs defaultActiveKey="1">
-                <TabPane tab="详情列表" key="1">
-                  <div className="line-break">{taskLog.agent || '任务未执行完成，请稍后再查看日志。'}</div>
-                </TabPane>
-                <TabPane tab="部署日志" key="2">
-                  <div className="line-break">{taskLog.user || '任务未执行完成，请稍后再查看日志。'}</div>
-                </TabPane>
-              </Tabs>
-            </div>
-          </Spin>
-        </Modal>
-      </>
-    );
-  }
-);
+  return (
+    <>
+      <Drawer visible={true} title="日志详情" width={700} onClose={() => props.dispatch(actions.setModalId(""))}>
+        <Spin spinning={loading}>
+          <div className="task-log-content">{taskLog || "任务未执行完成，请稍后再查看日志。"}</div>
+        </Spin>
+      </Drawer>
+    </>
+  );
+});

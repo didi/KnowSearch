@@ -42,44 +42,49 @@ export interface ContrastFigurePropsType {
 }
 
 export const ContrastFigure: React.FC<ContrastFigurePropsType> = memo((props) => {
-    const { id, name, subtext, unit } = props;
+  const { id, name, subtext, unit } = props;
 
-    useEffect(() => {
-      // 基于准备好的dom，初始化echarts实例
-      const myChart = echarts.init(
-        document.getElementById(`${classPrefix}-box-content-${id}`)
-      );
-
-      // 指定图表的配置项和数据
-      const option = getPieOption(props);
-
-      // 使用刚指定的配置项和数据显示图表。
-      myChart.setOption(option);
-      
-      const resize = _.throttle(() => {
-        myChart.resize();
-      }, 300);
-      
-      window.addEventListener("resize", resize);
-
-      return () => {
-        window.removeEventListener("resize", resize);
-      };
-    }, [props]);
-
-    return (
-      <div className={`${classPrefix}-box`}>
-        <h4 className={`${classPrefix}-box-title`}>{name}</h4>
-        <div className={`${classPrefix}-box-container`}>
-          <span className={`${classPrefix}-box-subtext`}>
-            {ellipsis(subtext, 6, unit)}
-          </span>
-          <div
-            className={`${classPrefix}-box-content`}
-            id={`${classPrefix}-box-content-${id}`}
-          ></div>
-        </div>
-      </div>
+  useEffect(() => {
+    // 基于准备好的dom，初始化echarts实例
+    const myChart = echarts.init(
+      document.getElementById(`${classPrefix}-box-content-${id}`)
     );
-  }
+
+    // 指定图表的配置项和数据
+    const option = getPieOption(props);
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+
+    const resize = _.throttle(() => {
+      const el: HTMLElement = document.getElementById(`${classPrefix}-box-content-${id}`);
+      // 表示该dom未进入可视区
+      if (!el.getBoundingClientRect().width) {
+        return;
+      }
+      myChart.resize();
+    }, 300);
+
+    window.addEventListener("resize", resize);
+
+    return () => {
+      window.removeEventListener("resize", resize);
+    };
+  }, [props]);
+
+  return (
+    <div className={`${classPrefix}-box`}>
+      <h4 className={`${classPrefix}-box-title`}>{name}</h4>
+      <div className={`${classPrefix}-box-container`}>
+        <span className={`${classPrefix}-box-subtext`}>
+          {ellipsis(subtext, 6, unit)}
+        </span>
+        <div
+          className={`${classPrefix}-box-content`}
+          id={`${classPrefix}-box-content-${id}`}
+        ></div>
+      </div>
+    </div>
+  );
+}
 );

@@ -1,9 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
+
 import io.swagger.annotations.ApiModelProperty;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -57,6 +59,18 @@ public class ClusterJoinDTO extends BaseDTO {
 
     @ApiModelProperty("集群资源类型(-1 未知 1 共享 2 独立 3 独享)")
     private Integer                    resourceType;
+
+    @ApiModelProperty("kibana外链地址")
+    private String                    kibanaAddress;
+
+    @ApiModelProperty("cerebro外链地址")
+    private String                    cerebroAddress;
+
+    @ApiModelProperty("http地址-读")
+    private String                     httpAddress;
+
+    @ApiModelProperty("http地址-写")
+    private String                     httpWriteAddress;
 
     @ApiModelProperty("region划分方式，为空代表根据节点名称划分，否则为attribute属性")
     private String                     divideAttributeKey;

@@ -14,6 +14,6 @@ public class ZeusTemplate {
     private int batch = 1;
     private int tolerance = 0;
     private String script;
-    private Integer timeOut=360;
+    private Integer timeOut;
 
 }

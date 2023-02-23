@@ -564,7 +564,7 @@ public class IndicesManagerImpl implements IndicesManager {
             return Result.buildFail("获取索引shard(主)在节点中的分布详情异常");
         }
         List<IndexShardInfoVO> indexNodeShardVOList = indexShardInfoList.stream().filter(this::filterPrimaryShard)
-            .map(this::coverUnit).collect(Collectors.toList());
+                .map(this::coverUnit).collect(Collectors.toList());
         return Result.buildSucc(indexNodeShardVOList);
     }
 
@@ -577,7 +577,6 @@ public class IndicesManagerImpl implements IndicesManager {
         String phyCluster = getClusterRet.getData();
     
         IndexCatCell indexCatCell = esIndexCatService.syncGetCatIndexInfoById(phyCluster, indexName);
-    
         if (Objects.isNull(indexCatCell)) {
             return Result.buildFail("获取单个索引详情信息失败");
         }

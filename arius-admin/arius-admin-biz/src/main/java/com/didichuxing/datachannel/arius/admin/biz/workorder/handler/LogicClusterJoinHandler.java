@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
 import java.util.List;
 
-import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +23,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didiglobal.knowframework.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.knowframework.security.common.vo.user.UserBriefVO;
 
 @Service("logicClusterJoinHandler")
@@ -118,7 +118,7 @@ public class LogicClusterJoinHandler extends BaseWorkOrderHandler {
             operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.MY_CLUSTER_APPLY)
                     .bizId(esLogicClusterDTO.getId())
                     .project(projectBriefByProjectId).operateProject(projectBriefByProjectId)
-                    .content(String.format("申请:【%s】", clusterLogic.getName())).userOperation(workOrder.getSubmitor())
+                    .content(clusterLogic.getName()).userOperation(workOrder.getSubmitor())
                     .buildDefaultManualTrigger());
         }
         return Result.buildFrom(result);
