@@ -14,6 +14,7 @@ import { ProTable, Menu, Dropdown, Button, Modal, Tooltip } from "knowdesign";
 import { InfoCircleFilled } from "@ant-design/icons";
 import { isOpenUp, CodeType, GATEWAY_UNABLE_TIP, CONFIRM_BUTTON_TEXT } from "constants/common";
 import { initPaginationProps } from "constants/table";
+import { isSuperApp } from "lib/utils";
 import store from "store";
 import "./index.less";
 
@@ -32,10 +33,11 @@ export const IndexTplService = connect(
 )((props: { setModalId: Function; setDrawerId: Function; app: AppState; history: any }) => {
   const department: string = localStorage.getItem("current-project");
   const [loading, setLoading] = useState(false);
+  const superApp = isSuperApp();
   const [queryFormObject, setQueryFormObject]: any = useState({
     page: 1,
     size: 10,
-    showMetadata: false, // 默认不展示元数据集群模板
+    showMetadata: !superApp,
   });
   const [tableData, setTableData] = useState([]);
   const [paginationProps, setPaginationProps] = useState(initPaginationProps());
@@ -283,7 +285,7 @@ export const IndexTplService = connect(
     (filterArr || []).forEach((item) => {
       item ? (filterObj["hasDCDR"] = true) : (filterObj["openSrv"] = 10);
     });
-    filterObj["showMetadata"] = filters.name?.length ? true : false;
+    filterObj["showMetadata"] = filters.name?.length ? true : !superApp;
     setSorter({ ...sorterObject, ...filterObj });
     setQueryFormObject((state) => {
       if (!sorter.order) {

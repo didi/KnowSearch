@@ -63,7 +63,7 @@ public class ESIndexMoveTaskServiceImpl implements ESIndexMoveTaskService {
                     return Result.buildSucc();
                 }
             } catch (Exception e) {
-                LOGGER.error("fastdump返回异常：", e);
+                LOGGER.error("class=ESIndexMoveTaskServiceImpl||method=getSupportESVersion||errMsg=获取fastdump支持的版本异常{}", e);
                 return Result.buildFail("请求失败");
             }
         }
@@ -107,11 +107,16 @@ public class ESIndexMoveTaskServiceImpl implements ESIndexMoveTaskService {
         String response = get(fastIndexDTO.getTaskSubmitAddress(), fastIndexDTO.getSourceClusterPassword(),
             "/check-health");
         if (StringUtils.isNotBlank(response)) {
-            JSONObject jsonObject = JSON.parseObject(response);
-            if (FAST_DUMP_EXIST_CODE.equals(jsonObject.getString(CODE))) {
-                return Result.buildSucc(Boolean.TRUE);
-            } else {
-                return Result.buildSucc(Boolean.FALSE);
+            try {
+                JSONObject jsonObject = JSON.parseObject(response);
+                if (FAST_DUMP_EXIST_CODE.equals(jsonObject.getString(CODE))) {
+                    return Result.buildSucc(Boolean.TRUE);
+                } else {
+                    return Result.buildFail(Boolean.FALSE);
+                }
+            } catch (Exception e) {
+                LOGGER.error("class=ESIndexMoveTaskServiceImpl||method=checkHealth||errMsg=fastdump检查连接异常{}", e);
+                return Result.buildFail("请求失败");
             }
         }
         return Result.buildFail("请求发送失败");

@@ -16,7 +16,7 @@ const OperationPage = () => {
   const [dictionary, setDictionary] = useState({});
   const [toTopVisible, setToTopVisible] = useState(false);
 
-  const container = document.querySelector(".d1-layout-main");
+  const container = document.querySelector("#d1-layout-main");
 
   useEffect(() => {
     dashboardIndex().then((res) => {

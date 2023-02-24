@@ -105,11 +105,6 @@ export const baseInfo = (setModalId?: Function, reloadData?: Function, phyBaseIn
     ),
   };
 
-  let activeShardNum = {
-    label: "分片数",
-    key: "activeShardNum",
-  };
-
   let httpWriteAddress = {
     label: "写地址",
     key: "httpWriteAddress",
@@ -152,20 +147,13 @@ export const baseInfo = (setModalId?: Function, reloadData?: Function, phyBaseIn
       label: "分片数",
       key: "activeShardNum",
     },
-    // {
-    //   label: "创建时间",
-    //   key: "createTime",
-    //   render: (time: number) => transTimeFormat(time),
-    // },
-    // {
-    //   label: "备注",
-    //   key: "desc",
-    //   render: (value: string) => (
-    //     <>
-    //       <span>{value?.length > 56 ? <Tooltip title={value}>{value?.substring(0, 54) + "..."}</Tooltip> : value || "-"}</span>
-    //     </>
-    //   ),
-    // },
+    {
+      label: "gateway地址",
+      key: "gatewayUrl",
+      render: (value: string) => (
+        <span>{value?.length > 56 ? <Tooltip title={value}>{value?.substring(0, 54) + "..."}</Tooltip> : value || "-"}</span>
+      ),
+    },
   ];
 
   if (phyBaseInfo?.proxyAddress) {

@@ -84,8 +84,11 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
             String queryCluster = condition.getCluster();
             // 使用超级项目访问时，queryProjectId为null
             Integer queryProjectId = null;
-            if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) { queryProjectId = projectId;}
             Boolean showMetadata = MetadataControlUtils.showMetadataInfo(condition.getShowMetadata(),projectId);
+            if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+                queryProjectId = projectId;
+                showMetadata = true;
+            }
 
             Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(queryCluster,
                     condition.getIndex(), condition.getHealth(), condition.getStatus(), queryProjectId,

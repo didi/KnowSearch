@@ -140,6 +140,7 @@ export const GatewayCluster = withRouter((props: { history: any }) => {
             isResetClearAll: true,
           }}
           tableProps={{
+            tableId: "gateway_cluster_table",
             isCustomPg: false,
             loading: isLoading,
             rowKey: "id",

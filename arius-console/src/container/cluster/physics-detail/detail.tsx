@@ -94,7 +94,7 @@ export const PhyClusterDetail = connect(
   };
   const renderKibanaIcon = () => {
     return (
-      <>
+      <div className="kibana-icon-container">
         {clusterInfo?.kibanaAddress ? (
           <Tag className={`tag`} color={"blue"}>
             <a target="_blank" href={clusterInfo?.kibanaAddress} style={{ color: "#096dd9" }}>
@@ -109,7 +109,7 @@ export const PhyClusterDetail = connect(
             </a>
           </Tag>
         ) : null}
-      </>
+      </div>
     );
   };
 
@@ -174,6 +174,7 @@ export const PhyClusterDetail = connect(
       <Spin spinning={loading}>
         {renderPageHeader()}
         <div className="content cluster-menu-container">
+          {renderKibanaIcon()}
           <div className="menu-container cluster-menu">
             <Menu className="menu" selectedKeys={[menu]} mode="horizontal" onClick={changeMenu}>
               {TAB_LIST.map((d) => {

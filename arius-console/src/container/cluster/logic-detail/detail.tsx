@@ -97,7 +97,7 @@ export class LogicClusterDetail extends React.Component<any> {
               return null;
             }
             return (
-              <span className="cluster-detail" key={index}>
+              <span className="detail" key={index}>
                 <span className="label">{row.label}：</span>
                 {/* @ts-ignore */}
                 <span className="value">{row.render ? row.render(clusterInfo?.[row.key]) : `${clusterInfo?.[row.key] || "-"}`}</span>

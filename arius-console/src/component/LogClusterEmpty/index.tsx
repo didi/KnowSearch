@@ -2,6 +2,7 @@ import "./index.less";
 import React, { useState } from "react";
 import { Button } from "antd";
 import { uuid } from "lib/utils";
+
 export const RenderEmpty = (props) => {
   const {
     title = "无集群信息",

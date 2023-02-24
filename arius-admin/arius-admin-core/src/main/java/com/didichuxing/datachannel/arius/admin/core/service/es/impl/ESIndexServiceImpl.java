@@ -716,15 +716,16 @@ public class ESIndexServiceImpl implements ESIndexService {
             List<String> indexNameList = indexCatCellList.stream().map(IndexCatCell::getIndex)
                 .collect(Collectors.toList());
             Map<String, IndexConfig> name2IndexConfigMap = this.syncGetIndexConfig(cluster, indexNameList, 3);
+            Map<String, IndexConfig> name2IndexSettingMap = this.syncGetIndexSetting(cluster, indexNameList, 3);
 
             Map<String, List<String>> aliasMap = this.syncGetIndexAliasesByIndices(cluster,
                 indexNameList.toArray(new String[0]));
             indexCatCellList.forEach(indexCatCell -> {
                 indexCatCell.setAliases(aliasMap.getOrDefault(indexCatCell.getIndex(), Lists.newArrayList()));
-
                 IndexConfig indexConfig = name2IndexConfigMap.get(indexCatCell.getIndex());
+                IndexConfig indexSetting = name2IndexSettingMap.get(indexCatCell.getIndex());
                 List<String> indexTypes = getIndexTypes(indexConfig);
-                Tuple<Boolean, Boolean> writeAndReadBlockFromMerge = getWriteAndReadBlock(indexConfig);
+                Tuple<Boolean, Boolean> writeAndReadBlockFromMerge = getWriteAndReadBlock(indexSetting);
 
                 indexCatCell.setIndexTypeList(indexTypes);
                 indexCatCell

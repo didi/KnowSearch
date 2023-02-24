@@ -92,7 +92,7 @@ export const CustomTimeRangePicker = React.forwardRef((props: IProps, ref) => {
 
   const refresh = () => {
     if (commonTime) {
-      changeRangeTime([moment(new Date().getTime() - commonTime), moment(new Date().getTime()-120000)], false);
+      changeRangeTime([moment(new Date().getTime() - commonTime), moment(new Date().getTime() - 120000)], false);
     } else if (isLastTime) {
       const values = form.getFieldsValue();
       const { unit, input, type } = values;

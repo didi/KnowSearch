@@ -85,7 +85,6 @@
     "@babel/preset-env": "^7.4.2",
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.14.5",
-    "@dt/fe-gift": "^0.1.31",
     "@knowdesign/kbn-sense": "1.1.1",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.1",
     "@types/lodash": "^4.14.138",

@@ -371,7 +371,7 @@ export const getPhysicsColumns = (setModalId: any, setDrawerId: any, reloadDataF
       title: "磁盘使用率",
       dataIndex: "diskInfo",
       key: "diskInfo",
-      width: 160,
+      width: 180,
       sorter: true,
       render: (_, diskInfo) => renderDiskRate(diskInfo),
     },
@@ -414,7 +414,7 @@ export const getPhysicsColumns = (setModalId: any, setDrawerId: any, reloadDataF
       title: "操作",
       dataIndex: "operation",
       key: "operation",
-      width: 120,
+      width: 200,
       filterTitle: true, //开启表格自定义列
       fixed: "right",
       render: (id: number, records: IOpPhysicsCluster) => {

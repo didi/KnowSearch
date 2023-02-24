@@ -86,6 +86,7 @@ export const currentLeftIndex = (isSuperApp: boolean) => {
     "/es/scheduling/log",
     "/es/scheduling/log/detail",
     "/es/work-order/task",
+    "/es/work-order/task/detail",
     "/es/work-order/my-approval",
     "/es/system/project",
     "/es/system/user",
@@ -293,7 +294,7 @@ export const bytesUnitFormatter = (bytes: number, type?: string) => {
       if (type === "float") {
         return formatNum(bytes / unitFormatter[i].value) + unitFormatter[i].name;
       }
-      return parseInt(bytes / unitFormatter[i].value + "") + unitFormatter[i].name;
+      return (bytes / unitFormatter[i].value).toFixed(2) + unitFormatter[i].name;
     }
   }
 };

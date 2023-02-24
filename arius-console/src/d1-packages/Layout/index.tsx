@@ -48,6 +48,12 @@ const index = withRouter((props: any) => {
   const cPrefixCls = `${prefixCls}-layout`;
   const [feConf] = useState(props.feConf || {});
 
+  useEffect(() => {
+    if (props.leftIndex === 0 && props.history.location.pathname === "/work-order/task/detail") {
+      props.setLeftIndex(1);
+    }
+  }, [props.history.location.pathname]);
+
   return (
     <Layout className={cPrefixCls}>
       <Header className={`${cPrefixCls}-header ${_.get(feConf, "header.theme")}`}>

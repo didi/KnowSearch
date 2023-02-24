@@ -1,419 +1,416 @@
-# 1.部署架构说明
+# 前言
 
-KnowSearch由两个后端应用，一个前端应用，一个kibana服务，一个ngnix服务构成，它们之间的部署架构如下图所属：
+ + 本文以Centos7系统为例，系统基础配置要求：4核8G
+ + 本文以0.3.1.2版本为例进行部署，按照本文可以快速部署一套单机模式的KnowSearch环境
+ + 部署完成后可以通过浏览器输入IP:PORT进行访问，默认用户名密码: admin/admin123
+ + shell部署方式支持分布式，具体方式可以参考安装包中的README文档
+ + 安装完成后可以通过构造测试数据来体验产品功能（参考第三部分）
 
-<img src="http://116.85.24.226/images/3001.png" alt="3001" style="zoom:50%;" />
+# 软件版本及依赖
+| 软件名 | 版本要求 | 默认端口 |
+| ------ | ------ | ------ |
+| Mysql | v5.7+ | 3306 |
+| Elasticsearch | 软件包中的固定版本 | 8060 |
+| Grafana | v8.5.9 | 3000 |
+| JDK | v8+ | - |
+|  Centos| v6+ | - |
+| Ubuntu| v16+ | - |
+# 部署方式选择
 
-# 2.物理机部署文档
++ SHELL方式部署
 
-部署流程：关系型数据库构建 ——> Elasticsearch元数据集群搭建 ——> Arius-admin 服务部署(包括设置服务基础配置、元数据集群的接入、元数据模板初始化等关键流程 )   ——> Arius-Gateway部署（包括设置服务基础配置）——> kibana部署 ——> 前端部署六个步骤。
++ 根据文档手动部署
 
-## 2.1 关系数据库构建
+# 一、SHELL部署
+## 1.1 快速体验单机版
+### 1.1.1 在线方式安装
+```
+#在服务器中下载安装脚本,脚本中会重新安装Mysql
+wget https://s3-gzpu.didistatic.com/pub/knowsearch/deploy_KnowSearch-0.3.1.2.sh
 
-默认使用关系型数据库Mysql，具体构建mysql操作如下： 
+#执行脚本
+sh deploy_KnowSearch-0.3.1.2.sh
 
-- CREATE DATABASE IF NOT EXISTS logi_em; 
-- USE logi_em 
-- 建表语句
-  - [数据库创建DDL下载跳转链接](https://logi-em.s3.didiyunapi.com/logi-em-ddl.sql)
-- 插入初始化数据
-  - [数据库初始化DML下载跳转链接](https://logi-em.s3.didiyunapi.com/logi-em-init-dml.sql)
-
-初始化dsl需要指定【元数据Elasticsearch集群名称】 ，即在初始化表query_app 时涉及一列cluster ，为元数据集群名称，例如 logi-elasticsearch-7.6.0
-
-## 2.2 Elasticsearch元数据集群搭建
-
-需要搭建一个Elasticsearch元数据集群来支持平台核心指标数据的存储，如集群维度指标、节点维度指标等等，可以参考如下 [Elasticsearch官方文档](https://www.elastic.co/guide/en/elasticsearch/reference/7.6/elasticsearch-intro.html)。
-
-## 2.3.基础资源下载
-
-1. 下载后端资源服务包（包括admin服务、gateway服务），[下载跳转链接](https://logi-em.s3.didiyunapi.com/Logi-EM-Installation-package.tar.gz)
-2. 如需要二次开发，clone KnowSearch到本地打开admin/gateway，进行打包，详见如下【服务打包】流程
-
-
-## 2.4 Arius-admin服务部署
-
-### 2.4.2 基础配置
-
-下载相关资源，解压后进入admin目录，修改常用 application-full.yml 配置
-
-```yaml
-#################### 常用修改配置 begin #####################
-# admin配置
-admin:
-  port:
-    web: 8015                #admin端口号
-  contextPath: /admin/api    #admin http请求前缀
-  thread:
-    size:                   
-      op: 20                 #admin 内置线程池大小
-
-# gateway相关配置
-es.gateway.url: 127.0.0.1    #网关服务ip
-es.gateway.port: 8200        #网关服务端口号
-
-# ES元数据集群名称
-es.update.cluster.name: logi-em-matedata-cluster
-es.client.cluster.port: 9200
-
-# spring 公共配置
-spring:
-  http:
-    encoding:
-      force: true
-      charset: UTF-8
-      enabled: true
-  messages:
-    encoding: UTF-8
-  profiles:
-    active: test
-  datasource:
-    name: data
-    type: com.alibaba.druid.pool.DruidDataSource
-    druid:
-      driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://127.0.0.1:3306/logi_em?useUnicode=true&characterEncoding=utf8&jdbcCompliantTruncation=true&allowMultiQueries=true&useSSL=false       #jdbc驱动相关信息
-      username: root                     #mysql db  客户端用户名
-      password: Logi_em123               #mysql db 客户端密码
-      initialSize: 10
-      validationQueryTimeout: 5000
-      transactionQueryTimeout: 60000
-      minIdle: 10
-      maxActive: 30
-      max-wait: 60000
-      keepAlive: true
-      time-between-eviction-runs-millis: 1000
-      min-evictable-idle-time-millis: 300000
-      defaultAutoCommit: true
-      validationQuery: select 'x'
-      testWhileIdle: true
-      testOnReturn: false
-      testOnBorrow: true
-      logAbandoned: true
-      pool-prepared-statements: true
-      max-open-prepared-statements: 50
-      filters: stat,wall
-  servlet:
-    multipart:
-      max-file-size: 60MB
-      max-request-size: 60MB
-  logi-job:
-    jdbc-url: jdbc:mysql://127.0.0.1:3306/logi_em?useUnicode=true&characterEncoding=utf8&jdbcCompliantTruncation=true&allowMultiQueries=true&useSSL=false             #jdbc驱动相关信息
-    username: root                            #mysql db  客户端用户名
-    password: Logi_em123                      #mysql db 客户端密码
-    driver-class-name: com.mysql.jdbc.Driver
-    max-lifetime: 60000
-    init-sql: true
-    init-thread-num: 10
-    max-thread-num: 20
-    log-exipre: 3                     #定时调度任务日志保存天数，以天为单位
-    app_name: arius_test02       #环境名称，用于进行不同环境调度任务状态隔离
-    claim-strategy: com.didiglobal.logi.job.core.consensual.RandomConsensual
-################ 常用修改配置 end ########################
+#访问测试(默认用户名密码：admin/admin123)
+127.0.0.1:8080
+	
 ```
 
-### 2.4.3 服务打包
-
-使用maven打包生成jar包，具体指令如下：
+### 1.1.2 离线方式安装
 
 ```
-mvn clean package -Dmaven.test.skip=true
+#将安装包下载到本地且传输到目标服务器
+wget https://s3-gzpu.didistatic.com/pub/knowsearch/KnowSearch-0.3.1.2_offline.tar.gz
+	
+#解压安装包
+tar -zxf KnowSearch-0.3.1.2_offline.tar.gz
+	
+#执行安装脚本
+cd ./knowsearch
+sh deploy_KnowSearch-0.3.1.2_offline.sh
+	
+#访问测试(默认用户名密码：admin/admin123)
+127.0.0.1:8080
+	
 ```
 
-### 2.4.4 服务启动
-
-1. 部署环境要求
-   1. 机器要求（单台机器4C 8G）
-   2. JDK1.8 、操作系统不限
-
-2. 进入arius-admin-rest.jar 所在目录，执行下面指令
-
+## 1.2 分布式高可用版
+### 1.2.1 安装ansible
 ```
-java -jar -Xmx8g -Xms8g -Xmn3g -XX:MaxDirectMemorySize=2G -XX:MaxMetaspaceSize=256M -Djdk.nio.maxCachedBufferSize=262144 ./arius-admin-rest.jar --spring.config.location=./application-full.yml &
-```
-
-3. 校验服务是否正常
-
-```
-curl -X GET 'http://{host}:{port}/admin/api/v2/thirdpart/gateway/listApp' --header 'X-ARIUS-GATEWAY-TICKET: xTc59aY72'
+#ansible安装方法 
+yum -y install  ansible
+ 
+#修改配置文件，避免首访问的机器信息没写入known_hosts文件
+vim /etc/ansible/ansible.cfg
+host_key_checking = False
 ```
 
-### 2.4.5 初始化数据
-
-首次部署需要导入系统初始化数据，下载以下包到包目录，运行以下shell脚本，[下载链接跳转](https://logi-em.s3.didiyunapi.com/logi-init.tar.gz)
+### 1.2.2 操作步骤
 
 ```
-sh init_logi_em_linux.sh 116.85.6.111 8015 116.85.6.111 8060
-脚本入参说明：
-$1 任意logi-em服务ip   
-$2 任意logi-em服务port 
-$3 元数据集群任意有效master节点ip
-$4 元数据集群任意有效master节点port
-$5 如果存在元数据信息是否需要删除 1为需要、0为不需要(不建议使用)
-```
+#下载安装包
+wget https://s3-gzpu.didistatic.com/pub/knowsearch/deploy_KnowSeach.tar.gz
 
-## 2.5 Arius-Gateway服务部署
+#解压安装包
+tar -zxf deploy_KnowSeach.tar.gz
 
-### 2.5.1 基础配置
+#修改hosts.ini文件（根据注释和README文件修改）
+cd ./deploy_KnowSeach
+vim hosts.ini
 
-先部署启动Arius-Admin，再部署Arius-Gateway-v2，Arius-Gateway-v2 作为网关层，需配合 arius-admin-v2 使用。
-
-下载 Logi-EM-Installation package.zip，解压，进入gateway目录，涉及以下常用 application-full.properties 文件配置修改 
+#修改完成后执行安装脚本
+sh install.sh
 
 ```
-gateway.cluster.name={metaCluster}
-elasticsearch.admin.cluster.name={metaCluster}
-arius.gateway.adminUrl=http://{ariusIp}:{ariusPort}/admin/api/
-gateway.httpTransport.port=8200
+
+# 二、手动部署
+
+## 1. 部署流程
+
+基础依赖服务部署 ——>  KnowSearch各个模块部署
+
+## 2. 基础依赖服务部署
+ ###如已经部署过相关服务，可跳过对其的安装，但配置需要按照文档修改
+ 
+### 2.1、安装Mysql服务
+ ###版本需要5.7及以上
+#### 2.1.1 yum方式安装
 ```
-
-### 2.5.2 服务打包
-
-使用maven打包生成jar包，具体指令如下：
-
+#配置yum源
+wget https://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm
+rpm -ivh mysql57-community-release-el7-9.noarch.rpm
+	
+#执行安装
+yum -y install mysql-server mysql-client
+	
+#服务启动
+systemctl start mysqld
+	
+#获取初始密码并修改
+old_pass=`grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}' | tail -n 1`
+mysql -NBe "alter user USER() identified by 'Didi_am_678';" --connect-expired-password -uroot -p$old_pass
 ```
-mvn clean package -Dmaven.test.skip=true
+	
+####2.1.2 rpm包方式安装（推荐此方式安装）
 ```
+#下载安装包
+wget https://s3-gzpu.didistatic.com/knowsearch/mysql5.7.tar.gz
 
-### 2.5.3 服务启动
-
-1. 部署环境要求
-   1. 机器要求（单台机器4C 内存8G）
-   2. JDK1.8 、操作系统不限
-2. 进入arius-gateway-rest.jar r 所在目录，执行下面指令
-
+#解压到指定目录
+tar -zxf mysql5.7.tar.gz -C /tmp/
+	
+#执行安装
+yum -y localinstall /tmp/libaio-*.rpm /tmp/mysql-*.rpm
+	
+#服务启动
+systemctl start mysqld
+	
+#获取初始密码并修改
+old_pass=`grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}' | tail -n 1`
+mysql -NBe "alter user USER() identified by 'Didi_am_678';" --connect-expired-password -uroot -p$old_pass
 ```
-java -jar ./arius-gateway-rest.jar --spring.config.location=./application-full.properties &
-```
-
-3. 进入arius-gateway-rest.jar 所在目录，执行下面命令启动filebeats(metaCluster为元数据es集群)
-
-```
-sh filebeats_start.sh {metaCluster}
-比如sh filebeats_start.sh 127.0.0.1:9200
-```
-
-4. 检查服务是否生效，检查gateway是否启动
-
-```
-curl -XGET "http://1:azAWiJhxkho33ac@{host}:{port}/_cluster/health"
-```
-
-检查filebeats是否启动
-
-```
-ps -ef | grep filebeat
-```
-
-**PS：**
-
-Arius-Admin中访问Arius-Gateway服务地址检查
-部署好Arius-Gateway服务后，回头确认Arius-Admin  application-full.yml中的配置，是否为Arius-Gateway的服务url和端口 ，检查样例如下：
-
-```
-es.gateway.url: 10.190.5.95
-es.gateway.port: 8200
-```
-
-## 2.6 Kibana服务部署
-
-### 2.6.1 部署目的
-
-Arius用户控制台中内嵌了kibana应用，用于用户在控制台上直接进行kibana查询和dashboard的访问，并做了相应的权限管控和隔离。
-
-### 2.6.2 部署前提
-
-部署 arius-kibana 需要提前做好以下准备：
-
-1. 部署好 arius-admin、arius-gateway、arius-console、nginx、ES元数据集群
-2. 在 arius-admin 上申请一个超级用户，如：appid：1，appPassword：azAWiJhxkho33ac
-3. 这里的超级用户主要是为了能够通过gateway的权限校验
-
-### 2.6.3 开始部署 kibana
-
-1. 地址相关包解压到用户目录，如：/home/ec2-user/arius-kibana-release   ，[下载跳转链接](https://logi-em.s3.didiyunapi.com/arius-kibana-release.tar.gz)
-2. 设置kibana应用的配置文件，打开/home/ec2-user/arius-kibana-release/config/config.yaml，修改以下配置项
+### 2.2 安装Nginx服务
+ ###版本无要求
 
 ```
-erver.basePath: "/console/arius/kibana7"
-server.rewriteBasePath: true
-kibana.index: ".kibana7_arius"
-#arius gateway的地址
-elasticsearch.hosts: ["http://10.161.98.190:8200"]     
-#arius admin超级账号
-elasticsearch.username: "1"   
-#arius admin超级账号密码                                          
-elasticsearch.password: "azAWiJhxkho33ac"                
-server.port: 8061
-```
+#yum方式安装
+yum -y install nginx
+	
+#rpm包方式安装
+wget https://s3-gzpu.didistatic.com/knowsearch/nginx-1.8.1.rpm
 
-启动kibana执行：sh /home/ec2-user/arius-kibana-release/control.sh start，若显示 "start ok" ，则表示启动成功。
-
-也可以直接执行：nohup sh home/ec2-user/arius-kibana-release/bin/kibana serve -l home/ec2-user/output/logibana.log >> /dev/null 2>&1 &
-
-成功启动之后，访问kibana会需要进行权限校验
-
-## 2.7 前端部署
-
-### 2.7.1 部署依赖
-
-1. 资源：一台可用机器，用于部署前端资源及nginx
-2. 环境：机器上安装 node（v12 及以上版本）、nginx
-
-### 2.7.2 部署步骤
-
-1. 获取前端资源文件
-   1. 通过github 下载 release 资源包直接使用
-   2. 编译前端源码生成 release 资源包使用，编译步骤详见前端工程readme
-2. 上传前端资源文件至机器
-   1. 可通过 scp 命令上传
+rpm -ivh nginx-1.8.1.rpm
+	
+#服务启动
+systemctl start nginx
 
 ```
-# ./pub/es 本地前端资源所在路径
-scp -r ./pub/es 账号@ip: 服务器文件路径
+### 2.3 配置JAVA环境
+ ###版本要求11 
+ 
 ```
+#下载安装包
+wget https://s3-gzpu.didistatic.com/knowsearch/jdk11.tar.gz
 
-3. 配置 nginx
-   1. 配置前端资源路径
-   2. 接口请求代理
-   3. kibana 服务代理
+#解压到指定目录
+tar -zxf jdk11.tar.gz -C /usr/local/
 
+#更改目录名
+mv  /usr/local/jdk-11.0.2 /usr/local/java11
+
+#添加到环境变量
+echo "export JAVA_HOME=/usr/local/java11" >> ~/.bashrc
+echo "export CLASSPATH=/usr/java/java11/lib" >> ~/.bashrc
+echo "export PATH=\$JAVA_HOME/bin:\$PATH:\$HOME/bin" >> ~/.bashrc
+source ~/.bashrc
 ```
-# 示例如下
-# For more information on configuration, see:
-#   * Official English Documentation: http://nginx.org/en/docs/
-#   * Official Russian Documentation: http://nginx.org/ru/docs/
-
-
-user root;
-worker_processes auto;
-error_log /var/log/nginx/error.log;
-pid /run/nginx.pid;
-
-
-# Load dynamic modules. See /usr/share/doc/nginx/README.dynamic.
-include /usr/share/nginx/modules/*.conf;
-
-
-events {
-    worker_connections 1024;
-}
-
-
-http {
-    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-                      '$status $body_bytes_sent "$http_referer" '
-                      '"$http_user_agent" "$http_x_forwarded_for"';
-
-
-    access_log  /var/log/nginx/access.log  main;
     
-    sendfile            on;
-    tcp_nopush          on;
-    tcp_nodelay         on;
-    keepalive_timeout   65;
-    types_hash_max_size 2048;
-
-
-    include             /etc/nginx/mime.types;
-    default_type        application/octet-stream;
-
-
-    # Load modular configuration files from the /etc/nginx/conf.d directory.
-    # See http://nginx.org/en/docs/ngx_core_module.html#include
-    # for more information.
-    include /etc/nginx/conf.d/*.conf;
-
-
-    server {
-      listen       80 default_server;
-      server_name  _;
-      client_max_body_size 600m; # 上传文件大小限制
-      root        /root/es;
-
-
-      # Load configuration files for the default server block.
-      include /etc/nginx/default.d/*.conf;
-
-
-    gzip on;
-      gzip_buffers        16 8k;
-      gzip_comp_level     4;
-      gzip_http_version   1.0;
-      gzip_min_length     1280;
-      gzip_types          text/plain text/css text/xml application/x-javascript application/xml application/xml+rss application/json application/javascript text/*;
-      gzip_vary           on; 
-
-
-
-    location / {
-      root /root/es; # /root/es 前端资源文件存放路径
-      if ($request_filename ~* .*\.(?:htm|html|json)$) { # 对 htm|html|json 不做缓存
-          add_header Cache-Control "private, no-store, no-cache, must-revalidate, proxy-revalidate";
-      }
-      try_files $uri /index.html;
-    }
-
-
-    location /es {
-      root  /root;
-      try_files $uri @fallback;
-    }
-
-
-    location @fallback {
-      root /root/es/;
-      rewrite .* /index.html break;
-    }
-        
-    # 接口代理
-    location ~ ^/api/es/admin/ { 
-        rewrite ^/api/es/admin/(.*)$ /admin/api/$1 break; # 路径规则重写
-        proxy_pass http://xxx.com; # 后端服务地址
-    }
-
-
-    location ~ ^/api/es/ams/ {
-      proxy_pass http://xxx:8888;
-    }
-
-
-    location ^~ /console/arius/kibana7/ {
-        if ($request_filename ~* .*\.(?:js|css)$) {
-          add_header Cache-Control "max-age=604800000"; # 强缓存过期时间一周
-        }
-        
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-NginX-Proxy true;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header Authorization 'Basic $cookie_Authorization';
-        proxy_pass_request_headers on;
-        proxy_cache_bypass $http_upgrade $http_authorization;
-        proxy_pass http://xxx:8061;  # kibana 服务地址
-        rewrite ^/console/arius/kibana7/(.*)$ /console/arius/kibana7/$1 break;
-    }
-
-
-    error_page 404 /404.html;
-    location = /404.html {}
-
-
-    error_page 500 502 503 504 /50x.html;
-    location = /50x.html {}
-  }
-}
-```
-
-### 2.7.3 服务启动
-
- 启动 nginx
+### 2.4 Elasticsearch元数据实例搭建
+ ###Elasticsearch元数据集群来支持平台核心指标数据的存储，如集群维度指标、节点维度指标等
 
 ```
-nginx -t # 检查 nginx 配置是否正确
-systemctl start nginx    # 启动 Nginx
+#下载安装包
+wget https://s3-gzpu.didistatic.com/pub/knowsearch/elasticsearch-v7.6.0.1400.tar.gz
+
+#创建ES数据存储目录
+mkdir -p /data/es_data
+	
+#创建ES所属用户
+useradd arius
+	
+#配置用户的打开文件数
+echo "arius soft nofile 655350" >>/etc/security/limits.conf
+echo "arius hard nofile 655350" >>/etc/security/limits.conf
+echo "vm.max_map_count = 655360" >>/etc/sysctl.conf
+sysctl -p
+	
+#解压安装包
+tar -zxf elasticsearch-v7.6.0.1400.tar.gz -C /data/
+	
+#更改目录所属组
+chown -R arius:arius /data/
+	
+#修改配置文件(参考一下配置)
+vim /data/elasticsearch-v7.6.0.1400/config/elasticsearch.yml
+cluster.name: logi-elasticsearch-meta
+node.name: es-node1
+node.master: true
+node.data: true
+path.data: /data/es_data
+http.port: 8060
+discovery.seed_hosts: ["127.0.0.1:9300"]
+	
+#修改内存配置
+vim /data/elasticsearch-v7.6.0.1400/config/jvm.options
+-Xms2g
+-Xmx2g
+	
+#启动服务
+su - arius
+export JAVA_HOME=/usr/local/java11
+sh /data/elasticsearch-v7.6.0.1400/control.sh start
+	
+	
+#确认状态
+su - arius
+export JAVA_HOME=/usr/local/java11
+sh /data/elasticsearch-v7.6.0.1400/control.sh status
 ```
 
-在浏览器输入 ip:port 访问前端页面
+### 2.5 安装grafana服务
+
+```
+#下载安装包
+wget https://s3-gzpu.didistatic.com/pub/knowsearch/grafana-8.5.9.tar.gz
+
+#解压安装包
+tar -zxf grafana-8.5.9.tar.gz -C /data/
+
+#启动服务
+cd  /data/grafana-8.5.9/bin/
+nohup ./grafana-server &
+
+#添加数据源（其中url参数需要修改成真实的elasticsearch服务地址）
+curl -X POST -H "Content-Type: application/json" "http://127.0.0.1:3000/api/datasources" -d '{"name":"elasticsearch-observability","type":"elasticsearch","url":"http://127.0.0.1:8060","access":"proxy","basicAuth":false,"database":"index_observability","jsonData":{"esVersion":"7.0.0","includeFrozen":false,"logLevelField":"","logMessageField":"","maxConcurrentShardRequests":5,"timeField":"logMills"},"readOnly":false}}' 
+
+#导入大盘模版(示例是其中之一，七个模版都要导入)
+cd  /data/grafana-8.5.9/template/
+curl  -H "Content-Type: application/json" -X POST "http://127.0.0.1:3000/api/dashboards/db" -d @metrics-process.json
+
+```   
+
+	
+## 3、KnowSearch服务部署
+ ###依赖JAVA11、服务器可用内存大于4G
+### 3.1 admin模块
+
+```
+#下载安装包
+wget https://s3-gzpu.didistatic.com/knowsearch/KnowSearch-0.3.1.2.tar.gz
+
+#解压安装包到指定目录
+tar -zxf KnowSearch-0.3.1.2.tar.gz -C /data/
+	
+#修改启动脚本并加入systemd管理
+cd  /data/KnowSearch-0.3.1.2/admin/
+sed -i '#dir_home#/data/KnowSearch-0.3.1.2#g' control.sh arius-admin.service
+cp arius-admin.service /usr/lib/systemd/system/
+	
+#创建相应的库和导入初始化数据
+mysql -uroot -p -e "CREATE DATABASE IF NOT EXISTS knowsearch;"
+mysql -uroot -p knowsearch < /data/KnowSearch-0.3.1.2/admin/init/init.sql
+	
+	
+#修改配置文件
+vim application-full.yml
+	
+#admin相关配置
+admin.port.web: 8015 #admin服务端口
+admin.contextPath: /admin/api 
+
+#gateway相关配置
+es.gateway.url: 127.0.0.1
+es.gateway.port: 8200
+
+#ES元数据集群相关配置
+es.update.cluster.name: logi-elasticsearch-meta
+
+#ES客户端相关配置
+es.client.cluster.port: 8060
+
+#mysql服务相关配置(配置文件中有两部分mysql相关的，都需要修改)
+ url: jdbc:mariadb://127.0.0.1:3306/knowsearch?useUnicode=true&characterEncoding=utf8&jdbcCompliantTruncation=true&allowMultiQueries=true&useSSL=false&alwaysAutoGeneratedKeys=true&serverTimezone=GMT%2B8
+      username: root
+      password: pwd
+      
+#监控大盘ES地址
+elasticsearch-address: 127.0.0.1
+elasticsearch-port: 8060	
+
+
+#启动服务
+systemctl daemon-reload
+systemctl start arius-admin
+	
+#服务启动成功后执行元数据导入脚本
+sh /data/KnowSearch-0.3.1.2/admin/init/init_knowsearch_liunx.sh
+
+
+#重启服务
+systemctl restart arius-admin
+
+``` 
+
+### 3.2 gateway模块
+
+``` 
+#修改启动脚本并加入systemd管理
+cd  /data/KnowSearch-0.3.1.2/gateway/
+sed -i '#dir_home#/data/KnowSearch-0.3.1.2#g' control.sh arius-gateway.service
+cp arius-gateway.service /usr/lib/systemd/system/
+	
+#修改配置文件
+gateway.cluster.name=logi-elasticsearch-meta #ES集群名称
+elasticsearch.admin.cluster.name=logi-elasticsearch-meta	
+arius.gateway.adminUrl=http://127.0.0.1:8015/	
+admin/api/ #arius-admin模块服务地址和端口
+gateway.httpTransport.port=8200 #gateway监听端口
+	
+#启动服务
+systemctl daemon-reload
+systemctl start arius-gateway
+	
+#启动filebeats服务(IP地址和端口为ES集群地址)
+sh filebeats_start.sh 
+```	
+   
+### 3.3 前端代码部署及配置
+
+```
+#下载配置文件
+wget https://s3-gzpu.didistatic.com/knowsearch/nginx.conf
+
+#将配置文件放到etc目录
+mv knowsearch_nginx.conf /etc/nginx/conf.d/knowsearch_nginx.conf
+	
+#修改配置文件(data目录是前端文件跟目录,$ip_addr需要换成本机访问IP)
+sed -i 's#c_path#data/KnowSearch-0.3.1.2#g' /etc/nginx/conf.d/knowsearch_nginx.conf
+sed -i 's#ups_admin#127.0.0.1:8015#' /etc/nginx/conf.d/knowsearch_nginx.conf
+sed -i "s#jumpToGrafana#http://$ip_addr:3000/dashboards#g" /data/KnowSearch-0.3.1.2/es/es-*.js
+
+#重启Nginx服务
+systemctl restart nginx
+```
+
+ ###打开浏览器输入NginxIP地址测试，用户名密码（admin/admin123）
+ 
+# 三、构造测试数据
+ 
+```
+#下载脚本
+wget https://s3-gzpu.didistatic.com/pub/knowsearch/IndexTestTools.tar.gz
+
+```
+## 1. 目录结构
+  ```
+  IndexTestTools
+├── cluster_info.list
+├── index_name.list
+├── init_data #二级目录
+│ ├── create_index.json
+│ ├── create_template.json
+│ ├── delete_index.json
+│ ├── get_templateID.json
+│ ├── index_data.json
+│ ├── join_cluster.json
+│ ├── query.json
+│ └── template_data.json
+├── IndexTestTools.sh
+  ```
+## 2. 文件作用说明(附json压缩转义方法)
+ 
+![](https://s3-gzpu.didistatic.com/pub/knowsearch/image/文件作用.png)
+
+附：转义工具：https://www.bejson.com/
+
+压缩json
+
+![](https://s3-gzpu.didistatic.com/pub/knowsearch/image/压缩前.png)
+![](https://s3-gzpu.didistatic.com/pub/knowsearch/image/压缩后.png)
+
+转义json
+![](https://s3-gzpu-inter.didistatic.com/pub/knowsearch/image/转义.png)
+
+## 3. 脚本使用流程
+### 3.1 根据注释提示修改IndexTestTools.sh中的参数
+![](https://s3-gzpu.didistatic.com/pub/knowsearch/image/参数.png)
+
+### 3.2 自定义mapping或者setting 
+ + 无特殊需求可以使用默认,即不需修改
+ + 修改init_data目录下的对应的json文件（参考文件作用说明）
+
+### 3.3 执行IndexTestTools.sh 
+
+```
+sh IndexTestTools.sh -h 获取使用方法
+```
+![](https://s3-gzpu.didistatic.com/pub/knowsearch/image/使用方法.png)
+
++ action参数释义：join 接入集群 ，create创建模版或索引，write写入数据，query查询数据，delete下线模版或索引，其他参考组合用法
++ type参数释义：操作类型，索引或模版
+count参数释义：写入或查询时指定的次数，不指定时默认为1，-1表示持续
++ name参数为空时需要在IndexTestTools.sh脚本中指定cluster_name参数
++ action参数为write/query可以指定次数（不指定默认为1次）
+
+### 3.4其他
+
+```
+sh IndexTestTools.sh -a=write -t=index -c=10 #表示往每个索引写入10次，指定为-1时 代表持续写入，在持续写入时可以使用nohup sh IndexTestTools.sh -a=write -c=-1 & 进行后台运行
+sh IndexTestTools.sh -a=query -t=index -c=10 #表示索引查询10次，指定为-1时 代表持续查询，在持续查询时可以使用 nohup sh IndexTestTools.sh -a=query -c=-1 & 进行后台运行
+
+组合用法1：接入集群+创建模版/索引+写入数据
+sh IndexTestTools.sh -a=joinANDcreateANDwrite -t=index
+
+组合用法2: 创建模版/索引+写入数据（集群需要已接入）
+sh IndexTestTools.sh -a=createANDwrite -t=index
+```

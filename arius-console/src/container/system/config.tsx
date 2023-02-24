@@ -299,6 +299,7 @@ export const getOperationColumns = (setDrawerId) => {
       title: "操作内容",
       dataIndex: "content",
       key: "content",
+      filterTitle: true,
       width: 260,
       ellipsis: true,
       render: (val: string, record) => {
