@@ -78,7 +78,7 @@ const AccessCluster = ({ app, cb, setModalId }) => {
           flatPost = true;
         }
         if (isPostArr[1] && flatIp === false) {
-          if (+isPostArr[1] > 25535) {
+          if (+isPostArr[1] > 65535) {
             flatLength = true;
           }
         }
@@ -92,7 +92,7 @@ const AccessCluster = ({ app, cb, setModalId }) => {
       return IP_TIP;
     } else if (flatLength) {
       // 格式错误，:号端口格式不正确, 多个请换行。
-      return `${IP_TIP}，输入端口号超最大值25535`;
+      return `${IP_TIP}，输入端口号超最大值65535`;
     }
   };
 

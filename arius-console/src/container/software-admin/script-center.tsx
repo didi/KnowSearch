@@ -89,6 +89,7 @@ export const ScriptCenter = connect(
             showCollapseButton: false,
           }}
           tableProps={{
+            tableId: "script_center_table",
             isCustomPg: false,
             loading,
             rowKey: "id",

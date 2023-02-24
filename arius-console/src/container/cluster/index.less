@@ -2,14 +2,13 @@
   display: flex;
   align-items: center;
   &-tag {
-    font-size: 12px;
-    color: #1473ff;
-    background-color: rgba(20, 115, 255, 0.06);
-    border-radius: 4px;
+    font-size: 12px !important;
+    color: #1473ff !important;
+    background-color: rgba(20, 115, 255, 0.06) !important;
+    border-radius: 4px !important;
     border: none;
-    width: 80px;
-    text-align: center;
-    margin-left: 4px;
+    width: 64px;
+    margin-left: 4px !important;
     cursor: pointer;
   }
 }
@@ -19,7 +18,8 @@
 //   height: 32px !important;
 //   border-radius: 2px;
 // }
-.ant-col {
+.ant-col,
+.dcloud-col {
   //对全局的改样式生效
   //max-width:100%;
   #d-range-time {
@@ -28,6 +28,16 @@
       width: 100% !important;
       height: 32px !important;
       border-radius: 2px;
+      background: #fff;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      &:hover {
+        background: #fff;
+        border: 1px solid #1473ff;
+      }
+    }
+    .ant-input-suffix .anticon {
+      color: #ced4da !important;
     }
   }
 }

@@ -93,6 +93,7 @@ export const SoftwareCenter = connect(
             showCollapseButton: false,
           }}
           tableProps={{
+            tableId: "software_center_table",
             isCustomPg: false,
             loading,
             rowKey: "id",

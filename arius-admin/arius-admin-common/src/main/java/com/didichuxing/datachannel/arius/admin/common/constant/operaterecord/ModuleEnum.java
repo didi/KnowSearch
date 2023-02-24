@@ -65,7 +65,7 @@ TEMPLATE_MANAGEMENT("模板管理", 4),
     ES_CLUSTER_PLUGINS("ES集群插件", 12),
     ES_CLUSTER_CONFIG("ES集群配置", 13),
     ROLE_MANAGER("角色管理", 14),
-    GATEWAY("Gateway集群", 15),
+    GATEWAY("Gateway集群", 18),
     SCRIPT_CENTER("脚本中心",16),
     SOFTWARE_CENTER("软件中心",17);
 

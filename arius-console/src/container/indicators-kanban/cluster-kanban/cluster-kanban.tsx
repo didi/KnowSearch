@@ -28,7 +28,7 @@ export const ClusterKanban = (props) => {
 
   const currentTime = new Date().getTime();
   const [startTime, setStartTime] = useState(currentTime - ONE_HOUR);
-  const [endTime, setEndTime] = useState(currentTime-120000);
+  const [endTime, setEndTime] = useState(currentTime - 120000);
   const [clusterName, setClusterName] = useState(clusterKanban.clusterName);
   const [clusterNameList, setClusterNameList] = useState([]);
   const [refreshTime, setRefreshTime] = useState(0);
@@ -37,7 +37,7 @@ export const ClusterKanban = (props) => {
 
   const superApp = isSuperApp();
 
-  const container = document.querySelector(".d1-layout-main");
+  const container = document.querySelector("#d1-layout-main");
 
   useEffect(() => {
     setSelectClusterName();

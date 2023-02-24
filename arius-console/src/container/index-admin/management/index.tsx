@@ -1,13 +1,10 @@
-import React, { memo, useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { Tooltip, Button, Spin } from "antd";
-import { DTable } from "component/dantd/dtable";
 import { RenderTitle } from "component/render-title";
-import { getColumns, getQueryFormConfig, queryFormText } from "./config";
-import QueryForm from "component/dantd/query-form";
+import { getColumns, getQueryFormConfig } from "./config";
 import * as actions from "actions";
-import "./index.less";
 import { getIndexAdminData } from "api/index-admin";
 import { getClusterPerApp, getPhyClusterPerApp } from "api/cluster-index-api";
 import { initPaginationProps } from "constants/table";
@@ -16,6 +13,8 @@ import { IndexPermissions } from "constants/permission";
 import { hasOpPermission } from "lib/permission";
 import { RenderEmpty } from "component/LogClusterEmpty";
 import { ProTable } from "knowdesign";
+import { uuid } from "lib/utils";
+import "./index.less";
 
 export const IndexAdmin = withRouter((props: { history: any }) => {
   const department: string = localStorage.getItem("current-project");
@@ -40,7 +39,7 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
   const [queryData, setQueryData]: any = useState({
     page: 1,
     size: 10,
-    showMetadata: false,
+    showMetadata: !superApp,
   });
   const [pageLoad, setPageLoad] = useState(false);
 
@@ -119,7 +118,7 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
       sorterObject.orderByDesc = sorter.order === "ascend" ? false : true;
     }
     let filterObj = {} as { showMetadata: boolean };
-    filterObj["showMetadata"] = filters.index?.length ? true : false;
+    filterObj["showMetadata"] = filters.index?.length ? true : !superApp;
     setQueryData((state) => {
       if (!sorter.order) {
         delete state.sortTerm;
@@ -274,7 +273,7 @@ export const IndexAdmin = withRouter((props: { history: any }) => {
           ? !pageLoad && renderNode()
           : !pageLoad && (
               <div>
-                <RenderEmpty {...props} />
+                <RenderEmpty {...props} href={`/cluster/logic?needApplyCluster=${uuid()}`} />
               </div>
             )}
       </Spin>

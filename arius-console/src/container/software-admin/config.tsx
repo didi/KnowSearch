@@ -167,6 +167,7 @@ export const getScriptCenterColumns = (setDrawerId, reloadDataFn) => {
       title: "操作",
       dataIndex: "operation",
       key: "operation",
+      filterTitle: true,
       width: 120,
       render: (text: string, record: any) => {
         const btns = getOperationList(record, setDrawerId, reloadDataFn);
@@ -331,6 +332,7 @@ export const getSoftwareColumns = (setDrawerId, reloadDataFn) => {
       title: "操作",
       dataIndex: "operation",
       key: "operation",
+      filterTitle: true,
       width: 120,
       render: (text: string, record: any) => {
         const btns = getOperationList(record, setDrawerId, reloadDataFn);

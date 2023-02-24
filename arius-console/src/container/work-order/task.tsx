@@ -93,7 +93,7 @@ export const TaskList = connect(
         delete result[key];
       }
     }
-    setQueryFormObject(result);
+    setQueryFormObject({ ...result, size: queryFormObject.size, current: 1 });
   };
   const handleTimeChange = (times: number[], periodOrPicker: boolean) => {
     //periodOrPicker为true表示此时时间选择器选的是period，false表示Picker

@@ -37,7 +37,7 @@ export const IndexService = withRouter((props: { history: any }) => {
   const [queryData, setQueryData]: any = useState({
     page: 1,
     size: 10,
-    showMetadata: false, // 默认不展示元数据集群索引
+    showMetadata: !superApp,
   });
   const [paginationProps, setPaginationProps] = useState(initPaginationProps());
   const [realTotal, setRealTotal] = useState(0);
@@ -102,7 +102,7 @@ export const IndexService = withRouter((props: { history: any }) => {
       sorterObject.orderByDesc = sorter.order === "ascend" ? false : true;
     }
     let filterObj = {} as { showMetadata: boolean };
-    filterObj["showMetadata"] = filters.index?.length ? true : false;
+    filterObj["showMetadata"] = filters.index?.length ? true : !superApp;
     setQueryData((state) => {
       if (!sorter.order) {
         delete state.sortTerm;

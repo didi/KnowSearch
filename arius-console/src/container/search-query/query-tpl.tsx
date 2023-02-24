@@ -63,8 +63,7 @@ export const QueryTpl = connect(mapStateToProps)((props: { app: AppState }) => {
     size: 10,
     sortInfo: "",
     orderByDesc: true,
-    // TODO 元数据筛选字段尚未定义，联调时更新
-    showMetadata: false, // 默认不展示元数据集群查询模板
+    showMetadata: !superApp,
   });
 
   useEffect(() => {
@@ -123,7 +122,7 @@ export const QueryTpl = connect(mapStateToProps)((props: { app: AppState }) => {
       size: pagination.pageSize,
       sortInfo: tableParams.order === "ascend" || tableParams.order === "descend" ? tableParams.field : null,
       orderByDesc: tableParams.order === "ascend" || tableParams.order === "descend" ? tableParams.order !== "ascend" : null,
-      showMetadata: filters.dslTemplate?.length ? true : false,
+      showMetadata: filters.dslTemplate?.length ? true : !superApp,
     });
   };
 

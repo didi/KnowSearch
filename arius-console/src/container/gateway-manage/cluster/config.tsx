@@ -231,6 +231,7 @@ export const getColumns = (setModalId?: any, setDrawerId?: any, reloadDataFn?: a
       title: "操作",
       dataIndex: "operation",
       fixed: "right",
+      filterTitle: true,
       width: 250,
       render: (index: number, record) => {
         const records = { ...record, ...props };

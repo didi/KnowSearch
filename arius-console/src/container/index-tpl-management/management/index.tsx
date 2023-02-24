@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { getLogicIndexColumns, getQueryFormConfig } from "./config";
 import { LOGIC_INDEX_TITLE } from "./constants";
 import { connect } from "react-redux";
-import { NavRouterLink } from "container/custom-component";
 import { Dispatch } from "redux";
 import * as actions from "actions";
 import { ProTable, Button, Spin } from "knowdesign";
@@ -12,6 +11,8 @@ import { initPaginationProps } from "constants/table";
 import { TempletPermissions } from "constants/permission";
 import { hasOpPermission } from "lib/permission";
 import { RenderEmpty } from "component/LogClusterEmpty";
+import { isSuperApp } from "lib/utils";
+import { uuid } from "lib/utils";
 import "./index.less";
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
@@ -25,9 +26,11 @@ export const IndexTplManagement = connect(
 )((props: { setModalId: Function; setDrawerId: Function; history: any }) => {
   const department: string = localStorage.getItem("current-project");
   const [loading, setloading] = useState(false);
+  const superApp = isSuperApp();
   const [queryFormObject, setqueryFormObject]: any = useState({
     page: 1,
     size: 10,
+    showMetadata: !superApp,
   });
   const [tableData, setTableData] = useState([]);
   const [paginationProps, setPaginationProps] = useState(initPaginationProps());
@@ -71,7 +74,7 @@ export const IndexTplManagement = connect(
         delete result[key];
       }
     }
-    setqueryFormObject({ ...result, ...sorter, page: 1, size: paginationProps.pageSize });
+    setqueryFormObject({ ...result, ...sorter, page: 1, size: paginationProps.pageSize, showMetadata: queryFormObject.showMetadata });
   };
 
   const reloadData = () => {
@@ -86,6 +89,7 @@ export const IndexTplManagement = connect(
       resourceId: queryFormObject.cluster,
       sortTerm: queryFormObject.sortTerm,
       orderByDesc: queryFormObject.orderByDesc,
+      showMetadata: queryFormObject.showMetadata,
     };
     getAllIndexList(Params)
       .then((res) => {
@@ -141,6 +145,8 @@ export const IndexTplManagement = connect(
       }
       sorterObject.orderByDesc = sorter.order === "ascend" ? false : true;
     }
+    let filterObj = {} as { showMetadata: boolean };
+    filterObj["showMetadata"] = filters.name?.length ? true : !superApp;
     setSorter(sorterObject);
     setqueryFormObject((state) => {
       if (!sorter.order) {
@@ -150,6 +156,7 @@ export const IndexTplManagement = connect(
       return {
         ...state,
         ...sorterObject,
+        ...filterObj,
         page: pagination.current,
         size: pagination.pageSize,
       };
@@ -203,7 +210,7 @@ export const IndexTplManagement = connect(
         ? !pageLoad && renderNode()
         : !pageLoad && (
             <div>
-              <RenderEmpty {...props} />
+              <RenderEmpty {...props} href={`/cluster/logic?needApplyCluster=${uuid()}`} />
             </div>
           )}
     </Spin>

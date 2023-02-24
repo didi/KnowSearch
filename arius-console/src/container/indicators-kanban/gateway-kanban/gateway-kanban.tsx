@@ -21,7 +21,7 @@ export const GatewayKanban = connect(mapStateToProps)((props: { app: AppState })
   const [refreshTime, setRefreshTime] = useState(0);
   const [toTopVisible, setToTopVisible] = useState(false);
 
-  const container = document.querySelector(".d1-layout-main");
+  const container = document.querySelector("#d1-layout-main");
 
   const onTimeStampChange = (startTime: number, endTime: number, timeRadioKey?: string) => {
     const timeMinus = endTime - startTime;
@@ -41,7 +41,7 @@ export const GatewayKanban = connect(mapStateToProps)((props: { app: AppState })
     dispatch(
       setGatewayForm({
         startTime: currentTime - ONE_HOUR,
-        endTime: currentTime-120000,
+        endTime: currentTime - 120000,
         isMoreDay: false,
         timeRadioKey: "oneHour",
       })

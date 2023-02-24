@@ -1,150 +1,166 @@
-.config-group-box {
-  width: 100%;
-  padding-right: 50px;
-  position: relative;
-  .name-input {
-    width: 348px;
-  }
-  .edit-config-radio {
-    .ant-form-item-control-input {
-      margin-bottom: 10px;
-        .ant-form-item-control-input-content {
-          border-bottom: 1px solid #ccc;
-          .ant-radio-group {
-            width: 196px;
-            height: 28px;
-            margin-bottom: 0;
-            .ant-radio-button-wrapper {
-              padding: 0px 13px;
-              background: transparent;
-              border: none;
-              font-family: PingFangSC-Regular;
-              font-size: 14px;
-              color: rgba(0, 0, 0, 0.87);
-              &::before {
-                background-color: transparent;
-              }
-            }
-            .ant-radio-button-wrapper-checked {
-              border: none;
-              box-shadow: none;
-              font-family: PingFangSC-Medium;
-              font-size: 14px;
-              color: #1473FF;
-              text-align: center;
-              line-height: 22px;
-              font-weight: 500;
-              .ant-radio-button-checked {
+.ant-form-item-control-input-content {
+  .config-group-box {
+    width: 100%;
+    padding-right: 50px;
+    position: relative;
+    .name-input {
+      width: 348px;
+    }
+    .edit-config-radio {
+      .ant-form-item-control-input {
+        margin-bottom: 10px;
+          .ant-form-item-control-input-content {
+            border-bottom: 1px solid #ccc;
+            .ant-radio-group {
+              width: 196px;
+              height: 28px;
+              margin-bottom: 0;
+              .ant-radio-button-wrapper {
+                padding: 0px 13px;
                 background: transparent;
                 border: none;
+                font-family: PingFangSC-Regular;
+                font-size: 14px;
+                color: rgba(0, 0, 0, 0.87);
+                &::before {
+                  background-color: transparent;
+                }
               }
-              span:nth-child(2) {
-                border-bottom: 2px solid #1473FF;
-                line-height: 27px;
-                display: inline-block;
+              .ant-radio-button-wrapper-checked {
+                border: none;
+                box-shadow: none;
+                font-family: PingFangSC-Medium;
+                font-size: 14px;
+                color: #1473FF;
+                text-align: center;
+                line-height: 22px;
+                font-weight: 500;
+                .ant-radio-button-checked {
+                  background: transparent;
+                  border: none;
+                }
+                span:nth-child(2) {
+                  border-bottom: 2px solid #1473FF;
+                  line-height: 27px;
+                  display: inline-block;
+                }
               }
             }
-          }
+        }
       }
-    }
-    .ant-form-item-extra {
-      .ant-form-item-control-input {
-        margin-bottom: 0;
-        .ant-form-item-control-input-content {
-          border-bottom: none
+      .ant-form-item-extra {
+        .ant-form-item-control-input {
+          margin-bottom: 0;
+          .ant-form-item-control-input-content {
+            border-bottom: none
+          }
         }
       }
     }
-  }
-  
-  .file-tab {
-    .ant-tabs-nav {
-      &::before {
-        border-bottom: none;
-      }
-      .ant-tabs-nav-list {
-        .ant-tabs-tab {
-          border: 0.5px solid rgba(0, 0, 0, 0.36);
-          border-radius: 4px;
-          .file-name-text {
-            font-size: 14px;
-            line-height: 17px;
-          }
-          .file-name-input {
-            border: none;
-            padding: 0;
-            box-shadow: none;
-            &:focus {
+    
+    .file-tab {
+      .ant-tabs-nav {
+        &::before {
+          border-bottom: none;
+        }
+        .ant-tabs-nav-list {
+          .ant-tabs-tab {
+            border: 0.5px solid rgba(0, 0, 0, 0.36);
+            border-radius: 4px;
+            .file-name-text {
+              font-size: 14px;
+              line-height: 17px;
+            }
+            .file-name-input {
+              border: none;
+              padding: 0;
               box-shadow: none;
-            }
-            .ant-input-clear-icon {
-              margin-right: 0;
+              &:focus {
+                box-shadow: none;
+              }
+              .ant-input-clear-icon {
+                margin-right: 0;
+              }
             }
           }
-        }
-        .ant-tabs-tab-active {
-          border: 0.5px solid #1473ff;
-        }
-        .ant-tabs-nav-add {
-          border: none;
-          .add-file {
-            font-size: 14px;
-            color: #1473ff;
-            line-height: 20px;
-            .add {
-              font-size: 16px;
+          .ant-tabs-tab-active {
+            border: 0.5px solid #1473ff;
+          }
+          .ant-tabs-nav-add {
+            border: none;
+            .add-file {
+              font-size: 14px;
+              color: #1473ff;
+              line-height: 20px;
+              .add {
+                font-size: 16px;
+              }
             }
           }
         }
       }
-    }
-    .ant-tabs-content {
-      display: block;
-    }
-  }
-  .config-edit-btn {
-    width: 46px;
-    position: absolute;
-    right: -5px;
-    top: 0;
-    .add-row,
-    .delete-row {
-      font-size: 12px;
-      display: inline-block;
-      text-align: center;
-      line-height: 12px;
-      cursor: pointer;
-      width: 18px;
-      height: 18px;
-      background: #ffffff;
-      border: 0.56px solid #d7dae0;
-      border-radius: 1.12px;
-      padding-top: 1.5px;
-      user-select: none;
-      margin-right: 5px;
-      &:hover {
-        border: 0.56px solid #2c74e7;
-        color: #2c74e7;
+      .ant-tabs-content {
+        display: block;
       }
     }
-    .add-row {
-      background: #1473ff;
-      color: #ffffff;
-      &:hover {
+    .config-edit-btn {
+      width: 46px;
+      position: absolute;
+      right: -5px;
+      top: 0;
+      .add-row,
+      .delete-row {
+        font-size: 12px;
+        display: inline-block;
+        text-align: center;
+        line-height: 12px;
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+        background: #ffffff;
+        border: 0.56px solid #d7dae0;
+        border-radius: 1.12px;
+        padding-top: 1.5px;
+        user-select: none;
+        margin-right: 5px;
+        &:hover {
+          border: 0.56px solid #2c74e7;
+          color: #2c74e7;
+        }
+      }
+      .add-row {
+        background: #1473ff;
         color: #ffffff;
+        &:hover {
+          color: #ffffff;
+        }
       }
     }
-  }
-  .cluster-link-address {
-    font-size: 14px;
-    position: absolute;
-    right: 250px;
-    top: 50px;
-    .ant-checkbox-wrapper {
-      margin-right: 5px;
+    .cluster-link-address {
+      font-size: 14px;
+      position: absolute;
+      right: 250px;
+      top: 37px;
+      .ant-checkbox-wrapper {
+        margin-right: 5px;
+      }
+    }
+    .noneed-tab .ant-tabs-nav {
+      display: none;
+    }
+    .config-group {
+      padding: 1px 12px;
+      margin-bottom: 10px;
+      opacity: .8;
+      background: #f7f9fa;
+      border-radius: 4px;
+      .ant-form-item,.action {
+        margin: 12px 0!important;
+      }
     }
   }
 }
+
 
 .config-group-editor-container {
   position: relative;

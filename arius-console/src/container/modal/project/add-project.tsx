@@ -97,7 +97,7 @@ const AddOrEditProjectModal = (props: { dispatch: any; cb: any; params: any }) =
   const [loginStatus, setLoginStatus] = useGlobalLoginStatus();
   const [list, setList] = useState(usersList);
   const [targetKeys, setTargetKeys] = useState(params?.userIdList || []);
-  const [ownerIdList, setOwnerIdList] = useState([]);
+  const [ownerIdList, setOwnerIdList] = useState([+getCookie("userId")]);
   const [userListWithAdminRole, setUserListWithAdminRole] = useState([]);
 
   const fetchOptions = (value, size = 100) => {

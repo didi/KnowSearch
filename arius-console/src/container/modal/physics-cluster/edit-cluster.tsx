@@ -40,7 +40,7 @@ const EditPhyCluster = (props: { dispatch: any; cb: Function; params: IOpPhysics
           flatPost = true;
         }
         if (isPostArr[1] && flatIp === false) {
-          if (+isPostArr[1] > 25535) {
+          if (+isPostArr[1] > 65535) {
             flatLength = true;
           }
         }
@@ -49,12 +49,12 @@ const EditPhyCluster = (props: { dispatch: any; cb: Function; params: IOpPhysics
     // 多个相同 ip
     if (new Set(ipArr).size != ipArr.length) {
       return `${IP_TIP}且 ip 不能相同`;
+    } else if (flatLength && flatPost) {
+      // 格式错误，:号端口格式不正确, 多个请换行。
+      return `${IP_TIP}，输入端口号超最大值65535`;
     } else if (flat || flatIp || flatPost) {
       // 格式错误，ip不符合规范, 没有:号, :号后面没有端口
       return IP_TIP;
-    } else if (flatLength) {
-      // 格式错误，:号端口格式不正确, 多个请换行。
-      return `${IP_TIP}，输入端口号超最大值25535`;
     }
   };
 
