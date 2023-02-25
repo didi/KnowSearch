@@ -379,3 +379,6 @@ ALTER TABLE gateway_cluster_node_info
         UNIQUE (host_name, port, cluster_name);
 -- 设置supperapp为索引模式
 update `arius_es_user` set cluster='' , search_type=1  where id=1;
+#增加唯一键
+ALTER TABLE logi_op_component
+    ADD UNIQUE (name);

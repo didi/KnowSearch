@@ -352,3 +352,6 @@ ALTER TABLE gateway_cluster_node_info
         UNIQUE (host_name, port, cluster_name);
 
 update kf_security_role_permission set is_delete=0 where id=1973;
+#增加唯一键
+ALTER TABLE logi_op_component
+    ADD UNIQUE (name);
