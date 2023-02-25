@@ -2283,3 +2283,6 @@ CREATE TABLE plugin_info
     update_time  TIMESTAMP     DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 )
     COMMENT '插件信息管理' CHARSET = utf8;
+#增加唯一键
+ALTER TABLE logi_op_component
+    ADD UNIQUE (name);

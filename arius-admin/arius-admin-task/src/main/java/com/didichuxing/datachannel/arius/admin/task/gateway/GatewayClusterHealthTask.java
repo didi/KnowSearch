@@ -126,7 +126,7 @@ public class GatewayClusterHealthTask implements Job {
 										final Date current = new Date();
 										long diff = current.getTime() - heartbeatTime.getTime();
 										TimeUnit time = TimeUnit.MINUTES;
-										long diffrence = time.convert(diff, TimeUnit.MINUTES);
+										long diffrence = time.convert(diff, TimeUnit.MILLISECONDS);
 										return diffrence <= 30;
 										
 								});
