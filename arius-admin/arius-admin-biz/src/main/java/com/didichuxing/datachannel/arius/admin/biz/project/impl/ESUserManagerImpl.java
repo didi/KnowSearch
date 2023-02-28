@@ -53,7 +53,6 @@ import org.springframework.stereotype.Component;
  *         由于es user 的创建统一归 super admin 进行管理分配，那么系统所有创建es user的逻辑只需要校验用户是否是超级用户即可
  *     </pre>
  * </blockquote>
- * @see 0.2 将appservice 中的能力迁移到es user manager
  * @author shizeying
  * @date 2022/05/25
  */
