@@ -57,18 +57,18 @@ public class ESClusterConfigEditTaskHandler extends AbstractESTaskHandler {
 				if (count>1){
 						return Result.buildFail("配置组的名称不能是重复的");
 				}
-				final Map<String, String> groupName2DTOPortMap = ConvertUtil.list2Map(
+				final Map<String, String> groupName2DtoPortMap = ConvertUtil.list2Map(
 						groupConfigList, GeneralGroupConfigDTO::getGroupName,
 						i -> getHttpPort(i.getFileConfig()));
 				final Map<String, String> groupName2PortMap = ConvertUtil.list2Map(
 						result.getData().getGroupConfigList(),
 						ComponentGroupConfig::getGroupName, i -> getHttpPort(i.getFileConfig()));
-				if (!groupName2DTOPortMap.keySet().stream()
+				if (!groupName2DtoPortMap.keySet().stream()
 						.allMatch(groupName2PortMap::containsKey)) {
 						return Result.buildFail("当前修改的配置组不存在，请确认后再进行提交");
 				}
 				// 校验端口号
-				for (Entry<String, String> groupName2PortEntry : groupName2DTOPortMap.entrySet()) {
+				for (Entry<String, String> groupName2PortEntry : groupName2DtoPortMap.entrySet()) {
 						final String groupName = groupName2PortEntry.getKey();
 						final String port      = groupName2PortEntry.getValue();
 						final String oldPort   = groupName2PortMap.get(groupName);
@@ -143,7 +143,6 @@ public class ESClusterConfigEditTaskHandler extends AbstractESTaskHandler {
 		
 		@Override
 		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
-				//TODO 后续考虑下如果端口号变更的情况，那么需要怎么做，这里需要补充更新到节点信息中
 				return Result.buildSucc();
 		}
 		
