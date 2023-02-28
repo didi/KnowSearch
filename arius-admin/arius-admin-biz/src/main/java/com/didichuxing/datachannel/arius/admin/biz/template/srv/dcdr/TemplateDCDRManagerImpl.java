@@ -237,6 +237,9 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                 targetClusterPhyResult.getData().getEsVersion()))) {
             return Result.buildFail("主从集群版本必须一致");
         }
+        /**
+         * 注意：鉴于目前dcdr插件是不支持带有密码的跨集群迁移，后续要需要加入密码验证方可完成迁移，后续支持
+         */
         final Result<Void> remoteClusterAndCheckConnected = createRemoteClusterAndCheckConnected(
                 masterPhyTemplate.getCluster(), targetCluster);
         if (remoteClusterAndCheckConnected.failed()) {
@@ -333,6 +336,14 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         return Result.buildSucc();
     }
     
+    /**
+     * 创建远程集群和检查连接
+     *
+     * @param cluster       集群
+     * @param targetCluster 目标集群
+     * @return {@link Result}<{@link Void}>
+     * @throws ESOperateException esoperateException
+     */
     private Result<Void> createRemoteClusterAndCheckConnected(String cluster, String targetCluster)
             throws ESOperateException {
         // 判断集群与从集群是否配置了
