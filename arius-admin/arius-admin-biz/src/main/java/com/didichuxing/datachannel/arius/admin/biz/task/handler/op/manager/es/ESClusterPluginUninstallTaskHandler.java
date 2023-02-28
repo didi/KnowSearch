@@ -108,7 +108,7 @@ public class ESClusterPluginUninstallTaskHandler extends AbstractESTaskHandler {
 		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
 				String expandData = opTask.getExpandData();
 				ClusterPluginUninstallContent content = convertString2Content(expandData);
-				//1.根据依赖组件ID获取集群ID
+				//根据依赖组件ID获取集群ID
 				Result<Integer> clusterIdRes = clusterPhyManager.getIdByComponentId(content.getDependComponentId());
 				if (clusterIdRes.failed()){
 						return Result.buildFrom(clusterIdRes);
