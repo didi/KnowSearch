@@ -1,0 +1,97 @@
+<html>
+
+<head>
+    <title>ZEUS</title>
+    {{ template "common/head" . }}
+</head>
+
+<body>
+    <div class="container-fluid" style="margin-bottom: 20px;">
+        {{ template "common/banner" . }}
+        <div class="row">
+            {{ template "common/menu" . }}
+            <div class="col-md-11">
+
+                <!-- search -->
+                <div class="form-inline">
+                    <div class="form-group">
+                        <input type="text" class="form-control input-sm" id="search" value="{{.Search}}" onkeypress="if (event.keyCode==13) grp_search();"
+                            placeholder="">
+                    </div>
+                    <button onclick="grp_search()" class="btn btn-default btn-sm">
+                        <i class="fa fa-search"></i> Search
+                    </button>
+                    <a href="javascript:grp_add_modal_show(0);" class="btn btn-success btn-sm pull-right">
+                        <i class="fa fa-plus"></i> New
+                    </a>
+                </div>
+
+                <table class="table table-striped table-bordered" style="margin-bottom:0px;margin-top:20px;">
+                    <thead>
+                        <tr>
+                            <th>模板分组</th>
+                            <th>ID</th>
+                            <th>权限人员</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .List}}
+                        <tr id="tr-grp-{{.ID}}">
+                            <td><a href="/grp/{{.ID}}/children">{{.Name}}</a></td>
+                            <td>{{.ID}}</td>
+                            <td>{{.Users}}</td>
+                            <td>
+                                <a href="javascript:grp_edit_modal_show({{.ID}}, {{.PID}}, '{{.Name}}', '{{.Users}}');">修改</a>
+                                <span class="cut-line">|</span>
+                                <a href="javascript:grp_del('{{.ID}}', '{{.Name}}');">删除</a>
+                            </td>
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td colspan="4">No records</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+                
+
+            </div>
+        </div>
+    </div>
+
+{{ template "modal/grp_add" . }}
+{{ template "modal/grp_edit" . }}
+
+<script type="text/javascript">
+function grp_search() {
+    var search = $.trim($("#search").val());
+    location.href = "/grps?search=" + search;
+}
+function grp_del(id, name) {
+    layer.confirm("删除分组" + ':' + name, {
+        title: "请确认",
+        shadeClose: true,
+        btn: ['确认'],
+        offset: '100px',
+        icon: 3
+    }, function() {
+        $.ajax({
+            url: "/grp/" + id,
+            type: "DELETE",
+            success: function (json) {
+                handle_json(json, function () {
+                    $("#tr-grp-" + id).remove();
+                });
+            }
+        });
+    });
+}
+$(function() {
+    // var t=$("#search").val(); 
+    // $("#search").val("").focus().val(t); 
+});
+</script>
+</body>
+
+</html>

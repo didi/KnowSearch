@@ -1,0 +1,133 @@
+<html xmlns="http://www.w3.org/1999/html">
+
+<head>
+    <title>任务执行结果</title>
+    {{ template "common/head" . }}
+</head>
+
+<body>
+
+    <div class="container-fluid" style="margin-bottom: 20px;">
+        {{ template "common/banner" . }}
+        <div class="row">
+            {{ template "common/menu" . }}
+            <div class="col-md-11">
+
+                <div class="row">
+                    <div class="col-md-9">
+                        status : {{if .IsDone}}finish{{else}}running{{end}}
+                        <span class="cut-line">|</span>
+                        <a target="_blank" href="/output/stdouts/{{$.Task.ID}}.txt">stdouts</a>
+                        <span class="cut-line">|</span> total: <a href="/task/{{$.Task.ID}}/result">{{.Total}}</a>    {{range $k, $v := $.Ss}}
+                        <span class="cut-line">|</span> 
+                        <a href="/task/{{$.Task.ID}}/result?status={{$k}}">{{$k}}:</a>
+                        <a href="/task/{{$.Task.ID}}/{{$k}}" target="_blank">{{$v}}</a>
+                        {{end}}
+                        <span class="cut-line">|</span>
+                        <a href="/task/{{$.Task.ID}}/detail">meta</a>
+                        <span class="cut-line">|</span>
+                        <a href="/task/new?fork={{$.Task.ID}}" target="_blank">fork</a>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="btns pull-right">
+                            {{if not .IsDone}}
+                            {{if .IsPause}}
+                            <input class="btn btn-success btn-sm" type="button" value="Start" onclick="do_task_action('{{.Task.ID}}', 'start');">
+                            {{else}}
+                            <input class="btn btn-primary btn-sm" type="button" value="Pause" onclick="do_task_action('{{.Task.ID}}', 'pause');">
+                            {{end}}
+                            <input class="btn btn-warning btn-sm" type="button" value="Cancel" onclick="do_task_action('{{.Task.ID}}', 'cancel');">
+                            <input class="btn btn-danger btn-sm" type="button" value="Kill" onclick="do_task_action('{{.Task.ID}}', 'kill');">
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12" style="color: #666; font-style: italic;margin-top:10px;">
+                        task : {{.Task.Keywords}}
+                    </div>
+                </div>
+
+                <table class="table table-hover table-bordered" style="margin-top:20px;">
+                    <thead>
+                        <tr>
+                            <th>Hostname</th>
+                            <th>Status</th>
+                            <th>Output</th>
+                            <th>Operation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .Hosts}}
+                        <tr>
+                            <td>{{.Hostname}}</td>
+                            <td class="{{StatusClass .Status}}" id="td-{{.ID}}-status">{{.Status}}</td>
+                            <td>
+                                <a target="_blank" href="/output/stdout.html?id={{$.Task.ID}}&hostname={{.Hostname}}">stdout</a>
+                                <span class="cut-line">|</span>
+                                <a target="_blank" href="/output/stderr.html?id={{$.Task.ID}}&hostname={{.Hostname}}">stderr</a>
+                            </td>
+                            <td>
+                                <a href="javascript:ignore_task('{{.ID}}', '{{.Hostname}}');">ignore</a>
+                                <span class="cut-line">|</span>
+                                <a href="javascript:redo_task('{{.ID}}', '{{.Hostname}}');">redo</a>
+                                <span class="cut-line">|</span>
+                                <a href="javascript:kill_task('{{.ID}}', '{{.Hostname}}');">kill</a>
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<script>
+function ignore_task(id, host) {
+    $.post("/task/" + id + "/ignore", {'host': host}, function (json) {
+        if (json.msg.length > 0) {
+            err(json.msg);
+        } else {
+            info(json.data);
+        }
+    })
+}
+
+function redo_task(id, host) {
+    $.post("/task/" + id + "/redo", {'host': host}, function (json) {
+        if (json.msg.length > 0) {
+            err(json.msg);
+        } else {
+            info("系统尝试去重做，但如果该任务卡住了，系统将放弃redo");
+        }
+    })
+}
+
+function kill_task(id, host) {
+    $.post("/task/" + id + "/kill", {'host': host}, function (json) {
+        if (json.msg.length > 0) {
+            err(json.msg);
+        } else {
+            info("系统尝试kill，如果kill不掉，还请手工处理");
+        }
+    })
+}
+
+function do_task_action(id, action) {
+    $.post("/task/" + id + "/action", {"action": action}, function (json) {
+        if (json.msg.length > 0) {
+            err(json.msg);
+        } else {
+            info("系统已接收指令，正在积极调度...", function () {
+                location.reload();
+            });
+        }
+    })
+}
+</script>
+
+
+</body>
+
+</html>

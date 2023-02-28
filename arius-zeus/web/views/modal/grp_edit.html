@@ -1,0 +1,53 @@
+<!-- modal -->
+<div class="modal fade" id="grp_edit_modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                修改分组
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="grp_edit_modal_name">分组名称</label>
+                    <input id="grp_edit_modal_name" type="text" class="form-control input-sm"></input>
+                </div>
+                <div class="form-group">
+                    <label for="grp_edit_modal_users">权限人员:<span class="resume">（空格分隔）</span></label>
+                    <input id="grp_edit_modal_users" type="text" class="form-control input-sm"></input>
+                </div>
+                <div class="form-group">
+                    <label for="grp_edit_modal_pid">父分组ID:<span class="resume">（只有在迁移分组的时候才需要关注）</span></label>
+                    <input type="text" id="grp_edit_modal_pid" class="form-control input-sm"></input>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success btn-sm" data-dismiss="modal" onclick="grp_edit_modal_do();">Submit</button>
+                <input type="hidden" id="grp_edit_modal_id">
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+<script type="text/javascript">
+function grp_edit_modal_show(id, pid, name, users) {
+    $("#grp_edit_modal_id").val(id);
+    $("#grp_edit_modal_pid").val(pid);
+    $("#grp_edit_modal_name").val(name);
+    $("#grp_edit_modal_users").val(users);
+    $("#grp_edit_modal").modal("show");
+}
+
+function grp_edit_modal_do() {
+    var id = $.trim($("#grp_edit_modal_id").val());
+    var pid = $.trim($("#grp_edit_modal_pid").val());
+    var name = $.trim($("#grp_edit_modal_name").val());
+    var users = $.trim($("#grp_edit_modal_users").val());
+    $.post("/grp/"+id+"/update", {"pid": pid, "name":name, "users":users}, function(json) {
+        handle_json(json, function() {
+            location.reload(true);
+        });
+    });
+}
+</script>

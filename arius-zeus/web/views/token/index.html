@@ -1,0 +1,28 @@
+<html>
+
+<head>
+    <title>Token管理</title>
+    {{ template "common/head" . }}
+</head>
+
+<body>
+
+    <div class="container-fluid" style="margin-bottom: 20px;">
+    {{ template "common/banner" . }}
+        <div class="row">
+        {{ template "common/menu" . }}
+            <div class="col-md-11">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Token Management</div>
+                    <div class="panel-body">
+                        Token: {{.Token}}
+                        <button class="btn btn-success btn-xs" onclick="location.href='/token/set'" style="margin-left: 30px;">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

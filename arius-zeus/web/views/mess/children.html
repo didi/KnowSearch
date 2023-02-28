@@ -1,0 +1,213 @@
+<html>
+
+<head>
+    <title>ZEUS</title>
+    {{ template "common/head" . }}
+    <style>
+        a.tpllink {
+            color: #CE48CE;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid" style="margin-bottom: 20px;">
+        {{ template "common/banner" . }}
+        <div class="row">
+            {{ template "common/menu" . }}
+            <div class="col-md-11">
+
+                <ol class="breadcrumb">
+                    <li><a href="/grps">顶层分组</a></li>
+                    {{range .Grp.ParentGrps}}
+                    <li><a href="/grp/{{.ID}}/children">{{.Name}}</a></li>
+                    {{end}}
+                    <li class="active">{{.Grp.Name}}</li>
+                </ol>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-striped table-bordered" style="margin-bottom:20px;">
+                            <thead>
+                                <tr>
+                                    <th>分组名称</th>
+                                    <th>ID</th>
+                                    <th>权限人员</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .Grps}}
+                                <tr id="tr-grp-{{.ID}}">
+                                    <td><a href="/grp/{{.ID}}/children">{{.Name}}</a></td>
+                                    <td>{{.ID}}</td>
+                                    <td>{{.Users}}</td>
+                                    <td>
+                                        <a href="javascript:grp_edit_modal_show({{.ID}}, {{.PID}}, '{{.Name}}', '{{.Users}}')">修改</a>
+                                        <span class="cut-line">|</span>
+                                        <a href="javascript:grp_del('{{.ID}}', '{{.Name}}');">删除</a>
+                                    </td>
+                                </tr>
+                                {{else}}
+                                <tr>
+                                    <td colspan="4">No records</td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+
+                        <button class="btn btn-sm btn-success" onclick="grp_add_modal_show({{.Grp.ID}})">创建分组</button>
+                        {{.Grp.Name}}共{{.GrpCount}}个子分组
+                    </div>
+
+                    <div class="col-md-6">
+                        <table class="table table-striped table-bordered" style="margin-bottom:20px;">
+                            <thead>
+                                <tr>
+                                    <th><input name="boxs" type="checkbox" id="selectAll"/></th>
+                                    <th>ID</th>
+                                    <th>模板关键字</th>
+                                    <th>编辑者</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .Tpls}}
+                                <tr id="tr-tpl-{{.ID}}">
+                                    <th><input name="box-{{.ID}}" value="{{.ID}}" class="boxes" type="checkbox"/></th>
+                                    <td>{{.ID}}</td>
+                                    <td>
+                                        <a href="/tpl/{{.ID}}/view" class="tpllink">{{.Keywords}}</a>
+                                    </td>
+                                    <td>{{.Updator}}</td>
+                                    <td>
+                                        <a target="_blank" href="/task/new?tpl={{.ID}}">创建任务</a>
+                                        <span class="cut-line">|</span>
+                                        <a href="/tpl/{{.ID}}/edit">编辑</a>
+                                        <span class="cut-line">|</span>
+                                        <a href="javascript:tpl_del('{{.ID}}', '{{.Keywords}}');">删除</a>
+                                    </td>
+                                </tr>
+                                {{else}}
+                                <tr>
+                                    <td colspan="5">No records</td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#tplMove">移动模板</button>
+                        <a href="/grp/{{.Grp.ID}}/tpl/new" class="btn btn-sm btn-success">新建模板</a>
+                        {{.Grp.Name}}共{{.TplCount}}个模板
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="tplMove" tabindex="-1" role="dialog" aria-labelledby="tplMovelLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">移动模板</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="recipient-name" class="col-form-label">模板id:</label>
+                            <input type="text" readonly="readonly" required="required" class="form-control" id="tpl_move_ids">
+                        </div>
+                        <div class="form-group-1">
+                            <label for="grpID" class="col-form-label">移动到（组id）:</label>
+                            <input type="text" required="required" class="form-control" id="grp_id">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="tpl_move()">移动</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{{ template "modal/grp_add" . }}
+{{ template "modal/grp_edit" . }}
+
+<script type="text/javascript">
+function grp_del(id, name) {
+    layer.confirm("删除分组" + ':' + name, {
+            title: "请确认",
+            shadeClose: true,
+            btn: ['确认'],
+            offset: '100px',
+            icon: 3
+        }, function() {
+            $.ajax({
+                url: "/grp/" + id,
+                type: "DELETE",
+                success: function (json) {
+                    handle_json(json, function () {
+                        $("#tr-grp-" + id).remove();
+                    });
+                }
+            });
+        });
+}
+function tpl_del(id, keywords) {
+    layer.confirm("删除模板" + ':' + keywords, {
+        title: "请确认",
+        shadeClose: true,
+        btn: ['确认'],
+        offset: '100px',
+        icon: 3
+    }, function() {
+        $.ajax({
+            url: "/tpl/" + id,
+            type: "DELETE",
+            success: function (json) {
+                handle_json(json, function () {
+                    $("#tr-tpl-" + id).remove();
+                });
+            }
+        });
+    });
+}
+
+function tpl_move() {
+    var tpl_ids = $.trim($("#tpl_move_ids").val());
+    var grp_id = $.trim($("#grp_id").val());
+    $.post("/tpl/move", {"tpl_ids": tpl_ids, "grp_id":grp_id}, function(json) {
+        handle_json(json, function() {
+            location.reload(true);
+        });
+    });
+}
+
+function selectValue(){
+    obj = document.getElementsByClassName("boxes");
+    check_val = [];
+    for(k in obj){
+        if(obj[k].checked)
+            check_val.push(obj[k].value);
+    }
+    return check_val
+}
+
+$("#selectAll").click(function(){
+    var xz = $(this).prop("checked");
+    var ck = $(".boxes").prop("checked",xz);
+})
+
+$('#tplMove').on('show.bs.modal', function (event) {
+    var recipient = selectValue()
+    var modal = $(this)
+    modal.find('.modal-body .form-group input').val(recipient)
+})
+
+</script>
+</body>
+
+</html>

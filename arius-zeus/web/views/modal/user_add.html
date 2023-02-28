@@ -1,0 +1,37 @@
+<!-- modal -->
+<div class="modal fade" id="user_add_modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                添加用户
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="add_modal_username">用户名</label>
+                    <input id="add_modal_username" type="text" class="form-control input-sm"></input>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success btn-sm" data-dismiss="modal" onclick="user_add_modal_do();">Submit</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+<script type="text/javascript">
+function user_add_modal_show(pid) {
+    $("#user_add_modal").modal("show");
+}
+
+function user_add_modal_do() {
+    var username = $.trim($("#add_modal_username").val());
+    $.post("/user/add", {"username":username}, function(json) {
+        handle_json(json, function() {
+            location.reload(true);
+        });
+    });
+}
+</script>

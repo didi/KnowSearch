@@ -1,0 +1,33 @@
+body, input, div, span, h1, h2, h3, h4, h5, table, th, td, ul, li, dl, dt, dd, a {
+    font-family: 'verdana', 'Microsoft YaHei', 'Consolas', 'Deja Vu Sans Mono', 'Bitstream Vera Sans Mono';
+    font-size: 10px;
+}
+span.resume {
+    color: #666;
+    font-weight: normal;
+}
+.status-success {
+    background-color: #5cb85c; color: white;
+}
+.status-other {
+    background-color: #d9534f; color: white;
+}
+.gray {
+    color: #ccc;
+}
+pre code {
+    font-family: Consolas, monospace, monospace;
+    font-size: 0.9em;
+    line-height: 1.4em;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+.hljs {
+    color: #ddd;
+}
+.cut-line {
+    margin-left:5px;
+    margin-right:5px;
+    color: #ccc;
+}

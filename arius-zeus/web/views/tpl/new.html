@@ -1,0 +1,105 @@
+<html>
+
+<head>
+    <title>ZEUS</title>
+    {{ template "common/head" . }}
+</head>
+
+<body>
+
+    <div class="container-fluid" style="margin-bottom: 20px;">
+        {{ template "common/banner" . }}
+        <div class="row">
+            {{ template "common/menu" . }}
+            <div class="col-md-11">
+
+                <ol class="breadcrumb">
+                    <li><a href="/grps">顶层分组</a></li>
+                    {{range .Grp.ParentGrps}}
+                    <li><a href="/grp/{{.ID}}/children">{{.Name}}</a></li>
+                    {{end}}
+                    <li><a href="/grp/{{.Grp.ID}}/children">{{.Grp.Name}}</a></li>
+                </ol>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">新建模板</div>
+                    <div class="panel-body">
+                        <div>
+                            <div class="form-group">
+                                <label for="keywords">keywords：<span class="resume">标题或者关键字，说明这个模板的作用</span></label>
+                                <input type="text" class="form-control input-sm" id="keywords" value="{{.Obj.Keywords}}">
+                            </div>
+                            <div class="form-group">
+                                <label for="account">account：<span class="resume">执行账号，慎用root，除非要代表操作系统意志</span></label>
+                                <input type="text" class="form-control input-sm" id="account" value="{{.Obj.Account}}">
+                            </div>
+                            <div class="form-group">
+                                <label for="batch">batch：<span class="resume">并发度，默认是0，表示全并发执行，1表示顺序执行，2表示每次执行2台</span></label>
+                                <input type="text" class="form-control input-sm" id="batch" value="{{.Obj.Batch}}">
+                            </div>
+                            <div class="form-group">
+                                <label for="tolerance">tolerance：<span class="resume">容忍几台机器失败，默认是0，表示一台都不容忍，只要失败了，立马暂停</span></label>
+                                <input type="text" class="form-control input-sm" id="tolerance" value="{{.Obj.Tolerance}}">
+                            </div>
+                            <div class="form-group">
+                                <label for="timeout">timeout：<span class="resume">单机脚本执行的超时时间，单位是秒</span></label>
+                                <input type="text" class="form-control input-sm" id="timeout" value="{{.Obj.Timeout}}">
+                            </div>
+                            <div class="form-group">
+                                <label for="pause">pause：<span class="resume">暂停点，做完某台之后暂停一下，要暂停多台，写多个hostname，逗号分隔</span></label>
+                                <input type="text" class="form-control input-sm" id="pause" value="{{.Obj.Pause}}">
+                            </div>
+                            <div class="form-group">
+                                <label for="hostnames">hostnames：<span class="resume">要执行的机器列表，一行一个hostname</span></label>
+                                <textarea id="hostnames" cols="30" rows="10" class="form-control input-sm"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="script">script：<span class="resume">要执行的脚本内容</span></label>
+                                <textarea name="script" id="script" cols="30" rows="10" class="form-control input-sm">{{.Obj.Script}}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="args">args：<span class="resume">附于脚本之后的参数，多个参数之间用双逗号,,分隔，比如arg1,,arg 2,,arg3</span></label>
+                                <input type="text" class="form-control input-sm" id="args" value="{{.Obj.Args}}">
+                            </div>
+
+                            <button class="btn btn-success btn-sm" onclick="tpl_new();">创建</button>
+                            <a href="javascript:history.go(-1);" class="btn btn-success btn-sm">取消</a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+function tpl_new() {
+    $.post("/grp/{{.Grp.ID}}/tpl/new", {
+        "batch": $("#batch").val(),
+        "tolerance": $("#tolerance").val(),
+        "timeout": $("#timeout").val(),
+        "pause": $("#pause").val(),
+        "hostnames": $("#hostnames").val(),
+        "nss": $("#nss").val(),
+        "script": $("#script").val(),
+        "args": $("#args").val(),
+        "account": $("#account").val(),
+        "keywords": $("#keywords").val()
+    }, function (json) {
+        if (json.msg.length > 0) {
+            err(json.msg);
+        } else {
+            succ('恭喜，模板创建成功：）', function () {
+                location.href = "/grp/{{.Grp.ID}}/children";
+            });
+        }
+    });
+}
+$(function() {
+    $("#script").taby();
+});
+</script>
+
+</body>
+
+</html>

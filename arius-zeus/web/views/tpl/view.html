@@ -1,0 +1,97 @@
+<html>
+
+<head>
+    <title>任务模板</title>
+    {{ template "common/head" . }}
+    <style>
+        tbody#meta tr th{
+            text-align: right;
+            width: 100px;
+        }
+        pre code {
+            line-height: 1.6em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container-fluid" style="margin-bottom: 20px;">
+        {{ template "common/banner" . }}
+        <div class="row">
+            {{ template "common/menu" . }}
+            <div class="col-md-11">
+
+                <ol class="breadcrumb">
+                    <li><a href="/grps">顶层分组</a></li>
+                    {{range .Grp.ParentGrps}}
+                    <li><a href="/grp/{{.ID}}/children">{{.Name}}</a></li>
+                    {{end}}
+                    <li><a href="/grp/{{.Grp.ID}}/children">{{.Grp.Name}}</a></li>
+                </ol>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        模板信息
+                    </div>
+                    <div class="panel-body">
+                        
+                        <table class="table table-bordered">
+                            <tbody id="meta">
+                                <tr>
+                                    <th>关键字</th>
+                                    <td>{{.Obj.Keywords}}</td>
+                                </tr>
+                                <tr>
+                                    <th>最后更新</th>
+                                    <td>{{.Obj.Updator}} @ {{TimeFormat .Obj.Updated}}</td>
+                                </tr>
+                                <tr>
+                                    <th>控制参数</th>
+                                    <td>
+                                        运行账号：{{.Obj.Account}}
+                                        <span class="cut-line">|</span>
+                                        并发度：{{.Obj.Batch}}
+                                        <span class="cut-line">|</span>
+                                        容忍度：{{.Obj.Tolerance}}
+                                        <span class="cut-line">|</span>
+                                        超时时间：{{.Obj.Timeout}}秒
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>脚本内容</th>
+                                    <td>
+                                        <pre style="margin:0;border:0;padding:0;"><code class="hljs" style="padding: 15px;font-family: Consolas;">{{.Obj.Script}}</code></pre>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>脚本参数</th>
+                                    <td>{{.Obj.Args}}</td>
+                                </tr>
+                                <tr>
+                                    <th>机器列表</th>
+                                    <td>
+                                        <pre style="font-family: Consolas;border:0;margin:0;padding: 0;background-color: white;font-size: 10px;">{{.Hosts}}</pre>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>暂停点</th>
+                                    <td>{{.Obj.Pause}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <a class="btn btn-success btn-sm" href="/tpl/{{.Obj.ID}}/edit">编辑模板</a>
+                        <a class="btn btn-success btn-sm" href="/task/new?tpl={{.Obj.ID}}" target="_blank">创建任务</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+</script>
+</body>
+
+</html>
