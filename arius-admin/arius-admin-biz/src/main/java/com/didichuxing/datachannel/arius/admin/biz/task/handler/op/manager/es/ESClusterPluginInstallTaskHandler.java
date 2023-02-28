@@ -161,7 +161,6 @@ public class ESClusterPluginInstallTaskHandler extends AbstractESTaskHandler {
 								.clusterId(clusterIdRes.getData()).version(packageRes.getData().getVersion())
 								.componentId(componentResult.getData().getId())
 								
-								//TODO 插件类型未知 需要等
 								.pluginType(PluginInfoTypeEnum.find(content.getPluginType()).getPluginType())
 								.clusterType(PluginClusterTypeEnum.ES.getClusterType()).build();
 				return pluginManager.createWithECM(pluginCreateDTO);

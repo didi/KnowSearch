@@ -124,7 +124,6 @@ public class ESClusterPluginRestartTaskHandler extends AbstractESTaskHandler {
 		
 		@Override
 		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
-				//TODO 重启可能根本不需要后置处理，带测试后如果需要再进行补齐
 				return Result.buildSucc();
 		}
 		

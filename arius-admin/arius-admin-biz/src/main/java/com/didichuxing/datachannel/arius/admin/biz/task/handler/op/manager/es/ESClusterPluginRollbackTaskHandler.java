@@ -108,7 +108,6 @@ public class ESClusterPluginRollbackTaskHandler extends AbstractESTaskHandler {
 		
 		@Override
 		protected Result<Void> afterSuccessTaskExecution(OpTask opTask) {
-				//TODO 后续考虑下如果端口号变更的情况，那么需要怎么做，这里需要补充更新到节点信息中
 				return Result.buildSucc();
 		}
 	

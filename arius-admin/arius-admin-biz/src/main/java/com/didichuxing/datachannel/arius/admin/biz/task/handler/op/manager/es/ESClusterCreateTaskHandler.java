@@ -147,15 +147,15 @@ public class ESClusterCreateTaskHandler extends AbstractESTaskHandler {
 				final Map<String, GeneralGroupConfigDTO> groupName2GroupConfigDTOMap = ConvertUtil.list2Map(
 						content.getGroupConfigList(), GeneralGroupConfigDTO::getGroupName);
 				//2.获取指定的配置
-				List<GeneralGroupConfigDTO> configDTOS = content.getDefaultGroupNames().stream()
+				List<GeneralGroupConfigDTO> configs = content.getDefaultGroupNames().stream()
 						.map(groupName2GroupConfigDTOMap::get).collect(
 								Collectors.toList());
-				if (CollectionUtils.isEmpty(configDTOS)) {
-						configDTOS = Collections.singletonList(content.getGroupConfigList().get(0));
+				if (CollectionUtils.isEmpty(configs)) {
+						configs = Collections.singletonList(content.getGroupConfigList().get(0));
 				}
 				//3.获取指定配置的ip和端口号
 				final List<TupleTwo<String, Integer>> ip2PortTuples = convertFGeneralGroupConfigDTO2IpAndPortTuple(
-								configDTOS);
+								configs);
 				Map<String, List<Integer>> ip2PortsMap = ConvertUtil.list2MapOfList(ip2PortTuples,
 						TupleTwo::v1,
 						TupleTwo::v2);
