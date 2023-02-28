@@ -1,0 +1,20 @@
+---
+debug: true
+maintainers:
+  - root
+password: "Work5834"
+log:
+  access: "var/access.log"
+  error: "var/error.log"
+http:
+  listen: "0.0.0.0:8010"
+  secret: "36005025221c6e1ff4bf9b255e49d350"
+table: 100
+mysql:
+  addr: "root:1234@tcp(127.0.0.1:3306)/zeus_es?charset=utf8&parseTime=True&loc=Asia%2FShanghai"
+  idle: 8
+  max: 32
+  showsql: true
+auth:
+  - name: "fault_recover"
+    pass: "a52d5314c6184225f37910130b7ab888"

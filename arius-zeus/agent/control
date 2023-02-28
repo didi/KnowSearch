@@ -1,0 +1,149 @@
+#!/bin/bash
+
+cwd=$(cd $(dirname $0) && pwd)
+cd $cwd
+
+binfile=zeus-agent
+ymlfile=cfg.yml
+logfile=log/app.log
+
+port=2015
+
+is_running()
+{
+    output=$(curl -s "http://127.0.0.1:${port}/version")
+    if [ $? -ne 0 ]; then
+        return 1
+    fi
+    
+    return 0
+}
+
+start()
+{
+    # already started?
+    is_running
+    if [ $? -eq 0 ]; then
+        return 0
+    fi
+
+    mkdir -p log
+    nohup ./$binfile -c $ymlfile >>$logfile 2>&1 &
+    
+    for i in $(seq 1 10); do
+        sleep 0.3
+        is_running
+        if [ $? -eq 0 ]; then
+            echo "$binfile started"
+            return 0
+        fi
+    done
+
+    echo "$binfile cannot start"
+    return 1
+}
+
+stop()
+{
+    # not running?
+    is_running
+    if [ $? -ne 0 ]; then
+        return 0
+    fi
+
+    curl -s "http://127.0.0.1:${port}/exit"
+
+    for i in $(seq 1 10); do
+        sleep 0.3
+        is_running
+        if [ $? -ne 0 ]; then
+            echo "$binfile stopped"
+            return 0
+        fi
+    done
+
+    echo "$binfile cannot stop"
+    return 1
+}
+
+install()
+{
+    return 0
+}
+
+status()
+{
+    is_running
+    if [ $? -ne 0 ]; then
+        echo "stopped"
+        return 1
+    fi
+
+    echo "started"
+}
+
+running_version()
+{
+    output=$(curl -s "http://127.0.0.1:${port}/version")
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
+
+    echo $output
+}
+
+get_pid()
+{
+    output=$(curl -s "http://127.0.0.1:${port}/pid")
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
+
+    echo $output
+}
+
+build() {
+    go build -o $binfile
+    if [ $? -ne 0 ]; then
+        exit $?
+    fi
+    ./$binfile -v
+}
+
+pack() {
+    build
+    version=$(./$binfile -v)
+    tar zcvf $binfile-$version.tar.gz control $binfile $ymlfile
+}
+
+usage()
+{
+    echo "$0 start|stop|status|running_version|pid|build|pack"
+}
+
+case $1 in
+    "start" )
+        start
+        ;;
+    "stop" )
+        stop
+        ;;
+    "running_version" )
+        running_version
+        ;;
+    "status" )
+        status
+        ;;
+    "pid" )
+        get_pid
+        ;;
+    "build" )
+        build
+        ;;
+    "pack" )
+        pack
+        ;;
+    * )
+        usage
+        ;;
+esac

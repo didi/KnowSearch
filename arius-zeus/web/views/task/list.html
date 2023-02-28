@@ -1,0 +1,88 @@
+<html>
+
+<head>
+    <title>控制系统</title>
+    {{ template "common/head" . }}
+</head>
+
+<body>
+
+    <div class="container-fluid" style="margin-bottom: 20px;">
+        {{ template "common/banner" . }}
+        <div class="row">
+            {{ template "common/menu" . }}
+            <div class="col-md-11">
+
+                <!-- search -->
+                <div class="form-inline">
+                    <div class="form-group">
+                        <input type="text" class="form-control input-sm" id="query"  value="{{.Query}}" onkeypress="if (event.keyCode==13) task_search();">
+                    </div>
+                    <button onclick="task_search()" class="btn btn-default btn-sm">
+                        <i class="fa fa-search"></i> Search
+                    </button>
+                    <div class="checkbox">
+                        <label>
+                          <input type="checkbox" id="mine" {{if eq .Mine 1}}checked{{end}}> 只看自己的任务
+                        </label>
+                    </div>
+                    <a href="/task/new" class="btn btn-success btn-sm pull-right">
+                        <i class="fa fa-plus"></i> 新建任务
+                    </a>
+                </div>
+
+                <table class="table table-striped table-bordered" style="margin-bottom:0px;margin-top:20px;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>关键字</th>
+                            <th>操作</th>
+                            <th>是否结束</th>
+                            <th>创建者</th>
+                            <th>创建时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="indexes">
+                        {{range .Tasks}}
+                        <tr id="tr-task-{{.ID}}">
+                            <td>{{.ID}}</td>
+                            <td>
+                                <a href="/task/{{.ID}}/result">{{.Keywords}}</a>
+                            </td>
+                            <td>
+                                <a href="/task/new?fork={{.ID}}" target="_blank">克隆</a>
+                                <span class="cut-line">|</span>
+                                <a href="/task/{{.ID}}/detail" target="_blank">元信息</a>
+                            </td>
+                            <td>{{.IsFinished}}</td>
+                            <td>{{.Creator}}</td>
+                            <td>{{TimeFormat .Created}}</td>
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td colspan="6">no records</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+                {{ template "common/pager" . }}
+            </div>
+        </div>
+    </div>
+
+<script>
+function task_search() {
+    var query = $.trim($("#query").val());
+    var mine = document.getElementById("mine").checked ? 1 : 0;
+    location.href = "/tasks?query=" + query+"&mine="+mine;
+}
+$(function() {
+    $("#mine").change(function() {
+        task_search();
+    });
+});
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,51 @@
+<html>
+
+<head>
+    <title>权限维护</title>
+    {{ template "common/head" . }}
+</head>
+
+<body>
+
+    <div class="container">
+        {{ template "common/banner" . }}
+        <div class="row">
+            <div class="col-md-12">
+
+                <ol class="breadcrumb">
+                    <li><a href="/team/list">团队列表</a></li>
+                    <li class="active">后台权限维护</li>
+                </ol>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">配置用户对机器的权限</div>
+                    <div class="panel-body">
+                        <div>
+                            <div class="form-group">
+                                <label for="usernames">usernames:</label>
+                                <textarea id="usernames" cols="30" rows="5" class="form-control input-sm"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="hostnames">hostnames:</label>
+                                <textarea id="hostnames" cols="30" rows="20" class="form-control input-sm"></textarea>
+                            </div>
+                            <button class="btn btn-success btn-sm" onclick="vmop_input();">Submit</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+function vmop_input() {
+    $.post("/vmop", {"hostnames": $("#hostnames").val(), "usernames": $("#usernames").val()}, function (json) {
+        handle_json(json);
+    });
+}
+</script>
+
+</body>
+
+</html>

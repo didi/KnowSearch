@@ -1,0 +1,41 @@
+<html>
+
+<head>
+    <title>登录</title>
+    {{ template "common/head" . }}
+</head>
+
+<body>
+    <div style="margin: 40px auto; max-width:400px;">
+        <div class="panel panel-default">
+            <div class="panel-heading">Log in</div>
+            <div class="panel-body">
+                <div>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control input-sm" id="username" placeholder="Username">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control input-sm" id="password" onkeypress="if (event.keyCode==13) login();" placeholder="Password">
+                    </div>
+                    <button type="button" class="btn btn-success btn-sm" onclick="login();">LOGIN</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="text/javascript">
+        function login() {
+            var username = $.trim($("#username").val());
+            var password = $.trim($("#password").val());
+            $.post("/login", {"username": username, "password": password}, function(json) {
+                handle_json(json, function() {
+                    location.href="{{.Callback}}";
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

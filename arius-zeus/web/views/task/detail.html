@@ -1,0 +1,91 @@
+<html>
+
+<head>
+    <title>任务元信息</title>
+    {{ template "common/head" . }}
+    <style>
+        tbody#meta tr th{
+            text-align: right;
+            width: 100px;
+        }
+        pre code {
+            line-height: 1.6em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container-fluid" style="margin-bottom: 20px;">
+        {{ template "common/banner" . }}
+        <div class="row">
+            {{ template "common/menu" . }}
+            <div class="col-md-11">
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">任务元信息</div>
+                    <div class="panel-body">
+                        
+                        <table class="table table-bordered">
+                            <tbody id="meta">
+                                <tr>
+                                    <th>关键字</th>
+                                    <td>{{.Task.Keywords}}</td>
+                                </tr>
+                                <tr>
+                                    <th>创建者</th>
+                                    <td>{{.Task.Creator}} @ {{TimeFormat .Task.Created}}</td>
+                                </tr>
+                                <tr>
+                                    <th>控制参数</th>
+                                    <td>
+                                        运行账号：{{.Task.Account}}
+                                        <span class="cut-line">|</span>
+                                        并发度：{{.Task.Batch}}
+                                        <span class="cut-line">|</span>
+                                        容忍度：{{.Task.Tolerance}}
+                                        <span class="cut-line">|</span>
+                                        超时时间：{{.Task.Timeout}}秒
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>脚本内容</th>
+                                    <td>
+                                        <pre style="margin:0;border:0;padding:0;"><code class="hljs" style="padding: 15px;font-family: Consolas;">{{.Task.Script}}</code></pre>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>脚本参数</th>
+                                    <td>{{.Task.Args}}</td>
+                                </tr>
+                                <tr>
+                                    <th>暂停点</th>
+                                    <td>{{.Task.Pause}}</td>
+                                </tr>
+                                <tr>
+                                    <th>机器列表</th>
+                                    <td>
+                                        <pre style="margin:0;border:0;padding:0;font-family: Consolas;background-color: white;font-size: 10px;">{{range .Hosts}}{{.Hostname}}
+{{end}}</pre>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        {{if not .IsFinished}}
+                        <a class="btn btn-success btn-sm" href="/task/{{.Task.ID}}/result">去管理页面执行之</a>
+                        {{end}}
+
+                        <a class="btn btn-primary btn-sm" href="/task/new?fork={{.Task.ID}}">FORK一个新任务</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+</script>
+</body>
+
+</html>

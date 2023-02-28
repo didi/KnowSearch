@@ -1,0 +1,24 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "XqTDLy8bXAGifWuqK+OgvxOFgeU=",
+			"path": "github.com/toolkits/file",
+			"revision": "a5b3c5147e07f934d9f9d00b901a20b2529f1a57",
+			"revisionTime": "2016-03-25T03:37:39Z"
+		},
+		{
+			"checksumSHA1": "hNhvRpOJSA61+Qf84pvRaqLKo8A=",
+			"path": "github.com/toolkits/sys",
+			"revision": "1f33b217ffafd62561fa8f5b4977dfe3099f47e3",
+			"revisionTime": "2017-06-15T10:30:26Z"
+		},
+		{
+			"checksumSHA1": "12GqsW8PiRPnezDDy0v4brZrndM=",
+			"path": "gopkg.in/yaml.v2",
+			"revision": ""
+		}
+	],
+	"rootPath": "zeus/agent"
+}

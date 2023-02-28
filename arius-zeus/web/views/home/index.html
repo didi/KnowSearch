@@ -1,0 +1,77 @@
+<html>
+
+<head>
+    <title>控制系统</title>
+    {{ template "common/head" . }}
+</head>
+
+<body>
+
+    <div class="container" style="margin-bottom: 20px;">
+        {{ template "common/banner" . }}
+        <div class="row">
+            {{ template "common/menu" . }}
+            <div class="col-md-10">
+                <!-- search -->
+                <div class="form-inline">
+                    <div class="form-group">
+                        <input type="text" class="form-control input-sm" id="keywords" value="{{.Keywords}}" onkeypress="if (event.keyCode==13) search();"
+                            placeholder="input keywords to search">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control input-sm" id="creator" value="{{.Creator}}" onkeypress="if (event.keyCode==13) search();" placeholder="input creator to search">
+                    </div>
+                    <button onclick="search()" class="btn btn-default btn-sm">
+                        <i class="fa fa-search"></i> Search
+                    </button>
+                    <a href="/task" class="btn btn-success btn-sm pull-right">New Task</a>
+                </div>
+
+                <table class="table table-striped table-bordered" style="margin-bottom:0px;margin-top:20px;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Keywords</th>
+                            <th>Creator</th>
+                            <th>Created</th>
+                            <th>Operation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="indexes">
+                        {{range .Tasks}}
+                        <tr id="tr-task-{{.ID}}">
+                            <td>{{.ID}}</td>
+                            <td>
+                                <a href="/task/{{.ID}}/result">{{.Keywords}}</a>
+                            </td>
+                            <td>
+                                <a href="/?creator={{.Creator}}">{{.Creator}}</a>
+                            </td>
+                            <td>{{HumanDuration $.Now .Created}}</td>
+                            <td>
+                                <a href="/task/{{.ID}}/result" data-toggle="tooltip" data-placement="top" title="执行结果">output</a>
+                                <span class="cut-line">|</span>
+                                <a href="/task?fork={{.ID}}" data-toggle="tooltip" data-placement="top" title="克隆任务">fork</a>
+                                <span class="cut-line">|</span>
+                                <a href="/task/{{.ID}}/meta" data-toggle="tooltip" data-placement="top" title="任务元信息">meta</a>
+                                {{if $.IsMaintainer}}
+                                <span class="cut-line">|</span>
+                                <a href="javascript:task_del('{{.ID}}');" data-toggle="tooltip" data-placement="top" title="删除任务">delete</a>
+                                {{end}}
+                            </td>
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td colspan="5">no records</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+                {{ template "common/pager" . }}
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
