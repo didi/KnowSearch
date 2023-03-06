@@ -28,7 +28,7 @@
                 <!-- 开启所有日志-->
                 <!--                <RegexFilter regex='.*"logEventType":"(LOG|METRIC|TRACE)".*' onMatch="ACCEPT" onMismatch="DENY"/>-->
                 <!-- 仅开启LOG和METRIC-->
-                <RegexFilter regex='.*"logEventType":"(LOG|METRIC)".*' onMatch="ACCEPT" onMismatch="DENY"/>
+                <!-- <RegexFilter regex='.*"logEventType":"(LOG|METRIC)".*' onMatch="ACCEPT" onMismatch="DENY"/> -->
                 <!-- 开启LOG和METRIC，TRACE日志仅当traceId不为空时打印-->
                 <!--            <RegexFilter regex='.*"logEventType":"(LOG|METRIC)".*' onMatch="ACCEPT" onMismatch="NEUTRAL"/>-->
                 <!--            <RegexFilter regex='.*"logEventType":"TRACE".*' onMatch="NEUTRAL" onMismatch="DENY"/>-->
