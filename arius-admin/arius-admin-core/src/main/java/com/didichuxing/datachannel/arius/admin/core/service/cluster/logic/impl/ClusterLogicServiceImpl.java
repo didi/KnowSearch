@@ -106,7 +106,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      * 条件查询逻辑集群
      *
      * @param param 条件
-     * @return 逻辑集群列表
+     * @return List<ClusterLogic> 逻辑集群列表
      */
     @Override
     public List<ClusterLogic> listClusterLogics(ESLogicClusterDTO param) {
@@ -120,7 +120,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     /**
      * 获取所有逻辑集群
      *
-     * @return 逻辑集群列表
+     * @return List<ClusterLogic> 逻辑集群列表
      */
     @Override
     public List<ClusterLogic> listAllClusterLogics() {
@@ -134,7 +134,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     /**
      * 删除逻辑集群
      *
-     * @param logicClusterId 资源id
+     * @param logicClusterId 逻辑集群ID
      * @param operator       操作人
      * @param deleteProjectId     项目id
      * @return result
@@ -242,6 +242,14 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         return checkLogicClusterParams(param, operation, projectId);
     }
 
+     /**
+     * 编辑逻辑集群信息
+     *
+     * @param param     参数
+     * @param operator  操作人
+     * @param projectId 项目id
+     * @return result
+     */
     @Override
     public Result<Void> editClusterLogic(ESLogicClusterDTO param, String operator, Integer projectId) {
         Result<Void> checkResult = validateClusterLogicParams(param, EDIT, projectId);
@@ -283,14 +291,22 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     }
     
     /**
-     * @param logicClusterId
-     * @return
+     * 根据逻辑集群Id判断逻辑集群是否存在
+     * @param logicClusterId 逻辑集群Id
+     * @return boolean 存在与否
      */
     @Override
     public boolean existClusterLogicById(Long logicClusterId) {
         return Objects.nonNull(logicClusterDAO.getById(logicClusterId));
     }
     
+     /**
+     * 查询指定逻辑集群
+     *
+     * @param logicClusterId 逻辑集群id
+     * @param projectId 项目id
+     * @return ClusterLogic 逻辑集群 不存在返回null
+     */
     @Override
     public ClusterLogic getClusterLogicByIdAndProjectId(Long logicClusterId, Integer projectId) {
         return clusterLogicPoProjectIdStrConvertClusterLogic(logicClusterDAO.getById(logicClusterId)).stream()
@@ -300,14 +316,23 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     }
     
     /**
-     * @param logicClusterId
-     * @return
+     *通过逻辑集群id获取逻辑集群而且将projectIdStr转换为ProjectIdList
+     *
+     * @param logicClusterId 逻辑集群id
+     * @return {@code List<ClusterLogic>}
      */
     @Override
     public List<ClusterLogic> listClusterLogicByIdThatProjectIdStrConvertProjectIdList(Long logicClusterId) {
         return clusterLogicPoProjectIdStrConvertClusterLogic(logicClusterDAO.getById(logicClusterId));
     }
     
+     /**
+     * 获取逻辑集群通过名字和项目id
+     *
+     * @param logicClusterName 逻辑集群名称
+     * @param projectId        项目id
+     * @return {@code ClusterLogic}
+     */
     @Override
     public ClusterLogic getClusterLogicByNameAndProjectId(String logicClusterName, Integer projectId) {
         return clusterLogicPoProjectIdStrConvertClusterLogic(logicClusterDAO.getByName(logicClusterName)).stream()
@@ -316,8 +341,10 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     }
     
     /**
-     * @param logicClusterName
-     * @return
+     * 获取集群逻辑通过名字但不包含项目id
+     *
+     * @param logicClusterName 逻辑集群名称
+     * @return {@code ClusterLogic}
      */
     @Override
     public ClusterLogic getClusterLogicByNameThatNotContainsProjectId(String logicClusterName) {
@@ -325,8 +352,10 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     }
     
     /**
-     * @param logicClusterName
-     * @return
+     * 通过逻辑集群名称获取逻辑集群而且将projectIdStr转换为ProjectIdList
+     *
+     * @param logicClusterName 逻辑集群名称
+     * @return {@code List<ClusterLogic>}
      */
     @Override
     public List<ClusterLogic> listClusterLogicByNameThatProjectIdStrConvertProjectIdList(String logicClusterName) {
@@ -362,6 +391,12 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
                 .collect(Collectors.toList());
     }
 
+     /**
+     * 通过项目id获取对应项目下有权限的逻辑集群id列表
+     *
+     * @param projectId 项目id
+     * @return List<Long> 逻辑集群id列表
+     */
     @Override
     public List<Long> getHasAuthClusterLogicIdsByProjectId(Integer projectId) {
         if (projectId == null) {
@@ -378,8 +413,8 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     /**
      * 查询指定app有权限的逻辑集群（包括申请权限）
      *
-     * @param projectId APP ID
-     * @return 逻辑集群列表
+     * @param projectId 项目ID
+     * @return List<ClusterLogic> 逻辑集群列表
      */
     @Override
     public List<ClusterLogic> getHasAuthClusterLogicsByProjectId(Integer projectId) {
@@ -419,6 +454,11 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
                 .collect(Collectors.toList());
     }
 
+     /**
+     * 判断逻辑集群是否存在
+     * @param resourceId 逻辑集群id
+     * @return result
+     */
     @Override
     public Boolean isClusterLogicExists(Long resourceId) {
         return null != logicClusterDAO.getById(resourceId);
@@ -438,6 +478,11 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         return JSON.parseObject(configJson, LogicResourceConfig.class);
     }
 
+     /**
+     * 获取逻辑集群datanode的规格信息
+     * @param logicClusterId 逻辑集群ID
+     * @return 规格信息
+     */
     @Override
     public Set<RoleClusterNodeSepc> getLogicDataNodeSepc(Long logicClusterId) {
         List<ClusterRoleInfo> clusterRoleInfos = getClusterLogicRole(logicClusterId);
@@ -468,6 +513,11 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         return esRoleClusterDataNodeSepcs;
     }
 
+    /**
+     * 获取逻辑集群的所有role
+     * @param logicClusterId 逻辑集群ID
+     * @return ClusterRoleInfo 逻辑集群role信息
+     */
     @Override
     public List<ClusterRoleInfo> getClusterLogicRole(Long logicClusterId) {
         List<ClusterRoleInfo> clusterRoleInfos = new ArrayList<>();
@@ -512,6 +562,11 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         return clusterRoleInfos;
     }
 
+     /**
+     * 根据逻辑集群ID获取插件信息
+     * @param  logicClusterId 逻辑集群ID
+     * @return List<Plugin> 插件列表
+     */
     @Override
     public List<Plugin> getClusterLogicPlugins(Long logicClusterId) {
         List<String> clusterNameList = clusterRegionService.listPhysicClusterNames(logicClusterId);
@@ -555,8 +610,13 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         return new ArrayList<>(pluginMap.values());
     }
 
-
-
+    /**
+     * 根据逻辑集群Id添加插件信息
+     * @param  logicClusterId        逻辑集群ID
+     * @param  pluginDTO           插件信息
+     * @param  operator              操作人
+     * @return Result<Long> 
+     */
     @Override
     public Result<Long> addPlugin(Long logicClusterId, PluginDTO pluginDTO,
                                   String operator) throws NotFindSubclassException {
@@ -573,6 +633,14 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         return esPluginService.addESPlugin(pluginDTO);
     }
 
+     /**
+     * 转移逻辑集群
+     *
+     * @param clusterLogicId  逻辑集群Id
+     * @param targetProjectId 项目Id
+     * @param submitor        提交人
+     * @return 成功/失败
+     */
     @Override
     public Result<Void> transferClusterLogic(Long clusterLogicId, Integer targetProjectId, String submitor) {
 
@@ -582,6 +650,11 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         return editClusterLogicNotCheck(esLogicClusterDTO);
     }
 
+     /**
+     * 模糊分页查询物理集群列表信息，仅获取部分属性
+     * @param param 模糊查询条件
+     * @return List<ClusterLogic> 逻辑集群列表
+     */
     @Override
     public List<ClusterLogic> pagingGetClusterLogicByCondition(ClusterLogicConditionDTO param) {
         List<ClusterLogicPO> clusters = Lists.newArrayList();
@@ -597,11 +670,21 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
               .collect(Collectors.toList());
     }
 
+     /**
+     * 模糊查询统计总命中数
+     * @param param 模糊查询条件
+     * @return 命中数
+     */
     @Override
     public Long fuzzyClusterLogicHitByCondition(ClusterLogicConditionDTO param) {
         return logicClusterDAO.getTotalHitByCondition(param);
     }
 
+     /**
+     * 根据逻辑集群id列表获取逻辑集群列表信息
+     * @param clusterLogicIdList  逻辑集群id列表
+     * @return List<ClusterLogic> 逻辑集群列表
+     */
     @Override
     public List<ClusterLogic> getClusterLogicListByIds(List<Long> clusterLogicIdList) {
         return logicClusterDAO.listByIds(new HashSet<>(clusterLogicIdList)).stream()
@@ -609,6 +692,13 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
                 .collect(Collectors.toList());
     }
 
+     /**
+     *
+     * 通过项目Id和集群名获取逻辑集群列表
+     * @param clusterName
+     * @param projectId     
+     * @return {@code List<ClusterLogic>} 逻辑集群列表
+     */
     @Override
     public List<ClusterLogic> listClusterLogicByProjectIdAndName(Integer projectId, String clusterName) {
         return logicClusterDAO.listByNameAndProjectId(clusterName, projectId).stream()
@@ -619,8 +709,10 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     }
     
     /**
-     * @param level
-     * @return
+     *
+     * 通过level获取逻辑集群并且将projectIdStr convert projectId list
+     * @param level 水平
+     * @return {@code List<ClusterLogic>}
      */
     @Override
     public List<ClusterLogic> listLogicClustersByLevelThatProjectIdStrConvertProjectIdList(Integer level) {
@@ -806,6 +898,14 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         }
     }
 
+   /**
+     * 设置逻辑集群信息
+     *
+     * @param logicClusterId
+     * @param clusterLogicPO
+     * @param clusterRoleInfo
+     * @param clusterRoleHosts    
+     */
     private void setLogicClusterInfo(Long logicClusterId, ClusterLogicPO clusterLogicPO,
                                      ClusterRoleInfo clusterRoleInfo, List<ClusterRoleHost> clusterRoleHosts) {
         clusterRoleInfo.setPodNumber(clusterLogicPO.getDataNodeNum());
