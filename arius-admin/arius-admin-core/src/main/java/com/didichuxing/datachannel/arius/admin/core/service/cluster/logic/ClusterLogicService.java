@@ -36,7 +36,7 @@ public interface ClusterLogicService {
     List<ClusterLogic> listAllClusterLogics();
 
     /**
-     * 删除逻辑集群
+     * 根据逻辑集群ID删除逻辑集群
      *
      * @param logicClusterId 逻辑集群ID
      * @param operator       操作人
@@ -48,7 +48,7 @@ public interface ClusterLogicService {
                                         Integer projectId) throws AdminOperateException;
 
     /**
-     * > 索引模板的项目id与待删除项目的项目id是否可以匹配
+     * > 判断索引模板的项目id与待删除项目的项目id是否可以匹配
      *
      * @param logicClusterId 逻辑集群的id
      * @param deleteProjectId 要删除的项目
@@ -168,6 +168,12 @@ public interface ClusterLogicService {
      */
     List<ClusterLogic> listClusterLogicByProjectIdAndName(Integer projectId, String clusterName);
 
+     /**
+     * 获取对应项目下有权限的逻辑集群
+     *
+     * @param projectId   项目id
+     * @return List<Long> 有权限的逻辑集群id列表
+     */
     List<Long> getHasAuthClusterLogicIdsByProjectId(Integer projectId);
 
     /**
@@ -180,7 +186,7 @@ public interface ClusterLogicService {
     /**
      * 根据配置字符创生成配置，填充默认值
      * @param configJson JSON
-     * @return config
+     * @return LogicResourceConfig
      */
     LogicResourceConfig genClusterLogicConfig(String configJson);
 
@@ -201,7 +207,7 @@ public interface ClusterLogicService {
     /**
      * 根据逻辑集群ID获取插件信息
      * @param  logicClusterId 逻辑集群ID
-     * @return config 插件信息
+     * @return List<Plugin> 插件信息
      */
     List<Plugin> getClusterLogicPlugins(Long logicClusterId);
 
