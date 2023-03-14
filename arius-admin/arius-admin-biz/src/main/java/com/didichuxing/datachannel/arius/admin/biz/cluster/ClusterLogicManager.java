@@ -33,14 +33,14 @@ public interface ClusterLogicManager {
     /**
      * 构建运维页面的逻辑集群VO
      * @param logicClusters     逻辑集群列表
-     * @return 逻辑集群VO
+     * @return List<ClusterLogicVO> 逻辑集群VO列表
      */
     List<ClusterLogicVO> buildClusterLogics(List<ClusterLogic> logicClusters);
 
     /**
      * 构建运维页面的逻辑集群VO
      * @param clusterLogic    逻辑集群
-     * @return
+     * @return ClusterLogicVO 逻辑集群VO
      */
     ClusterLogicVO buildClusterLogic(ClusterLogic clusterLogic);
 
@@ -62,7 +62,7 @@ public interface ClusterLogicManager {
     /**
      * 根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表
      * @param projectId 项目id
-     * @param type
+     * @param type 集群类型
      * @return
      */
     Result<List<ClusterLogicVO>> getProjectLogicClusterInfoByType(Integer projectId, Integer type);
@@ -88,7 +88,7 @@ public interface ClusterLogicManager {
      * 获取逻辑集群分派的物理集群列表
      *
      * @param logicClusterId 逻辑集群ID
-     * @return
+     * @return ClusterPhy 物理集群
      */
     ClusterPhy getLogicClusterAssignedPhysicalClusters(Long logicClusterId);
 
@@ -98,6 +98,7 @@ public interface ClusterLogicManager {
      *  获取单个逻辑集群overView信息
      * @param clusterLogicId 逻辑集群id
      * @param currentProjectId 当前登录项目
+     * @return ClusterLogicVO 逻辑集群VO
      */
     ClusterLogicVO getClusterLogic(Long clusterLogicId, Integer currentProjectId);
 
@@ -115,7 +116,7 @@ public interface ClusterLogicManager {
      * 逻辑集群下线
      * @param logicClusterId 逻辑集群id
      * @param operator 操作人
-     * @param projectId projectId
+     * @param projectId projectId 项目id
      * @return 成功或者失败
      * @throws AdminOperateException
      */
@@ -158,7 +159,7 @@ public interface ClusterLogicManager {
 
     /**
      * 获取预估磁盘大小
-     * @param clusterLogicId
+     * @param clusterLogicId 逻辑集群id
      * @param count
      * @return
      */
@@ -200,6 +201,12 @@ public interface ClusterLogicManager {
      */
     Result<Boolean> isLogicClusterRegionIsNotEmpty(Long logicClusterId);
     
+     /**
+     * 根据level获取逻辑集群VO列表
+     *
+     * @param level
+     * @return {@link Result}<{@link List<ClusterLogicVO>}>
+     */
     Result<List<ClusterLogicVO>> getLogicClustersByLevel(Integer level);
     
     /**
@@ -208,6 +215,7 @@ public interface ClusterLogicManager {
      * @param param 要验证的参数对象。
      * @param operation OperationEnum.ADD、OperationEnum.UPDATE、OperationEnum.DELETE
      * @param projectId 项目编号
+     * @return 返回类型是 Result<Void>，它是操作结果的包装类。
      */
     Result<Void> validateClusterLogicParams(ESLogicClusterDTO param, OperationEnum operation, Integer projectId);
     
@@ -226,7 +234,7 @@ public interface ClusterLogicManager {
      * 返回与给定物理集群名称关联的逻辑集群名称列表
      *
      * @param phyClusterName 物理集群的名称。
-     * @return 与给定集群物理名称关联的集群逻辑名称列表。
+     * @return List<String> 与给定集群物理名称关联的集群逻辑名称列表。
      */
     List<String> getClusterPhyAssociatedClusterLogicNames(String phyClusterName);
 
@@ -261,12 +269,20 @@ public interface ClusterLogicManager {
      * @return 列表<ClusterPhyWithLogicClusterVO>
      */
     Result<List<ClusterPhyWithLogicClusterVO>> listLogicClusterWithClusterPhyByProjectId(Integer projectId);
-
+    
+    /**
+     * 根据物理集群名获取其对应的逻辑集群
+     *
+     * @param phyClusterName 物理集群名
+     * @return 列表<ClusterLogicVO>
+     */
     Result<List<ClusterLogicVO>> listClusterLogicByPhyName(String phyClusterName);
 
     /**
      * 删除从模板及索引数据
-     * @param clusterLogicId
+     * @param clusterLogicId 逻辑集群id
+     * @param projectId 项目编号
+     * @param operator 操作人
      * @return
      */
     Result<Void> deleteTemplatesIndicesInfo(Long clusterLogicId,Integer projectId,String operator);
