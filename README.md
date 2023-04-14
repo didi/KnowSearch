@@ -51,3 +51,4 @@ DashBoard、集群看板、网关看板、集群管理、索引管理核心产�
 # 5.技术交流
 
 微信加群：添加`mike_zhangliang`的微信号备注KnowSearch加群，加群之前有劳点一下 Star，一个小小的 Star 是对KnowSearch作者们努力建设社区的动力。
+
