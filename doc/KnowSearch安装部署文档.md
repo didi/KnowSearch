@@ -246,7 +246,7 @@ curl  -H "Content-Type: application/json" -X POST "http://127.0.0.1:3000/api/das
 
 ```
 #下载安装包
-wget https://s3-gzpu.didistatic.com/knowsearch/KnowSearch-0.3.1.2.tar.gz
+wget https://s3-gzpu.didistatic.com/pub/knowsearch/KnowSearch-0.3.1.2.tar.gz
 
 #解压安装包到指定目录
 tar -zxf KnowSearch-0.3.1.2.tar.gz -C /data/
