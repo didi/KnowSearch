@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration package="org.apache.logging.log4j.core,com.didiglobal.knowframework.log.log4j2.appender">
     <Properties>
-        <Property name="address" value="${sys:spring.logi-job.elasticsearch-address}"/>
-        <Property name="port" value="${sys:spring.logi-job.elasticsearch-port}"/>
-        <Property name="user" value="${sys:spring.logi-job.elasticsearch-user}"/>
-        <Property name="password" value="${sys:spring.logi-job.elasticsearch-password}"/>
-        <Property name="indexName" value="${sys:spring.logi-job.elasticsearch-index-name}"/>
-        <Property name="typeName" value="${sys:spring.logi-job.elasticsearch-type-name}"/>
+        <Property name="address" value="${spring.logi-job.elasticsearch-address}"/>
+        <Property name="port" value="${spring.logi-job.elasticsearch-port}"/>
+        <Property name="user" value="${spring.logi-job.elasticsearch-user}"/>
+        <Property name="password" value="${spring.logi-job.elasticsearch-password}"/>
+        <Property name="indexName" value="${spring.logi-job.elasticsearch-index-name}"/>
+        <Property name="typeName" value="${spring.logi-job.elasticsearch-type-name}"/>
         <!-- 基础日志配置 -->
         <Property name="PID">????</Property>
         <Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
