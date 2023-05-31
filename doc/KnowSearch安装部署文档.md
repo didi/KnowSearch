@@ -331,11 +331,12 @@ sh filebeats_start.sh
 wget https://s3-gzpu.didistatic.com/knowsearch/nginx.conf
 
 #将配置文件放到etc目录
-mv knowsearch_nginx.conf /etc/nginx/conf.d/knowsearch_nginx.conf
+mv nginx.conf /etc/nginx/conf.d/knowsearch_nginx.conf
 	
 #修改配置文件(data目录是前端文件跟目录,$ip_addr需要换成本机访问IP)
 sed -i 's#c_path#data/KnowSearch-0.3.1.2#g' /etc/nginx/conf.d/knowsearch_nginx.conf
-sed -i 's#ups_admin#127.0.0.1:8015#' /etc/nginx/conf.d/knowsearch_nginx.conf
+sed -i 's#ups_admin#127.0.0.1:8015#g' /etc/nginx/conf.d/knowsearch_nginx.conf
+sed -i 's#ups_gateway#127.0.0.1:8200#g' /etc/nginx/conf.d/knowsearch_nginx.conf
 sed -i "s#jumpToGrafana#http://$ip_addr:3000/dashboards#g" /data/KnowSearch-0.3.1.2/es/es-*.js
 
 #重启Nginx服务
