@@ -44,6 +44,7 @@ DashBoard、集群看板、网关看板、集群管理、索引管理核心产�
 - [KnowSearch用户手册](doc/KnowSearch用户手册.md)
 - [KnowSearch安装部署文档](doc/KnowSearch安装部署文档.md)
 - [KnowSearch设计说明](doc/KnowSearch设计说明.md)
+- [KnowSearch-GateWay设计说明](doc/KnowSearch-GateWay设计文档.md)
 - [KnowSearch源码编译运行文档](doc/KnowSearch源码编译运行文档.md)
 - [ElasticSearch最佳实践](doc/ElasticSearch最佳实践.md)
 - [KnowSearch常见FAQ](doc/KnowSearch常见FAQ.md)
