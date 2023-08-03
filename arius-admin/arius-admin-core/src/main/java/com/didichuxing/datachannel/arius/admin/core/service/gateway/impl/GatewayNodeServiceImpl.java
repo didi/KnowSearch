@@ -32,7 +32,7 @@ public class GatewayNodeServiceImpl implements GatewayNodeService {
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public boolean insertBatch(List<GatewayNodeHostDTO> gatewayNodeHosts) {
-		return gatewayNodeHosts.stream().mapToInt(this::insertOne).count()
+		return gatewayNodeHosts.stream().mapToInt(this::insertOne).sum()
 						== gatewayNodeHosts.size();
 	}
 	
