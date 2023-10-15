@@ -4,8 +4,8 @@
     <!--变量配置-->
     <Properties>
         <property name="gateway.queryConfig.logPath" value="." />
-        <Property name="address" value="10.96.75.19"/>
-        <Property name="port" value="18938"/>
+        <Property name="address" value="127.0.0.1"/>
+        <Property name="port" value="8060"/>
         <Property name="user" value=""/>
         <Property name="password" value=""/>
         <Property name="indexName" value="index_observability"/>
