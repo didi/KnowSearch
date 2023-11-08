@@ -17,6 +17,7 @@ KnowSearch是面向Elasticsearch研发与运维人员，围绕集群、索引构
   - 基于原生ES网关，零侵入、插件化的构建查询/写入限流、权限校验、跨集群访问、DSL查询模板分析与管控能力
 
 体验地址 http://101.43.178.205 ，用户名/密码：admin/admin123
+Grafana地址 http://101.43.178.205:3000
 
 # 2.KnowSearch特性
 
